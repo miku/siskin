@@ -31,5 +31,6 @@ setup(name='tsk',
         'bin/tasknames',
         'bin/taskoutput',
         'bin/taskrm',
+        'bin/taskwc',
       ]
 )
