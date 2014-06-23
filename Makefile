@@ -1,10 +1,3 @@
-# Might want to use /usr/local as well ...
-PREFIX = /usr/local
-DOLLAR = $$
-
-HOSTNAME = $(shell hostname)
-WHOAMI = $(shell whoami)
-ACTIVATE = $(WORKON_HOME)/tasktree/bin/activate
 help:
 	@echo "make clean"
 
