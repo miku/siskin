@@ -15,6 +15,7 @@ except:
 setup(name='siskin',
       version='0.0.2',
       description='Various sources and workflows.',
+      url='https://github.com/miku/siskin',
       author='Martin Czygan',
       author_email='martin.czygan@gmail.com',
       packages=[
