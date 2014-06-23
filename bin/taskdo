@@ -6,6 +6,7 @@ The main command line program to interact with the tasks.
 """
 
 from tsk.sources.doaj import *
+from tsk.sources.ema import *
 from tsk.sources.gbv import *
 from tsk.sources.hszigr import *
 from tsk.sources.ksd import *

@@ -4,6 +4,7 @@
 from __future__ import print_function
 from luigi.task import Register
 from tsk.sources.doaj import *
+from tsk.sources.ema import *
 from tsk.sources.gbv import *
 from tsk.sources.hszigr import *
 from tsk.sources.ksd import *
