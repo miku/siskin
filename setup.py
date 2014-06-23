@@ -11,18 +11,18 @@ except:
     from distutils.core import setup
 
 
-setup(name='tsk',
-      version='0.0.1',
+setup(name='siskin',
+      version='0.0.2',
       description='Various sources and workflows.',
       author='Martin Czygan',
       author_email='martin.czygan@gmail.com',
       packages=[
-        'tsk',
-        'tsk.sources',
-        'tsk.workflows'
+        'siskin',
+        'siskin.sources',
+        'siskin.workflows'
       ],
-      package_dir={'tsk': 'tsk'},
-      package_data={'tsk': ['assets/*']},
+      package_dir={'siskin': 'siskin'},
+      package_data={'siskin': ['assets/*']},
       scripts=[
         'bin/taskcat',
         'bin/taskdo',

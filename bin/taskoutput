@@ -7,14 +7,14 @@ Find the output of (most) tasks.
 
 from __future__ import print_function
 from gluish.utils import pairwise
-from tsk.sources.doaj import *
-from tsk.sources.ema import *
-from tsk.sources.gbv import *
-from tsk.sources.hszigr import *
-from tsk.sources.ksd import *
-from tsk.sources.mtc import *
-from tsk.sources.nl import *
-from tsk.sources.pao import *
+from siskin.sources.doaj import *
+from siskin.sources.ema import *
+from siskin.sources.gbv import *
+from siskin.sources.hszigr import *
+from siskin.sources.ksd import *
+from siskin.sources.mtc import *
+from siskin.sources.nl import *
+from siskin.sources.pao import *
 import collections
 import luigi
 import sys

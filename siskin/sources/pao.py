@@ -19,15 +19,15 @@ from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import shellout
-from tsk.task import DefaultTask
+from siskin.task import DefaultTask
 import datetime
 import luigi
 import re
 import tempfile
 
 # get config
-from tsk.configuration import TskConfig
-config = TskConfig.instance()
+from siskin.configuration import Config
+config = Config.instance()
 
 class PAOTask(DefaultTask):
     TAG = '007'

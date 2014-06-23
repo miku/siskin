@@ -5,10 +5,10 @@ Define a TSK wide task with artefacts under core.home directory.
 """
 
 from gluish.task import BaseTask
-from tsk.configuration import TskConfig
+from siskin.configuration import Config
 
-config = TskConfig.instance()
+config = Config.instance()
 
 class DefaultTask(BaseTask):
     """ A base task that sets its base directory based on config value. """
-    BASE = config.get('core', 'home', TskConfig.NO_DEFAULT)
+    BASE = config.get('core', 'home', Config.NO_DEFAULT)

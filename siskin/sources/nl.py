@@ -23,7 +23,7 @@ from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import random_string, shellout
-from tsk.task import DefaultTask
+from siskin.task import DefaultTask
 import datetime
 import gspread
 import json
@@ -34,10 +34,9 @@ import re
 import string
 import tempfile
 
-# get config
-from tsk.configuration import TskConfig
-config = TskConfig.instance()
-logger = logging.getLogger('tsk')
+from siskin.configuration import Config
+config = Config.instance()
+logger = logging.getLogger('siskin')
 
 class NLTask(DefaultTask):
     TAG = '017'

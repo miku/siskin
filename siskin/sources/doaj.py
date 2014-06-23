@@ -8,17 +8,16 @@ from gluish.benchmark import timed
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from tsk.task import DefaultTask
+from siskin.task import DefaultTask
 import datetime
 import elasticsearch
 import json
 import logging
 import luigi
 
-# config/logging
-from tsk.configuration import TskConfig
-config = TskConfig.instance()
-logger = logging.getLogger('tsk')
+from siskin.configuration import Config
+config = Config.instance()
+logger = logging.getLogger('siskin')
 
 class DOAJTask(DefaultTask):
     """ Base task for DOAJ. """

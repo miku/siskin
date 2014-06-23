@@ -13,7 +13,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles, wc
 from gluish.utils import shellout
 from lxml import etree
-from tsk.task import DefaultTask
+from siskin.task import DefaultTask
 import BeautifulSoup
 import cStringIO
 import datetime
@@ -22,7 +22,7 @@ import luigi
 import os
 import tempfile
 
-logger = logging.getLogger('tsk')
+logger = logging.getLogger('siskin')
 
 class MTCTask(DefaultTask):
     TAG = '010'

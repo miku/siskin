@@ -4,19 +4,19 @@
 
 """
 Configuration handling, taken from luigi. File format is ini. File location
-at the moment is fixed at /etc/tsk/tsk.ini.
+at the moment is fixed at /etc/siskin/siskin.ini.
 """
 
 from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 import datetime
 
 
-class TskConfig(ConfigParser):
-    """ Wrapper around /etc/tsk/tsk.ini
+class Config(ConfigParser):
+    """ Wrapper around /etc/siskin/siskin.ini
     """
     NO_DEFAULT = None
     _instance = None
-    _config_paths = ['/etc/tsk/tsk.ini']
+    _config_paths = ['/etc/siskin/siskin.ini']
 
     @classmethod
     def add_config_path(cls, path):
@@ -43,7 +43,7 @@ class TskConfig(ConfigParser):
         try:
             return method(self, section, option)
         except (NoOptionError, NoSectionError):
-            if default is TskConfig.NO_DEFAULT:
+            if default is Config.NO_DEFAULT:
                 raise
             if expected_type is not None and default is not None and not isinstance(default, expected_type):
                 raise
