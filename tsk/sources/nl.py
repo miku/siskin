@@ -17,6 +17,7 @@ google-docs-key = crypticstring
 """
 
 from gluish.benchmark import timed
+from gluish.common import Directory
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
@@ -53,6 +54,9 @@ class NLTask(DefaultTask):
 class NLSync(NLTask):
     """ Sync the complete 'nationallizenzen' folder as is. """
     indicator = luigi.Parameter(default=random_string())
+
+    def requires(self):
+        return Directory(path=os.path.dirname(self.output().path))
 
     def run(self):
         source = os.path.join(config.get('core', 'swb-mirror'), 'nationallizenzen')
