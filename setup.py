@@ -2,7 +2,8 @@
 # coding: utf-8
 
 """
-tsk is a set of tasks for library metadata management.
+siskin is a set of tasks for library metadata management.
+~~~~~~
 """
 
 try:

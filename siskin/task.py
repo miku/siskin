@@ -1,7 +1,7 @@
 # coding: utf-8
 # pylint: disable=C0103,W0232
 """
-Define a TSK wide task with artefacts under core.home directory.
+Define a siskin wide task with artefacts under core.home directory.
 """
 
 from gluish.task import BaseTask

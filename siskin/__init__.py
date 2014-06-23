@@ -1,7 +1,7 @@
 # coding: utf-8
 # pylint: disable=C0103
 import tempfile
-from tsk.configuration import TskConfig
+from siskin.configuration import Config
 
-config = TskConfig.instance()
+config = Config.instance()
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())
