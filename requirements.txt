@@ -5,7 +5,6 @@ astroid==1.1.1
 colorama==0.3.1
 distribute==0.6.34
 elasticsearch==1.0.0
-git-pylint-commit-hook==2.0.5
 gluish==0.1.52
 logilab-common==0.61.0
 luigi==1.0.16
