@@ -27,6 +27,7 @@ setup(name='tsk',
         'bin/taskcat',
         'bin/taskdo',
         'bin/taskless',
+        'bin/taskls',
         'bin/tasknames',
         'bin/taskoutput',
       ]

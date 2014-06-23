@@ -1,0 +1,4 @@
+#!/bin/bash
+
+set -e -u
+ls -lah $(taskoutput $@ 2> /dev/null|tail -1)
