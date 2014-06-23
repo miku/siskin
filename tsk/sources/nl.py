@@ -147,7 +147,7 @@ class NLPackageDescriptor(NLTask):
     indicator = luigi.Parameter(default=random_string())
 
     def run(self):
-        gc = gspread.login(config.get('core', 'google-user'),
+        gc = gspread.login(config.get('core', 'google-username'),
                            config.get('core', 'google-password'))
         doc = gc.open_by_key(config.get('core', 'google-docs-key'))
         sheet = doc.get_worksheet(4)
