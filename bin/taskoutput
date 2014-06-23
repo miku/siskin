@@ -11,6 +11,7 @@ from tsk.sources.doaj import *
 from tsk.sources.gbv import *
 from tsk.sources.hszigr import *
 from tsk.sources.mtc import *
+from tsk.sources.nl import *
 from tsk.sources.pao import *
 import collections
 import luigi
