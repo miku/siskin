@@ -8,6 +8,7 @@ The main command line program to interact with the tasks.
 from tsk.sources.doaj import *
 from tsk.sources.gbv import *
 from tsk.sources.hszigr import *
+from tsk.sources.pao import *
 import luigi
 
 if __name__ == '__main__':
