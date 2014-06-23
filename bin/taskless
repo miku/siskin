@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Just like `less` but takes a taskname as arguments. The task must have been
+# completed successfully before you `taskcat` it.
+#
+# Examples
+#
+#     $ taskcat EBLDates
+#     $ taskcat Events --iln 10
+#
+set -e -u
+
+args=("$@")
+
+if [ "${args[0]}" == "-N" ]; then
+    less -N $(taskoutput ${@:2}|tail -1)
+else
+    less $(taskoutput $@|tail -1)
+fi

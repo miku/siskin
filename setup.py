@@ -24,6 +24,10 @@ setup(name='tsk',
       package_dir={'tsk': 'tsk'},
       package_data={'tsk': ['assets/*']},
       scripts=[
-        'bin/tsk-make',
+        'bin/taskcat',
+        'bin/taskdo',
+        'bin/taskless',
+        'bin/tasknames',
+        'bin/taskoutput',
       ]
 )
