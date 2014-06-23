@@ -21,14 +21,12 @@ import luigi
 from tsk.configuration import TskConfig
 config = TskConfig.instance()
 
-
 class HSZIGRTask(DefaultTask):
     TAG = '023'
 
     def closest(self):
         """ One time thing. """
         return datetime.date(2014, 1, 1)
-
 
 class HSZIGRImport(HSZIGRTask):
     date = ClosestDateParameter(default=datetime.date.today())
@@ -41,7 +39,6 @@ class HSZIGRImport(HSZIGRTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
-
 
 class HSZIGRJson(HSZIGRTask):
     date = ClosestDateParameter(default=datetime.date.today())
@@ -58,10 +55,9 @@ class HSZIGRJson(HSZIGRTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
-
 class HSZIGRIndex(HSZIGRTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())
-    
+
     index = 'hszigr'
     doc_type = 'title'
     pruge_existing_index = True

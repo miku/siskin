@@ -20,7 +20,6 @@ from tsk.configuration import TskConfig
 config = TskConfig.instance()
 logger = logging.getLogger('tsk')
 
-
 class DOAJTask(DefaultTask):
     """ Base task for DOAJ. """
     TAG = '028'
@@ -28,7 +27,6 @@ class DOAJTask(DefaultTask):
     def closest(self):
         """ Monthly schedule. """
         return monthly(date=self.date)
-
 
 class DOAJCSV(DOAJTask):
     """ CSV dump, updated every 30 minutes. Not sure what's in there. """
@@ -43,7 +41,6 @@ class DOAJCSV(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
-
 
 class DOAJDump(DOAJTask):
     """ Complete DOAJ Elasticsearch dump. """

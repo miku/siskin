@@ -29,14 +29,12 @@ import tempfile
 from tsk.configuration import TskConfig
 config = TskConfig.instance()
 
-
 class PAOTask(DefaultTask):
     TAG = '007'
 
     def closest(self):
         """ One time data source. """
         return datetime.date(2014, 1, 1)
-
 
 class PAOSync(PAOTask):
     date = ClosestDateParameter(default=datetime.date.today())
@@ -54,7 +52,6 @@ class PAOSync(PAOTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
 
-
 class PAODeletions(PAOTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -65,7 +62,6 @@ class PAODeletions(PAOTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
-
 
 class PAOJson(PAOTask):
     """ Convert to JSON, respect deletions. """
@@ -101,7 +97,6 @@ class PAOJson(PAOTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 
 class PAOIndex(PAOTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())

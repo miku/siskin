@@ -26,11 +26,9 @@ import datetime
 import luigi
 import tempfile
 
-
 # config
 from tsk.configuration import TskConfig
 config = TskConfig.instance()
-
 
 class GBVTask(DefaultTask):
     """ GBV base task. """
@@ -39,7 +37,6 @@ class GBVTask(DefaultTask):
     def closest(self):
         """ Singular event. """
         return datetime.date(2014, 1, 1)
-
 
 class GBVImport(GBVTask):
     """ Copy and merge files from a single tag on the fly. Tag is the name of
@@ -53,7 +50,7 @@ class GBVImport(GBVTask):
         stopover = tempfile.mkdtemp(prefix='tsk-')
         origin = config.get('gbv', 'scp-src').format(tag=self.tag)
         shellout("scp {origin} {output}", origin=origin, output=stopover)
-        
+
         _, combined = tempfile.mkstemp(prefix='tsk-')
         for path in iterfiles(stopover):
             shellout("cat {input} >> {output}", input=path, output=combined)
@@ -61,7 +58,6 @@ class GBVImport(GBVTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
-
 
 class GBVCombine(GBVTask):
     """ Combine different files from different tags together. """
@@ -71,7 +67,7 @@ class GBVCombine(GBVTask):
         for tag in ('haab', 'hfm', 'sbb'):
             yield GBVImport(date=self.date, tag=tag)
 
-    @timed            
+    @timed
     def run(self):
         _, combined = tempfile.mkstemp(prefix='tsk-')
         for target in self.input():
@@ -82,7 +78,6 @@ class GBVCombine(GBVTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
-
 
 class GBVJson(GBVTask):
     """ Convert to Json. """
@@ -99,7 +94,6 @@ class GBVJson(GBVTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 
 class GBVIndex(GBVTask, CopyToIndex):
     """ Upload to ES. """
