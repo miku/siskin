@@ -59,7 +59,8 @@ class DOAJDump(DOAJTask):
         hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
         es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries)
         with self.output().open('w') as output:
-            offset, total = 0, 0
+	    offset = 0
+	    total = es.count(body={'query': {'match_all': {}}}, index=('journal', 'article')).get('count')
             while offset <= total:
                 logger.debug(json.dumps({'offset': offset, 'total': total}))
                 result = es.search(body={'constant_score':
@@ -68,7 +69,6 @@ class DOAJDump(DOAJTask):
                                    size=self.batch_size, from_=offset)
                 for doc in result['hits']['hits']:
                     output.write("%s\n" % json.dumps(doc))
-                total = result['hits']['total']
                 offset += self.batch_size
 
     def output(self):
