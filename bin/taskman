@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Below are all available tasks.
+"""
+
+from siskin.utils import generate_tasks_manual
+import subprocess
+import sys
+
+if __name__ == '__main__':
+    try:
+        pager = subprocess.Popen(['less', '-FRSXK'], stdin=subprocess.PIPE, stdout=sys.stdout)
+        pager.communicate(generate_tasks_manual())
+    except KeyboardInterrupt:
+        pass
