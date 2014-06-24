@@ -46,8 +46,8 @@ class BMSImport(BMSTask):
 
     def requires(self):
         host = config.get('bms', 'ftp-host')
-        username = config.get('bms', 'ftp-username'),
-        password = config.get('bms', 'ftp-password'),
+        username = config.get('bms', 'ftp-username')
+        password = config.get('bms', 'ftp-password')
         filepath = config.get('bms', 'ftp-filepath')
         return FTPFile(host=host, username=username, password=password,
                        filepath=filepath)
