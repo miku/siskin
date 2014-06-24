@@ -5,8 +5,8 @@
 #
 # Examples
 #
-#     $ taskless EBLDates
-#     $ taskless Events --iln 10
+#     $ taskcat EBLDates
+#     $ taskcat Events --iln 10
 #
 
 set -e -u
