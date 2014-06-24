@@ -7,6 +7,7 @@ The main command line program to interact with the tasks.
 
 from siskin.sources.bms import *
 from siskin.sources.disson import *
+from siskin.sources.doab import *
 from siskin.sources.doaj import *
 from siskin.sources.ema import *
 from siskin.sources.gbv import *
