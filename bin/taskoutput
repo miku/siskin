@@ -16,6 +16,7 @@ from siskin.sources.ema import *
 from siskin.sources.gbv import *
 from siskin.sources.hszigr import *
 from siskin.sources.ksd import *
+from siskin.sources.lfer import *
 from siskin.sources.mtc import *
 from siskin.sources.nl import *
 from siskin.sources.pao import *
