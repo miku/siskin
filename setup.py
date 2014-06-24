@@ -32,6 +32,7 @@ setup(name='siskin',
         'bin/taskls',
         'bin/tasknames',
         'bin/taskoutput',
+        'bin/taskredo',
         'bin/taskrm',
         'bin/taskwc',
       ]
