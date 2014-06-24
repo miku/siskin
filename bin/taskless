@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Just like `less` but takes a taskname as arguments. The task must have been
-# completed successfully before you `taskcat` it.
+# Just like `less` but takes a taskname as argument. The task must have been
+# completed successfully before you can `taskless` it.
 #
 # Examples
 #
-#     $ taskcat EBLDates
-#     $ taskcat Events --iln 10
+#     $ taskless EBLDates
+#     $ taskless -N Events --iln 10
 #
 set -e -u
 
