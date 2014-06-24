@@ -1,14 +1,14 @@
-_tsk_names()
+_siskin_task_names()
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
     COMPREPLY=( $(compgen -W "$(tasknames)" -- $cur) )
 }
 
-complete -F _tsk_names taskcat
-complete -F _tsk_names taskdo
-complete -F _tsk_names taskless
-complete -F _tsk_names taskls
-complete -F _tsk_names taskoutput
-complete -F _tsk_names taskredo
-complete -F _tsk_names taskrm
-complete -F _tsk_names taskwc
+complete -F _siskin_task_names taskcat
+complete -F _siskin_task_names taskdo
+complete -F _siskin_task_names taskless
+complete -F _siskin_task_names taskls
+complete -F _siskin_task_names taskoutput
+complete -F _siskin_task_names taskredo
+complete -F _siskin_task_names taskrm
+complete -F _siskin_task_names taskwc
