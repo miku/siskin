@@ -7,13 +7,10 @@ from gluish.esindex import CopyToIndex
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
 import tempfile
-
-config = Config.instance()
 
 class DissonTask(DefaultTask):
     TAG = '013'
