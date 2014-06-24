@@ -6,7 +6,7 @@ from siskin.configuration import Config
 import os
 import tempfile
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 config = Config.instance()
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())
