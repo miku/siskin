@@ -5,8 +5,10 @@ Define a siskin wide task with artefacts under core.home directory.
 """
 
 from gluish.task import BaseTask
+from gluish.utils import shellout
 from siskin.configuration import Config
 import os
+import random
 
 config = Config.instance()
 
@@ -18,3 +20,30 @@ class DefaultTask(BaseTask):
         """ Return the absolute path to the asset. `path` is the relative path
         below the assets root dir. """
         return os.path.join(os.path.dirname(__file__), 'assets', path)
+
+#
+# ambience experiment - audio feedback to command line tasks
+#
+
+    def _ambience_ok(self):
+        return os.path.join('ambience/ok{}.mp3'.format(random.randint(1, 12)))
+
+    def _ambience_deny(self):
+        return os.path.join('ambience/deny{}.mp3'.format(random.randint(1, 4)))
+
+    def _ambience_complete(self):
+        return os.path.join('ambience/complete.mp3')
+
+    def _ambience(self, kind='ok'):
+        filenames = {'ok': self._ambience_ok(),
+                     'deny': self._ambience_deny(),
+                     'complete': self._ambience_complete()}
+        shellout("""mpg123 -q {path}""", path=self.assets(filenames.get(kind)))
+
+    def on_success(self):
+        if config.getboolean('core', 'ambience', False):
+            self._ambience(kind='ok')
+
+    def on_failure(self, exception):
+        if config.getboolean('core', 'ambience', False):
+            self._ambience(kind='deny')

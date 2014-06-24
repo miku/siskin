@@ -44,8 +44,6 @@ loeppn-datefmt = %y%m%d
 # regular expression to match the date (maybe obsolete)
 leoppn-datepattern = [0-9]{6}
 
-# audible feedback
-ambience = off
 """
 
 from __future__ import print_function
@@ -73,7 +71,6 @@ import operator
 import os
 import pandas as pd
 import pymarc
-import random
 import re
 import shelve
 import string
@@ -135,32 +132,6 @@ class BSZTask(DefaultTask):
         params = {'lookfor': 'record_id:%s' % ppn}
         return os.path.join(self.mappings().get('iln_live').get(iln), 'Search',
                             'Results?%s' % urllib.urlencode(params))
-
-    def _ambience_ok(self):
-        return os.path.join('ambience/ok{}.mp3'.format(random.randint(1, 12)))
-
-    def _ambience_deny(self):
-        return os.path.join('ambience/deny{}.mp3'.format(random.randint(1, 4)))
-
-    def _ambience_complete(self):
-        return os.path.join('ambience/complete.mp3')
-
-    def _ambience(self, kind='ok'):
-        filenames = {'ok': self._ambience_ok(),
-                     'deny': self._ambience_deny(),
-                     'complete': self._ambience_complete()}
-        try:
-            shellout("""mpg123 -q {path}""", path=self.assets(filenames.get(kind)))
-        except Exception:
-            pass
-
-    def on_success(self):
-        if config.get('bsz', 'ambience', False):
-            self._ambience(kind='ok')
-
-    def on_failure(self, exception):
-        if config.get('bsz', 'ambience', False):
-            self._ambience(kind='deny')
 
 # ==============================================================================
 #
@@ -755,7 +726,7 @@ class LiberoCacheDump(BSZTask):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
     def on_success(self):
-        if config.get('bsz', 'ambience', False):
+        if config.getboolean('core', 'ambience', False):
             self._ambience(kind='complete')
 
 class LiberoCacheCopy(BSZTask):
@@ -790,7 +761,7 @@ class LiberoCacheCopy(BSZTask):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
     def on_success(self):
-        if config.get('bsz', 'ambience', False):
+        if config.getboolean('core', 'ambience', False):
             self._ambience(kind='complete')
 
 class FincMappingDump(BSZTask):
@@ -850,7 +821,7 @@ class FincMappingDump(BSZTask):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
     def on_success(self):
-        if config.get('bsz', 'ambience', False):
+        if config.getboolean('core', 'ambience', False):
             self._ambience(kind='complete')
 
 class ISBNDump(BSZTask):
@@ -897,7 +868,7 @@ class ISBNDump(BSZTask):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
     def on_success(self):
-        if config.get('bsz', 'ambience', False):
+        if config.getboolean('core', 'ambience', False):
             self._ambience(kind='ok')
 
 # ==============================================================================
