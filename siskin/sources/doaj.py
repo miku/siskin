@@ -43,10 +43,11 @@ class DOAJCSV(DOAJTask):
 
 class DOAJDump(DOAJTask):
     """ Complete DOAJ Elasticsearch dump. """
-    host = luigi.Parameter(default='doaj.org')
-    port = luigi.IntParameter(default=80)
-    url_prefix = luigi.Parameter(default='query')
     date = ClosestDateParameter(default=datetime.date.today())
+
+    host = luigi.Parameter(default='doaj.org', significant=False)
+    port = luigi.IntParameter(default=80, significant=False)
+    url_prefix = luigi.Parameter(default='query', significant=False)
 
     batch_size = luigi.IntParameter(default=1000, significant=False)
     timeout = luigi.IntParameter(default=60, significant=False)
