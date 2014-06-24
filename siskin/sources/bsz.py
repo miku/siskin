@@ -1300,7 +1300,8 @@ class Events(BSZTask):
                     break
             else:
                 shellout("touch {output}", output=self.output().path)
-                logger.warn('No events for ILN {iln} {begin} -- {end}'.format(iln=self.iln, begin=self.begin, end=self.end))
+                logger.warn('No events for ILN {iln} {begin} -- {end}'.format(
+                            iln=self.iln, begin=self.begin, end=self.end))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
