@@ -1237,6 +1237,7 @@ class EventsPreflight(BSZTask):
         # plus: write a receipt (iln, events_for_iln.output().path)
         with self.output().open('w') as output:
             for iln, target in filemap.iteritems():
+                # TODO: This is a bad idea, because `taskredo Events` will fail
                 task = Events(begin=self.begin, end=self.end, iln=iln)
                 events_for_iln_output = task.output().path
                 luigi.File(target.path).move(events_for_iln_output)
