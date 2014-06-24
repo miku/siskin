@@ -21,6 +21,7 @@ from siskin.sources.lfer import *
 from siskin.sources.mtc import *
 from siskin.sources.nl import *
 from siskin.sources.pao import *
+from siskin.sources.rism import *
 import collections
 import luigi
 import sys
