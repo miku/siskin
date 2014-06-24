@@ -1,5 +1,0 @@
-[MASTER]
-ignore=setup.py,bin,dist,build
-
-[pre-commit-hook]
-limit=8.0
