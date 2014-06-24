@@ -72,4 +72,4 @@ class DOAJDump(DOAJTask):
                 offset += self.batch_size
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
