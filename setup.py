@@ -13,7 +13,7 @@ except:
 
 
 setup(name='siskin',
-      version='0.0.2',
+      version='0.0.3',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
