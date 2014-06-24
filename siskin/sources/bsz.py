@@ -1262,7 +1262,7 @@ class Events(BSZTask):
                 if row.iln == self.iln:
                     df = pd.read_csv(row.path, sep='\t', names=('epn', 'date',
                                      'type', 'prio', 'ppn'),
-                                     dtype={'epn': npstr, 'ppn': npstr})
+                                     dtype={'epn': pd.np.str, 'ppn': pd.np.str})
                     begins, ends = str(self.begin), str(self.end)
                     filtered = df[(df.date >= begins) & (df.date < ends)]
                     with self.output().open('w') as output:
