@@ -13,5 +13,5 @@ from siskin.sources.nl import *
 from siskin.sources.pao import *
 
 if __name__ == '__main__':
-	for name in sorted(Register.get_reg().keys()):
-		print(name)
+    for name in sorted(Register.get_reg().keys()):
+        print(name)
