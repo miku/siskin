@@ -85,7 +85,7 @@ class RISMJson(RISMTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class RISMIndex(RISMTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())
