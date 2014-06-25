@@ -41,15 +41,18 @@ def generate_tasks_manual():
     task_tuples = sorted(Register.get_reg().iteritems())
     output.write(MAN_HEADER)
     output.write('+ {} tasks found\n\n'.format(len(task_tuples)))
-    for key, klass in task_tuples:
+
+    for name, klass in task_tuples:
+        doc = klass.__doc__ or colors.red("@todo")
+        output.write('{} {}\n'.format(colors.green(name), doc))
+
         try:
             deps = flatten(klass().requires())
         except Exception:
             # TODO: tasks that have required arguments will fail here
-            pass
-        doc = klass.__doc__ or colors.red("@todo")
-        output.write('{} {}\n'.format(colors.green(key), doc))
-        if deps:
+            formatted = colors.yellow("\tUnavailable since task has required parameters.")
+        else:
             formatted = '\t{}'.format(pprint.pformat(deps).replace('\n', '\n\t'))
-            output.write(colors.magenta('\n    Dependencies ({}):\n\n{}\n\n'.format(len(deps), formatted)))
+        output.write(colors.magenta('\n\tDependencies ({}):\n\n{}\n\n'.format(len(deps), formatted)))
+
     return output.getvalue()
