@@ -291,8 +291,9 @@ class NEPEvents(NEPTask):
         luigi.build([task], local_scheduler=True)
         with task.output().open() as handle:
             for row in handle.iter_tsv(cols=('date',)):
-                date = datetime.datetime.strptime(row.date, '%Y-%m-%d').date()
-                yield NEPTable(date=date)
+                date = datetime.date(*(int(v) for v in row.date.split('-')))
+                if date < self.closest():
+                    yield NEPTable(date=date)
 
     @timed
     def run(self):
