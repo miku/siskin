@@ -86,13 +86,15 @@ class NEPCopy(NEPTask):
     username = luigi.Parameter(default=config.get('nep', 'backlog-username'))
     pattern = luigi.Parameter(default=config.get('nep', 'backlog-pattern'))
 
+    timeout = luigi.IntParameter(default=10, description='rsnyc IO timeout', significant=False)
+
     def requires(self):
         return Directory(path=os.path.dirname(self.output().path))
 
     @timed
     def run(self):
-        shellout("""rsync -avz {username}@{server}:{pattern} {directory}""",
-                 username=self.username, server=self.server,
+        shellout("""rsync --timeout {timeout} -avz {username}@{server}:{pattern} {directory}""",
+                 timeout=self.timeout, username=self.username, server=self.server,
                  pattern=self.pattern, directory=self.input().path)
 
         with self.output().open('w') as output:
