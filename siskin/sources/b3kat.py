@@ -123,7 +123,7 @@ class B3KatShadowHarvest(B3KatTask):
                                       doc_number=self.doc_number, service_type=self.service_type))
         url = urlparse.urlunparse((self.scheme, self.netloc, self.urlpath, '', query, ''))
         with self.output().open('w') as output:
-            for _ in range(100):
+            for _ in range(self.loop):
                 try:
                     r = requests.get(url, timeout=20)
                     output.write(r.text)
