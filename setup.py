@@ -12,7 +12,7 @@ except:
     from distutils.core import setup
 
 setup(name='siskin',
-      version='0.0.4',
+      version='0.0.5',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
@@ -23,7 +23,7 @@ setup(name='siskin',
         'siskin.workflows'
       ],
       package_dir={'siskin': 'siskin'},
-      package_data={'siskin': ['assets/*']},
+      package_data={'siskin': ['assets/*', 'assets/ambience/*']},
       scripts=[
         'bin/taskcat',
         'bin/taskdo',

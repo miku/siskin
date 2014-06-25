@@ -6,7 +6,12 @@ from siskin.configuration import Config
 import os
 import tempfile
 
-__version__ = '0.0.4'
+# temporary leave this here, since on 2.7 pytz seems to import
+# module argparse a second time
+import warnings
+warnings.filterwarnings("ignore")
+
+__version__ = '0.0.5'
 
 config = Config.instance()
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())
