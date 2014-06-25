@@ -34,6 +34,7 @@ from gluish.benchmark import timed
 from gluish.common import Directory, FTPMirror
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
+from gluish.interval import every_minute
 from gluish.parameter import ClosestDateParameter
 from gluish.path import copyregions
 from gluish.utils import shellout, random_string, memoize
@@ -109,7 +110,7 @@ class NEPCopy(NEPTask):
 class NEPImport(NEPTask):
     """ NEPCopy and FTP. """
 
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute())
 
     def requires(self):
         return {'copy': NEPCopy(),
@@ -142,7 +143,7 @@ class NEPImport(NEPTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class NEPDatesAndPaths(NEPTask):
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute())
 
     def requires(self):
         return NEPImport()
@@ -174,10 +175,10 @@ class NEPLatestDate(NEPTask):
     """ For a given date, return the closest date in the past
     on which EBL shipped. """
     date = luigi.DateParameter(default=datetime.date.today())
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute())
 
     def requires(self):
-        return NEPDatesAndPaths(indicator=self.indicator)
+        return NEPDatesAndPaths()
 
     @timed
     def run(self):
