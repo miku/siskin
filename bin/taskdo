@@ -5,6 +5,7 @@
 The main command line program to interact with the tasks.
 """
 
+from siskin.sources.b3kat import *
 from siskin.sources.bms import *
 from siskin.sources.bsz import *
 from siskin.sources.disson import *

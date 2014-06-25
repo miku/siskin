@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 from luigi.task import Register
+from siskin.sources.b3kat import *
 from siskin.sources.bms import *
 from siskin.sources.bsz import *
 from siskin.sources.disson import *
