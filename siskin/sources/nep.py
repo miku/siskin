@@ -78,8 +78,7 @@ class NEPTask(DefaultTask):
         luigi.build([task], local_scheduler=True)
         with task.output().open() as handle:
             date = handle.iter_tsv(cols=('date', 'path')).next().date
-        result = datetime.date(*(int(v) for v in date.split('-')))
-        return result
+        return datetime.date(*(int(v) for v in date.split('-')))
 
 class NEPCopy(NEPTask):
 
@@ -157,8 +156,7 @@ class NEPDatesAndPaths(NEPTask):
                 basename = os.path.basename(row.path)
                 match = re.search(r'.*_([0-9]{8})_.*', basename)
                 if match:
-                    date_obj = datetime.datetime.strptime(match.group(1),
-                                                          '%Y%m%d').date()
+                    date_obj = datetime.datetime.strptime(match.group(1), '%Y%m%d').date()
                     if not date_obj in self.muted():
                         entries.add((date_obj, row.path))
                     else:
@@ -189,7 +187,7 @@ class NEPLatestDate(NEPTask):
         pathmap = {}
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('date', 'path')):
-                date = datetime.datetime.strptime(row.date, '%Y-%m-%d').date()
+                date = datetime.date(*(int(v) for v in row.date.split('-')))
                 pathmap[date] = row.path
 
         def closest_keyfun(date):
@@ -233,8 +231,7 @@ class NEPLatestDateAndPaths(NEPTask):
         with self.input().open() as handle:
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('date', 'path')):
-                    date = datetime.datetime.strptime(row.date,
-                                                      '%Y-%m-%d').date()
+                    date = datetime.date(*(int(v) for v in row.date.split('-')))
                     if date == self.closest():
                         output.write_tsv(*row)
 
@@ -356,8 +353,7 @@ class NEPSnapshot(NEPTask):
             dates = df.date.unique()
             with self.output().open('w') as output:
                 for date in dates:
-                    task = NEPCombine(date=datetime.datetime.strptime(date,
-                                      '%Y-%m-%d').date())
+                    task = NEPCombine(date=datetime.date(*(int(v) for v in date.split('-'))))
                     luigi.build([task], local_scheduler=True)
                     with task.output().open() as fh:
                         # this gathers offset and length for a single date,
