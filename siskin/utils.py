@@ -29,6 +29,7 @@ from siskin.sources.nep import *
 from siskin.sources.nl import *
 from siskin.sources.pao import *
 from siskin.sources.rism import *
+from siskin.sources.wikipedia import *
 
 MAN_HEADER = r"""
 
