@@ -25,6 +25,8 @@ Copy this file to `/etc/siskin/siskin.ini`. `BSZTask` will require an additional
 configuration under `/etc/siskin/mappings.json`, which is not included in the
 public distribution.
 
+To use siskin, start the luigi scheduler first with `luigid` (in the background or in a separate terminal).
+
 Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/master/bin), all sharing the prefix `task`:
 
     taskcat          - inspect task output
