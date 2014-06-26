@@ -708,7 +708,7 @@ class BSZDumpTask(BSZTask):
                 elif errno == 1045:
                     self._ambience(kind='access_denied')
                 elif errno == 2013:
-                    self._ambience(kind='access_denied')
+                    self._ambience(kind='critical')
                 else:
                     self._ambience(kind='deny')
             else:
