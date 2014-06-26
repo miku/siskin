@@ -24,6 +24,7 @@ from siskin.sources.elsevier import *
 from siskin.sources.ema import *
 from siskin.sources.freebase import *
 from siskin.sources.gbv import *
+from siskin.sources.gnd import *
 from siskin.sources.hszigr import *
 from siskin.sources.imslp import *
 from siskin.sources.ksd import *

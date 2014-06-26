@@ -18,6 +18,7 @@ numpy==1.8.1
 openpyxl==1.8.6
 pandas==0.14.0
 ply==3.4
+prettytable==0.7.2
 pyisbn==1.0.0
 pylint==1.2.1
 pymarc==3.0.1
