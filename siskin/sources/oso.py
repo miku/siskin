@@ -10,6 +10,7 @@ so there tasks will fail now. TODO: update.
 from gluish.benchmark import timed
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
+from gluish.parameter import ClosestDateParameter
 from gluish.intervals import monthly
 from siskin.task import DefaultTask
 from gluish.utils import shellout
@@ -31,7 +32,7 @@ class OSOTask(DefaultTask):
 
 class OSOPage(OSOTask):
     """ Download page only once a day. """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(
         default="http://www.oxfordscholarship.com/page/643/marc-records", significant=False)
 
@@ -45,7 +46,7 @@ class OSOPage(OSOTask):
 
 class OSOSync(OSOTask):
     """ Use "Complete Set ..." hint for download. """
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return OSOPage(date=self.date)
@@ -92,7 +93,7 @@ class OSOSync(OSOTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class OSOCombined(OSOTask):
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return OSOSync(date=self.date)
@@ -111,7 +112,7 @@ class OSOCombined(OSOTask):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 class OSOJson(OSOTask):
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return OSOCombined(date=self.date)
@@ -126,7 +127,7 @@ class OSOJson(OSOTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class OSOIndex(OSOTask, CopyToIndex):
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     index = 'oso'
     doc_type = 'title'
