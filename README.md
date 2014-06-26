@@ -13,12 +13,14 @@ Getting started
 
 You might want to try siskin in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) first.
 
+    $ pip install siskin
+
 Installation takes a few minutes and you'll need libxml, libxslt and mysql
 development headers.
 
-    $ pip install siskin
+**Configuration**
 
-Most siskin tasks require configuration. An example configuration file
+Many siskin tasks require configuration. An example configuration file
 is can be found under [siskin.example.ini](https://github.com/miku/siskin/blob/master/siskin.example.ini).
 
 Copy this file to `/etc/siskin/siskin.ini`. `BSZTask` will require an additional
