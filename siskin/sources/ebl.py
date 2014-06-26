@@ -25,7 +25,7 @@ from gluish.benchmark import timed
 from gluish.common import FTPMirror, Executable
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
-from gluish.intervals import every_minute
+from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout, memoize
 from siskin.configuration import Config
@@ -64,7 +64,7 @@ class EBLTask(DefaultTask):
 
 class EBLPaths(EBLTask):
     """ A list of EBL file paths (via FTP). """
-    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         host = config.get('ebl', 'ftp-host')
@@ -84,7 +84,7 @@ class EBLPaths(EBLTask):
 
 class EBLDatesAndPaths(EBLTask):
     """ Dump the dates and file paths to a file sorted. """
-    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return EBLPaths(indicator=self.indicator)
@@ -111,7 +111,7 @@ class EBLDatesAndPaths(EBLTask):
 
 class EBLDates(EBLTask):
     """ All EBL dates sorted in a single file. """
-    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return EBLDatesAndPaths(indicator=self.indicator)
@@ -128,7 +128,7 @@ class EBLLatestDateAndPath(EBLTask):
     """ For a given date, return the closest date in the past
     on which EBL shipped. """
     date = luigi.DateParameter(default=datetime.date.today())
-    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return EBLDatesAndPaths(indicator=self.indicator)
@@ -163,7 +163,7 @@ class EBLLatestDateAndPath(EBLTask):
 class EBLLatestDate(EBLTask):
     """ Only output the latest date. """
     date = luigi.DateParameter(default=datetime.date.today())
-    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return EBLLatestDateAndPath(date=self.date, indicator=self.indicator)

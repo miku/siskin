@@ -20,9 +20,10 @@ from gluish.benchmark import timed
 from gluish.common import Directory
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
+from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
-from gluish.utils import shellout, random_string
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
@@ -53,7 +54,7 @@ class LFERTask(DefaultTask):
 
 class LFERSync(LFERTask):
     """ Copy all LFER files over. """
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=hourly())
 
     def requires(self):
         return Directory(path=os.path.dirname(self.output().path))
@@ -72,7 +73,7 @@ class LFERSync(LFERTask):
 
 class LFERDatesAndPaths(LFERTask):
     """ Just emit a two column TSV with (date, path). """
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=hourly())
 
     def requires(self):
         return LFERSync(indicator=self.indicator)
@@ -94,7 +95,7 @@ class LFERDatesAndPaths(LFERTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class LFERLatestDateAndPath(LFERTask):
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=hourly())
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -126,7 +127,7 @@ class LFERLatestDateAndPath(LFERTask):
 class LFERLatestDate(LFERTask):
     """ Only output the latest date. """
     date = luigi.DateParameter(default=datetime.date.today())
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=hourly())
 
     def requires(self):
         return LFERLatestDateAndPath(date=self.date, indicator=self.indicator)
