@@ -32,18 +32,30 @@ class DefaultTask(BaseTask):
 #
 
     def _ambience_ok(self):
-        return os.path.join('ambience/ok{}.mp3'.format(random.randint(1, 12)))
+        return os.path.join('ambience', 'ok{}.mp3'.format(random.randint(1, 12)))
 
     def _ambience_deny(self):
-        return os.path.join('ambience/deny{}.mp3'.format(random.randint(1, 4)))
+        return os.path.join('ambience', 'deny{}.mp3'.format(random.randint(1, 4)))
 
     def _ambience_complete(self):
-        return os.path.join('ambience/complete.mp3')
+        return os.path.join('ambience', 'complete.mp3')
+
+    def _ambience_unable_to_comply(self):
+        return os.path.join('ambience', 'unable_to_comply.mp3')
+
+    def _ambience_access_denied(self):
+        return os.path.join('ambience', 'access_denied.mp3')
+
+    def _ambience_critical(self):
+        return os.path.join('ambience', 'critical.mp3')
 
     def _ambience(self, kind='ok'):
         filenames = {'ok': self._ambience_ok(),
                      'deny': self._ambience_deny(),
-                     'complete': self._ambience_complete()}
+                     'complete': self._ambience_complete(),
+                     'unable_to_comply': self._ambience_unable_to_comply(),
+                     'access_denied': self._ambience_access_denied(),
+                     'critical': self._ambience_critical()}
         shellout("""mpg123 -q {path}""", path=self.assets(filenames.get(kind)))
 
     def on_success(self):
