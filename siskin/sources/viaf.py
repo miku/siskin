@@ -10,14 +10,14 @@ from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import BaseTask
+from siskin.task import DefaultTask
 import BeautifulSoup
 import datetime
 import luigi
 import re
 import requests
 
-class VIAFTask(BaseTask):
+class VIAFTask(DefaultTask):
     TAG = 'viaf'
 
     def closest(self):
