@@ -1,0 +1,312 @@
+# coding: utf-8
+# pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301
+
+from gluish.benchmark import timed
+from gluish.database import sqlite3db
+from gluish.esindex import CopyToIndex
+from gluish.format import TSV
+from gluish.parameter import ClosestDateParameter
+from gluish.path import copyregions
+from siskin.task import DefaultTask
+from gluish.utils import shellout
+import BeautifulSoup
+import collections
+import datetime
+import luigi
+import pandas as pd
+import re
+import requests
+import tempfile
+import urlparse
+
+class SWBOpenDataTask(DefaultTask):
+    TAG = '025'
+
+    def closest(self):
+        if not hasattr(self, 'date'):
+            raise RuntimeError('no date attribute on %s' % self)
+        task = SWBOpenDataLatestDate(date=self.date)
+        luigi.build([task], local_scheduler=True)
+        with task.output().open() as handle:
+            s = handle.read().strip()
+            date = datetime.date(*map(int, s.split('-')))
+        return date
+
+class SWBOpenDataLatestDate(SWBOpenDataTask):
+    """ For a given date, return the closest date in the past
+    on which EBL shipped. """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataInventory()
+
+    @timed
+    def run(self):
+        """ load dates and paths in pathmap, use a custom key
+        function to find the closest date, but double check,
+        if that date actually lies in the future - if it does, raise
+        an exception, otherwise dump the closest date and filename to output """
+        dates = set()
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('date', 'type', 'url')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                dates.add(date)
+
+        def closest_keyfun(date):
+            if date > self.date:
+                return datetime.timedelta(999999999)
+            return abs(date - self.date)
+
+        closest = min(dates, key=closest_keyfun)
+        if closest > self.date:
+            raise RuntimeError('No shipment before: %s' % min(dates))
+
+        with self.output().open('w') as output:
+            output.write_tsv(closest)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataInventory(SWBOpenDataTask):
+    base = luigi.Parameter(default="http://swblod.bsz-bw.de/od/", significant=False)
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    @timed
+    def run(self):
+        r = requests.get(self.base)
+        if not r.status_code == 200:
+            raise RuntimeError("HTTP %s: %s" % (r.status_code, r.text))
+        soup = BeautifulSoup.BeautifulSoup(r.text)
+        links = soup.findAll('a')
+        packages = collections.defaultdict(set)
+        patterns = {'update': r'od-up_bsz-tit_([\d]{6})_([\d]{1,}).xml.tar.gz',
+                    'dump': r'od_bsz-tit_([\d]{6})_([\d]{1,}).xml.tar.gz'}
+        for link in links:
+            filename = link.get('href')
+            kind, pattern = None, None
+            if filename.startswith('od-up_bsz'):
+                pattern = re.compile(patterns.get('update'))
+                kind = 'update'
+            elif filename.startswith('od_bsz'):
+                pattern = re.compile(patterns.get('dump'))
+                kind = 'dump'
+            else:
+                continue
+
+            match = pattern.match(filename)
+            if not match:
+                raise RuntimeError("unexpected filename: %s" % filename)
+
+            date = datetime.datetime.strptime(match.group(1), '%y%m%d').date()
+            packages[date].add((kind, filename))
+
+        with self.output().open('w') as output:
+            for date in sorted(packages):
+                for kind, filename in sorted(packages[date]):
+                    url = urlparse.urljoin(self.base, filename)
+                    output.write_tsv(date, kind, url)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataMarc(SWBOpenDataTask):
+    """ Get the MARC version of SWB OD for some date. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataInventory()
+
+    @timed
+    def run(self):
+        """ Assumes every tarball contains a single file. Will fail during
+        XML -> MARC conversion otherwise. """
+        urls = set()
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('date', 'kind', 'url')):
+                dateobj = datetime.date(*map(int, row.date.split('-')))
+                if dateobj == self.closest():
+                    urls.add(row.url)
+
+        _, combined = tempfile.mkstemp(prefix='tasktree-')
+        for url in urls:
+            output = shellout("wget --retry-connrefused -O {output} '{url}'", url=url)
+            output = shellout("tar -Oxzf {input} > {output}", input=output)
+            shellout("yaz-marcdump -i marcxml -o marc {input} >> {output}",
+                     input=output, output=combined)
+        luigi.File(combined).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+class SWBOpenDataSeekMapDB(SWBOpenDataTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+    def requires(self):
+        return SWBOpenDataMarc(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("marcmap -o {output} {input}",
+                          input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
+class SWBOpenDataListified(SWBOpenDataTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataMarc(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""
+            marctotsv -f NA -s "|" {input} 001 {date} 005 924.b > {output}""",
+            date=self.closest(), input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataListifiedRange(SWBOpenDataTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        task = SWBOpenDataDates(date=self.date)
+        luigi.build([task], local_scheduler=True)
+        with task.output().open() as handle:
+            for row in handle.iter_tsv(cols=('date',)):
+                dateobj = datetime.date(*map(int, row.date.split('-')))
+                yield SWBOpenDataListified(date=dateobj)
+
+    @timed
+    def run(self):
+        _, combined = tempfile.mkstemp(prefix='tasktree')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path,
+                     output=combined)
+        output = shellout("sort -k1,1 -k2,2 {input} > {output}", input=combined)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class SWBOpenDataDates(SWBOpenDataTask):
+    """ Just all the dates up to the last dump. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataInventory()
+
+    @timed
+    def run(self):
+        dates = set()
+        with self.input().open() as handle:
+            sequence = list(handle.iter_tsv(cols=('date', 'type', 'url')))
+            for row in reversed(sequence):
+                dateobj = datetime.date(*map(int, row.date.split('-')))
+                if dateobj > self.date:
+                    continue
+                dates.add(row.date)
+                if row.type == 'dump':
+                    break
+        if not dates:
+            raise RuntimeError('no shipments before %s' % self.date)
+
+        with self.output().open('w') as output:
+            for date in sorted(dates):
+                output.write_tsv(date)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataSnapshot(SWBOpenDataTask):
+    """ Find the latest entries from SWB OD. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataListifiedRange(date=self.date)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            df = pd.read_csv(handle, sep='\t',
+                             names=('id', 'date', 'transaction', 'sigels'))
+        surface = df.drop_duplicates(cols=('id'), take_last=True)
+        with self.output().open('w') as output:
+            surface.to_csv(output, sep='\t', cols=('id', 'date'), index=False,
+                           header=False)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
+    """ Create a single MARC file, that represents
+    the current state of affairs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataSnapshot(date=self.date)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            df = pd.read_csv(handle, sep="\t", names=('id', 'date'))
+        dates = df.date.unique()
+
+        with self.output().open('w') as output:
+            for date in sorted(dates):
+                dateobj = datetime.date(*map(int, date.split('-')))
+                marc = SWBOpenDataMarc(date=dateobj)
+                sdb = SWBOpenDataSeekMapDB(date=dateobj)
+                luigi.build([marc, sdb], local_scheduler=True)
+                with open(marc.output().path) as handle:
+                    with sqlite3db(sdb.output().path) as cursor:
+                        idset = df[df.date == date].id.values.tolist()
+                        cursor.execute("""
+                            SELECT offset, length
+                            FROM seekmap WHERE id IN (%s)""" % (
+                                ','.join(("'%s'" % id for id in idset))))
+                        rows = cursor.fetchall()
+                        copyregions(handle, output, rows)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+class SWBOpenDataSnapshotJson(SWBOpenDataTask):
+    """ Create a single JSON file, that represents
+    the current state of affairs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataSnapshotMarc(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("marctojson -m date={date} {input} > {output}",
+                          input=self.input().path, date=self.closest())
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class SWBOpenDataIndex(SWBOpenDataTask, CopyToIndex):
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    index = 'swbod'
+    doc_type = 'title'
+    purge_existing_index = True
+
+    mapping = {'title': {'date_detection': False,
+                          '_id': {'path': 'content.001'},
+                          '_all': {'enabled': True,
+                                   'term_vector': 'with_positions_offsets',
+                                   'store': True}}}
+
+    def update_id(self):
+        """ This id will be a unique identifier for this indexing task."""
+        return self.effective_task_id()
+
+    def requires(self):
+        return SWBOpenDataSnapshotJson(date=self.date)
