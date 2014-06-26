@@ -11,7 +11,7 @@ Various tasks for metadata handling.
 Getting started
 ---------------
 
-You might want to try siskin in a virtual environment first.
+You might want to try siskin in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) first.
 
 Installation takes a few minutes and you'll need libxml, libxslt and mysql
 development headers.
