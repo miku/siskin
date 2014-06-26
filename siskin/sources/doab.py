@@ -9,12 +9,8 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 import datetime
-import logging
 import luigi
 import pymarc
-
-# logging
-logger = logging.getLogger('siskin')
 
 class DOABTask(DefaultTask):
     TAG = '026'
@@ -56,15 +52,15 @@ class DOABCombine(DOABTask):
                         record = reader.next()
                         record_id = record['001'].value()
                         if record_id in ('15270', '15298', '15318', '15335'):
-                            logger.debug("Skipping {}".format(record_id))
+                            self.logger.debug("Skipping {}".format(record_id))
                             continue
                         if not record_id in seen:
                             writer.write(record)
                             seen.add(record_id)
                         else:
-                            logger.debug("Skipping duplicate: {}".format(record_id))
+                            self.logger.debug("Skipping duplicate: {}".format(record_id))
                     except pymarc.exceptions.RecordDirectoryInvalid as err:
-                        logger.warn(err)
+                        self.logger.warn(err)
                     except StopIteration:
                         break
 

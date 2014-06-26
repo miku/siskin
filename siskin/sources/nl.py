@@ -23,6 +23,7 @@ from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import random_string, shellout
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import gspread
@@ -34,9 +35,7 @@ import re
 import string
 import tempfile
 
-from siskin.configuration import Config
 config = Config.instance()
-logger = logging.getLogger('siskin')
 
 class NLTask(DefaultTask):
     TAG = '017'
@@ -257,7 +256,7 @@ class NLJsonWithSuggestions(NLTask):
 
                             doc['content']['245'][i]['suggest'] = suggest
                     except Exception as err:
-                        logger.warn(err)
+                        self.logger.warn(err)
                         continue
                     output.write(json.dumps(doc))
                     output.write('\n')

@@ -26,11 +26,9 @@ from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
-import logging
 import luigi
 
 config = Config.instance()
-logger = logging.getLogger('siskin')
 
 class BMSTask(DefaultTask):
     """ BMS base task. """

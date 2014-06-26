@@ -27,13 +27,11 @@ from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import json
-import logging
 import luigi
 import os
 import re
 
 config = Config.instance()
-logger = logging.getLogger('siskin')
 
 class LFERTask(DefaultTask):
     TAG = '008'
@@ -161,7 +159,7 @@ class LFERMarc(LFERTask):
         # the latest shipment relative to self.date
         with self.input().open() as handle:
             date, path = handle.iter_tsv(cols=('date', 'path')).next()
-        logger.debug("The closest shipment occured at {}".format(date))
+        self.logger.debug("The closest shipment occured at {}".format(date))
 
         # stream file out
         output = shellout("tar -zOxf {archive} {fn} > {output}",
@@ -217,7 +215,7 @@ class LFERJsonWithSuggestions(LFERTask):
 
                             doc['content']['245'][i]['suggest'] = suggest
                     except Exception as err:
-                        logger.warn(err)
+                        self.logger.warn(err)
                         continue
                     output.write(json.dumps(doc))
                     output.write('\n')

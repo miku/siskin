@@ -44,7 +44,6 @@ import datetime
 import glob
 import gspread
 import json
-import logging
 import luigi
 import marcx
 import os
@@ -53,7 +52,6 @@ import pymarc
 import re
 import tempfile
 
-logger = logging.getLogger('siskin')
 config = Config.instance()
 
 class NEPTask(DefaultTask):
@@ -160,7 +158,7 @@ class NEPDatesAndPaths(NEPTask):
                     if not date_obj in self.muted():
                         entries.add((date_obj, row.path))
                     else:
-                        logger.debug('ignoring %s via nep.mute' % date_obj)
+                        self.logger.debug('ignoring %s via nep.mute' % date_obj)
 
         with self.output().open('w') as output:
             for date, path in sorted(entries):
@@ -474,7 +472,7 @@ class NEPJsonWithSuggestions(NEPTask):
 
                             doc['content']['245'][i]['suggest'] = suggest
                     except Exception as err:
-                        logger.warn(err)
+                        self.logger.warn(err)
                         continue
                     output.write(json.dumps(doc))
                     output.write('\n')

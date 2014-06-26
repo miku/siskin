@@ -13,7 +13,6 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout, random_string
 from siskin.task import DefaultTask
 import datetime
-import logging
 import luigi
 import random
 import requests
@@ -21,8 +20,6 @@ import tempfile
 import time
 import urllib
 import urlparse
-
-logger = logging.getLogger('siskin')
 
 class B3KatTask(DefaultTask):
     """ Base task for http://www.b3kat.de/ related things. """
@@ -130,7 +127,7 @@ class B3KatShadowHarvest(B3KatTask):
                     output.write("\n\n\n\n")
                     time.sleep(random.random())
                 except Exception as err:
-                    logger.error(err)
+                    self.logger.error(err)
                     break
 
     def output(self):

@@ -7,6 +7,7 @@ Define a siskin wide task with artefacts under core.home directory.
 from gluish.task import BaseTask
 from gluish.utils import shellout
 from siskin.configuration import Config
+import logging
 import os
 import random
 
@@ -20,6 +21,11 @@ class DefaultTask(BaseTask):
         """ Return the absolute path to the asset. `path` is the relative path
         below the assets root dir. """
         return os.path.join(os.path.dirname(__file__), 'assets', path)
+
+    @property
+    def logger(self):
+        # logging uses singleton internally, so no worries
+        return logging.getLogger('siskin')
 
 #
 # ambience experiment - audio feedback to command line tasks

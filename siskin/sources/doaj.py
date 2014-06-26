@@ -8,16 +8,14 @@ from gluish.benchmark import timed
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import elasticsearch
 import json
-import logging
 import luigi
 
-from siskin.configuration import Config
 config = Config.instance()
-logger = logging.getLogger('siskin')
 
 class DOAJTask(DefaultTask):
     """ Base task for DOAJ. """
@@ -62,7 +60,7 @@ class DOAJDump(DOAJTask):
             offset = 0
             total = es.count(body={'query': {'match_all': {}}}, index=('journal', 'article')).get('count')
             while offset <= total:
-                logger.debug(json.dumps({'offset': offset, 'total': total}))
+                self.logger.debug(json.dumps({'offset': offset, 'total': total}))
                 result = es.search(body={'constant_score':
                                    {'query': {'match_all': {}}}},
                                    index=('journal', 'article'),

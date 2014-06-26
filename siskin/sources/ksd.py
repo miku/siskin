@@ -17,12 +17,12 @@ from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import shellout
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
 import tempfile
 
-from siskin.configuration import Config
 config = Config.instance()
 
 class KSDTask(DefaultTask):

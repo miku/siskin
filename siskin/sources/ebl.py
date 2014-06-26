@@ -31,11 +31,9 @@ from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import json
-import logging
 import luigi
 import re
 
-logger = logging.getLogger('siskin')
 config = Config.instance()
 
 class EBLTask(DefaultTask):
@@ -103,7 +101,7 @@ class EBLDatesAndPaths(EBLTask):
                     date = datetime.date(int(gdict['year']), int(gdict['month']),
                                          int(gdict['day']))
                     if date in self.muted():
-                        logger.debug("Skipping %s since it is muted." % date)
+                        self.logger.debug("Skipping %s since it is muted." % date)
                     else:
                         output.write_tsv(date, row.path)
 
@@ -241,7 +239,7 @@ class EBLJsonWithSuggestions(EBLTask):
 
                             doc['content']['245'][i]['suggest'] = suggest
                     except Exception as err:
-                        logger.warn(err)
+                        self.logger.warn(err)
                         continue
                     output.write(json.dumps(doc))
                     output.write('\n')

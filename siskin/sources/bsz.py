@@ -57,15 +57,14 @@ from gluish.parameter import ILNParameter
 from gluish.path import copyregions
 from gluish.utils import shellout, memoize, random_string, nwise
 from luigi import date_interval
-from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.configuration import Config
 import collections
 import datetime
 import difflib
 import elasticsearch
 import glob
 import json
-import logging
 import luigi
 import operator
 import os
@@ -78,7 +77,6 @@ import tarfile
 import tempfile
 import urllib
 
-logger = logging.getLogger('siskin')
 config = Config.instance()
 SeekInfo = collections.namedtuple('SeekInfo', ['offset', 'length'])
 
@@ -484,13 +482,13 @@ class TASync(BSZTask):
         src = config.get('bsz', 'ta-pattern').format(date=self.date.strftime(fmt))
         if not os.path.exists(src):
             if self.date in self.muted():
-                logger.debug("{} is muted by config".format(self.date))
+                self.logger.debug("{} is muted by config".format(self.date))
                 path = create_empty_daily_update()
                 luigi.File(path=path).move(self.output().path)
             else:
                 raise RuntimeError("No Tagesupdate (yet?) for {}".format(self.date))
         else:
-            logger.info("Syncing TA {}".format(src))
+            self.logger.info("Syncing TA {}".format(src))
             luigi.File(path=src).copy(self.output().path)
 
     def output(self):
@@ -709,7 +707,7 @@ class LiberoCacheDump(BSZTask):
             raise RuntimeError("no mapping found from ILN to LIBERO-ID")
 
         url = config.get('bsz', 'liberocache-url')
-        logger.debug("Using LiberoCache via {}".format(url))
+        self.logger.debug("Using LiberoCache via {}".format(url))
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT record_id, content from libero_cache WHERE db_name = '%s' """ % (db_name,))
             _, stopover = tempfile.mkstemp(prefix='tasktree-')
@@ -749,7 +747,7 @@ class LiberoCacheCopy(BSZTask):
                 for i, row in enumerate(cursor):
                     if i % self.batch == 0 and i > 0:
                         cc.connection.commit()
-                        logger.debug("Transferred %s rows." % i)
+                        self.logger.debug("Transferred %s rows." % i)
                     cc.execute("""INSERT INTO libero_cache (record_id, db_name, content) VALUES (?, ?, ?)""", row)
                 cc.connection.commit()
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_lc_record_id ON libero_cache (record_id)""")
@@ -813,9 +811,9 @@ class FincMappingDump(BSZTask):
             if os.path.exists(path):
                 try:
                     os.remove(path)
-                    logger.debug('Removed stale: %s' % path)
+                    self.logger.debug('Removed stale: %s' % path)
                 except OSError as err:
-                    logger.error(err)
+                    self.logger.error(err)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
@@ -860,9 +858,9 @@ class ISBNDump(BSZTask):
             if os.path.exists(path):
                 try:
                     os.remove(path)
-                    logger.debug('Removed stale: %s' % path)
+                    self.logger.debug('Removed stale: %s' % path)
                 except OSError as err:
-                    logger.warn(err)
+                    self.logger.warn(err)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
@@ -1091,9 +1089,9 @@ class ListifyLocalRange(BSZTask):
             if os.path.exists(path):
                 try:
                     os.remove(path)
-                    logger.debug('Removed stale: %s' % path)
+                    self.logger.debug('Removed stale: %s' % path)
                 except OSError as err:
-                    logger.error(err)
+                    self.logger.error(err)
 
         _, stopover = tempfile.mkstemp(prefix='tasktree-')
         for target in self.input():
@@ -1204,11 +1202,11 @@ class EventsPreflight(BSZTask):
 
         Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn'])
         filemap = collections.defaultdict(lambda: luigi.File(is_tmp=True, format=TSV))
-        logger.debug("Processing {} ILNs ...".format(len(self.finc_ilns())))
+        self.logger.debug("Processing {} ILNs ...".format(len(self.finc_ilns())))
 
         for iln in self.finc_ilns():
             begins, ends = str(self.begin), str(self.end)
-            logger.debug("[{iln}] Filtering events ({begin}-{end})".format(
+            self.logger.debug("[{iln}] Filtering events ({begin}-{end})".format(
                          iln=iln, begin=begins, end=ends))
             filtered = df[(df.iln == iln) & (df.date >= begins) &
                                             (df.date < ends)]
@@ -1226,7 +1224,7 @@ class EventsPreflight(BSZTask):
                 epn_events[epn].add(Event(*(date, 'U', 10, ppn)))
 
             # Writing events
-            logger.debug("[{iln}] Writing ({fn})".format(iln=iln, fn=filemap[iln].path))
+            self.logger.debug("[{iln}] Writing ({fn})".format(iln=iln, fn=filemap[iln].path))
             with filemap[iln].open('w') as handle:
                 for epn, events in sorted(epn_events.iteritems()):
                     # sort events by date and prio
@@ -1272,7 +1270,7 @@ class Events(BSZTask):
                     break
             else:
                 shellout("touch {output}", output=self.output().path)
-                logger.warn('No events for ILN {iln} {begin} -- {end}'.format(
+                self.logger.warn('No events for ILN {iln} {begin} -- {end}'.format(
                             iln=self.iln, begin=self.begin, end=self.end))
 
     def output(self):
@@ -1309,7 +1307,7 @@ class SnapshotBasic(BSZTask):
                         epn_misses.add(row.epn)
                 else:
                     raise ValueError('Only [U]pdate and [D]elete types known.')
-        logger.debug("The %s deletions that weren't there (ex: %s)" % (
+        self.logger.debug("The %s deletions that weren't there (ex: %s)" % (
                      len(epn_misses), list(epn_misses)[:3]))
 
         _, stopover = tempfile.mkstemp(prefix='tasktree-')
@@ -1377,7 +1375,7 @@ class OpacDisplayFlag(BSZTask):
                 output.write_tsv(uncached, 0, 'SNAPSHOT_ONLY')
 
         # the following is just informative and could be omitted
-        logger.debug(json.dumps({
+        self.logger.debug(json.dumps({
             'in snapshot': len(ppns),
             'in cache': len(cached_ppns),
             'in cache, but not in snapshot': {
@@ -1499,7 +1497,7 @@ class UnifiedSnapshot(BSZTask):
                             counter['written'] += 1
                             output.write_tsv(*row)
                             seen.add(row.ppn)
-        logger.debug(counter)
+        self.logger.debug(counter)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -1544,7 +1542,7 @@ class BSZIndexPatch(BSZTask):
         es = elasticsearch.Elasticsearch(timeout=30)
 
         if not es.indices.exists('bsz'):
-            logger.debug('Creating index...')
+            self.logger.debug('Creating index...')
             # mapping for MLT, see also: http://bit.ly/1cHuJGA
             settings = {
                 "settings": {
@@ -1643,7 +1641,7 @@ class BSZIndexPatch(BSZTask):
                 current_map[hit['_id'].encode('utf-8')] = fields['meta.date'][0]
 
         # inline benchmark, which size works best?
-        logger.debug(json.dumps({'size': batch_size,
+        self.logger.debug(json.dumps({'size': batch_size,
                                  'elapsed': timer.elapsed_s}))
 
         # outdated items are those, that are already indexed, but do have
@@ -1665,7 +1663,7 @@ class BSZIndexPatch(BSZTask):
             os.remove(desired_target.path)
             os.remove(current_target.path)
         except OSError as err:
-            logger.warn(err)
+            self.logger.warn(err)
 
         # dump the comparisons (fyi)
         receipt = json.dumps({
@@ -1695,14 +1693,14 @@ class BSZIndexPatch(BSZTask):
                 'sample': list(current & desired - outdated)[:10]
             }
         }, indent=4)
-        logger.info(receipt)
+        self.logger.info(receipt)
 
         # delete the obsolete docs
         obsolete = current.difference(desired)
         if len(obsolete) == 0:
-            logger.debug("Nothing to delete.")
+            self.logger.debug("Nothing to delete.")
         else:
-            logger.debug('Deleting %s docs...' % len(obsolete))
+            self.logger.debug('Deleting %s docs...' % len(obsolete))
             for batch in nwise(obsolete, n=10000):
                 es.delete_by_query(index='bsz', doc_type='title',
                                    body={'query': {'ids': {'values': batch}}})
@@ -1711,10 +1709,10 @@ class BSZIndexPatch(BSZTask):
         patch = desired.difference(current).union(outdated)
 
         if len(patch) == 0:
-            logger.debug("Nothing to add.")
+            self.logger.debug("Nothing to add.")
         else:
             # if len(patch) > 0, we need to index
-            logger.debug('Preparing %s docs...' % len(patch))
+            self.logger.debug('Preparing %s docs...' % len(patch))
 
             # store on which date we'll pick up which id
             shards = collections.defaultdict(set)
@@ -1738,11 +1736,11 @@ class BSZIndexPatch(BSZTask):
 
                 raw = GenericImport(date=date, kind='tit')
                 sdb = SeekmapDB(date=date, kind='tit')
-                logger.debug("Scheduling prerequisites %s, %s ..." % (sdb, raw))
+                self.logger.debug("Scheduling prerequisites %s, %s ..." % (sdb, raw))
                 luigi.build([sdb, raw])
 
                 _, stopover = tempfile.mkstemp(prefix='tasktree-')
-                logger.debug("Using seekmap-db at %s" % sdb.output().path)
+                self.logger.debug("Using seekmap-db at %s" % sdb.output().path)
 
                 with sqlite3db(sdb.output().path) as cursor:
                     with raw.output().open() as handle:
@@ -1762,7 +1760,7 @@ class BSZIndexPatch(BSZTask):
                 garbage.add(stopover)
                 garbage.add(output)
 
-            logger.debug("Combined JSON patch at {}".format(combined))
+            self.logger.debug("Combined JSON patch at {}".format(combined))
 
             # index inline
             def docs():
@@ -1777,7 +1775,7 @@ class BSZIndexPatch(BSZTask):
                     for d in documents:
                         yield d
 
-            logger.debug("Bulk indexing %s docs..." % len(patch))
+            self.logger.debug("Bulk indexing %s docs..." % len(patch))
 
             es.indices.put_settings({"index": {"refresh_interval": "-1"}}, index='bsz')
             eshelpers.bulk_index(es, docs(), chunk_size=2000, raise_on_error=True)
@@ -1790,7 +1788,7 @@ class BSZIndexPatch(BSZTask):
                 try:
                     os.remove(path)
                 except OSError as err:
-                    logger.warning(err)
+                    self.logger.warning(err)
 
         # dump the receipt for later inspection
         with self.output().open('w') as output:
@@ -1821,9 +1819,9 @@ class Lookup(BSZTask):
 
     @timed
     def run(self):
-        logger.info('Trace for {kind}: {id} (ppn, epn, sigel, 004, date, iln)'.format(
+        self.logger.info('Trace for {kind}: {id} (ppn, epn, sigel, 004, date, iln)'.format(
                     kind=self.kind.upper(), id=self.id))
-        logger.info('Note: could match both, EPNs and PPNs, e.g. 108834948')
+        self.logger.info('Note: could match both, EPNs and PPNs, e.g. 108834948')
         output = shellout("grep {id} {input} > {output}", id=self.id,
                           ignoremap={1: "ID NOT FOUND"},
                           input=self.input().get('local').path)
@@ -1836,21 +1834,21 @@ class Lookup(BSZTask):
         elif self.kind == 'lok':
             epns.add(self.id)
 
-        logger.debug("\n\n{output}".format(output=open(output).read()))
+        self.logger.debug("\n\n{output}".format(output=open(output).read()))
 
         if len(epns) == 0:
-            logger.info('# No EPN to consider between {begin} and {end}'.format(
+            self.logger.info('# No EPN to consider between {begin} and {end}'.format(
                   self.begin, self.end))
 
         for epn in sorted(epns):
-            logger.info('# trace in deletions for EPN (epn, iln, date): %s' % (epn))
+            self.logger.info('# trace in deletions for EPN (epn, iln, date): %s' % (epn))
             try:
                 output = shellout("grep {epn} {input} > {output}", epn=epn,
                                   input=self.input().get('deletion').path)
-                logger.info("\n\n{output}".format(output=open(output).read()))
+                self.logger.info("\n\n{output}".format(output=open(output).read()))
             except RuntimeError as err:
                 if err.code == 1:
-                    logger.info("NO DELETIONS FOR {epn}".format(epn=epn))
+                    self.logger.info("NO DELETIONS FOR {epn}".format(epn=epn))
 
     def complete(self):
         return False

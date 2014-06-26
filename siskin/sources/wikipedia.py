@@ -18,11 +18,8 @@ import collections
 import datetime
 import elasticsearch
 import json
-import logging
 import luigi
 import urlparse
-
-logger = logging.getLogger('siskin')
 
 class WikipediaTask(DefaultTask):
     """
