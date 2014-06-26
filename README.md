@@ -25,7 +25,7 @@ Copy this file to `/etc/siskin/siskin.ini`. `BSZTask` will require an additional
 configuration under `/etc/siskin/mappings.json`, which is not included in the
 public distribution.
 
-Siskin comes with a couple of commands, all sharing the prefix `task`:
+Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/master/bin), all sharing the prefix `task`:
 
     taskcat          - inspect task output
     taskdo           - run task
