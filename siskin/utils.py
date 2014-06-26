@@ -13,6 +13,7 @@ from gluish import colors
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *
 from siskin.sources.bsz import *
+from siskin.sources.bvb import *
 from siskin.sources.disson import *
 from siskin.sources.doab import *
 from siskin.sources.doaj import *
