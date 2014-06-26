@@ -1,6 +1,10 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301
 
+"""
+SWB Open Data.
+"""
+
 from gluish.benchmark import timed
 from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
