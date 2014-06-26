@@ -27,8 +27,8 @@ from siskin.sources.hszigr import *
 from siskin.sources.imslp import *
 from siskin.sources.ksd import *
 from siskin.sources.lfer import *
-from siskin.sources.mtc import *
 from siskin.sources.mor import *
+from siskin.sources.mtc import *
 from siskin.sources.naxos import *
 from siskin.sources.nep import *
 from siskin.sources.nl import *
@@ -38,8 +38,8 @@ from siskin.sources.qucosa import *
 from siskin.sources.rism import *
 from siskin.sources.swbod import *
 from siskin.sources.viaf import *
-from siskin.sources.wikipedia import *
 from siskin.sources.wikidata import *
+from siskin.sources.wikipedia import *
 
 MAN_HEADER = r"""
 
