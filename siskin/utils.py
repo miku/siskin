@@ -27,6 +27,7 @@ from siskin.sources.imslp import *
 from siskin.sources.ksd import *
 from siskin.sources.lfer import *
 from siskin.sources.mtc import *
+from siskin.sources.mor import *
 from siskin.sources.nep import *
 from siskin.sources.nl import *
 from siskin.sources.pao import *
