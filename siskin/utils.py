@@ -31,6 +31,7 @@ from siskin.sources.mor import *
 from siskin.sources.naxos import *
 from siskin.sources.nep import *
 from siskin.sources.nl import *
+from siskin.sources.oso import *
 from siskin.sources.pao import *
 from siskin.sources.rism import *
 from siskin.sources.wikipedia import *
