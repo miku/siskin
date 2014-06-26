@@ -9,6 +9,7 @@ from __future__ import print_function
 from gluish.utils import pairwise
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *
+from siskin.sources.bnf import *
 from siskin.sources.bsz import *
 from siskin.sources.bvb import *
 from siskin.sources.disson import *

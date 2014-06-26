@@ -12,6 +12,7 @@ import cStringIO as StringIO
 from gluish import colors
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *
+from siskin.sources.bnf import *
 from siskin.sources.bsz import *
 from siskin.sources.bvb import *
 from siskin.sources.disson import *
