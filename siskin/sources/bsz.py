@@ -692,7 +692,31 @@ class DeletionRangeFinc(BSZTask):
 #
 # ==============================================================================
 
-class LiberoCacheDump(BSZTask):
+class BSZDumpTask(BSZTask):
+    """ Data transfer tasks. """
+    def on_success(self):
+        if config.getboolean('core', 'ambience', False):
+            self._ambience(kind='complete')
+
+    def on_failure(self, exception):
+        import MySQLdb
+        if config.getboolean('core', 'ambience', False):
+            if isinstance(exception, MySQLdb.OperationalError):
+                errno, errmsg = exception.args
+                if errno == 2003:
+                    self._ambience(kind='unable_to_comply')
+                elif errno == 1045:
+                    self._ambience(kind='access_denied')
+                elif errno == 2013:
+                    self._ambience(kind='access_denied')
+                else:
+                    self._ambience(kind='deny')
+            else:
+                self._ambience(kind='deny')
+        raise exception
+
+
+class LiberoCacheDump(BSZDumpTask):
     """
     Dump the liberocache database locally for faster access (per ILN).
     """
@@ -723,11 +747,7 @@ class LiberoCacheDump(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
-    def on_success(self):
-        if config.getboolean('core', 'ambience', False):
-            self._ambience(kind='complete')
-
-class LiberoCacheCopy(BSZTask):
+class LiberoCacheCopy(BSZDumpTask):
     """ Complete Libero cache db copy. Takes up to an hour. """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
@@ -758,11 +778,7 @@ class LiberoCacheCopy(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
-    def on_success(self):
-        if config.getboolean('core', 'ambience', False):
-            self._ambience(kind='complete')
-
-class FincMappingDump(BSZTask):
+class FincMappingDump(BSZDumpTask):
     """
     Copies finc_mapping table from MySQL/mddb3 to a local sqlite3 db.
     Takes about 4-5 minutes including index creation. Get generated per day.
@@ -818,11 +834,7 @@ class FincMappingDump(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
-    def on_success(self):
-        if config.getboolean('core', 'ambience', False):
-            self._ambience(kind='complete')
-
-class ISBNDump(BSZTask):
+class ISBNDump(BSZDumpTask):
     """ Copies isbns table from MySQL/mddb3 to a local sqlite3 db. """
     date = luigi.DateParameter(default=datetime.date.today())
     batch = luigi.IntParameter(default=250000, significant=False)
@@ -864,10 +876,6 @@ class ISBNDump(BSZTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
-
-    def on_success(self):
-        if config.getboolean('core', 'ambience', False):
-            self._ambience(kind='ok')
 
 # ==============================================================================
 #
