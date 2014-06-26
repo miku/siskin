@@ -20,6 +20,7 @@ from gluish.benchmark import timed
 from gluish.common import Directory
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
+from gluish.intervals import every_minute
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import random_string, shellout
@@ -51,7 +52,7 @@ class NLTask(DefaultTask):
 
 class NLSync(NLTask):
     """ Sync the complete 'nationallizenzen' folder as is. """
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
 
     def requires(self):
         return Directory(path=os.path.dirname(self.output().path))
@@ -69,7 +70,7 @@ class NLSync(NLTask):
 
 class NLInventory(NLTask):
     """ All (date, path) for a section, type, format and tag. """
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
     section = luigi.Parameter(default='Monografien',
                               description='Monographien, ZDB, ZDB_in_Ein...')
     type = luigi.Parameter(default='SA', description='SA or SZ')
@@ -104,7 +105,7 @@ class NLInventory(NLTask):
 
 class NLLatestDateAndPath(NLTask):
     """ The latest (date, path) for a section, type, format and tag. """
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
     date = luigi.DateParameter(default=datetime.date.today())
     section = luigi.Parameter(default='Monografien',
                               description='Monographien, ZDB, ZDB_in_Ein...')
@@ -142,7 +143,7 @@ class NLLatestDateAndPath(NLTask):
 
 class NLPackageDescriptor(NLTask):
     """ Download package descriptor from google docs. """
-    indicator = luigi.Parameter(default=random_string())
+    indicator = luigi.Parameter(default=every_minute(fmt='%s'))
 
     def run(self):
         gc = gspread.login(config.get('core', 'google-username'),
