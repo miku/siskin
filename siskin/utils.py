@@ -40,6 +40,7 @@ from siskin.sources.swbod import *
 from siskin.sources.viaf import *
 from siskin.sources.wikidata import *
 from siskin.sources.wikipedia import *
+from siskin.sources.yago import *
 
 MAN_HEADER = r"""
 
