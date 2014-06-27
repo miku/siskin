@@ -2,6 +2,7 @@ BeautifulSoup==3.2.1
 MySQL-python==1.2.5
 argparse==1.2.1
 astroid==1.1.1
+backports.ssl-match-hostname==3.4.0.2
 colorama==0.3.1
 decorator==3.4.0
 distribute==0.6.34
@@ -27,5 +28,6 @@ pytz==2014.4
 requests==2.3.0
 six==1.7.2
 sqlitebck==1.2.1
+tornado==3.2.2
 urllib3==1.8.2
 wsgiref==0.1.2
