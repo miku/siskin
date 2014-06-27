@@ -28,6 +28,7 @@ setup(name='siskin',
       scripts=[
         'bin/taskcat',
         'bin/taskdo',
+        'bin/taskfast',
         'bin/taskless',
         'bin/taskls',
         'bin/taskman',

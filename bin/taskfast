@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Experimental way to save import time, and still import the right module.
+Effect should be the same as taskdo, just faster.
+"""
+
+prefixmap = {
+    'b3kat': 'siskin.sources.b3kat',
+    'bms': 'siskin.sources.bms',
+    'bnf': 'siskin.sources.bnf',
+    'bsz': 'siskin.sources.bsz',
+    'bvb': 'siskin.sources.bvb',
+    'disson': 'siskin.sources.disson',
+    'doab': 'siskin.sources.doab',
+    'doaj': 'siskin.sources.doaj',
+    'ebl': 'siskin.sources.ebl',
+    'ebrary': 'siskin.sources.ebrary',
+    'elsevier': 'siskin.sources.elsevier',
+    'ema': 'siskin.sources.ema',
+    'freebase': 'siskin.sources.freebase',
+    'gbv': 'siskin.sources.gbv',
+    'gnd': 'siskin.sources.gnd',
+    'hszigr': 'siskin.sources.hszigr',
+    'imdb': 'siskin.sources.imdb',
+    'imslp': 'siskin.sources.imslp',
+    'ksd': 'siskin.sources.ksd',
+    'lfer': 'siskin.sources.lfer',
+    'mor': 'siskin.sources.mor',
+    'mtc': 'siskin.sources.mtc',
+    'naxos': 'siskin.sources.naxos',
+    'nep': 'siskin.sources.nep',
+    'nl': 'siskin.sources.nl',
+    'oso': 'siskin.sources.oso',
+    'pao': 'siskin.sources.pao',
+    'pqdt': 'siskin.sources.pqdtopen',
+    'qucosa': 'siskin.sources.qucosa',
+    'rism': 'siskin.sources.rism',
+    'ssoar': 'siskin.sources.ssoar',
+    'swbod': 'siskin.sources.swbod',
+    'viaf': 'siskin.sources.viaf',
+    'wikidata': 'siskin.sources.wikidata',
+    'wikipedia': 'siskin.sources.wikipedia',
+    'yago': 'siskin.sources.yago',
+}
+
+import importlib
+import luigi
+import sys
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        raise RuntimeError('task required')
+    task = sys.argv[1]
+    for prefix, name in prefixmap.iteritems():
+        if task.lower().startswith(prefix):
+            importlib.import_module(name)
+            luigi.run()
+            break
+    else:
+        raise RuntimeError('command not found or not yet mapped')
