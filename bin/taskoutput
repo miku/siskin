@@ -36,6 +36,7 @@ from siskin.sources.oso import *
 from siskin.sources.pao import *
 from siskin.sources.qucosa import *
 from siskin.sources.rism import *
+from siskin.sources.ssoar import *
 from siskin.sources.swbod import *
 from siskin.sources.viaf import *
 from siskin.sources.wikidata import *
