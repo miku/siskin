@@ -1,0 +1,61 @@
+\catcode `\Ç = \active \def Ç{\c C}
+\catcode `\ç = \active \def ç{\c c}
+
+\catcode `\Á = \active \def Á{\'A}
+\catcode `\á = \active \def á{\'a}
+\catcode `\É = \active \def É{\'E}
+\catcode `\é = \active \def é{\'e}
+\catcode `\Í = \active \def Í{\'I}
+\catcode `\í = \active \def í{\'\i}
+\catcode `\Ó = \active \def Ó{\'O}
+\catcode `\ó = \active \def ó{\'o}
+\catcode `\Ú = \active \def Ú{\'U}
+\catcode `\ú = \active \def ú{\'u}
+
+\catcode `\À = \active \def À{\`A}
+\catcode `\à = \active \def à{\`a}
+\catcode `\È = \active \def È{\`E}
+\catcode `\è = \active \def è{\`e}
+\catcode `\Ì = \active \def Ì{\`I}
+\catcode `\ì = \active \def ì{\`\i}
+\catcode `\Ò = \active \def Ò{\`O}
+\catcode `\ò = \active \def ò{\`o}
+\catcode `\Ù = \active \def Ù{\`U}
+\catcode `\ù = \active \def ù{\`u}
+
+\catcode `\Ä = \active \def Ä{\"A}
+\catcode `\ä = \active \def ä{\"a}
+\catcode `\Ë = \active \def Ë{\"E}
+\catcode `\ë = \active \def ë{\"e}
+\catcode `\Ï = \active \def Ï{\"I}
+\catcode `\ï = \active \def ï{\"\i}
+\catcode `\Ö = \active \def Ö{\"O}
+\catcode `\ö = \active \def ö{\"o}
+\catcode `\Ü = \active \def Ü{\"U}
+\catcode `\ü = \active \def ü{\"u}
+
+\catcode `\Â = \active \def Â{\^A}
+\catcode `\â = \active \def â{\^a}
+\catcode `\Ê = \active \def Ê{\^E}
+\catcode `\ê = \active \def ê{\^e}
+\catcode `\Î = \active \def Î{\^I}
+\catcode `\î = \active \def î{\^\i}
+\catcode `\Ô = \active \def Ô{\^O}
+\catcode `\ô = \active \def ô{\^o}
+\catcode `\Û = \active \def Û{\^U}
+\catcode `\û = \active \def û{\^u}
+
+\catcode `\ñ = \active \def ñ{\~n}
+\catcode `\Ñ = \active \def Ñ{\~N}
+
+% somehow the sharp s was forgotten  RT 13.4.93
+\catcode `\ß = \active \def ß{\ss}
+% if we have german.sty, then use it for better hyphenation RT 14.4.93
+%\@ifundefined{mdqon}{}{%
+% \def Ä{"A}
+% \def ä{"a}
+% \def Ö{"O}
+% \def ö{"o}
+% \def Ü{"U}
+% \def ü{"u}
+% \def ß{"s}}

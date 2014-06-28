@@ -1,0 +1,98 @@
+digraph Deps {
+    graph [fontname = "helvetica"];
+    node [fontname = "helvetica"];
+    edge [fontname = "helvetica"];
+
+    graph[rankdir=TB, center=true]
+
+    subgraph cluster_source_1 {
+        label = "Source 1";
+        labelloc = "b";
+        S1D1 [label="..."];
+        S1D2 [label="..."];
+        S1D3 [label="..."];
+        Deletions1 [label="Deletions\n01/2014"];
+        Deletions2 [label="Deletions\n02/2014"];
+        S1D3->OpacFlags;
+        OpacFlags->DatabaseDump;
+        OpacFlags->Snapshot;
+        Snapshot->Events;
+        Events->Deletions;
+        Events->Additions;
+        Additions->S1D1;
+        Deletions->S1D2;
+        S1D2->Deletions1;
+        S1D2->Deletions2;
+        color=gray;
+    }
+
+    subgraph cluster_source_2 {
+        label = "Source 2";
+        labelloc = "b";
+        S2D1       [label="..."];
+        S2D2       [label="..."];
+        S2Index1   [label="Index"];
+        S2Index1->JSON;
+        S2D2->JSON;
+        JSON->MARC;
+        MARC->XML;
+        XML->OAIHarvest;
+        OAIHarvest->S2D1;
+        color=gray;
+    }
+
+    subgraph cluster_source_3 {
+        label = "Source 3";
+        labelloc = "b";
+        S3D1     [label="..."];
+        S3D2     [label="..."];
+        S3Index1 [label="Index"];
+        S3Json   [label="JSON"];
+        S3Marc   [label="MARC"];
+        S3D2->S3Index1;
+        S3Index1->S3Json;
+        S3Json->S3Marc;
+        S3Marc->FTPMirror;
+        FTPMirror->S3D1;
+        color=gray;
+    }
+
+    subgraph cluster_source_4 {
+        label = "Source 4";
+        labelloc = "b";
+        S4D1     [label="..."];
+        S4D2     [label="..."];
+        S4Index1 [label="Index"];
+        S4Json   [label="JSON"];
+        S4CC1    [label="Custom\nConversion"];
+        S4CF1    [label="Custom\nFormat"];
+        S4D1->S4Index1;
+        S4Index1->S4Json;
+        S4Json->S4CC1;
+        S4CC1->S4CF1;
+        S4CF1->S4D2;
+        color=gray;
+    }
+
+    subgraph cluster_workflow_1 {
+        label = "Workflow 1";
+        style=filled;
+        color=gray;
+        node [style=filled,color=white];
+        W1 [label="Deduplication"];
+        W1->S4Index1;
+        W1->S3Index1;
+        W1->S2Index1:ne;
+        W1->Snapshot;
+    }
+
+    subgraph cluster_workflow_2 {
+        label = "Workflow 2";
+        style=filled;
+        color=gray;
+        node [style=filled,color=white];
+        W2 [label="Report"];
+        W2->OpacFlags;
+        W2:se->S2Index1:nw;
+    }
+}
