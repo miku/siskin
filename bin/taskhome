@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import print_function
+from siskin.configuration import Config
+
+if __name__ == '__main__':
+    print(Config.instance().get('core', 'home'))
