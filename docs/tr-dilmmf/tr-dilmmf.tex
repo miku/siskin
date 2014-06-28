@@ -1,19 +1,17 @@
 \documentclass[english]{lni}
 
-% \IfFileExists{latin1.sty}{\usepackage{latin1}}{\usepackage{isolatin1}}
-
 \usepackage{graphicx}
 \usepackage{hyperref}
 
 \author{
-    Martin Czygan \\
-    Leipzig University Library \\
-    Beethovenstra\ss{}e 6 \\
-    04107 Leipzig \\
-    martin.czygan@uni-leipzig.de
+Martin Czygan \\
+Leipzig University Library \\
+Beethovenstra\ss{}e 6 \\
+04107 Leipzig \\
+martin.czygan@uni-leipzig.de
 }
 \title{Design and Implementation of a Library Metadata Management Framework and its Application
-       in Fuzzy Data Deduplication and Data Reconciliation with Authority Data}
+in Fuzzy Data Deduplication and Data Reconciliation with Authority Data}
 \begin{document}
 \maketitle
 
@@ -60,50 +58,47 @@ record or a stream of records. This requirement is broad and leaves a lot of des
 
 \paragraph{Consistency}
 Transformations on data should happen in a transactional manner
-    or should in other ways be guaranteed to be atomic\footnote{\cite{haerder1983principles} describes atomicity as one of the four characteristics of a transaction: ``Atomicity. It must be of the all-or-nothing type [...], and the user must, whatever happens, know which state he or she is in.''}, that is a transformation
-    should either be applied to a data element or not. Atomicity should be
-    enforced at different data granularity levels, from a single field in a
-    single record, that is rewritten, to sets of potentielly
-    tens of millions of records, that need a transformation to be
-    applied on all of its elements.
+or should in other ways be guaranteed to be atomic\footnote{\cite{haerder1983principles} describes atomicity as one of the four characteristics of a transaction: ``Atomicity. It must be of the all-or-nothing type [...], and the user must, whatever happens, know which state he or she is in.''}, that is a transformation
+should either be applied to a data element or not. Atomicity should be
+enforced at different data granularity levels, from a single field in a
+single record, that is rewritten, to sets of potentielly
+tens of millions of records, that need a transformation to be
+applied on all of its elements.
 
 \paragraph{Composability}
 It is desireable to design the data elements or the
-    processing units in ways that support reuse.
-    There are several approaches to this: A certain data package can be used to build various
-    workflows atop. In that way, workflows do not need to recompute
-    certain states or shapes of the data over and over again. Another way of reuse
-    would be the application of a single task or processing unit on
-    several data streams. For example, different data sources could be fetched
-    in form of compressed files from an FTP server, so the task of fetching and
-    extracting these files would present itself as a template task, because
-    for several different data sources the processing would be similar up to a fixed number of parameters.
+processing units in ways that support reuse.
+There are several approaches to this: A certain data package can be used to build various
+workflows atop. In that way, workflows do not need to recompute
+certain states or shapes of the data over and over again. Another way of reuse
+would be the application of a single task or processing unit on
+several data streams. For example, different data sources could be fetched
+in form of compressed files from an FTP server, so the task of fetching and
+extracting these files would present itself as a template task, because
+for several different data sources the processing would be similar up to a fixed number of parameters.
 
 \paragraph{Efficiency} Many data sources are updated in intervals and
-    recomputations of data derived from that data source in turn should
-    happen as frequently as the data source itself is updated. In general,
-    a workflow, that encompasses a number of data sources should be executed
-    as soon as any one of the constituent data sources changes in a significant
-    way. Conceptually, one can view the combination of a number of data sources as a data source
-    itself with the update times consisting of the update times
-    of all subsumed data sources along with a total order.
-
-    % $d_{i_s}, \ldots, d_{j_t}, \ldots$ with
-    % $d_{i_s} \leq d_{j_t}$ with $i, j = 1, \ldots, k$ and $t = 1, \ldots, T$  with $T = \mathrm{max}\;t: d_{i_t}, i = 1, \ldots, k$.
+recomputations of data derived from that data source in turn should
+happen as frequently as the data source itself is updated. In general,
+a workflow, that encompasses a number of data sources should be executed
+as soon as any one of the constituent data sources changes in a significant
+way. Conceptually, one can view the combination of a number of data sources as a data source
+itself with the update times consisting of the update times
+of all subsumed data sources along with a total order.
 
 \paragraph{Ease of deployment, agile development and change management} The application
-    should be easily relocatable\footnote{This is certainly interesting in a cloud setup,
-    where machines may be spun up and down on a regular basis.}
-    and should bootstrap its
-    data environment as autonomously as possible. This proves to be useful
-    for development since a simple setup enables developers to
-    mirror a production environment on a development machine and therefore
-    reduce the gap between both setups.
+should be easily relocatable\footnote{This is certainly interesting in a cloud setup,
+where machines may be spun up and down on a regular basis.}
+and should bootstrap its
+data environment as autonomously as possible. This proves to be useful
+for development since a simple setup enables developers to
+mirror a production environment on a development machine and therefore
+reduce the gap between both setups.
 
-    Development of new workflows
-    and changes to existing workflows should not affect established setups, that
-    might be part of a production system. It should be possible to distribute
-    tasks sensibly among members of a team.
+Development of new workflows
+and changes to existing workflows should not affect established setups, that
+might be part of a production system. It should be possible to distribute
+tasks sensibly among members of a team.
 
 \paragraph{Testability, transparency and introspection}
 Writing code that deals with millions of records and complicated workflows
@@ -112,9 +107,9 @@ be desireable to be able to unit test components as well as to write integration
 tests for complete workflows with the help of mock services.
 
 Most workflow
-    management systems will break down a multi-stage workflow into
-    several subtasks. One should be able to introspect the shape of the
-    data along the way at the different steps to support transparency and debuggability.
+management systems will break down a multi-stage workflow into
+several subtasks. One should be able to introspect the shape of the
+data along the way at the different steps to support transparency and debuggability.
 
 \section{Forces}
 \label{forces}
@@ -122,73 +117,73 @@ Most workflow
 There are a number of forces around the problem of library metadata management,
 of which a few should be introduced in this section.
 
-    \paragraph{Data formats}
+\paragraph{Data formats}
 
-    The format of the data to be processed varies widely. While there are standardized data
-    formats for libraries such as MARC\footnote{\url{http://www.loc.gov/marc/}},
-    MAB\footnote{\url{http://www.dnb.de/DE/Standardisierung/Formate/MAB/mab_node.html}} or RDA\footnote{\url{http://www.rda-jsc.org/rda.html}},
-    there is still enough room for variation. Other data sources, which
-    might be of interest to the library community, have not yet been
-    standardized or are not necessarily curated with the goal of standardization.
-    Typical formats are XML (which in turn can come in many flavors to
-    express similar things), JSON, HTML, N-Triples, CSV or plain text. All
-    these formats can furthermore be compressed or span multiple files.
+The format of the data to be processed varies widely. While there are standardized data
+formats for libraries such as MARC\footnote{\url{http://www.loc.gov/marc/}},
+MAB\footnote{\url{http://www.dnb.de/DE/Standardisierung/Formate/MAB/mab_node.html}} or RDA\footnote{\url{http://www.rda-jsc.org/rda.html}},
+there is still enough room for variation. Other data sources, which
+might be of interest to the library community, have not yet been
+standardized or are not necessarily curated with the goal of standardization.
+Typical formats are XML (which in turn can come in many flavors to
+express similar things), JSON, HTML, N-Triples, CSV or plain text. All
+these formats can furthermore be compressed or span multiple files.
 
-    \paragraph{Data access} As we described for the data formats the accessibility of the data varies widely, too.
-    Typical examples are FTP servers, metadata harvesting protocols such as
-    OAI-PMH~\cite{oai2008}, Web-APIs, E-Mail attachments, database or index
-    connections.
+\paragraph{Data access} As we described for the data formats the accessibility of the data varies widely, too.
+Typical examples are FTP servers, metadata harvesting protocols such as
+OAI-PMH~\cite{oai2008}, Web-APIs, E-Mail attachments, database or index
+connections.
 
-    \paragraph{Update intervals and update signalling}
-    \label{updates}
+\paragraph{Update intervals and update signalling}
+\label{updates}
 
-    Typical for the use case, data sources are updated in intervals.
-    The update intervals can range from a
-    few seconds over days to many weeks, months or years. In other words
-    they can range from real-time to a singular update.
-    In these remarks of we do not consider real-time, but only cases, where
-    the update granularity does not underrun 24 hours\footnote{The workflow
-    framework ships with a parameters class, that allows update intervals of 60 minutes. Below
-    that, the inherently batch-oriented nature of the framework might not prove supportive.}.
+Typical for the use case, data sources are updated in intervals.
+The update intervals can range from a
+few seconds over days to many weeks, months or years. In other words
+they can range from real-time to a singular update.
+In these remarks of we do not consider real-time, but only cases, where
+the update granularity does not underrun 24 hours\footnote{The workflow
+framework ships with a parameters class, that allows update intervals of 60 minutes. Below
+that, the inherently batch-oriented nature of the framework might not prove supportive.}.
 
-    An interesting observation concerns the way, the availability of an update
-    is signalled. This can happen in many ways as well, with two broad categories being explicit or implicit.
-    An example for explicit signalling would be a file name containing a date
-    or some other indicator of succession, such as a serial number. Implicit
-    signalling means that the data source will not convey the
-    availability of updates, unless it is preprocessed to
-    reveal this information. An example for implicit signalling would be
-    OAI-harvesting, where one would need to perform an actual request and a
-    comparison with existing records to find out, whether updates are available\footnote{A \emph{from} parameter in the request is required, which in turn can only be derived from some previous harvest.}.
+An interesting observation concerns the way, the availability of an update
+is signalled. This can happen in many ways as well, with two broad categories being explicit or implicit.
+An example for explicit signalling would be a file name containing a date
+or some other indicator of succession, such as a serial number. Implicit
+signalling means that the data source will not convey the
+availability of updates, unless it is preprocessed to
+reveal this information. An example for implicit signalling would be
+OAI-harvesting, where one would need to perform an actual request and a
+comparison with existing records to find out, whether updates are available\footnote{A \emph{from} parameter in the request is required, which in turn can only be derived from some previous harvest.}.
 
-    Another aspect during update processing is the way in which an update
-    to a data source is expressed. There are at least two ways in which this can be
-    achieved in practice. A simple way to express an update to a data source is to provide a complete dump.
+Another aspect during update processing is the way in which an update
+to a data source is expressed. There are at least two ways in which this can be
+achieved in practice. A simple way to express an update to a data source is to provide a complete dump.
 
-    Using deltas is also common practice. Given an initial dump or a delta against an empty state,
-        subsequent changes to the data source are expressed as changes, which
-        need to be applied to the previous state of the data source. The upside
-        of this approach is the limitation of the update to the affected
-        records, the downside -- which sometimes results in significant
-        overhead in the amount of processing -- is the need to keep all the metadata
-        packages available if one wants to recompute some state of the data
-        source after a number of deltas. The way in which the deltas are formulated can differ
-        between data sources. One data source might provide an
-        update or deletion list as an extra file, while other data sources
-        ship updated or deleted records with a flag set at a predefined record field. The
-        variety of these notions does not assist in the definition
-        of a consistent abstraction layer, when one tries to generalize the
-        event of an update over a bigger number of data sources\footnote{This fact suggests,
-        that the notion of an update to a data source alone might not be
-        the abstraction level sweet spot.}.
+Using deltas is also common practice. Given an initial dump or a delta against an empty state,
+subsequent changes to the data source are expressed as changes, which
+need to be applied to the previous state of the data source. The upside
+of this approach is the limitation of the update to the affected
+records, the downside -- which sometimes results in significant
+overhead in the amount of processing -- is the need to keep all the metadata
+packages available if one wants to recompute some state of the data
+source after a number of deltas. The way in which the deltas are formulated can differ
+between data sources. One data source might provide an
+update or deletion list as an extra file, while other data sources
+ship updated or deleted records with a flag set at a predefined record field. The
+variety of these notions does not assist in the definition
+of a consistent abstraction layer, when one tries to generalize the
+event of an update over a bigger number of data sources\footnote{This fact suggests,
+that the notion of an update to a data source alone might not be
+the abstraction level sweet spot.}.
 
-    \paragraph{Processing speed}
-    It is desirable to utilize modern multicore
-    computers by implementing systems, which take advantage of parallel processing
-    whenever feasible. It should be noted that while certain parts of a workflow
-    might not be suitable for parallelization, others might and the processing
-    framework would ideally be able to identify these parts by itself
-    and schedule the tasks accordingly.
+\paragraph{Processing speed}
+It is desirable to utilize modern multicore
+computers by implementing systems, which take advantage of parallel processing
+whenever feasible. It should be noted that while certain parts of a workflow
+might not be suitable for parallelization, others might and the processing
+framework would ideally be able to identify these parts by itself
+and schedule the tasks accordingly.
 
 \section{Design}
 \label{design}
@@ -275,10 +270,10 @@ tasks for mirroring FTP files and directories, harvesting OAI-PMH interfaces
 or indexing documents.
 
 \begin{figure}[htb]
-  \begin{center}
-    \includegraphics[width=10cm]{locdist}
-    \caption{\label{locfreq}Distribution of lines of code (LOC) over 317 tasks. The average LOC per task (business logic only) is $13.7$.}
-  \end{center}
+\begin{center}
+\includegraphics[width=10cm]{locdist}
+\caption{\label{locfreq}Distribution of lines of code (LOC) over 317 tasks. The average LOC per task (business logic only) is $13.7$.}
+\end{center}
 \end{figure}
 
 \paragraph{Efficiency}
@@ -436,7 +431,7 @@ source. It is possible to view the data generated by the tasks of the workflow
 as a cache, computing parts of the process once and reducing the number
 of computations required for subsequent steps. One example for this incremental
 computing\footnote{\emph{Reactive Imperative Programming with Dataflow Constraints}~\cite{demetrescu2011reactive}
- describes incremental computing as follows: ``When the input is subject to small changes,
+describes incremental computing as follows: ``When the input is subject to small changes,
 a program may incrementally fix only the portion of the output affected by the update, without having to recompute the
 entire solution from scratch. ``} approach is the handling of data sources, that ship updates with deltas.
 In one case, each delta package needs a few processing steps (e.g. extraction,
