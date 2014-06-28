@@ -15,7 +15,7 @@ class HathiSync(HathiTask):
     date = luigi.DateParameter(default=datetime.date.today())
     collection = luigi.Parameter(default='hathitrust')
     prefix = luigi.Parameter(default='marc21')
-    url = luigi.Parameter(default='http://quod.lib.umich.edu/cgi/o/oai/oai')
+    url = luigi.Parameter(default='http://quod.lib.umich.edu/cgi/o/oai/oai', significant=False)
 
     def requires(self):
         return OAIHarvestChunk(begin=self.begin, end=self.date, url=self.url,
