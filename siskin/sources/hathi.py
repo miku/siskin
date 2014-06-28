@@ -10,7 +10,7 @@ class HathiTask(DefaultTask):
     TAG = '035'
 
 class HathiSync(HathiTask):
-
+    """ OAI Harvest """
     begin = luigi.DateParameter(datetime.date(2010, 1, 1))
     date = luigi.DateParameter(default=datetime.date.today())
     collection = luigi.Parameter(default='hathitrust')
