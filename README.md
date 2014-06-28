@@ -21,7 +21,7 @@ development headers.
 **Configuration**
 
 Many siskin tasks require configuration. An example configuration file
-is can be found under [siskin.example.ini](https://github.com/miku/siskin/blob/master/siskin.example.ini).
+can be found under [siskin.example.ini](https://github.com/miku/siskin/blob/master/siskin.example.ini).
 
 Copy this file to `/etc/siskin/siskin.ini`. `BSZTask` will require an additional
 configuration under `/etc/siskin/mappings.json`, which is not included in the
