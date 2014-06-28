@@ -41,6 +41,7 @@ prefixmap = {
     'ssoar': 'siskin.sources.ssoar',
     'swbod': 'siskin.sources.swbod',
     'viaf': 'siskin.sources.viaf',
+    'vifa': 'siskin.sources.vifa',
     'wikidata': 'siskin.sources.wikidata',
     'wikipedia': 'siskin.sources.wikipedia',
     'yago': 'siskin.sources.yago',
