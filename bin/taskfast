@@ -28,6 +28,7 @@ prefixmap = {
     'imdb': 'siskin.sources.imdb',
     'imslp': 'siskin.sources.imslp',
     'ksd': 'siskin.sources.ksd',
+    'liberec': 'siskin.sources.liberec',
     'lfer': 'siskin.sources.lfer',
     'mor': 'siskin.sources.mor',
     'mtc': 'siskin.sources.mtc',
