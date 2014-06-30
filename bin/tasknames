@@ -46,6 +46,7 @@ from siskin.sources.vifa import *
 from siskin.sources.wikidata import *
 from siskin.sources.wikipedia import *
 from siskin.sources.yago import *
+from siskin.workflows.daily import *
 
 if __name__ == '__main__':
     for name in sorted(Register.get_reg().keys()):

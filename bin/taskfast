@@ -50,6 +50,7 @@ prefixmap = {
     'wikidata': 'siskin.sources.wikidata',
     'wikipedia': 'siskin.sources.wikipedia',
     'yago': 'siskin.sources.yago',
+    'daily': 'siskin.workflows.daily',
 }
 
 import importlib

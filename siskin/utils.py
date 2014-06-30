@@ -53,6 +53,7 @@ from siskin.sources.vifa import *
 from siskin.sources.wikidata import *
 from siskin.sources.wikipedia import *
 from siskin.sources.yago import *
+from siskin.workflows.daily import *
 
 MAN_HEADER = r"""
 
