@@ -35,6 +35,7 @@ from siskin.sources.munz import *
 from siskin.sources.naxos import *
 from siskin.sources.nep import *
 from siskin.sources.nl import *
+from siskin.sources.opiv import *
 from siskin.sources.oso import *
 from siskin.sources.pao import *
 from siskin.sources.pqdtopen import *

@@ -35,6 +35,7 @@ prefixmap = {
     'naxos': 'siskin.sources.naxos',
     'nep': 'siskin.sources.nep',
     'nl': 'siskin.sources.nl',
+    'opiv': 'siskin.sources.opiv',
     'oso': 'siskin.sources.oso',
     'pao': 'siskin.sources.pao',
     'pqdt': 'siskin.sources.pqdtopen',
