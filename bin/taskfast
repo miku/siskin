@@ -30,6 +30,7 @@ prefixmap = {
     'lfer': 'siskin.sources.lfer',
     'mor': 'siskin.sources.mor',
     'mtc': 'siskin.sources.mtc',
+    'munz': 'siskin.sources.munz',
     'naxos': 'siskin.sources.naxos',
     'nep': 'siskin.sources.nep',
     'nl': 'siskin.sources.nl',
