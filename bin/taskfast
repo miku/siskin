@@ -38,6 +38,7 @@ prefixmap = {
     'opiv': 'siskin.sources.opiv',
     'oso': 'siskin.sources.oso',
     'pao': 'siskin.sources.pao',
+    'pilsen': 'siskin.sources.pilsen',
     'pqdt': 'siskin.sources.pqdtopen',
     'qucosa': 'siskin.sources.qucosa',
     'rism': 'siskin.sources.rism',
