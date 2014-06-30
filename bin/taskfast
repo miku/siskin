@@ -22,6 +22,7 @@ prefixmap = {
     'freebase': 'siskin.sources.freebase',
     'gbv': 'siskin.sources.gbv',
     'gnd': 'siskin.sources.gnd',
+    'gutenberg': 'siskin.sources.gutenberg',
     'hathi': 'siskin.sources.hathi',
     'hszigr': 'siskin.sources.hszigr',
     'imdb': 'siskin.sources.imdb',
