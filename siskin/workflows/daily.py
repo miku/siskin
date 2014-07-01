@@ -3,8 +3,9 @@
 """
 Things that should run often.
 """
-from siskin.task import DefaultTask
+
 from gluish.utils import random_string
+from siskin.task import DefaultTask
 import datetime
 import luigi
 
@@ -13,7 +14,7 @@ class Workflow(DefaultTask):
 
 class DailyIndexUpdates(Workflow):
     """
-    A wrapper around a lot of heavy tasks keep ES up to date.
+    A wrapper around a lot of heavy tasks to keep ES up to date.
     """
     date = luigi.DateParameter(default=datetime.date.today())
     indicator = luigi.Parameter(default=random_string())
