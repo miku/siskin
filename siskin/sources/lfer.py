@@ -54,7 +54,7 @@ class LFERTask(DefaultTask):
 
 class LFERSync(LFERTask):
     """ Copy all LFER files over. """
-    indicator = luigi.Parameter(default=hourly())
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return Directory(path=os.path.dirname(self.output().path))
@@ -73,7 +73,7 @@ class LFERSync(LFERTask):
 
 class LFERDatesAndPaths(LFERTask):
     """ Just emit a two column TSV with (date, path). """
-    indicator = luigi.Parameter(default=hourly())
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return LFERSync(indicator=self.indicator)
@@ -95,7 +95,7 @@ class LFERDatesAndPaths(LFERTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class LFERLatestDateAndPath(LFERTask):
-    indicator = luigi.Parameter(default=hourly())
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -127,7 +127,7 @@ class LFERLatestDateAndPath(LFERTask):
 class LFERLatestDate(LFERTask):
     """ Only output the latest date. """
     date = luigi.DateParameter(default=datetime.date.today())
-    indicator = luigi.Parameter(default=hourly())
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return LFERLatestDateAndPath(date=self.date, indicator=self.indicator)

@@ -15,7 +15,7 @@ class IMDBTask(DefaultTask):
 
 class IMDBSync(IMDBTask):
 
-    indicator = luigi.Parameter(default=hourly())
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
         return FTPMirror(host='ftp.fu-berlin.de',
