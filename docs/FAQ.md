@@ -25,4 +25,7 @@ own parameters, so you might want to extend those as well:
 
     $ ulimit -S -n 10240
 
-See also: [Is there a fix for the “Too many open files in system” error on OS X 10.7.1?](http://superuser.com/a/443168/38447)
+See also:
+
+* [Is there a fix for the “Too many open files in system” error on OS X 10.7.1?](http://superuser.com/a/443168/38447)
+* [How do I change the number of open files limit in Linux?](http://stackoverflow.com/q/34588/89391)
