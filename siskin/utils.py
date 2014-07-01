@@ -54,6 +54,7 @@ from siskin.sources.wikidata import *
 from siskin.sources.wikipedia import *
 from siskin.sources.yago import *
 from siskin.workflows.daily import *
+from siskin.workflows.fuzzy import *
 
 MAN_HEADER = r"""
 
