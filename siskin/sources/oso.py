@@ -158,7 +158,7 @@ class OSOSnapshot(OSOTask):
                         copyregions(fh, output, regions)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 class OSOJson(OSOTask):
     date = ClosestDateParameter(default=datetime.date.today())
