@@ -249,6 +249,8 @@ class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
     """ Create a single MARC file, that represents
     the current state of affairs. """
     date = ClosestDateParameter(default=datetime.date.today())
+    limit = luigi.IntParameter(default=50000, significant=False,
+                               description='limit for seekmapdb queries')
 
     def requires(self):
         return SWBOpenDataSnapshot(date=self.date)
@@ -268,12 +270,18 @@ class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
                 with open(marc.output().path) as handle:
                     with sqlite3db(sdb.output().path) as cursor:
                         idset = df[df.date == date].id.values.tolist()
-                        cursor.execute("""
-                            SELECT offset, length
-                            FROM seekmap WHERE id IN (%s)""" % (
-                                ','.join(("'%s'" % id for id in idset))))
-                        rows = cursor.fetchall()
-                        copyregions(handle, output, rows)
+                        limit, offset = self.limit, 0
+                        while True:
+                            cursor.execute("""
+                                SELECT offset, length
+                                FROM seekmap WHERE id IN (%s)""" % (
+                                    ','.join(("'%s'" % id for id in idset[offset:offset + limit]))))
+                            rows = cursor.fetchall()
+                            if not rows:
+                                break
+                            else:
+                                copyregions(handle, output, rows)
+                                offset += limit
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
