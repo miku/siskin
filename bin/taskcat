@@ -15,7 +15,7 @@ args=("$@")
 
 OUTPUT=$(taskoutput $@|tail -1)
 if [[ "$OUTPUT" == *mrc ]]; then
-    yaz-marcdump $(taskoutput $@|tail -1)
+    yaz-marcdump $(taskoutput "$@"|tail -1)
 else
-    cat $(taskoutput $@|tail -1)
+    cat $(taskoutput "$@"|tail -1)
 fi

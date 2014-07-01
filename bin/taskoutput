@@ -7,6 +7,7 @@ Find the output of (most) tasks.
 
 from __future__ import print_function
 from gluish.utils import pairwise
+from luigi.task import Register
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *
 from siskin.sources.bnf import *
@@ -75,12 +76,14 @@ if __name__ == '__main__':
                   'workers'):
         kwargs.pop(param, None)
 
-    # throwaway task, only used to get the types of the params out
-    task = locals()[taskname](**kwargs)
+    task_klass = Register.get_reg().get(taskname)
     typed_kwargs = dict()
     for k, v in kwargs.iteritems():
-        klass = getattr(task.__class__, k).__class__
-        typed_kwargs[k] = klass().parse(v)
+        try:
+            klass = getattr(task_klass, k).__class__
+            typed_kwargs[k] = klass().parse(v)
+        except AttributeError as err:
+            print('ignoring missed attribute %s'.format(k))
 
     task = locals()[taskname](**typed_kwargs)
     output = task.output()
