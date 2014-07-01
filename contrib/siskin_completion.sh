@@ -6,6 +6,7 @@ _siskin_task_names()
 
 complete -F _siskin_task_names taskcat
 complete -F _siskin_task_names taskdo
+complete -F _siskin_task_names taskfast
 complete -F _siskin_task_names taskless
 complete -F _siskin_task_names taskls
 complete -F _siskin_task_names taskoutput
