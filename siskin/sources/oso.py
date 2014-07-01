@@ -5,21 +5,22 @@
 OSO.
 
 This group of task worked once, but OSO completely redesigned their site,
-so there tasks will fail now. TODO: update.
+so there tasks will fail now.
 """
+
 from gluish.benchmark import timed
+from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
-from gluish.parameter import ClosestDateParameter
 from gluish.intervals import monthly
-from siskin.task import DefaultTask
+from gluish.parameter import ClosestDateParameter
+from gluish.path import iterfiles, copyregions
 from gluish.utils import shellout
+from siskin.task import DefaultTask
 import BeautifulSoup
 import datetime
-import hashlib
 import luigi
 import os
-import re
 import tempfile
 import urlparse
 
@@ -28,13 +29,12 @@ class OSOTask(DefaultTask):
     TAG = '018'
 
     def closest(self):
-    	return monthly(self.date)
+        return monthly(self.date)
 
-class OSOPage(OSOTask):
-    """ Download page only once a day. """
+class OSODownloadPage(OSOTask):
     date = ClosestDateParameter(default=datetime.date.today())
-    url = luigi.Parameter(
-        default="http://www.oxfordscholarship.com/page/643/marc-records", significant=False)
+    url = luigi.Parameter(default="http://www.universitypressscholarship.com/page/1250/oso-marc-archive",
+                          significant=False)
 
     @timed
     def run(self):
@@ -44,78 +44,127 @@ class OSOPage(OSOTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='html'))
 
-class OSOSync(OSOTask):
-    """ Use "Complete Set ..." hint for download. """
+class OSOMarcFiles(OSOTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return OSOPage(date=self.date)
+        return OSODownloadPage(date=self.date)
 
     @timed
     def run(self):
         with self.input().open() as handle:
             soup = BeautifulSoup.BeautifulSoup(handle.read())
-        links = []
-        for element in soup(text=re.compile('Complete set')):
-            current = element
-            for _ in range(5):
-                if hasattr(current, 'name') and current.name == 'a':
-                    links.append(current['href'])
-                    break
-                if hasattr(current, 'parent'):
-                    current = current.parent
-                else:
-                    break
+        with self.output().open('w') as output:
+            for anchor in soup.findAll('a'):
+                href = anchor.get('href')
+                if not href.endswith('mrc'):
+                    continue
+                output.write_tsv(href)
 
-        # create a separate dir
-        target = os.path.join(os.path.dirname(self.output().path),
-                              str(self.date))
-        if not os.path.exists(target):
-            os.makedirs(target)
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
-        downloaded = set()
-        for link in links:
-            url = urlparse.urljoin('http://www.oxfordscholarship.com', link)
-            filename = hashlib.sha1(link).hexdigest()
-            destination = os.path.join(target, filename)
-            shellout("wget -q --retry-connrefused '{url}' -O {output}",
-                     url=url, output=destination)
-            downloaded.add(destination)
+class OSOMarcDownload(OSOTask):
+    date = ClosestDateParameter(default=datetime.date.today())
 
-        if not downloaded:
-            raise RuntimeError('no OSO files found, maybe the file pattern changed?')
+    def requires(self):
+        return OSOMarcFiles(date=self.date)
+
+    def run(self):
+        base = "http://www.universitypressscholarship.com/"
+
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                dirname, basename = row.path.split('/')[-2:]
+                slugged = dirname.replace('%20', '-').lower()
+                url = urlparse.urljoin(base, row.path)
+                dst = os.path.join(self.taskdir(), '{}-{}'.format(slugged, basename))
+                if os.path.exists(dst):
+                    continue
+                output = shellout("""wget --retry-connrefused "{url}" -O {output} """, url=url)
+                luigi.File(output).move(dst)
 
         with self.output().open('w') as output:
-            for path in downloaded:
+            for path in iterfiles(self.taskdir()):
+                if not path.endswith('mrc'):
+                    continue
                 output.write_tsv(path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class OSOCombined(OSOTask):
+class OSOCombine(OSOTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return OSOSync(date=self.date)
+        return OSOMarcDownload(date=self.date)
 
-    @timed
     def run(self):
-        _, combined = tempfile.mkstemp(prefix='tasktree-')
+        _, combined = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                shellout("cat {input} >> {output}", input=row.path,
-                         output=combined)
-        output = shellout("marcuniq {input} > {output}", input=combined)
+                shellout('cat {input} >> {output}', input=row.path, output=combined)
+        luigi.File(combined).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'), format=TSV)
+
+class OSOSeekmap(OSOTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return OSOCombine(date=self.date)
+
+    def run(self):
+        output = shellout('marcmap -o {output} {input}', input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
+class OSOSurface(OSOTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return OSOCombine(date=self.date)
+
+    def run(self):
+        output = shellout("marctotsv {input} 001 005 > {output}",
+                          input=self.input().path)
+        output = shellout("sort {input} > {output}", input=output)
+        output = shellout("tac {input} | uniq -w 13 > {output}", input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class OSOSnapshot(OSOTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'surface': OSOSurface(date=self.date),
+                'seekmap': OSOSeekmap(date=self.date),
+                'file': OSOCombine(date=self.date)}
+
+    def run(self):
+        with self.input().get('surface').open() as handle:
+            with self.output().open('w') as output:
+                with self.input().get('file').open() as fh:
+                    with sqlite3db(self.input().get('seekmap').path) as cursor:
+                        regions = []
+                        for row in handle.iter_tsv(cols=('id', 'date')):
+                            cursor.execute("SELECT offset, length FROM seekmap where id = ?", (row.id,))
+                            regions.append(cursor.fetchone())
+                        copyregions(fh, output, regions)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
 
 class OSOJson(OSOTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return OSOCombined(date=self.date)
+        return OSOSnapshot(date=self.date)
 
     @timed
     def run(self):
