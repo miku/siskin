@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Remove and index including its trace in the update_log
+
+if [ "$#" -le 0 ]; then
+    echo "Usage: taskindex-delete INDEX"
+else
+    INDEX="$1"
+    curl -XDELETE "localhost:9200/update_log/_query?q=target_index:$INDEX" && echo
+    curl -XDELETE "localhost:9200/$INDEX" && echo
+fi
