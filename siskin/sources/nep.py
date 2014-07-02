@@ -80,6 +80,8 @@ class NEPTask(DefaultTask):
 
 class NEPCopy(NEPTask):
 
+    indicator = luigi.Parameter(default=hourly(fmt='%s'))
+
     server = luigi.Parameter(default=config.get('nep', 'backlog-host'))
     username = luigi.Parameter(default=config.get('nep', 'backlog-username'))
     pattern = luigi.Parameter(default=config.get('nep', 'backlog-pattern'))
