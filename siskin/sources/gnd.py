@@ -93,7 +93,7 @@ class GNDDump(GNDTask):
                                                     params=urllib.urlencode(params))
         output = shellout("""wget --retry-connrefused "{url}" -O {output}""",
                           url=url)
-        luigi.File(output).move(self.output().fn)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ttl.gz'))
