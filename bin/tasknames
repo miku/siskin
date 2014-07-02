@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from __future__ import print_function
+from gluish.common import IndexIdList, IndexFieldList
 from luigi.task import Register
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *

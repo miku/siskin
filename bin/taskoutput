@@ -6,6 +6,7 @@ Find the output of (most) tasks.
 """
 
 from __future__ import print_function
+from gluish.common import IndexIdList, IndexFieldList
 from gluish.utils import pairwise
 from luigi.task import Register
 from siskin.sources.b3kat import *

@@ -10,6 +10,7 @@ from luigi.task import Register, flatten
 import pprint
 import cStringIO as StringIO
 from gluish import colors
+from gluish.common import IndexIdList, IndexFieldList
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *
 from siskin.sources.bnf import *

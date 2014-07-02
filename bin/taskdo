@@ -5,6 +5,7 @@
 The main command line program to interact with the tasks.
 """
 
+from gluish.common import IndexIdList, IndexFieldList
 from siskin.sources.b3kat import *
 from siskin.sources.bms import *
 from siskin.sources.bnf import *
