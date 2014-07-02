@@ -27,7 +27,7 @@ from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout, memoize
+from gluish.utils import shellout, memoize, random_string
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
@@ -84,7 +84,7 @@ class EBLPaths(EBLTask):
 
 class EBLDatesAndPaths(EBLTask):
     """ Dump the dates and file paths to a file sorted. """
-    indicator = luigi.Parameter(default=hourly(fmt='%s'))
+    indicator = luigi.Parameter(default=random_string())
 
     def requires(self):
         return EBLPaths(indicator=self.indicator)
