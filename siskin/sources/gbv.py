@@ -46,11 +46,11 @@ class GBVImport(GBVTask):
 
     @timed
     def run(self):
-        stopover = tempfile.mkdtemp(prefix='tsk-')
+        stopover = tempfile.mkdtemp(prefix='siskin-')
         origin = config.get('gbv', 'scp-src').format(tag=self.tag)
         shellout("scp {origin} {output}", origin=origin, output=stopover)
 
-        _, combined = tempfile.mkstemp(prefix='tsk-')
+        _, combined = tempfile.mkstemp(prefix='siskin-')
         for path in iterfiles(stopover):
             shellout("cat {input} >> {output}", input=path, output=combined)
         luigi.File(combined).move(self.output().fn)
@@ -68,7 +68,7 @@ class GBVCombine(GBVTask):
 
     @timed
     def run(self):
-        _, combined = tempfile.mkstemp(prefix='tsk-')
+        _, combined = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=combined)
