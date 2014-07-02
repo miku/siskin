@@ -12,7 +12,7 @@ from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
-from gluish.task import BaseTask
+from siskin.task import DefaultTask
 from gluish.utils import shellout
 import BeautifulSoup
 import collections
@@ -25,7 +25,7 @@ import prettytable
 import requests
 import urllib
 
-class GNDTask(BaseTask):
+class GNDTask(DefaultTask):
     TAG = 'gnd'
 
     def closest(self):
