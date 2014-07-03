@@ -40,10 +40,10 @@ class KSDImport(KSDTask):
     @timed
     def run(self):
         # gather files
-        stopover = tempfile.mkdtemp(prefix='tsk-')
+        stopover = tempfile.mkdtemp(prefix='siskin-')
         shellout("scp {origin} {output}", origin=config.get('ksd', 'scp-src'), output=stopover)
         # combine files
-        _, combined = tempfile.mkstemp(prefix='tsk-')
+        _, combined = tempfile.mkstemp(prefix='siskin-')
         for path in sorted(iterfiles(stopover), reverse=True):
             shellout("cat {input} >> {output}", input=path, output=combined)
         # clean dups

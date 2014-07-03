@@ -131,7 +131,7 @@ class MTCMarcXML(MTCTask):
         if not os.path.exists(target):
             os.makedirs(target)
 
-        _, errorlog = tempfile.mkstemp(prefix='tsk-')
+        _, errorlog = tempfile.mkstemp(prefix='siskin-')
         stylesheet = self.input().get('stylesheet').path
         size = wc(self.input().get('filelist').path)
 
@@ -179,7 +179,7 @@ class MTCCombine(MTCTask):
             os.makedirs(target)
 
         size = wc(self.input().path)
-        _, combined = tempfile.mkstemp(prefix='tsk-')
+        _, combined = tempfile.mkstemp(prefix='siskin-')
 
         with self.input().open() as handle:
             for i, row in enumerate(handle.iter_tsv(cols=('path',)), start=1):
@@ -202,7 +202,7 @@ class MTCCombine(MTCTask):
                     parent.remove(misplaced)
                     record.append(misplaced)
 
-                _, cleaned = tempfile.mkstemp(prefix='tsk-')
+                _, cleaned = tempfile.mkstemp(prefix='siskin-')
                 with open(cleaned, 'w') as output:
                     output.write(etree.tostring(doc, pretty_print=True))
 

@@ -40,9 +40,9 @@ class PAOSync(PAOTask):
 
     @timed
     def run(self):
-        stopover = tempfile.mkdtemp(prefix='tsk-')
+        stopover = tempfile.mkdtemp(prefix='siskin-')
         shellout("scp {origin} {stopover}".format(origin=config.get('pao', 'scp-src'), stopover=stopover))
-        _, combined = tempfile.mkstemp(prefix='tsk-')
+        _, combined = tempfile.mkstemp(prefix='siskin-')
         for path in iterfiles(directory=stopover,
                               fun=lambda path: re.search(r'pao[\d].mrc', path)):
             shellout("cat {path} >> {output}", path=path, output=combined)
