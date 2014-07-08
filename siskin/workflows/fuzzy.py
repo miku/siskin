@@ -6,6 +6,7 @@ Fuzzy deduplication related tasks.
 """
 
 from elasticsearch import helpers as eshelpers
+from gluish.benchmark import timed
 from gluish.common import ElasticsearchMixin
 from gluish.format import TSV
 from gluish.intervals import weekly
@@ -38,6 +39,7 @@ class FuzzyEditionList(FuzzyTask, ElasticsearchMixin):
     date = luigi.DateParameter(default=datetime.date.today())
     index = luigi.Parameter(description='name of the index')
 
+    @timed
     def run(self):
         es = elasticsearch.Elasticsearch([dict(host=self.es_host, port=self.es_port)])
         hits = eshelpers.scan(es, {'query': {'match_all': {}},
@@ -71,6 +73,7 @@ class FuzzyEditionListRange(FuzzyTask, ElasticsearchMixin):
             yield FuzzyEditionList(date=self.date, index=index,
                                    es_host=self.es_host, es_port=self.es_port)
 
+    @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
