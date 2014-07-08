@@ -188,7 +188,8 @@ class EBLCombine(EBLTask):
     def run(self):
         with self.input().open() as handle:
             path = handle.iter_tsv(cols=('date', 'path')).next().path
-        output = shellout("unzip -p {input} \*.mrc > {output}", input=path)
+        output = shellout("unzip -p {input} \*.mrc > {output}", input=path,
+                          ignoremap={1: 'A warning alone will trigger a non-zero return value. Assuming everything went well anyway.'})
         luigi.File(output).move(self.output().path)
 
     def output(self):
