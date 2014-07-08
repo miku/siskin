@@ -10,6 +10,7 @@ from gluish.benchmark import timed
 from gluish.common import ElasticsearchMixin
 from gluish.format import TSV
 from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 import datetime
@@ -36,7 +37,7 @@ class FuzzyEditionList(FuzzyTask, ElasticsearchMixin):
 
         $ taskdo FuzzyEditionList --index ebl
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     index = luigi.Parameter(description='name of the index')
 
     @timed
@@ -64,7 +65,7 @@ class FuzzyEditionListRange(FuzzyTask, ElasticsearchMixin):
 
         $ taskdo FuzzyEditionList --indices "bsz ebl nep"
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     indices = luigi.Parameter(default="bsz ebl nep")
 
     def requires(self):
