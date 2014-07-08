@@ -7,7 +7,7 @@ GND-related tasks.
 
 from elasticsearch import helpers as eshelpers
 from gluish.benchmark import timed
-from gluish.common import ElasticsearchMixin
+from gluish.common import ElasticsearchMixin, Executable
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import monthly
@@ -23,6 +23,8 @@ import HTMLParser
 import luigi
 import prettytable
 import requests
+import shutil
+import tempfile
 import urllib
 
 class GNDTask(DefaultTask):
@@ -131,6 +133,25 @@ class GNDNTriples(GNDTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
+
+class GNDCayleyLevelDB(GNDTask):
+    """ Create a Cayley LevelDB database from GND data. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'ntriples': GNDNTriples(date=self.date),
+                'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
+
+    @timed
+    def run(self):
+        dbpath = tempfile.mkdtemp(prefix='siskin-')
+        shellout("cayley init -alsologtostderr -db=leveldb -dbpath={dbpath}", dbpath=dbpath)
+        shellout("cayley load -alsologtostderr -db=leveldb -dbpath={dbpath} --triples {input}",
+                 dbpath=dbpath, input=self.input().get('ntriples').path)
+        shutil.move(dbpath, self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='leveldb'))
 
 class GNDJson(GNDTask):
     """ Convert to some indexable JSON. """
