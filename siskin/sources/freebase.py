@@ -7,18 +7,22 @@ Freebase.
 
 from gluish.benchmark import timed
 from gluish.common import Executable
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
-from gluish.intervals import monthly
-from gluish.benchmark import timed
+import datetime
 import luigi
 
 class FreebaseTask(DefaultTask):
     TAG = 'freebase'
 
+    def closest(self):
+        return monthly(date=self.date)
+
 class FreebasePublic(FreebaseTask):
     """ Download bucket descriptor. """
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return Executable(name='wget')
@@ -34,7 +38,7 @@ class FreebasePublic(FreebaseTask):
 
 class FreebaseDump(FreebaseTask):
     """ Download the dump. """
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return Executable(name='wget')
@@ -50,7 +54,7 @@ class FreebaseDump(FreebaseTask):
 
 class FreebaseExtract(FreebaseTask):
     """ Extract the dump. 250G+ !"""
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return FreebaseDump(date=self.date)
@@ -67,7 +71,7 @@ class FreebaseExtract(FreebaseTask):
 class FreebaseJson(FreebaseTask):
     """ Convert all Freebase ntriples to a single JSON file. """
 
-    date = luigi.DateParameter(default=monthly())
+    date = ClosestDateParameter(default=datetime.date.today())
     language = luigi.Parameter(default="en")
 
     def requires(self):
