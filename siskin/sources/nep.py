@@ -86,7 +86,7 @@ class NEPCopy(NEPTask):
     username = luigi.Parameter(default=config.get('nep', 'backlog-username'))
     pattern = luigi.Parameter(default=config.get('nep', 'backlog-pattern'))
 
-    timeout = luigi.IntParameter(default=3, description='rsnyc IO timeout', significant=False)
+    timeout = luigi.IntParameter(default=15, description='rsnyc IO timeout', significant=False)
 
     def requires(self):
         return Directory(path=os.path.dirname(self.output().path))
