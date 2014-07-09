@@ -5,6 +5,7 @@
 Freebase.
 """
 
+from gluish.benchmark import timed
 from gluish.common import Executable
 from gluish.utils import shellout
 from siskin.task import DefaultTask
@@ -22,6 +23,7 @@ class FreebasePublic(FreebaseTask):
     def requires(self):
         return Executable(name='wget')
 
+    @timed
     def run(self):
         url = "http://commondatastorage.googleapis.com/freebase-public/"
         output = shellout(""" wget -q --retry-connrefused {url} -O {output}""", url=url)
