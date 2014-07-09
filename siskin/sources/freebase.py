@@ -97,7 +97,7 @@ class FreebaseJson(FreebaseTask):
 
     @timed
     def run(self):
-        output = shellout("nttoldj -l {language} -i -a {input} >> {output}",
+        output = shellout("nttoldj -l {language} -i -a {input} > {output}",
                           input=self.input().path, language=self.language)
         luigi.File(output).move(self.output().path)
 
