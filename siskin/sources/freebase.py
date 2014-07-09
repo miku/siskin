@@ -68,6 +68,24 @@ class FreebaseExtract(FreebaseTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class FreebaseAbbreviatedNTriples(FreebaseTask):
+    """ Convert all Freebase ntriples to abbreviated ones. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return FreebaseExtract()
+
+    @timed
+    def run(self):
+        output = shellout("nttoldj -l {language} -i -a -f nt {input} > {output}",
+                          input=self.input().path, language=self.language)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
 class FreebaseJson(FreebaseTask):
     """ Convert all Freebase ntriples to a single JSON file. """
 
