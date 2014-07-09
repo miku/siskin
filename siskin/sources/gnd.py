@@ -134,12 +134,28 @@ class GNDNTriples(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class GNDAbbreviatedNTriples(GNDTask):
+    """ Get a Ntriples representation of GND, but abbreviate with nttoldj. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("nttoldj -a -f nt {input} > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
 class GNDCayleyLevelDB(GNDTask):
     """ Create a Cayley LevelDB database from GND data. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'ntriples': GNDNTriples(date=self.date),
+        return {'ntriples': GNDAbbreviatedNTriples(date=self.date),
                 'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
 
     @timed
