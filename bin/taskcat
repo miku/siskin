@@ -13,9 +13,9 @@ set -e -u
 
 args=("$@")
 
-OUTPUT=$(taskoutput $@|tail -1)
+OUTPUT=$(taskoutput "$@"|tail -1)
 if [[ "$OUTPUT" == *mrc ]]; then
-    yaz-marcdump $(taskoutput "$@"|tail -1)
+    yaz-marcdump $OUTPUT
 else
-    cat $(taskoutput "$@"|tail -1)
+    cat $OUTPUT
 fi
