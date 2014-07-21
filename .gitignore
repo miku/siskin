@@ -47,4 +47,4 @@ docs/_build/
 *.rpm
 *.deb
 .vagrant
-
+vagrant.key
