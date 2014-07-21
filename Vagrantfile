@@ -1,22 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-VAGRANTFILE_API_VERSION = "2"
+$script = <<SETUP_SCRIPT
 
-$script = <<SCRIPT
-
-#
-# ES, some essential RPMs
-#
+# Adjust versions here ...
+ELASTICSEARCH_VERSION=1.2.2
+MARCTOOLS_VERSION=1.4.1
 
 # Download Elasticsearch and install
-ES_VERSION=1.2.2
-ES_RPM=elasticsearch-$ES_VERSION.noarch.rpm
+ES_RPM=elasticsearch-$ELASTICSEARCH_VERSION.noarch.rpm
 cd /tmp && wget -N "https://download.elasticsearch.org/elasticsearch/elasticsearch/$ES_RPM"
 cd /tmp && yum install -y $ES_RPM
 
 # Marc converters
-MARCTOOLS_VERSION=1.4.1
 cd /tmp && wget -O marctools-$MARCTOOLS_VERSION-0.x86_64.rpm "https://github.com/ubleipzig/marctools/releases/download/v$MARCTOOLS_VERSION/marctools-$MARCTOOLS_VERSION-0.x86_64.rpm"
 cd /tmp && yum install -y marctools-$MARCTOOLS_VERSION-0.x86_64.rpm
 
@@ -41,24 +37,20 @@ yum install -y libxslt-devel
 yum install -y mysql-devel
 yum install -y perl-XML-Twig
 yum install -y php
-yum install -y ruby-devel
 yum install -y rsync
+yum install -y ruby-devel
 yum install -y tar
 yum install -y tree
 yum install -y unzip
 yum install -y wget
-
-# Adding YAZ repo (http://ftp.indexdata.dk/pub/yaz/redhat/centos/6/README)
-# rpm --import http://ftp.indexdata.com/pub/yum/centos/6/RPM-GPG-KEY-indexdata
-# wget --no-clobber http://ftp.indexdata.com/pub/yum/centos/6/indexdata.repo -P /etc/yum.repos.d/
 yum install -y yaz
 
-#
-# The packaging infrastructure
-#
+# The packaging infrastructure (https://github.com/jordansissel/fpm)
 gem install fpm
 
-SCRIPT
+SETUP_SCRIPT
+
+VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "centos65min"
