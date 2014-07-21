@@ -1208,7 +1208,7 @@ class EventsPreflight(BSZTask):
                             'transaction', 'date', 'iln'), dtype={'epn': pd.np.str,
                             'ppn': pd.np.str, 'iln': pd.np.str})
 
-        Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn'])
+        Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn', 'sigel'])
         filemap = collections.defaultdict(lambda: luigi.File(is_tmp=True, format=TSV))
         self.logger.debug("Processing {} ILNs ...".format(len(self.finc_ilns())))
 
@@ -1225,11 +1225,11 @@ class EventsPreflight(BSZTask):
             with self.input().get('deletions').open() as handle:
                 for row in handle.iter_tsv(cols=('epn', 'iln', 'date')):
                     if row.iln.zfill(4) == iln:
-                        epn_events[row.epn].add(Event(*(row.date, 'D', 0, '-')))
+                        epn_events[row.epn].add(Event(*(row.date, 'D', 0, '-', 'NO_SIGEL')))
 
             # Additions
-            for _, ppn, epn, _, _, date, _ in filtered.itertuples():
-                epn_events[epn].add(Event(*(date, 'U', 10, ppn)))
+            for _, ppn, epn, sigel, _, date, _ in filtered.itertuples():
+                epn_events[epn].add(Event(*(date, 'U', 10, ppn, sigel)))
 
             # Writing events
             self.logger.debug("[{iln}] Writing ({fn})".format(iln=iln, fn=filemap[iln].path))
@@ -1237,7 +1237,7 @@ class EventsPreflight(BSZTask):
                 for epn, events in sorted(epn_events.iteritems()):
                     # sort events by date and prio
                     for e in sorted(events, key=operator.itemgetter(0, 2)):
-                        handle.write_tsv(epn, e.date, e.type, e.prio, e.ppn)
+                        handle.write_tsv(epn, e.date, e.type, e.prio, e.ppn, e.sigel)
 
         # move all files into the right place (events_for_iln_output)
         # plus: write a receipt (iln, events_for_iln.output().path)
@@ -1305,9 +1305,9 @@ class SnapshotBasic(BSZTask):
         epn_map, epn_misses = dict(), set()
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('epn', 'date', 'type',
-                                             'prio', 'ppn')):
+                                             'prio', 'ppn', 'sigel')):
                 if row.type == 'U':
-                    epn_map[row.epn] = (row.ppn, row.date)
+                    epn_map[row.epn] = (row.ppn, row.date, row.sigel)
                 elif row.type == 'D':
                     try:
                         del epn_map[row.epn]
@@ -1320,8 +1320,8 @@ class SnapshotBasic(BSZTask):
 
         _, stopover = tempfile.mkstemp(prefix='tasktree-')
         with luigi.File(stopover, format=TSV).open('w') as output:
-            for epn, (ppn, date) in epn_map.iteritems():
-                output.write_tsv(ppn, epn, date)
+            for epn, (ppn, date, sigel) in epn_map.iteritems():
+                output.write_tsv(ppn, epn, date, sigel)
         output = shellout("sort -k1,1 -k3,3 {input} > {output}", input=stopover)
         luigi.File(output).move(self.output().path)
 
@@ -1357,7 +1357,7 @@ class OpacDisplayFlag(BSZTask):
     def run(self):
         ppns = set()
         with self.input().get('snapshot').open() as handle:
-            for row in handle.iter_tsv(cols=('ppn', 'epn', 'date')):
+            for row in handle.iter_tsv(cols=('ppn', 'epn', 'date', 'X')):
                 ppns.add(row.ppn)
 
         cached_ppns = set()
@@ -1421,7 +1421,7 @@ class SnapshotWithCache(BSZTask):
     def run(self):
         with self.input().get('snapshot').open() as handle:
             snapshot = pd.read_csv(handle, sep='\t',
-                                   names=('ppn', 'epn', 'date'),
+                                   names=('ppn', 'epn', 'date', 'sigel'),
                                    dtype={'ppn': pd.np.str, 'epn': pd.np.str})
         with self.input().get('odf').open() as handle:
             odflist = pd.read_csv(handle, sep='\t',
@@ -1498,7 +1498,7 @@ class UnifiedSnapshot(BSZTask):
         with self.output().open('w') as output:
             for target in self.input():
                 with target.open() as handle:
-                    for row in handle.iter_tsv(cols=('ppn', 'epn', 'date')):
+                    for row in handle.iter_tsv(cols=('ppn', 'epn', 'date', 'X')):
                         if row.ppn in seen:
                             counter['skipped'] += 1
                         else:
