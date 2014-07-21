@@ -44,5 +44,7 @@ coverage.xml
 docs/_build/
 
 # packaging
-*rpm
-*deb
+*.rpm
+*.deb
+.vagrant
+
