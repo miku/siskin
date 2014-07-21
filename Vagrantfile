@@ -20,6 +20,7 @@ cd /tmp && yum install -y marctools-$MARCTOOLS_VERSION-0.x86_64.rpm
 rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
 # Install essential packages
+yum groupinstall -y "Development tools"
 yum install -y blas-devel
 yum install -y bzip2
 yum install -y curl
@@ -37,6 +38,9 @@ yum install -y libxslt-devel
 yum install -y mysql-devel
 yum install -y perl-XML-Twig
 yum install -y php
+yum install -y python-devel
+yum install -y python-pip
+yum install -y rpm-build
 yum install -y rsync
 yum install -y ruby-devel
 yum install -y tar
@@ -47,6 +51,9 @@ yum install -y yaz
 
 # The packaging infrastructure (https://github.com/jordansissel/fpm)
 gem install fpm
+
+# upgrade setuptools
+pip install -U setuptools
 
 SETUP_SCRIPT
 
