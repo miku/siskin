@@ -56,9 +56,14 @@ prefixmap = {
     'hmt': 'siskin.workflows.hmt',
 }
 
+import sys
+if sys.version_info < (2, 7):
+    print('This command requires Python 2.7')
+    sys.exit(1)
+
+# importlib requires 2.7
 import importlib
 import luigi
-import sys
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
