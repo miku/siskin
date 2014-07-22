@@ -11,7 +11,7 @@ SSHCMD = ssh -o StrictHostKeyChecking=no -i vagrant.key vagrant@127.0.0.1 -p 222
 
 # Helper to build RPM on a RHEL6 VM, to link against glibc 2.12
 vagrant.key:
-	curl -sL "https://raw2.github.com/mitchellh/vagrant/mastekeys/vagrant" > vagrant.key
+	curl -sL "https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant" > vagrant.key
 	chmod 0600 vagrant.key
 
 vm-setup: vagrant.key
@@ -22,9 +22,12 @@ createrepo:
 	cp dist/python*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
 	createrepo /usr/share/nginx/html/repo/CentOS/6/x86_64
 
-# run this target inside the CentOS6/libc2.12 VM
-packages:
+all-packages:
 	git pull origin master
 	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
+	fpm -s python -t rpm .
+	cp python*rpm /vagrant/dist
+
+package:
 	fpm -s python -t rpm .
 	cp python*rpm /vagrant/dist
