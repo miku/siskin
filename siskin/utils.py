@@ -72,11 +72,11 @@ def generate_tasks_manual():
     output = StringIO.StringIO()
     task_tuples = sorted(Register.get_reg().iteritems())
     output.write(MAN_HEADER)
-    output.write('+ {} tasks found\n\n'.format(len(task_tuples)))
+    output.write('  {0} tasks found\n\n'.format(len(task_tuples)))
 
     for name, klass in task_tuples:
         doc = klass.__doc__ or colors.red("@todo")
-        output.write('{} {}\n'.format(colors.green(name), doc))
+        output.write('{0} {1}\n'.format(colors.green(name), doc))
 
         try:
             deps = flatten(klass().requires())
@@ -84,7 +84,7 @@ def generate_tasks_manual():
             # TODO: tasks that have required arguments will fail here
             formatted = colors.yellow("\tUnavailable since task has required parameters.")
         else:
-            formatted = '\t{}'.format(pprint.pformat(deps).replace('\n', '\n\t'))
-        output.write(colors.magenta('\n\tDependencies ({}):\n\n{}\n\n'.format(len(deps), formatted)))
+            formatted = '\t{0}'.format(pprint.pformat(deps).replace('\n', '\n\t'))
+        output.write(colors.magenta('\n\tDependencies ({0}):\n\n{1}\n\n'.format(len(deps), formatted)))
 
     return output.getvalue()

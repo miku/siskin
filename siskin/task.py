@@ -32,10 +32,10 @@ class DefaultTask(BaseTask):
 #
 
     def _ambience_ok(self):
-        return os.path.join('ambience', 'ok{}.mp3'.format(random.randint(1, 12)))
+        return os.path.join('ambience', 'ok{0}.mp3'.format(random.randint(1, 12)))
 
     def _ambience_deny(self):
-        return os.path.join('ambience', 'deny{}.mp3'.format(random.randint(1, 4)))
+        return os.path.join('ambience', 'deny{0}.mp3'.format(random.randint(1, 4)))
 
     def _ambience_complete(self):
         return os.path.join('ambience', 'complete.mp3')

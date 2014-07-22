@@ -160,7 +160,7 @@ class LFERMarc(LFERTask):
         # the latest shipment relative to self.date
         with self.input().open() as handle:
             date, path = handle.iter_tsv(cols=('date', 'path')).next()
-        self.logger.debug("The closest shipment occured at {}".format(date))
+        self.logger.debug("The closest shipment occured at {0}".format(date))
 
         # stream file out
         output = shellout("tar -zOxf {archive} {fn} > {output}",

@@ -156,7 +156,7 @@ class BNFJsonChunk(BNFTask):
             doc['id'] = doc['oai'].split('/')[-1] # too short?
 
             if header.get('status') == 'deleted':
-                self.logger.debug("Skipping deleted: {}".format(doc['oai']))
+                self.logger.debug("Skipping deleted: {0}".format(doc['oai']))
                 continue
 
             metadata = record.find('metadata')

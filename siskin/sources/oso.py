@@ -78,7 +78,7 @@ class OSOMarcDownload(OSOTask):
                 dirname, basename = row.path.split('/')[-2:]
                 slugged = dirname.replace('%20', '-').lower()
                 url = urlparse.urljoin(base, row.path)
-                dst = os.path.join(self.taskdir(), '{}-{}'.format(slugged, basename))
+                dst = os.path.join(self.taskdir(), '{0}-{1}'.format(slugged, basename))
                 if os.path.exists(dst):
                     continue
                 output = shellout("""wget --retry-connrefused "{url}" -O {output} """, url=url)

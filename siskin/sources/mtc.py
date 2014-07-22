@@ -103,7 +103,7 @@ class MTCModsImport(MTCTask):
                     output = shellout("""wget -q --retry-connrefused
                                       {url} -O {output}""", url=row.url)
                     luigi.File(output).move(destination)
-                self.logger.debug("{}/{} {}".format(i, size, row.url))
+                self.logger.debug("{0}/{1} {2}".format(i, size, row.url))
 
         # write "receipt"
         with self.output().open('w') as output:
@@ -146,10 +146,10 @@ class MTCMarcXML(MTCTask):
                                           input=row.path, xsl=stylesheet)
                         luigi.File(output).move(destination)
                     except RuntimeError as err:
-                        self.logger.error("{}: {}".format(row.path, err))
+                        self.logger.error("{0}: {1}".format(row.path, err))
                         with open(errorlog, 'a') as log:
                             log.write('%s\t%s\n' % (row.path, err))
-                self.logger.debug("{}/{} {}".format(i, size, row.path))
+                self.logger.debug("{0}/{1} {2}".format(i, size, row.path))
 
         # write receipt
         with self.output().open('w') as output:
@@ -157,7 +157,7 @@ class MTCMarcXML(MTCTask):
                 output.write_tsv(path)
 
         # this is just a temporary artefact for now
-        self.logger.debug("Conversion errors logged at: {}".format(errorlog))
+        self.logger.debug("Conversion errors logged at: {0}".format(errorlog))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -195,7 +195,7 @@ class MTCCombine(MTCTask):
                 result = doc.xpath('/marc:record/marc:datafield/marc:datafield',
                           namespaces={'marc': 'http://www.loc.gov/MARC21/slim'})
                 if len(result) > 0:
-                    self.logger.debug("Fixing broken MARCXML in: {}".format(row.path))
+                    self.logger.debug("Fixing broken MARCXML in: {0}".format(row.path))
                 for misplaced in result:
                     parent = misplaced.getparent()
                     record = misplaced.getparent().getparent()
@@ -216,7 +216,7 @@ class MTCCombine(MTCTask):
                     shellout("""yaz-marcdump -i marcxml -o marc
                              {input} >> {output}""", input=cleaned,
                              output=combined, ignoremap={5: 'FIXME'})
-                self.logger.debug("{}/{} {}".format(i, size, row.path))
+                self.logger.debug("{0}/{1} {2}".format(i, size, row.path))
 
         luigi.File(combined).move(self.output().path)
 

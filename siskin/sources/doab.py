@@ -52,13 +52,13 @@ class DOABCombine(DOABTask):
                         record = reader.next()
                         record_id = record['001'].value()
                         if record_id in ('15270', '15298', '15318', '15335'):
-                            self.logger.debug("Skipping {}".format(record_id))
+                            self.logger.debug("Skipping {0}".format(record_id))
                             continue
                         if not record_id in seen:
                             writer.write(record)
                             seen.add(record_id)
                         else:
-                            self.logger.debug("Skipping duplicate: {}".format(record_id))
+                            self.logger.debug("Skipping duplicate: {0}".format(record_id))
                     except pymarc.exceptions.RecordDirectoryInvalid as err:
                         self.logger.warn(err)
                     except StopIteration:

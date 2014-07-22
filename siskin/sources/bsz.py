@@ -109,7 +109,7 @@ class BSZTask(DefaultTask):
         TODO: memoize must handle kwargs as well!
         """
         if not os.path.exists(filename):
-            raise RuntimeError('{} required'.format(filename))
+            raise RuntimeError('{0} required'.format(filename))
         with open(filename) as handle:
             content = json.loads(handle.read())
         return content
@@ -181,7 +181,7 @@ class SASync(BSZTask):
         with self.input().open() as handle:
             for i, row in enumerate(handle.iter_tsv(cols=('path',))):
                 dst = os.path.join(os.path.dirname(self.output().path),
-                                   '{}-{:02d}.tar.gz'.format(self.date, i))
+                                   '{0}-{1:02d}.tar.gz'.format(self.date, i))
                 luigi.File(path=row.path).copy(dst)
                 copied.append(dst)
 
@@ -268,7 +268,7 @@ class SAFile(BSZTask):
             for row in handle.iter_tsv(cols=('path',)):
                 shard, filename = row.path.split('/')[-2:]
                 if int(shard) == int(self.tag):
-                    if filename.endswith('{}.mrc'.format(self.kind)):
+                    if filename.endswith('{0}.mrc'.format(self.kind)):
                         target = os.path.dirname(self.output().path)
                         if not os.path.exists(target):
                             os.makedirs(target)
@@ -484,13 +484,13 @@ class TASync(BSZTask):
         src = config.get('bsz', 'ta-pattern').format(date=self.date.strftime(fmt))
         if not os.path.exists(src):
             if self.date in self.muted():
-                self.logger.debug("{} is muted by config".format(self.date))
+                self.logger.debug("{0} is muted by config".format(self.date))
                 path = create_empty_daily_update()
                 luigi.File(path=path).move(self.output().path)
             else:
-                raise RuntimeError("No Tagesupdate (yet?) for {}".format(self.date))
+                raise RuntimeError("No Tagesupdate (yet?) for {0}".format(self.date))
         else:
-            self.logger.info("Syncing TA {}".format(src))
+            self.logger.info("Syncing TA {0}".format(src))
             luigi.File(path=src).copy(self.output().path)
 
     def output(self):
@@ -733,7 +733,7 @@ class LiberoCacheDump(BSZDumpTask):
             raise RuntimeError("no mapping found from ILN to LIBERO-ID")
 
         url = config.get('bsz', 'liberocache-url')
-        self.logger.debug("Using LiberoCache via {}".format(url))
+        self.logger.debug("Using LiberoCache via {0}".format(url))
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT record_id, content from libero_cache WHERE db_name = '%s' """ % (db_name,))
             _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -1211,7 +1211,7 @@ class EventsPreflight(BSZTask):
 
         Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn', 'sigel'])
         filemap = collections.defaultdict(lambda: luigi.File(is_tmp=True, format=TSV))
-        self.logger.debug("Processing {} ILNs ...".format(len(self.finc_ilns())))
+        self.logger.debug("Processing {0} ILNs ...".format(len(self.finc_ilns())))
 
         for iln in self.finc_ilns():
             begins, ends = str(self.begin), str(self.end)
@@ -1769,7 +1769,7 @@ class BSZIndexPatch(BSZTask):
                 garbage.add(stopover)
                 garbage.add(output)
 
-            self.logger.debug("Combined JSON patch at {}".format(combined))
+            self.logger.debug("Combined JSON patch at {0}".format(combined))
 
             # index inline
             def docs():

@@ -53,7 +53,7 @@ class DNBStatus(GNDTask):
         soup = BeautifulSoup.BeautifulSoup(r.text)
         tables = soup.findAll('table')
         if not tables:
-            raise RuntimeError('No tabular data found on {}'.format(r.url))
+            raise RuntimeError('No tabular data found on {0}'.format(r.url))
 
         table = tables[0]
         h = HTMLParser.HTMLParser()

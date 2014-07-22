@@ -69,7 +69,7 @@ class DailyIndexUpdates(Workflow):
         ]
 
     def run(self):
-        self.logger.debug("Synced {} indices on {}".format(len(self.input()), self.date))
+        self.logger.debug("Synced {0} indices on {1}".format(len(self.input()), self.date))
         with self.output().open('w'):
             pass
 

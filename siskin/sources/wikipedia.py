@@ -335,7 +335,7 @@ class WikipediaRawAuthorityJson(WikipediaTask):
                         if errors > self.allowed_errors:
                             raise RuntimeError('more than %s errors, adjust allowed_errors')
                         else:
-                            logger.error('error in row: {}'.format(str(row)))
+                            logger.error('error in row: {0}'.format(str(row)))
                             continue
                     title, ids = row
                     trimmed = ids.strip("{}")
@@ -443,6 +443,6 @@ class WikipediaCategoryExample(WikipediaTask, ElasticsearchMixin):
                 else:
                     empty += 1
 
-        logger.info('{} {} {}'.format(len(gnds), empty, i))
+        logger.info('{0} {1} {2}'.format(len(gnds), empty, i))
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))

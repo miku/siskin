@@ -73,7 +73,7 @@ class QucosaJsonChunk(QucosaTask):
                 if diss.find('dc:title'):
                     doc['title'] = diss.find('dc:title').text
                 else:
-                    self.logger.error("Qucosa w/o title: {}".format(doc.get('id', 'NA')))
+                    self.logger.error("Qucosa w/o title: {0}".format(doc.get('id', 'NA')))
                     # raise ValueError('qucosa without title')
 
                 # subtitle
@@ -161,7 +161,7 @@ class QucosaJsonChunk(QucosaTask):
                         doc['filesize'] += int(fileprop.get('ddb:filesize', 0))
                         doc['filename'].append(fileprop.get('ddb:filename'))
                     except ValueError:
-                        self.logger.warn("Empty/wrong filesize in {}".format(doc['id']))
+                        self.logger.warn("Empty/wrong filesize in {0}".format(doc['id']))
 
                 for ispartof in diss.findAll('dcterms:ispartof'):
                     if ispartof.get('xsi:type') == 'ddb:noScheme':
