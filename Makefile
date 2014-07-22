@@ -16,5 +16,5 @@ vagrant.key:
 vm-setup: vagrant.key
 	$(SSHCMD) git clone https://github.com/miku/siskin.git
 
-vm-rpm:
-	$(SSHCMD) cd siskin && git pull origin master && cat requirements.txt | while read line; do fpm -s python -t rpm $line; done
+# vm-rpm:
+# 	$(SSHCMD) "cd siskin && git pull origin master && cat requirements.txt | while read line; do fpm -s python -t rpm $line; done"
