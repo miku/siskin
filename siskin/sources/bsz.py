@@ -1627,7 +1627,7 @@ class BSZIndexPatch(BSZTask):
         desired_map = shelve.open(desired_target.path, "c")
 
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('ppn', 'X', 'date')):
+            for row in handle.iter_tsv(cols=('ppn', 'X', 'date', 'X')):
                 desired_map[row.ppn] = row.date
 
         # collect all indexed ids, (this is the slowest part, actually)
@@ -1724,7 +1724,7 @@ class BSZIndexPatch(BSZTask):
             # store on which date we'll pick up which id
             shards = collections.defaultdict(set)
             with self.input().open() as handle:
-                for row in handle.iter_tsv(cols=('ppn', 'epn', 'date')):
+                for row in handle.iter_tsv(cols=('ppn', 'epn', 'date', 'X')):
                     if row.ppn in patch:
                         shards[row.date].add(row.ppn)
 
