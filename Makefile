@@ -23,5 +23,5 @@ createrepo:
 # run this target inside the CentOS6/libc2.12 VM
 packages:
 	git pull origin master
-	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $line; done
+	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
 	cp python*rpm /vagrant/dist
