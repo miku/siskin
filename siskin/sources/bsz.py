@@ -292,8 +292,10 @@ class SATransactionTagListRange(BSZTask):
         prerequisite = SATags()
         luigi.build([prerequisite])
         tags = prerequisite.output().open().read().split()
-        return {tag: SAFile(tag=int(tag), kind=self.kind, date=self.date)
-                for tag in tags}
+        taskmap = {}
+        for tag in tags:
+            taskmap[tag] = SAFile(tag=int(tag), kind=self.kind, date=self.date)
+        return taskmap
 
     @timed
     def run(self):
