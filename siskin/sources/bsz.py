@@ -304,7 +304,7 @@ class SATransactionTagListRange(BSZTask):
             awk '/^001 / {{printf $2"\t"}};
                  /^005 / {{print $2"\t{tag}"}}' > {output}
         """
-        _, stopover = tempfile.mkstemp(prefix='tasktree-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for tag, target in self.input().iteritems():
             tmp = shellout(template, input=target.path, tag=tag,
                            preserve_spaces=True)
@@ -440,7 +440,7 @@ class SAMerged(BSZTask):
 
     @timed
     def run(self):
-        _, merged = tempfile.mkstemp(prefix='tasktree-')
+        _, merged = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.fn, output=merged)
         luigi.File(merged).move(self.output().fn)
@@ -456,9 +456,9 @@ class SAMerged(BSZTask):
 
 def create_empty_daily_update():
     """ Create an empty daily updated. Used with the muted dates. """
-    _, dummy = tempfile.mkstemp(prefix='tasktree-')
+    _, dummy = tempfile.mkstemp(prefix='siskin-')
     with tarfile.open(dummy, 'w:gz') as handle:
-        _, empty = tempfile.mkstemp(prefix='tasktree-')
+        _, empty = tempfile.mkstemp(prefix='siskin-')
         handle.add(empty, config.get('bsz', 'ta-title-filename'))
         handle.add(empty, config.get('bsz', 'ta-local-filename'))
         handle.add(empty, config.get('bsz', 'ta-authority-filename'))
@@ -652,7 +652,7 @@ class DeletionRange(BSZTask):
         """
         Concatenate, sort, deduplicate.
         """
-        _, stopover = tempfile.mkstemp(prefix='tasktree-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=stopover)
@@ -734,7 +734,7 @@ class LiberoCacheDump(BSZDumpTask):
         self.logger.debug("Using LiberoCache via {}".format(url))
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT record_id, content from libero_cache WHERE db_name = '%s' """ % (db_name,))
-            _, stopover = tempfile.mkstemp(prefix='tasktree-')
+            _, stopover = tempfile.mkstemp(prefix='siskin-')
             with sqlite3db(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS libero_cache (record_id TEXT PRIMARY KEY, content TEXT)""")
                 for i, row in enumerate(cursor):
@@ -760,7 +760,7 @@ class LiberoCacheCopy(BSZDumpTask):
             # http://bit.ly/1fADENH
             cursor.execute("""SET NET_WRITE_TIMEOUT = 600""")
             cursor.execute("""SELECT record_id, db_name, content FROM libero_cache""")
-            _, stopover = tempfile.mkstemp(prefix='tasktree-')
+            _, stopover = tempfile.mkstemp(prefix='siskin-')
             with sqlite3db(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS libero_cache
                               (record_id TEXT, db_name TEXT, content TEXT, PRIMARY KEY (record_id, db_name))""")
@@ -800,7 +800,7 @@ class FincMappingDump(BSZDumpTask):
         url = config.get('bsz', 'mddb3-url')
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT finc_id, source_id, record_id, created, status FROM finc_mapping""")
-            _, stopover = tempfile.mkstemp(prefix='tasktree-')
+            _, stopover = tempfile.mkstemp(prefix='siskin-')
             with sqlite3db(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS finc_mapping
                               (finc_id INTEGER PRIMARY KEY,
@@ -850,7 +850,7 @@ class ISBNDump(BSZDumpTask):
         url = config.get('bsz', 'mddb3-url')
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT finc_id, isbn, updated FROM isbn""")
-            _, stopover = tempfile.mkstemp(prefix='tasktree-')
+            _, stopover = tempfile.mkstemp(prefix='siskin-')
             with sqlite3db(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS isbn (finc_id INTEGER, isbn TEXT,
                               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) """)
@@ -924,7 +924,7 @@ class FieldListWithDateMerged(BSZTask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='tasktree-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=stopover)
@@ -1101,7 +1101,7 @@ class ListifyLocalRange(BSZTask):
                 except OSError as err:
                     self.logger.error(err)
 
-        _, stopover = tempfile.mkstemp(prefix='tasktree-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=stopover)
@@ -1318,7 +1318,7 @@ class SnapshotBasic(BSZTask):
         self.logger.debug("The %s deletions that weren't there (ex: %s)" % (
                      len(epn_misses), list(epn_misses)[:3]))
 
-        _, stopover = tempfile.mkstemp(prefix='tasktree-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         with luigi.File(stopover, format=TSV).open('w') as output:
             for epn, (ppn, date, sigel) in epn_map.iteritems():
                 output.write_tsv(ppn, epn, date, sigel)
@@ -1470,7 +1470,7 @@ class Snapshot(BSZTask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='tasktree-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
@@ -1730,7 +1730,7 @@ class BSZIndexPatch(BSZTask):
                         shards[row.date].add(row.ppn)
 
             # collect all JSON in this file
-            _, combined = tempfile.mkstemp(prefix='tasktree-')
+            _, combined = tempfile.mkstemp(prefix='siskin-')
 
             # collect residue paths here
             garbage = set()
@@ -1747,7 +1747,7 @@ class BSZIndexPatch(BSZTask):
                 self.logger.debug("Scheduling prerequisites %s, %s ..." % (sdb, raw))
                 luigi.build([sdb, raw])
 
-                _, stopover = tempfile.mkstemp(prefix='tasktree-')
+                _, stopover = tempfile.mkstemp(prefix='siskin-')
                 self.logger.debug("Using seekmap-db at %s" % sdb.output().path)
 
                 with sqlite3db(sdb.output().path) as cursor:
