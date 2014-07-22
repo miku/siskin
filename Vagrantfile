@@ -21,6 +21,7 @@ rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.r
 
 # Install essential packages
 yum groupinstall -y "Development tools"
+yum install -y bash-completion
 yum install -y blas-devel
 yum install -y bzip2
 yum install -y curl
