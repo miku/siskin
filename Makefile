@@ -40,5 +40,6 @@ vm-all: /vargant/dist
 	cp python*rpm /vagrant/dist
 
 vm-package: /vargant/dist
+	git pull origin master
 	fpm --force -s python -t rpm .
 	cp python*rpm /vagrant/dist
