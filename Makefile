@@ -38,11 +38,11 @@ package:
 
 vm-all: /vargant/dist
 	git pull origin master
-	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
-	fpm --force -s python -t rpm .
+	cat requirements.txt | while read line; do fpm --force --verbose -s python -t rpm $$line; done
+	fpm --force --verbose -s python -t rpm .
 	cp python-*.rpm /vagrant/dist
 
 vm-package: /vargant/dist
 	git pull origin master
-	fpm --force -s python -t rpm .
+	fpm --force --verbose -s python -t rpm .
 	cp python-*.rpm /vagrant/dist
