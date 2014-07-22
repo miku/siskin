@@ -26,8 +26,10 @@ all-packages:
 	git pull origin master
 	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
 	fpm -s python -t rpm .
+	mkdir -p /vagrant/dist
 	cp python*rpm /vagrant/dist
 
 package:
 	fpm --force -s python -t rpm .
+	mkdir -p /vagrant/dist
 	cp python*rpm /vagrant/dist
