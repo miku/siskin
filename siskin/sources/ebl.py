@@ -97,7 +97,7 @@ class EBLDatesAndPaths(EBLTask):
                 for row in sorted(handle.iter_tsv(cols=('path',))):
                     mo = pattern.match(row.path)
                     if not mo:
-                        raise RuntimeError('unknown EBL pattern: %s' % row.path)
+                        raise RuntimeError('unknown EBL pattern: %s, %s' % (row.path, pattern))
                     gdict = mo.groupdict()
                     date = datetime.date(int(gdict['year']), int(gdict['month']),
                                          int(gdict['day']))
