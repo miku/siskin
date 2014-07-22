@@ -14,7 +14,7 @@ vagrant.key:
 	curl -sL "https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant" > vagrant.key
 	chmod 0600 vagrant.key
 
-vm-setup: vagrant.key
+setup: vagrant.key
 	$(SSHCMD) git clone https://github.com/miku/siskin.git
 
 # make sure /usr/share/nginx/html/repo/CentOS/6/x86_64 exists and is writable
@@ -24,15 +24,21 @@ createrepo:
 	cp dist/python*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
 	createrepo /usr/share/nginx/html/repo/CentOS/6/x86_64
 
+all:
+	$(SSHCMD) "cd siskin && make vm-all"
+
+package:
+	$(SSHCMD) "cd siskin && make vm-package"
+
 /vargant/dist:
 	mkdir -p /vagrant/dist
 
-all: /vargant/dist
+vm-all: /vargant/dist
 	git pull origin master
 	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
 	fpm -s python -t rpm .
 	cp python*rpm /vagrant/dist
 
-package: /vargant/dist
+vm-package: /vargant/dist
 	fpm --force -s python -t rpm .
 	cp python*rpm /vagrant/dist
