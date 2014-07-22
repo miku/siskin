@@ -48,3 +48,4 @@ docs/_build/
 *.deb
 .vagrant
 vagrant.key
+dist
