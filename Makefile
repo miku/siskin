@@ -36,13 +36,13 @@ package:
 /vargant/dist:
 	mkdir -p /vagrant/dist
 
-vm-all: /vargant/dist
+vm-all: clean /vargant/dist
 	git pull origin master
 	cat requirements.txt | while read line; do fpm --force --verbose -s python -t rpm $$line; done
 	fpm --force --verbose -s python -t rpm .
 	cp python-*.rpm /vagrant/dist
 
-vm-package: /vargant/dist
+vm-package: clean /vargant/dist
 	git pull origin master
 	fpm --force --verbose -s python -t rpm .
 	cp python-*.rpm /vagrant/dist
