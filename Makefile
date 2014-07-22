@@ -19,6 +19,8 @@ vm-setup: vagrant.key
 
 # make sure /usr/share/nginx/html/repo/CentOS/6/x86_64 exists and is writable
 createrepo:
+	rm /usr/share/nginx/html/repo/CentOS/6/x86_64/*rpm
+	rm -rf /usr/share/nginx/html/repo/CentOS/6/x86_64/repodata
 	cp dist/python*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
 	createrepo /usr/share/nginx/html/repo/CentOS/6/x86_64
 
