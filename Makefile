@@ -17,12 +17,14 @@ vagrant.key:
 vm-setup: vagrant.key
 	$(SSHCMD) git clone https://github.com/miku/siskin.git
 
+# make sure /usr/share/nginx/html/repo/CentOS/6/x86_64 exists and is writable
 createrepo:
-	cp dist/* /usr/share/nginx/html/repo/CentOS/6/x86_64
+	cp dist/python*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
 	createrepo /usr/share/nginx/html/repo/CentOS/6/x86_64
 
 # run this target inside the CentOS6/libc2.12 VM
 packages:
 	git pull origin master
 	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
+	fpm -s python -t rpm .
 	cp python*rpm /vagrant/dist
