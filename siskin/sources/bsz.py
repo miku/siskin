@@ -1204,9 +1204,8 @@ class EventsPreflight(BSZTask):
         happens on the same day. Deletes are processed first (0 = highest PRIO).
         """
         with self.input().get('local').open() as handle:
-            df = pd.read_csv(handle, sep='\t', names=('ppn', 'epn', 'sigel',
-                            'transaction', 'date', 'iln'), dtype={'epn': pd.np.str,
-                            'ppn': pd.np.str, 'iln': pd.np.str})
+            df = pd.read_csv(handle, sep='\t', names=('ppn', 'epn', 'sigel', 'transaction', 'date', 'iln'),
+                             dtype={'epn': pd.np.str, 'ppn': pd.np.str, 'iln': pd.np.str})
 
         Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn', 'sigel'])
         filemap = collections.defaultdict(lambda: luigi.File(is_tmp=True, format=TSV))
@@ -1215,7 +1214,7 @@ class EventsPreflight(BSZTask):
         for iln in self.finc_ilns():
             begins, ends = str(self.begin), str(self.end)
             self.logger.debug("[{iln}] Filtering events ({begin}-{end})".format(
-                         iln=iln, begin=begins, end=ends))
+                              iln=iln, begin=begins, end=ends))
             filtered = df[(df.iln == iln) & (df.date >= begins) &
                                             (df.date < ends)]
 
