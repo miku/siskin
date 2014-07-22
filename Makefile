@@ -4,6 +4,7 @@ help:
 clean:
 	rm -rf siskin.egg-info
 	rm -rf build/ dist/
+	rm -rf python-*.rpm
 
 # packaging via vagrant
 SSHCMD = ssh -o StrictHostKeyChecking=no -i vagrant.key vagrant@127.0.0.1 -p 2222
