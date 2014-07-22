@@ -29,5 +29,5 @@ all-packages:
 	cp python*rpm /vagrant/dist
 
 package:
-	fpm -s python -t rpm .
+	fpm --force -s python -t rpm .
 	cp python*rpm /vagrant/dist
