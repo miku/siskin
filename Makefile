@@ -24,7 +24,7 @@ publish: all createrepo
 createrepo:
 	rm /usr/share/nginx/html/repo/CentOS/6/x86_64/*rpm
 	rm -rf /usr/share/nginx/html/repo/CentOS/6/x86_64/repodata
-	cp dist/python*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
+	cp dist/python-*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
 	createrepo /usr/share/nginx/html/repo/CentOS/6/x86_64
 
 all:
@@ -39,10 +39,10 @@ package:
 vm-all: /vargant/dist
 	git pull origin master
 	cat requirements.txt | while read line; do fpm --verbose -s python -t rpm $$line; done
-	fpm -s python -t rpm .
-	cp python*rpm /vagrant/dist
+	fpm --force -s python -t rpm .
+	cp python-*.rpm /vagrant/dist
 
 vm-package: /vargant/dist
 	git pull origin master
 	fpm --force -s python -t rpm .
-	cp python*rpm /vagrant/dist
+	cp python-*.rpm /vagrant/dist
