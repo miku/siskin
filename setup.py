@@ -12,7 +12,7 @@ except:
     from distutils.core import setup
 
 setup(name='siskin',
-      version='0.0.14',
+      version='0.0.15',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
@@ -39,6 +39,7 @@ setup(name='siskin',
         'bin/taskredo',
         'bin/taskrm',
         'bin/tasktree',
+        'bin/taskversion',
         'bin/taskwc',
       ],
       install_requires=[
