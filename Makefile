@@ -32,10 +32,10 @@ createrepo:
 	cp dist/python-*.rpm /usr/share/nginx/html/repo/CentOS/6/x86_64
 	createrepo /usr/share/nginx/html/repo/CentOS/6/x86_64
 
-all:
+all: vagrant.key
 	$(SSHCMD) "cd siskin && make vm-all"
 
-package:
+package: vagrant.key
 	$(SSHCMD) "cd siskin && make vm-package"
 
 /vargant/dist:
