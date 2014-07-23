@@ -17,8 +17,13 @@ vagrant.key:
 setup: vagrant.key
 	$(SSHCMD) git clone https://github.com/miku/siskin.git
 
-publish: all createrepo
-	@echo Run "yum clean all && yum update" on your target machine
+# this will take a few minutes
+republish: all createrepo
+	@echo "Now: yum clean all && yum update"
+
+# this will take a few seconds (and works fine if deps didn't change)
+publish: package createrepo
+	@echo "Now: yum clean all && yum update"
 
 # make sure /usr/share/nginx/html/repo/CentOS/6/x86_64 exists and is writable
 createrepo:
