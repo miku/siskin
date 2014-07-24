@@ -21,5 +21,5 @@ if not os.path.exists(tempfile.tempdir):
     try:
         os.makedirs(tempfile.tempdir, 1777)
     except OSError as err:
-        print('temp dir does not exists and we cannot create it: {}'.format(tempfile.tempdir))
+        print('temp dir does not exists and we cannot create it: {0}'.format(tempfile.tempdir))
         sys.exit(1)
