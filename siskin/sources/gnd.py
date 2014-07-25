@@ -153,6 +153,7 @@ class GNDAbbreviatedNTriples(GNDTask):
 class GNDCayleyLevelDB(GNDTask):
     """ Create a Cayley LevelDB database from GND data. """
     date = ClosestDateParameter(default=datetime.date.today())
+    gomaxprocs = luigi.IntParameter(default=8)
 
     def requires(self):
         return {'ntriples': GNDAbbreviatedNTriples(date=self.date),
@@ -161,9 +162,10 @@ class GNDCayleyLevelDB(GNDTask):
     @timed
     def run(self):
         dbpath = tempfile.mkdtemp(prefix='siskin-')
-        shellout("cayley init -alsologtostderr -db=leveldb -dbpath={dbpath}", dbpath=dbpath)
-        shellout("cayley load -alsologtostderr -db=leveldb -dbpath={dbpath} --triples {input}",
-                 dbpath=dbpath, input=self.input().get('ntriples').path)
+        shellout("cayley init -alsologtostderr -config {config} -dbpath={dbpath}",
+                 config=self.assets('cayley.conf'), dbpath=dbpath)
+        shellout("GOMAXPROCS={gomaxprocs} cayley load -config {config} -alsologtostderr -dbpath={dbpath} --triples {input}",
+                 gomaxprocs=self.gomaxprocs, config=self.assets('cayley.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
         shutil.move(dbpath, self.output().path)
 
     def output(self):
