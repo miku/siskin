@@ -41,6 +41,7 @@ prefixmap = {
     'pao': 'siskin.sources.pao',
     'pilsen': 'siskin.sources.pilsen',
     'pqdt': 'siskin.sources.pqdtopen',
+    'prefixcc': 'siskin.sources.prefixcc',
     'qucosa': 'siskin.sources.qucosa',
     'rism': 'siskin.sources.rism',
     'ssoar': 'siskin.sources.ssoar',
