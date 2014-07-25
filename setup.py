@@ -12,7 +12,7 @@ except:
     from distutils.core import setup
 
 setup(name='siskin',
-      version='0.0.18',
+      version='0.0.19',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
@@ -24,7 +24,10 @@ setup(name='siskin',
       ],
       package_dir={'siskin': 'siskin'},
       # adjust the globs here (http://stackoverflow.com/a/3712682/89391)
-      package_data={'siskin': ['assets/*.xsl', 'assets/ambience/*']},
+      package_data={'siskin': ['assets/*.xsl',
+                               'assets/*.php',
+                               'assets/*.conf',
+                               'assets/ambience/*']},
       scripts=[
         'bin/taskcat',
         'bin/taskdo',
