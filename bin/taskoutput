@@ -22,7 +22,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     taskname = sys.argv[1]
-    if not taskname in locals():
+    if not Register.get_reg().get(taskname):
         print('no such task: %s' % taskname, file=sys.stderr)
         sys.exit(1)
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         except AttributeError as err:
             print('ignoring missed attribute %s'.format(k))
 
-    task = locals()[taskname](**typed_kwargs)
+    task = task_klass(**typed_kwargs)
     output = task.output()
 
     if isinstance(output, collections.Iterable):
