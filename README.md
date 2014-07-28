@@ -33,6 +33,8 @@ Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/mas
 
     taskcat          - inspect task output
     taskdo           - run task
+    taskhome         - show base directory of all artefacts
+    taskindex-delete - delete Elasticsearch index and remove trace of it in the 'update_log'
     taskless         - inspect task output
     taskls           - show task output
     taskman          - manual of all tasks
@@ -40,6 +42,8 @@ Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/mas
     taskoutput       - output file path of a task
     taskredo         - rm and do
     taskrm           - delete task artefact
+    tasktree         - run tree command under the given tasks directory
+    taskversion      - show siskin version
     taskwc           - count lines in task output
 
 Run `taskman` to see what tasks are available. Run `taskdo` to execute a task.
