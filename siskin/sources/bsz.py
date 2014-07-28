@@ -211,7 +211,7 @@ class SAImport(BSZTask):
 
         with self.input().open() as handle:
             for i, row in enumerate(handle.iter_tsv(cols=('path',))):
-                shard = os.path.join(target, '{:02d}'.format(i))
+                shard = os.path.join(target, '{0:02d}'.format(i))
                 if not os.path.exists(shard):
                     os.makedirs(shard)
                 with tarfile.open(row.path) as tar:
