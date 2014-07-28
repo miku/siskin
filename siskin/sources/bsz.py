@@ -214,10 +214,11 @@ class SAImport(BSZTask):
                 shard = os.path.join(target, '{0:02d}'.format(i))
                 if not os.path.exists(shard):
                     os.makedirs(shard)
-                with tarfile.open(row.path) as tar:
-                    tar.extractall(path=shard)
-                    for name in tar.getnames():
-                        extracted.append(os.path.join(shard, name))
+                tar = tarfile.open(row.path)
+                tar.extractall(path=shard)
+                for name in tar.getnames():
+                    extracted.append(os.path.join(shard, name))
+                tar.close()
 
         with self.output().open('w') as output:
             for path in extracted:
@@ -459,11 +460,12 @@ class SAMerged(BSZTask):
 def create_empty_daily_update():
     """ Create an empty daily updated. Used with the muted dates. """
     _, dummy = tempfile.mkstemp(prefix='siskin-')
-    with tarfile.open(dummy, 'w:gz') as handle:
-        _, empty = tempfile.mkstemp(prefix='siskin-')
-        handle.add(empty, config.get('bsz', 'ta-title-filename'))
-        handle.add(empty, config.get('bsz', 'ta-local-filename'))
-        handle.add(empty, config.get('bsz', 'ta-authority-filename'))
+    handle = tarfile.open(dummy, 'w:gz')
+    _, empty = tempfile.mkstemp(prefix='siskin-')
+    handle.add(empty, config.get('bsz', 'ta-title-filename'))
+    handle.add(empty, config.get('bsz', 'ta-local-filename'))
+    handle.add(empty, config.get('bsz', 'ta-authority-filename'))
+    handle.close()
     return dummy
 
 class TASync(BSZTask):
