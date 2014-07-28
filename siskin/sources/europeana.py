@@ -34,8 +34,11 @@ class EuropeanaDownload(EuropeanaTask):
         stopover = tempfile.mkdtemp(prefix='siskin-')
         shellout("""wget -q -nd -P {directory} -rc -np -A.{format}.gz '{url}'""",
                     url=url, directory=stopover, format=self.format)
-        for path in glob.glob(os.path.join(stopover, '*')):
-            shutil.move(path, target)
+        for path in glob.glob(unicode(os.path.join(stopover, '*'))):
+            dst = os.path.join(target, os.path.basename(path))
+            if not os.path.exists(dst):
+                # this is atomic given path and target are on the same device
+                shutil.move(path, target)
         with self.output().open('w') as output:
             for path in iterfiles(target, fun=lambda p: p.endswith('nt.gz')):
                 output.write_tsv(self.version, self.format, path)
