@@ -61,7 +61,7 @@ class DBPExtract(DBPTask):
             for row in handle.iter_tsv(cols=('path',)):
                 basename = os.path.basename(row.path)
                 dst = os.path.join(target, os.path.splitext(basename)[0])
-                shellout("pbunzip2 {src} -c > {dst}", src=row.path, dst=dst)
+                shellout("pbzip2 -d -m1000 -c {src} > {dst}", src=row.path, dst=dst)
 
         with self.output().open('w') as output:
             for path in sorted(iterfiles(target)):
