@@ -93,6 +93,8 @@ class DBPAbbreviatedNTriples(DBPTask):
                     continue
                 if 'old_' in row.path:
                     continue
+                if 'revision_ids' in row.path:
+                    continue
                 output = shellout("ntto -r {rules} -o {output} {input}",
                                   rules=self.assets('prefix_rules.txt'), input=row.path)
                 shellout("cat {input} >> {output} && rm -f {input}", input=output, output=stopover)
