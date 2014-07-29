@@ -70,6 +70,36 @@ class DBPExtract(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPAbbreviatedNTriples(DBPTask):
+    """ Convert all DBPedia ntriples to a single JSON file. """
+
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format='nt')
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                # TODO: ignore these in a saner way ...
+                if 'long_abstracts_' in row.path:
+                    continue
+                if '_unredirected' in row.path:
+                    continue
+                if '_cleaned' in row.path:
+                    continue
+                if 'old_' in row.path:
+                    continue
+                output = shellout("ntto -o {output} {input}", input=row.path)
+                shellout("cat {input} >> {output} && rm -f {input}", input=output, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
 class DBPJson(DBPTask):
     """ Convert all DBPedia ntriples to a single JSON file. """
 
