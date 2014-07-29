@@ -18,19 +18,22 @@ class GraphTask(DefaultTask):
 
 class GraphCombineNTriples(GraphTask):
     date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="en")
 
     def requires(self):
-	return {'gnd': GNDAbbreviatedNTriples(date=self.date),
-		'dbp': DBPAbbreviatedNTriples(date=self.date)}
+        return {'gnd': GNDAbbreviatedNTriples(date=self.date),
+                'dbp': DBPAbbreviatedNTriples(version=self.version,
+                                              language=self.language)}
 
     def run(self):
-	_, stopover = tempfile.mkstemp(prefix='siskin-')
-	for _, target in self.input():
-	    shellout("cat {input} >> {output}", input=target.path, output=stopover)
-	luigi.File(stopover).move(self.output().path)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for _, target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='nt'))
+        return luigi.LocalTarget(path=self.path(ext='nt'))
 
 class GraphCayleyLevelDB(GraphTask):
     """ Create a Cayley LevelDB database from GND and dbpedia data. """
@@ -38,17 +41,17 @@ class GraphCayleyLevelDB(GraphTask):
     gomaxprocs = luigi.IntParameter(default=8)
 
     def requires(self):
-	return {'ntriples': GraphCombineNTriples(date=self.date),
-		'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
+        return {'ntriples': GraphCombineNTriples(date=self.date),
+                'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
 
     @timed
     def run(self):
-	dbpath = tempfile.mkdtemp(prefix='siskin-')
-	shellout("cayley init -alsologtostderr -config {config} -dbpath={dbpath}",
-		 config=self.assets('cayley.conf'), dbpath=dbpath)
-	shellout("GOMAXPROCS={gomaxprocs} cayley load -config {config} -alsologtostderr -dbpath={dbpath} --triples {input}",
-		 gomaxprocs=self.gomaxprocs, config=self.assets('cayley.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
-	shutil.move(dbpath, self.output().path)
+        dbpath = tempfile.mkdtemp(prefix='siskin-')
+        shellout("cayley init -alsologtostderr -config {config} -dbpath={dbpath}",
+             config=self.assets('cayley.conf'), dbpath=dbpath)
+        shellout("GOMAXPROCS={gomaxprocs} cayley load -config {config} -alsologtostderr -dbpath={dbpath} --triples {input}",
+             gomaxprocs=self.gomaxprocs, config=self.assets('cayley.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
+        shutil.move(dbpath, self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='leveldb'))
+        return luigi.LocalTarget(path=self.path(ext='leveldb'))
