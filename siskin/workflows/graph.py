@@ -19,7 +19,7 @@ class GraphTask(DefaultTask):
 class GraphCombineNTriples(GraphTask):
     date = ClosestDateParameter(default=datetime.date.today())
     version = luigi.Parameter(default="3.9")
-    language = luigi.Parameter(default="en")
+    language = luigi.Parameter(default="de")
 
     def requires(self):
         return {'gnd': GNDAbbreviatedNTriples(date=self.date),
@@ -38,7 +38,10 @@ class GraphCombineNTriples(GraphTask):
 class GraphCayleyLevelDB(GraphTask):
     """ Create a Cayley LevelDB database from GND and dbpedia data. """
     date = ClosestDateParameter(default=datetime.date.today())
-    gomaxprocs = luigi.IntParameter(default=8)
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+
+    gomaxprocs = luigi.IntParameter(default=8, significant=False)
 
     def requires(self):
         return {'ntriples': GraphCombineNTriples(date=self.date),
