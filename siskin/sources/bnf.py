@@ -115,15 +115,15 @@ class BNFJsonChunk(BNFTask):
             # person name: no digits
             a = r'(?P<a>[^0-9]+)'
             # (year-year ; foo)
-            #d = r'\((?P<d>[0-9\.\-\? ]+)(?: ; [^0-9]+)?\)'
+            # d = r'\((?P<d>[0-9\.\-\? ]+)(?: ; [^0-9]+)?\)'
             # (foo ; year-year ; bar)
-            #d = r'\(([^0-9]+ ; )?(?P<d>[0-9\.\-\? ]+)( ; [^0-9]+)?\)'
+            # d = r'\(([^0-9]+ ; )?(?P<d>[0-9\.\-\? ]+)( ; [^0-9]+)?\)'
             # (foo ; year-year ; bar)
             d = r'\(([^0-9]+ ; )?(?P<d>[0-9\.\-\? ]+)( ; .*?)?\)'
             # type of work: no digits
             e = r'(?P<e>[^0-9]+)'
             # type of work: no digits
-            #e = r'(?P<e>[^0-9]{5,})'
+            # e = r'(?P<e>[^0-9]{5,})'
 
             # name (years). type
             test = re.match(r'%s( %s)?(\. %s)$' % (a, d, e), s)
@@ -133,7 +133,7 @@ class BNFJsonChunk(BNFTask):
                 # k['t'].append(test.groupdict())
                 sf = test.groupdict()
             else:
-                #io.append({ 'l':line })
+                # io.append({ 'l':line })
                 # k['f'].append(line)
                 # no match: assume person name alone
                 sf = {'a': s, 'd': '', 'e' : ''}

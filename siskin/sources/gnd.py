@@ -320,7 +320,7 @@ class GNDRelatedTerms(GNDTask, ElasticsearchMixin):
             for hit in hits:
                 fields = hit.get('fields')
                 try:
-                    output.write_tsv(fields['s'][0],fields['o'][0])
+                    output.write_tsv(fields['s'][0], fields['o'][0])
                 except Exception:
                     pass
 
@@ -344,7 +344,7 @@ class GNDTaxonomy(GNDTask):
                 broader = []
                 while True:
                     broader.append(value)
-                    if not value in taxonomy:
+                    if value not in taxonomy:
                         break
                     else:
                         value = taxonomy[value]

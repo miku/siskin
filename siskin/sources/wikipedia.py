@@ -105,7 +105,7 @@ class WikipediaCategoryList(WikipediaTask):
     @timed
     def run(self):
         prefixes = {'en': 'Category', 'de': 'Kategorie', 'fr': u'Catégorie'}
-        if not self.language in prefixes:
+        if self.language not in prefixes:
             raise RuntimeError('Categorie prefix not added yet')
         output = shellout("""grep -iF "{prefix}:" {input} > {output}""",
                           input=self.input().path,
@@ -168,7 +168,7 @@ class WikipediaCategoryTable(WikipediaTask):
     def run(self):
         prefixes = {'en': 'Category', 'de': 'Kategorie', 'fr': u'Catégorie',
                     'es': u'Categoría'}
-        if not self.language in prefixes:
+        if self.language not in prefixes:
             raise RuntimeError('Categorie prefix not added yet')
 
         output = shellout("""wikikit -c "{prefix}" {input} > {output}""",
@@ -335,7 +335,7 @@ class WikipediaRawAuthorityJson(WikipediaTask):
                         if errors > self.allowed_errors:
                             raise RuntimeError('more than %s errors, adjust allowed_errors')
                         else:
-                            logger.error('error in row: {0}'.format(str(row)))
+                            self.logger.error('error in row: {0}'.format(str(row)))
                             continue
                     title, ids = row
                     trimmed = ids.strip("{}")
@@ -434,15 +434,15 @@ class WikipediaCategoryExample(WikipediaTask, ElasticsearchMixin):
         result = es.get(index='dewikicats', id=self.category)
 
         for i, page in enumerate(result.get('_source').get('pages')):
-            logger.info(page)
+            self.logger.info(page)
             r = es.search(index='dewikinorm', body={'query': {'query_string': {'query': '"%s"' % page}}})
             for hit in r['hits']['hits']:
-                logger.info(hit.get('_source').get('gnd'))
+                self.logger.info(hit.get('_source').get('gnd'))
                 if hit.get('_source').get('gnd'):
                     gnds.add(hit.get('_source').get('gnd'))
                 else:
                     empty += 1
 
-        logger.info('{0} {1} {2}'.format(len(gnds), empty, i))
+        self.logger.info('{0} {1} {2}'.format(len(gnds), empty, i))
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
