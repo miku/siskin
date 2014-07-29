@@ -144,7 +144,8 @@ class GNDAbbreviatedNTriples(GNDTask):
 
     @timed
     def run(self):
-        output = shellout("nttoldj -a -f nt {input} > {output}", input=self.input().path)
+        # output = shellout("nttoldj -a -f nt {input} > {output}", input=self.input().path)
+        output = shellout("ntto -r {rules} -o {output} {input}", input=self.input().path, rules=self.assets('prefix_rules.txt'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
