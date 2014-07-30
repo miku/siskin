@@ -30,7 +30,7 @@ class FreebasePublic(FreebaseTask):
     @timed
     def run(self):
         url = "http://commondatastorage.googleapis.com/freebase-public/"
-        output = shellout(""" wget -q --retry-connrefused {url} -O {output}""", url=url)
+        output = shellout(""" wget --retry-connrefused {url} -O {output}""", url=url)
         luigi.File(output).move(self.output().path)
 
     def output(self):

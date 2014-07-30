@@ -30,7 +30,7 @@ class DBPDownload(DBPTask):
         target = os.path.join(self.taskdir(), self.version, self.language, self.format)
         if not os.path.exists(target):
             os.makedirs(target)
-        output = shellout(""" wget -q --retry-connrefused
+        output = shellout(""" wget --retry-connrefused
                           -P {prefix} -nd -nH -np -r -c -A *{format}.bz2
                           http://downloads.dbpedia.org/{version}/{language}/ """,
                           prefix=target, format=self.format,

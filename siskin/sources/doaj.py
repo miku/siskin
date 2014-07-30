@@ -33,7 +33,7 @@ class DOAJCSV(DOAJTask):
     @timed
     def run(self):
         """ Just download file. """
-        output = shellout('wget -q --retry-connrefused {url} -O {output}', url=self.url)
+        output = shellout('wget --retry-connrefused {url} -O {output}', url=self.url)
         luigi.File(output).move(self.output().path)
 
     def output(self):

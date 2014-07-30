@@ -66,7 +66,7 @@ class WikidataDumpDates(WikidataTask):
 
     @timed
     def run(self):
-        output = shellout("""wget --retry-connrefused -q
+        output = shellout("""wget --retry-connrefused
                              http://dumps.wikimedia.org/wikidatawiki/
                              -O {output}""")
         with open(output) as handle:
@@ -96,7 +96,7 @@ class WikidataDumpLinks(WikidataTask):
     @timed
     def run(self):
         url = "http://dumps.wikimedia.org/wikidatawiki/%s/" % (self.closest().strftime('%Y%m%d'))
-        output = shellout("""wget --retry-connrefused -q
+        output = shellout("""wget --retry-connrefused
                              {url} -O {output}""", url=url)
 
         with open(output) as handle:
