@@ -51,10 +51,34 @@ class GraphCayleyLevelDB(GraphTask):
     def run(self):
         dbpath = tempfile.mkdtemp(prefix='siskin-')
         shellout("cayley init -alsologtostderr -config {config} -dbpath={dbpath}",
-             config=self.assets('cayley.conf'), dbpath=dbpath)
+             config=self.assets('cayley.leveldb.conf'), dbpath=dbpath)
         shellout("GOMAXPROCS={gomaxprocs} cayley load -config {config} -alsologtostderr -dbpath={dbpath} --triples {input}",
-             gomaxprocs=self.gomaxprocs, config=self.assets('cayley.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
+             gomaxprocs=self.gomaxprocs, config=self.assets('cayley.leveldb.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
         shutil.move(dbpath, self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='leveldb'))
+
+class GraphCayleyMongoDB(GraphTask):
+    """ Create a Cayley MongoDB database from GND and dbpedia data. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+
+    gomaxprocs = luigi.IntParameter(default=8, significant=False)
+
+    def requires(self):
+        return {'ntriples': GraphCombineNTriples(date=self.date),
+                'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
+
+    @timed
+    def run(self):
+        shellout("cayley init -alsologtostderr -config {config}",
+                 config=self.assets('cayley.mongodb.conf'))
+        shellout("cayley load -config {config} -alsologtostderr --triples {input}",
+                 config=self.assets('cayley.mongodb.conf'),
+                 input=self.input().get('ntriples').path)
+        shellout("touch {output}", output=self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mongo'))

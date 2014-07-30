@@ -164,9 +164,9 @@ class GNDCayleyLevelDB(GNDTask):
     def run(self):
         dbpath = tempfile.mkdtemp(prefix='siskin-')
         shellout("cayley init -alsologtostderr -config {config} -dbpath={dbpath}",
-                 config=self.assets('cayley.conf'), dbpath=dbpath)
+                 config=self.assets('cayley.leveldb.conf'), dbpath=dbpath)
         shellout("GOMAXPROCS={gomaxprocs} cayley load -config {config} -alsologtostderr -dbpath={dbpath} --triples {input}",
-                 gomaxprocs=self.gomaxprocs, config=self.assets('cayley.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
+                 gomaxprocs=self.gomaxprocs, config=self.assets('cayley.leveldb.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
         shutil.move(dbpath, self.output().path)
 
     def output(self):
