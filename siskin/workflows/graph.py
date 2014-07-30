@@ -60,6 +60,11 @@ class GraphIndex(GraphTask, CopyToIndex):
     index = 'graph'
     doc_type = 'de'
     purge_existing_index = True
+    mapping = {'de': {'date_detection': False,
+                      'properties': {
+                        's': {'type': 'string', 'index': 'not_analyzed'},
+                        'p': {'type': 'string', 'index': 'not_analyzed'},
+                        'o': {'type': 'string', 'index': 'not_analyzed'}}}}
 
     def requires(self):
         return GraphCombinedJson(date=self.date, version=self.version, language=self.language)
