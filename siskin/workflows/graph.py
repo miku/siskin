@@ -46,7 +46,7 @@ class GraphCombinedJson(GraphTask):
                 'nttoldj': Executable(name='nttoldj')}
 
     def run(self):
-        output = shellout("nttoldj {input} > {output}", input=self.input().get('ntriples').path)
+        output = shellout("nttoldj -i {input} > {output}", input=self.input().get('ntriples').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
