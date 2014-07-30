@@ -3,6 +3,7 @@
 
 from gluish.benchmark import timed
 from gluish.common import Executable
+from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.sources.dbpedia import DBPAbbreviatedNTriples
@@ -16,7 +17,7 @@ import tempfile
 class GraphTask(DefaultTask):
     TAG = 'graph'
 
-class GraphCombineNTriples(GraphTask):
+class GraphCombinedNTriples(GraphTask):
     date = ClosestDateParameter(default=datetime.date.today())
     version = luigi.Parameter(default="3.9")
     language = luigi.Parameter(default="de")
@@ -35,6 +36,34 @@ class GraphCombineNTriples(GraphTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class GraphCombinedJson(GraphTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        return {'ntriples': GraphCombinedNTriples(date=self.date),
+                'nttoldj': Executable(name='nttoldj')}
+
+    def run(self):
+        output = shellout("nttoldj {input} > {output}", input=self.input().get('ntriples').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class GraphIndex(GraphTask, CopyToIndex):
+    date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+
+    index = 'graph'
+    doc_type = 'de'
+    purge_existing_index = True
+
+    def requires(self):
+        return GraphCombinedJson(date=self.date, version=self.version, language=self.language)
+
 class GraphCayleyLevelDB(GraphTask):
     """ Create a Cayley LevelDB database from GND and dbpedia data. """
     date = ClosestDateParameter(default=datetime.date.today())
@@ -44,7 +73,7 @@ class GraphCayleyLevelDB(GraphTask):
     gomaxprocs = luigi.IntParameter(default=8, significant=False)
 
     def requires(self):
-        return {'ntriples': GraphCombineNTriples(date=self.date),
+        return {'ntriples': GraphCombinedNTriples(date=self.date),
                 'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
 
     @timed
@@ -68,7 +97,7 @@ class GraphCayleyMongoDB(GraphTask):
     gomaxprocs = luigi.IntParameter(default=8, significant=False)
 
     def requires(self):
-        return {'ntriples': GraphCombineNTriples(date=self.date),
+        return {'ntriples': GraphCombinedNTriples(date=self.date),
                 'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
 
     @timed
