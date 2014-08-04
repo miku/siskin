@@ -57,20 +57,18 @@ class GraphCombinedJson(GraphTask):
 
 class GraphIndex(GraphTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())
-    version = luigi.Parameter(default="3.9")
-    language = luigi.Parameter(default="de")
 
     index = 'graph'
-    doc_type = 'de'
+    doc_type = 'triple'
     purge_existing_index = True
-    mapping = {'de': {'date_detection': False,
-                      'properties': {
-                        's': {'type': 'string', 'index': 'not_analyzed'},
-                        'p': {'type': 'string', 'index': 'not_analyzed'},
-                        'o': {'type': 'string', 'index': 'not_analyzed'}}}}
+    mapping = {'triple': {'date_detection': False,
+                          'properties': {
+                            's': {'type': 'string', 'index': 'not_analyzed'},
+                            'p': {'type': 'string', 'index': 'not_analyzed'},
+                            'o': {'type': 'string', 'index': 'not_analyzed'}}}}
 
     def requires(self):
-        return GraphCombinedJson(date=self.date, version=self.version, language=self.language)
+        return GraphCombinedJson(date=self.date)
 
 class GraphCayleyLevelDB(GraphTask):
     """ Create a Cayley LevelDB database from GND and dbpedia data. """
