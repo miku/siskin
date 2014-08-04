@@ -18,16 +18,19 @@ import tempfile
 class GraphTask(DefaultTask):
     TAG = 'graph'
 
+    def closest(self):
+        return monthly(date=self.date)
+
 class GraphCombinedNTriples(GraphTask):
     date = ClosestDateParameter(default=datetime.date.today())
     version = luigi.Parameter(default="3.9")
-    language = luigi.Parameter(default="de")
 
     def requires(self):
         return {'gnd': GNDAbbreviatedNTriples(date=self.date),
-                'dbp': DBPAbbreviatedNTriples(version=self.version,
-                                              language=self.language)}
+                'de': DBPAbbreviatedNTriples(version=self.version, language='de'),
+                'en': DBPAbbreviatedNTriples(version=self.version, language='en')}
 
+    @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for _, target in self.input().iteritems():
