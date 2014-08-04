@@ -4,6 +4,7 @@
 from gluish.benchmark import timed
 from gluish.common import Executable
 from gluish.esindex import CopyToIndex
+from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.sources.dbpedia import DBPAbbreviatedNTriples

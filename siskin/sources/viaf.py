@@ -106,6 +106,22 @@ class VIAFExtract(VIAFTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class VIAFAbbreviatedNTriples(VIAFTask):
+    """ Get a Ntriples representation of VIAF, but abbreviate with ntto. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VIAFExtract(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("ntto -a -r {rules} -o {output} {input}", input=self.input().path, rules=self.assets('RULES.txt'))
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
 class VIAFSameAs(VIAFTask):
     """ Extract the VIAF sameAs relations. """
 
