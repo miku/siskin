@@ -135,7 +135,7 @@ class GNDNTriples(GNDTask):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
 class GNDAbbreviatedNTriples(GNDTask):
-    """ Get a Ntriples representation of GND, but abbreviate with nttoldj. """
+    """ Get a Ntriples representation of GND, but abbreviate with ntto. """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -144,8 +144,7 @@ class GNDAbbreviatedNTriples(GNDTask):
 
     @timed
     def run(self):
-        # output = shellout("nttoldj -a -f nt {input} > {output}", input=self.input().path)
-        output = shellout("ntto -r {rules} -o {output} {input}", input=self.input().path, rules=self.assets('prefix_rules.txt'))
+        output = shellout("ntto -a -r {rules} -o {output} {input}", input=self.input().path, rules=self.assets('RULES.txt'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -181,7 +180,7 @@ class GNDJson(GNDTask):
 
     @timed
     def run(self):
-        output = shellout("nttoldj -a -i {input} > {output}", input=self.input().path)
+        output = shellout("ntto -a -j -i {input} > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

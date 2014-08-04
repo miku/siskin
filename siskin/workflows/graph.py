@@ -43,10 +43,11 @@ class GraphCombinedJson(GraphTask):
 
     def requires(self):
         return {'ntriples': GraphCombinedNTriples(date=self.date),
-                'nttoldj': Executable(name='nttoldj')}
+                'ntto': Executable(name='ntto')}
 
+    @timed
     def run(self):
-        output = shellout("nttoldj -i {input} > {output}", input=self.input().get('ntriples').path)
+        output = shellout("ntto -w 2 -i -j {input} > {output}", input=self.input().get('ntriples').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

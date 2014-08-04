@@ -95,8 +95,8 @@ class DBPAbbreviatedNTriples(DBPTask):
                     continue
                 if 'revision_ids' in row.path:
                     continue
-                output = shellout("ntto -r {rules} -o {output} {input}",
-                                  rules=self.assets('prefix_rules.txt'), input=row.path)
+                output = shellout("ntto -a -r {rules} -o {output} {input}",
+                                  rules=self.assets('RULES.txt'), input=row.path)
                 shellout("cat {input} >> {output} && rm -f {input}", input=output, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
@@ -127,7 +127,8 @@ class DBPJson(DBPTask):
                     continue
                 if 'old_' in row.path:
                     continue
-                shellout("nttoldj -i -a {input} >> {output}", input=row.path,
+                shellout("ntto -i -j -a -r {rules} {input} >> {output}",
+                         input=row.path, rules=self.assets('RULES.txt'),
                          output=stopover)
         luigi.File(stopover).move(self.output().path)
 
