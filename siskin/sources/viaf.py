@@ -116,6 +116,7 @@ class VIAFPredicateDistribution(VIAFTask):
     def run(self):
         output = shellout("""cut -d " " -f2 {input} | sort | uniq -c > {output}""",
                           input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
