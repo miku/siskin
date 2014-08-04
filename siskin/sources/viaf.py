@@ -106,6 +106,20 @@ class VIAFExtract(VIAFTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class VIAFPredicateDistribution(VIAFTask):
+    """ Just a uniq -c on the predicate 'column' """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VIAFExtract(date=self.date)
+
+    def run(self):
+        output = shellout("""cut -d " " -f2 {input} | sort | uniq -c > {output}""",
+                          input=self.input().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
+
 class VIAFAbbreviatedNTriples(VIAFTask):
     """ Get a Ntriples representation of VIAF, but abbreviate with ntto. """
 

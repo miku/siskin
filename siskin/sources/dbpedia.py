@@ -70,6 +70,21 @@ class DBPExtract(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPPredicateDistribution(DBPTask):
+    """ Just a uniq -c on the predicate 'column' """
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout("""cut -d " " -f2 {input} | sort | uniq -c > {output}""",
+                          input=self.input().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
+
 class DBPAbbreviatedNTriples(DBPTask):
     """ Convert all DBPedia ntriples to a single JSON file. """
 
