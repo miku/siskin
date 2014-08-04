@@ -42,8 +42,6 @@ class GraphCombinedNTriples(GraphTask):
 
 class GraphCombinedJson(GraphTask):
     date = ClosestDateParameter(default=datetime.date.today())
-    version = luigi.Parameter(default="3.9")
-    language = luigi.Parameter(default="de")
 
     def requires(self):
         return {'ntriples': GraphCombinedNTriples(date=self.date),
