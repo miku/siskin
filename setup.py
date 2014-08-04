@@ -12,7 +12,7 @@ except:
     from distutils.core import setup
 
 setup(name='siskin',
-      version='0.0.35',
+      version='0.0.36',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
@@ -54,7 +54,7 @@ setup(name='siskin',
         'colorama==0.2.7',
         'decorator==3.4.0',
         'elasticsearch==1.0.0',
-        'gluish==0.1.60',
+        'gluish==0.1.61',
         'gspread==0.2.1',
         'jsonpath-rw==1.3.0',
         'logilab-common==0.61.0',
