@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# report disk usage for a certain task
+
+if [ $# -eq 0 ]; then
+	du -hs $(taskhome)
+else
+	du -hs $(taskdir "$@")
+fi

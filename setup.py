@@ -12,7 +12,7 @@ except:
     from distutils.core import setup
 
 setup(name='siskin',
-      version='0.0.36',
+      version='0.0.37',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
@@ -31,7 +31,9 @@ setup(name='siskin',
                                'assets/ambience/*']},
       scripts=[
         'bin/taskcat',
+        'bin/taskdir',
         'bin/taskdo',
+        'bin/taskdu',
         'bin/taskfast',
         'bin/taskhome',
         'bin/taskindex-delete',

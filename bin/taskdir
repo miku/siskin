@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Output the task directory given a task name.
+"""
+
+from __future__ import print_function
+from gluish.common import IndexIdList, IndexFieldList
+from gluish.utils import pairwise
+from luigi.task import Register
+from siskin.sources import *
+from siskin.workflows import *
+import sys
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('taskdir TASKNAME', file=sys.stderr)
+        sys.exit(1)
+
+    taskname = sys.argv[1]
+    if not Register.get_reg().get(taskname):
+        print('no such task: %s' % taskname, file=sys.stderr)
+        sys.exit(1)
+
+    kwargs = dict((k.lstrip('--').replace('-', '_'), v)
+                   for k, v in pairwise(sys.argv[2:]))
+
+    # ignore global arguments
+    for param in ('local-scheduler', 'lock', 'lock-pid-dir',
+                  'logging-conf-file', 'scheduler-host', 'scheduler-port',
+                  'workers'):
+        kwargs.pop(param, None)
+
+    task_klass = Register.get_reg().get(taskname)
+    typed_kwargs = dict()
+    for k, v in kwargs.iteritems():
+        try:
+            klass = getattr(task_klass, k).__class__
+            typed_kwargs[k] = klass().parse(v)
+        except AttributeError as err:
+            print('ignoring missed attribute %s'.format(k))
+
+    task = task_klass(**typed_kwargs)
+    print(task.taskdir())
