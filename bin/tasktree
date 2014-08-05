@@ -1,3 +1,7 @@
 #!/bin/bash
 
-tree -sh $(taskhome)
+if [ $# -eq 0 ]; then
+	tree -sh $(taskhome)
+else
+	tree -sh $(taskdir "$@")
+fi
