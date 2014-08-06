@@ -12,7 +12,7 @@ import tempfile
 import warnings
 warnings.filterwarnings("ignore")
 
-__version__ = '0.0.38'
+__version__ = '0.0.39'
 
 config = Config.instance()
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())

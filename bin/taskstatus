@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Display, whether a task is done or not.
+
+OUTPUT=$(taskoutput "$@")
+if [ ! -f "$OUTPUT" ]; then
+    echo "\033[33mTODO\033[39m $OUTPUT"
+else
+    echo "\033[32mDONE\033[39m $OUTPUT"
+fi
