@@ -2,9 +2,17 @@
 
 # Display, whether a task is done or not.
 
-OUTPUT=$(taskoutput "$@")
+OUTPUT=$(taskoutput "$@" 2> /dev/null)
+
+if [ $? -ne 0 ]; then
+    echo "Usage: taskstatus TASKNAME"
+    exit 1
+fi
+
 if [ ! -f "$OUTPUT" ]; then
-    echo "\033[33mTODO\033[39m $OUTPUT"
+    echo "TODO $OUTPUT"
+    exit 1
 else
-    echo "\033[32mDONE\033[39m $OUTPUT"
+    echo "DONE $OUTPUT"
+    exit 0
 fi
