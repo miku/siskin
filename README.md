@@ -34,7 +34,7 @@ Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/mas
     taskcat          - inspect task output
     taskdo           - run task
     taskhome         - show base directory of all artefacts
-    taskindex-delete - delete Elasticsearch index and remove trace of it in the 'update_log'
+    taskindex-delete - delete Elasticsearch index and remove trace in 'update_log'
     taskless         - inspect task output
     taskls           - show task output
     taskman          - manual of all tasks
