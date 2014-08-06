@@ -7,7 +7,6 @@ Various tasks for metadata handling.
 
 [![pypi version](http://img.shields.io/pypi/v/siskin.svg?style=flat)](https://pypi.python.org/pypi/siskin)
 
-
 Getting started
 ---------------
 
@@ -46,9 +45,15 @@ Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/mas
     taskversion      - show siskin version
     taskwc           - count lines in task output
 
-Run `taskman` to see what tasks are available. Run `taskdo` to execute a task.
-Run `taskdo TASKNAME --help`, to see all available parameters of the task.
+Run
 
+    taskman
+
+to see what tasks are available. Run `taskdo` to execute a task. Run
+
+    taskdo TASKNAME --help
+
+to see all available parameters of the task.
 
 ----
 
