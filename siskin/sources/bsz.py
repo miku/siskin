@@ -490,9 +490,9 @@ class TASync(BSZTask):
                 path = create_empty_daily_update()
                 luigi.File(path=path).move(self.output().path)
             else:
-                raise RuntimeError("No Tagesupdate (yet?) for {0}".format(self.date))
+                raise RuntimeError("No Tagesupdate (yet?) for {0} at {1}".format(self.date, src))
         else:
-            self.logger.info("Syncing TA {0}".format(src))
+            self.logger.info("Syncing TA from {0}".format(src))
             luigi.File(path=src).copy(self.output().path)
 
     def output(self):
