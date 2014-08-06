@@ -310,7 +310,7 @@ class SATransactionTagListRange(BSZTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for tag, target in self.input().iteritems():
             tmp = shellout(template, input=target.path, tag=tag,
-                           preserve_spaces=True)
+                           preserve_whitespace=True)
             shellout("cat {input} >> {output}", input=tmp, output=stopover)
 
         output = shellout("sort -k1,1 -k2,2 {input} > {output}", input=stopover)
