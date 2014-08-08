@@ -167,7 +167,7 @@ class GNDPredicateDistribution(GNDTask):
 class GNDCayleyLevelDB(GNDTask):
     """ Create a Cayley LevelDB database from GND data. """
     date = ClosestDateParameter(default=datetime.date.today())
-    gomaxprocs = luigi.IntParameter(default=8)
+    gomaxprocs = luigi.IntParameter(default=8, significant=False)
 
     def requires(self):
         return {'ntriples': GNDAbbreviatedNTriples(date=self.date),
