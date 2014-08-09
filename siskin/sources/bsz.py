@@ -337,8 +337,7 @@ class SATransactionTagSurface(BSZTask):
     @timed
     def run(self):
         """ c.f. http://unix.stackexchange.com/q/138072/376 """
-        output = shellout("tac {input} | uniq -w 9 | cut -f 1,3 > {output}",
-                          input=self.input().path)
+        output = shellout("tac {input} | uniq -w 9 | cut -f 1,3 > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
