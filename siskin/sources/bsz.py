@@ -668,6 +668,27 @@ class DeletionRange(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DeletionRangeILN(BSZTask):
+    """
+    Deletions relevant for an ILN.
+    """
+    begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
+    end = luigi.DateParameter(default=datetime.date.today())
+    dtype = luigi.Parameter(default='9')
+    iln = ILNParameter(default='0010')
+
+    def requires(self):
+        return DeletionRange(begin=self.begin, end=self.end, dtype=self.dtype)
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C awk -F '\\t' '$2=="{iln}" {{print $0}}' {input} > {output}""", input=self.input().path, iln=self.iln)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
 class DeletionRangeFinc(BSZTask):
     """
     Only keep the deletions, that are relevant to FINC.
