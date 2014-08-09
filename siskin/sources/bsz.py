@@ -1230,116 +1230,36 @@ class LocalUpdatesISIL(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class EventsPreflight(BSZTask):
-    """
-    Take deletions and the (EPN, DATE) list and merge them.
-    TODO: simplify this, since this is an important task.
-
-    Run this task once per day to get Event lists for all ILNs.
-    Then slice out date ranges for ILNs from that lists.
-
-    self.begin and self.end are defined, so the file needs no be computed
-    every day, but it should always run with
-
-        begin=SONDERABZUG
-        end=datetime.date.today()
-
-    as bounds.
-
-    Takes about 2 minutes for 18 ILNs, including big ILNs like 0010 or 0005.
-    """
-    begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
-    end = luigi.DateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'local': ListifyLocalRange(begin=self.begin, end=self.end),
-            'deletions': DeletionRangeFinc(begin=self.begin, end=self.end)
-        }
-
-    @timed
-    def run(self):
-        """
-        Collect both updates (and additions) and deletions in epn_events.
-
-        Events need a PRIO, since there are cases when an update and a delete
-        happens on the same day. Deletes are processed first (0 = highest PRIO).
-        """
-        with self.input().get('local').open() as handle:
-            df = pd.read_csv(handle, sep='\t', names=('ppn', 'epn', 'sigel', 'transaction', 'date', 'iln'),
-                             dtype={'epn': pd.np.str, 'ppn': pd.np.str, 'iln': pd.np.str})
-
-        Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn', 'sigel'])
-        filemap = collections.defaultdict(lambda: luigi.File(is_tmp=True, format=TSV))
-        self.logger.debug("Processing {0} ILNs ...".format(len(self.finc_ilns())))
-
-        for iln in self.finc_ilns():
-            begins, ends = str(self.begin), str(self.end)
-            self.logger.debug("[{iln}] Filtering events ({begin}-{end})".format(
-                              iln=iln, begin=begins, end=ends))
-            filtered = df[(df.iln == iln) & (df.date >= begins) &
-                                            (df.date < ends)]
-
-            epn_events = collections.defaultdict(set)
-
-            # Deletions
-            with self.input().get('deletions').open() as handle:
-                for row in handle.iter_tsv(cols=('epn', 'iln', 'date')):
-                    if row.iln.zfill(4) == iln:
-                        epn_events[row.epn].add(Event(*(row.date, 'D', 0, '-', 'NO_SIGEL')))
-
-            # Additions
-            for _, ppn, epn, sigel, _, date, _ in filtered.itertuples():
-                epn_events[epn].add(Event(*(date, 'U', 10, ppn, sigel)))
-
-            # Writing events
-            self.logger.debug("[{iln}] Writing ({fn})".format(iln=iln, fn=filemap[iln].path))
-            with filemap[iln].open('w') as handle:
-                for epn, events in sorted(epn_events.iteritems()):
-                    # sort events by date and prio
-                    for e in sorted(events, key=operator.itemgetter(0, 2)):
-                        handle.write_tsv(epn, e.date, e.type, e.prio, e.ppn, e.sigel)
-
-        # move all files into the right place (events_for_iln_output)
-        # plus: write a receipt (iln, events_for_iln.output().path)
-        with self.output().open('w') as output:
-            for iln, target in filemap.iteritems():
-                # TODO: This is a bad idea, because `taskredo Events` will fail
-                task = Events(begin=self.begin, end=self.end, iln=iln)
-                events_for_iln_output = task.output().path
-                luigi.File(target.path).move(events_for_iln_output)
-                output.write_tsv(iln, events_for_iln_output)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class Events(BSZTask):
-    """ Behave like to old Event task, but be faster,
-        consume less disk space. """
+    """ Testing a new fast clean Event implementation. """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
     iln = ILNParameter(default='0010')
 
     def requires(self):
-        return EventsPreflight(begin=self.begin, end=self.end)
+        return {'updates': LocalUpdatesILN(begin=self.begin, end=self.end, iln=self.iln),
+                'deletions': DeletionRangeILN(begin=self.begin, end=self.end, iln=self.iln)}
 
-    @timed
     def run(self):
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('iln', 'path')):
-                if row.iln == self.iln:
-                    df = pd.read_csv(row.path, sep='\t', names=('epn', 'date',
-                                     'type', 'prio', 'ppn'),
-                                     dtype={'epn': pd.np.str, 'ppn': pd.np.str})
-                    begins, ends = str(self.begin), str(self.end)
-                    filtered = df[(df.date >= begins) & (df.date < ends)]
-                    with self.output().open('w') as output:
-                        filtered.to_csv(output, sep='\t', index=False, header=False)
-                    break
-            else:
-                shellout("touch {output}", output=self.output().path)
-                self.logger.warn('No events for ILN {iln} {begin} -- {end}'.format(
-                            iln=self.iln, begin=self.begin, end=self.end))
+        Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn', 'isil'])
+        epn_events = collections.defaultdict(set)
+        PRIO = {'deletion': 0, 'update': 10} # lower means higher
+
+        # Deletions
+        with self.input().get('deletions').open() as handle:
+            for row in handle.iter_tsv(cols=('epn', 'iln', 'date')):
+                epn_events[row.epn].add(Event(*(row.date, 'D', PRIO['deletion'], 'NO_PPN', 'NO_SIGEL')))
+
+        # Additions
+        with self.input().get('updates').open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'epn', 'isil', 0, 'date', 'iln')):
+                epn_events[row.epn].add(Event(*(row.date, 'U', PRIO['update'], row.ppn, row.isil)))
+
+        with self.output().open('w') as handle:
+            for epn, events in sorted(epn_events.iteritems()):
+                # sort events by date and prio
+                for e in sorted(events, key=operator.itemgetter(0, 2)):
+                    handle.write_tsv(epn, e.date, e.type, e.prio, e.ppn, e.isil)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
