@@ -24,6 +24,7 @@ pymarc==3.0.1
 python-dateutil==2.2
 pytz==2014.4
 requests==2.3.0
+simplejson==3.6.0
 six==1.6.1
 sqlitebck==1.2.1
 urllib3==1.8.2

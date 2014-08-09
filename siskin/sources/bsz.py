@@ -64,7 +64,6 @@ import datetime
 import difflib
 import elasticsearch
 import glob
-import json
 import luigi
 import operator
 import os
@@ -76,6 +75,11 @@ import string
 import tarfile
 import tempfile
 import urllib
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 config = Config.instance()
 SeekInfo = collections.namedtuple('SeekInfo', ['offset', 'length'])
