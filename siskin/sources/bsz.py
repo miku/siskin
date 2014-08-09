@@ -1170,6 +1170,45 @@ class Record(BSZTask):
         """ Shard paths, just in case we extract too many of those. """
         return luigi.LocalTarget(path=self.path(shard=True))
 
+class LocalUpdatesILN(BSZTask):
+    """
+    Get the local additions and updates for a given ILN.
+    """
+    begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
+    end = luigi.DateParameter(default=datetime.date.today())
+    iln = ILNParameter(default='0010')
+
+    def requires(self):
+        return ListifyLocalRange(begin=self.begin, end=self.end)
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C awk -F '\\t' '$6=="{iln}" {{print $0}}' {input} > {output}""",
+                          input=self.input().path, iln=self.iln)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class LocalUpdatesISIL(BSZTask):
+    """
+    Get the local additions and updates for a given ISIL.
+    """
+    begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
+    end = luigi.DateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(default='DE-15')
+
+    def requires(self):
+        return ListifyLocalRange(begin=self.begin, end=self.end)
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C awk -F '\\t' '$3=="{isil}" {{print $0}}' {input} > {output}""", input=self.input().path, isil=self.isil)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class EventsPreflight(BSZTask):
     """
     Take deletions and the (EPN, DATE) list and merge them.
