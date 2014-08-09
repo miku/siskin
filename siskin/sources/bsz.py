@@ -1106,9 +1106,8 @@ class ListifyLocalRange(BSZTask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path,
-                     output=stopover)
-        luigi.File(stopover).move(self.output().fn)
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -1275,8 +1274,7 @@ class Events(BSZTask):
                     begins, ends = str(self.begin), str(self.end)
                     filtered = df[(df.date >= begins) & (df.date < ends)]
                     with self.output().open('w') as output:
-                        filtered.to_csv(output, sep='\t', index=False,
-                                        header=False)
+                        filtered.to_csv(output, sep='\t', index=False, header=False)
                     break
             else:
                 shellout("touch {output}", output=self.output().path)
