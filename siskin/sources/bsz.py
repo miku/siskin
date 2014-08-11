@@ -400,11 +400,9 @@ class SARegionalCopy(BSZTask):
     date = luigi.DateParameter(default=BSZTask.SONDERABZUG)
 
     def requires(self):
-        return {
-            'db': SAIdSeekMapDB(tag=self.tag, kind=self.kind),
-            'file': SAFile(tag=self.tag, kind=self.kind),
-            'idlist': SATransactionSingleTag(tag=self.tag, kind=self.kind)
-        }
+        return {'db': SAIdSeekMapDB(tag=self.tag, kind=self.kind),
+                'file': SAFile(tag=self.tag, kind=self.kind),
+                'idlist': SATransactionSingleTag(tag=self.tag, kind=self.kind)}
 
     @timed
     def run(self):
@@ -507,11 +505,9 @@ class TAImport(BSZTask):
 
     @timed
     def run(self):
-        filenames = {
-            'tit': config.get('bsz', 'ta-title-filename'),
-            'lok': config.get('bsz', 'ta-local-filename'),
-            'aut': config.get('bsz', 'ta-authority-filename'),
-        }
+        filenames = {'tit': config.get('bsz', 'ta-title-filename'),
+                     'lok': config.get('bsz', 'ta-local-filename'),
+                     'aut': config.get('bsz', 'ta-authority-filename')}
         output = shellout("tar -O -zf {input} -x {filename} > {output}",
                           filename=filenames.get(self.kind),
                           input=self.input().path)
@@ -1328,10 +1324,8 @@ class OpacDisplayFlag(BSZTask):
 
     def requires(self):
         # there can be only a current LC dump, so just use SONDERABZUG and today
-        return {
-            'dump': LiberoCacheDump(iln=self.iln),
-            'snapshot': SnapshotBasic(begin=self.begin, end=self.end, iln=self.iln)
-        }
+        return {'dump': LiberoCacheDump(iln=self.iln),
+                'snapshot': SnapshotBasic(begin=self.begin, end=self.end, iln=self.iln)}
 
     @timed
     def run(self):
@@ -1349,9 +1343,7 @@ class OpacDisplayFlag(BSZTask):
                     record_id, blob = row[0], json.loads(row[1], 'latin-1')
                     cached_ppns.add(record_id)
                     if blob.get('errorcode') == 0:
-                        odf = blob.get('getTitleInformation', {}).get(
-                                       record_id, {}).get(
-                                       'opac_display_flag', 0)
+                        odf = blob.get('getTitleInformation', {}).get(record_id, {}).get('opac_display_flag', 0)
                         if record_id in ppns:
                             output.write_tsv(record_id, odf, "OK")
                         else:
@@ -1392,10 +1384,8 @@ class SnapshotWithCache(BSZTask):
     iln = ILNParameter(default='0010')
 
     def requires(self):
-        return {
-            'snapshot': SnapshotBasic(begin=self.begin, end=self.end, iln=self.iln),
-            'odf': OpacDisplayFlag(begin=self.begin, end=self.end, iln=self.iln)
-        }
+        return {'snapshot': SnapshotBasic(begin=self.begin, end=self.end, iln=self.iln),
+                'odf': OpacDisplayFlag(begin=self.begin, end=self.end, iln=self.iln)}
 
     @timed
     def run(self):
@@ -1481,10 +1471,10 @@ class UnifiedSnapshot(BSZTask):
                     for row in handle.iter_tsv(cols=('ppn', 'epn', 'date', 'X')):
                         if row.ppn in seen:
                             counter['skipped'] += 1
-                        else:
-                            counter['written'] += 1
-                            output.write_tsv(*row)
-                            seen.add(row.ppn)
+                            continue
+                        counter['written'] += 1
+                        output.write_tsv(*row)
+                        seen.add(row.ppn)
         self.logger.debug(counter)
 
     def output(self):
@@ -1800,10 +1790,8 @@ class Lookup(BSZTask):
     kind = luigi.Parameter(default='tit')
 
     def requires(self):
-        return {
-            'local': ListifyLocalRange(begin=self.begin, end=self.end),
-            'deletion': DeletionRangeFinc(begin=self.begin, end=self.end)
-        }
+        return {'local': ListifyLocalRange(begin=self.begin, end=self.end),
+                'deletion': DeletionRangeFinc(begin=self.begin, end=self.end)}
 
     @timed
     def run(self):
