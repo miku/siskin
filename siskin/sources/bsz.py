@@ -1239,6 +1239,7 @@ class Events(BSZTask):
         return {'updates': LocalUpdatesILN(begin=self.begin, end=self.end, iln=self.iln),
                 'deletions': DeletionRangeILN(begin=self.begin, end=self.end, iln=self.iln)}
 
+    @timed
     def run(self):
         Event = collections.namedtuple('Event', ['date', 'type', 'prio', 'ppn', 'isil'])
         epn_events = collections.defaultdict(set)
