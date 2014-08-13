@@ -31,7 +31,9 @@ To use siskin, start the luigi scheduler first with `luigid` (in the background 
 Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/master/bin), all sharing the prefix `task`:
 
     taskcat          - inspect task output
+    taskdir          - show task directory
     taskdo           - run task
+    taskdu           - show disk usage of task
     taskhome         - show base directory of all artefacts
     taskindex-delete - delete Elasticsearch index and remove trace in 'update_log'
     taskless         - inspect task output
@@ -41,6 +43,7 @@ Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/mas
     taskoutput       - output file path of a task
     taskredo         - rm and do
     taskrm           - delete task artefact
+    taskstatus       - show whether a task is done or not
     tasktree         - run tree command under the given tasks directory
     taskversion      - show siskin version
     taskwc           - count lines in task output
