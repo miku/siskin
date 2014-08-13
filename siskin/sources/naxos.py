@@ -44,14 +44,17 @@ class NaxosJson(NaxosTask):
 
     @timed
     def run(self):
-        output = shellout("unzip -p {input} {path} > {output}",
+        """ Unzip and strip namespace. """
+        output = shellout("""unzip -p {input} {path} |
+                             LANG=C perl -lnpe 's@xmlns:marc="http://www.loc.gov/MARC21/slim"@@g' |
+                             LANG=C perl -lnpe 's@<marc:@<@' |
+                             LANG=C perl -lnpe 's@</marc:@</@' > {output}""",
                           input=self.input().path, path='marc-nml-gesamt.xml')
-        output = shellout("marcxmltojson -m date={date} {input} > {output}",
-                          date=self.closest(), input=output)
+        output = shellout("marcxmltojson -m date={date} {input} > {output}", date=self.closest(), input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class NaxosIndex(NaxosTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())
