@@ -100,40 +100,40 @@ class FuzzySimilarItems(FuzzyTask, ElasticsearchMixin):
     size = luigi.IntParameter(default=5, description="number of similar items to return")
 
     def run(self):
-	"""
-	245.{a,b,c} are NR / http://www.loc.gov/marc/bibliographic/bd245.html
-	"""
-	indices = self.indices.split()
-	es = elasticsearch.Elasticsearch([dict(host=self.es_host, port=self.es_port)])
-	with luigi.File(self.filename, format=TSV).open() as handle:
-	    with self.output().open('w') as output:
-		for row in handle.iter_tsv(cols=('index', 'id')):
-		    try:
-			doc = marcx.DotDict(es.get_source(index=row.index, id=row.id))
-			if not doc['content'].get('245'):
-			    continue
-			title = doc.content['245'][0].get('a', [''])[0]
-			subtitle = doc.content['245'][0].get('b', [''])[0]
-			like_text = '%s %s' % (title, subtitle)
+        """
+        245.{a,b,c} are NR / http://www.loc.gov/marc/bibliographic/bd245.html
+        """
+        indices = self.indices.split()
+        es = elasticsearch.Elasticsearch([dict(host=self.es_host, port=self.es_port)])
+        with luigi.File(self.filename, format=TSV).open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('index', 'id')):
+                    try:
+                        doc = marcx.DotDict(es.get_source(index=row.index, id=row.id))
+                        if not doc['content'].get('245'):
+                            continue
+                        title = doc.content['245'][0].get('a', [''])[0]
+                        subtitle = doc.content['245'][0].get('b', [''])[0]
+                        like_text = '%s %s' % (title, subtitle)
 
-			query = {'query': {
-			    'more_like_this': {
-				'fields': ['content.245.a', 'content.245.b'],
-				'like_text': like_text,
-				'stop_words': [],
-				'min_term_freq' : 1,
-				'max_query_terms' : 25,
-			    }
-			}}
+                        query = {'query': {
+                            'more_like_this': {
+                            'fields': ['content.245.a', 'content.245.b'],
+                            'like_text': like_text,
+                            'stop_words': [],
+                            'min_term_freq' : 1,
+                            'max_query_terms' : 25,
+                            }
+                        }}
 
-			response = es.search(index=indices, body=query, size=self.size)
-			hits = response['hits']['hits']
-			for hit in hits:
-			    output.write_tsv(row.index, row.id, hit['_index'], hit['_id'])
+                        response = es.search(index=indices, body=query, size=self.size)
+                        hits = response['hits']['hits']
+                        for hit in hits:
+                            output.write_tsv(row.index, row.id, hit['_index'], hit['_id'])
 
-		    except elasticsearch.exceptions.TransportError as err:
-			self.logger.warn(err)
-			continue
+                    except elasticsearch.exceptions.TransportError as err:
+                        self.logger.warn(err)
+                        continue
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
