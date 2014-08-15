@@ -22,6 +22,7 @@ class GraphTask(DefaultTask):
         return monthly(date=self.date)
 
 class GraphCombinedNTriples(GraphTask):
+    """ Combine German and English DBpedia and GND. """
     date = ClosestDateParameter(default=datetime.date.today())
     version = luigi.Parameter(default="3.9")
 
