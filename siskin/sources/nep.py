@@ -404,8 +404,7 @@ class NEPForUBL(NEPTask):
 
     @timed
     def run(self):
-        df = pd.read_csv(self.input().get('codes').open(), sep='\t',
-                         names=('code',))
+	df = pd.read_csv(self.input().get('codes').open(), sep='\t', names=('code',))
         filter_codes = set(df.code.tolist())
 
         with self.input().get('snaphost').open() as handle:
@@ -415,13 +414,15 @@ class NEPForUBL(NEPTask):
                 for record in reader:
                     record = marcx.FatRecord.from_record(record)
 
-                    # UBL specific
+		    # 240.a Uniform title
                     if record.has('240.a'):
                         continue
+
+		    # 007 Physical Description Fixed Field, Text
                     if not record.test('007', lambda s: s.startswith('t')):
                         continue
 
-                    # subject filter
+		    # 072.2 Subject Category Code, Source
                     if record.test('072.2', lambda s: s.startswith('bicssc')):
                         for code in record.itervalues('072.a'):
                             if code in filter_codes:
@@ -569,4 +570,4 @@ class NEPIndex(NEPTask, CopyToIndex):
         return self.effective_task_id()
 
     def requires(self):
-        return NEPJsonWithSuggestions(date=self.date)
+	return NEPJson(date=self.date)
