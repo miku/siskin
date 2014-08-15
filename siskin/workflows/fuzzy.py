@@ -91,13 +91,13 @@ class FuzzySimilarItems(FuzzyTask, ElasticsearchMixin):
     report all records in the indices, that are similar to those given in the file.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    indices = luigi.Parameter(default="bsz ebl nep")
 
     filename = luigi.Parameter(description="path to a TSV (Index, ID)")
+    indices = luigi.Parameter(default="bsz ebl nep")
 
-    size = luigi.IntParameter(default=5, description="number of similar items to return")
-    min_term_freq = luigi.IntParameter(default=1)
     max_query_terms = luigi.IntParameter(default=25)
+    min_term_freq = luigi.IntParameter(default=1)
+    size = luigi.IntParameter(default=5, description="number of similar items to return")
 
     def run(self):
 	"""
