@@ -13,6 +13,7 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 import datetime
 import luigi
+import tempfile
 
 class FreebaseTask(DefaultTask):
     TAG = 'freebase'
@@ -72,15 +73,14 @@ class FreebaseAbbreviatedNTriples(FreebaseTask):
     """ Convert all Freebase ntriples to abbreviated ones. """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    language = luigi.Parameter(default="en")
 
     def requires(self):
         return FreebaseExtract()
 
     @timed
     def run(self):
-        output = shellout("nttoldj -l {language} -i -a -f nt {input} > {output}",
-                          input=self.input().path, language=self.language)
+        output = shellout("TMPDIR={tmpdir} ntto -i -a -r {rules} {input} > {output}",
+                          tmpdir=tempfile.tempdir, input=self.input().path, rules=self.assets('RULES.txt'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -90,15 +90,14 @@ class FreebaseJson(FreebaseTask):
     """ Convert all Freebase ntriples to a single JSON file. """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    language = luigi.Parameter(default="en")
 
     def requires(self):
         return FreebaseExtract()
 
     @timed
     def run(self):
-        output = shellout("nttoldj -l {language} -i -a {input} > {output}",
-                          input=self.input().path, language=self.language)
+        output = shellout("TMPDIR={tmpdir} ntto -i -a -j -r {rules} {input} > {output}",
+                          tmpdir=tempfile.tempdir, input=self.input().path, rules=self.assets('RULES.txt'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
