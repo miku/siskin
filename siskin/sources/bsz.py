@@ -1730,7 +1730,7 @@ class BSZIndexPatch(BSZTask):
                             rows = cursor.fetchall()
                             copyregions(handle, so, rows)
 
-                output = shellout("""marctojson -m date={date} {input} >
+                output = shellout("""marctojson -l -m date={date} {input} >
                                      {output}""", date=date, input=stopover)
 
                 shellout("cat {input} >> {output}", input=output, output=combined)
