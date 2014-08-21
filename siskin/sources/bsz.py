@@ -1464,7 +1464,7 @@ class UnifiedSnapshot(BSZTask):
     @timed
     def run(self):
         seen = set()
-        counter = collections.Counter()
+        counter = {'skipped': 0, 'written': 0}
         with self.output().open('w') as output:
             for target in self.input():
                 with target.open() as handle:
