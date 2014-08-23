@@ -1932,3 +1932,60 @@ class UniqueSigel(BSZTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class ParentRecordsTable(BSZTask):
+    """
+    Example:
+
+        ...
+        000105252       (DE-576)000105244       NA      NA      NA      NA
+        00015704X       NA      NA      NA      NA      (DE-576)016294300
+        000303747       NA      NA      NA      NA      NA
+        000439797       (DE-576)000439789       NA      NA      NA      NA
+        ...
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'data': GenericImport(date=self.date, kind='tit'),
+                'apps': Executable(name='marctotsv')}
+
+    @timed
+    def run(self):
+        stopover = shellout("""marctotsv -s "|" -f NA {input}
+                               001 773.w 800.w 810.w 811.w 830.w > {output}""",
+                               input=self.input().get('data').path)
+        luigi.File(stopover).move(self.output().fn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class ParentRecords(BSZTask):
+    """
+    Dump the parent record. Just a reordering of :class:`ParentRecordsTable`.
+
+    This version accounts for repeated subfields through the separator flag
+    on marctotsv.
+
+    4.3GB: 4m48.239s vs. 17m57.460s (previous version with pymarc parsing)
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return ParentRecordsTable(date=self.date)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('id', 'f773w', 'f800w', 'f810w', 'f811w', 'f830w')):
+                    parents = set()
+                    for field in row[1:]:
+                        for value in field.split('|'):
+                            if not value == 'NA':
+                                parents.add(value.replace('(DE-576)', ''))
+                    for parent in parents:
+                        output.write_tsv(row.id, parent, self.date)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
