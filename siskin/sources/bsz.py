@@ -74,6 +74,7 @@ import re
 import shelve
 import simplejson as json
 import string
+import sys
 import tarfile
 import tempfile
 import urllib
@@ -531,8 +532,12 @@ class TAImport(BSZTask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("tar -O -zf {input} -x --wildcards --no-anchored '*-{kind}.mrc' >> {output}",
-                     kind=self.kind, input=target.path, output=output)
+            if sys.platform.startswith("linux"):
+                shellout("tar -O -zf {input} -x --wildcards --no-anchored '*-{kind}.mrc' >> {output}",
+                         kind=self.kind, input=target.path, output=output)
+            if sys.platform == "darwin":
+                shellout("tar -O -zf {input} -x --include='*-{kind}.mrc' >> {output}",
+                         kind=self.kind, input=target.path, output=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
