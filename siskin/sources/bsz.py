@@ -44,6 +44,12 @@ loeppn-datefmt = %y%m%d
 # regular expression to match the date (maybe obsolete)
 leoppn-datepattern = [0-9]{6}
 
+# additional shipments
+# standard shipment -tit.mrc, -lok.mrc, -aut.mrc assumed
+# format is DATE:PATH,DATE:PATH,.... and so forth - so we do not have to rely
+# on filename date parsing
+extra = 2014-04-13:/path/to/extra.tar.gz, 2014-04-18:/path/to/another/shipment.tar.gz
+
 """
 
 from __future__ import print_function
@@ -130,6 +136,24 @@ class BSZTask(DefaultTask):
         params = {'lookfor': 'record_id:%s' % ppn}
         return os.path.join(self.mappings().get('iln_live').get(iln), 'Search',
                             'Results?%s' % urllib.urlencode(params))
+
+    def extra_shipments(self):
+        """ Return a map of extra shipments, that should be added to the daily
+        shipments. """
+        spec = config.get('bsz', 'extra', '')
+        extramap = collections.defaultdict(set)
+        if not spec:
+            return extramap
+        items = map(string.strip, spec.split(","))
+        for item in items:
+            if not ":" in item:
+                raise RuntimeError("required format for bsz.extra is DATE:PATH")
+            if not len(item.split(":")) == 2:
+                raise RuntimeError("required format for bsz.extra is DATE:PATH")
+            value, path = map(string.strip, item.split(":"))
+            date = date_string = datetime.date(*map(int, value.split('-')))
+            extramap[date].add(path)
+        return extramap
 
 # ==============================================================================
 #
@@ -496,25 +520,35 @@ class TASync(BSZTask):
         return luigi.LocalTarget(path=self.path(ext='tar.gz'))
 
 class TAImport(BSZTask):
-    """ Import the TA for a single kind. """
+    """ Import the TA for a single kind. Consider adding extra files as well. """
     date = luigi.DateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='tit', description='tit, lok, aut')
 
     def requires(self):
-        return TASync(date=self.date)
+        """ Require all external standard shipments. Plus require normal daily update. """
+        for date, pathset in self.extra_shipments().iteritems():
+            if date == self.date:
+                for path in pathset:
+                    yield ExternalFile(filename=path)
+        yield TASync(date=self.date)
 
     @timed
     def run(self):
-        filenames = {'tit': config.get('bsz', 'ta-title-filename'),
-                     'lok': config.get('bsz', 'ta-local-filename'),
-                     'aut': config.get('bsz', 'ta-authority-filename')}
-        output = shellout("tar -O -zf {input} -x {filename} > {output}",
-                          filename=filenames.get(self.kind),
-                          input=self.input().path)
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("tar -O -zf {input} -x --wildcards --no-anchored '*-{kind}.mrc' >> {output}",
+                     kind=self.kind, input=target.path, output=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+class ExternalFile(luigi.ExternalTask):
+    """ An externally given file. """
+    filename = luigi.Parameter()
+
+    def output(self):
+        return luigi.LocalTarget(path=self.filename)
 
 class GenericImport(luigi.WrapperTask):
     """ This one is *special*. You do not need to know anything about SA or TA,
