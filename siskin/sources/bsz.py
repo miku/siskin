@@ -712,7 +712,6 @@ class DeletionRangeILN(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-
 class DeletionRangeFinc(BSZTask):
     """
     Only keep the deletions, that are relevant to FINC.
