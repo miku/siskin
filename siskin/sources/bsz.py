@@ -483,9 +483,9 @@ def create_empty_daily_update():
     _, dummy = tempfile.mkstemp(prefix='siskin-')
     handle = tarfile.open(dummy, 'w:gz')
     _, empty = tempfile.mkstemp(prefix='siskin-')
-    handle.add(empty, config.get('bsz', 'ta-title-filename'))
-    handle.add(empty, config.get('bsz', 'ta-local-filename'))
-    handle.add(empty, config.get('bsz', 'ta-authority-filename'))
+    handle.add(empty, 'empty-tit.mrc')
+    handle.add(empty, 'empty-lok.mrc')
+    handle.add(empty, 'empty-lok.mrc')
     handle.close()
     return dummy
 
