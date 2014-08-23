@@ -24,11 +24,6 @@ sa-date = 2014-03-04
 ta-pattern = /path/to/TA-MARC-010_finc-{date}.tar.gz
 ta-datefmt = %y%m%d
 
-# filenames inside the daily shipments
-ta-authority-filename = 010_finc-aut.mrc
-ta-local-filename = 010_finc-lok.mrc
-ta-title-filename = 010_finc-tit.mrc
-
 # list of dates with no daily updates
 mute = 2013-10-26, 2013-10-27, 2013-09-27, 2013-09-28, 2013-09-29, 2013-08-30,
        2013-08-31, 2013-09-01, 2013-11-23, 2013-11-30, 2013-12-01, 2013-12-06,
