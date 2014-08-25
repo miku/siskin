@@ -50,6 +50,7 @@ class MTCStylesheet(MTCTask):
     @timed
     def run(self):
         output = shellout("""wget -q --retry-connrefused -O {output} {url}""", url=self.url)
+        output = shellout(""" sed -e 's@include href="http://www.loc.gov/marcxml/xslt/MARC21slimUtils.xsl"@include href="{local}"@' {input} > {output}""", input=output, local=self.assets("MARC21slimUtils.xsl"))
         luigi.File(output).move(self.output().path)
 
     def output(self):
