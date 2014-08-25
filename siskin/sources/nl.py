@@ -34,6 +34,7 @@ import luigi
 import os
 import re
 import string
+import sys
 import tempfile
 
 config = Config.instance()
@@ -204,9 +205,12 @@ class NLPackage(NLTask):
         for target in self.input():
             with target.open() as handle:
                 _, path = handle.iter_tsv(cols=('date', 'path')).next()
-                shellout("""tar xf {input} -O --wildcards --no-anchored
-                            '*-{kind}.mrc' >> {output}""", input=path,
-                            kind=self.kind, output=combined)
+		if sys.platform.startswith("linux"):
+		    shellout("tar -O -zf {input} -x --wildcards --no-anchored '*-{kind}.mrc' >> {output}",
+			     kind=self.kind, input=target.path, output=combined)
+		if sys.platform == "darwin":
+		    shellout("tar -O -zf {input} -x --include='*-{kind}.mrc' >> {output}",
+			     kind=self.kind, input=target.path, output=combined)
         luigi.File(combined).move(self.output().path)
 
     def output(self):
