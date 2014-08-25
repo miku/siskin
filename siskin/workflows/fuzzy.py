@@ -94,6 +94,7 @@ class FuzzyFieldList(FuzzyTask, ElasticsearchMixin):
     def requires(self):
         return Executable(name='estab', message='http://git.io/bLY7cQ')
 
+    @timed
     def run(self):
         output = shellout("""estab -host {host} -port {port} -indices "{indices}" -f "{fields}" > {output} """,
                           indices=self.indices,fields=self.fields, host=self.es_host, port=self.es_port)
@@ -102,22 +103,57 @@ class FuzzyFieldList(FuzzyTask, ElasticsearchMixin):
     def output(self):
             return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
-class FuzzyDeduplication(FuzzyTask, ElasticsearchMixin):
+class FuzzyPool(FuzzyTask, ElasticsearchMixin):
     """ Deduplicate items. """
 
     date = ClosestDateParameter(default=datetime.date.today())
     source = luigi.Parameter(description='indices that are compared')
     target = luigi.Parameter(description='indices that are compared against')
+    null = luigi.Parameter(default="NOT_AVAILABLE", significant=False)
 
     def requires(self):
         return {'file': FuzzyFieldList(date=self.date, indices=self.source, fields='_id _index _type content.245.a content.245.b'),
-                'esmlt': Executable(name='esmlt', message='http://git.io/ckXUgA')}
+                'esmlt': Executable(name='esmlt', message='http://git.io/ckXUgA'),
+                'stardust': Executable(name='stardust')}
 
+    @timed
     def run(self):
         # find similar titles
-        output = shellout("""esmlt -indices "{target}" -fields "content.245.a content.245.b"
-                             -file "{file}" -columns "4,5" > {output} """, file=self.input().get('file').path, target=self.target)
-        # TODO: postprocessing similarity measures
+        output = shellout("""esmlt -host {host} -port {port} -indices "{target}" -fields "content.245.a content.245.b"
+                             -file "{file}" -columns "4,5" > {output} """, host=self.es_host, port=self.es_port,
+                             file=self.input().get('file').path, target=self.target)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with luigi.File(output, format=TSV).open() as handle:
+            with luigi.File(stopover, format=TSV).open('w') as output:
+                for row in handle.iter_tsv(cols=('idl', 'il', 'tl', 'til', 'sl', 'idr', 'ir', 'tr', 'score', 'tir', 'sr')):
+                    ml = ' '.join([v for v in (row.til, row.sl) if v and not v == "NOT_AVAILABLE"])
+                    mr = ' '.join([v for v in (row.tir, row.sr) if v and not v == "NOT_AVAILABLE"])
+                    if not ml: ml = "NOT_AVAILABLE"
+                    if not mr: mr = "NOT_AVAILABLE"
+                    output.write_tsv(row.idl, row.il, row.tl, ml,
+                                     row.idr, row.ir, row.tr, mr, row.score)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+
+class FuzzyCandidates(FuzzyTask):
+    date = ClosestDateParameter(default=datetime.date.today())
+    source = luigi.Parameter(description='indices that are compared')
+    target = luigi.Parameter(description='indices that are compared against')
+    null = luigi.Parameter(default="NOT_AVAILABLE", significant=False)
+
+    measure = luigi.Parameter(default='ngram')
+    threshold = luigi.FloatParameter(default=0.75)
+
+    def requires(self):
+        return FuzzyPool(source=self.source, target=self.target, null=self.null, date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""stardust -f "4,8" {measure} {input} > {output}""", measure=self.measure, input=self.input().path)
+        output = shellout(r"""/bin/bash -c "sort -t$'\t' -k10,10 -nr {input} > {output}" """, input=output)
+        output = shellout(""" awk -F'\\t' '$10 > {threshold} {{print $0}}' {input} > {output} """, threshold=self.threshold, input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
