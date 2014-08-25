@@ -103,8 +103,8 @@ class FuzzyFieldList(FuzzyTask, ElasticsearchMixin):
     def output(self):
             return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
-class FuzzyPool(FuzzyTask, ElasticsearchMixin):
-    """ Deduplicate items. """
+class FuzzyTitlePool(FuzzyTask, ElasticsearchMixin):
+    """ Deduplicate titles. """
 
     date = ClosestDateParameter(default=datetime.date.today())
     source = luigi.Parameter(description='indices that are compared')
@@ -147,7 +147,7 @@ class FuzzyCandidates(FuzzyTask):
     threshold = luigi.FloatParameter(default=0.75)
 
     def requires(self):
-        return FuzzyPool(source=self.source, target=self.target, null=self.null, date=self.date)
+        return FuzzyTitlePool(source=self.source, target=self.target, null=self.null, date=self.date)
 
     @timed
     def run(self):
