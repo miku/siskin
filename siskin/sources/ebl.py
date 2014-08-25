@@ -213,42 +213,6 @@ class EBLJson(EBLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
-class EBLJsonWithSuggestions(EBLTask):
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return EBLJson(date=self.date)
-
-    @timed
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle:
-                    doc = json.loads(row)
-                    try:
-                        for i in range(len(doc['content']['245'])):
-                            full_title = doc['content']['245'][i]['a']
-                            parts = full_title.split()
-
-                            suggest = {
-                                'input': [full_title] + parts,
-                                'output': full_title,
-                                'payload': {
-                                    'id': doc['content']['001'],
-                                    'index': 'ebl',
-                                }
-                            }
-
-                            doc['content']['245'][i]['suggest'] = suggest
-                    except Exception as err:
-                        self.logger.warn(err)
-                        continue
-                    output.write(json.dumps(doc))
-                    output.write('\n')
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 class EBLIndex(EBLTask, CopyToIndex):
     """ Index EBL. """
     date = ClosestDateParameter(default=datetime.date.today())

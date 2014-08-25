@@ -187,43 +187,6 @@ class LFERJson(LFERTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
-class LFERJsonWithSuggestions(LFERTask):
-    date = ClosestDateParameter(default=datetime.date.today())
-    kind = luigi.Parameter(default='tit')
-
-    def requires(self):
-        return LFERJson(date=self.date, kind=self.kind)
-
-    @timed
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle:
-                    doc = json.loads(row)
-                    try:
-                        for i in range(len(doc['content']['245'])):
-                            full_title = doc['content']['245'][i]['a']
-                            parts = full_title.split()
-
-                            suggest = {
-                                'input': [full_title] + parts,
-                                'output': full_title,
-                                'payload': {
-                                    'id': doc['content']['001'],
-                                    'index': 'lfer',
-                                }
-                            }
-
-                            doc['content']['245'][i]['suggest'] = suggest
-                    except Exception as err:
-                        self.logger.warn(err)
-                        continue
-                    output.write(json.dumps(doc))
-                    output.write('\n')
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
-
 class LFERIndex(LFERTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -242,4 +205,4 @@ class LFERIndex(LFERTask, CopyToIndex):
         return self.effective_task_id()
 
     def requires(self):
-        return LFERJsonWithSuggestions(date=self.date, kind='tit')
+        return LFERJson(date=self.date, kind='tit')
