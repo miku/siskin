@@ -7,7 +7,7 @@ Fuzzy deduplication related tasks.
 
 from elasticsearch import helpers as eshelpers
 from gluish.benchmark import timed
-from gluish.common import ElasticsearchMixin
+from gluish.common import ElasticsearchMixin, Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -85,55 +85,40 @@ class FuzzyEditionListRange(FuzzyTask, ElasticsearchMixin):
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
-class FuzzySimilarItems(FuzzyTask, ElasticsearchMixin):
-    """
-    For a single file containing (index, id) tuples and a list of indices
-    report all records in the indices, that are similar to those given in the file.
-    """
+class FuzzyFieldList(FuzzyTask, ElasticsearchMixin):
+    """ Run estab to gather a TSV of (id, index, type, values...) for  comparisons. """
     date = ClosestDateParameter(default=datetime.date.today())
+    indices = luigi.Parameter(description='indices to extract values from')
+    fields = luigi.Parameter(default='_id _index _type content.245.a content.245.b', description='values to extract')
 
-    filename = luigi.Parameter(description="path to a TSV (Index, ID)")
-    indices = luigi.Parameter(default="bsz ebl nep")
-
-    max_query_terms = luigi.IntParameter(default=25)
-    min_term_freq = luigi.IntParameter(default=1)
-    size = luigi.IntParameter(default=5, description="number of similar items to return")
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
 
     def run(self):
-        """
-        245.{a,b,c} are NR / http://www.loc.gov/marc/bibliographic/bd245.html
-        """
-        indices = self.indices.split()
-        es = elasticsearch.Elasticsearch([dict(host=self.es_host, port=self.es_port)])
-        with luigi.File(self.filename, format=TSV).open() as handle:
-            with self.output().open('w') as output:
-                for row in handle.iter_tsv(cols=('index', 'id')):
-                    try:
-                        doc = marcx.DotDict(es.get_source(index=row.index, id=row.id))
-                        if not doc['content'].get('245'):
-                            continue
-                        title = doc.content['245'][0].get('a', [''])[0]
-                        subtitle = doc.content['245'][0].get('b', [''])[0]
-                        like_text = '%s %s' % (title, subtitle)
+        output = shellout("""estab -host {host} -port {port} -indices "{indices}" -f "{fields}" > {output} """,
+                          indices=self.indices,fields=self.fields, host=self.es_host, port=self.es_port)
+        luigi.File(output).move(self.output().path)
 
-                        query = {'query': {
-                            'more_like_this': {
-                            'fields': ['content.245.a', 'content.245.b'],
-                            'like_text': like_text,
-                            'stop_words': [],
-                            'min_term_freq' : 1,
-                            'max_query_terms' : 25,
-                            }
-                        }}
+    def output(self):
+            return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
-                        response = es.search(index=indices, body=query, size=self.size)
-                        hits = response['hits']['hits']
-                        for hit in hits:
-                            output.write_tsv(row.index, row.id, hit['_index'], hit['_id'])
+class FuzzyDeduplication(FuzzyTask, ElasticsearchMixin):
+    """ Deduplicate items. """
 
-                    except elasticsearch.exceptions.TransportError as err:
-                        self.logger.warn(err)
-                        continue
+    date = ClosestDateParameter(default=datetime.date.today())
+    source = luigi.Parameter(description='indices that are compared')
+    target = luigi.Parameter(description='indices that are compared against')
+
+    def requires(self):
+        return {'file': FuzzyFieldList(date=self.date, indices=self.source, fields='_id _index _type content.245.a content.245.b'),
+                'esmlt': Executable(name='esmlt', message='http://git.io/ckXUgA')}
+
+    def run(self):
+        # find similar titles
+        output = shellout("""esmlt -indices "{target}" -fields "content.245.a content.245.b"
+                             -file "{file}" -columns "4,5" > {output} """, file=self.input().get('file').path, target=self.target)
+        # TODO: postprocessing similarity measures
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
