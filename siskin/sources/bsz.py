@@ -1750,14 +1750,13 @@ class BSZIndexPatch(BSZTask):
 
             # index inline
             def docs():
-                """ Function to yield all documents, that need to be indexed. """
+                """ Yield all documents, that need to be indexed. """
                 with open(combined) as handle:
                     documents = ({
                         '_index': 'bsz',
                         '_type': 'title',
                         '_id': d['content']['001'],
-                        '_source': d} for d in (json.loads(line)
-                                      for line in handle))
+                        '_source': d} for d in (json.loads(line) for line in handle))
                     for d in documents:
                         yield d
 
