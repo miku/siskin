@@ -1755,7 +1755,7 @@ class BSZIndexPatch(BSZTask):
                     documents = ({
                         '_index': 'bsz',
                         '_type': 'title',
-                        '_id': d.get('content').get('001'),
+                        '_id': d['content']['001'],
                         '_source': d} for d in (json.loads(line)
                                       for line in handle))
                     for d in documents:
