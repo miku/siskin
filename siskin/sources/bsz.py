@@ -1626,55 +1626,33 @@ class BSZIndexPatch(BSZTask):
             es.indices.create(index='bsz', body=settings)
             es.indices.put_mapping(index='bsz', doc_type='title', body=mapping)
 
-        # collect all ids=dates, that we need to have in the index
-        desired_target = luigi.File(is_tmp=True)
-        desired_map = shelve.open(desired_target.path, "c")
+        # collect residue paths here
+        garbage = set()
 
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('ppn', 'X', 'date', 'X')):
-                desired_map[row.ppn] = row.date
+        desired_db = shellout("tabtokv -f '1,3' -o {output} {input}", input=self.input().path)
+        output = shellout('estab -indices "bsz" -f "_id meta.date" > {output}')
+        current_db = shellout("tabtokv -f '1,2' -o {output} {input}", input=output)
 
-        # collect all indexed ids, (this is the slowest part, actually)
-        # TODO: should be store the ILNs as well?
+        garbage.add(desired_db)
+        garbage.add(current_db)
+        garbage.add(output)
 
-        current_target = luigi.File(is_tmp=True)
-        current_map = shelve.open(current_target.path, "c")
+        with sqlite3db(current_db) as cc:
+            currentkv = cc.execute('SELECT key, value from store').fetchall()
 
-        batch_size = 10000
-        with Timer() as timer:
-            hits = eshelpers.scan(es, {'query': {'match_all': {}},
-                'fields': ['meta.date']}, index='bsz', doc_type='title',
-                scroll='10m', size=batch_size)
-            for hit in hits:
-                fields = hit.get('fields')
-                if not fields['meta.date']:
-                    raise RuntimeError("BSZ documents has not meta.date field")
-                current_map[hit['_id'].encode('utf-8')] = fields['meta.date'][0]
-
-        # inline benchmark, which size works best?
-        self.logger.debug(json.dumps({'size': batch_size,
-                                 'elapsed': timer.elapsed_s}))
-
-        # outdated items are those, that are already indexed, but do have
-        # a differing date (might be earlier or later)
         outdated = set()
-        for id, current_date in current_map.iteritems():
-            if id in desired_map:
-                if not current_date == desired_map[id]:
-                    outdated.add(id)
+        with sqlite3db(desired_db) as dc:
+            for id, current_date in currentkv:
+                result = dc.execute('SELECT value from store where key = ?', (id,)).fetchone()
+                if result is not None:
+                    if not current_date == result[0]:
+                        outdated.add(id)
 
-        desired = set(desired_map.iterkeys())
-        current = set(current_map.iterkeys())
+        with sqlite3db(desired_db) as cc:
+            desiredkv = cc.execute('SELECT key from store').fetchall()
 
-        # cleanup temporary stuff
-        current_map.close()
-        desired_map.close()
-
-        try:
-            os.remove(desired_target.path)
-            os.remove(current_target.path)
-        except OSError as err:
-            self.logger.warn(err)
+        desired = set((kv[0] for kv in desiredkv))
+        current = set((kv[0] for kv in currentkv))
 
         # dump the comparisons (fyi)
         receipt = json.dumps({
@@ -1734,9 +1712,6 @@ class BSZIndexPatch(BSZTask):
 
             # collect all JSON in this file
             _, combined = tempfile.mkstemp(prefix='siskin-')
-
-            # collect residue paths here
-            garbage = set()
 
             # - for each day, we need the raw file (raw) and its seekmap db
             # - we need to convert each snippet to JSON and the concatenate the
