@@ -324,8 +324,8 @@ class SATransactionTagListRange(BSZTask):
         # `marctotsv {input} 001 005 {tag} > {output}`
         template = """
             yaz-marcdump {input} |
-            awk '/^001 / {{printf $2"\t"}};
-                 /^005 / {{print $2"\t{tag}"}}' > {output}
+            LANG=C awk '/^001 / {{printf $2"\t"}};
+                        /^005 / {{print $2"\t{tag}"}}' > {output}
         """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for tag, target in self.input().iteritems():
@@ -333,7 +333,7 @@ class SATransactionTagListRange(BSZTask):
                            preserve_whitespace=True)
             shellout("cat {input} >> {output}", input=tmp, output=stopover)
 
-        output = shellout("sort -k1,1 -k2,2 {input} > {output}", input=stopover)
+        output = shellout("LANG=C sort -k1,1 -k2,2 {input} > {output}", input=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -375,7 +375,7 @@ class SATransactionSingleTag(BSZTask):
     @timed
     def run(self):
         """ 1 awk < 5 Pandas < 10 python :) """
-        output = shellout("awk '$2=={tag} {{print $0}}' {input} > {output}",
+        output = shellout("LANG=C awk '$2=={tag} {{print $0}}' {input} > {output}",
                           input=self.input().path, tag=self.tag)
         luigi.File(output).move(self.output().path)
 
@@ -690,7 +690,7 @@ class DeletionRange(BSZTask):
             shellout("cat {input} >> {output}", input=target.path,
                      output=stopover)
         # TODO: do we need to sort here?
-        output = shellout("sort -k1,1 -k2,2 {input} | uniq > {output}",
+        output = shellout("LANG=C sort -k1,1 -k2,2 {input} | uniq > {output}",
                           input=stopover)
         luigi.File(output).move(self.output().path)
 
@@ -980,7 +980,7 @@ class FieldListWithDateMerged(BSZTask):
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=stopover)
-        output = shellout("sort -k1,1 -k2,2 {input} > {output}", input=stopover)
+        output = shellout("LANG=C sort -k1,1 -k2,2 {input} > {output}", input=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -1331,7 +1331,7 @@ class SnapshotBasic(BSZTask):
         with luigi.File(stopover, format=TSV).open('w') as output:
             for epn, (ppn, date, sigel) in epn_map.iteritems():
                 output.write_tsv(ppn, epn, date, sigel)
-        output = shellout("sort -k1,1 -k3,3 {input} > {output}", input=stopover)
+        output = shellout("LANG=C sort -k1,1 -k3,3 {input} > {output}", input=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -1453,7 +1453,7 @@ class SnapshotPPNList(BSZTask):
 
     @timed
     def run(self):
-        output = shellout("awk '{{print $1}}' {input} | sort -u > {output}",
+        output = shellout("LANG=C awk '{{print $1}}' {input} | LANG=C sort -u > {output}",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -1906,7 +1906,7 @@ class UniqueSigel(BSZTask):
     @timed
     def run(self):
         filenames = ' '.join([obj.fn for obj in self.input()])
-        t = """cat {files} | awk '{{print $1}}' | sort -u > {output}"""
+        t = """cat {files} | LANG=C awk '{{print $1}}' | LANG=C sort -u > {output}"""
         temp = shellout(t, files=filenames)
         luigi.File(temp).move(self.output().fn)
 
