@@ -1629,9 +1629,11 @@ class BSZIndexPatch(BSZTask):
         # collect residue paths here
         garbage = set()
 
-        desired_db = shellout("tabtokv -f '1,3' -o {output} {input}", input=self.input().path)
+        desired_db = shellout("TMPDIR={tmpdir} tabtokv -f '1,3' -o {output} {input}",
+                              input=self.input().path, tmpdir=tempfile.gettempdir())
         output = shellout('estab -indices "bsz" -f "_id meta.date" > {output}')
-        current_db = shellout("tabtokv -f '1,2' -o {output} {input}", input=output)
+        current_db = shellout("TMPDIR={tmpdir} tabtokv -f '1,2' -o {output} {input}",
+                              input=output, tmpdir=tempfile.gettempdir())
 
         garbage.add(desired_db)
         garbage.add(current_db)
