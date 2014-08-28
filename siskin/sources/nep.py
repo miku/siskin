@@ -404,7 +404,7 @@ class NEPForUBL(NEPTask):
 
     @timed
     def run(self):
-    df = pd.read_csv(self.input().get('codes').open(), sep='\t', names=('code',))
+        df = pd.read_csv(self.input().get('codes').open(), sep='\t', names=('code',))
         filter_codes = set(df.code.tolist())
 
         with self.input().get('snaphost').open() as handle:
@@ -534,4 +534,4 @@ class NEPIndex(NEPTask, CopyToIndex):
         return self.effective_task_id()
 
     def requires(self):
-    return NEPJson(date=self.date)
+        return NEPJson(date=self.date)
