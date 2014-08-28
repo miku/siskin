@@ -131,8 +131,8 @@ class OSOSurface(OSOTask):
     def run(self):
         output = shellout("marctotsv {input} 001 005 > {output}",
                           input=self.input().path)
-        output = shellout("sort {input} > {output}", input=output)
-        output = shellout("tac {input} | uniq -w 13 > {output}", input=output)
+        output = shellout("LANG=C sort {input} > {output}", input=output)
+        output = shellout("LANG=C tac {input} | LANG=C uniq -w 13 > {output}", input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):

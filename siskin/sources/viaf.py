@@ -114,7 +114,7 @@ class VIAFPredicateDistribution(VIAFTask):
         return VIAFExtract(date=self.date)
 
     def run(self):
-        output = shellout("""cut -d " " -f2 {input} | sort | uniq -c > {output}""",
+        output = shellout("""cut -d " " -f2 {input} | LANG=C sort | LANG=C uniq -c > {output}""",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -146,7 +146,7 @@ class VIAFSameAs(VIAFTask):
         return VIAFExtract(date=self.date)
 
     def run(self):
-        output = shellout("""grep -F "<http://www.w3.org/2002/07/owl#sameAs>"
+        output = shellout("""LANG=C grep -F "<http://www.w3.org/2002/07/owl#sameAs>"
                              {input} > {output}""", input=self.input().path,
                              ignoremap={1: "Not found."})
         luigi.File(output).move(self.output().path)
@@ -165,15 +165,15 @@ class VIAFJson(VIAFTask):
     @timed
     def run(self):
         output = shellout("""nttoldj -a -i {input} |
-            grep -Fv "This primary entity identifier is deprecated" |
-            grep -Fv "This concept identifier is deprecated" |
-            grep -Fv "foaf:primaryTopic" |
-            grep -Fv "void:inDataset" |
-            grep -Fv "foaf:focus" |
-            grep -Fv "foaf:Document" |
-            grep -Fv "/#foaf:Organization" |
-            grep -Fv "/#rdaEnt:CorporateBody" |
-            grep -Fv "/#foaf:Person" > {output}""",
+            LANG=C grep -Fv "This primary entity identifier is deprecated" |
+            LANG=C grep -Fv "This concept identifier is deprecated" |
+            LANG=C grep -Fv "foaf:primaryTopic" |
+            LANG=C grep -Fv "void:inDataset" |
+            LANG=C grep -Fv "foaf:focus" |
+            LANG=C grep -Fv "foaf:Document" |
+            LANG=C grep -Fv "/#foaf:Organization" |
+            LANG=C grep -Fv "/#rdaEnt:CorporateBody" |
+            LANG=C grep -Fv "/#foaf:Person" > {output}""",
             input=self.input().path)
         luigi.File(output).move(self.output().path)
 

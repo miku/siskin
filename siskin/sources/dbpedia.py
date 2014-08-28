@@ -79,7 +79,7 @@ class DBPPredicateDistribution(DBPTask):
         return DBPExtract(version=self.version, language=self.language)
 
     def run(self):
-        output = shellout("""cut -d " " -f2 {input} | sort | uniq -c > {output}""",
+        output = shellout("""cut -d " " -f2 {input} | LANG=C sort | LANG=C uniq -c > {output}""",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -188,7 +188,7 @@ class DBPSameAs(DBPTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                shellout('grep "owl#sameAs" {path} >> {output}', path=row.path,
+                shellout('LANG=C grep "owl#sameAs" {path} >> {output}', path=row.path,
                          output=stopover, ignoremap={1: "Not found."})
         luigi.File(stopover).move(self.output().path)
 

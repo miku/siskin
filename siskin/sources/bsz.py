@@ -1807,7 +1807,7 @@ class Lookup(BSZTask):
         self.logger.info('Trace for {kind}: {id} (ppn, epn, sigel, 004, date, iln)'.format(
                     kind=self.kind.upper(), id=self.id))
         self.logger.info('Note: could match both, EPNs and PPNs, e.g. 108834948')
-        output = shellout("grep {id} {input} > {output}", id=self.id,
+        output = shellout("LANG=C grep {id} {input} > {output}", id=self.id,
                           ignoremap={1: "ID NOT FOUND"},
                           input=self.input().get('local').path)
 
@@ -1828,7 +1828,7 @@ class Lookup(BSZTask):
         for epn in sorted(epns):
             self.logger.info('# trace in deletions for EPN (epn, iln, date): %s' % (epn))
             try:
-                output = shellout("grep {epn} {input} > {output}", epn=epn,
+                output = shellout("LANG=C grep {epn} {input} > {output}", epn=epn,
                                   input=self.input().get('deletion').path)
                 self.logger.info("\n\n{output}".format(output=open(output).read()))
             except RuntimeError as err:

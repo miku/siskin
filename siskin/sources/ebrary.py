@@ -50,7 +50,7 @@ class EbraryCombine(EbraryTask):
                             input=self.input().path)
 
         # there is a broken record inside!
-        mmap = shellout("""marcmap {input} | grep -v ^ebr10661760 \
+        mmap = shellout("""marcmap {input} | LANG=C grep -v ^ebr10661760 \
                            | awk '{{print $2":"$3}}' > {output} """,
                            input=combined)
         # prepare seekmap

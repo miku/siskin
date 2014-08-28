@@ -58,7 +58,7 @@ class HMTNaxosUniqPersonsAndDates(HMTTask):
         return HMTNaxosPersonsAndDates(date=self.date)
 
     def run(self):
-        output = shellout("cut -f 2-3 < {input} | sort -u > {output}",
+        output = shellout("cut -f 2-3 < {input} | LANG=C sort -u > {output}",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -75,7 +75,7 @@ class HMTNaxosCompletePersonsAndDates(HMTTask):
         return HMTNaxosUniqPersonsAndDates(date=self.date)
 
     def run(self):
-        output = shellout("""grep -v "{null}" {input} > {output}""",
+        output = shellout("""LANG=C grep -v "{null}" {input} > {output}""",
                           null=self.NULL, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -92,7 +92,7 @@ class HMTNaxosIncompleteAuthorsAndDates(HMTTask):
         return HMTNaxosUniqPersonsAndDates(date=self.date)
 
     def run(self):
-        output = shellout("""grep "{null}" {input} > {output}""",
+        output = shellout("""LANG=C grep "{null}" {input} > {output}""",
                           null=self.NULL, input=self.input().path)
         luigi.File(output).move(self.output().path)
 

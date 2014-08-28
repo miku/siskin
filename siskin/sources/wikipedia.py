@@ -61,9 +61,9 @@ class WikipediaTitles(WikipediaTask):
 
     @timed
     def run(self):
-        output = shellout("""grep -E "<title>[^<]*</title>" {input} |
-                             sed -e 's@<title>@@g' |
-                             sed -e 's@</title>@@g' > {output}""",
+        output = shellout("""LANG=C grep -E "<title>[^<]*</title>" {input} |
+                             LANG=C sed -e 's@<title>@@g' |
+                             LANG=C sed -e 's@</title>@@g' > {output}""",
                              input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -107,10 +107,10 @@ class WikipediaCategoryList(WikipediaTask):
         prefixes = {'en': 'Category', 'de': 'Kategorie', 'fr': u'Catégorie'}
         if self.language not in prefixes:
             raise RuntimeError('Categorie prefix not added yet')
-        output = shellout("""grep -iF "{prefix}:" {input} > {output}""",
+        output = shellout("""LANG=C grep -iF "{prefix}:" {input} > {output}""",
                           input=self.input().path,
                           prefix=prefixes.get(self.language))
-        output = shellout("sort {input} | uniq > {output}", input=output)
+        output = shellout("LANG=C sort {input} | LANG=C uniq > {output}", input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -256,8 +256,8 @@ class WikipediaCategoryDistribution(WikipediaTask):
 
     @timed
     def run(self):
-        output = shellout(r"""cat {input} | cut -f2- | sort | uniq -c |
-                              sort -nr > {output}""", input=self.input().path)
+        output = shellout(r"""cat {input} | cut -f2- | LANG=C sort | LANG=C uniq -c |
+                              LANG=C sort -nr > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -273,7 +273,7 @@ class WikipediaPagesWithCategories(WikipediaTask):
 
     @timed
     def run(self):
-        output = shellout(r"""cat {input} | cut -f1 | sort | uniq > {output}""",
+        output = shellout(r"""cat {input} | cut -f1 | LANG=C sort | LANG=C uniq > {output}""",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 

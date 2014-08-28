@@ -138,7 +138,7 @@ class FreebaseEquivalent(FreebaseTask):
 
     @timed
     def run(self):
-        output = shellout('LC_ALL="C" grep -E "(equivalent|owl#sameAs)" {path} > {output}',
+        output = shellout('LC_ALL="C" LANG=C grep -E "(equivalent|owl#sameAs)" {path} > {output}',
                  path=self.input().path, ignoremap={1: "Not found."})
         luigi.File(output).move(self.output().path)
 

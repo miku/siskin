@@ -157,7 +157,7 @@ class GNDPredicateDistribution(GNDTask):
         return GNDNTriples(date=self.date)
 
     def run(self):
-        output = shellout("""cut -d " " -f2 {input} | sort | uniq -c > {output}""",
+        output = shellout("""cut -d " " -f2 {input} | LANG=C sort | LANG=C uniq -c > {output}""",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 

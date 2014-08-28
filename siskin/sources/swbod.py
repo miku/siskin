@@ -190,7 +190,7 @@ class SWBOpenDataListifiedRange(SWBOpenDataTask):
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=combined)
-        output = shellout("sort -k1,1 -k2,2 {input} > {output}", input=combined)
+        output = shellout("LANG=C sort -k1,1 -k2,2 {input} > {output}", input=combined)
         luigi.File(output).move(self.output().path)
 
     def output(self):

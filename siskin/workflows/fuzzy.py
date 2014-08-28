@@ -152,7 +152,7 @@ class FuzzyCandidates(FuzzyTask):
     @timed
     def run(self):
         output = shellout("""stardust -f "4,8" {measure} {input} > {output}""", measure=self.measure, input=self.input().path)
-        output = shellout(r"""/bin/bash -c "sort -t$'\t' -k10,10 -nr {input} > {output}" """, input=output)
+        output = shellout(r"""/bin/bash -c "LANG=C sort -t$'\t' -k10,10 -nr {input} > {output}" """, input=output)
         output = shellout(""" awk -F'\\t' '$10 > {threshold} {{print $0}}' {input} > {output} """, threshold=self.threshold, input=output)
         luigi.File(output).move(self.output().path)
 

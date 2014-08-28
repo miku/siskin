@@ -66,7 +66,7 @@ class B3KatSameAs(B3KatTask):
 
     def run(self):
         """ TODO: try https://github.com/miku/nttoldj """
-        output = shellout("""serdi -b -f -i turtle -o ntriples {input} | grep "owl#sameAs" > {output}""",
+        output = shellout("""serdi -b -f -i turtle -o ntriples {input} | LANG=C grep "owl#sameAs" > {output}""",
                           input=self.input().get('content').path)
         luigi.File(output).move(self.output().path)
 
@@ -88,7 +88,7 @@ class B3KatExtractRelation(B3KatTask):
 
     def run(self):
 
-        output = shellout("""serdi -b -f -i turtle -o ntriples {input} | grep "{relator}" > {output}""",
+        output = shellout("""serdi -b -f -i turtle -o ntriples {input} | LANG=C grep "{relator}" > {output}""",
                           relator=self.relator, input=self.input().get('content').path)
         luigi.File(output).move(self.output().path)
 

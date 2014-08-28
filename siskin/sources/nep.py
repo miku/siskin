@@ -213,7 +213,7 @@ class NEPDates(NEPTask):
 
     @timed
     def run(self):
-        output = shellout("awk '{{print $1}}' {input} | sort -u > {output}",
+        output = shellout("LANG=C awk '{{print $1}}' {input} | LANG=C sort -u > {output}",
                         input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -301,7 +301,7 @@ class NEPEvents(NEPTask):
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path,
                      output=combined)
-        output = shellout("sort -k1,1 -k3,3 {input} > {output}", input=combined)
+        output = shellout("LANG=C sort -k1,1 -k3,3 {input} > {output}", input=combined)
         luigi.File(output).move(self.output().fn)
 
     def output(self):
@@ -330,7 +330,7 @@ class NEPSurface(NEPTask):
             for _, row in surface.iteritems():
                 output.write_tsv(*row)
 
-        output = shellout("sort -k3,3 -k4,4n {input} > {output}",
+        output = shellout("LANG=C sort -k3,3 -k4,4n {input} > {output}",
                           input=stopover)
         luigi.File(output).move(self.output().path)
 
@@ -404,7 +404,7 @@ class NEPForUBL(NEPTask):
 
     @timed
     def run(self):
-	df = pd.read_csv(self.input().get('codes').open(), sep='\t', names=('code',))
+    df = pd.read_csv(self.input().get('codes').open(), sep='\t', names=('code',))
         filter_codes = set(df.code.tolist())
 
         with self.input().get('snaphost').open() as handle:
@@ -414,15 +414,15 @@ class NEPForUBL(NEPTask):
                 for record in reader:
                     record = marcx.FatRecord.from_record(record)
 
-		    # 240.a Uniform title
+                    # 240.a Uniform title
                     if record.has('240.a'):
                         continue
 
-		    # 007 Physical Description Fixed Field, Text
+                    # 007 Physical Description Fixed Field, Text
                     if not record.test('007', lambda s: s.startswith('t')):
                         continue
 
-		    # 072.2 Subject Category Code, Source
+                    # 072.2 Subject Category Code, Source
                     if record.test('072.2', lambda s: s.startswith('bicssc')):
                         for code in record.itervalues('072.a'):
                             if code in filter_codes:
@@ -534,4 +534,4 @@ class NEPIndex(NEPTask, CopyToIndex):
         return self.effective_task_id()
 
     def requires(self):
-	return NEPJson(date=self.date)
+    return NEPJson(date=self.date)
