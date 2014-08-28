@@ -185,6 +185,27 @@ class GNDCayleyLevelDB(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='leveldb'))
 
+class GNDCayleyBoltDB(GNDTask):
+    """ Create a Cayley BoltDB database from GND data. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    gomaxprocs = luigi.IntParameter(default=8, significant=False)
+
+    def requires(self):
+        return {'ntriples': GNDAbbreviatedNTriples(date=self.date),
+                'cayley': Executable(name='cayley', message='http://git.io/KH-wFA')}
+
+    @timed
+    def run(self):
+        _, dbpath = tempfile.mkstemp(prefix='siskin-')
+        shellout("cayley init -alsologtostderr -config {config} -dbpath={dbpath}",
+                 config=self.assets('cayley.bolt.conf'), dbpath=dbpath)
+        shellout("GOMAXPROCS={gomaxprocs} cayley load -config {config} -alsologtostderr -dbpath={dbpath} --triples {input}",
+                 gomaxprocs=self.gomaxprocs, config=self.assets('cayley.bolt.conf'), dbpath=dbpath, input=self.input().get('ntriples').path)
+        shutil.move(dbpath, self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='bolt'))
+
 class GNDJson(GNDTask):
     """ Convert to some indexable JSON. """
     date = ClosestDateParameter(default=datetime.date.today())
