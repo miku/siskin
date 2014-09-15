@@ -33,6 +33,7 @@ from siskin.task import DefaultTask
 import datetime
 import json
 import luigi
+import operator
 import re
 
 config = Config.instance()
@@ -78,6 +79,28 @@ class EBLPaths(EBLTask):
     @timed
     def run(self):
         self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class EBLInventory(EBLTask):
+    """ List EBL inventory in form of (type, date, path) tuples. No sorting. """
+
+    def requires(self):
+        return EBLPaths()
+
+    def run(self):
+        getdate = operator.itemgetter('year', 'month', 'day')
+        dump = re.compile(".*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-(\d{4})_leip_FULL_CATALOGUE_export.zip")
+        delta = re.compile(".*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-(\d{4})_leip_Content_export.zip")
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('path',)):
+                    for name, pattern in (('dump', dump), ('delta', delta)):
+                        match = pattern.search(row.path)
+                        if match:
+                            date = datetime.date(*map(int, getdate(match.groupdict())))
+                            output.write_tsv(name, date, row.path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
