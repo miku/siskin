@@ -45,7 +45,7 @@ class DailyIndexUpdates(Workflow):
 
         return [
             BMSIndex(date=self.date),
-            BNFIndex(date=self.date),
+            BNFIndex(date=datetime.date(2014, 8, 1)),
             BSZIndexPatch(end=self.date, indicator=self.indicator),
             DissonIndex(date=self.date),
             DOABIndex(date=self.date),
