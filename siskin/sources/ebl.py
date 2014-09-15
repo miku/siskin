@@ -299,4 +299,4 @@ class EBLIndex(EBLTask, CopyToIndex):
         return self.effective_task_id()
 
     def requires(self):
-	return EBLJson(date=self.date)
+        return EBLJson(date=self.date)
