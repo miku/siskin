@@ -108,6 +108,34 @@ class EBLInventory(EBLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class EBLBacklog(EBLTask):
+    """ A list of all task relevant for a certain date. Includes dumps and deltas.
+    Will raise an error, if there no dump can be found. Ordered by date, dump first. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return EBLInventory()
+
+    def run(self):
+        backlog = []
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'date', 'path')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                if date <= self.date:
+                    backlog.append(row)
+        if all([entry.kind == 'delta' for entry in backlog]):
+            raise RuntimeError('No EBL dump found before %s' % self.date)
+        backlog = sorted(backlog, key=operator.itemgetter(1), reverse=True)
+        index = [entry.kind for entry in backlog].index('dump') + 1
+        backlog = reversed(backlog[:index])
+        with self.output().open('w') as output:
+            for entry in backlog:
+                output.write_tsv(*entry)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class EBLDatesAndPaths(EBLTask):
     """ Dump the dates and file paths to a file sorted. """
     indicator = luigi.Parameter(default=random_string())
