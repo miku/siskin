@@ -113,8 +113,7 @@ class FuzzyTitlePool(FuzzyTask, ElasticsearchMixin):
 
     def requires(self):
         return {'file': FuzzyFieldList(date=self.date, indices=self.source, fields='_id _index _type content.245.a content.245.b'),
-                'esmlt': Executable(name='esmlt', message='http://git.io/ckXUgA'),
-                'stardust': Executable(name='stardust')}
+                'esmlt': Executable(name='esmlt', message='http://git.io/ckXUgA')}
 
     @timed
     def run(self):
@@ -147,13 +146,14 @@ class FuzzyCandidates(FuzzyTask):
     threshold = luigi.FloatParameter(default=0.75)
 
     def requires(self):
-        return FuzzyTitlePool(source=self.source, target=self.target, null=self.null, date=self.date)
+        return {'file': FuzzyTitlePool(source=self.source, target=self.target, null=self.null, date=self.date),
+                'stardust': Executable(name='stardust', message='http://git.io/_ehcwQ')}
 
     @timed
     def run(self):
-        output = shellout("""stardust -f "4,8" {measure} {input} > {output}""", measure=self.measure, input=self.input().path)
+        output = shellout("""stardust -f "4,8" {measure} {input} > {output}""", measure=self.measure, input=self.input().get('file').path)
         output = shellout(r"""/bin/bash -c "LANG=C sort -t$'\t' -k10,10 -nr {input} > {output}" """, input=output)
-        output = shellout(""" awk -F'\\t' '$10 > {threshold} {{print $0}}' {input} > {output} """, threshold=self.threshold, input=output)
+        output = shellout("""awk -F'\\t' '$10 > {threshold} {{print $0}}' {input} > {output} """, threshold=self.threshold, input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
