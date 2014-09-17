@@ -23,6 +23,7 @@ path-regex = .*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-.*.zip
 
 from gluish.benchmark import timed
 from gluish.common import FTPMirror, Executable
+from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import hourly
@@ -35,6 +36,7 @@ import json
 import luigi
 import operator
 import re
+import tempfile
 
 config = Config.instance()
 
@@ -136,6 +138,170 @@ class EBLBacklog(EBLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class EBLDumpCombined(EBLTask):
+    """ Combine .mrc files out of dump. """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return EBLInventory()
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'date', 'path')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                if date == self.date and row.kind == 'dump':
+                    output = shellout("unzip -p {input} \*.mrc > {output}", input=row.path,
+                                      ignoremap={1: 'A warning alone will trigger a non-zero return value. Assuming everything went well anyway.'})
+                    luigi.File(output).move(self.output().path)
+                    break
+            else:
+                raise RuntimeError("No EBL dump on given date: %s" % self.date)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+class EBLDeltaCombined(EBLTask):
+    """ Out of a delta, extract and combine the additions or deletions. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='add', description='add or delete')
+
+    def requires(self):
+        return EBLInventory()
+
+    def run(self):
+        patterns = {
+            'add': '*leip_Content_Add_*.mrc',
+            'delete': '*leip_Content_Delete_*.mrc',
+        }
+        if self.kind not in patterns:
+            raise RuntimeError("Unknown kind, only valid kinds are add and delete.")
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'date', 'path')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                if date == self.date and row.kind == 'delta':
+                    output = shellout("unzip -p {input} \{pattern} > {output}", input=row.path, pattern=patterns[self.kind],
+                                      ignoremap={1: 'A warning alone will trigger a non-zero return value. Assuming everything went well anyway.'})
+                    luigi.File(output).move(self.output().path)
+                    break
+            else:
+                raise RuntimeError("No EBL delta package on given date: %s" % self.date)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+class EBLMarcDB(EBLTask):
+    """ Create a sqlite3 db with (id, secondary (date), blob) table to allow random access
+    to a single marc records by id for a certain date. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return EBLBacklog(date=self.closest())
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'date', 'path')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                if row.kind == 'delta':
+                    task = EBLDeltaCombined(date=date, kind='add')
+                    luigi.build([task])
+                    shellout("marcdb -secondary {date} -o {output} {input}", date=date, input=task.output().path, output=stopover)
+                if row.kind == 'dump':
+                    task = EBLDumpCombined(date=date)
+                    luigi.build([task])
+                    shellout("marcdb -secondary {date} -o {output} {input}", date=date, input=task.output().path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
+class EBLEvents(EBLTask):
+    """ Given a date, create a single MARC file, that incorporates the dump and all deltas (additions, deletions). """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return EBLBacklog(date=self.closest())
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'date', 'path')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                if row.kind == 'dump':
+                    task = EBLDumpCombined(date=date)
+                    luigi.build([task])
+                    shellout("marctotsv {input} U 001 {date} >> {output}", input=task.output().path, date=date, output=stopover)
+                if row.kind == 'delta':
+                    task = EBLDeltaCombined(date=date, kind='add')
+                    luigi.build([task])
+                    shellout("marctotsv {input} U 001 {date} >> {output}", input=task.output().path, date=date, output=stopover)
+                    task = EBLDeltaCombined(date=date, kind='delete')
+                    luigi.build([task])
+                    shellout("marctotsv {input} D 001 {date} >> {output}", input=task.output().path, date=date, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class EBLSurface(EBLTask):
+    """ For a given date, list the (EBL ID, date) that should be in the current
+    state of the data source. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return EBLEvents(date=self.date)
+
+    @timed
+    def run(self):
+        datemap = {}
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'id', 'date')):
+                date = datetime.date(*map(int, row.date.split('-')))
+                if row.kind == 'U':
+                    datemap[row.id] = date
+                if row.kind == 'D':
+                    if row.id in datemap:
+                        del datemap[row.id]
+                    else:
+                        # just another indication of a deleted record that
+                        # was not added before - ignore
+                        pass
+
+        with self.output().open('w') as output:
+            for id, date in sorted(datemap.iteritems(), key=operator.itemgetter(1)):
+                output.write_tsv(id, date)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class EBLSnapshot(EBLTask):
+    """ Create a single MARC file, that represents the state of the data for
+    a given date. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'surface': EBLSurface(date=self.date),
+                'db': EBLMarcDB(date=self.date)}
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with sqlite3db(self.input().get('db').path) as cursor:
+            with self.input().get('surface').open() as handle:
+                with open(stopover, 'wb') as output:
+                    for row in handle.iter_tsv(cols=('id', 'date')):
+                        cursor.execute("SELECT record from store where id = ? and secondary = ?", (row.id, row.date))
+                        result = cursor.fetchone()
+                        output.write(result[0])
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
 class EBLDatesAndPaths(EBLTask):
     """ Dump the dates and file paths to a file sorted. """
     indicator = luigi.Parameter(default=random_string())
@@ -231,30 +397,12 @@ class EBLLatestDate(EBLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class EBLCombine(EBLTask):
-    """ Unzip the file contents MARC files into a single file. """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return EBLLatestDateAndPath(date=self.date)
-
-    @timed
-    def run(self):
-        with self.input().open() as handle:
-            path = handle.iter_tsv(cols=('date', 'path')).next().path
-        output = shellout("unzip -p {input} \*.mrc > {output}", input=path,
-                          ignoremap={1: 'A warning alone will trigger a non-zero return value. Assuming everything went well anyway.'})
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
-
 class EBLJson(EBLTask):
     """ Take EBL combined and convert it to JSON. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'marc': EBLCombine(date=self.date),
+        return {'marc': EBLSnapshot(date=self.date),
                 'converter': Executable(name='marctojson'),}
 
     @timed
