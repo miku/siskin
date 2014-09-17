@@ -42,7 +42,7 @@ if __name__ == '__main__':
             klass = getattr(task_klass, k).__class__
             typed_kwargs[k] = klass().parse(v)
         except AttributeError as err:
-            print('ignoring missed attribute %s'.format(k))
+            print('ignoring missed attribute {0}'.format(k))
 
     task = task_klass(**typed_kwargs)
     output = task.output()
