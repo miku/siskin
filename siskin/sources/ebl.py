@@ -31,6 +31,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout, memoize, random_string
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+import base64
 import datetime
 import json
 import luigi
@@ -207,11 +208,11 @@ class EBLMarcDB(EBLTask):
                 if row.kind == 'delta':
                     task = EBLDeltaCombined(date=date, kind='add')
                     luigi.build([task])
-                    shellout("marcdb -secondary {date} -o {output} {input}", date=date, input=task.output().path, output=stopover)
+                    shellout("marcdb -encode -secondary {date} -o {output} {input}", date=date, input=task.output().path, output=stopover)
                 if row.kind == 'dump':
                     task = EBLDumpCombined(date=date)
                     luigi.build([task])
-                    shellout("marcdb -secondary {date} -o {output} {input}", date=date, input=task.output().path, output=stopover)
+                    shellout("marcdb -encode -secondary {date} -o {output} {input}", date=date, input=task.output().path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
@@ -296,7 +297,7 @@ class EBLSnapshot(EBLTask):
                     for row in handle.iter_tsv(cols=('id', 'date')):
                         cursor.execute("SELECT record from store where id = ? and secondary = ?", (row.id, row.date))
                         result = cursor.fetchone()
-                        output.write(result[0])
+                        output.write(base64.b64decode(result[0]))
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
