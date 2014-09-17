@@ -17,8 +17,12 @@ ftp-pattern = some*glob*pattern.zip
 # Dates to ignore.
 exclude = 1970-12-31
 
-# This regex is matched against the file paths. It must provide `year`, `month` and `day` named groups.
-path-regex = .*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-.*.zip
+# This regexes are matched against the file paths. It must provide `year`, `month` and `day` named groups.
+regex-dump = .*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-(\d{4})_leip_FULL_CATALOGUE_export.zip
+regex-delta = .*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-(\d{4})_leip_Content_export.zip
+
+glob-add = *leip_Content_Add_*.mrc
+glob-delete = *leip_Content_Delete_*.mrc
 """
 
 from gluish.benchmark import timed
@@ -28,12 +32,11 @@ from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout, memoize, random_string
+from gluish.utils import shellout, memoize
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import base64
 import datetime
-import json
 import luigi
 import operator
 import re
@@ -96,8 +99,8 @@ class EBLInventory(EBLTask):
     def run(self):
         getdate = operator.itemgetter('year', 'month', 'day')
         patterns = (
-            ('dump', re.compile(".*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-(\d{4})_leip_FULL_CATALOGUE_export.zip")),
-            ('delta', re.compile(".*(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})-(\d{4})_leip_Content_export.zip")),
+            ('dump', re.compile(config.get('ebl', 'regex-dump'))),
+            ('delta', re.compile(config.get('ebl', 'regex-delta'))),
         )
         with self.input().open() as handle:
             with self.output().open('w') as output:
@@ -106,6 +109,8 @@ class EBLInventory(EBLTask):
                         match = pattern.search(row.path)
                         if match:
                             date = datetime.date(*map(int, getdate(match.groupdict())))
+                            if date in self.muted():
+                                continue
                             output.write_tsv(name, date, row.path)
 
     def output(self):
@@ -172,8 +177,8 @@ class EBLDeltaCombined(EBLTask):
 
     def run(self):
         patterns = {
-            'add': '*leip_Content_Add_*.mrc',
-            'delete': '*leip_Content_Delete_*.mrc',
+            'add': config.get('ebl', 'glob-add'),
+            'delete': config.get('ebl', 'glob-delete'),
         }
         if self.kind not in patterns:
             raise RuntimeError("Unknown kind, only valid kinds are add and delete.")
@@ -303,56 +308,14 @@ class EBLSnapshot(EBLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
 
-class EBLDatesAndPaths(EBLTask):
-    """ Dump the dates and file paths to a file sorted. """
-    indicator = luigi.Parameter(default=random_string())
-
-    def requires(self):
-        return EBLPaths(indicator=self.indicator)
-
-    @timed
-    def run(self):
-        pattern = re.compile(config.get('ebl', 'path-regex'))
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in sorted(handle.iter_tsv(cols=('path',))):
-                    mo = pattern.match(row.path)
-                    if not mo:
-                        raise RuntimeError('unknown EBL pattern: %s, %s' % (row.path, pattern))
-                    gdict = mo.groupdict()
-                    date = datetime.date(int(gdict['year']), int(gdict['month']),
-                                         int(gdict['day']))
-                    if date in self.muted():
-                        self.logger.debug("Skipping %s since it is muted." % date)
-                    else:
-                        output.write_tsv(date, row.path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class EBLDates(EBLTask):
-    """ All EBL dates sorted in a single file. """
-    indicator = luigi.Parameter(default=hourly(fmt='%s'))
-
-    def requires(self):
-        return EBLDatesAndPaths(indicator=self.indicator)
-
-    def run(self):
-        output = shellout("awk '{{print $1}}' {input} > {output}",
-                          input=self.input().path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class EBLLatestDateAndPath(EBLTask):
     """ For a given date, return the closest date in the past
-    on which EBL shipped. """
+    on which EBL shipped (dump or delta). """
     date = luigi.DateParameter(default=datetime.date.today())
     indicator = luigi.Parameter(default=hourly(fmt='%s'))
 
     def requires(self):
-        return EBLDatesAndPaths(indicator=self.indicator)
+        return EBLInventory(indicator=self.indicator)
 
     @timed
     def run(self):
@@ -362,13 +325,13 @@ class EBLLatestDateAndPath(EBLTask):
         an exception, otherwise dump the closest date and filename to output """
         pathmap = {}
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('date', 'path')):
+            for row in handle.iter_tsv(cols=('kind', 'date', 'path')):
                 date = datetime.datetime.strptime(row.date, '%Y-%m-%d').date()
                 pathmap[date] = row.path
 
         def closest_keyfun(date):
             if date > self.date:
-                return datetime.timedelta(999999999)
+                return datetime.timedelta(1e8)
             return abs(date - self.date)
 
         closest = min(pathmap.keys(), key=closest_keyfun)
