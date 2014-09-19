@@ -4,8 +4,8 @@
 $script = <<SETUP_SCRIPT
 
 # Adjust versions here ...
-ELASTICSEARCH_VERSION=1.3.0
-MARCTOOLS_VERSION=1.5.0
+ELASTICSEARCH_VERSION=1.3.2
+MARCTOOLS_VERSION=1.5.5
 
 # Download Elasticsearch and install
 ES_RPM=elasticsearch-$ELASTICSEARCH_VERSION.noarch.rpm
