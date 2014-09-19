@@ -2,6 +2,7 @@
 # pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301
 
 from gluish.benchmark import timed
+from gluish.common import Executable
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout, memoize
@@ -158,11 +159,12 @@ class WikiPagesJson(WikidataTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return WikidataFile(suffix='pages-articles.xml.bz2', date=self.date)
+        return {'dump': WikidataFile(suffix='pages-articles.xml.bz2', date=self.date),
+                'app': Executable(name='wikidatatojson', message='https://github.com/miku/wikitools'))}
 
     @timed
     def run(self):
-        output = shellout("wikikit -d {input} > {output}", input=self.input().path)
+        output = shellout("wikidatatojson {input} > {output}", input=self.input().get('dump').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

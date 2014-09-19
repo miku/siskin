@@ -125,11 +125,12 @@ class WikipediaJson(WikipediaTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return WikipediaArticleDump(date=self.date, language=self.language)
+        return {'dump': WikipediaArticleDump(date=self.date, language=self.language),
+                'app': Executable(name='wikitojson', message='https://github.com/miku/wikitools')}
 
     @timed
     def run(self):
-        output = shellout("wikikit {input} > {output}", input=self.input().path)
+        output = shellout("wikitojson {input} > {output}", input=self.input().get('dump').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -137,8 +138,8 @@ class WikipediaJson(WikipediaTask):
 
 class WikipediaCategoryTable(WikipediaTask):
     """
-    A list of wikipedia categories. Using wikikit
-    (https://github.com/miku/wikikit).
+    A list of wikipedia categories. Using wikitools
+    (https://github.com/miku/wikitools).
 
     Similar to `WikipediaCategoryList`.
 
@@ -162,17 +163,18 @@ class WikipediaCategoryTable(WikipediaTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return WikipediaArticleDump(date=self.date, language=self.language)
+        return {'dump': WikipediaArticleDump(date=self.date, language=self.language),
+                'app': Executable(name='wikicats', message='https://github.com/miku/wikitools')}
 
     @timed
     def run(self):
         prefixes = {'en': 'Category', 'de': 'Kategorie', 'fr': u'Catégorie',
                     'es': u'Categoría'}
         if self.language not in prefixes:
-            raise RuntimeError('Categorie prefix not added yet')
+            raise RuntimeError('Category prefix not added yet')
 
-        output = shellout("""wikikit -c "{prefix}" {input} > {output}""",
-                          input=self.input().path, prefix=prefixes.get(self.language),
+        output = shellout("""wikicats -pattern "{prefix}" {input} > {output}""",
+                          input=self.input().get('dump').path, prefix=prefixes.get(self.language),
                           encoding='utf-8')
         luigi.File(output).move(self.output().path)
 
@@ -302,15 +304,16 @@ class WikipediaRawAuthorityData(WikipediaTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return WikipediaArticleDump(date=self.date, language=self.language)
+        return {'dump': WikipediaArticleDump(date=self.date, language=self.language),
+                'app': Executable(name='wikinorm', message='https://github.com/miku/wikitools')}
 
     @timed
     def run(self):
         prefixes = {'de': 'Normdaten', 'en': 'Authority control'}
         if not self.language in prefixes:
             raise RuntimeError("Languages available %s" % prefixes)
-        output = shellout("""wikikit -a {prefix} {input} > {output}""",
-                          input=self.input().path, prefix=prefixes.get(self.language))
+        output = shellout("""wikinorm -pattern {prefix} {input} > {output}""",
+                          input=self.input().get('dump').path, prefix=prefixes.get(self.language))
         luigi.File(output).move(self.output().path)
 
     def output(self):
