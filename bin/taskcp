@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# copy task output
+# split args into [HEAD] [LAST] (HEAD is the task name + parameters, LAST the destination)
+
+LEN=$(($#-1))
+HEAD=${@:1:$LEN}
+LAST="${!#}"
+
+OUTPUT=$(taskoutput $HEAD 2> /dev/null)
+
+if [ $? -ne 0 ]; then
+    echo "Usage: taskcp TASKNAME DST"
+    exit 1
+fi
+
+if [ ! -e "$OUTPUT" ]; then
+    echo "Task is not done yet. Run: taskdo $HEAD"
+    exit 1
+else
+    cp -v "$OUTPUT" "$LAST"
+fi

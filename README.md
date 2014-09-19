@@ -29,6 +29,7 @@ To use siskin, start the luigi scheduler first with `luigid` (in the background 
 Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/master/bin), all sharing the prefix `task`:
 
     taskcat          - inspect task output
+    taskcp           - copy task output
     taskdir          - show task directory
     taskdo           - run task
     taskdu           - show disk usage of task
