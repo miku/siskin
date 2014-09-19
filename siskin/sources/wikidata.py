@@ -151,7 +151,7 @@ class WikidataFile(WikidataTask):
                                    'Try to rerun WikidataDumpLinks task')
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext=None), format=TSV)
+        return luigi.LocalTarget(path=self.path(digest=True, ext='xml'))
 
 class WikiPagesJson(WikidataTask):
 
