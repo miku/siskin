@@ -13,6 +13,9 @@ import luigi
 import re
 
 class WikidataTask(DefaultTask):
+    """
+    Base task for wikidata.
+    """
     TAG = 'wikidata'
 
     @memoize
@@ -27,8 +30,9 @@ class WikidataTask(DefaultTask):
         return result
 
 class WikidataLatestDate(WikidataTask):
-    """ For a given date, return the closest date in the past
-    on which EBL shipped. """
+    """
+    For a given date, return the closest date in the past on which wikidata shipped.
+    """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -62,14 +66,18 @@ class WikidataLatestDate(WikidataTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class WikidataDumpDates(WikidataTask):
+    """ Dump dates and links like this:
 
+    2014-02-10  http://dumps.wikimedia.org/wikidatawiki/20140210/
+    2014-02-26  http://dumps.wikimedia.org/wikidatawiki/20140226/
+    2014-03-15  http://dumps.wikimedia.org/wikidatawiki/20140315/
+    ...
+    """
     date = luigi.DateParameter(default=datetime.date.today())
 
     @timed
     def run(self):
-        output = shellout("""wget --retry-connrefused
-                             http://dumps.wikimedia.org/wikidatawiki/
-                             -O {output}""")
+        output = shellout("""wget --retry-connrefused http://dumps.wikimedia.org/wikidatawiki/ -O {output}""")
         with open(output) as handle:
             soup = BeautifulSoup.BeautifulSoup(handle.read())
 
@@ -90,15 +98,14 @@ class WikidataDumpDates(WikidataTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class WikidataDumpLinks(WikidataTask):
-    """ Dump all links for a dump date. """
+    """ A wikidata dump will consist of many files. Dump all links for those files. """
 
     date = luigi.DateParameter(default=datetime.date.today())
 
     @timed
     def run(self):
         url = "http://dumps.wikimedia.org/wikidatawiki/%s/" % (self.closest().strftime('%Y%m%d'))
-        output = shellout("""wget --retry-connrefused
-                             {url} -O {output}""", url=url)
+        output = shellout("""wget --retry-connrefused {url} -O {output}""", url=url)
 
         with open(output) as handle:
             soup = BeautifulSoup.BeautifulSoup(handle.read())
@@ -107,8 +114,8 @@ class WikidataDumpLinks(WikidataTask):
         links = set()
         for link in soup.findAll('a'):
             if pattern.match(link.text):
-                url = "http://dumps.wikimedia.org/wikidatawiki/%s/%s" % (
-                    (self.closest().strftime('%Y%m%d'), link.text))
+                date = self.closest().strftime('%Y%m%d')
+                url = "http://dumps.wikimedia.org/wikidatawiki/%s/%s" % (date, link.text)
                 links.add(url)
 
         with self.output().open('w') as output:
@@ -119,7 +126,10 @@ class WikidataDumpLinks(WikidataTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class WikidataFile(WikidataTask):
-
+    """
+    Download a single file with a certain suffix out of the dump files.
+    The most important is pages-articles.xml.bz2, which is the default.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
     suffix = luigi.Parameter(default='pages-articles.xml.bz2')
 
@@ -133,29 +143,20 @@ class WikidataFile(WikidataTask):
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('url',)):
                 if row.url.endswith(self.suffix):
-                    output = None
-                    if row.url.endswith('.gz'):
-                        output = shellout("""curl --connect-timeout {timeout} {url} | gunzip -c > {output}""",
-                                          url=row.url, timeout=self.timeout)
-                    elif row.url.endswith('.bz2'):
-                        output = shellout("""curl --connect-timeout {timeout} {url} | bunzip2 -c > {output}""",
-                                          url=row.url, timeout=self.timeout)
-                    else:
-                        output = shellout("""wget --retry-connrefused -q {url}
-                                             -O {output}""", url=row.url)
-                    if output is None:
-                        raise RuntimeError('no output')
+                    output = shellout("""curl --connect-timeout {timeout} {url} | bunzip2 -c > {output}""",
+                                      url=row.url, timeout=self.timeout)
                     luigi.File(output).move(self.output().path)
                     break
             else:
-                raise RuntimeError('No URL matches parameters. '
-                                   'Try to rerun WikidataDumpLinks task')
+                raise RuntimeError('No URL with suffix: %s, try to rerun WikidataDumpLinks' % self.suffix)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext='xml'))
 
 class WikiPagesJson(WikidataTask):
-
+    """
+    Generic conversion from XML to JSON.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
