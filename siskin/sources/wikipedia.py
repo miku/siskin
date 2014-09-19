@@ -463,7 +463,8 @@ class WikipediaRawCitations(WikipediaTask):
 
     @timed
     def run(self):
-        shellout("""egrep -oi "\\{{\\{{cite book[^}}]*?}}}}" {input} > {output}""", input=self.input().path)
+        output = shellout("""egrep -oi "\\{{\\{{cite book[^}}]*?}}}}" {input} > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
