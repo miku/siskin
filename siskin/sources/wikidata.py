@@ -160,7 +160,7 @@ class WikiPagesJson(WikidataTask):
 
     def requires(self):
         return {'dump': WikidataFile(suffix='pages-articles.xml.bz2', date=self.date),
-                'app': Executable(name='wikidatatojson', message='https://github.com/miku/wikitools'))}
+                'app': Executable(name='wikidatatojson', message='https://github.com/miku/wikitools')}
 
     @timed
     def run(self):
