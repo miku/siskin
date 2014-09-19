@@ -7,7 +7,8 @@ clean:
 	rm -rf python-*.rpm
 
 # packaging via vagrant
-SSHCMD = ssh -o StrictHostKeyChecking=no -i vagrant.key vagrant@127.0.0.1 -p 2222
+PORT = 2222
+SSHCMD = ssh -o StrictHostKeyChecking=no -i vagrant.key vagrant@127.0.0.1 -p $(PORT)
 REPOPATH = /usr/share/nginx/html/repo/CentOS/6/x86_64
 PROJECTGIT = https://github.com/miku/siskin.git
 
