@@ -9,7 +9,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ ! -f "$OUTPUT" ]; then
+if [ ! -e "$OUTPUT" ]; then
     echo "TODO $OUTPUT"
     exit 1
 else
