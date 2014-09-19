@@ -17,16 +17,16 @@ class FactbookTask(DefaultTask):
     TAG = 'factbook'
 
     def closest(self):
-	return yearly(self.date)
+        return yearly(self.date)
 
 class FactbookXML(FactbookTask):
     """ Download factbook XML version. There may be better versions. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-	url = 'http://jmatchparser.sourceforge.net/factbook/data/factbook.xml.gz'
-	output = shellout("curl --connect-timeout 10 {url} | gunzip -c > {output}", url=url)
-	luigi.File(output).move(self.output().path)
+        url = 'http://jmatchparser.sourceforge.net/factbook/data/factbook.xml.gz'
+        output = shellout("curl --connect-timeout 10 {url} | gunzip -c > {output}", url=url)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
