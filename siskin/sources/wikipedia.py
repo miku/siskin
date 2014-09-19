@@ -447,5 +447,23 @@ class WikipediaCategoryExample(WikipediaTask, ElasticsearchMixin):
                     empty += 1
 
         self.logger.info('{0} {1} {2}'.format(len(gnds), empty, i))
+
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class WikipediaRawCitations(WikipediaTask):
+    """
+    Very crudely extract citations from wikipedia markup.
+    """
+    language = luigi.Parameter(default='en')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaArticleDump(date=self.date, language=self.language)
+
+    @timed
+    def run(self):
+        shellout("""egrep -oi "\\{{\\{{cite book[^}}]*?}}}}" {input} > {output}""", input=self.input().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
