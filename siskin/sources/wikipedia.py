@@ -32,7 +32,7 @@ class WikipediaTask(DefaultTask):
 
 class WikipediaArticleDump(WikipediaTask):
     """
-    Download wiki-latest-pages-articles.xml.bz2 for a given language.
+    Download wiki-latest-pages-articles.xml.bz2 for a given language. Unarchive on the fly.
     """
     language = luigi.Parameter(default='en')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -52,6 +52,13 @@ class WikipediaArticleDump(WikipediaTask):
 class WikipediaTitles(WikipediaTask):
     """
     Get a list of wikipedia article titles.
+
+    James Joyce
+    Judo
+    JapaneseLanguage
+    James Bond
+    Japanese language
+    Johnny Got His Gun
     """
     language = luigi.Parameter(default='en')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -72,7 +79,18 @@ class WikipediaTitles(WikipediaTask):
 
 class WikipediaIsbnList(WikipediaTask):
     """
-    A list ISBN (candidates) found in the dump.
+    A list ISBN (candidates) found in the dump. Contains dups.
+
+    9780716703440
+    9780471925675
+    9780486653839
+    9780486653839
+    9780674033634
+    9780201151428
+    9780805386622
+    9780521316774
+    9780201149425
+    9780767915014
     """
 
     language = luigi.Parameter(default='en')
@@ -94,6 +112,19 @@ class WikipediaIsbnList(WikipediaTask):
 class WikipediaCategoryList(WikipediaTask):
     """
     A list of wikipedia categories. Using `grep`.
+
+    ...
+    Category:1358 establishments by country
+    Category:1358 establishments in England
+    Category:1358 in England
+    Category:1358 in Europe
+    Category:1358 in France
+    Category:1358 in Norway
+    Category:1358 in international relations
+    Category:1358 in law
+    Category:1358 in politics
+    Category:1358 works
+    ...
     """
 
     language = luigi.Parameter(default='en')
@@ -118,7 +149,7 @@ class WikipediaCategoryList(WikipediaTask):
 
 class WikipediaJson(WikipediaTask):
     """
-    A Json representation of a wikipedia dump.
+    A Json representation of a wikipedia dump. Line delimited JSON.
     """
 
     language = luigi.Parameter(default='en')
@@ -185,6 +216,10 @@ class WikipediaCategoryExtension(WikipediaTask):
     """
     For each category, collect the pages it contains. Similar to
     WikipediaCategoryExtensionJson, except the output here is tabular.
+
+    Badeanlage in Niedersachsen Moskaubad|Maschsee|Hardausee|Waldbad Birkerteich
+    Filmpreis als Thema Kategorie:Goldene Kamera|Kategorie:Golden Globe Award
+    Kanute (Schweiz)    Daniela Baumer|Corrado Filipponi|Ron Fischer (Kanute)|Michael Kurt
     """
 
     language = luigi.Parameter(default='de')
@@ -313,6 +348,27 @@ class WikipediaCategoryDistribution(WikipediaTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class WikipediaPagesWithCategories(WikipediaTask):
+    """
+    Contains dirty rows. But good row look like this:
+
+    ...
+    1932 Maccabiah Games
+    1932 Madras and Southern Mahratta Railway Strike
+    1932 Major League Baseball season
+    1932 Massachusetts State Aggies football team
+    1932 Memorial Cup
+    ...
+    A Gleam
+    A Gleam Handicap
+    A Glen Campbell Christmas
+    A Glimmer of Hope
+    ...
+    Abazu-Akabo
+    Abaí
+    Abaíra
+    Abaúj (region)
+    ...
+    """
 
     language = luigi.Parameter(default='en')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -503,6 +559,12 @@ class WikipediaCategoryExample(WikipediaTask, ElasticsearchMixin):
 class WikipediaRawCitations(WikipediaTask):
     """
     Very crudely extract citations from wikipedia markup.
+
+    Example:
+
+    {{cite book | url=http://books.google.de/books?id=GlICpnVArb8C&amp;pg=PA304 | pages =304–305 | chapter =The Antimonials ...
+    {{cite book|author = [[Michael Sipser]] | year = 1997 | title = Introduction to the Theory of Computation
+    ...
     """
     language = luigi.Parameter(default='en')
     date = ClosestDateParameter(default=datetime.date.today())
