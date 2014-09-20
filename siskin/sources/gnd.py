@@ -426,3 +426,17 @@ class GNDSameAs(GNDTask, ElasticsearchMixin):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDDBPediaLinks(GNDTask):
+    """ Return (s, p, o) tuples that connect gnd and wikipedia. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDSameAs(date=self.date)
+
+    def run(self):
+        output = shellout(r""" awk '$3 ~ "d:" {{print $0}' {input} > {output}""", index=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
