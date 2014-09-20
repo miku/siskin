@@ -440,3 +440,19 @@ class GNDDBPediaLinks(GNDTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDDefinitions(GNDTask):
+    """ Extract all dnb.es:defintion relations. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    index = luigi.Parameter(default='gnd', description='name of the index to search')
+
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
+
+    def run(self):
+        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"dnb.es:definition\""}}}}}}' > {output}""", index=self.index)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)

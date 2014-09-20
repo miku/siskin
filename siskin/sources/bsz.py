@@ -58,8 +58,9 @@ from gluish.parameter import ILNParameter
 from gluish.path import copyregions
 from gluish.utils import shellout, memoize, random_string, nwise
 from luigi import date_interval
-from siskin.task import DefaultTask
 from siskin.configuration import Config
+from siskin.sources.gnd import GNDDefinitions
+from siskin.task import DefaultTask
 import collections
 import datetime
 import difflib
@@ -2055,6 +2056,121 @@ class BSZ689Authority(BSZTask):
     def run(self):
         output = shellout(""" estab -indices {index} -f "content.001 content.689.0" > {output} """, index=self.index)
         luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDPersonRelations(BSZTask):
+    """ For a PPN return all DE-588 relations from 100 and 700. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'100': BSZ100Authority(date=self.date),
+                '700': BSZ700Authority(date=self.date)}
+    @timed
+    def run(self):
+        gnds = collections.defaultdict(set)
+        for _, target in self.input().iteritems():
+            with target.open() as handle:
+                for row in handle.iter_tsv(cols=('ppn', 'rels')):
+                    rels = row.rels.split('|')
+                    for r in rels:
+                        if r.startswith('(DE-588)'):
+                            gnds[row.ppn].add(r.replace('(DE-588)', 'gnd:'))
+
+        with self.output().open('w') as output:
+            for ppn, gnds in sorted(gnds.iteritems()):
+                output.write_tsv(ppn, '|'.join(gnds))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDRelations(BSZTask):
+    """ For a PPN return all DE-588 relations from 650 and 689. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'650': BSZ650Authority(date=self.date),
+                '689': BSZ689Authority(date=self.date)}
+    @timed
+    def run(self):
+        gnds = collections.defaultdict(set)
+        for _, target in self.input().iteritems():
+            with target.open() as handle:
+                for row in handle.iter_tsv(cols=('ppn', 'rels')):
+                    rels = row.rels.split('|')
+                    for r in rels:
+                        if r.startswith('(DE-588)'):
+                            gnds[row.ppn].add(r.replace('(DE-588)', 'gnd:'))
+
+        with self.output().open('w') as output:
+            for ppn, gnds in sorted(gnds.iteritems()):
+                output.write_tsv(ppn, '|'.join(gnds))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDReverseRelations(BSZTask):
+    """ For a GND report all PPNs. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return BSZGNDRelations(date=self.date)
+
+    def run(self):
+        rmap = collections.defaultdict(set)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'gnds')):
+                for gnd in row.gnds.split('|'):
+                    rmap[gnd].add(row.ppn)
+
+        with self.output().open('w') as output:
+            for gnd, ppns in sorted(rmap.iteritems()):
+                output.write_tsv(gnd, '|'.join(ppns))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDReferenceCount(BSZTask):
+    """ For a GND the number of PPNs that reference it. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return BSZGNDReverseRelations(date=self.date)
+
+    def run(self):
+        with self.output().open('w') as output:
+            with self.input().open() as handle:
+                for row in handle.iter_tsv(cols=('gnd', 'ppns')):
+                    output.write_tsv(row.gnd, len(row.ppns.split('|')))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDDefinitionAvailable(BSZTask):
+    """ For a GND that appears in BSZ check whether a defintion is available. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'bsz': BSZGNDReverseRelations(date=self.date),
+                'defs': GNDDefinitions(date=self.date)}
+
+    def run(self):
+        gnds_with_defs = set()
+        with self.input().get('defs').open() as handle:
+            for row in handle.iter_tsv(cols=('s', 'p', 'o')):
+                gnds_with_defs.add(row.s)
+
+        with self.input().get('bsz').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('gnd', 'ppns')):
+                    if row.gnd in gnds_with_defs:
+                        output.write_tsv(*row)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

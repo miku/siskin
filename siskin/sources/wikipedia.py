@@ -333,6 +333,8 @@ class WikipediaIndex(WikipediaTask, CopyToIndex):
     language = luigi.Parameter(default='en')
     date = ClosestDateParameter(default=datetime.date.today())
 
+    purge_existing_index = True
+
     @property
     def index(self):
         return '%swiki' % self.language
