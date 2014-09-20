@@ -76,12 +76,12 @@ Most tasks will let you know by themselves, what additional programs they need, 
     $ # Running a task with a missing external program ...
     $ taskdo EBLJson
     ...
-    [2014-09-20 23:24:35][luigi-interface][INFO    ] [pid 9486] Worker running   Executable(name=marctojson, message='http://git.io/1LXpQA')
-    [2014-09-20 23:24:35][luigi-interface][ERROR   ] [pid 9486] Worker failed    Executable(name=marctojson, message='http://git.io/1LXpQA')
+    ... [pid 9486] Worker running   Executable(name=marctojson, message='http://git.io/1LXpQA')
+    ... [pid 9486] Worker failed    Executable(name=marctojson, message='http://git.io/1LXpQA')
     Traceback (most recent call last):
-      File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/luigi/worker.py", line 76, in run
+      File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/...
         self.task.run()
-      File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/gluish/common.py", line 118, in run
+      File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/...
         self.message))
     RuntimeError: External app marctojson required.
     http://git.io/1LXpQA
