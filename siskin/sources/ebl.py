@@ -367,7 +367,7 @@ class EBLJson(EBLTask):
 
     def requires(self):
         return {'marc': EBLSnapshot(date=self.date),
-                'converter': Executable(name='marctojson'),}
+                'converter': Executable(name='marctojson', message='http://git.io/1LXpQA')}
 
     @timed
     def run(self):
