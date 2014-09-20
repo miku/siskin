@@ -178,7 +178,7 @@ class DBPImages(DBPTask, ElasticsearchMixin):
         return Executable(name='estab', message='http://git.io/bLY7cQ')
 
     def run(self):
-        output = shellout(""" estab -indices {index} -f "s p o" -query '{"query": {"query_string": {"query": "*jpg"}}}' > {output}""")
+        output = shellout(""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "*jpg"}}}}}}' > {output}""", index=self.index)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -193,7 +193,7 @@ class DBPDepictions(DBPTask, ElasticsearchMixin):
         return Executable(name='estab', message='http://git.io/bLY7cQ')
 
     def run(self):
-        output = shellout(r""" estab -indices dbp -f "s p o" -query '{"query": {"query_string": {"query": "p:\"foaf:depiction\""}}}' > {output}""")
+        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"foaf:depiction\""}}}}}}' > {output}""", index=self.index)
         luigi.File(output).move(self.output().path)
 
     def output(self):
