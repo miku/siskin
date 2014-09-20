@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Just like `head` but takes a taskname as arguments. The task must have been
+# completed successfully before you can `head` it.
+#
+# Examples
+#
+#     $ taskhead EBLDates
+#     $ taskhead Events --iln 10
+#
+
+set -e -u
+
+args=("$@")
+
+OUTPUT=$(taskoutput "$@"|tail -1)
+if [[ "$OUTPUT" == *mrc ]]; then
+    yaz-marcdump $OUTPUT | head -100
+else
+    head -10 $OUTPUT
+fi
