@@ -12,7 +12,7 @@ except:
     from distutils.core import setup
 
 setup(name='siskin',
-      version='0.0.60',
+      version='0.0.61',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
