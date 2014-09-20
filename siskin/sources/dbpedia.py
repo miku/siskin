@@ -169,6 +169,21 @@ class DBPIndex(DBPTask, CopyToIndex):
     def requires(self):
         return DBPJson(version=self.version, language=self.language)
 
+class DBPImages(DBPTask, ElasticsearchMixin):
+    """ Generate a raw list of (s, p, o) tuples that contain string ending with jpg. """
+
+    index = luigi.Parameter(default='dbp', description='name of the index to search')
+
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
+
+    def run(self):
+        output = shellout(""" estab -indices {index} -f "s p o" -query '{"query": {"query_string": {"query": "*jpg"}}}' > {output}""")
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 #
 # Some ad-hoc task, TODO: cleanup or rework.
 #
