@@ -184,6 +184,25 @@ class WikipediaCategoryTable(WikipediaTask):
 class WikipediaCategoryExtension(WikipediaTask):
     """
     For each category, collect the pages it contains.
+    Example:
+
+    {
+       "category" : "Jazz-Oboist",
+       "pages" : [
+          "Bob Cooper",
+          "Charles Owens (Saxophonist, 1939)",
+          "Karl Jenkins",
+          "Marshall Allen",
+          "Matthias Schubert",
+          "Maud Sauer",
+          "Paul McCandless",
+          "Phil Bodner",
+          "Roger Janotta",
+          "Sonny Simmons",
+          "Werner Baumgart",
+          "Yusef Lateef"
+       ]
+    }
     """
 
     language = luigi.Parameter(default='de')
