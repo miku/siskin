@@ -126,7 +126,7 @@ A rough list of extrernal tools used:
      1 pbzip2         .
      1 mpg123         .
      1 marcxmltojson  x        marctools
-     1 esmlt          .
+     1 esmlt          .        esmlt
      1 egrep          .
      1 awk            .
      1 7z             .
