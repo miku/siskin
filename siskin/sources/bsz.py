@@ -1973,9 +1973,10 @@ class ParentRecords(BSZTask):
 
 #
 # Authority data related tasks
+# https://wiki.bsz-bw.de/doku.php?id=v-team:daten:datendienste:marc21
 #
 class BSZ100Authority(BSZTask):
-    """ Report (_id, content.100.0, content.100.2) tuples. """
+    """ Report (_id, content.100.0) tuples. """
 
     index = luigi.Parameter(default='bsz', description='name of bsz index')
     date = luigi.DateParameter(default=datetime.date.today())
@@ -1988,8 +1989,22 @@ class BSZ100Authority(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class BSZ110Authority(BSZTask):
+    """ Report (_id, content.100.0) tuples. """
+
+    index = luigi.Parameter(default='bsz', description='name of bsz index')
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    @timed
+    def run(self):
+        output = shellout(""" estab -indices {index} -f "content.001 content.110.0" > {output} """, index=self.index)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class BSZ700Authority(BSZTask):
-    """ Report (_id, content.700.0, content.700.2) tuples. """
+    """ Report (_id, content.700.0) tuples. """
 
     index = luigi.Parameter(default='bsz', description='name of bsz index')
     date = luigi.DateParameter(default=datetime.date.today())
@@ -2002,15 +2017,43 @@ class BSZ700Authority(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class BSZ689Authority(BSZTask):
-    """ Report (_id, content.689.0, content.689.2) tuples. """
+class BSZ710Authority(BSZTask):
+    """ Report (_id, content.710.0) tuples. """
 
     index = luigi.Parameter(default='bsz', description='name of bsz index')
     date = luigi.DateParameter(default=datetime.date.today())
 
     @timed
     def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.689.0 content.689.2" > {output} """, index=self.index)
+        output = shellout(""" estab -indices {index} -f "content.001 content.710.0" > {output} """, index=self.index)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZ650Authority(BSZTask):
+    """ Report (_id, content.689.0) tuples. """
+
+    index = luigi.Parameter(default='bsz', description='name of bsz index')
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    @timed
+    def run(self):
+        output = shellout(""" estab -indices {index} -f "content.001 content.650.0" > {output} """, index=self.index)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZ689Authority(BSZTask):
+    """ Report (_id, content.689.0) tuples. """
+
+    index = luigi.Parameter(default='bsz', description='name of bsz index')
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    @timed
+    def run(self):
+        output = shellout(""" estab -indices {index} -f "content.001 content.689.0" > {output} """, index=self.index)
         luigi.File(output).move(self.output().path)
 
     def output(self):
