@@ -9,6 +9,7 @@ from gluish.path import iterfiles
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 import elasticsearch
+import hashlib
 import luigi
 import os
 import pprint
@@ -198,6 +199,28 @@ class DBPDepictions(DBPTask, ElasticsearchMixin):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPDownloadDepictions(DBPTask):
+    """ Download depictions from wikimedia. """
+
+    def requires(self):
+        return DBPDepictions()
+
+    def run(self):
+
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('s', 'p', 'o')):
+                url = row.o
+                id = hashlib.sha1(url).hexdigest()
+                shard, filename = id[:2], id[2:]
+                target = os.path.join(self.taskdir(), shard, filename)
+                if not os.path.exists(target):
+                    output = shellout("""wget -O {output} "{url}" """, url=url, ignoremap={8: '404s throw 8'})
+                    luigi.File(output).move(target)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 #
 # Some ad-hoc task, TODO: cleanup or rework.
 #
