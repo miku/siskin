@@ -164,7 +164,8 @@ class VIAFJson(VIAFTask):
 
     @timed
     def run(self):
-        output = shellout("""nttoldj -a -i {input} |
+        output = shellout("""ntto -o {output} -a -i {input} &&
+            cat {output} |
             LANG=C grep -Fv "This primary entity identifier is deprecated" |
             LANG=C grep -Fv "This concept identifier is deprecated" |
             LANG=C grep -Fv "foaf:primaryTopic" |
