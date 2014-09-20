@@ -183,6 +183,34 @@ class WikipediaCategoryTable(WikipediaTask):
 
 class WikipediaCategoryExtension(WikipediaTask):
     """
+    For each category, collect the pages it contains. Similar to
+    WikipediaCategoryExtensionJson, except the output here is tabular.
+    """
+
+    language = luigi.Parameter(default='de')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaCategoryTable(date=self.date, language=self.language)
+
+    @timed
+    def run(self):
+        reverse = collections.defaultdict(set)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv():
+                if not len(row) == 2:
+                    continue
+                page, category = row
+                reverse[category].add(page)
+        with self.output().open('w') as output:
+            for category, pages in reverse.iteritems():
+                output.write_tsv(category, '|'.join(pages))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WikipediaCategoryExtensionJson(WikipediaTask):
+    """
     For each category, collect the pages it contains.
     Example:
 
@@ -248,7 +276,7 @@ class WikipediaCategoryExtensionIndex(WikipediaTask, CopyToIndex):
                                     'store': True}}}
 
     def requires(self):
-        return WikipediaCategoryExtension(language=self.language, date=self.date)
+        return WikipediaCategoryExtensionJson(language=self.language, date=self.date)
 
 class WikipediaCategoryDistribution(WikipediaTask):
     """
