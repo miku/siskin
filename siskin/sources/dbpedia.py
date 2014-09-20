@@ -294,7 +294,6 @@ class GraphLookup(DBPTask, ElasticsearchMixin):
 class DBPGNDLinks(DBPTask, ElasticsearchMixin):
     """ Find all links from DBP to GND via dp.de:gnd """
 
-    date = ClosestDateParameter(default=datetime.date.today())
     index = luigi.Parameter(default='dbp', description='name of the index to search')
 
     def requires(self):
