@@ -415,34 +415,14 @@ class GNDSameAs(GNDTask, ElasticsearchMixin):
     """ Find all GNDs that link to some dbp id. """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    index = luigi.Parameter(default='gnd', description='name of the index to search')
 
-    @timed
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
+
     def run(self):
-        es = elasticsearch.Elasticsearch([dict(host=self.es_host,
-                                               port=self.es_port)])
-        hits = eshelpers.scan(es, {"query": {
-                "filtered": {
-                    "query": {
-                        "match_all": {}
-                    },
-                    "filter": {
-                        "query": {
-                            "query_string": {
-                                "default_field": "p",
-                                "query": "*sameAs"
-                            }
-                        }
-                    }
-                }
-            }, 'fields': ["s", "o"]}, index='gnd', scroll='30m', size=10000)
-
-        with self.output().open('w') as output:
-            for hit in hits:
-                fields = hit.get('fields')
-                try:
-                    output.write_tsv(fields['s'][0],fields['o'][0])
-                except Exception:
-                    pass
+        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"owl:sameAs\""}}}}}}' > {output}""", index=self.index)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
