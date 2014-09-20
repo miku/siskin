@@ -76,8 +76,8 @@ Most tasks will let you know by themselves, what additional programs they need, 
     $ # Running a task with a missing external program ...
     $ taskdo EBLJson
     ...
-    ... [pid 9486] Worker running   Executable(name=marctojson, message='http://git.io/1LXpQA')
-    ... [pid 9486] Worker failed    Executable(name=marctojson, message='http://git.io/1LXpQA')
+    ... [pid 9486] Worker running Executable(name=marctojson, message='http://git.io/1LXpQA')
+    ... [pid 9486] Worker failed Executable(name=marctojson, message='http://git.io/1LXpQA')
     Traceback (most recent call last):
       File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/...
         self.task.run()
