@@ -41,12 +41,15 @@ Initially this will take some time, since a wikipedia dump must be downloaded fi
 Data Stores
 -----------
 
-siskin uses elasticsearch as its primary data store. Usually, each data source
+siskin uses [elasticsearch](http://elasticsearch.org/) as its primary data store. Usually, each data source
 has its own index. Most data sources come with a task to build an up-to-date
 version of their index, and they - by convention - have the suffix Index, like
-`DOABIndex`, `OSOIndex`, `VIAFIndex`, `NEPIndex`, etc.
+[`DOABIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/doab.py#L89),
+[`OSOIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/oso.py#L178),
+[`VIAFIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/viaf.py#L184),
+[`NEPIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/nep.py#L450), etc.
 
-The BSZ indexing task is awkwardly named `BSZIndexPatch`, because it actually
+The BSZ indexing task is awkwardly named [`BSZIndexPatch`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/bsz.py#L1517), because it actually
 can patch the BSZ index to be up-to-date by deleting obsolete docs and only
 indexing the docs, that are not in the index yet or have been updated. For
 about 6 million records, a typical daily patch takes about 10 minutes on single
@@ -56,14 +59,15 @@ to follow convention.)
 For BSZ processing, siskin makes use of a couple of other (internal) data stores.
 
 elasticsearch is used mainly for two kinds of operations. To query data sources for
-certain data, e.g. `GNDDefinitions` will extract all definitions, that are in the GND,
-`DOIList` will extract in a best effort manner all DOIs from BSZ, etc. The second
+certain data, e.g.
+[`GNDDefinitions`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/gnd.py#L444) will extract all definitions, that are in the GND,
+[`DOIList`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/workflows/adhoc.py#L23) will extract in a best effort manner all DOIs from BSZ, etc. The second
 use cases for elasticsearch is fuzzy deduplication. The lucene *more-like-this*
-query facility is key here. The task `FuzzyCandidates` can generate a list
-of records from several indices, that are similar and probably duplicates.
+query facility is key here. The task
+[`FuzzyCandidates`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/workflows/fuzzy.py#L139) can generate a list of records from several indices, that are similar and probably duplicates.
 
 There is no central relation database, although some tasks may use sqlite3
-iternally to speed up operations and to allow SQL queries over certain data.
+[iternally](https://github.com/miku/siskin/search?utf8=%E2%9C%93&q=sqlite3db), to speed up operations and to allow SQL queries over certain data.
 
 Tools
 -----
