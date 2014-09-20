@@ -435,7 +435,7 @@ class GNDDBPediaLinks(GNDTask):
         return GNDSameAs(date=self.date)
 
     def run(self):
-        output = shellout(r""" awk '$3 ~ "d:" {{print $0}' {input} > {output}""", index=self.input().path)
+        output = shellout(r""" awk '$3 ~ "d:" {{print $0}}' {input} > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
