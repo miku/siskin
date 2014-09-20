@@ -89,48 +89,48 @@ Most tasks will let you know by themselves, what additional programs they need, 
 
 A rough list of extrernal tools used:
 
-    FR command                 package name
-    -- -------                 ------------
-    23 cat            .
-    21 marctojson     x        marctools
-    18 wget           .
-    15 yaz-marcdump   .
-    11 marcuniq       x        marctools
-    10 sort           .
-    10 cayley         x        cayley
-     9 scp            .
-     9 awk            .
-     8 marctotsv      x        marctools
-     8 estab          x        estab
-     7 rsync          .
-     7 ntto           x        ntto
-     7 grep           .
-     7 curl           .
-     6 xsltproc       .
-     6 tar            .
-     5 marcmap        x        marctools
-     4 unzip          .
-     4 cut            .
-     3 serdi          x        serdi
-     3 gunzip         .
-     2 touch          .
-     2 tac            .
-     2 marcdb         x        marctools
-     1 wikitojson     x        wikitools
-     1 wikinorm       x        wikitools
-     1 wikidatatojson x        wikitools
-     1 wikicats       x        wikitools
-     1 stardust       x        stardust
-     1 sed            .
-     1 php            .
-     1 pbzip2         .
-     1 mpg123         .
-     1 marcxmltojson  x        marctools
-     1 esmlt          .        esmlt
-     1 egrep          .
-     1 awk            .
-     1 7z             .
-     1 bash           .
+    frequency command                 package name
+    --------- -------                 ------------
+    23        cat            .
+    21        marctojson     x        marctools
+    18        wget           .
+    15        yaz-marcdump   .
+    11        marcuniq       x        marctools
+    10        sort           .
+    10        cayley         x        cayley
+     9        scp            .
+     9        awk            .
+     8        marctotsv      x        marctools
+     8        estab          x        estab
+     7        rsync          .
+     7        ntto           x        ntto
+     7        grep           .
+     7        curl           .
+     6        xsltproc       .
+     6        tar            .
+     5        marcmap        x        marctools
+     4        unzip          .
+     4        cut            .
+     3        serdi          x        serdi
+     3        gunzip         .
+     2        touch          .
+     2        tac            .
+     2        marcdb         x        marctools
+     1        wikitojson     x        wikitools
+     1        wikinorm       x        wikitools
+     1        wikidatatojson x        wikitools
+     1        wikicats       x        wikitools
+     1        stardust       x        stardust
+     1        sed            .
+     1        php            .
+     1        pbzip2         .
+     1        mpg123         .
+     1        marcxmltojson  x        marctools
+     1        esmlt          x        esmlt
+     1        egrep          .
+     1        awk            .
+     1        7z             .
+     1        bash           .
 
 Commands
 --------
