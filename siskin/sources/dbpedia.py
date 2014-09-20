@@ -184,6 +184,20 @@ class DBPImages(DBPTask, ElasticsearchMixin):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPDepictions(DBPTask, ElasticsearchMixin):
+    """ Generate a raw list of (s, p, o) tuples that are foaf:depictions. """
+
+    index = luigi.Parameter(default='dbp', description='name of the index to search')
+
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
+
+    def run(self):
+        output = shellout(r""" estab -indices dbp -f "s p o" -query '{"query": {"query_string": {"query": "p:\"foaf:depiction\""}}}' > {output}""")
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 #
 # Some ad-hoc task, TODO: cleanup or rework.
 #
