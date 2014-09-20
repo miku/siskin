@@ -290,3 +290,19 @@ class GraphLookup(DBPTask, ElasticsearchMixin):
 
     def complete(self):
         return False
+
+class DBPGNDLinks(DBPTask, ElasticsearchMixin):
+    """ Find all links from DBP to GND via dp.de:gnd """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    index = luigi.Parameter(default='dbp', description='name of the index to search')
+
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
+
+    def run(self):
+        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"dp.de:gnd\""}}}}}}' > {output}""", index=self.index)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
