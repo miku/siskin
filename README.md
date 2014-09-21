@@ -66,7 +66,7 @@ use cases for elasticsearch is fuzzy deduplication. The lucene *more-like-this*
 query facility is key here. The task
 [`FuzzyCandidates`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/workflows/fuzzy.py#L139) can generate a list of records from several indices, that are similar and probably duplicates.
 
-There is no central relation database, although some tasks may use sqlite3
+There is no central relational database, although some tasks may use sqlite3
 [iternally](https://github.com/miku/siskin/search?utf8=%E2%9C%93&q=sqlite3db), to speed up operations and to allow SQL queries over certain data.
 
 Tools
