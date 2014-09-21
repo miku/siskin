@@ -75,7 +75,7 @@ Tools
 siskin often uses shell command in tasks, both for simplicity and speed. Some
 programs are installed by default on UNIX systems, like `awk`, `sed`, `perl`, `scp`, `grep`, `sort`, `unzip`, `tar`, etc.
 Additionally, siskin uses other programs, mostly for MARC, elasticsearch and linked data related tasks, that are not installed by default.
-Among them are [xsltproc](http://xmlsoft.org/XSLT/xsltproc.html), [php](http://php.net/), [yaz](http://www.indexdata.com/yaz), [marctools](https://github.com/ubleipzig/marctools), [estab](https://github.com/miku/estab), [ntto](https://github.com/miku/ntto), [cayley](https://github.com/google/cayley) and a few more.
+Among them are [xsltproc](http://xmlsoft.org/XSLT/xsltproc.html), [php](http://php.net/), [yaz](http://www.indexdata.com/yaz), [marctools](https://github.com/ubleipzig/marctools), [estab](https://github.com/miku/estab), [ntto](https://github.com/miku/ntto), [cayley](https://github.com/google/cayley), [serdi](http://drobilla.net/software/serd/) and a few more.
 Most tasks will let you know by themselves, what additional programs they need, and how to get them:
 
     $ # Running a task with a missing external program ...
