@@ -84,10 +84,7 @@ Most tasks will let you know by themselves, what additional programs they need, 
     ... Worker running Executable(name=marctojson, message='http://git.io/1LXpQA')
     ... Worker failed Executable(name=marctojson, message='http://git.io/1LXpQA')
     Traceback (most recent call last):
-      File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/...
-        self.task.run()
-      File "/home/mtc/.virtualenvs/siskin/local/lib/python2.7/site-packages/...
-        self.message))
+    ...
     RuntimeError: External app marctojson required.
     http://git.io/1LXpQA
 
