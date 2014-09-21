@@ -128,6 +128,7 @@ class BSZTask(DefaultTask):
     def url_for_ppn(self, ppn, iln='0010'):
         """
         Return the search URL for a given PPN and ILN.
+        TODO: this don't belong here.
         """
         iln = iln.zfill(4)
         params = {'lookfor': 'record_id:%s' % ppn}
@@ -1522,16 +1523,13 @@ class BSZIndexPatch(BSZTask):
     Moving the index forward a single day takes about 5-10min
     (asking ES for all ids takes about 3min alone - for about 4M ids).
 
-    This task will take into account: additions, explicit deletions,
+    This task will take into account: additions, updates, explicit deletions and
     implicit deletions (Umhängungen).
 
     Note: This task will contain all IDs that are currently in FINC
     (18 ILNs that is). Information about which library has what is not stored
     here. The main purpose of this index is to represent "BSZ" in the fuzzy
     deduplication process. It is also an example of managing an index by deltas.
-
-    DONE: Rework this, consumes too much memory - upto 4G.
-    TODO: Find a faster alternative to shelves.
     """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
@@ -1630,6 +1628,8 @@ class BSZIndexPatch(BSZTask):
         # collect residue paths here
         garbage = set()
 
+        # current_db (ppn, date) and desired_db (ppn, date) and are sqlite3 key-value
+        # stores that reflect the current state and state we need to get into, respectively
         desired_db = shellout("TMPDIR={tmpdir} tabtokv -f '1,3' -o {output} {input}",
                               input=self.input().path, tmpdir=tempfile.gettempdir())
         output = shellout('estab -indices "bsz" -f "_id meta.date" > {output}')
@@ -1643,6 +1643,7 @@ class BSZIndexPatch(BSZTask):
         with sqlite3db(current_db) as cc:
             currentkv = cc.execute('SELECT key, value from store').fetchall()
 
+        # find outdated docs (ppns)
         outdated = set()
         with sqlite3db(desired_db) as dc:
             for id, current_date in currentkv:
@@ -1698,6 +1699,7 @@ class BSZIndexPatch(BSZTask):
                                    body={'query': {'ids': {'values': batch}}})
 
         # start constructing the patch
+        # set algebra ftw
         patch = desired.difference(current).union(outdated)
 
         if len(patch) == 0:
@@ -1717,19 +1719,16 @@ class BSZIndexPatch(BSZTask):
             _, combined = tempfile.mkstemp(prefix='siskin-')
 
             # - for each day, we need the raw file (raw) and its seekmap db
-            # - we need to convert each snippet to JSON and the concatenate the
-            #   snippets, so that each part carries is't date with it, which
-            #   will be used to apply delta-patches
+            # - we need to convert each snippet to JSON and then concatenate the
+            #   snippets
             for date_value, ppnset in sorted(shards.iteritems()):
                 date = datetime.date(*map(int, date_value.split('-')))
 
                 raw = GenericImport(date=date, kind='tit')
                 sdb = SeekmapDB(date=date, kind='tit')
-                self.logger.debug("Scheduling prerequisites %s, %s ..." % (sdb, raw))
                 luigi.build([sdb, raw])
 
                 _, stopover = tempfile.mkstemp(prefix='siskin-')
-                self.logger.debug("Using seekmap-db at %s" % sdb.output().path)
 
                 with sqlite3db(sdb.output().path) as cursor:
                     with raw.output().open() as handle:
@@ -1753,7 +1752,9 @@ class BSZIndexPatch(BSZTask):
 
             # index inline
             def docs():
-                """ Yield all documents, that need to be indexed. """
+                """ Yield all documents, that need to be indexed.
+                This is works ok on average hardware,
+                but gets the bottleneck high-end machines. """
                 with open(combined) as handle:
                     documents = ({
                         '_index': 'bsz',
@@ -1792,7 +1793,7 @@ class BSZIndexPatch(BSZTask):
 class Lookup(BSZTask):
     """
     Which EPN are pointing to this PPN (in a certain date interval)?
-    TODO: This takes about 0.5s net, but the whole luigi overhead is about 6s.
+    TODO: This takes about 0.5s net, but the whole luigi (import) overhead is about 6s.
     """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
@@ -1976,6 +1977,7 @@ class ParentRecords(BSZTask):
 # Authority data related tasks
 # https://wiki.bsz-bw.de/doku.php?id=v-team:daten:datendienste:marc21
 #
+# TODO: Combine BSZXXXTasks into a single one with a parameter for the field.
 class BSZ100Authority(BSZTask):
     """ Report (_id, content.100.0) tuples. """
 
