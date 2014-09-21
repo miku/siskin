@@ -132,7 +132,6 @@ A rough list of extrernal tools used:
      1        marcxmltojson  x        marctools
      1        esmlt          x        esmlt
      1        egrep          .
-     1        awk            .
      1        7z             .
      1        bash           .
 
