@@ -228,7 +228,7 @@ class GNDCayleyMongoDB(GNDTask):
         return luigi.LocalTarget(path=self.path(ext='mongo'))
 
 class GNDJson(GNDTask):
-    """ Convert to some indexable JSON. """
+    """ Convert GND to some indexable JSON. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):

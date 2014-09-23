@@ -1261,7 +1261,7 @@ class LocalUpdatesISIL(BSZTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class Events(BSZTask):
-    """ Testing a new fast clean Event implementation. """
+    """ Events for an ILN between `begin` and `end` date. """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
     iln = ILNParameter(default='0010')
@@ -1897,7 +1897,7 @@ class SigelFrequencyTotal(BSZTask):
 
 class UniqueSigel(BSZTask):
     """
-    Compute all uniq sigel that occur in the data.
+    Compute all sigels that occur in the data.
     """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
