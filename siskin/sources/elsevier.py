@@ -33,7 +33,7 @@ class ElsevierJson(ElsevierTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return (Executable(name='marcuniq'), Executable(name='marctojson'))
+        return [Executable(name='marcuniq'), Executable(name='marctojson')]
 
     @timed
     def run(self):

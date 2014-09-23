@@ -846,8 +846,8 @@ class FincMappingDump(BSZDumpTask):
     def pathlist(self):
         """ Previous artefacts. """
         interval = date_interval.Custom(BSZTask.SONDERABZUG, datetime.date.today())
-        tasks = (FincMappingDump(date=date) for date in interval)
-        return (t.output().fn for t in tasks)
+        tasks = [FincMappingDump(date=date) for date in interval]
+        return [t.output().path for t in tasks]
 
     @timed
     def run(self):
@@ -897,7 +897,7 @@ class ISBNDump(BSZDumpTask):
         """ Previous artefacts. """
         interval = date_interval.Custom(BSZTask.SONDERABZUG, self.date)
         tasks = (ISBNDump(date=date) for date in interval)
-        return (t.output().path for t in tasks)
+        return [t.output().path for t in tasks]
 
     @timed
     def run(self):
@@ -1878,7 +1878,7 @@ class SigelFrequencyTotal(BSZTask):
 
     def requires(self):
         interval = date_interval.Custom(self.begin, self.end)
-        return (SigelFrequency(date=date) for date in interval)
+        return [SigelFrequency(date=date) for date in interval]
 
     @timed
     def run(self):
@@ -1904,7 +1904,7 @@ class UniqueSigel(BSZTask):
 
     def requires(self):
         interval = date_interval.Custom(self.begin, self.end)
-        return (SigelFrequency(date=date) for date in interval)
+        return [SigelFrequency(date=date) for date in interval]
 
     @timed
     def run(self):
