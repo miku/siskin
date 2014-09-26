@@ -207,7 +207,6 @@ class DBPDownloadDepictions(DBPTask):
         return DBPDepictions()
 
     def run(self):
-
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('s', 'p', 'o')):
                 url = row.o

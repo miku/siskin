@@ -27,10 +27,11 @@ from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
-import json
+import simplejson as json
 import luigi
 import os
 import re
+import simplejson
 
 config = Config.instance()
 
@@ -187,6 +188,39 @@ class LFERJson(LFERTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
+class LFERJsonSuggest(LFERTask):
+    """ LFER Json with Suggestion suppport. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return LFERJson(date=self.date)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle:
+                    doc = json.loads(row)
+                    try:
+                        for i in range(len(doc['content']['245'])):
+                            title = doc['content']['245'][i]['a']
+                            parts = title[0].split()
+                            suggest = {
+                                'input': [title] + parts,
+                                'output': title,
+                                'payload': {'id': doc['content']['001'], 'index': 'ebl'}
+                            }
+
+                            doc['content']['245'][i]['suggest'] = suggest
+                    except Exception as err:
+                        self.logger.warn(err)
+                        continue
+                    output.write(json.dumps(doc))
+                    output.write('\n')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class LFERIndex(LFERTask, CopyToIndex):
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -205,4 +239,4 @@ class LFERIndex(LFERTask, CopyToIndex):
         return self.effective_task_id()
 
     def requires(self):
-        return LFERJson(date=self.date, kind='tit')
+        return LFERJson(date=self.date)

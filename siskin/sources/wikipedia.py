@@ -167,6 +167,86 @@ class WikipediaJson(WikipediaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class WikipediaTitleIsbnCandidates(WikipediaTask):
+    """ Just create a single file for each article. """
+
+    language = luigi.Parameter(default='en')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaJson(date=self.date, language=self.language)
+
+    @timed
+    def run(self):
+        import re
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle:
+                    doc = json.loads(row)
+                    candidates = re.findall(r'[0-9X][X0-9-]{9,24}', doc.get('text'))
+                    if not doc.get('title'):
+                        continue
+                    for c in candidates:
+                        output.write_tsv(doc.get('title').encode('utf-8'), c)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WikipediaTitleIsbn(WikipediaTask):
+    """ Just create a single file for each article. """
+
+    language = luigi.Parameter(default='en')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaTitleIsbnCandidates(date=self.date, language=self.language)
+
+    @timed
+    def run(self):
+        import pyisbn
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('page', 'candidate')):
+                    value = row.candidate.replace('-', '')
+                    if len(value) == 10:
+                        try:
+                            value = pyisbn.convert(value)
+                            output.write_tsv(row.page, value)
+                        except:
+                            pass
+                    elif len(value) == 13 and value.startswith('978'):
+                        output.write_tsv(row.page, value)
+                    else:
+                        continue
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WikipediaTitleIsbnWithIds(WikipediaTask):
+    """ Turn wikipedia titles into dbp ids in a best effort way. """
+
+    language = luigi.Parameter(default='en')
+    date = ClosestDateParameter(default=datetime.date.today())
+    prefix = luigi.Parameter(default='dbp')
+
+    def requires(self):
+        return WikipediaTitleIsbn(date=self.date, language=self.language)
+
+    @timed
+    def run(self):
+
+        with self.input().open() as handle:
+            file = luigi.File(is_tmp=True, format=TSV)
+            with file.open('w') as output:
+                for row in handle.iter_tsv(cols=('title', 'isbn')):
+                    id = '%s:%s' % (self.prefix, row.title.replace(' ', '_'))
+                    output.write_tsv(id, row.isbn)
+        output = shellout('sort -u {input} > {output}', input=file.path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class WikipediaCategoryTable(WikipediaTask):
     """
     A list of wikipedia categories. Using wikitools
@@ -579,3 +659,45 @@ class WikipediaRawCitations(WikipediaTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
+
+class WikipediaGNDIsbn(WikipediaTask):
+    """ Relate GND, and ISBNs via DBP. """
+
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def requires(self):
+        from siskin.sources.gnd import GNDDBPediaLinks
+        from siskin.sources.bsz import BSZWikiISBN
+        return {'gndto': GNDDBPediaLinks(date=self.date),
+                'bsz': BSZWikiISBN(date=self.date)}
+
+    def run(self):
+        isbns = collections.defaultdict(set)
+        with self.input().get('bsz').open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'isbn', 'dbp')):
+                isbns[row.dbp].add(row.isbn)
+
+        with self.input().get('gndto').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('gnd', 'dbp')):
+                    if row.dbp in isbns:
+                        for isbn in isbns[row.dbp]:
+                            output.write_tsv(row.gnd, row.dbp, isbn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WikipediaGNDIsbnDB(WikipediaTask):
+    """ Relate GND, and ISBNs via DBP. Build db """
+
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaGNDIsbn(date=self.date)
+
+    def run(self):
+        output = shellout(""" tabtokv -f "1,3" -o {output} {input} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)

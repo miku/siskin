@@ -7,20 +7,25 @@ GND-related tasks.
 
 from elasticsearch import helpers as eshelpers
 from gluish.benchmark import timed
-from gluish.common import ElasticsearchMixin, Executable
+from gluish.common import ElasticsearchMixin, Executable, Directory
+from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout, random_string
+from siskin.sources.dbpedia import DBPGNDLinks, DBPDepictions
 from siskin.task import DefaultTask
-from gluish.utils import shellout
 import BeautifulSoup
 import collections
 import cPickle as pickle
 import datetime
 import elasticsearch
+import hashlib
 import HTMLParser
+import json
 import luigi
+import os
 import prettytable
 import requests
 import shutil
@@ -252,143 +257,14 @@ class GNDIndex(GNDTask, CopyToIndex):
     def requires(self):
         return GNDJson(date=self.date)
 
-class GNDBroaderTerms(GNDTask, ElasticsearchMixin):
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def run(self):
-        es = elasticsearch.Elasticsearch([dict(host=self.es_host,
-                                               port=self.es_port)])
-        hits = eshelpers.scan(es, {
-            "query": {
-                "query_string": {
-                    "query": "*broaderTermGeneral"
-                }
-            }, 'fields': ["s", "o"]}, index='gnd', scroll='30m', size=10000)
-
-        with self.output().open('w') as output:
-            for hit in hits:
-                fields = hit.get('fields')
-                try:
-                    output.write_tsv(fields['s'][0],fields['o'][0])
-                except Exception:
-                    pass
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class GNDPreferredNames(GNDTask, ElasticsearchMixin):
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        es = elasticsearch.Elasticsearch([dict(host=self.es_host,
-                                               port=self.es_port)])
-        hits = eshelpers.scan(es, {
-            "query": {
-                "query_string": {
-                    "query": "*preferredNameForTheSubjectHeading"
-                }
-            }, 'fields': ["s", "o"]}, index='gnd', scroll='30m', size=10000)
-
-        with self.output().open('w') as output:
-            for hit in hits:
-                fields = hit.get('fields')
-                try:
-                    output.write_tsv(fields['s'][0], fields['o'][0])
-                except Exception:
-                    pass
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class GNDPreferredNamesPickled(GNDTask):
-    """ For each term in broaderTermGeneral, save broader and narrower terms. """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return GNDPreferredNames(date=self.date)
-
-    def run(self):
-        names = {}
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('id', 'name')):
-                names[row.id] = row.name
-
-        with self.output().open('w') as output:
-            pickle.dump(names, output)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='pkl'))
-
-class GNDNarrowerTermsPickled(GNDTask):
-    """ For each term in broaderTermGeneral, save broader and narrower terms. """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return GNDBroaderTerms(date=self.date)
-
-    def run(self):
-        down = collections.defaultdict(set)
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('narrower', 'broader')):
-                down[row.broaders].add(row.narrower)
-
-        with self.output().open('w') as output:
-            pickle.dump(down, output)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='pkl'))
-
-class GNDBroaderTermsPickled(GNDTask):
-    """ For each term in broaderTermGeneral, save broader and narrower terms. """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return GNDBroaderTerms(date=self.date)
-
-    def run(self):
-        up = {}
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('narrower', 'broader')):
-                up[row.narrower] = row.broader
-
-        with self.output().open('w') as output:
-            pickle.dump(up, output)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='pkl'))
-
-class GNDRelatedTerms(GNDTask, ElasticsearchMixin):
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        es = elasticsearch.Elasticsearch([dict(host=self.es_host,
-                                               port=self.es_port)])
-        hits = eshelpers.scan(es, {
-            "query": {
-                "query_string": {
-                    "query": "*relatedTerm"
-                }
-            }, 'fields': ["s", "o"]}, index='gnd', scroll='30m', size=10000)
-
-        with self.output().open('w') as output:
-            for hit in hits:
-                fields = hit.get('fields')
-                try:
-                    output.write_tsv(fields['s'][0], fields['o'][0])
-                except Exception:
-                    pass
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class GNDTaxonomy(GNDTask):
-    """ For each term in broaderTermGeneral, save broader and narrower terms. """
+    """
+    For each term in broaderTermGeneral, save broader and narrower terms.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GNDBroaderTerms(date=self.date)
+        return GNDRelations(date=self.date, relation='dnb:broaderTermGeneral')
 
     def run(self):
         taxonomy = {}
@@ -411,48 +287,254 @@ class GNDTaxonomy(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class GNDSameAs(GNDTask, ElasticsearchMixin):
-    """ Find all GNDs that link to some dbp id. """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-    index = luigi.Parameter(default='gnd', description='name of the index to search')
-
-    def requires(self):
-        return Executable(name='estab', message='http://git.io/bLY7cQ')
-
-    def run(self):
-        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"owl:sameAs\""}}}}}}' > {output}""", index=self.index)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class GNDDBPediaLinks(GNDTask):
-    """ Return (s, p, o) tuples that connect gnd and wikipedia. """
+    """ Return (s, o) tuples that connect gnd and wikipedia. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GNDSameAs(date=self.date)
+        return GNDRelations(date=self.date, relation='owl:sameAs')
 
     def run(self):
-        output = shellout(r""" awk '$3 ~ "d:" {{print $0}}' {input} > {output}""", input=self.input().path)
+        output = shellout(r""" awk '$2 ~ "dbp:" {{print $0}}' {input} > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class GNDDefinitions(GNDTask):
-    """ Extract all dnb.es:defintion relations. """
+class GNDDBPediaInterlinks(GNDTask):
+    """
+    Report GND <-> dbpedia interlinking stats.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
 
+    def requires(self):
+        return {
+            'gndto': GNDDBPediaLinks(date=self.date),
+            'dbpto': DBPGNDLinks(),
+            'gndpage': GNDPage(date=self.date, relation='foaf:Page')}
+
+    def run(self):
+        gndto = set()
+        with self.input().get('gndto').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'dbp')):
+                gndto.add(row.gnd)
+
+        dbpto = set()
+        with self.input().get('dbpto').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'p', 'dbp')):
+                dbpto.add(row.gnd)
+
+        gndpage = set()
+        with self.input().get('gndpage').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'url')):
+                dbpto.add(row.gnd)
+
+        result = dict(
+            gnd_links=len(gndto),
+            dbp_links=len(dbpto),
+            gnd_and_dbp=len(gndto.intersection(dbpto)),
+            gnd_only=len(gndto - dbpto),
+            dbp_only=len(dbpto - gndto),
+            gnd_or_dbp=len(gndto.union(dbpto)),
+            dbp_and_via_url=len(dbpto.intersection(gndpage)),
+        )
+        with self.output().open('w') as output:
+            for key, value in result.iteritems():
+                output.write_tsv(key, value)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDDepictions(GNDTask):
+    """
+    For each GND, that has a DBP link (TODO: more is possible via backlinks)
+    report the image URL in foaf:depiction.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'gndto': GNDDBPediaLinks(date=self.date),
+                'dbppics': DBPDepictions()}
+
+    @timed
+    def run(self):
+        kv = shellout(""" tabtokv -f "1,3" -o {output} {input}""", input=self.input().get('dbppics').path)
+        with self.input().get('gndto').open() as handle:
+            with sqlite3db(kv) as cursor:
+                with self.output().open('w') as output:
+                    for row in handle.iter_tsv(cols=('gnd', 'dbp')):
+                        cursor.execute("""select value from store where key = ?""", (row.dbp,))
+                        result = cursor.fetchall()
+                        for url in set(result):
+                            output.write_tsv(row.gnd, url[0])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDDownloadDepictions(GNDTask):
+    """ Download depictions from wikimedia, that are linked with a GND, about 70k. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'urls': GNDDepictions(date=self.date), 'dir': Directory(path=self.taskdir())}
+
+    def run(self):
+        with self.input().get('urls').open() as handle:
+            for i, row in enumerate(handle.iter_tsv(cols=('gnd', 'url'))):
+                gnd = row.gnd.replace('gnd:', '')
+                _, ext = os.path.splitext(row.url)
+                imgname = '%s-%s%s' % (gnd, hashlib.sha1(row.url).hexdigest(), ext)
+                imgpath = os.path.join(self.taskdir(), imgname)
+                if not os.path.exists(imgpath):
+                    output = shellout("""wget -q -O {output} "{url}" """, output=imgpath, url=row.url, ignoremap={8: '404s throw 8'})
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDDepictionsDB(GNDTask):
+    """ Create a small KV store. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDDepictions(date=self.date)
+
+    def run(self):
+        output = shellout(""" tabtokv -f "1,2" -o {output} {input} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
+class GNDPredicates(GNDTask):
+    """ Report all existing predicates. """
     date = ClosestDateParameter(default=datetime.date.today())
     index = luigi.Parameter(default='gnd', description='name of the index to search')
 
     def requires(self):
         return Executable(name='estab', message='http://git.io/bLY7cQ')
 
+    @timed
     def run(self):
-        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"dnb.es:definition\""}}}}}}' > {output}""", index=self.index)
+        output = shellout(r""" estab -indices {index} -f "p" | sort -u > {output} """, index=self.index)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+
+class GNDDatabase(GNDTask):
+    """
+    Build a relational version of GND. sqlite3, each relation
+    gets an indexed (s, o) table.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    index = luigi.Parameter(default='gnd', description='name of the index to search')
+
+    def requires(self):
+        relations = [
+            "dnb:acquaintanceshipOrFriendship",
+            "dnb:affiliation",
+            "dnb:annotator",
+            "dnb:architect",
+            "dnb:broaderTermGeneral",
+            "dnb:definition",
+            "dnb:familialRelationship",
+            "dnb:fieldOfActivity",
+            "dnb:fieldOfStudy",
+            "dnb:functionOrRole",
+            "dnb:memberOfTheFamily",
+            "dnb:placeOfActivity",
+            "dnb:placeOfBirth",
+            "dnb:placeOfExile",
+            "dnb:playedInstrument",
+            # "dnb:preferredNameForThePerson",
+            "dnb:professionOrOccupation",
+            "dnb:professionalRelationship",
+            "dnb:relatedTerm",
+            "dnb:related",
+            # "foaf:Page",
+            # "skos:narrowMatch",
+        ]
+        tasks = {}
+        for relation in relations:
+            tasks[relation] = GNDRelations(date=self.date, index=self.index, relation=relation)
+        return tasks
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with sqlite3db(stopover) as cursor:
+            for relation, target in self.input().iteritems():
+                table = relation.replace(':', '_')
+                cursor.execute("""CREATE TABLE IF NOT EXISTS %s (s TEXT, o TEXT)""" % table)
+                with target.open() as handle:
+                    for row in handle.iter_tsv(cols=('s', 'o')):
+                        cursor.execute("""INSERT INTO %s (s, o) VALUES (?, ?)""" % table, row)
+                cursor.connection.commit()
+                cursor.execute("""CREATE INDEX IF NOT EXISTS idx_%s_s on %s (s)""" % (table, table))
+                cursor.execute("""CREATE INDEX IF NOT EXISTS idx_%s_o on %s (o)""" % (table, table))
+                cursor.execute("""CREATE INDEX IF NOT EXISTS idx_%s_s_o on %s (s, o)""" % (table, table))
+                cursor.execute("""CREATE INDEX IF NOT EXISTS idx_%s_o_s on %s (o, s)""" % (table, table))
+                cursor.connection.commit()
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
+class GNDRelations(GNDTask):
+    """
+    Extract relations from GND.
+    Given the predicate shortname, extract (s, o) tuples from the index.
+
+    Example relations:
+
+    * dnb:acquaintanceshipOrFriendship
+    * dnb:affiliation
+    * dnb:annotator
+    * dnb:architect
+    * dnb:broaderTermGeneral
+    * dnb:definition
+    * dnb:familialRelationship
+    * dnb:fieldOfActivity
+    * dnb:fieldOfStudy
+    * dnb:functionOrRole
+    * dnb:memberOfTheFamily
+    * dnb:placeOfActivity
+    * dnb:placeOfExile
+    * dnb:playedInstrument
+    * dnb:preferredNameForThePerson
+    * dnb:relatedTerm
+    * foaf:Page
+    * skos:narrowMatch
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    relation = luigi.Parameter(default='dnb:definition')
+    index = luigi.Parameter(default='gnd', description='name of the index to search')
+
+    def requires(self):
+        return Executable(name='estab', message='http://git.io/bLY7cQ')
+
+    def run(self):
+        output = shellout(r""" estab -indices {index} -f "s o"
+            -query '{{"query": {{"query_string": {{"query": "p:\"{relation}\""}}}}}}' > {output}""", index=self.index, relation=self.relation)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+
+class GNDRelationsDB(GNDTask):
+    """ Build an sqlite key-value database from a single relation in the GND. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    relation = luigi.Parameter(default='dnb:definition')
+    index = luigi.Parameter(default='gnd', description='name of the index to search')
+
+    def requires(self):
+        return GNDRelations(date=self.date, relation=self.relation, index=self.index)
+
+    @timed
+    def run(self):
+        output = shellout(r""" tabtokv -f "1,2" -o {output} {input} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True))
