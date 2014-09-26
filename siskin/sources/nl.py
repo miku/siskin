@@ -67,7 +67,7 @@ class NLSync(NLTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class NLInventory(NLTask):
     """ All (date, path) for a section, type, format and tag. """

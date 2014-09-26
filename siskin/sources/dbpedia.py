@@ -42,7 +42,7 @@ class DBPDownload(DBPTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class DBPExtract(DBPTask):
     """ Extract all compressed files. """
@@ -69,7 +69,7 @@ class DBPExtract(DBPTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class DBPPredicateDistribution(DBPTask):
     """ Just a uniq -c on the predicate 'column' """

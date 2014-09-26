@@ -44,4 +44,4 @@ class EuropeanaDownload(EuropeanaTask):
                 output.write_tsv(self.version, self.format, path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)

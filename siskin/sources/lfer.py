@@ -69,7 +69,7 @@ class LFERSync(LFERTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class LFERDatesAndPaths(LFERTask):
     """ Just emit a two column TSV with (date, path). """

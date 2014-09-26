@@ -185,7 +185,7 @@ class SAOriginalFileList(BSZTask):
                     output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+        return luigi.LocalTarget(path=self.path(digest=True, ext='filelist'), format=TSV)
 
 class SASync(BSZTask):
     """
@@ -212,7 +212,7 @@ class SASync(BSZTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class SAImport(BSZTask):
     """
@@ -247,7 +247,7 @@ class SAImport(BSZTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class SATags(BSZTask):
     """
@@ -594,7 +594,7 @@ class DeletionPaths(BSZTask):
                     output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class DeletionDates(BSZTask):
     """

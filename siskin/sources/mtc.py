@@ -113,7 +113,7 @@ class MTCModsImport(MTCTask):
                     output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class MTCMarcXML(MTCTask):
     """ Convert the .mods XML files to Marc XML files via `xsltproc`.
@@ -161,7 +161,7 @@ class MTCMarcXML(MTCTask):
         self.logger.debug("Conversion errors logged at: {0}".format(errorlog))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class MTCCombine(MTCTask):
     """ Convert Marc XML to Marc8, via `yaz-marcdump`.
