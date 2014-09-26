@@ -32,6 +32,7 @@ setup(name='siskin',
       scripts=[
         'bin/taskcat',
         'bin/taskcp',
+        'bin/taskdeps-dot',
         'bin/taskdir',
         'bin/taskdo',
         'bin/taskdu',

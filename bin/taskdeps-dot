@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+# coding: utf-8
+# pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301
+
+"""
+Turn task dependencies into pretty graphs.
+
+Usage: taskdeps-dot TASKNAME
+
+Example outputs album: http://imgur.com/a/12Dag
+"""
+from __future__ import print_function
+from gluish.common import IndexIdList, IndexFieldList
+from gluish.utils import pairwise, random_string
+from luigi.task import id_to_name_and_params
+from luigi.task import Register
+from siskin.sources import *
+from siskin.workflows import *
+import collections
+import re
+import sys
+
+# task -> deps graph
+g = collections.defaultdict(set)
+
+def iterdeps(task):
+    """
+    Collect dependencies recursively and store them in the global graph `g`.
+    """
+    for dependency in task.deps():
+        tn, tp = id_to_name_and_params(str(task))
+        dn, dp = id_to_name_and_params(str(dependency))
+
+        # TODO: obfuscate password keys
+        t = "%s\n%s" % (tn, '\n'.join(tp.values()))
+        d = "%s\n%s" % (dn, '\n'.join(dp.values()))
+
+        g[t].add(d)
+        iterdeps(dependency)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('taskdeps-dot TASKNAME', file=sys.stderr)
+        sys.exit(1)
+
+    taskname = sys.argv[1]
+    # TODO: below code only works with options with parameters
+    kwargs = dict((k.lstrip('--').replace('-', '_'), v)
+                   for k, v in pairwise(sys.argv[2:]))
+
+    klass = Register.get_reg().get(taskname)
+    task = klass(**kwargs)
+    iterdeps(task)
+
+    print('digraph %s {' % random_string())
+    for key, values in g.iteritems():
+        for value in values:
+            print("""\t"%s" [fontname="Helvetica"]; """ % key)
+            print("""\t"%s" [fontname="Helvetica"]; """ % value)
+            print("""\t"%s" -> "%s"; """ % (key, value))
+    print('}')

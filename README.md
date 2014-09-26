@@ -139,9 +139,11 @@ Siskin comes with a couple of [commands](https://github.com/miku/siskin/tree/mas
 
     taskcat          - inspect task output
     taskcp           - copy task output
+    taskdeps-dot     - generate graphviz dot file for task and deps
     taskdir          - show task directory
     taskdo           - run task
     taskdu           - show disk usage of task
+    taskhead         - show first ten lines of output file
     taskhome         - show base directory of all artefacts
     taskindex-delete - delete Elasticsearch index and remove trace in 'update_log'
     taskless         - inspect task output
