@@ -54,12 +54,13 @@ from gluish.colors import dim, red, green
 from gluish.common import Executable
 from gluish.database import sqlite3db, mysqldb
 from gluish.format import TSV
+from gluish.intervals import weekly
 from gluish.parameter import ILNParameter
 from gluish.path import copyregions
 from gluish.utils import shellout, memoize, random_string, nwise
 from luigi import date_interval
 from siskin.configuration import Config
-from siskin.sources.gnd import GNDDefinitions
+from siskin.sources.gnd import GNDRelations, GNDDatabase
 from siskin.task import DefaultTask
 import collections
 import datetime
@@ -1978,98 +1979,49 @@ class ParentRecords(BSZTask):
 # https://wiki.bsz-bw.de/doku.php?id=v-team:daten:datendienste:marc21
 #
 # TODO: Combine BSZXXXTasks into a single one with a parameter for the field.
-class BSZ100Authority(BSZTask):
-    """ Report (_id, content.100.0) tuples. """
+#
+# Authority data related tasks
+# https://wiki.bsz-bw.de/doku.php?id=v-team:daten:datendienste:marc21
+#
+class BSZAuthority(BSZTask):
+    """
+    Extract various authority data from inside BSZ index.
+    Possible fields are:
 
-    index = luigi.Parameter(default='bsz', description='name of bsz index')
+    Author related: content.100.a, content.700.a, content.110.a, content.710.a
+
+    > Felder 100, 700, 110, 710: $0, wobei der eigentlichen Verknüpfungsidentnummer
+      das ISIL der die Identnummer erzeugenden Institution vorangestellt ist
+      (DE-588a = Deutsche Nationalbibliothek überregionale Personennormdatei,
+      DE-576 = SWB regionale Personendatei).
+
+    Subject related: content.650.a, content.689.a
+
+    > Felder 650 ff. für Einzelschlagworte und das anwenderspezifische Feld 689
+      für RSWK-Schlagwortketten (Verknüpfungsstruktur analog 100 ff. s.o.):
+
+    """
+    index = luigi.Parameter(default='bsz', description='name of bsz index', significant=False)
     date = luigi.DateParameter(default=datetime.date.today())
+    field = luigi.Parameter(default='content.100.0')
 
     @timed
     def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.100.0" > {output} """, index=self.index)
+        output = shellout(""" estab -indices {index} -f "content.001 {field}" > {output} """, field=self.field, index=self.index)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class BSZ110Authority(BSZTask):
-    """ Report (_id, content.100.0) tuples. """
-
-    index = luigi.Parameter(default='bsz', description='name of bsz index')
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.110.0" > {output} """, index=self.index)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class BSZ700Authority(BSZTask):
-    """ Report (_id, content.700.0) tuples. """
-
-    index = luigi.Parameter(default='bsz', description='name of bsz index')
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.700.0" > {output} """, index=self.index)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class BSZ710Authority(BSZTask):
-    """ Report (_id, content.710.0) tuples. """
-
-    index = luigi.Parameter(default='bsz', description='name of bsz index')
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.710.0" > {output} """, index=self.index)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class BSZ650Authority(BSZTask):
-    """ Report (_id, content.689.0) tuples. """
-
-    index = luigi.Parameter(default='bsz', description='name of bsz index')
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.650.0" > {output} """, index=self.index)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class BSZ689Authority(BSZTask):
-    """ Report (_id, content.689.0) tuples. """
-
-    index = luigi.Parameter(default='bsz', description='name of bsz index')
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    @timed
-    def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 content.689.0" > {output} """, index=self.index)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
 class BSZGNDPersonRelations(BSZTask):
     """ For a PPN return all DE-588 relations from 100 and 700. """
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return {'100': BSZ100Authority(date=self.date),
-                '700': BSZ700Authority(date=self.date)}
+        return {'100': BSZAuthority(date=self.date, field='content.100.0'),
+                '700': BSZAuthority(date=self.date, field='content.700.0')}
+
     @timed
     def run(self):
         gnds = collections.defaultdict(set)
@@ -2088,14 +2040,196 @@ class BSZGNDPersonRelations(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class BSZGNDRelations(BSZTask):
-    """ For a PPN return all DE-588 relations from 650 and 689. """
+class BSZGNDReferencedPersons(BSZTask):
+    """
+    Just a list of uniq referenced persons in BSZ.
+    Data point, about 504017 people are referenced on 2014-09-22.
+    """
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return {'650': BSZ650Authority(date=self.date),
-                '689': BSZ689Authority(date=self.date)}
+        return BSZGNDPersonRelations(date=self.date)
+
+    def run(self):
+        people = set()
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'gnds')):
+                for gnd in row.gnds.split('|'):
+                    people.add(gnd)
+
+        with self.output().open('w') as output:
+            for gnd in people:
+                output.write_tsv(gnd)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDBirthplaces(BSZTask):
+    """
+    For a person, report her birth place.
+    This is done with ES for now, but cayley should be the future.
+    """
+    date = luigi.DateParameter(default=weekly())
+    index = luigi.Parameter(default='gnd', significant=False)
+
+    def requires(self):
+        return BSZGNDReferencedPersons(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout(r""" estab -indices {index} -f "s o" -query '{{"query": {{"query_string": {{"query": "p:\"dnb:placeOfBirth\""}}}}}}' | sort -k 2 > {output}""", index=self.index)
+
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDProfessions(BSZTask):
+    """
+    For a person, report her profession.
+    This is done with ES for now, but cayley should be the future.
+    """
+    date = luigi.DateParameter(default=weekly())
+    index = luigi.Parameter(default='gnd', significant=False)
+
+    def requires(self):
+        return BSZGNDReferencedPersons(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout(r""" estab -indices {index} -f "s o" -query '{{"query": {{"query_string": {{"query": "p:\"dnb:professionOrOccupation\""}}}}}}' | sort -k2 > {output}""", index=self.index)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDAuthorCluster(BSZTask):
+    """ BSZGNDAuthorCluster clusters people together, that come from the same city. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return {'refs': BSZGNDReferencedPersons(date=self.date),
+                'places': BSZGNDBirthplaces(date=self.date),
+                'professions': BSZGNDProfessions(date=self.date)}
+
+    @timed
+    def run(self):
+        places = {}
+        invplaces = collections.defaultdict(set)
+        with self.input().get('places').open() as handle:
+            for row in handle.iter_tsv(cols=('person', 'place')):
+                places[row.person] = row.place
+                invplaces[row.place].add(row.person)
+
+        profs = {}
+        invprofs = collections.defaultdict(set)
+        with self.input().get('professions').open() as handle:
+            for row in handle.iter_tsv(cols=('person', 'profession')):
+                profs[row.person] = row.profession
+                invprofs[row.profession].add(row.person)
+
+        with self.output().open('w') as output:
+            with self.input().get('refs').open() as handle:
+                for row in handle.iter_tsv(cols=('person',)):
+                    byplace = invplaces.get(places.get(row.person), set())
+                    byprof = invprofs.get(profs.get(row.person), set())
+                    related = byplace.intersection(byprof)
+                    if not related:
+                        continue
+                    output.write_tsv(row.person, '|'.join(related))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDClusterBirthProfession(BSZTask):
+    """ For a given GND, find other gnds that share the birthplace and the profession. """
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return {'refs': BSZGNDReferencedPersons(date=self.date),
+                'db': GNDDatabase(date=self.date, index='gnd')}
+
+    @timed
+    def run(self):
+        with self.input().get('refs').open() as handle:
+            with sqlite3db(self.input().get('db').path) as cursor:
+                with self.output().open('w') as output:
+                    for row in handle.iter_tsv(cols=('gnd',)):
+                        cursor.execute("""
+                            select s from dnb_placeOfBirth where o =
+                                (select o from dnb_placeOfBirth where s = ?)
+                            intersect select s from dnb_professionOrOccupation where o =
+                                (select o from dnb_professionOrOccupation where s = ?)
+                            """, (row.gnd, row.gnd))
+                        rows = cursor.fetchall()
+                        if len(rows) == 0:
+                            continue
+                        output.write_tsv(row.gnd, '|'.join([r[0] for r in rows]))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDClusterBirthProfessionDB(BSZTask):
+    """ Create an sqlite3 database. """
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return BSZGNDClusterBirthProfession(date=self.date)
+
+    def run(self):
+        target = luigi.File(is_tmp=True, format=TSV)
+        with self.input().open() as handle:
+            with target.open('w') as output:
+                for row in handle.iter_tsv(cols=('key', 'values')):
+                    for value in row.values.split('|'):
+                        if not value == row.key:
+                            output.write_tsv(row.key, value)
+
+        output = shellout('tabtokv -f "1,2" -o {output} {input}', input=target.path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDClusterActivityProfession(BSZTask):
+    """ For a given GND, find other gnds that share the birthplace and the profession. """
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return {'refs': BSZGNDReferencedPersons(date=self.date),
+                'db': GNDDatabase(date=self.date, index='gnd')}
+
+    @timed
+    def run(self):
+        with self.input().get('refs').open() as handle:
+            with sqlite3db(self.input().get('db').path) as cursor:
+                with self.output().open('w') as output:
+                    for row in handle.iter_tsv(cols=('gnd',)):
+                        cursor.execute("""
+                            select s from dnb_placeOfBirth where o =
+                                (select o from dnb_placeOfActivity where s = ?)
+                            intersect select s from dnb_professionOrOccupation where o =
+                                (select o from dnb_professionOrOccupation where s = ?)
+                            """, (row.gnd, row.gnd))
+                        rows = cursor.fetchall()
+                        if len(rows) == 0:
+                            continue
+                        output.write_tsv(row.gnd, '|'.join([r[0] for r in rows]))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDSubjectRelations(BSZTask):
+    """ For a PPN return all DE-588 relations from 650 and 689. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return {'650': BSZAuthority(date=self.date, field='content.650.0'),
+                '689': BSZAuthority(date=self.date, field='content.689.0')}
+
     @timed
     def run(self):
         gnds = collections.defaultdict(set)
@@ -2115,9 +2249,9 @@ class BSZGNDRelations(BSZTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class BSZGNDReverseRelations(BSZTask):
-    """ For a GND report all PPNs. """
+    """ For a GND report all related PPNs. """
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=weekly())
 
     def requires(self):
         return BSZGNDRelations(date=self.date)
@@ -2139,7 +2273,7 @@ class BSZGNDReverseRelations(BSZTask):
 class BSZGNDReferenceCount(BSZTask):
     """ For a GND the number of PPNs that reference it. """
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=weekly())
 
     def requires(self):
         return BSZGNDReverseRelations(date=self.date)
@@ -2154,18 +2288,18 @@ class BSZGNDReferenceCount(BSZTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class BSZGNDDefinitionAvailable(BSZTask):
-    """ For a GND that appears in BSZ check whether a defintion is available. """
+    """ For a GND that appears in BSZ check whether a definition is available. """
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=weekly())
 
     def requires(self):
         return {'bsz': BSZGNDReverseRelations(date=self.date),
-                'defs': GNDDefinitions(date=self.date)}
+                'defs': GNDRelations(date=self.date, relation='dnb:definition')}
 
     def run(self):
         gnds_with_defs = set()
         with self.input().get('defs').open() as handle:
-            for row in handle.iter_tsv(cols=('s', 'p', 'o')):
+            for row in handle.iter_tsv(cols=('s', 'o')):
                 gnds_with_defs.add(row.s)
 
         with self.input().get('bsz').open() as handle:
@@ -2173,6 +2307,84 @@ class BSZGNDDefinitionAvailable(BSZTask):
                 for row in handle.iter_tsv(cols=('gnd', 'ppns')):
                     if row.gnd in gnds_with_defs:
                         output.write_tsv(*row)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZIsbnList(BSZTask):
+    """
+    Dump all ISBNs from current BSZ index.
+    """
+    index = luigi.Parameter(default='bsz', significant=False)
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return [] # return BSZIndexPatch(begin=BSZTask.SONDERABZUG, end=self.date)
+
+    def run(self):
+        indexed = shellout(r""" estab -indices {index} -f "_id content.020.a content.020.9 content.020.z content.776.a" > {output}""", index=self.index)
+        with luigi.File(indexed, format=TSV).open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv():
+                    for field in row[1:]:
+                        if field == 'NOT_AVAILABLE':
+                            continue
+                        for value in field.split('|'):
+                            value = value.replace("-", "")
+                            if len(value) == 10:
+                                try:
+                                    output.write_tsv(row[0], pyisbn.convert(value))
+                                except:
+                                    pass
+                            if len(value) == 13:
+                                output.write_tsv(row[0], value)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZWikiISBN(BSZTask):
+    """ Report ISBNs that are both in BSZ and in the German wikipedia. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        from siskin.sources.wikipedia import WikipediaTitleIsbnWithIds
+        return {'bsz': BSZIsbnList(date=self.date), 'wiki': WikipediaTitleIsbnWithIds(language='de', date=self.date)}
+
+    def run(self):
+        wiki = collections.defaultdict(set)
+        with self.input().get('wiki').open() as handle:
+            for row in handle.iter_tsv(cols=('id', 'isbn')):
+                wiki[row.isbn].add(row.id)
+
+        with self.input().get('bsz').open() as handle:
+            stopover = luigi.File(is_tmp=True, format=TSV)
+            with stopover.open('w') as output:
+                for row in handle.iter_tsv(cols=('id', 'isbn')):
+                    if row.isbn in wiki:
+                        output.write_tsv(row.id, row.isbn, '|'.join(wiki[row.isbn]))
+
+        output = shellout("sort -u {input} > {output}", input=stopover.path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZRVKDistribution(BSZTask):
+    """ Compute the RVK distribution over the current bsz index. Use 936.a """
+
+    date = luigi.DateParameter(default=weekly())
+    field = luigi.Parameter(default='content.936.a')
+    index = luigi.Parameter(default='bsz')
+
+    @timed
+    def run(self):
+        output = shellout("""estab -indices "{index}" -f "{field}" > {output} """, index=self.index, field=self.field)
+        with luigi.File(output, format=TSV) as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('value',)):
+                    for v in row.value.split('|'):
+                        output.write_tsv(v)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
