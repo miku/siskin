@@ -179,9 +179,19 @@ Here are some outputs:
 
 ![OSOIndex](http://i.imgur.com/Y55GCvz.png)
 
+A data source scraped from the web.
+
+----
+
 ![MTCIndex](http://i.imgur.com/OysC5pV.png)
 
+Another scraped and transformed data source.
+
+----
+
 ![SAMerged](https://cdn.mediacru.sh/o0ui7QRSMYyW.png)
+
+A deduplication task.
 
 ----
 
