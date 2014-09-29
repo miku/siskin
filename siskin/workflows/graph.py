@@ -50,7 +50,7 @@ class GraphCombinedJson(GraphTask):
 
     @timed
     def run(self):
-        output = shellout("ntto -w 2 -i -j {input} > {output}", input=self.input().get('ntriples').path)
+        output = shellout("ntto -i -j {input} > {output}", input=self.input().get('ntriples').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
