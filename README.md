@@ -168,6 +168,21 @@ to see what tasks are available. Run `taskdo` to execute a task. Run
 
 to see all available parameters of the task.
 
+Example graphs
+--------------
+
+Most workflows are easy to visualize with [Graphviz]():
+
+    $ taskdeps-dot OSOIndex | dot -Tpng -o OSOIndex.png
+
+Here are some outputs:
+
+![OSOIndex](http://i.imgur.com/Y55GCvz.png)
+
+![MTCIndex](http://i.imgur.com/OysC5pV.png)
+
+![SAMerged](https://cdn.mediacru.sh/o0ui7QRSMYyW.png)
+
 ----
 
 How does it sound? &mdash; Hear [The sound of data being processed](http://vimeo.com/99084953).
