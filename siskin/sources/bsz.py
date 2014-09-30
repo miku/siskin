@@ -1516,7 +1516,7 @@ class UnifiedSnapshot(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class BSZIndexPatch(BSZTask):
+class BSZIndex(BSZTask):
     """
     Adjust the index. This is a long task, but it is reasonably fast
     compared to the alternatives. It can bootstrap an index or just move
@@ -2319,7 +2319,7 @@ class BSZIsbnList(BSZTask):
     date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return [] # return BSZIndexPatch(begin=BSZTask.SONDERABZUG, end=self.date)
+        return [] # return BSZIndex(begin=BSZTask.SONDERABZUG, end=self.date)
 
     def run(self):
         indexed = shellout(r""" estab -indices {index} -f "_id content.020.a content.020.9 content.020.z content.776.a" > {output}""", index=self.index)

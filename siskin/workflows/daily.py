@@ -22,7 +22,7 @@ class DailyIndexUpdates(Workflow):
     def requires(self):
         from siskin.sources.bms import BMSIndex
         from siskin.sources.bnf import BNFIndex
-        from siskin.sources.bsz import BSZIndexPatch
+        from siskin.sources.bsz import BSZIndex
         from siskin.sources.disson import DissonIndex
         from siskin.sources.doab import DOABIndex
         from siskin.sources.ebl import EBLIndex
@@ -46,7 +46,7 @@ class DailyIndexUpdates(Workflow):
         return [
             BMSIndex(date=self.date),
             BNFIndex(date=self.date),
-            BSZIndexPatch(end=self.date, indicator=self.indicator),
+            BSZIndex(end=self.date, indicator=self.indicator),
             DissonIndex(date=self.date),
             DOABIndex(date=self.date),
             EBLIndex(date=self.date),

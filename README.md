@@ -49,12 +49,11 @@ version of their index, and they - by convention - have the suffix Index, like
 [`VIAFIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/viaf.py#L184),
 [`NEPIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/nep.py#L450), etc.
 
-The BSZ indexing task is awkwardly named [`BSZIndexPatch`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/bsz.py#L1517), because it actually
-can patch the BSZ index to be up-to-date by deleting obsolete docs and only
+The BSZ indexing task is named [`BSZIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/bsz.py#L1517). It can actually
+patch the BSZ index to be up-to-date by deleting obsolete docs and only
 indexing the docs, that are not in the index yet or have been updated. For
 about 6 million records, a typical daily patch takes about 10 minutes on single
-machine elasticsearch cluster. (It will probably be renamed into `BSZIndex` in the future
-to follow convention.)
+machine elasticsearch cluster.
 
 For BSZ processing, siskin makes use of a couple of other (internal) data stores.
 
