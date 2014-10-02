@@ -123,7 +123,7 @@ class HistbestGNDPages(HistbestTask):
             url = "http://histbest.ub.uni-leipzig.de/receive/UBLHistBestGND_gnd_0000%s?XSL.Style=native" % padded
             output = "%s.xml" % os.path.join(self.input().path, padded)
             if not os.path.exists(output):
-                output = shellout("""wget -O "{output}.xml" "{url}" """, url=url, output=output,
+                output = shellout("""wget -O "{output}" "{url}" """, url=url, output=output,
                                   ignoremap={8: '404 exit with 8'})
                 time.sleep(self.delay)
 
