@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=F0401,C0111,W0232,E1101,E1103
 
 from gluish.benchmark import timed
 from gluish.common import OAIHarvestChunk
