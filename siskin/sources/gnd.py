@@ -209,7 +209,8 @@ class GNDVirtuoso(GNDTask):
             output.write(cmd)
         shellout("isql-vt {host}:{port} {username} {password} {file}",
                  host=self.host, port=self.port, username=self.username, password=self.password, file=tmp)
-        shellout("touch {output}", output=self.output().path)
+        with self.output().open('w') as output:
+            pass
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='touch', digest=True))

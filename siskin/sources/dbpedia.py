@@ -6,13 +6,14 @@ from gluish.common import Executable, ElasticsearchMixin
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.path import iterfiles
-from gluish.utils import shellout
+from gluish.utils import shellout, random_string
 from siskin.task import DefaultTask
 import elasticsearch
 import hashlib
 import luigi
 import os
 import pprint
+import shutil
 import tempfile
 
 class DBPTask(DefaultTask):
@@ -62,7 +63,8 @@ class DBPExtract(DBPTask):
             for row in handle.iter_tsv(cols=('path',)):
                 basename = os.path.basename(row.path)
                 dst = os.path.join(target, os.path.splitext(basename)[0])
-                shellout("pbzip2 -d -m1000 -c {src} > {dst}", src=row.path, dst=dst)
+                if not os.path.exists(dst):
+                    shellout("pbzip2 -d -m1000 -c {src} > {dst}", src=row.path, dst=dst)
 
         with self.output().open('w') as output:
             for path in sorted(iterfiles(target)):
@@ -70,6 +72,170 @@ class DBPExtract(DBPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class DBPImages(DBPTask):
+    """ Return a file with about 8M foaf:depictions. """
+
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('images_%s.%s' % (self.language, self.format)):
+                    filtered = shellout("""LANG=C grep -F "<http://xmlns.com/foaf/0.1/depiction>" {input} > {output}""", input=row.path)
+                    luigi.File(filtered).copy(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class DBPCategories(DBPTask):
+    """ Return a file with categories and their labels. """
+
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('/article_categories_%s.%s' % (self.language, self.format)):
+                    shellout("""cat {input} >> {output}""", input=row.path, output=stopover)
+                if row.path.endswith('/category_labels_%s.%s' % (self.language, self.format)):
+                    shellout("""cat {input} >> {output}""", input=row.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class DBPInterlanguageBacklinks(DBPTask):
+    """ Extract interlanguage links pointing to the english dbpedia resource.
+        Example output line:
+
+    <http://de.dbpedia.org/resource/Vokov> <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Vokov> .
+    """
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('/interlanguage_links_%s.%s' % (self.language, self.format)):
+                    filtered = shellout("""LANG=C grep -F "<http://dbpedia.org/resource/" {input} > {output}""", input=row.path)
+                    luigi.File(filtered).copy(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class DBPTripleMelange(DBPTask):
+    """ Combine several slices of triples from DBP for KG. """
+
+    version = luigi.Parameter(default="3.9")
+
+    def requires(self):
+        return {
+            'images-en': DBPImages(language='en', version=self.version),
+            'images-de': DBPImages(language='de', version=self.version),
+            'categories-en': DBPCategories(language='en', version=self.version),
+            'categories-de': DBPCategories(language='de', version=self.version),
+            'links': DBPInterlanguageBacklinks(language='de', version=self.version),
+        }
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for _, target in self.input().iteritems():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
+class DBPTriplesSplitted(DBPTask):
+    """ Split Ntriples into chunks, so we see some progress in virtuoso. """
+
+    version = luigi.Parameter(default="3.9")
+    lines = luigi.IntParameter(default=1000000)
+
+    def requires(self):
+        return DBPTripleMelange(version=self.version)
+
+    @timed
+    def run(self):
+        prefix = '{0}-'.format(random_string())
+        output = shellout("cd {tmp} && split -l {lines} -a 8 {input} {prefix} && cd -",
+                          lines=self.lines, tmp=tempfile.gettempdir(),
+                          input=self.input().path, prefix=prefix)
+        target = os.path.join(self.taskdir())
+        if not os.path.exists(target):
+            os.makedirs(target)
+        with self.output().open('w') as output:
+            for path in iterfiles(tempfile.gettempdir()):
+                filename = os.path.basename(path)
+                if filename.startswith(prefix):
+                    dst = os.path.join(target, filename)
+                    shutil.move(path, dst)
+                    output.write_tsv(dst)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class DBPVirtuoso(DBPTask):
+    """ Load DBP parts into virtuoso 6. Assume there is no graph yet.
+    Clear any graph manually with `SPARQL CLEAR GRAPH <http://dbpedia.org/resource/>;`
+
+    See SELECT * FROM DB.DBA.LOAD_LIST; for progress.
+
+    Also add `dirname $(taskoutput DBPTriplesSplitted)` to
+    AllowedDirs in /etc/virtuoso-opensource-6.1/virtuoso.ini
+    """
+
+    version = luigi.Parameter(default="3.9")
+    graph = luigi.Parameter(default='http://dbpedia.org/resource/')
+    host = luigi.Parameter(default='localhost', significant=False)
+    port = luigi.IntParameter(default=1111, significant=False)
+    username = luigi.Parameter(default='dba', significant=False)
+    password = luigi.Parameter(default='dba', significant=False)
+
+    def requires(self):
+        return DBPTriplesSplitted(version=self.version)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            path = handle.iter_tsv(cols=('path',)).next().path
+            dirname = os.path.dirname(path)
+            filename = os.path.basename(path)
+            prefix, id = filename.split('-')
+
+        # allow access to all to dirname
+        os.chmod(dirname, 0777)
+
+        cmd = """
+            LD_DIR ('%s', '%s-*', '%s');
+            RDF_LOADER_RUN();
+        """ % (dirname, prefix, self.graph)
+        _, tmp = tempfile.mkstemp(prefix='siskin-')
+        with open(tmp, 'w') as output:
+            output.write(cmd)
+        shellout("isql-vt {host}:{port} {username} {password} {file}",
+                 host=self.host, port=self.port, username=self.username, password=self.password, file=tmp)
+        with self.output().open('w') as output:
+            pass
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='touch', digest=True))
 
 class DBPPredicateDistribution(DBPTask):
     """ Just a uniq -c on the predicate 'column' """
@@ -170,7 +336,7 @@ class DBPIndex(DBPTask, CopyToIndex):
     def requires(self):
         return DBPJson(version=self.version, language=self.language)
 
-class DBPImages(DBPTask, ElasticsearchMixin):
+class DBPRawImages(DBPTask, ElasticsearchMixin):
     """ Generate a raw list of (s, p, o) tuples that contain string ending with jpg. """
 
     index = luigi.Parameter(default='dbp', description='name of the index to search')
