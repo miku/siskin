@@ -68,6 +68,9 @@ class DBPExtract(DBPTask):
 
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
+                if not row.path.endswith('%s.bz2' % self.format):
+                    self.logger.debug('skipping non bz2 file: %s' % row.path)
+                    continue
                 basename = os.path.basename(row.path)
                 dst = os.path.join(target, os.path.splitext(basename)[0])
                 if not os.path.exists(dst):
