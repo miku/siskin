@@ -199,8 +199,15 @@ class WikipediaCategoryTable(WikipediaTask):
 
     @timed
     def run(self):
-        prefixes = {'en': 'Category', 'de': 'Kategorie', 'fr': u'Catégorie',
-                    'es': u'Categoría'}
+        prefixes = {
+            'de': 'Kategorie',
+            'en': 'Category',
+            'fr': u'Catégorie',
+            'eo': 'Kategorio',
+            'es': u'Categoría',
+            'it': 'Categoria',
+            'he': u'קטגוריות', # won't work
+        }
         if self.language not in prefixes:
             raise RuntimeError('Category prefix not added yet')
 
