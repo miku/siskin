@@ -140,6 +140,22 @@ class GNDNTriples(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class GNDCount(GNDTask):
+    """ Just count the number of triples and store it. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("wc -l {input} | awk '{{print $1}}' > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='count'))
+
 class GNDNTriplesSplitted(GNDTask):
     """ Split Ntriples into chunks, so we see some progress in virtuoso. """
 
@@ -196,24 +212,29 @@ class GNDVirtuoso(GNDTask):
             dirname = os.path.dirname(path)
             filename = os.path.basename(path)
             prefix, id = filename.split('-')
-
-        # allow access to all to dirname
         os.chmod(dirname, 0777)
+        shellout(""" echo "LD_DIR ('{dirname}', '{prefix}-*', '{name}'); RDF_LOADER_RUN();" | isql-vt {host}:{port} {username} {password}""",
+                 dirname=dirname, prefix=prefix, name=self.graph, host=self.host, port=self.port, username=self.username, password=self.password)
 
-        cmd = """
-            LD_DIR ('%s', '%s-*', '%s');
-            RDF_LOADER_RUN();
-        """ % (dirname, prefix, self.graph)
-        _, tmp = tempfile.mkstemp(prefix='siskin')
-        with open(tmp, 'w') as output:
-            output.write(cmd)
-        shellout("isql-vt {host}:{port} {username} {password} {file}",
-                 host=self.host, port=self.port, username=self.username, password=self.password, file=tmp)
-        with self.output().open('w') as output:
-            pass
+    def complete(self):
+        """ Compare the expected number of triples with the number of loaded ones. """
+        output = shellout("""curl -s -H 'Accept: text/csv' {host}:8890/sparql 
+                             --data-urlencode 'query=SELECT COUNT(*) FROM <{graph}> WHERE {{?a ?b ?c}}' |
+                             grep -v callret > {output}""", host=self.host, port=self.port, graph=self.graph)
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='touch', digest=True))
+        with open(output) as handle:
+            loaded = int(handle.read().strip())
+
+        task = GNDCount(date=self.date)
+        luigi.build([task], local_scheduler=True)
+        with task.output().open() as handle:
+            expected = int(handle.read().strip())
+            if expected == 0:
+                return False
+            elif expected == loaded:
+                return True
+            else:
+                raise RuntimeError('expected %s triples but loaded %s' % (expected, loaded))
 
 class GNDAbbreviatedNTriples(GNDTask):
     """ Get a Ntriples representation of GND, but abbreviate with ntto. """
