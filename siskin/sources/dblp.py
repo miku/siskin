@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
@@ -12,7 +13,7 @@ class DBLPTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
-class DBLPDownload(DefaultTask):
+class DBLPDownload(DBLPTask):
     """ Download file and extract. """
     url = luigi.Parameter(default='http://dblp.uni-trier.de/xml/dblp.xml.gz', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
