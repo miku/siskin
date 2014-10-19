@@ -229,7 +229,7 @@ class GNDVirtuoso(GNDTask):
         luigi.build([task], local_scheduler=True)
         with task.output().open() as handle:
             expected = int(handle.read().strip())
-            if expected == 0:
+            if expected > 0 and loaded == 0:
                 return False
             elif expected == loaded:
                 return True
