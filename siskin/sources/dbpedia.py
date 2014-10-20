@@ -235,35 +235,24 @@ class DBPVirtuoso(DBPTask):
 
     @timed
     def run(self):
-        with self.input().open() as handle:
-            path = handle.iter_tsv(cols=('path',)).next().path
-            dirname = os.path.dirname(path)
-            filename = os.path.basename(path)
-            prefix, id = filename.split('-')
-        os.chmod(dirname, 0777)
-        shellout(""" echo "LD_DIR ('{dirname}', '{prefix}-*', '{name}');
-                           RDF_LOADER_RUN();" | isql-vt {host}:{port} {username} {password}""",
-                 dirname=dirname, prefix=prefix, name=self.graph, host=self.host, port=self.port, username=self.username, password=self.password)
+        print("""
+            This is a manual task for now. If you haven't already:
+
+            Run `isql-vt` (V6) or `isql` (V7), then execute:
+
+                LD_DIR('{dirname}', '{prefix}-*', '{name}';
+
+            Check the result via:
+
+                SELECT * FROM DB.DBA.LOAD_LIST;
+
+            When you are done adding all triples files to the load list, run:
+
+                RDF_LOADER_RUN();
+        """)
 
     def complete(self):
-        """ Compare the expected number of triples with the number of loaded ones. """
-        output = shellout("""curl -s -H 'Accept: text/csv' {host}:8890/sparql
-                             --data-urlencode 'query=SELECT COUNT(*) FROM <{graph}> WHERE {{?a ?b ?c}}' |
-                             grep -v callret > {output}""", host=self.host, port=self.port, graph=self.graph)
-
-        with open(output) as handle:
-            loaded = int(handle.read().strip())
-
-        task = DBPCount(base=self.base, version=self.version)
-        luigi.build([task], local_scheduler=True)
-        with task.output().open() as handle:
-            expected = int(handle.read().strip())
-            if expected > 0 and loaded == 0:
-                return False
-            elif expected == loaded:
-                return True
-            else:
-                raise RuntimeError('expected %s triples but loaded %s' % (expected, loaded))
+        return False
 
 class DBPPredicateDistribution(DBPTask):
     """ Just a uniq -c on the predicate 'column' """
