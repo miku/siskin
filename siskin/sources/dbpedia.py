@@ -241,8 +241,11 @@ class DBPVirtuoso(DBPTask):
             filename = os.path.basename(path)
             prefix, id = filename.split('-')
         os.chmod(dirname, 0777)
-        shellout(""" echo "LD_DIR('{dirname}', '{prefix}-*', '{name}'); RDF_LOADER_RUN();" | isql-vt {host}:{port} {username} {password}""",
-                 dirname=dirname, prefix=prefix, name=self.graph, host=self.host, port=self.port, username=self.username, password=self.password)
+        shellout(""" echo "LD_DIR ('{dirname}', '{prefix}-*', '{name}');
+                           RDF_LOADER_RUN();
+                          " | isql-vt {host}:{port} {username} {password}""",
+                 dirname=dirname, prefix=prefix, name=self.graph, host=self.host, port=self.port,
+                 username=self.username, password=self.password)
 
     def complete(self):
         """ Compare the expected number of triples with the number of loaded ones. """
