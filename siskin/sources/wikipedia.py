@@ -75,7 +75,30 @@ class WikipediaTitles(WikipediaTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv'))
+        return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
+
+class WikipediaTitlesInBSZ(WikipediaTask):
+    """ Run a query with the exact wikipedia title in elasticsearch/bsz
+    and report back the number of hits. """
+
+    language = luigi.Parameter(default='en')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaTitles(date=self.date, language=self.language)
+
+    @timed
+    def run(self):
+        es = elasticsearch.Elasticsearch()
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('title',)):
+                    title = row.title.strip()
+                    result = es.search(index='bsz', q='"%s"' % title.replace('"','\\"'))
+                    output.write_tsv(title, result['hits']['total'])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
 
 class WikipediaIsbnList(WikipediaTask):
     """
