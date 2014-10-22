@@ -544,7 +544,7 @@ class DBPGNDLinks(DBPTask):
             for row in handle.iter_tsv(cols=('path',)):
                 if row.path.endswith('infobox_properties_%s.nt' % (self.language)):
                     output = shellout("""LANG=C grep -F "{relation}" {input} |
-                                         sed -e 's@<http://de.dbpedia.org/property/gnd>@@g' |
+                                         sed -e 's@{relation}@@g' |
                                          sed -e 's@\^\^.*@@g' |
                                          sed -e 's@"@@g' > {output}""",
                                       relation=relation.get(self.language, 'en'),
@@ -608,12 +608,17 @@ class DBPGNDValidLinks(DBPTask):
         return DBPGNDValidity(version=self.version, language=self.language, date=self.date)
 
     def run(self):
+        relation = {
+            'de': '<http://de.dbpedia.org/resource/',
+            'en': '<http://dbpedia.org/resource/'
+        }
+
         output = shellout("""
             grep -v INVALID {input} |
             awk '{{print $1"\\t"$2}}' |
-            sed -e 's@<http://de.dbpedia.org/resource/@dbp:@g' |
+            sed -e 's@{relation}@dbp:@g' |
             sed -e 's@>@@g' > {output}
-            """, input=self.input().path)
+            """, input=self.input().path, relation=relation.get(self.language, 'en'))
 
         with luigi.File(output, format=TSV).open() as handle:
             with self.output().open('w') as output:
