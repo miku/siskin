@@ -158,6 +158,24 @@ class GNDList(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GNDNames(GNDTask):
+    """ Extract all preferred and variant names and list them as (gnd, name) tuples. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C grep -E "variantName|preferredName" {input} |
+                             LANG=C sed -e 's@<http://d-nb.info/gnd/\([0-9X-]*\)>@\\1@g' |
+                             LANG=C sed -e 's@<http://d-nb.info/standards/elementset/gnd#[^>]*>@@g' |
+                             LANG=C sed 's/.$//' | sed -e 's/"//g' | LANG=C grep -v "_:node" > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GNDCount(GNDTask):
     """ Just count the number of triples and store it. """
 
@@ -239,7 +257,7 @@ class GNDVirtuoso(GNDTask):
 
     def complete(self):
         """ Compare the expected number of triples with the number of loaded ones. """
-        output = shellout("""curl -s -H 'Accept: text/csv' {host}:8890/sparql 
+        output = shellout("""curl -s -H 'Accept: text/csv' {host}:8890/sparql
                              --data-urlencode 'query=SELECT COUNT(*) FROM <{graph}> WHERE {{?a ?b ?c}}' |
                              grep -v callret > {output}""", host=self.host, port=self.port, graph=self.graph)
 
