@@ -10,7 +10,7 @@ from gluish.benchmark import timed
 from gluish.common import ElasticsearchMixin, Executable
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
-from gluish.intervals import yearly
+from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
@@ -28,7 +28,7 @@ class WikipediaTask(DefaultTask):
     TAG = 'wikipedia'
 
     def closest(self):
-        return yearly(self.date)
+        return monthly(self.date)
 
 class WikipediaArticleDump(WikipediaTask):
     """
