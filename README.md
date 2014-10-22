@@ -156,7 +156,7 @@ How does it sound? &mdash; Hear [The sound of data being processed](http://vimeo
 Implementation Guidelines
 -------------------------
 
-* tasks that produce files, should generate one file
+* tasks that produce files, should generate one and only one file (use indirection, if the output consists of multiple files)
 * file output should be free from headers or other decoration
 * task output should be simple to parse and compose (this usually means
   representing each record as a single, plain-text formatted line of output whose columns are separated by whitespace)
