@@ -140,6 +140,24 @@ class GNDNTriples(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class GNDList(GNDTask):
+    """ Just dump a list of uniq GNDs. No URIs, just one id per line. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C awk '{{print $1}}' {input} |
+                             LANG=C sed -e 's@<http://d-nb.info/gnd/@@g' |
+                             LANG=C sed -e 's@>@@g' |
+                             LANG=C grep -v '^_:' | sort -u > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GNDCount(GNDTask):
     """ Just count the number of triples and store it. """
 
@@ -396,7 +414,12 @@ class GNDDBPediaLinks(GNDTask):
 
     def run(self):
         output = shellout(r""" awk '$2 ~ "dbp:" {{print $0}}' {input} > {output}""", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        with luigi.File(output, format=TSV).open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('gnd', 'dbp')):
+                    decoded = urllib.unquote(row.dbp)
+                    print(decoded)
+                    output.write_tsv(decoded, row.gnd)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -405,6 +428,7 @@ class GNDDBPediaInterlinks(GNDTask):
     """
     Report GND <-> dbpedia interlinking stats.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):

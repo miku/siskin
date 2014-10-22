@@ -8,8 +8,10 @@ from gluish.format import TSV
 from gluish.path import iterfiles
 from gluish.utils import shellout, random_string
 from siskin.task import DefaultTask
+import datetime
 import elasticsearch
 import hashlib
+import json
 import luigi
 import os
 import pprint
@@ -45,8 +47,12 @@ class DBPDownload(DBPTask):
                           base=self.base, prefix=target, format=self.format,
                           version=self.version, language=self.language)
 
+        pathlist = sorted(iterfiles(target))
+        if len(pathlist) == 0:
+            raise RuntimeError('no files downloaded, double check --base option')
+
         with self.output().open('w') as output:
-            for path in sorted(iterfiles(target)):
+            for path in pathlist:
                 output.write_tsv(path)
 
     def output(self):
@@ -76,8 +82,12 @@ class DBPExtract(DBPTask):
                 if not os.path.exists(dst):
                     shellout("pbzip2 -d -m1000 -c {src} > {dst}", src=row.path, dst=dst)
 
+        pathlist = sorted(iterfiles(target))
+        if len(pathlist) == 0:
+            raise RuntimeError('no files extracted, double check --base option')
+
         with self.output().open('w') as output:
-            for path in sorted(iterfiles(target)):
+            for path in pathlist:
                 output.write_tsv(path)
 
     def output(self):
@@ -124,6 +134,24 @@ class DBPCategories(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class DBPInfobox(DBPTask):
+    """ Use infobox properties. """
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(base=self.base, version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('infobox_properties_%s.%s' % (self.language, self.format)):
+                    luigi.File(row.path).copy(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
 class DBPInterlanguageBacklinks(DBPTask):
     """ Extract interlanguage links pointing to the english dbpedia resource.
         Example output line:
@@ -157,6 +185,8 @@ class DBPTripleMelange(DBPTask):
             'images-de': DBPImages(base=self.base, language='de', version=self.version),
             'categories-en': DBPCategories(base=self.base, language='en', version=self.version),
             'categories-de': DBPCategories(base=self.base, language='de', version=self.version),
+            'infobox-en': DBPInfobox(base=self.base, language='en', version=self.version),
+            'infobox-de': DBPInfobox(base=self.base, language='de', version=self.version),
             'links': DBPInterlanguageBacklinks(base=self.base, language='de', version=self.version),
         }
 
@@ -170,7 +200,7 @@ class DBPTripleMelange(DBPTask):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
 class DBPCount(DBPTask):
-    """ Just count the number of triples and store it. """
+    """ Just count the number of triples in the mix and store it. """
     version = luigi.Parameter(default="3.9")
 
     def requires(self):
@@ -185,7 +215,7 @@ class DBPCount(DBPTask):
         return luigi.LocalTarget(path=self.path(ext='count'))
 
 class DBPTriplesSplitted(DBPTask):
-    """ Split Ntriples into chunks, so we see some progress in virtuoso. """
+    """ Split mixed Ntriples into chunks, so we see some progress in virtuoso. """
 
     version = luigi.Parameter(default="3.9")
     lines = luigi.IntParameter(default=1000000)
@@ -235,37 +265,24 @@ class DBPVirtuoso(DBPTask):
 
     @timed
     def run(self):
-        with self.input().open() as handle:
-            path = handle.iter_tsv(cols=('path',)).next().path
-            dirname = os.path.dirname(path)
-            filename = os.path.basename(path)
-            prefix, id = filename.split('-')
-        os.chmod(dirname, 0777)
-        shellout(""" echo "LD_DIR ('{dirname}', '{prefix}-*', '{name}');
-                           RDF_LOADER_RUN();
-                          " | isql-vt {host}:{port} {username} {password}""",
-                 dirname=dirname, prefix=prefix, name=self.graph, host=self.host, port=self.port,
-                 username=self.username, password=self.password)
+        print("""
+            This is a manual task for now. If you haven't already:
+
+            Run `isql-vt` (V6) or `isql` (V7), then execute:
+
+                LD_DIR('{dirname}', '{prefix}-*', '{name}';
+
+            Check the result via:
+
+                SELECT * FROM DB.DBA.LOAD_LIST;
+
+            When you are done adding all triples files to the load list, run:
+
+                RDF_LOADER_RUN();
+        """)
 
     def complete(self):
-        """ Compare the expected number of triples with the number of loaded ones. """
-        output = shellout("""curl -s -H 'Accept: text/csv' {host}:8890/sparql
-                             --data-urlencode 'query=SELECT COUNT(*) FROM <{graph}> WHERE {{?a ?b ?c}}' |
-                             grep -v callret > {output}""", host=self.host, port=self.port, graph=self.graph)
-
-        with open(output) as handle:
-            loaded = int(handle.read().strip())
-
-        task = DBPCount(base=self.base, version=self.version)
-        luigi.build([task], local_scheduler=True)
-        with task.output().open() as handle:
-            expected = int(handle.read().strip())
-            if expected > 0 and loaded == 0:
-                return False
-            elif expected == loaded:
-                return True
-            else:
-                raise RuntimeError('expected %s triples but loaded %s' % (expected, loaded))
+        return False
 
 class DBPPredicateDistribution(DBPTask):
     """ Just a uniq -c on the predicate 'column' """
@@ -510,17 +527,148 @@ class GraphLookup(DBPTask, ElasticsearchMixin):
     def complete(self):
         return False
 
-class DBPGNDLinks(DBPTask, ElasticsearchMixin):
+class DBPGNDLinks(DBPTask):
     """ Find all links from DBP to GND via dp.de:gnd """
-
-    index = luigi.Parameter(default='dbp', description='name of the index to search')
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
 
     def requires(self):
-        return Executable(name='estab', message='http://git.io/bLY7cQ')
+        return DBPExtract(base=self.base, version=self.version, language=self.language, format='nt')
+
+    @timed
+    def run(self):
+        relation = {
+            'de': '<http://de.dbpedia.org/property/gnd>',
+            'en': '<http://dbpedia.org/property/gnd>'
+        }
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('infobox_properties_%s.nt' % (self.language)):
+                    output = shellout("""LANG=C grep -F "{relation}" {input} |
+                                         sed -e 's@<http://de.dbpedia.org/property/gnd>@@g' |
+                                         sed -e 's@\^\^.*@@g' |
+                                         sed -e 's@"@@g' > {output}""",
+                                      relation=relation.get(self.language, 'en'),
+                                      input=row.path)
+                    luigi.File(output).move(self.output().path)
+                    break
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'), format=TSV)
+
+class DBPGNDValidity(DBPTask):
+    """ Check, how many <http://de.dbpedia.org/property/gnd> are
+    actually working. """
+
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        from siskin.sources.gnd import GNDList
+        return {
+            'dbp': DBPGNDLinks(base=self.base, version=self.version, language=self.language),
+            'gnd': GNDList(date=self.date),
+        }
+
+    @timed
+    def run(self):
+        gnds = set()
+        with self.input().get('gnd').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd',)):
+                gnds.add(row.gnd)
+
+        with self.input().get('dbp').open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    parts = line.strip().split()
+                    if not len(parts) == 2:
+                        self.logger.warn('skipping broken data: %s' % line)
+                        continue
+                    uri, id = parts
+                    if id in gnds:
+                        output.write_tsv(uri, id, 'OK')
+                    else:
+                        output.write_tsv(uri, id, 'INVALID')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPGNDValidLinks(DBPTask):
+    """ Only keep the valid links and abbreviate
+        <http://de.dbpedia.org/resource/Landkreis_Birkenfeld>
+    to
+        dbp:Landkreis_Birkenfeld
+    """
+
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DBPGNDValidity(base=self.base, version=self.version, language=self.language, date=self.date)
 
     def run(self):
-        output = shellout(r""" estab -indices {index} -f "s p o" -query '{{"query": {{"query_string": {{"query": "p:\"dp.de:gnd\""}}}}}}' > {output}""", index=self.index)
-        luigi.File(output).move(self.output().path)
+        output = shellout("""
+            grep -v INVALID {input} |
+            awk '{{print $1"\\t"$2}}' |
+            sed -e 's@<http://de.dbpedia.org/resource/@dbp:@g' |
+            sed -e 's@>@@g' > {output}
+            """, input=self.input().path)
+
+        with luigi.File(output, format=TSV).open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('dbp', 'gnd')):
+                    output.write_tsv(row.dbp.decode('unicode-escape').encode('utf-8'), 'gnd:%s' % row.gnd)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPGNDOverlap(DBPTask):
+    """ Compute overlap between DBP and GND. """
+
+    version = luigi.Parameter(default="3.9")
+    language = luigi.Parameter(default="de")
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        from siskin.sources.gnd import GNDDBPediaLinks
+        return {
+            'gtod': GNDDBPediaLinks(date=self.date),
+            'dtog': DBPGNDValidLinks(base=self.base, version=self.version, language=self.language),
+        }
+
+    def run(self):
+        gnd = set()
+        dbp = set()
+
+        with self.input().get('gtod').open() as handle:
+            for row in handle.iter_tsv(cols=('dbp', 'gnd')):
+                gnd.add((row.dbp, row.gnd))
+
+        with self.input().get('dtog').open() as handle:
+            for row in handle.iter_tsv(cols=('dbp', 'gnd')):
+                dbp.add((row.dbp, row.gnd))
+
+        info = {
+            'gnd': len(gnd),
+            'dbp': len(dbp),
+            'gnd & dbp': len(gnd.intersection(dbp)),
+            'gnd | dbp': len(gnd.union(dbp)),
+            'gnd - dbp': len(gnd.difference(dbp)),
+            'dbp - gnd': len(dbp.difference(gnd)),
+        }
+
+        print(json.dumps(info, indent=4))
+
+        with self.output().open('w') as output:
+            for d, g in gnd.union(dbp):
+                flag = 'BOTH'
+                if not (d, g) in dbp:
+                    flag = 'ONLY_GND'
+                if not (d, g) in gnd:
+                    flag = 'ONLY_DBP'
+                output.write_tsv(d, g, flag)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
