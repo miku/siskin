@@ -8,6 +8,7 @@ from gluish.format import TSV
 from gluish.path import iterfiles
 from gluish.utils import shellout, random_string
 from siskin.task import DefaultTask
+import collections
 import datetime
 import elasticsearch
 import hashlib
@@ -21,13 +22,10 @@ import tempfile
 class DBPTask(DefaultTask):
     TAG = 'dbpedia'
 
-    base = luigi.Parameter(default='http://downloads.dbpedia.org',
-                           description='base url, for 2014 version, try http://data.dws.informatik.uni-mannheim.de/dbpedia',
-                           significant=False)
-
 class DBPDownload(DBPTask):
     """ Download DBPedia version and language.
-    2014 versions seems to be hosted under
+    2014 versions hosted under http://data.dws.informatik.uni-mannheim.de/dbpedia.
+    For other download locations adjust bases.
 
     """
     version = luigi.Parameter(default="3.9")
@@ -38,14 +36,15 @@ class DBPDownload(DBPTask):
         return Executable(name='wget')
 
     def run(self):
+        bases = collections.defaultdict(lambda: 'http://downloads.dbpedia.org')
+        bases['2014'] = 'http://data.dws.informatik.uni-mannheim.de/dbpedia'
+
         target = os.path.join(self.taskdir(), self.version, self.language, self.format)
         if not os.path.exists(target):
             os.makedirs(target)
-        output = shellout(""" wget --retry-connrefused
-                          -P {prefix} -nd -nH -np -r -c -A *{format}.bz2
-                          {base}/{version}/{language}/ """,
-                          base=self.base, prefix=target, format=self.format,
-                          version=self.version, language=self.language)
+
+        url = '{base}/{version}/{language}/'.format(base=bases[self.version], version=self.version, language=self.language)
+        output = shellout(""" wget --retry-connrefused -P {prefix} -nd -nH -np -r -c -A *{format}.bz2 {url}""", url=url, prefix=target, format=self.format)
 
         pathlist = sorted(iterfiles(target))
         if len(pathlist) == 0:
@@ -65,7 +64,7 @@ class DBPExtract(DBPTask):
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPDownload(base=self.base, version=self.version, language=self.language, format=self.format)
+        return DBPDownload(version=self.version, language=self.language, format=self.format)
 
     def run(self):
         target = os.path.join(self.taskdir(), self.version, self.language, self.format)
@@ -100,7 +99,7 @@ class DBPImages(DBPTask):
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format=self.format)
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
 
     def run(self):
         with self.input().open() as handle:
@@ -119,7 +118,7 @@ class DBPCategories(DBPTask):
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format=self.format)
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -141,7 +140,7 @@ class DBPInfobox(DBPTask):
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format=self.format)
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
 
     def run(self):
         with self.input().open() as handle:
@@ -163,7 +162,7 @@ class DBPInterlanguageBacklinks(DBPTask):
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format=self.format)
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
 
     def run(self):
         with self.input().open() as handle:
@@ -181,13 +180,13 @@ class DBPTripleMelange(DBPTask):
 
     def requires(self):
         return {
-            'images-en': DBPImages(base=self.base, language='en', version=self.version),
-            'images-de': DBPImages(base=self.base, language='de', version=self.version),
-            'categories-en': DBPCategories(base=self.base, language='en', version=self.version),
-            'categories-de': DBPCategories(base=self.base, language='de', version=self.version),
-            'infobox-en': DBPInfobox(base=self.base, language='en', version=self.version),
-            'infobox-de': DBPInfobox(base=self.base, language='de', version=self.version),
-            'links': DBPInterlanguageBacklinks(base=self.base, language='de', version=self.version),
+            'images-en': DBPImages(language='en', version=self.version),
+            'images-de': DBPImages(language='de', version=self.version),
+            'categories-en': DBPCategories(language='en', version=self.version),
+            'categories-de': DBPCategories(language='de', version=self.version),
+            'infobox-en': DBPInfobox(language='en', version=self.version),
+            'infobox-de': DBPInfobox(language='de', version=self.version),
+            'links': DBPInterlanguageBacklinks(language='de', version=self.version),
         }
 
     def run(self):
@@ -204,7 +203,7 @@ class DBPCount(DBPTask):
     version = luigi.Parameter(default="3.9")
 
     def requires(self):
-        return DBPTripleMelange(base=self.base, version=self.version)
+        return DBPTripleMelange(version=self.version)
 
     @timed
     def run(self):
@@ -221,7 +220,7 @@ class DBPTriplesSplitted(DBPTask):
     lines = luigi.IntParameter(default=1000000)
 
     def requires(self):
-        return DBPTripleMelange(base=self.base, version=self.version)
+        return DBPTripleMelange(version=self.version)
 
     @timed
     def run(self):
@@ -261,7 +260,7 @@ class DBPVirtuoso(DBPTask):
     password = luigi.Parameter(default='dba', significant=False)
 
     def requires(self):
-        return DBPTriplesSplitted(base=self.base, version=self.version)
+        return DBPTriplesSplitted(version=self.version)
 
     @timed
     def run(self):
@@ -290,7 +289,7 @@ class DBPPredicateDistribution(DBPTask):
     language = luigi.Parameter(default="en")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language)
+        return DBPExtract(version=self.version, language=self.language)
 
     def run(self):
         output = shellout("""cut -d " " -f2 {input} | LANG=C sort | LANG=C uniq -c > {output}""",
@@ -307,7 +306,7 @@ class DBPAbbreviatedNTriples(DBPTask):
     language = luigi.Parameter(default="en")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format='nt')
+        return DBPExtract(version=self.version, language=self.language, format='nt')
 
     @timed
     def run(self):
@@ -340,7 +339,7 @@ class DBPJson(DBPTask):
     language = luigi.Parameter(default="en")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language,
+        return DBPExtract(version=self.version, language=self.language,
                           format='nt')
 
     @timed
@@ -381,7 +380,7 @@ class DBPIndex(DBPTask, CopyToIndex):
         return self.language
 
     def requires(self):
-        return DBPJson(base=self.base, version=self.version, language=self.language)
+        return DBPJson(version=self.version, language=self.language)
 
 class DBPRawImages(DBPTask, ElasticsearchMixin):
     """ Generate a raw list of (s, p, o) tuples that contain string ending with jpg. """
@@ -417,7 +416,7 @@ class DBPDownloadDepictions(DBPTask):
     """ Download depictions from wikimedia. """
 
     def requires(self):
-        return DBPDepictions(base=self.base)
+        return DBPDepictions()
 
     def run(self):
 
@@ -447,7 +446,7 @@ class DBPSameAs(DBPTask):
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format=self.format)
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -533,7 +532,7 @@ class DBPGNDLinks(DBPTask):
     language = luigi.Parameter(default="de")
 
     def requires(self):
-        return DBPExtract(base=self.base, version=self.version, language=self.language, format='nt')
+        return DBPExtract(version=self.version, language=self.language, format='nt')
 
     @timed
     def run(self):
@@ -567,7 +566,7 @@ class DBPGNDValidity(DBPTask):
     def requires(self):
         from siskin.sources.gnd import GNDList
         return {
-            'dbp': DBPGNDLinks(base=self.base, version=self.version, language=self.language),
+            'dbp': DBPGNDLinks(version=self.version, language=self.language),
             'gnd': GNDList(date=self.date),
         }
 
@@ -606,7 +605,7 @@ class DBPGNDValidLinks(DBPTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return DBPGNDValidity(base=self.base, version=self.version, language=self.language, date=self.date)
+        return DBPGNDValidity(version=self.version, language=self.language, date=self.date)
 
     def run(self):
         output = shellout("""
@@ -635,7 +634,7 @@ class DBPGNDOverlap(DBPTask):
         from siskin.sources.gnd import GNDDBPediaLinks
         return {
             'gtod': GNDDBPediaLinks(date=self.date),
-            'dtog': DBPGNDValidLinks(base=self.base, version=self.version, language=self.language),
+            'dtog': DBPGNDValidLinks(version=self.version, language=self.language),
         }
 
     def run(self):
