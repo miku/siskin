@@ -252,7 +252,11 @@ class DBPCategoryExtensionGND(DBPTask):
                 'links': DBPGNDValidLinks(version=self.version, language=self.language)}
 
     def abbreviate_ns(self, s):
-        return s.replace('<http://dbpedia.org/resource/', 'dbp:').rstrip('>')
+        pattern = {
+            'de': '<http://de.dbpedia.org/resource/',
+            'en': '<http://dbpedia.org/resource/',
+        }
+        return s.replace(pattern.get(self.language, 'en'), 'dbp:').rstrip('>')
 
     @timed
     def run(self):
