@@ -92,6 +92,42 @@ class DBPExtract(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+class DBPCategoryDistribution(DBPTask):
+    """
+    Something like this: https://gist.github.com/miku/78d84756d08d7dace204
+
+    Another example from the english wikipedia:
+
+         664354 Living people
+          88726 Archived files for deletion discussions
+          51015 Year of birth missing (living people)
+          37800 Pending DYK nominations
+          28772 English-language films
+          20531 American films
+          19743 Local COIBot Reports
+          19606 Year of birth unknown
+          18093 Year of birth missing
+          17793 The Football League players
+          17192 Year of death missing
+        ...
+    """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPCategories(version=self.version, language=self.language, format=self.format)
+
+    @timed
+    def run(self):
+        output = shellout(r"""LANG=C cut -d ' ' -f 3 {input} |
+                              LANG=C sort | LANG=C uniq -c |
+                              LANG=C sort -nr > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class DBPImages(DBPTask):
     """ Return a file with about 8M foaf:depictions. """
     version = luigi.Parameter(default="2014")
