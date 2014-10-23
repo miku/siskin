@@ -94,8 +94,11 @@ class WikipediaTitlesInBSZ(WikipediaTask):
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('title',)):
                     title = row.title.strip()
-                    result = es.search(index='bsz', q='"%s"' % title.replace('"','\\"'))
-                    output.write_tsv(title, result['hits']['total'])
+                    try:
+                        result = es.search(index='bsz', q='"%s"' % title.replace('"','\\"'))
+                        output.write_tsv(title, result['hits']['total'])
+                    except Exception as exc:
+                        self.logger.warn(exc)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
