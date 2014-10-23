@@ -429,7 +429,7 @@ class DBPVirtuoso(DBPTask):
 
             Run `isql-vt` (V6) or `isql` (V7), then execute:
 
-                LD_DIR('{dirname}', '{prefix}-*', '{graph}';
+                LD_DIR('{dirname}', '{prefix}-*', '{graph}');
 
             Check the result via:
 
