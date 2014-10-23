@@ -362,7 +362,7 @@ class DBPCount(DBPTask):
 class DBPTriplesSplitted(DBPTask):
     """ Split mixed Ntriples into chunks, so we see some progress in virtuoso. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     lines = luigi.IntParameter(default=1000000)
 
     def requires(self):
