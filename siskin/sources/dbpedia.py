@@ -143,6 +143,30 @@ class DBPImages(DBPTask):
                 if row.path.endswith('images_%s.%s' % (self.language, self.format)):
                     filtered = shellout("""LANG=C grep -F "<http://xmlns.com/foaf/0.1/depiction>" {input} > {output}""", input=row.path)
                     luigi.File(filtered).copy(self.output().path)
+                    break
+            else:
+                raise RuntimeError('no file found')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class DBPAbstracts(DBPTask):
+    """ Return a file with about rdfs:comment abstracts. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('short_abstracts_%s.%s' % (self.language, self.format)):
+                    luigi.File(row.path).copy(self.output().path)
+                    break
+            else:
+                raise RuntimeError('no file found')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
@@ -169,6 +193,85 @@ class DBPCategories(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class DBPCategoryTable(DBPTask):
+    """
+    Just as WikipediaCategoryTable compute a table of tuples
+    of (page, category), here, with full URIs.
+    """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPCategories(version=self.version, language=self.language, format='nt')
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C grep -vF "<http://www.w3.org/2000/01/rdf-schema#label>" {input} |
+                             LANG=C cut -d ' ' -f1,3 |
+                             LANG=C sed -e 's/> </>\\t</g' |
+                             LANG=C grep -v "^#" > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPCategoryExtension(DBPTask):
+    """ For a category, collect all pages/resources, that fall into that
+    category. Format (category, page). """
+
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPCategoryTable(version=self.version, language=self.language)
+
+    @timed
+    def run(self):
+        extension = collections.defaultdict(set)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('page', 'category')):
+                extension[row.category].add(row.page)
+
+        with self.output().open('w') as output:
+            for category, pages in extension.iteritems():
+                for p in pages:
+                    output.write_tsv(category, p)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPCategoryExtensionGND(DBPTask):
+    """ For a category, collect all pages/resources, that fall into that
+    category. Format (category, page). Replace category and page with GND if possible. """
+
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return {'cats': DBPCategoryExtension(version=self.version, language=self.language),
+                'links': DBPGNDValidLinks(version=self.version, language=self.language)}
+
+    def abbreviate_ns(self, s):
+        return s.replace('<http://dbpedia.org/resource/', 'dbp:').rstrip('>')
+
+    @timed
+    def run(self):
+        mappings = {}
+
+        with self.input().get('links').open() as handle:
+            for row in handle.iter_tsv(cols=('dbp', 'gnd')):
+                mappings[row.dbp] = row.gnd
+
+        with self.input().get('cats').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('category', 'page')):
+                    cc = mappings.get(self.abbreviate_ns(row.category), row.category)
+                    pp = mappings.get(self.abbreviate_ns(row.page), row.page)
+                    output.write_tsv(cc, pp)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class DBPInfobox(DBPTask):
     """ Use infobox properties. """
     version = luigi.Parameter(default="2014")
@@ -183,6 +286,9 @@ class DBPInfobox(DBPTask):
             for row in handle.iter_tsv(cols=('path',)):
                 if row.path.endswith('infobox_properties_%s.%s' % (self.language, self.format)):
                     luigi.File(row.path).copy(self.output().path)
+                    break
+            else:
+                raise RuntimeError('no file found')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
@@ -206,6 +312,9 @@ class DBPInterlanguageBacklinks(DBPTask):
                 if row.path.endswith('/interlanguage_links_%s.%s' % (self.language, self.format)):
                     filtered = shellout("""LANG=C grep -F "<http://dbpedia.org/resource/" {input} > {output}""", input=row.path)
                     luigi.File(filtered).copy(self.output().path)
+                    break
+            else:
+                raise RuntimeError('no file found')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
@@ -222,6 +331,7 @@ class DBPTripleMelange(DBPTask):
             'categories-de': DBPCategories(language='de', version=self.version),
             'infobox-en': DBPInfobox(language='en', version=self.version),
             'infobox-de': DBPInfobox(language='de', version=self.version),
+            'abstracts-de': DBPAbstracts(language='de', version=self.version),
             'links': DBPInterlanguageBacklinks(language='de', version=self.version),
         }
 
@@ -300,12 +410,22 @@ class DBPVirtuoso(DBPTask):
 
     @timed
     def run(self):
+        with self.input().open() as handle:
+            path = handle.iter_tsv(cols=('path',)).next().path
+            dirname = os.path.dirname(path)
+            filename = os.path.basename(path)
+            prefix, _ = filename.split('-')
+
         print("""
+            Note: If you want to reload everything, clear any previous graph first:
+
+                SPARQL CLEAR GRAPH <http://dbpedia.org/resource/>;
+
             This is a manual task for now. If you haven't already:
 
             Run `isql-vt` (V6) or `isql` (V7), then execute:
 
-                LD_DIR('{dirname}', '{prefix}-*', '{name}';
+                LD_DIR('{dirname}', '{prefix}-*', '{graph}';
 
             Check the result via:
 
@@ -314,7 +434,7 @@ class DBPVirtuoso(DBPTask):
             When you are done adding all triples files to the load list, run:
 
                 RDF_LOADER_RUN();
-        """)
+        """.format(dirname=dirname, prefix=prefix, graph=self.graph))
 
     def complete(self):
         return False
@@ -597,13 +717,12 @@ class DBPGNDValidity(DBPTask):
 
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
-    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         from siskin.sources.gnd import GNDList
         return {
             'dbp': DBPGNDLinks(version=self.version, language=self.language),
-            'gnd': GNDList(date=self.date),
+            'gnd': GNDList(),
         }
 
     @timed
@@ -638,10 +757,9 @@ class DBPGNDValidLinks(DBPTask):
 
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
-    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return DBPGNDValidity(version=self.version, language=self.language, date=self.date)
+        return DBPGNDValidity(version=self.version, language=self.language)
 
     def run(self):
         relation = {
@@ -663,6 +781,36 @@ class DBPGNDValidLinks(DBPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPGNDLinkDB(DBPTask):
+    """ Create a single sqlite3 database containing the links from GND to DBPedia """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        return DBPGNDValidLinks(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout("tabtokv -f 1,2 -o {output} {input}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
+class GNDDBPLinkDB(DBPTask):
+    """ Create a single sqlite3 database containing the links from GND to DBPedia. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        return DBPGNDValidLinks(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout("tabtokv -f 2,1 -o {output} {input}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path('db'))
 
 class DBPGNDOverlap(DBPTask):
     """ Compute overlap between DBP and GND. """
