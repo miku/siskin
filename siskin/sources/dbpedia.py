@@ -28,7 +28,7 @@ class DBPDownload(DBPTask):
     For other download locations adjust bases.
 
     """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -59,7 +59,7 @@ class DBPDownload(DBPTask):
 
 class DBPExtract(DBPTask):
     """ Extract all compressed files. """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -94,7 +94,7 @@ class DBPExtract(DBPTask):
 
 class DBPImages(DBPTask):
     """ Return a file with about 8M foaf:depictions. """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -113,7 +113,7 @@ class DBPImages(DBPTask):
 
 class DBPCategories(DBPTask):
     """ Return a file with categories and their labels. """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -135,7 +135,7 @@ class DBPCategories(DBPTask):
 
 class DBPInfobox(DBPTask):
     """ Use infobox properties. """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -157,7 +157,7 @@ class DBPInterlanguageBacklinks(DBPTask):
 
     <http://de.dbpedia.org/resource/Vokov> <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Vokov> .
     """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -176,7 +176,7 @@ class DBPInterlanguageBacklinks(DBPTask):
 
 class DBPTripleMelange(DBPTask):
     """ Combine several slices of triples from DBP for KG. """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
 
     def requires(self):
         return {
@@ -200,7 +200,7 @@ class DBPTripleMelange(DBPTask):
 
 class DBPCount(DBPTask):
     """ Just count the number of triples in the mix and store it. """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
 
     def requires(self):
         return DBPTripleMelange(version=self.version)
@@ -252,7 +252,7 @@ class DBPVirtuoso(DBPTask):
     AllowedDirs in /etc/virtuoso-opensource-6.1/virtuoso.ini
     """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     graph = luigi.Parameter(default='http://dbpedia.org/resource/')
     host = luigi.Parameter(default='localhost', significant=False)
     port = luigi.IntParameter(default=1111, significant=False)
@@ -285,7 +285,7 @@ class DBPVirtuoso(DBPTask):
 
 class DBPPredicateDistribution(DBPTask):
     """ Just a uniq -c on the predicate 'column' """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
 
     def requires(self):
@@ -302,7 +302,7 @@ class DBPPredicateDistribution(DBPTask):
 class DBPAbbreviatedNTriples(DBPTask):
     """ Convert all DBPedia ntriples to a single JSON file. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
 
     def requires(self):
@@ -335,7 +335,7 @@ class DBPAbbreviatedNTriples(DBPTask):
 class DBPJson(DBPTask):
     """ Convert all DBPedia ntriples to a single JSON file. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
 
     def requires(self):
@@ -367,7 +367,7 @@ class DBPJson(DBPTask):
 class DBPIndex(DBPTask, CopyToIndex):
     """ Index most of DBPedia into a single index. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
 
     index = 'dbp'
@@ -441,7 +441,7 @@ class DBPSameAs(DBPTask):
     Extract all owl:sameAS relations from dbpedia.
     TODO: get rid of this or rework. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
     format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
@@ -462,7 +462,7 @@ class DBPSameAs(DBPTask):
 class DBPKnowledgeGraphLookup(DBPTask, ElasticsearchMixin):
     """ Example aggregation of things. """
 
-    # version = luigi.Parameter(default="3.9")
+    # version = luigi.Parameter(default="2014")
     # language = luigi.Parameter(default="de")
     gnd = luigi.Parameter(default='118540238')
 
@@ -528,7 +528,7 @@ class GraphLookup(DBPTask, ElasticsearchMixin):
 
 class DBPGNDLinks(DBPTask):
     """ Find all links from DBP to GND via dp.de:gnd """
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
 
     def requires(self):
@@ -559,7 +559,7 @@ class DBPGNDValidity(DBPTask):
     """ Check, how many <http://de.dbpedia.org/property/gnd> are
     actually working. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -600,7 +600,7 @@ class DBPGNDValidLinks(DBPTask):
         dbp:Landkreis_Birkenfeld
     """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -631,7 +631,7 @@ class DBPGNDValidLinks(DBPTask):
 class DBPGNDOverlap(DBPTask):
     """ Compute overlap between DBP and GND. """
 
-    version = luigi.Parameter(default="3.9")
+    version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
     date = luigi.DateParameter(default=datetime.date.today())
 
