@@ -423,6 +423,7 @@ class DBPVirtuoso(DBPTask):
         print("""
             Note: If you want to reload everything, clear any previous graph first:
 
+                log_enable(0);
                 SPARQL CLEAR GRAPH <http://dbpedia.org/resource/>;
 
             This is a manual task for now. If you haven't already:
@@ -438,6 +439,15 @@ class DBPVirtuoso(DBPTask):
             When you are done adding all triples files to the load list, run:
 
                 RDF_LOADER_RUN();
+
+            See also:
+
+            * http://docs.openlinksw.com/virtuoso/fn_log_enable.html
+            * http://docs.openlinksw.com/virtuoso/sparqlextensions.html#rdfsparulexamples10
+
+            Note that "Section 16.3.2.3.10. Example for Dropping graph"
+            calls graphs with 600M triples very large RDF data collections.
+
         """.format(dirname=dirname, prefix=prefix, graph=self.graph))
 
     def complete(self):
