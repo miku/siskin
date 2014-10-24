@@ -22,6 +22,9 @@ import tempfile
 class DBPTask(DefaultTask):
     TAG = 'dbpedia'
 
+    bases = collections.defaultdict(lambda: 'http://downloads.dbpedia.org',
+                                    (('2014', 'http://data.dws.informatik.uni-mannheim.de/dbpedia'),))
+
 class DBPDownload(DBPTask):
     """ Download DBPedia version and language.
     2014 versions hosted under http://data.dws.informatik.uni-mannheim.de/dbpedia.
@@ -36,14 +39,11 @@ class DBPDownload(DBPTask):
         return Executable(name='wget')
 
     def run(self):
-        bases = collections.defaultdict(lambda: 'http://downloads.dbpedia.org')
-        bases['2014'] = 'http://data.dws.informatik.uni-mannheim.de/dbpedia'
-
         target = os.path.join(self.taskdir(), self.version, self.language, self.format)
         if not os.path.exists(target):
             os.makedirs(target)
 
-        url = '{base}/{version}/{language}/'.format(base=bases[self.version], version=self.version, language=self.language)
+        url = '{base}/{version}/{language}/'.format(base=self.bases[self.version], version=self.version, language=self.language)
         output = shellout(""" wget --retry-connrefused -P {prefix} -nd -nH -np -r -c -A *{format}.bz2 {url}""", url=url, prefix=target, format=self.format)
 
         pathlist = sorted(iterfiles(target))
@@ -127,6 +127,45 @@ class DBPCategoryDistribution(DBPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPLinksList(DBPTask):
+    """ List available linked datasets.
+    """
+    version = luigi.Parameter(default="2014")
+
+    def run(self):
+        url = '{base}/{version}/links'.format(base=self.bases[self.version], version=self.version)
+        output = shellout(""" curl -sL {url} | grep -Eo '="[^"]+bz2' | sed -e 's/^="//g' | sort > {output} """, url=url)
+
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPLinks(DBPTask):
+    """
+    Download and extract some links dataset.
+    """
+    version = luigi.Parameter(default="2014")
+    filename = luigi.Parameter(default="amsterdammuseum_links.nt.bz2")
+
+    def requires(self):
+        return DBPLinksList(version=self.version)
+
+    def run(self):
+        if not self.filename.endswith('bz2'):
+            raise RuntimeError('can only handle bz2')
+
+        target = os.path.join(self.taskdir(), self.version)
+        if not os.path.exists(target):
+            os.makedirs(target)
+
+        url = '{base}/{version}/links/{filename}'.format(base=bases[self.version], version=self.version, filename=self.filename)
+        output = shellout(""" curl -L {url} | bunzip2 -c > {output} """, url=url)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(filename=self.filename.replace('.bz2', '')), format=TSV)
 
 class DBPImages(DBPTask):
     """ Return a file with about 8M foaf:depictions. """
@@ -337,6 +376,7 @@ class DBPTripleMelange(DBPTask):
             'infobox-de': DBPInfobox(language='de', version=self.version),
             'abstracts-de': DBPAbstracts(language='de', version=self.version),
             'links': DBPInterlanguageBacklinks(language='de', version=self.version),
+            'yagotax': DBPLinks(version=self.version, filename='yago_taxonomy.nt.bz2')
         }
 
     def run(self):
