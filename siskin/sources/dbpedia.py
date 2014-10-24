@@ -336,6 +336,27 @@ class DBPInfobox(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class DBPMappingBasedProperties(DBPTask):
+    """ Use infobox properties. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('mappingbased_properties_%s.%s' % (self.language, self.format)):
+                    luigi.File(row.path).copy(self.output().path)
+                    break
+            else:
+                raise RuntimeError('no file found')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
 class DBPInterlanguageBacklinks(DBPTask):
     """ Extract interlanguage links pointing to the english dbpedia resource.
         Example output line:
@@ -361,6 +382,24 @@ class DBPInterlanguageBacklinks(DBPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class DBPInfluenceGraph(DBPTask):
+    """ Extract influenced relations from mapping based properties.
+
+    <http://de.dbpedia.org/resource/Vokov> <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Vokov> .
+    """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPMappingBasedProperties(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout("""LANG=C grep -F "<http://dbpedia.org/ontology/influenced>" {input} | cut -f1,3 > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
 
 class DBPTripleMelange(DBPTask):
     """ Combine several slices of triples from DBP for KG. """
