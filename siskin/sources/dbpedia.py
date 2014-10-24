@@ -493,13 +493,31 @@ class DBPVirtuoso(DBPTask):
     def complete(self):
         return False
 
+class DBPCombined(DBPTask):
+    """ Combine all dbpedia files into one. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format='nt')
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                shellout("cat {input} >> {output}", input=row.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
 class DBPPredicateDistribution(DBPTask):
     """ Just a uniq -c on the predicate 'column' """
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
 
     def requires(self):
-        return DBPExtract(version=self.version, language=self.language)
+        return DBPCombined(version=self.version, language=self.language)
 
     def run(self):
         output = shellout("""cut -d " " -f2 {input} | LANG=C sort | LANG=C uniq -c > {output}""",
