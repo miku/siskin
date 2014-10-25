@@ -357,6 +357,23 @@ class DBPMappingBasedProperties(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class DBPMappingBasedPropertiesDistribution(DBPTask):
+    """ Just how ofter are properties specified. """
+
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPMappingBasedProperties(version=self.version, language=self.language)
+
+    @timed
+    def run(self):
+        output = shellout("LANG=C cut -f2 -d ' ' {input} | LANG=C sort | LANG=C uniq -c | sort -nr > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
+
 class DBPInterlanguageBacklinks(DBPTask):
     """ Extract interlanguage links pointing to the english dbpedia resource.
         Example output line:
@@ -395,11 +412,53 @@ class DBPInfluenceGraph(DBPTask):
         return DBPMappingBasedProperties(version=self.version, language=self.language)
 
     def run(self):
-        output = shellout("""LANG=C grep -F "<http://dbpedia.org/ontology/influenced>" {input} | cut -f1,3 > {output}""", input=self.input().path)
+        output = shellout("""LANG=C grep -F "<http://dbpedia.org/ontology/influencedBy>" {input} | cut -f1,3 > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
+
+class DBPInfluenceGraphDot(DBPTask):
+    """ Create dot file for graphviz. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def abbreviate_ns(self, s):
+        pattern = {
+            'de': '<http://de.dbpedia.org/resource/',
+            'en': '<http://dbpedia.org/resource/',
+        }
+        return s.replace(pattern.get(self.language, 'en'), 'dbp:').rstrip('>')
+
+    def requires(self):
+        return DBPInfluenceGraph(version=self.version, language=self.language)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                output.write("""digraph "%s" {\n""" % self.task_id)
+                for line in handle:
+                    parts = line.split()
+                    output.write("""    "%s" -> "%s";\n""" % (self.abbreviate_ns(parts[2]), self.abbreviate_ns(parts[0])))
+                output.write("}\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='dot'))
+
+class DBPInfluenceGraphPNG(DBPTask):
+    """ Create image file with graphviz. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPInfluenceGraphDot(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout("cat {input} | dot -Tpng -o {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='png'))
 
 class DBPTripleMelange(DBPTask):
     """ Combine several slices of triples from DBP for KG. """
