@@ -12,6 +12,7 @@ prefixmap = {
     'bnf': 'siskin.sources.bnf',
     'bsz': 'siskin.sources.bsz',
     'bvb': 'siskin.sources.bvb',
+    'dbp': 'siskin.sources.dbpedia',
     'disson': 'siskin.sources.disson',
     'doab': 'siskin.sources.doab',
     'doaj': 'siskin.sources.doaj',
