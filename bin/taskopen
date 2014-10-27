@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e -u
+
+xopen() {
+    if hash gnome-open 2> /dev/null; then
+        gnome-open "$@"
+    elif hash open 2> /dev/null; then
+        open "$@"
+    else
+        echo "open or gnome-open required" && exit 1
+    fi
+}
+
+xopen $(taskoutput $@ 2> /dev/null)
