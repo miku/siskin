@@ -315,6 +315,103 @@ class DBPCategoryExtensionGND(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPCategoriesWithGND(DBPTask):
+    """ List all categories that contain contain at least one GND.
+    Store the count and the predicate. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPCategoryExtensionGND(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout(""" grep gnd: {input} | cut -f1 | uniq -c | sort -nr > {output} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPGNDInCategories(DBPTask):
+    """ List all GND that appear in at least on category. Store the count. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPCategoryExtensionGND(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout(""" grep gnd: {input} | cut -f2 | sort | uniq -c | sort -nr > {output} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPGNDBSZOverlap(DBPTask):
+    """
+    Of the GNDs that are referenced in the categories, how much are
+    actually in BSZ? Only use BSZGNDReferencedPersons. TODO: extend to all GNDs.
+    """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        from siskin.sources.bsz import BSZGNDReferencedPersons
+        return {'dbp': DBPGNDInCategories(version=self.version, language=self.language),
+                'bsz': BSZGNDReferencedPersons()}
+
+    def run(self):
+        dbp = set()
+        with self.input().get('dbp').open() as handle:
+            for line in handle:
+                count, gnd = line.strip().split()
+                dbp.add(gnd)
+
+        bsz = set()
+        with self.input().get('bsz').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd',)):
+                bsz.add(row.gnd)
+
+        print(list(dbp)[:10])
+        print(list(bsz)[:10])
+
+        info = {
+            'dbp': len(dbp),
+            'bsz': len(bsz),
+            'dbp & bsz': len(dbp & bsz)
+        }
+        print(info)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPBSZRelevantCategories(DBPTask):
+    """ How many dbpedia categories can be actually used for the catalog. """
+
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        from siskin.sources.bsz import BSZGNDReferencedPersons
+        return {'dbp': DBPCategoryExtensionGND(version=self.version, language=self.language),
+                'bsz': BSZGNDReferencedPersons()}
+
+    def run(self):
+        bsz = set()
+        with self.input().get('bsz').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd',)):
+                bsz.add(row.gnd)
+
+        with self.input().get('dbp').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('category', 'page')):
+                    if not row.page.startswith('gnd:'):
+                        continue
+                    if row.page in bsz:
+                        output.write_tsv(row.category, row.page)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class DBPInfobox(DBPTask):
     """ Use infobox properties. """
     version = luigi.Parameter(default="2014")
