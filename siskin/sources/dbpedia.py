@@ -437,8 +437,9 @@ class DBPBSZRelevantCategoriesReach(DBPTask):
                 catsize[row.category] += 1
                 catreach[row.category] += gndreach[row.gnd]
 
-        for category, reach in catreach.iteritems():
-            print("%s\t%s\t%s" % (category, reach, float(reach) / catsize[category]))
+        with self.output().open('w') as output:
+            for category, reach in catreach.iteritems():
+                output.write_tsv(category, reach, float(reach) / catsize[category])
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
