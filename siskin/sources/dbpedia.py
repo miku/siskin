@@ -319,7 +319,7 @@ class DBPCategoriesWithGND(DBPTask):
     """ List all categories that contain contain at least one GND.
     Store the count and the predicate. """
     version = luigi.Parameter(default="2014")
-    language = luigi.Parameter(default="en")
+    language = luigi.Parameter(default="de")
 
     def requires(self):
         return DBPCategoryExtensionGND(version=self.version, language=self.language)
@@ -334,7 +334,7 @@ class DBPCategoriesWithGND(DBPTask):
 class DBPGNDInCategories(DBPTask):
     """ List all GND that appear in at least on category. Store the count. """
     version = luigi.Parameter(default="2014")
-    language = luigi.Parameter(default="en")
+    language = luigi.Parameter(default="de")
 
     def requires(self):
         return DBPCategoryExtensionGND(version=self.version, language=self.language)
