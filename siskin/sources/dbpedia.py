@@ -412,6 +412,37 @@ class DBPBSZRelevantCategories(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPBSZRelevantCategoriesReach(DBPTask):
+    """ For each category, compute the number of actual metadata items in
+    the FINC PPN list. Compute a relative measure (reached PPNs / size of category) as well. """
+
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        from siskin.sources.bsz import BSZGNDPersonInverseRelationCount
+        return {'cats': DBPBSZRelevantCategories(version=self.version, language=self.language),
+                'count': BSZGNDPersonInverseRelationCount()}
+
+    def run(self):
+        gndreach = collections.defaultdict(int)
+        with self.input().get('count').open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'count')):
+                gndreach[row.gnd] = int(row.count)
+
+        catreach = collections.defaultdict(int)
+        catsize = collections.defaultdict(int)
+        with self.input().get('cats').open() as handle:
+            for row in handle.iter_tsv(cols=('category', 'gnd')):
+                catsize[row.category] += 1
+                catreach[row.category] += gndreach[row.gnd]
+
+        for category, reach in catreach.iteritems():
+            print("%s\t%s\t%s" % (category, reach, float(reach) / catsize[category]))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class DBPInfobox(DBPTask):
     """ Use infobox properties. """
     version = luigi.Parameter(default="2014")

@@ -2040,6 +2040,68 @@ class BSZGNDPersonRelations(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class BSZGNDPersonInverseRelations(BSZTask):
+    """ For a GND return all PPNs. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return BSZGNDPersonRelations(date=self.date)
+
+    @timed
+    def run(self):
+        mapping = collections.defaultdict(set)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'gnds')):
+                for gnd in row.gnds.split('|'):
+                    mapping[gnd].add(row.ppn)
+
+        with self.output().open('w') as output:
+            for key, values in mapping.iteritems():
+                output.write_tsv(key, '|'.join(values))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDPersonInverseRelationCount(BSZTask):
+    """ For a GND return the count of linked PPNs. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return BSZGNDPersonInverseRelations(date=self.date)
+
+    @timed
+    def run(self):
+        mapping = collections.defaultdict(int)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'ppns')):
+                for _ in row.ppns.split('|'):
+                    mapping[row.gnd] += 1
+
+        with self.output().open('w') as output:
+            for gnd, count in mapping.iteritems():
+                output.write_tsv(gnd, count)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDPersonInverseRelationCountDB(BSZTask):
+    """ For a GND return the count of linked PPNs. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return BSZGNDPersonInverseRelationCount(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""tabtokv -o {output} -f "1,2" {input}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
+
 class BSZGNDReferencedPersons(BSZTask):
     """
     Just a list of uniq referenced persons in BSZ.
