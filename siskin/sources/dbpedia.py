@@ -445,20 +445,21 @@ class DBPInfluenceGraphDot(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='dot'))
 
-class DBPInfluenceGraphPNG(DBPTask):
+class DBPInfluenceGraphImage(DBPTask):
     """ Create image file with graphviz. """
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="pdf")
 
     def requires(self):
         return DBPInfluenceGraphDot(version=self.version, language=self.language)
 
     def run(self):
-        output = shellout("cat {input} | dot -Tpng -o {output}", input=self.input().path)
+        output = shellout("cat {input} | dot -T{format} -o {output}", format=self.format, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='png'))
+        return luigi.LocalTarget(path=self.path(ext=self.format))
 
 class DBPTripleMelange(DBPTask):
     """ Combine several slices of triples from DBP for KG. """
