@@ -381,8 +381,8 @@ class DBPGNDBSZOverlap(DBPTask):
         }
         print(info)
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+    def complete(self):
+        return False
 
 class DBPBSZRelevantCategories(DBPTask):
     """ How many dbpedia categories can be actually used for the catalog. """
