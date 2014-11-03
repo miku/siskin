@@ -24,12 +24,15 @@ import datetime
 import elasticsearch
 import hashlib
 import HTMLParser
+import itertools
 import json
 import luigi
 import os
 import prettytable
+import re
 import requests
 import shutil
+import string
 import tempfile
 import urllib
 
@@ -84,6 +87,7 @@ class GNDDump(GNDTask):
     """ Download the GND snapshot. """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='ttl', description='alternatively rdf')
 
     @timed
     def run(self):
@@ -93,7 +97,7 @@ class GNDDump(GNDTask):
             "userID": "opendata",
             "pass": "opendata",
             "cmd": "fetch",
-            "mabheft": "GND.ttl.gz",
+            "mabheft": "GND.%s.gz" % self.format,
         }
 
         url = 'http://{host}{path}?{params}'.format(host=host,
@@ -110,9 +114,10 @@ class GNDExtract(GNDTask):
     """ Extract the archive. """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='ttl', description='alternatively rdf')
 
     def requires(self):
-        return GNDDump(date=self.date)
+        return GNDDump(date=self.date, format=self.format)
 
     @timed
     def run(self):
@@ -121,6 +126,40 @@ class GNDExtract(GNDTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ttl'))
+
+class GNDCacheDB(GNDTask):
+    """ Turn the dump into a (id, content) sqlite3 db.
+    This artefact will be used by the cache server.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDExtract(date=self.date, format='rdf')
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        pattern = re.compile("""rdf:about="http://d-nb.info/gnd/([0-9X-]+)">""")
+
+        with sqlite3db(stopover) as cursor:
+            cursor.execute("""CREATE TABLE gnd (id text  PRIMARY KEY, content blob)""")
+            cursor.execute("""CREATE INDEX IF NOT EXISTS idx_gnd_id ON gnd (id)""")
+
+            with self.input().open() as handle:
+                groups = itertools.groupby(handle, key=str.isspace)
+                for i, (k, lines) in enumerate(groups):
+                    if k:
+                        continue
+                    lines = map(string.strip, list(lines))
+                    match = pattern.search(lines[0])
+                    if match:
+                        row = (match.group(1), '\n'.join(lines))
+                        cursor.execute("INSERT INTO gnd VALUES (?, ?)", row)
+
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
 
 class GNDNTriples(GNDTask):
     """ Get a Ntriples representation of GND. """
