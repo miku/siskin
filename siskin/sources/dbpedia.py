@@ -210,6 +210,44 @@ class DBPAbstracts(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class DBPSkos(DBPTask):
+    """ Return a file that contains skos:broader links. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPExtract(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('skos_categories_%s.%s' % (self.language, self.format)):
+                    luigi.File(row.path).copy(self.output().path)
+                    break
+            else:
+                raise RuntimeError('no file found')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class DBPSkosBroader(DBPTask):
+    """ Return a file with only skos:broader links. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPSkos(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        output = shellout("""LANG=C grep -F "<http://www.w3.org/2004/02/skos/core#broader>" {input} > {output} """,
+                          input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
 class DBPCategories(DBPTask):
     """ Return a file with categories and their labels. """
     version = luigi.Parameter(default="2014")
