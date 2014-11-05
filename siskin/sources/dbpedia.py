@@ -235,10 +235,9 @@ class DBPSkosBroader(DBPTask):
     """ Return a file with only skos:broader links. """
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
-    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
 
     def requires(self):
-        return DBPSkos(version=self.version, language=self.language, format=self.format)
+        return DBPSkos(version=self.version, language=self.language)
 
     def run(self):
         output = shellout("""LANG=C grep -F "<http://www.w3.org/2004/02/skos/core#broader>" {input} > {output} """,
@@ -246,7 +245,50 @@ class DBPSkosBroader(DBPTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext=self.format))
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
+class DBPSkosPagerank(DBPTask):
+    """ Calculate the pagerank of the categories. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return {'data': DBPSkosBroader(version=self.version, language=self.language),
+                'app': Executable(name='pgrk', msg='https://github.com/miku/pgrk')}
+
+    def run(self):
+        """ Map URIs to integers, write the graph to output, pgrk. """
+        stoi, itos, next = {}, {}, 0
+        graph = collections.defaultdict(set)
+        with self.input().get('data').open() as handle:
+            for line in handle:
+                parts = line.strip().split()
+                if not len(parts) == 4:
+                    continue
+                s, p, o, _ = parts
+                if s not in stoi:
+                    stoi[s] = next
+                    itos[next] = s
+                    next += 1
+                if o not in stoi:
+                    stoi[o] = next
+                    itos[next] = o
+                    next += 1
+                graph[stoi[s]].add(stoi[o])
+
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with luigi.File(stopover, format=TSV).open('w') as output:
+            for k, values in graph.iteritems():
+                output.write_tsv(k, *values)
+
+        output = shellout("pgrk {input} | sort -nrk2,2 > {output}", input=stopover)
+        with luigi.File(output, format=TSV).open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('id', 'rank')):
+                    output.write_tsv(row.rank, itos[int(row.id)])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class DBPCategories(DBPTask):
     """ Return a file with categories and their labels. """
