@@ -254,7 +254,7 @@ class DBPSkosPagerank(DBPTask):
 
     def requires(self):
         return {'data': DBPSkosBroader(version=self.version, language=self.language),
-                'app': Executable(name='pgrk', msg='https://github.com/miku/pgrk')}
+                'app': Executable(name='pgrk', message='https://github.com/miku/pgrk')}
 
     def run(self):
         """ Map URIs to integers, write the graph to output, pgrk. """
