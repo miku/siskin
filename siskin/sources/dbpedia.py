@@ -3,6 +3,7 @@
 
 from gluish.benchmark import timed
 from gluish.common import Executable, ElasticsearchMixin
+from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.path import iterfiles
@@ -277,6 +278,35 @@ class DBPSkosAbbreviatedBroader(DBPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
+
+class DBPSkosDB(DBPTask):
+    """ Create a small skos category hierarchy database. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPSkosAbbreviatedBroader(version=self.version, language=self.language)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with sqlite3db(stopover) as cursor:
+            cursor.execute(""" CREATE TABLE IF NOT EXISTS tree (node TEXT, parent TEXT) """)
+            cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_node on tree(node) """)
+            cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_parent on tree(parent) """)
+            cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_node_parent on tree(node, parent) """)
+            cursor.connection.commit()
+            with self.input().open() as handle:
+                for line in handle:
+                    parts = line.strip().split()
+                    if not len(parts) == 4:
+                        raise RuntimeError('invalid line: %s' % line)
+                    s, _, o, _ = parts
+                    cursor.execute(""" INSERT INTO tree (node, parent) VALUES (?, ?) """, (s, o))
+            cursor.connection.commit()
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='db'))
 
 class DBPSkosPagerank(DBPTask):
     """ Calculate the pagerank of the categories. """
