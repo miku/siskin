@@ -2040,6 +2040,30 @@ class BSZGNDPersonRelations(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class BSZGNDPersonRelationsCount(BSZTask):
+    """ Just count the number of linked GNDs. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return {'rel': BSZGNDPersonRelations(date=self.date),
+                'snapshot': Snapshot(end=self.date)}
+
+    @timed
+    def run(self):
+        freq = collections.defaultdict(int)
+        with self.input().get('rel').open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'gnds')):
+                freq[row.ppn] += len(row.gnds.split('|'))
+
+        with self.input().get('snapshot').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('ppn',)):
+                    output.write_tsv(row.ppn, freq[row.ppn])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class BSZGNDPersonInverseRelations(BSZTask):
     """ For a GND return all PPNs. """
 
@@ -2316,7 +2340,7 @@ class BSZGNDReverseRelations(BSZTask):
     date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return BSZGNDRelations(date=self.date)
+        return BSZGNDSubjectRelations(date=self.date)
 
     def run(self):
         rmap = collections.defaultdict(set)
