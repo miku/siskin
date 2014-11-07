@@ -210,6 +210,22 @@ class DBPAbstracts(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class DBPAbstractsCleaned(DBPTask):
+    """ Clean various stuff out. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    format = luigi.Parameter(default="nt", description="nq, nt, tql, ttl")
+
+    def requires(self):
+        return DBPAbstracts(version=self.version, language=self.language, format=self.format)
+
+    def run(self):
+        output = shellout("LANG=C sed -e 's/([^)]*)//g; s/ , /, /g' {input} | tr -s '\t' | tr -s ' ' > {output}", input=self.input().path, preserve_whitespace=True)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext=self.format))
+
 class DBPSkos(DBPTask):
     """ Return a file that contains skos:broader links. """
     version = luigi.Parameter(default="2014")
