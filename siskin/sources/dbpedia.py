@@ -713,7 +713,7 @@ class DBPTripleMelange(DBPTask):
             'categories-de': DBPCategories(language='de', version=self.version),
             'infobox-en': DBPInfobox(language='en', version=self.version),
             'infobox-de': DBPInfobox(language='de', version=self.version),
-            'abstracts-de': DBPAbstracts(language='de', version=self.version),
+            'abstracts-de': DBPAbstractsCleaned(language='de', version=self.version),
             'links': DBPInterlanguageBacklinks(language='de', version=self.version),
             'yagotax': DBPLinks(version=self.version, filename='yago_taxonomy.nt.bz2')
         }
