@@ -291,9 +291,6 @@ class DBPSkosDB(DBPTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with sqlite3db(stopover) as cursor:
             cursor.execute(""" CREATE TABLE IF NOT EXISTS tree (node TEXT, parent TEXT) """)
-            cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_node on tree(node) """)
-            cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_parent on tree(parent) """)
-            cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_node_parent on tree(node, parent) """)
             cursor.connection.commit()
             with self.input().open() as handle:
                 for line in handle:
@@ -303,6 +300,9 @@ class DBPSkosDB(DBPTask):
                     s, _, o, _ = parts
                     cursor.execute(""" INSERT INTO tree (node, parent) VALUES (?, ?) """, (s, o))
             cursor.connection.commit()
+	    cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_node on tree(node) """)
+	    cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_parent on tree(parent) """)
+	    cursor.execute(""" CREATE INDEX IF NOT EXISTS idx_tree_node_parent on tree(node, parent) """)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
