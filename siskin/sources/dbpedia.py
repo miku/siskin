@@ -247,6 +247,21 @@ class DBPSkosBroader(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class DBPSkosAbbreviatedBroader(DBPTask):
+    """ Return a file with only skos:broader links. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPSkosBroader(version=self.version, language=self.language)
+
+    def run(self):
+        output = shellout("""ntto -a -o {output} {input}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
+
 class DBPSkosPagerank(DBPTask):
     """ Calculate the pagerank of the categories. """
     version = luigi.Parameter(default="2014")
