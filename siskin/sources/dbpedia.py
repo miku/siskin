@@ -306,6 +306,7 @@ class DBPSkosDB(DBPTask):
     def requires(self):
         return DBPSkosAbbreviatedBroader(version=self.version, language=self.language)
 
+    @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with sqlite3db(stopover) as cursor:
@@ -336,36 +337,39 @@ class DBPSkosRootPath(DBPTask):
         return {'db': DBPSkosDB(version=self.version, language=self.language),
                 'cats': DBPSkosAbbreviatedCategories(version=self.version, language=self.language)}
 
+    @timed
     def run(self):
         pmap = collections.defaultdict(list)
         with self.input().get('cats').open() as handle:
             with sqlite3db(self.input().get('db').path) as cursor:
                 for i, row in enumerate(handle.iter_tsv(cols=('category',))):
                     if i % 100000 == 0:
-                        self.logger.debug("%s" % i)
+                        self.logger.debug("queried %s categories" % i)
                     node = row.category
                     parents = []
+
                     while True:
                         c = cursor.execute("""SELECT parent from tree where node = ?""", (node,))
                         result = c.fetchone()
-                        # this is the root
                         if not result:
                             break
-                        # catch loops
                         parent = result[0]
-                        previous = len(set(parents))
-                        parents.append(parent)
-                        if len(set(parents)) == previous:
+                        if parent in parents:
                             break
+
+                        parents.append(parent)
                         node = parent
-                    pmap[node] = parents
+
+                    if parents:
+                        self.logger.debug("%s: %s" % (row.category, ", ".join(parents)))
+                        pmap[row.category] = parents
 
         with self.output().open('w') as output:
             for node, parents in pmap.iteritems():
                 output.write_tsv(node, '|'.join(parents))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='db'))
+        return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
 
 class DBPSkosPagerank(DBPTask):
     """ Calculate the pagerank of the categories. """
