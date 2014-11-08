@@ -328,6 +328,36 @@ class DBPSkosDB(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='db'))
 
+class DBPSkosJson(DBPTask):
+    """ Create a small skos category json file for indexing. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPSkosAbbreviatedBroader(version=self.version, language=self.language)
+
+    @timed
+    def run(self):
+        relation = {'de': 'dbpde:Kategorie:', 'en': 'category:'}
+        if not self.language in relation:
+            raise RuntimeError('language not yet mapped: %s' % self.language)
+
+        pattern = relation.get(self.language)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    parts = line.strip().split()
+                    if not len(parts) == 4:
+                        raise RuntimeError('invalid line: %s' % line)
+                    s, _, o, _ = parts
+                    s = s.strip('<>').replace(pattern, '')
+                    o = o.strip('<>').replace(pattern, '')
+                    output.write("%s\n" % json.dumps({'node': s, 'parent': o}))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class DBPSkosRootPath(DBPTask):
     """ Infer the path to a root element for each category. """
     version = luigi.Parameter(default="2014")
