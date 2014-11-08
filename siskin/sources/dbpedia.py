@@ -339,34 +339,26 @@ class DBPSkosRootPath(DBPTask):
 
     @timed
     def run(self):
-        pmap = collections.defaultdict(list)
         with self.input().get('cats').open() as handle:
             with sqlite3db(self.input().get('db').path) as cursor:
-                for i, row in enumerate(handle.iter_tsv(cols=('category',))):
-                    if i % 100000 == 0:
-                        self.logger.debug("queried %s categories" % i)
-                    node = row.category
-                    parents = []
+                with self.output().open('w') as output:
+                    for i, row in enumerate(handle.iter_tsv(cols=('category',))):
+                        if i % 100000 == 0:
+                            self.logger.debug("queried %s categories" % i)
+                        node = row.category
+                        parents = []
+                        while True:
+                            c = cursor.execute("""SELECT parent from tree where node = ?""", (node,))
+                            result = c.fetchall()
+                            if not result or result[0] in parents:
+                                break
+                            parents.append(result[0])
+                            node = result[0]
+                        output.write_tsv(row.category, '|'.join(parents))
 
-                    while True:
-                        c = cursor.execute("""SELECT parent from tree where node = ?""", (node,))
-                        result = c.fetchone()
-                        if not result:
-                            break
-                        parent = result[0]
-                        if parent in parents:
-                            break
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
 
-                        parents.append(parent)
-                        node = parent
-
-                    if parents:
-                        self.logger.debug("%s: %s" % (row.category, ", ".join(parents)))
-                        pmap[row.category] = parents
-
-        with self.output().open('w') as output:
-            for node, parents in pmap.iteritems():
-                output.write_tsv(node, '|'.join(parents))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
