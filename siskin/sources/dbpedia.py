@@ -407,6 +407,40 @@ class DBPSkosHeight(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
 
+class DBPBSZSkosHeight(DBPTask):
+    """ Filter out the relevant categories for our catalog and report the
+    heights of the categories. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        return {'height': DBPSkosHeight(version=self.version, language=self.language),
+                'cats': DBPBSZRelevantCategories(version=self.version, language=self.language)}
+
+    @timed
+    def run(self):
+        # TODO: use only one representation
+        relation = {'de': {'key': 'dbpde:', 'value': 'http://de.dbpedia.org/resource/'},
+                    'en': {'key': 'dbp:', 'value': 'http://dbpedia.org/resource/'}}
+        if not self.language in relation:
+            raise RuntimeError('language not yet mapped: %s' % self.language)
+
+        heightmap = collections.defaultdict(int)
+        with self.input().get('height').open() as handle:
+            for row in handle.iter_tsv(cols=('category', 'height')):
+                key = relation.get(self.language).get('key')
+                replacement = relation.get(self.language).get('value')
+                normalized = row.category.replace(key, replacement)
+                heightmap[normalized] = int(row.height)
+
+        with self.input().get('cats').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('category', 'gnd')):
+                    output.write_tsv(row.category, row.gnd, heightmap[row.category])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
+
 class DBPSkosPagerank(DBPTask):
     """ Calculate the pagerank of the categories. """
     version = luigi.Parameter(default="2014")
