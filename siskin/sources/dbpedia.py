@@ -359,6 +359,20 @@ class DBPSkosRootPath(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
 
+class DBPSkosHeight(DBPTask):
+    """ For all categories, report the height in the category tree. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPSkosRootPath(version=self.version, language=self.language)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('category', 'parents')):
+                    output.write_tsv(row.category, len(row.parents.split('|')))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'), format=TSV)
