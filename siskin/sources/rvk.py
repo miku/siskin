@@ -20,7 +20,7 @@ class RVKTask(DefaultTask):
 
 class RVKDownload(RVKTask):
     """ Download and unzip XML dump of RVK. """
-    url = luigi.Parameter(default='http://goo.gl/abcdefgh')
+    url = luigi.Parameter(description="URL to a zipfile containing a single XML file.")
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
