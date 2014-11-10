@@ -161,7 +161,7 @@ class DBPLinks(DBPTask):
         if not os.path.exists(target):
             os.makedirs(target)
 
-        url = '{base}/{version}/links/{filename}'.format(base=bases[self.version], version=self.version, filename=self.filename)
+        url = '{base}/{version}/links/{filename}'.format(base=self.bases[self.version], version=self.version, filename=self.filename)
         output = shellout(""" curl -L {url} | bunzip2 -c > {output} """, url=url)
         luigi.File(output).move(self.output().path)
 
