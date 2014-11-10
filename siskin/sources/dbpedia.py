@@ -359,7 +359,8 @@ class DBPSkosJson(DBPTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class DBPSkosRootPath(DBPTask):
-    """ Infer the path to a root element for each category. """
+    """ Infer the path to a root element for each category. Note: this will not
+    extract *all* paths to root elements, but just a single one. """
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
 
