@@ -127,7 +127,7 @@ to see all available parameters of the task.
 Example graphs
 --------------
 
-Most workflows are easy to visualize with [Graphviz]():
+Most workflows are easy to visualize with [Graphviz](http://www.graphviz.org/):
 
     $ taskdeps-dot OSOIndex | dot -Tpng -o OSOIndex.png
 
