@@ -966,7 +966,7 @@ class DBPVirtuoso(DBPTask):
         print("""
             Note: If you want to reload everything, clear any previous graph first:
 
-                log_enable(0);
+                log_enable(3,1);
                 SPARQL CLEAR GRAPH <http://dbpedia.org/resource/>;
 
             This is a manual task for now. If you haven't already:
