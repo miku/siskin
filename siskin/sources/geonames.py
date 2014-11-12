@@ -33,7 +33,31 @@ class GeonamesDump(GeonamesTask):
 
 class GeonamesGND(GeonamesTask):
     """ For each reference in GND extract the RDF from GeonamesDump
-    and convert it to ntriples with rapper. """
+    and convert it to ntriples with rapper.
+
+    Inputs: A geonames dump with alternating URI and RDF/XML lines,
+    a list of geonames.org URIs, as they appear in the GND.
+
+    $ head -2 $(taskoutput GeonamesDump)
+    http://sws.geonames.org/1/
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <rdf:RDF xmlns:cc="http://creativecommons.org/ns#" ...
+
+    $ head -2 $(taskoutput GNDGeonames)
+    http://sws.geonames.org/1000501
+    http://sws.geonames.org/1007311
+    ...
+
+    Output is a single ntriples file that contains all facts about locations
+    referenced by GND. Example:
+
+    $ head -3 $(taskoutput GeonamesGND)
+
+    <http://sws.geonames.org/49518/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.geonames.org/ontology#Feature> .
+    <http://sws.geonames.org/49518/> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> "http://sws.geonames.org/49518/about.rdf" .
+    <http://sws.geonames.org/49518/> <http://www.geonames.org/ontology#name> "Republic of Rwanda" .
+    ...
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
