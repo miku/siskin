@@ -57,6 +57,7 @@ class GeonamesGND(GeonamesTask):
     <http://sws.geonames.org/49518/> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> "http://sws.geonames.org/49518/about.rdf" .
     <http://sws.geonames.org/49518/> <http://www.geonames.org/ontology#name> "Republic of Rwanda" .
     ...
+    Takes about 5 minutes. Yields 1012541 triples about 42429 locations (2014-11).
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
