@@ -71,7 +71,7 @@ class GeonamesGND(GeonamesTask):
         ids = set()
         with self.input().get('gnd').open() as handle:
             for row in handle.iter_tsv(cols=('uri',)):
-                ids.add('%s/' % row.uri)
+                ids.add(row.uri.rstrip('/'))
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().get('geo').open() as handle:
@@ -80,10 +80,9 @@ class GeonamesGND(GeonamesTask):
                     try:
                         line = handle.next().strip()
                         if line.startswith('http://'):
-                            if line in ids:
-                                output.write(handle.next())
-                            else:
-                                handle.next()
+                            content = handle.next()
+                            if line.rstrip('/') in ids:
+                                output.write(content)
                     except StopIteration:
                         break
 
