@@ -14,6 +14,17 @@ set -e -u
 args=("$@")
 
 OUTPUT=$(taskoutput "$@"|tail -1)
+
+if [[ ! -f "$OUTPUT" ]]; then
+    read -p "Output does not exists. Should we try to run this task now [y/N]? " -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        taskdo $@
+    else
+        exit 1
+    fi
+fi
+
 if [[ "$OUTPUT" == *mrc ]]; then
     yaz-marcdump $OUTPUT
 else
