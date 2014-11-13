@@ -537,7 +537,6 @@ class GNDDBPediaLinks(GNDTask):
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('gnd', 'dbp')):
                     decoded = urllib.unquote(row.dbp)
-                    print(decoded)
                     output.write_tsv(decoded, row.gnd)
 
     def output(self):
