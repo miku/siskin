@@ -244,6 +244,39 @@ class GNDNames(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GNDNamesWikipediaTitles(GNDTask):
+    """ Match GND names with wikipedia page titles to find more connections. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    language = luigi.Parameter(default='de')
+
+    def requires(self):
+        from siskin.sources.wikipedia import WikipediaTitles
+        return {'gnd': GNDNames(date=self.date),
+                'titles': WikipediaTitles(language=self.language)}
+
+    @timed
+    def run(self):
+        titles = set()
+        with self.input().get('titles').open() as handle:
+            for row in handle.iter_tsv(cols=('name',)):
+                titles.add(row.name)
+
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().get('gnd').open() as handle:
+            with luigi.File(stopover, format=TSV).open('w') as output:
+                for line in handle:
+                    parts = line.split()
+                    if len(parts) == 0:
+                        continue
+                    gnd, name = parts[0], string.strip(' '.join(parts[1:]))
+                    output.write_tsv('HIT' if name in titles else 'MISS', gnd, name)
+
+        output = shellout("sort -u {input} > {output}", input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GNDCount(GNDTask):
     """ Just count the number of triples and store it. """
 
