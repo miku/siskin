@@ -49,6 +49,25 @@ class WikipediaArticleDump(WikipediaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
+class WikipediaOutlinks(WikipediaTask):
+    """ Collect links to the interwebs (best effort). """
+    language = luigi.Parameter(default='en')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return WikipediaArticleDump(language=self.language, date=self.date)
+
+    @timed
+    def run(self):
+        """
+        Wrong Assumption: There is no space or | in the URL.
+        """
+        output = shellout("""LANG=C grep -o -E "http://[^| ]*" {input} > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class WikipediaTitles(WikipediaTask):
     """
     Get a list of wikipedia article titles.
