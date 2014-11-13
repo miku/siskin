@@ -89,7 +89,7 @@ class WikipediaTitles(WikipediaTask):
     def run(self):
         output = shellout("""LANG=C grep -E "<title>[^<]*</title>" {input} |
                              LANG=C sed -e 's@<title>@@g' |
-                             LANG=C sed -e 's@</title>@@g' > {output}""",
+                             LANG=C sed -e 's@</title>@@g' | sed -e 's/^ *//g' > {output}""",
                              input=self.input().path)
         luigi.File(output).move(self.output().path)
 
