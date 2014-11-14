@@ -380,7 +380,7 @@ class DBPSkosRootPath(DBPTask):
                         parents = []
                         while True:
                             c = cursor.execute("""SELECT parent from tree where node = ?""", (node,))
-			    result = c.fetchone()
+                            result = c.fetchone()
                             if not result or result[0] in parents:
                                 break
                             parents.append(result[0])
