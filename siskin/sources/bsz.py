@@ -2397,6 +2397,34 @@ class BSZGNDDefinitionAvailable(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class BSZGNDList(BSZTask):
+    """ A list of all GNDs in BSZ. """
+
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return {'100': BSZAuthority(date=self.date, field='content.100.0'),
+                '700': BSZAuthority(date=self.date, field='content.700.0'),
+                '650': BSZAuthority(date=self.date, field='content.650.0'),
+                '689': BSZAuthority(date=self.date, field='content.689.0')}
+
+    def run(self):
+        gnds = collections.defaultdict(set)
+        for _, target in self.input().iteritems():
+            with target.open() as handle:
+                for row in handle.iter_tsv(cols=('ppn', 'rels')):
+                    rels = row.rels.split('|')
+                    for r in rels:
+                        if r.startswith('(DE-588)'):
+                            gnds[row.ppn].add(r.replace('(DE-588)', 'gnd:'))
+
+        with self.output().open('w') as output:
+            for ppn, gnds in sorted(gnds.iteritems()):
+                output.write_tsv(ppn, '|'.join(gnds))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class BSZIsbnList(BSZTask):
     """
     Dump all ISBNs from current BSZ index.
