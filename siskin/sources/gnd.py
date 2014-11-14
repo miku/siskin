@@ -323,8 +323,8 @@ class GNDNTriplesSplitted(GNDTask):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class GNDVirtuoso(GNDTask):
-    """ Load GND into virtuoso 6. Assume there is no graph yet.
-    Clear any graph manually with `SPARQL CLEAR GRAPH <http://d-nb.info/gnd/>;`
+    """ Load GND parts into virtuoso 6.
+    Clear any graph manually with `SPARQL CLEAR GRAPH <http://dbpedia.org/resource/>;`
 
     See SELECT * FROM DB.DBA.LOAD_LIST; for progress.
 
@@ -348,33 +348,42 @@ class GNDVirtuoso(GNDTask):
             path = handle.iter_tsv(cols=('path',)).next().path
             dirname = os.path.dirname(path)
             filename = os.path.basename(path)
-            prefix, id = filename.split('-')
-        os.chmod(dirname, 0777)
-        shellout(""" echo "LD_DIR ('{dirname}', '{prefix}-*', '{name}');
-                           RDF_LOADER_RUN();
-                          " | isql-vt {host}:{port} {username} {password}""",
-                 dirname=dirname, prefix=prefix, name=self.graph, host=self.host, port=self.port,
-                 username=self.username, password=self.password)
+            prefix, _ = filename.split('-')
+
+        print("""
+            Note: If you want to reload everything, clear any previous graph first:
+
+                log_enable(3,1);
+                SPARQL CLEAR GRAPH <{graph}>;
+
+            -----------------------------------------------------
+
+            This is a manual task for now. If you haven't already:
+
+            Run `isql-vt` (V6) or `isql` (V7), then execute:
+
+                LD_DIR('{dirname}', '{prefix}-*', '{graph}');
+
+            Check the result via:
+
+                SELECT * FROM DB.DBA.LOAD_LIST;
+
+            When you are done adding all triples files to the load list, run:
+
+                RDF_LOADER_RUN();
+
+            See also:
+
+            * http://docs.openlinksw.com/virtuoso/fn_log_enable.html
+            * http://docs.openlinksw.com/virtuoso/sparqlextensions.html#rdfsparulexamples10
+
+            Note that "Section 16.3.2.3.10. Example for Dropping graph"
+            calls graphs with 600M triples very large RDF data collections.
+
+        """.format(dirname=dirname, prefix=prefix, graph=self.graph))
 
     def complete(self):
-        """ Compare the expected number of triples with the number of loaded ones. """
-        output = shellout("""curl -s -H 'Accept: text/csv' {host}:8890/sparql
-                             --data-urlencode 'query=SELECT COUNT(*) FROM <{graph}> WHERE {{?a ?b ?c}}' |
-                             grep -v callret > {output}""", host=self.host, port=self.port, graph=self.graph)
-
-        with open(output) as handle:
-            loaded = int(handle.read().strip())
-
-        task = GNDCount(date=self.date)
-        luigi.build([task], local_scheduler=True)
-        with task.output().open() as handle:
-            expected = int(handle.read().strip())
-            if expected > 0 and loaded == 0:
-                return False
-            elif expected == loaded:
-                return True
-            else:
-                raise RuntimeError('expected %s triples but loaded %s' % (expected, loaded))
+        return False
 
 class GNDAbbreviatedNTriples(GNDTask):
     """ Get a Ntriples representation of GND, but abbreviate with ntto. """
