@@ -2425,6 +2425,125 @@ class BSZGNDList(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class BSZGNDModel(BSZTask):
+    """ A language model using GNDs. """
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return BSZGNDList(date=self.date)
+
+    def run(self):
+        cooc = collections.defaultdict(list)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'gnds')):
+                gnds = row.gnds.split('|')
+                for key in gnds:
+                    for gnd in gnds:
+                        if not gnd == key:
+                            cooc[key].append(gnd)
+
+        with self.output().open('w') as output:
+            for k, v in cooc.iteritems():
+                output.write_tsv(k, '|'.join(v))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDTopCooccurences(BSZTask):
+    """ Report the top N coocurences only. Optionally
+    only take into account cooccurences set sizes greater or equal `size`.
+    """
+    date = luigi.DateParameter(default=weekly())
+    n = luigi.IntParameter(default=3)
+    size = luigi.IntParameter(default=10)
+
+    def requires(self):
+        return BSZGNDModel(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('gnd', 'gnds')):
+                    gnds = row.gnds.split('|')
+                    total = len(gnds)
+                    if total == 0:
+                        continue
+                    counter = collections.defaultdict(int)
+                    for gnd in gnds:
+                        counter[gnd] += 1
+                    if len(counter.keys()) < self.size:
+                        continue
+                    topn = sorted([k for k, _ in counter.iteritems()], key=operator.itemgetter(1), reverse=True)[:self.n]
+                    output.write_tsv(row.gnd, *topn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDTopCooccurencesHumanReadable(BSZTask):
+    """ Report the top N coocurences only. Optionally
+    only take into account cooccurences set sizes greater or equal `size`.
+    Translate GNDs via preferrednames.
+    """
+    date = luigi.DateParameter(default=weekly())
+    n = luigi.IntParameter(default=3)
+    size = luigi.IntParameter(default=10)
+
+    def requires(self):
+        from siskin.sources.gnd import GNDNames
+        return {'occ': BSZGNDTopCooccurences(date=self.date),
+                'names': GNDNames(date=self.date)}
+
+    def run(self):
+        namemap = {}
+        with self.input().get('names').open() as handle:
+            for line in handle:
+                parts = line.split()
+                if len(parts) == 0:
+                    continue
+                gnd, name = parts[0], ' '.join(parts[1:])
+                namemap['gnd:%s' % gnd] = name
+
+        with self.input().get('occ').open() as handle:
+            with self.output().open('w') as output:
+
+                for row in handle.iter_tsv():
+                    named = []
+                    for column in row:
+                        named.append(namemap.get(column, "NOT_AVAILABLE"))
+                    output.write_tsv(*named)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class BSZGNDModelJson(BSZTask):
+    """ A language model using GNDs. Json format. """
+    date = luigi.DateParameter(default=weekly())
+
+    def requires(self):
+        return BSZGNDModel(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('gnd', 'gnds')):
+                    gnds = row.gnds.split('|')
+                    total = len(gnds)
+                    if total == 0:
+                        continue
+                    counter = collections.defaultdict(int)
+                    for gnd in gnds:
+                        counter[gnd] += 1
+                    result = {
+                        'key': row.gnd,
+                        'cooc': sorted([(k, float(v) / total) for k, v in counter.iteritems()],
+                                       key=operator.itemgetter(1), reverse=True),
+                    }
+                    output.write(json.dumps(result))
+                    output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class BSZIsbnList(BSZTask):
     """
     Dump all ISBNs from current BSZ index.
