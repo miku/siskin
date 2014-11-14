@@ -2454,7 +2454,7 @@ class BSZGNDTopCooccurences(BSZTask):
     only take into account cooccurences set sizes greater or equal `size`.
     """
     date = luigi.DateParameter(default=weekly())
-    n = luigi.IntParameter(default=3)
+    top = luigi.IntParameter(default=3)
     size = luigi.IntParameter(default=10)
 
     def requires(self):
@@ -2473,7 +2473,7 @@ class BSZGNDTopCooccurences(BSZTask):
                         counter[gnd] += 1
                     if len(counter.keys()) < self.size:
                         continue
-                    topn = sorted([k for k, _ in counter.iteritems()], key=operator.itemgetter(1), reverse=True)[:self.n]
+                    topn = sorted([k for k, _ in counter.iteritems()], key=operator.itemgetter(1), reverse=True)[:self.top]
                     output.write_tsv(row.gnd, *topn)
 
     def output(self):
@@ -2485,12 +2485,12 @@ class BSZGNDTopCooccurencesHumanReadable(BSZTask):
     Translate GNDs via preferrednames.
     """
     date = luigi.DateParameter(default=weekly())
-    n = luigi.IntParameter(default=3)
+    top = luigi.IntParameter(default=3)
     size = luigi.IntParameter(default=10)
 
     def requires(self):
         from siskin.sources.gnd import GNDNames
-        return {'occ': BSZGNDTopCooccurences(date=self.date),
+        return {'occ': BSZGNDTopCooccurences(date=self.date, top=self.top, size=self.size),
                 'names': GNDNames(date=self.date)}
 
     def run(self):
@@ -2505,7 +2505,6 @@ class BSZGNDTopCooccurencesHumanReadable(BSZTask):
 
         with self.input().get('occ').open() as handle:
             with self.output().open('w') as output:
-
                 for row in handle.iter_tsv():
                     named = []
                     for column in row:
