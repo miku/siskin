@@ -179,6 +179,20 @@ class GNDNTriples(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
 
+class GNDTypes(GNDTask):
+    """ Extract all rdf types. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    def run(self):
+        output = shellout("""LANG=C grep -F 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' {input} > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GNDFoafPages(GNDTask):
     """ Extract all FOAF links. """
     date = ClosestDateParameter(default=datetime.date.today())
