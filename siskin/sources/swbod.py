@@ -17,6 +17,7 @@ import BeautifulSoup
 import collections
 import datetime
 import luigi
+import operator
 import pandas as pd
 import re
 import requests
@@ -322,3 +323,72 @@ class SWBOpenDataIndex(SWBOpenDataTask, CopyToIndex):
 
     def requires(self):
         return SWBOpenDataSnapshotJson(date=self.date)
+
+class SWBOpenDataRVK(SWBOpenDataTask):
+    """ Find the RVK categories per PPN. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataSnapshotMarc(date=self.date)
+
+    def run(self):
+        output = shellout("""marctotsv -s "|" {input} 001 936.a > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataRVKModel(SWBOpenDataTask):
+    """ Find the coocurrences of RVK categories. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SWBOpenDataRVK(date=self.date)
+
+    def run(self):
+        cooc = collections.defaultdict(list)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('ppn', 'rvks')):
+                rvks = row.rvks.split('|')
+                for key in rvks:
+                    for rvk in rvks:
+                        if not rvk == key:
+                            cooc[key].append(rvk)
+
+        with self.output().open('w') as output:
+            for k, v in cooc.iteritems():
+                output.write_tsv(k, '|'.join(v))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class SWBOpenDataRVKTopCooccurences(SWBOpenDataTask):
+    """ Report the top N coocurences only. Optionally
+    only take into account cooccurences set sizes greater or equal `size`.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    top = luigi.IntParameter(default=5)
+    size = luigi.IntParameter(default=5)
+
+    def requires(self):
+        return SWBOpenDataRVKModel(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('rvk', 'rvks')):
+                    rvks = row.rvks.split('|')
+                    total = len(rvks)
+                    if total == 0:
+                        continue
+                    counter = collections.defaultdict(int)
+                    for rvk in rvks:
+                        counter[rvk] += 1
+                    if len(counter.keys()) < self.size:
+                        continue
+                    topn = sorted([(k, v) for k, v in counter.iteritems()], key=operator.itemgetter(1), reverse=True)[:self.top]
+                    topn = map(operator.itemgetter(0), topn)
+                    output.write_tsv(row.rvk, *topn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
