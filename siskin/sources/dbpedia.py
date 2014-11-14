@@ -967,7 +967,9 @@ class DBPVirtuoso(DBPTask):
             Note: If you want to reload everything, clear any previous graph first:
 
                 log_enable(3,1);
-                SPARQL CLEAR GRAPH <http://dbpedia.org/resource/>;
+                SPARQL CLEAR GRAPH <{graph}>;
+
+            -----------------------------------------------------
 
             This is a manual task for now. If you haven't already:
 
