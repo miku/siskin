@@ -95,3 +95,20 @@ class GeonamesGND(GeonamesTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='nt'))
+
+class GeonamesSeeAlso(GeonamesTask):
+    """ Extract rdfs:seeAlso and remove slashes from geonames subject,
+    since GND use URIs without slashes. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeonamesGND(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""LANG=C grep -F "http://www.w3.org/2000/01/rdf-schema#seeAlso" {input} | sed -e 's@/>@>@g' > {output} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
