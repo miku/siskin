@@ -77,7 +77,7 @@ class PerseeCombine(PerseeTask):
                               marcxml -o marc {input} > {output}""",
                               input=target.fn, ignoremap={5: 'TODO: fix this'})
             shellout("cat {input} >> {output}", input=tmp, output=combined)
-        luigi.File(output).move(self.output().fn)
+        luigi.File(combined).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
