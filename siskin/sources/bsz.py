@@ -2549,17 +2549,28 @@ class BSZIsbnList(BSZTask):
     """
     index = luigi.Parameter(default='bsz', significant=False)
     date = luigi.DateParameter(default=weekly())
+    fillna = luigi.Parameter(default='NOT_AVAILABLE')
 
     def requires(self):
-        return [] # return BSZIndex(begin=BSZTask.SONDERABZUG, end=self.date)
+        """
+        Usually, these kind of tasks would require
+        `BSZIndex(begin=BSZTask.SONDERABZUG, end=self.date)`, but this is
+        a too slow dependency for now, so assume the user (or cron) has updated
+        the index in time.
+        """
+        return []
 
     def run(self):
-        indexed = shellout(r""" estab -indices {index} -f "_id content.020.a content.020.9 content.020.z content.776.a" > {output}""", index=self.index)
+        indexed = shellout(r"""estab -indices {index} -f "_id content.020.a content.020.9 content.020.z content.776.a"
+                               > {output}""", index=self.index)
+        errors = []
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+
         with luigi.File(indexed, format=TSV).open() as handle:
-            with self.output().open('w') as output:
+            with luigi.File(stopover, format=TSV).open('w') as output:
                 for row in handle.iter_tsv():
                     for field in row[1:]:
-                        if field == 'NOT_AVAILABLE':
+                        if field == self.fillna:
                             continue
                         for value in field.split('|'):
                             value = value.replace("-", "")
@@ -2567,9 +2578,13 @@ class BSZIsbnList(BSZTask):
                                 try:
                                     output.write_tsv(row[0], pyisbn.convert(value))
                                 except:
-                                    pass
+                                    errors.append(row[0])
                             if len(value) == 13:
                                 output.write_tsv(row[0], value)
+
+        self.logger.warn("%s ISBN conversion errors" % len(errors))
+        output = shellout("sort -u {input} > {output}", input=stopover)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
