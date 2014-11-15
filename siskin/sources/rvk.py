@@ -1,17 +1,28 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+Configuration keys:
+
+[rvk]
+
+url = http://example.org/path/to/rvk.zip
+"""
+
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.configuration import Config
 import collections
 import datetime
 import luigi
 import operator
 import os
 import tempfile
+
+config = Config.instance()
 
 class RVKTask(DefaultTask):
     """ Default RVK task. """
@@ -22,7 +33,7 @@ class RVKTask(DefaultTask):
 
 class RVKDownload(RVKTask):
     """ Download and unzip XML dump of RVK. """
-    url = luigi.Parameter(description="URL to a zipfile containing a single XML file.")
+    url = luigi.Parameter(default=config.get('rvk', 'url', 'http://example.org/path/to/rvk.zip'))
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -30,7 +41,7 @@ class RVKDownload(RVKTask):
         if not os.path.exists(target):
             os.makedirs(target)
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("wget --retry-connrefused -O {stopover} {url} && unzip -o -d {dir} {stopover}", dir=target, stopover=stopover, url=self.url)
+        shellout("wget --retry-connrefused -O {stopover} '{url}' && unzip -o -d {dir} {stopover}", dir=target, stopover=stopover, url=self.url)
         files = list(iterfiles(target))
         if not len(files) == 1:
             raise RuntimeError('more than one file')
