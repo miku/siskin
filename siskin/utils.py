@@ -35,7 +35,7 @@ def generate_tasks_manual():
     output.write('  {0} tasks found\n\n'.format(len(task_tuples)))
 
     for name, klass in task_tuples:
-        doc = klass.__doc__ or colors.red("@todo")
+        doc = klass.__doc__ or colors.red("@todo: docs")
         output.write('{0} {1}\n'.format(colors.green(name), doc))
 
         try:
