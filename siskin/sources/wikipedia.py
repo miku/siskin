@@ -469,7 +469,7 @@ class WikipediaRawAuthorityData(WikipediaTask):
         prefixes = {'de': 'Normdaten', 'en': 'Authority control'}
         if not self.language in prefixes:
             raise RuntimeError("Languages available %s" % prefixes)
-        output = shellout("""wikinorm -pattern {prefix} {input} > {output}""",
+        output = shellout("""wikinorm -pattern '{prefix}' {input} > {output}""",
                           input=self.input().get('dump').path, prefix=prefixes.get(self.language))
         luigi.File(output).move(self.output().path)
 
