@@ -4,35 +4,18 @@
 """
 The main command line program to interact with the tasks.
 """
-from __future__ import print_function
-from luigi.task import Register
-from siskin import __version__
+from siskin.utils import get_task_import_cache
 import importlib
-import json
 import luigi
 import os
 import sys
-import tempfile
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         raise RuntimeError('specify a task to run')
     taskname = sys.argv[1]
 
-    # cache modules for fast startup times
-    task_import_cache = None
-    path = os.path.join(tempfile.gettempdir(), 'siskin_task_import_cache_%s' % __version__)
-    if not os.path.exists(path):
-        from siskin.sources import *
-        from siskin.workflows import *
-        with open(path, 'w') as output:
-            task_import_cache = dict([(name, klass.__module__) for name, klass in Register.get_reg().iteritems()])
-            json.dump(task_import_cache, output)
-
-    if task_import_cache is None:
-        with open(path) as handle:
-            task_import_cache = json.load(handle)
-
+    task_import_cache, path = get_task_import_cache()
     if taskname in task_import_cache:
         importlib.import_module(task_import_cache[taskname])
     else:

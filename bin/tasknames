@@ -2,11 +2,9 @@
 # coding: utf-8
 
 from __future__ import print_function
-from gluish.common import IndexIdList, IndexFieldList
-from luigi.task import Register
-from siskin.sources import *
-from siskin.workflows import *
+from siskin.utils import get_task_import_cache
 
 if __name__ == '__main__':
-    for name in sorted(Register.get_reg().keys()):
+    task_import_cache, _ = get_task_import_cache()
+    for name in sorted(task_import_cache.keys()):
         print(name)

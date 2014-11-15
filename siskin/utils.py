@@ -6,13 +6,15 @@ Various utilities.
 """
 
 from __future__ import print_function
-from luigi.task import Register, flatten
-import pprint
-import cStringIO as StringIO
 from gluish import colors
 from gluish.common import IndexIdList, IndexFieldList
-from siskin.sources import *
-from siskin.workflows import *
+from luigi.task import Register, flatten
+import cStringIO as StringIO
+from siskin import __version__
+import json
+import os
+import pprint
+import tempfile
 
 MAN_HEADER = r"""
 
@@ -24,6 +26,9 @@ MAN_HEADER = r"""
 
 def generate_tasks_manual():
     """ Return a formatted listing of all tasks with their descriptions. """
+    from siskin.sources import *
+    from siskin.workflows import *
+
     output = StringIO.StringIO()
     task_tuples = sorted(Register.get_reg().iteritems())
     output.write(MAN_HEADER)
@@ -43,3 +48,23 @@ def generate_tasks_manual():
         output.write(colors.magenta('\n\tDependencies ({0}):\n\n{1}\n\n'.format(len(deps), formatted)))
 
     return output.getvalue()
+
+def get_task_import_cache():
+    """
+    Load `taskname: modulename` mappings from dictionary. Return a tuple containing
+    the dictionary and the path to the cache file.
+    """
+    task_import_cache = None
+    path = os.path.join(tempfile.gettempdir(), 'siskin_task_import_cache_%s' % __version__)
+    if not os.path.exists(path):
+        from siskin.sources import *
+        from siskin.workflows import *
+        with open(path, 'w') as output:
+            task_import_cache = dict([(name, klass.__module__) for name, klass in Register.get_reg().iteritems()])
+            json.dump(task_import_cache, output)
+
+    if task_import_cache is None:
+        with open(path) as handle:
+            task_import_cache = json.load(handle)
+
+    return task_import_cache, path
