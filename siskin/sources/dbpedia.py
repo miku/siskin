@@ -687,6 +687,36 @@ class DBPBSZRelevantCategories(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPBSZSharedCategories(DBPTask):
+    """ For each gnd find those gnds, that share the most categories. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+    threshold = luigi.IntParameter(default=4)
+
+    def requires(self):
+        return DBPBSZRelevantCategories(version=self.version, language=self.language)
+
+    def run(self):
+        gndset = collections.defaultdict(set)
+        catset = collections.defaultdict(set)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('category', 'gnd')):
+                gndset[row.category].add(row.gnd)
+                catset[row.gnd].add(row.category)
+
+        # naive O(n^2)
+        with self.output().open('w') as output:
+            for gnd in catset.iterkeys():
+                for other in catset.iterkeys():
+                    if other == gnd:
+                        continue
+                    shared = catset[gnd].intersection(catset[other])
+                    if len(shared) > self.threshold:
+                        output.write_tsv(gnd, other, len(shared))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class DBPBSZRelevantCategoriesReach(DBPTask):
     """ For each category, compute the number of actual metadata items in
     the FINC PPN list. Compute a relative measure (reached PPNs / size of category) as well. """
