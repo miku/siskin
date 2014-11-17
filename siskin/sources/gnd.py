@@ -627,7 +627,7 @@ class GNDDepictions(GNDTask):
         with self.input().get('gndto').open() as handle:
             with sqlite3db(kv) as cursor:
                 with self.output().open('w') as output:
-                    for row in handle.iter_tsv(cols=('gnd', 'dbp')):
+                    for row in handle.iter_tsv(cols=('dbp', 'gnd')):
                         cursor.execute("""select value from store where key = ?""", (row.dbp,))
                         result = cursor.fetchall()
                         for url in set(result):
