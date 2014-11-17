@@ -2627,7 +2627,7 @@ class BSZRVKDistribution(BSZTask):
     @timed
     def run(self):
         output = shellout("""estab -indices "{index}" -f "{field}" > {output} """, index=self.index, field=self.field)
-        with luigi.File(output, format=TSV) as handle:
+        with luigi.File(output, format=TSV).open() as handle:
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('value',)):
                     for v in row.value.split('|'):
