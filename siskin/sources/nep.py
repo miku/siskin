@@ -130,7 +130,8 @@ class NEPImport(NEPTask):
                         dstdir = os.path.dirname(destination)
                         if not os.path.exists(dstdir):
                             os.makedirs(dstdir)
-                        os.symlink(row.path, destination)
+                        if not os.path.exists(destination):
+                            shellout("ln -s {src} {dst}", src=row.path, dst=destination)
 
         p = os.path.basename(config.get('nep', 'ftp-pattern'))
         pattern = os.path.join(target, p)
