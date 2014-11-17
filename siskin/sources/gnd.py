@@ -207,6 +207,54 @@ class GNDFoafPages(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GNDFoafLinks(GNDTask):
+    """ Rewrite the GNDFoafPages output, so that we can compare it to
+    the output of `DBPGNDValidLinks`. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDFoafPages(date=self.date)
+
+    def run(self):
+        output = shellout("""cut -d ' ' -f1,3 {input} |
+                             sed -e 's@http://d-nb.info/gnd/@gnd:@g; s@http://de.wikipedia.org/wiki/@dbp:@g;' |
+                             tr -d '<>' | awk '{{print $2" "$1}}' | tr ' ' '\\t' > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDFoafOnly(GNDTask):
+    """ Which links to dbpedia in GND are only via foaf:page? """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+
+    def requires(self):
+        from siskin.sources.dbpedia import DBPGNDValidLinks
+        return {'sa': DBPGNDValidLinks(version=self.version, language=self.language),
+                'foaf': GNDFoafLinks(date=self.date)}
+
+    def run(self):
+        sa = set()
+        with self.input().get('sa').open() as handle:
+            for row in handle.iter_tsv(cols=('dbp', 'gnd')):
+                sa.add((row.dbp, row.gnd))
+
+        foaf = set()
+        with self.input().get('foaf').open() as handle:
+            for row in handle.iter_tsv(cols=('dbp', 'gnd')):
+                foaf.add((row.dbp, row.gnd))
+
+        with self.output().open('w') as output:
+            for dbp, gnd in foaf.difference(sa):
+                output.write_tsv(dbp, gnd)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GNDGeonames(GNDTask):
     """ Extract all geonames from dump """
     date = ClosestDateParameter(default=datetime.date.today())
