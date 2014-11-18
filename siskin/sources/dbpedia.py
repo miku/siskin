@@ -15,6 +15,7 @@ import elasticsearch
 import hashlib
 import json
 import luigi
+import operator
 import os
 import pprint
 import shutil
@@ -713,6 +714,62 @@ class DBPBSZSharedCategories(DBPTask):
                     shared = catset[gnd].intersection(catset[other])
                     if len(shared) > self.threshold:
                         output.write_tsv(gnd, other, len(shared))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPBSZTopSharedCategories(DBPTask):
+    """ Find the top N related gnds via shared wikipedia categories. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+    top = luigi.IntParameter(default=3)
+
+    def requires(self):
+        return DBPBSZSharedCategories(version=self.version, language=self.language)
+
+    def run(self):
+        top = collections.defaultdict(list)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'other', 'overlap')):
+                top[row.gnd].append((row.other, row.overlap))
+
+        with self.output().open('w') as output:
+            for gnd, related in top.iteritems():
+                topn = [id for id, _ in sorted(related, key=operator.itemgetter(1))][:self.top]
+                output.write_tsv(gnd, *topn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPBSZTopSharedCategoriesHumanReadable(DBPTask):
+    """ Just a human readable version. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+    top = luigi.IntParameter(default=3)
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        from siskin.sources.gnd import GNDNames
+        return {'occ': DBPBSZTopSharedCategories(version=self.version, language=self.language, top=self.top),
+                'names': GNDNames(date=self.date)}
+
+    def run(self):
+        namemap = {}
+        with self.input().get('names').open() as handle:
+            for line in handle:
+                parts = line.split()
+                if len(parts) == 0:
+                    continue
+                gnd, name = parts[0], ' '.join(parts[1:])
+                namemap['gnd:%s' % gnd] = name
+
+        with self.input().get('occ').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv():
+                    named = []
+                    for column in row:
+                        named.append(namemap.get(column, "NOT_AVAILABLE"))
+                    output.write_tsv(*named)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
