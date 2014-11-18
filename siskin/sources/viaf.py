@@ -141,18 +141,33 @@ class VIAFSameAs(VIAFTask):
     """ Extract the VIAF sameAs relations. """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    predicate = luigi.Parameter(default='<http://schema.org/sameAs>', description='older dumps use <http://www.w3.org/2002/07/owl#sameAs>')
 
     def requires(self):
         return VIAFExtract(date=self.date)
 
     def run(self):
-        output = shellout("""LANG=C grep -F "<http://www.w3.org/2002/07/owl#sameAs>"
-                             {input} > {output}""", input=self.input().path,
-                             ignoremap={1: "Not found."})
+        output = shellout("""LANG=C grep -F "{predicate}" {input} > {output}""",
+                          predicate=self.predicate, input=self.input().path, ignoremap={1: "Not found."})
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='n3'))
+        return luigi.LocalTarget(path=self.path(ext='nt', digest=True))
+
+class VIAFDBPediaLinks(VIAFTask):
+    """ Extract the VIAF sameAs to dbpedia. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VIAFSameAs(date=self.date)
+
+    def run(self):
+        output = shellout("""LANG=C grep -F "http://dbpedia.org/resource" {input} > {output}""", input=self.input().path, ignoremap={1: "Not found."})
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='nt'))
 
 class VIAFJson(VIAFTask):
     """ Shorter notation. """
