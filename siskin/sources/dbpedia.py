@@ -723,9 +723,10 @@ class DBPBSZTopSharedCategories(DBPTask):
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="de")
     top = luigi.IntParameter(default=3)
+    threshold = luigi.IntParameter(default=4)
 
     def requires(self):
-        return DBPBSZSharedCategories(version=self.version, language=self.language)
+        return DBPBSZSharedCategories(version=self.version, language=self.language, threshold=self.threshold)
 
     def run(self):
         top = collections.defaultdict(list)
@@ -747,10 +748,11 @@ class DBPBSZTopSharedCategoriesHumanReadable(DBPTask):
     language = luigi.Parameter(default="de")
     top = luigi.IntParameter(default=3)
     date = luigi.DateParameter(default=datetime.date.today())
+    threshold = luigi.IntParameter(default=4)
 
     def requires(self):
         from siskin.sources.gnd import GNDNames
-        return {'occ': DBPBSZTopSharedCategories(version=self.version, language=self.language, top=self.top),
+        return {'occ': DBPBSZTopSharedCategories(version=self.version, language=self.language, top=self.top, threshold=self.threshold),
                 'names': GNDNames(date=self.date)}
 
     def run(self):
