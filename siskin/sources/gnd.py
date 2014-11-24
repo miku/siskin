@@ -245,7 +245,7 @@ class GNDFriendshipImage(GNDTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext=self.format))
 
 class GNDFoafPages(GNDTask):
     """ Extract all FOAF links. """
