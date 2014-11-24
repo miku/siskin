@@ -2584,34 +2584,6 @@ class BSZIsbnList(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class BSZWikiISBN(BSZTask):
-    """ Report ISBNs that are both in BSZ and in the German wikipedia. """
-
-    date = luigi.DateParameter(default=weekly())
-
-    def requires(self):
-        from siskin.sources.wikipedia import WikipediaTitleIsbnWithIds
-        return {'bsz': BSZIsbnList(date=self.date), 'wiki': WikipediaTitleIsbnWithIds(language='de', date=self.date)}
-
-    def run(self):
-        wiki = collections.defaultdict(set)
-        with self.input().get('wiki').open() as handle:
-            for row in handle.iter_tsv(cols=('id', 'isbn')):
-                wiki[row.isbn].add(row.id)
-
-        with self.input().get('bsz').open() as handle:
-            stopover = luigi.File(is_tmp=True, format=TSV)
-            with stopover.open('w') as output:
-                for row in handle.iter_tsv(cols=('id', 'isbn')):
-                    if row.isbn in wiki:
-                        output.write_tsv(row.id, row.isbn, '|'.join(wiki[row.isbn]))
-
-        output = shellout("sort -u {input} > {output}", input=stopover.path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class BSZRVKDistribution(BSZTask):
     """ Compute the RVK distribution over the current bsz index. Use 936.a """
 
