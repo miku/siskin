@@ -234,6 +234,7 @@ class GNDFriendshipGraph(GNDTask):
 class GNDFriendshipImage(GNDTask):
     """ Create an image of the graph. """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='svg')
 
     def requires(self):
         return GNDFriendshipGraph(date=self.date)
