@@ -193,6 +193,59 @@ class GNDTypes(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GNDFriends(GNDTask):
+    """ Extract friendship relations. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    def run(self):
+        output = shellout("""LANG=C grep -F 'http://d-nb.info/standards/elementset/gnd#acquaintanceshipOrFriendship' {input} > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDFriendshipGraph(GNDTask):
+    """ Create a simple DOT graph representation of the friendships. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDFriends(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                output.write("graph friends {\n")
+                for line in handle:
+                    parts = line.split()
+                    if not len(parts) == 4:
+                        continue
+                    s, _, p, _ = parts
+                    s = s.replace("http://d-nb.info/gnd/", "").strip("<>")
+                    p = p.replace("http://d-nb.info/gnd/", "").strip("<>")
+                    output.write('\t"%s" -- "%s";\n' % (s, p))
+                output.write("}\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class GNDFriendshipImage(GNDTask):
+    """ Create an image of the graph. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDFriendshipGraph(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("dot -T{format} -o {output} {input}", format=self.format, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
 class GNDFoafPages(GNDTask):
     """ Extract all FOAF links. """
     date = ClosestDateParameter(default=datetime.date.today())
