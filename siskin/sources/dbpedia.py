@@ -2,7 +2,7 @@
 # pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301
 
 from gluish.benchmark import timed
-from gluish.common import Executable, ElasticsearchMixin
+from gluish.common import Directory, Executable, ElasticsearchMixin
 from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
@@ -893,7 +893,7 @@ class DBPInterlanguageBacklinks(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
-class DBPInfluenceGraph(DBPTask):
+class DBPInfluencedBy(DBPTask):
     """ Extract influenced relations from mapping based properties.
 
     <http://de.dbpedia.org/resource/Vokov> <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Vokov> .
@@ -911,6 +911,85 @@ class DBPInfluenceGraph(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
 
+class DBPInfluenceGraph(DBPTask):
+    """ Reduce triples to a TSV with (subject, influence) URIs. """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+
+    def requires(self):
+        return DBPInfluencedBy(version=self.version, language=self.language)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    parts = line.split()
+                    if not len(parts) == 4:
+                        continue
+                    s, _, o, _ = parts
+                    output.write_tsv(s, o)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DBPInfluenceImages(DBPTask):
+    """ For each URI, draw a transitive influce graph. """
+
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="en")
+    depth = luigi.IntParameter(default=3)
+
+    def requires(self):
+        return {'graph': DBPInfluenceGraph(version=self.version, language=self.language),
+                'dir': Directory(path=os.path.join(self.taskdir(), self.version, self.language, str(self.depth)))}
+
+    def shortname(self, uri):
+        return uri.strip('<>').split('/')[-1]
+
+    def run(self):
+        g = collections.defaultdict(set)
+        with self.input().get('graph').open() as handle:
+            for row in handle.iter_tsv(cols=('entity', 'influence')):
+                g[self.shortname(row.entity)].add(self.shortname(row.influence))
+
+        for entity in g.keys():
+            self.logger.debug("Computing subgraph for %s" % entity)
+            queue, seen, level = [entity], set(), 0
+            subgraph = collections.defaultdict(set)
+            while len(queue) > 0:
+                if level >= self.depth:
+                    break
+                key = queue.pop()
+                seen.add(key)
+                for influence in g[key]:
+                    if influence in seen:
+                        continue
+                    subgraph[key].add(influence)
+                    queue.append(influence)
+                level += 1
+
+            target = '%s.png' % (os.path.join(self.input().get('dir').path, self.shortname(entity)))
+            if os.path.exists(target):
+                continue
+
+            _, stopover = tempfile.mkstemp(prefix='siskin-')
+            with luigi.File(stopover).open('w') as output:
+                output.write('digraph "%s" {\n' % entity)
+                for k, values in subgraph.iteritems():
+                    for v in values:
+                        output.write('\t"%s" -> "%s";\n' % (k, v))
+                output.write('}\n')
+
+            output = shellout("dot -Tpng -o {output} {input}", input=stopover)
+            luigi.File(output).move(target)
+
+        with self.output().open('w') as output:
+            for path in iterfiles(self.input().get('dir').path):
+                output.write_tsv(path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
 class DBPInfluenceGraphDot(DBPTask):
     """ Create dot file for graphviz. """
     version = luigi.Parameter(default="2014")
@@ -924,7 +1003,7 @@ class DBPInfluenceGraphDot(DBPTask):
         return s.replace(pattern.get(self.language, 'en'), 'dbp:').rstrip('>')
 
     def requires(self):
-        return DBPInfluenceGraph(version=self.version, language=self.language)
+        return DBPInfluencedBy(version=self.version, language=self.language)
 
     def run(self):
         with self.input().open() as handle:
