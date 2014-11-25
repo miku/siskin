@@ -247,6 +247,107 @@ class GNDFriendshipImage(GNDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.format))
 
+class GNDDates(GNDTask):
+    """ Extract all dateOf... links. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDNTriples(date=self.date)
+
+    def run(self):
+        output = shellout("""LANG=C grep -F 'http://d-nb.info/standards/elementset/gnd#dateOf' {input} > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDBiographicalData(GNDTask):
+    """ For each GND collect birth date and death dates. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GNDDates(date=self.date)
+
+    def run(self):
+        biomap = collections.defaultdict(dict)
+        with self.input().open() as handle:
+            for line in handle:
+                line = line.strip()
+                parts = line.split()
+                if len(parts) < 4:
+                    raise RuntimeError('invalid ntriple: %s' % line)
+                s, p, o = parts[0], parts[1], ' '.join(parts[2:-1])
+                gnd = s.split('/')[-1].strip('<>')
+                value = 'NOT_AVAILABLE'
+                if o.endswith('^^<http://www.w3.org/2001/XMLSchema#date>'):
+                    try:
+                        value = datetime.date(*map(int, o[1:11].split('-')))
+                    except ValueError as err:
+                        self.logger.debug(line)
+                        self.logger.warn(err)
+                        continue
+
+                elif o.endswith('^^<http://www.w3.org/2001/XMLSchema#gYear>'):
+                    try:
+                        value = datetime.date(int(o[1:5]), 1, 1)
+                    except ValueError as err:
+                        self.logger.debug(line)
+                        self.logger.warn(err)
+                        continue
+
+                elif len(o.strip('"')) == 4:
+                    if o.strip('"').isdigit():
+                        value = datetime.date(int(o.strip('"')), 1, 1)
+                else:
+                    pass
+                    # self.logger.debug('unknown type: %s' % line)
+
+                if p == '<http://d-nb.info/standards/elementset/gnd#dateOfBirth>':
+                    biomap[gnd]['b'] = value
+                if p == '<http://d-nb.info/standards/elementset/gnd#dateOfDeath>':
+                    biomap[gnd]['d'] = value
+
+        with self.output().open('w') as output:
+            for gnd, bio in biomap.iteritems():
+                output.write_tsv(gnd, bio.get('b', 'NOT_AVAILABLE'), bio.get('d', 'NOT_AVAILABLE'))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GNDContemporaryPeople(GNDTask):
+    """ Build equivalence classes of people with birthdates within a given timespan. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    threshold = luigi.FloatParameter(default=0.7)
+
+    def requires(self):
+        return GNDBiographicalData(date=self.date)
+
+    @timed
+    def run(self):
+        yearspan = collections.defaultdict(set)
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('gnd', 'birth', 'death')):
+                try:
+                    birth = datetime.date(*map(int, row.birth.split('-')))
+                    death = datetime.date(*map(int, row.death.split('-')))
+                except ValueError:
+                    continue
+
+                yearspan[row.gnd] = set(range(birth.year, death.year + 1))
+
+        with self.output().open('w') as output:
+            for gnd, span in yearspan.iteritems():
+                for other, o in yearspan.iteritems():
+                    union = span.union(o)
+                    if len(union) == 0:
+                        continue
+                    jaccard = len(span.intersection(o)) / float(len(union))
+                    if jaccard > self.threshold:
+                        output.write_tsv(gnd, other, jaccard)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GNDFoafPages(GNDTask):
     """ Extract all FOAF links. """
     date = ClosestDateParameter(default=datetime.date.today())
