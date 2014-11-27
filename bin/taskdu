@@ -3,7 +3,7 @@
 # report disk usage for a certain task
 
 if [ $# -eq 0 ]; then
-	du -hs $(taskhome)
+    du -hs $(taskhome)
 else
-	du -hs $(taskdir "$@")
+    du -hs $(taskdir "$@")
 fi
