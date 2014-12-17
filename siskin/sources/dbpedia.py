@@ -742,6 +742,31 @@ class DBPBSZTopSharedCategories(DBPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class DBPBSZTopSharedCategoriesTriples(DBPTask):
+    """ Turn the clustering result into importable ntriples file.
+    """
+    version = luigi.Parameter(default="2014")
+    language = luigi.Parameter(default="de")
+    top = luigi.IntParameter(default=3)
+    threshold = luigi.IntParameter(default=4)
+    predicate = luigi.Parameter(default='<http://kg.ub.uni-leipzig.de/csc>', description='cluster predicate')
+
+    def requires(self):
+        return DBPBSZTopSharedCategories(version=self.version, language=self.language, threshold=self.threshold, top=self.top)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv():
+                    if len(row) < 1:
+                        continue
+                    subject, objects = row[0].replace('gnd:', ''), map(lambda s: s.replace('gnd:', ''), row[1:])
+                    for o in objects:
+                        output.write('<http://d-nb.info/gnd/%s> %s <http://d-nb.info/gnd/%s> .\n' % (subject, self.predicate, o))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+
 class DBPBSZTopSharedCategoriesHumanReadable(DBPTask):
     """ Just a human readable version. """
     version = luigi.Parameter(default="2014")
