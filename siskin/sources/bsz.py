@@ -1584,7 +1584,7 @@ class BSZIndex(BSZTask):
                 'title': {
                     'date_detection': False,
                     '_id': {
-                        'path': 'content.001'
+                        'path': 'record.001'
                     },
                     '_all': {
                         'enabled': True,
@@ -1592,7 +1592,7 @@ class BSZIndex(BSZTask):
                         'store': True
                     },
                     'properties': {
-                        'content': {
+                        'record': {
                             'properties': {
                                 '245': {
                                     'properties': {
@@ -1745,30 +1745,9 @@ class BSZIndex(BSZTask):
                 garbage.add(stopover)
 
             self.logger.debug("Combined JSON patch at {0}".format(combined))
-
-            # index inline
-            def docs():
-                """ Yield all documents, that need to be indexed.
-                This is works ok on average hardware,
-                but gets the bottleneck high-end machines. """
-                with open(combined) as handle:
-                    documents = ({
-                        '_index': 'bsz',
-                        '_type': 'title',
-                        '_id': d['content']['001'],
-                        '_source': d} for d in (json.loads(line) for line in handle))
-                    for d in documents:
-                        yield d
-
-            self.logger.debug("Bulk indexing %s docs..." % len(patch))
-
-            es.indices.put_settings({"index": {"refresh_interval": "-1"}}, index='bsz')
-            eshelpers.bulk_index(es, docs(), chunk_size=2000, raise_on_error=True)
-            es.indices.put_settings({"index": {"refresh_interval": "1s"}}, index='bsz')
-
+            shellout("esbulk -verbose -index bsz -type title {input}", input=combined)
             garbage.add(combined)
 
-            # get rid of the garbage
             for path in garbage:
                 try:
                     os.remove(path)
@@ -1983,14 +1962,14 @@ class BSZAuthority(BSZTask):
     Extract various authority data from inside BSZ index.
     Possible fields are:
 
-    Author related: content.100.a, content.700.a, content.110.a, content.710.a
+    Author related: record.100.a, record.700.a, record.110.a, record.710.a
 
     > Felder 100, 700, 110, 710: $0, wobei der eigentlichen Verknüpfungsidentnummer
       das ISIL der die Identnummer erzeugenden Institution vorangestellt ist
       (DE-588a = Deutsche Nationalbibliothek überregionale Personennormdatei,
       DE-576 = SWB regionale Personendatei).
 
-    Subject related: content.650.a, content.689.a
+    Subject related: record.650.a, record.689.a
 
     > Felder 650 ff. für Einzelschlagworte und das anwenderspezifische Feld 689
       für RSWK-Schlagwortketten (Verknüpfungsstruktur analog 100 ff. s.o.):
@@ -1998,11 +1977,11 @@ class BSZAuthority(BSZTask):
     """
     index = luigi.Parameter(default='bsz', description='name of bsz index', significant=False)
     date = luigi.DateParameter(default=datetime.date.today())
-    field = luigi.Parameter(default='content.100.0')
+    field = luigi.Parameter(default='record.100.0')
 
     @timed
     def run(self):
-        output = shellout(""" estab -indices {index} -f "content.001 {field}" > {output} """, field=self.field, index=self.index)
+        output = shellout(""" estab -indices {index} -f "record.001 {field}" > {output} """, field=self.field, index=self.index)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -2014,8 +1993,8 @@ class BSZGNDPersonRelations(BSZTask):
     date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return {'100': BSZAuthority(date=self.date, field='content.100.0'),
-                '700': BSZAuthority(date=self.date, field='content.700.0')}
+        return {'100': BSZAuthority(date=self.date, field='record.100.0'),
+                '700': BSZAuthority(date=self.date, field='record.700.0')}
 
     @timed
     def run(self):
@@ -2308,8 +2287,8 @@ class BSZGNDSubjectRelations(BSZTask):
     date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return {'650': BSZAuthority(date=self.date, field='content.650.0'),
-                '689': BSZAuthority(date=self.date, field='content.689.0')}
+        return {'650': BSZAuthority(date=self.date, field='record.650.0'),
+                '689': BSZAuthority(date=self.date, field='record.689.0')}
 
     @timed
     def run(self):
@@ -2398,10 +2377,10 @@ class BSZGNDList(BSZTask):
     date = luigi.DateParameter(default=weekly())
 
     def requires(self):
-        return {'100': BSZAuthority(date=self.date, field='content.100.0'),
-                '700': BSZAuthority(date=self.date, field='content.700.0'),
-                '650': BSZAuthority(date=self.date, field='content.650.0'),
-                '689': BSZAuthority(date=self.date, field='content.689.0')}
+        return {'100': BSZAuthority(date=self.date, field='record.100.0'),
+                '700': BSZAuthority(date=self.date, field='record.700.0'),
+                '650': BSZAuthority(date=self.date, field='record.650.0'),
+                '689': BSZAuthority(date=self.date, field='record.689.0')}
 
     def run(self):
         gnds = collections.defaultdict(set)
@@ -2580,7 +2559,7 @@ class BSZIsbnList(BSZTask):
         return []
 
     def run(self):
-        indexed = shellout(r"""estab -indices {index} -f "_id content.020.a content.020.9 content.020.z content.776.a"
+        indexed = shellout(r"""estab -indices {index} -f "_id record.020.a record.020.9 record.020.z record.776.a"
                                > {output}""", index=self.index)
         errors = []
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -2612,7 +2591,7 @@ class BSZRVKDistribution(BSZTask):
     """ Compute the RVK distribution over the current bsz index. Use 936.a """
 
     date = luigi.DateParameter(default=weekly())
-    field = luigi.Parameter(default='content.936.a')
+    field = luigi.Parameter(default='record.936.a')
     index = luigi.Parameter(default='bsz')
 
     @timed
