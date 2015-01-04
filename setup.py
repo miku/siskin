@@ -92,5 +92,6 @@ setup(name='siskin',
         'bin/taskversion',
         'bin/taskwc',
       ],
+      setup_requires=['numpy==1.8.1'],
       install_requires=install_requires,
 )
