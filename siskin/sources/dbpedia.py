@@ -1,6 +1,10 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301
 
+"""
+DBPedia related tasks.
+"""
+
 from gluish.benchmark import timed
 from gluish.common import Directory, Executable, ElasticsearchMixin
 from gluish.database import sqlite3db
@@ -22,6 +26,12 @@ import shutil
 import tempfile
 
 class DBPTask(DefaultTask):
+    """
+    Download base URL can be lookup in dictionary `bases`.
+
+        self.bases[self.version]
+
+    """
     TAG = 'dbpedia'
 
     bases = collections.defaultdict(lambda: 'http://downloads.dbpedia.org',
@@ -30,8 +40,7 @@ class DBPTask(DefaultTask):
 class DBPDownload(DBPTask):
     """ Download DBPedia version and language.
     2014 versions hosted under http://data.dws.informatik.uni-mannheim.de/dbpedia.
-    For other download locations adjust bases.
-
+    For other download locations and versions adjust `self.bases` dictionary.
     """
     version = luigi.Parameter(default="2014")
     language = luigi.Parameter(default="en")
