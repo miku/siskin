@@ -18,10 +18,10 @@ install_requires = [
     'MySQL-python==1.2.5',
     'argparse==1.2.1',
     'astroid==1.1.1',
-    'colorama==0.2.7',
+    'colorama==0.3.3',
     'decorator==3.4.0',
-    'elasticsearch==1.2.0',
-    'gluish==0.1.68',
+    'elasticsearch==1.3.0',
+    'gluish==0.1.69',
     'gspread==0.2.1',
     'jsonpath-rw==1.3.0',
     'logilab-common==0.61.0',
@@ -29,7 +29,7 @@ install_requires = [
     'lxml==3.3.5',
     'marcx==0.1.17',
     'nose==1.3.3',
-    'numpy==1.8.1',
+    'numpy==1.9.1',
     'openpyxl==1.8.6',
     'pandas==0.14.0',
     'ply==3.4',
@@ -39,16 +39,16 @@ install_requires = [
     'pymarc==3.0.1',
     'python-dateutil==2.2',
     'pytz==2014.4',
-    'requests==2.3.0',
+    'requests==2.5.1',
     'simplejson==3.6.0',
-    'six==1.6.1',
+    'six==1.9.0',
     'sqlitebck==1.2.1',
-    'urllib3==1.8.2',
+    'urllib3==1.10',
     'wsgiref==0.1.2',
 ]
 
 if sys.version_info < (2, 7):
-    install_requires.append('importlib==1.0.1')
+    install_requires.append('importlib==1.0.2')
 
 setup(name='siskin',
       version='0.0.91',
