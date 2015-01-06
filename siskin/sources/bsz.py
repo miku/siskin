@@ -1745,7 +1745,7 @@ class BSZIndex(BSZTask):
                 garbage.add(stopover)
 
             self.logger.debug("Combined JSON patch at {0}".format(combined))
-            shellout("esbulk -verbose -index bsz -type title {input}", input=combined)
+            shellout("esbulk -index bsz -type title {input}", input=combined)
             garbage.add(combined)
 
             for path in garbage:
