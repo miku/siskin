@@ -150,7 +150,7 @@ class BSZTask(DefaultTask):
             if not len(item.split(":")) == 2:
                 raise RuntimeError("required format for bsz.extra is DATE:PATH")
             value, path = map(string.strip, item.split(":"))
-            date = date_string = datetime.date(*map(int, value.split('-')))
+            date = datetime.date(*map(int, value.split('-')))
             extramap[date].add(path)
         return extramap
 
