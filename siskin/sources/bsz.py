@@ -250,6 +250,25 @@ class SAImport(BSZTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+class SASingle(BSZTask):
+    """ Turn the Sonderabzug files into a single file and deduplicate.
+    Requires: marctools 1.6.1 or later.
+    """
+    date = luigi.DateParameter(default=BSZTask.SONDERABZUG)
+    kind = luigi.Parameter(default='tit')
+
+    def requires(self):
+        return SAImport(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""marcsnapshot -l 9 -verbose `grep "{kind}.mrc" "{input}" | tr '\\n' ' '` > {output}""",
+                          kind=self.kind, input=self.input().path, preserve_whitespace=True)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'), format=TSV)
+
 class SATags(BSZTask):
     """
     The tag is just the name of the directory, where the extracted
