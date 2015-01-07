@@ -43,13 +43,11 @@ class CrossrefHarvestChunk(CrossrefTask):
     def run(self):
         if self.rows < 1:
             raise RuntimeError('rows parameter must be positive')
+        filter = "from-index-date:%s,until-index-date:%s" % (str(self.begin), str(self.end))
         rows, offset = self.rows, 0
         with self.output().open('w') as output:
             while True:
-                filter = "from-index-date:%s,until-index-date:%s" % (str(self.begin), str(self.end))
-                params = {"rows": rows,
-                          "offset": offset,
-                          "filter": filter}
+                params = {"rows": rows, "offset": offset, "filter": filter}
                 url = "http://api.crossref.org/works?%s" % urllib.urlencode(params)
                 r = requests.get(url)
                 if r.status_code == 200:
