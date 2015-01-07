@@ -4,13 +4,22 @@
 Crossref stub.
 """
 
+from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
+from gluish.parameter import ClosestDateParameter
+from gluish.intervals import monthly
+import datetime
+import json
 import luigi
 import requests
+import tempfile
 import urllib
 
 class CrossrefTask(DefaultTask):
     TAG = 'crossref'
+
+    def closest(self):
+        return monthly(date=self.date)
 
 class CrossrefHarvestChunk(CrossrefTask):
     """
@@ -18,26 +27,63 @@ class CrossrefHarvestChunk(CrossrefTask):
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
+    rows = luigi.IntParameter(default=100, significant=False)
 
     def run(self):
-        rows, offset = 10, 0
+        if self.rows < 1:
+            raise RuntimeError('rows parameter must be positive')
+        rows, offset = self.rows, 0
         with self.output().open('w') as output:
             while True:
+                filter = "from-index-date:%s,until-index-date:%s" % (str(self.begin), str(self.end))
                 params = {"rows": rows,
                           "offset": offset,
-                          "from-pub-date": str(self.begin),
-                          "until-pub-date": str(self.end)}
+                          "filter": filter}
                 url = "http://api.crossref.org/works?%s" % urllib.urlencode(params)
                 r = requests.get(url)
                 if r.status_code == 200:
                     content = json.loads(r.text)
-                    if len(content["message"]["items"]) == 0:
+                    items = content["message"]["items"]
+                    self.logger.debug("%s: %s" % (url, len(items)))
+                    if len(items) == 0:
                         break
-                    output.write(content)
+                    output.write(r.text)
                     output.write("\n")
-                    offset += 50
+                    offset += rows
                 else:
                     raise RuntimeError("%s on %s" % (r.status_code, url))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
+    """ Harvest everything in incremental steps. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    end = luigi.DateParameter()
+    rows = luigi.IntParameter(default=100, significant=False)
+
+    def requires(self):
+        dates = date_range(self.begin, self.end, 1, 'months')
+        for i, _ in enumerate(dates[:-1]):
+            yield CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows)
+
+    def output(self):
+        return self.input()
+
+class CrossrefCombine(CrossrefTask):
+    """ Harvest everything in incremental steps. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    rows = luigi.IntParameter(default=100, significant=False)
+
+    def requires(self):
+        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows)
+
+    def run(self):
+        _, combined = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=combined)
+        luigi.File(combined).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
