@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
 """
-Crossref source.
+CrossRef is an association of scholarly publishers that develops shared
+infrastructure to support more effective scholarly communications.
+
+Our citation-linking network today covers over 68 million journal articles
+and other content items (books chapters, data, theses, technical reports)
+from thousands of scholarly and professional publishers around the globe.
 """
 
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
-from gluish.parameter import ClosestDateParameter
-from gluish.intervals import monthly
 import datetime
 import json
 import luigi
@@ -16,6 +21,9 @@ import tempfile
 import urllib
 
 class CrossrefTask(DefaultTask):
+    """
+    Crossref source, http://www.crossref.org/
+    """
     TAG = 'crossref'
 
     def closest(self):
