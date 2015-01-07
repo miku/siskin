@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Crossref stub.
+Crossref source.
 """
 
 from gluish.utils import date_range, shellout
@@ -19,11 +19,14 @@ class CrossrefTask(DefaultTask):
     TAG = 'crossref'
 
     def closest(self):
+        """ Do monthly updates. """
         return monthly(date=self.date)
 
 class CrossrefHarvestChunk(CrossrefTask):
     """
-    http://api.crossref.org/works?rows=50&offset=10&filter=from-pub-date:1900-01-01,until-pub-date:1900-01-02
+    API docs can be found under: http://api.crossref.org/
+
+    The output file is line delimited JSON, just the concatenated responses.
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
@@ -57,7 +60,9 @@ class CrossrefHarvestChunk(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
-    """ Harvest everything in incremental steps. """
+    """
+    Harvest everything in incremental steps.
+    """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter()
     rows = luigi.IntParameter(default=100, significant=False)
@@ -71,7 +76,11 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
         return self.input()
 
 class CrossrefCombine(CrossrefTask):
-    """ Harvest everything in incremental steps. """
+    """
+    Combine all harvested files into a single LDJ file.
+    Might contain dups, since `from-index-date` and `until-index-date` are
+    both inclusive.
+    """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     rows = luigi.IntParameter(default=100, significant=False)
