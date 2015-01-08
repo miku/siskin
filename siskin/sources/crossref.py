@@ -106,3 +106,31 @@ class CrossrefCombine(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefItems(CrossrefTask):
+    """
+    Combine all harvested files into a single LDJ file.
+    Flatten and deduplicate. Stub.
+    """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    rows = luigi.IntParameter(default=1000, significant=False)
+
+    def requires(self):
+        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows)
+
+    def run(self):
+        with self.output().open('w') as output:
+            for target in self.input():
+                with target.open() as handle:
+                    for line in handle:
+                        content = json.loads(line)
+                        if not content.get("status") == "ok":
+                            raise RuntimeError("invalid response status")
+                        items = content["message"]["items"]
+                        for item in items:
+                            output.write(json.dumps(item))
+                            output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
