@@ -80,7 +80,7 @@ class EZBIndex(EZBTask, ElasticsearchMixin):
 
     def run(self):
         shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
-        shellout("esbulk -index ezb {input}", input=self.input().path)
+        shellout("esbulk -index {index} {input}", index=self.index, input=self.input().path)
         with self.output().open('w'):
             pass
 
