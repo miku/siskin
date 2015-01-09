@@ -17,7 +17,9 @@ from siskin.task import DefaultTask
 import datetime
 import json
 import luigi
+import os
 import requests
+import requests_cache
 import tempfile
 import urllib
 
@@ -43,7 +45,8 @@ class CrossrefHarvestChunk(CrossrefTask):
     max_retries = luigi.IntParameter(default=10, significant=False)
 
     def run(self):
-        sess = requests.Session()
+        cache_name = os.path.join(tempfile.gettempdir(), 'requests_cache')
+        sess = requests_cache.core.CachedSession(cache_name)
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
         sess.mount('http://', adapter)
 
