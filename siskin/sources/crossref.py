@@ -9,6 +9,7 @@ and other content items (books chapters, data, theses, technical reports)
 from thousands of scholarly and professional publishers around the globe.
 """
 
+from gluish.common import ElasticsearchMixin
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
