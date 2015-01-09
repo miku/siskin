@@ -134,3 +134,22 @@ class CrossrefItems(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
+    """ Vanilla records. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    index = luigi.Parameter(default='crossref')
+
+    def requires(self):
+        return CrossrefItems(begin=self.begin, date=self.date)
+
+    def run(self):
+        shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
+        shellout("esbulk -index {index} {input}", index=self.index, input=self.input().path)
+        with self.output().open('w'):
+            pass
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
