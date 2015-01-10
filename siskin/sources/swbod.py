@@ -227,7 +227,7 @@ class SWBOpenDataDates(SWBOpenDataTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class SWBOpenDataSnapshot(SWBOpenDataTask):
-    """ Find the latest entries from SWB OD. """
+    """ Find the latest entries from SWB OD. Non-pandas version. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -235,13 +235,8 @@ class SWBOpenDataSnapshot(SWBOpenDataTask):
 
     @timed
     def run(self):
-        with self.input().open() as handle:
-            df = pd.read_csv(handle, sep='\t',
-                             names=('id', 'date', 'transaction', 'sigels'))
-        surface = df.drop_duplicates(cols=('id'), take_last=True)
-        with self.output().open('w') as output:
-            surface.to_csv(output, sep='\t', cols=('id', 'date'), index=False,
-                           header=False)
+        output = shellout("""tac "{input}" | LANG=C uniq -w 9 | LANG=C cut -f 1,2 | LANG=C sort > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
