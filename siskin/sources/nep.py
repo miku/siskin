@@ -47,9 +47,9 @@ import json
 import luigi
 import marcx
 import os
-import pandas as pd
 import pymarc
 import re
+import string
 import tempfile
 
 config = Config.instance()
@@ -341,6 +341,7 @@ class NEPSurface(NEPTask):
 class NEPSnapshot(NEPTask):
     """ Create the snapshot by utilizing seekmaps/surface. This will create
     a single MARC binary. As of Fall 2013, this file is about 1G in size.
+    Non-pandas version.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -349,19 +350,18 @@ class NEPSnapshot(NEPTask):
 
     @timed
     def run(self):
-        with self.input().open() as handle:
-            df = pd.read_csv(handle, sep='\t',
-                             names=('id', 'status', 'date', 'offset', 'length'))
-            dates = df.date.unique()
-            with self.output().open('w') as output:
-                for date in dates:
-                    task = NEPCombine(date=datetime.date(*(int(v) for v in date.split('-'))))
-                    luigi.build([task], local_scheduler=True)
-                    with task.output().open() as fh:
-                        # this gathers offset and length for a single date,
-                        # as a list of tuples; pure pandas love
-                        seekmap = df[df.date == date].ix[:,
-                            ('offset', 'length')].itertuples(index=False)
+        output = shellout("cut -f3 {input} | LANG=C sort | LANG=C uniq > {output}", input=self.input().path)
+        with open(output) as handle:
+            dates = map(string.strip, handle.readlines())
+
+        with self.output().open('w') as output:
+            for date in dates:
+                task = NEPCombine(date=datetime.date(*(int(v) for v in date.split('-'))))
+                luigi.build([task], local_scheduler=True)
+                with task.output().open() as fh:
+                    seekfile = shellout("""LANG=C grep "{date}" "{input}" | cut -f 4,5 > {output}""", date=str(date), input=self.input().path)
+                    with luigi.File(seekfile, format=TSV).open() as handle:
+                        seekmap = ((int(offset), int(length)) for offset, length in handle.iter_tsv())
                         copyregions(fh, output, seekmap)
 
     def output(self):
