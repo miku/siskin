@@ -137,8 +137,7 @@ class SWBOpenDataMarc(SWBOpenDataTask):
         for url in urls:
             output = shellout("wget --retry-connrefused -O {output} '{url}'", url=url)
             output = shellout("tar -Oxzf {input} > {output}", input=output)
-            shellout("yaz-marcdump -i marcxml -o marc {input} >> {output}",
-                     input=output, output=combined)
+            shellout("yaz-marcdump -i marcxml -o marc {input} >> {output}", input=output, output=combined)
         luigi.File(combined).move(self.output().path)
 
     def output(self):
@@ -151,8 +150,7 @@ class SWBOpenDataSeekMapDB(SWBOpenDataTask):
 
     @timed
     def run(self):
-        output = shellout("marcmap -o {output} {input}",
-                          input=self.input().path)
+        output = shellout("marcmap -o {output} {input}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -189,8 +187,7 @@ class SWBOpenDataListifiedRange(SWBOpenDataTask):
     def run(self):
         _, combined = tempfile.mkstemp(prefix='tasktree')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path,
-                     output=combined)
+            shellout("cat {input} >> {output}", input=target.path, output=combined)
         output = shellout("LANG=C sort -k1,1 -k2,2 {input} > {output}", input=combined)
         luigi.File(output).move(self.output().path)
 
@@ -244,8 +241,7 @@ class SWBOpenDataSnapshot(SWBOpenDataTask):
 class SWBOpenDataSnapshotMarcX(SWBOpenDataTask):
     """ Try marcsnapshot for snapshots. High memory overhead for now. """
     date = ClosestDateParameter(default=datetime.date.today())
-    limit = luigi.IntParameter(default=50000, significant=False,
-                               description='limit for seekmapdb queries')
+    limit = luigi.IntParameter(default=50000, significant=False, description='limit for seekmapdb queries')
 
     def requires(self):
         prerequisite = SWBOpenDataDates(date=self.date)
@@ -266,15 +262,13 @@ class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
     """ Create a single MARC file, that represents
     the current state of affairs. """
     date = ClosestDateParameter(default=datetime.date.today())
-    limit = luigi.IntParameter(default=50000, significant=False,
-                               description='limit for seekmapdb queries')
+    limit = luigi.IntParameter(default=50000, significant=False, description='limit for seekmapdb queries')
 
     def requires(self):
         return SWBOpenDataSnapshot(date=self.date)
 
     @timed
     def run(self):
-
         output = shellout("cut -f2 {input} | LANG=C sort | LANG=C uniq > {output}", input=self.input().path)
         with open(output) as handle:
             dates = map(string.strip, handle.readlines())
@@ -314,8 +308,7 @@ class SWBOpenDataSnapshotJson(SWBOpenDataTask):
 
     @timed
     def run(self):
-        output = shellout("marctojson -m date={date} {input} > {output}",
-                          input=self.input().path, date=self.closest())
+        output = shellout("marctojson -m date={date} {input} > {output}", input=self.input().path, date=self.closest())
         luigi.File(output).move(self.output().path)
 
     def output(self):
