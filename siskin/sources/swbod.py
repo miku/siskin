@@ -18,9 +18,9 @@ import collections
 import datetime
 import luigi
 import operator
-import pandas as pd
 import re
 import requests
+import string
 import tempfile
 import urlparse
 
@@ -253,12 +253,13 @@ class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
 
     @timed
     def run(self):
-        with self.input().open() as handle:
-            df = pd.read_csv(handle, sep="\t", names=('id', 'date'))
-        dates = df.date.unique()
+
+        output = shellout("cut -f2 {input} | LANG=C sort | LANG=C uniq > {output}", input=self.input().path)
+        with open(output) as handle:
+            dates = map(string.strip, handle.readlines())
 
         with self.output().open('w') as output:
-            for date in sorted(dates):
+            for date in dates:
                 dateobj = datetime.date(*map(int, date.split('-')))
                 marc = SWBOpenDataMarc(date=dateobj)
                 sdb = SWBOpenDataSeekMapDB(date=dateobj)
