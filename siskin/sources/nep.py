@@ -259,7 +259,8 @@ class NEPCombine(NEPTask):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 class NEPTable(NEPTask):
-    """ (ID STATUS DATE OFFSET LENGTH) for a single NEP shipments. """
+    """ (ID STATUS DATE OFFSET LENGTH) for a single NEP shipments.
+    Assumes that a single shipment of NEP will contain no duplicate record IDs. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -267,18 +268,10 @@ class NEPTable(NEPTask):
 
     @timed
     def run(self):
-        marcmap = shellout("marcmap {input} > {output}",
-                           input=self.input().path)
-        status = shellout("marctotsv {file} 001 @Status {date} > {output}",
-                          file=self.input().path, date=self.closest())
-        # dataframes for marcmap and status
-        dfm = pd.read_csv(marcmap, sep='\t', names=('id', 'offset', 'length'))
-        dfs = pd.read_csv(status, sep='\t', names=('id', 'status', 'date'))
-        # concat the data frames
-        both = pd.merge(dfm, dfs)
-        with self.output().open('w') as output:
-            both.to_csv(output, header=False, index=False, sep='\t',
-                        cols=('id', 'status', 'date', 'offset', 'length'))
+        mm = shellout("marcmap {input} | LANG=C sort -k1,1 > {output}", input=self.input().path)
+        st = shellout("marctotsv {input} 001 @Status {date} | LANG=C sort -k1,1 > {output}", input=self.input().path, date=self.closest())
+        output = shellout("paste {status} {marcmap} | cut -f 1,2,3,5,6 > {output}", status=st, marcmap=mm)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -405,8 +398,8 @@ class NEPForUBL(NEPTask):
 
     @timed
     def run(self):
-        df = pd.read_csv(self.input().get('codes').open(), sep='\t', names=('code',))
-        filter_codes = set(df.code.tolist())
+        with self.input().get('codes').open() as handle:
+            filter_codes = map(string.strip, handle.readlines())
 
         with self.input().get('snaphost').open() as handle:
             with self.output().open('w') as output:
