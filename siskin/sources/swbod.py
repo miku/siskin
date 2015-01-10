@@ -241,6 +241,27 @@ class SWBOpenDataSnapshot(SWBOpenDataTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class SWBOpenDataSnapshotMarcX(SWBOpenDataTask):
+    """ Try marcsnapshot for snapshots. High memory overhead for now. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    limit = luigi.IntParameter(default=50000, significant=False,
+                               description='limit for seekmapdb queries')
+
+    def requires(self):
+        prerequisite = SWBOpenDataDates(date=self.date)
+        luigi.build([prerequisite])
+        with prerequisite.output().open() as handle:
+            for row in handle.iter_tsv(cols=('date',)):
+                yield SWBOpenDataMarc(date=row.date)
+
+    def run(self):
+        files = [target.path for target in self.input()]
+        output = shellout("""marcsnapshot -verbose -o {output} {files}""", files=' '.join(files))
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
 class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
     """ Create a single MARC file, that represents
     the current state of affairs. """
