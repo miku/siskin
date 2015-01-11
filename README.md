@@ -41,7 +41,7 @@ Initially this will take some time, since a wikipedia dump must be downloaded fi
 Data Stores
 -----------
 
-siskin uses [elasticsearch](http://elasticsearch.org/) as its primary data store. Usually, each data source
+A couple of tasks use [elasticsearch](http://elasticsearch.org/) as their data store. Usually, each data source
 has its own index. Most data sources come with a task to build an up-to-date
 version of their index, and they - by convention - have the suffix Index, like
 [`DOABIndex`](https://github.com/miku/siskin/blob/6897c0c4d4ea483f3a0b5bc5df6ad821a8c8e296/siskin/sources/doab.py#L89),
