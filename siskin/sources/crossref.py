@@ -41,7 +41,9 @@ class CrossrefHarvestChunk(CrossrefTask):
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
+
     max_retries = luigi.IntParameter(default=10, significant=False)
 
     def run(self):
@@ -50,7 +52,7 @@ class CrossrefHarvestChunk(CrossrefTask):
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
         sess.mount('http://', adapter)
 
-        filter = "from-index-date:%s,until-index-date:%s" % (str(self.begin), str(self.end))
+        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(self=self)
         rows, offset = self.rows, 0
 
         with self.output().open('w') as output:
@@ -84,12 +86,13 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter()
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
         dates = date_range(self.begin, self.end, 1, 'months')
         for i, _ in enumerate(dates[:-1]):
-            yield CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows)
+            yield CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
 
     def output(self):
         return self.input()
@@ -102,10 +105,11 @@ class CrossrefCombine(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
-        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows)
+        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
 
     def run(self):
         _, combined = tempfile.mkstemp(prefix='siskin-')
@@ -123,10 +127,11 @@ class CrossrefItems(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
-        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows)
+        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
 
     def run(self):
         with self.output().open('w') as output:
