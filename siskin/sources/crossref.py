@@ -59,7 +59,12 @@ class CrossrefHarvestChunk(CrossrefTask):
                 url = "http://api.crossref.org/works?%s" % urllib.urlencode(params)
                 r = sess.get(url)
                 if r.status_code == 200:
-                    content = json.loads(r.text)
+                    try:
+                        content = json.loads(r.text)
+                    except ValueError as err:
+                        self.logger.debug(err)
+                        self.logger.debug(r.text)
+                        raise
                     items = content["message"]["items"]
                     self.logger.debug("%s: %s" % (url, len(items)))
                     if len(items) == 0:
