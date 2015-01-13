@@ -14,12 +14,12 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
+from siskin.utils import URLCache
 import datetime
 import json
 import luigi
 import os
 import requests
-import requests_cache
 import tempfile
 import urllib
 
@@ -47,10 +47,9 @@ class CrossrefHarvestChunk(CrossrefTask):
     max_retries = luigi.IntParameter(default=10, significant=False)
 
     def run(self):
-        cache_name = os.path.join(tempfile.gettempdir(), 'requests_cache')
-        sess = requests_cache.core.CachedSession(cache_name)
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
-        sess.mount('http://', adapter)
+        cache.sess.mount('http://', adapter)
 
         filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(self=self)
         rows, offset = self.rows, 0
@@ -58,24 +57,21 @@ class CrossrefHarvestChunk(CrossrefTask):
         with self.output().open('w') as output:
             while True:
                 params = {"rows": rows, "offset": offset, "filter": filter}
-                url = "http://api.crossref.org/works?%s" % urllib.urlencode(params)
-                r = sess.get(url)
-                if r.status_code == 200:
-                    try:
-                        content = json.loads(r.text)
-                    except ValueError as err:
-                        self.logger.debug(err)
-                        self.logger.debug(r.text)
-                        raise
-                    items = content["message"]["items"]
-                    self.logger.debug("%s: %s" % (url, len(items)))
-                    if len(items) == 0:
-                        break
-                    output.write(r.text)
-                    output.write("\n")
-                    offset += rows
-                else:
-                    raise RuntimeError("%s on %s" % (r.status_code, url))
+                url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
+                body = cache.get(url)
+                try:
+                    content = json.loads(body)
+                except ValueError as err:
+                    self.logger.debug(err)
+                    self.logger.debug(body)
+                    raise
+                items = content["message"]["items"]
+                self.logger.debug("%s: %s" % (url, len(items)))
+                if len(items) == 0:
+                    break
+                output.write(body)
+                output.write("\n")
+                offset += rows
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))

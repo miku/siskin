@@ -11,9 +11,12 @@ from gluish.common import IndexIdList, IndexFieldList
 from luigi.task import Register, flatten
 import cStringIO as StringIO
 from siskin import __version__
+import errno
+import hashlib
 import json
 import os
 import pprint
+import requests
 import tempfile
 
 MAN_HEADER = r"""
@@ -68,3 +71,42 @@ def get_task_import_cache():
             task_import_cache = json.load(handle)
 
     return task_import_cache, path
+
+class URLCache(object):
+    """ A simple URL *content* cache. Stores everything on the filesystem.
+    Content is first written to a temporary file and then renamed.
+    With concurrent requests for the same URL, the last one wins.
+    Raises exception on any statuscode >= 400. """
+
+    def __init__(self, directory=None):
+        self.directory = directory or tempfile.gettempdir()
+        self.sess = requests.session()
+
+    def get_cache_file(self, url):
+        digest = hashlib.sha1(url).hexdigest()
+        d0, d1, d2 = digest[:2], digest[2:4], digest[4:6]
+        path = os.path.join(self.directory, d0, d1, d2)
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+            except OSError as e:
+                if e.errno == errno.EEXIST:
+                    pass
+                else:
+                    raise
+        return os.path.join(path, digest)
+
+    def is_cached(self, url):
+        return os.path.exists(self.get_cache_file(url))
+
+    def get(self, url):
+        if not self.is_cached(url):
+            r = self.sess.get(url)
+            if r.status_code >= 400:
+                raise RuntimeError('%s on %s' % (r.status_code, url))
+            with tempfile.NamedTemporaryFile(delete=False) as output:
+                output.write(r.text)
+            os.rename(output.name, self.get_cache_file(url))
+
+        with open(self.get_cache_file(url)) as handle:
+            return handle.read()
