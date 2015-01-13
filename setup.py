@@ -40,7 +40,6 @@ install_requires = [
     'python-dateutil==2.2',
     'pytz==2014.4',
     'requests==2.5.1',
-    'requests-cache==0.4.8',
     'simplejson==3.6.0',
     'six==1.9.0',
     'sqlitebck==1.2.1',
