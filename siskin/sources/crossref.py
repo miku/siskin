@@ -157,8 +157,8 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
         return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
 
     def run(self):
-        shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
-        shellout("esbulk -index {index} {input}", index=self.index, input=self.input().path)
+        shellout("curl -XDELETE {host}:{port}/{index} && sleep 5", host=self.es_host, port=self.es_port, index=self.index)
+        shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().path)
         with self.output().open('w'):
             pass
 
