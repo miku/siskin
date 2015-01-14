@@ -172,7 +172,7 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
         return luigi.LocalTarget(path=self.path())
 
 class CrossrefISSNList(CrossrefTask):
-    """ Just export a list of ISSNs. """
+    """ Just export a list of ISSNs. (real 69m41.247s) """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
