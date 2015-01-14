@@ -10,6 +10,7 @@ from thousands of scholarly and professional publishers around the globe.
 """
 
 from gluish.common import ElasticsearchMixin
+from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
@@ -164,3 +165,20 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
+class CrossrefISSNList(CrossrefTask):
+    """ Just export a list of ISSNs. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    index = luigi.Parameter(default='crossref')
+
+    def requires(self):
+        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
+
+    def run(self):
+        output = shellout("""cat "{input}" | jq '.ISSN[]' 2> /dev/null | LANG=C sort | LANG=C uniq > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
