@@ -150,10 +150,11 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date)
+        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
 
     def run(self):
         shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
