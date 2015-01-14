@@ -172,18 +172,19 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
         return luigi.LocalTarget(path=self.path())
 
 class CrossrefISSNList(CrossrefTask):
-    """ Just export a list of ISSNs. (real 69m41.247s) """
+    """ Just export a list of ISSNs. (real 20m17.534s) """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefIndex(begin=self.begin, date=self.date, filter=self.filter)
 
     @timed
     def run(self):
-        output = shellout("""cat "{input}" | jq '.ISSN[]' 2> /dev/null | LANG=C sort | LANG=C uniq > {output}""", input=self.input().path)
+        output = shellout("""estab -indices {index} -f "ISSN" | LANG=C grep -v NOT_AVAILABLE | LANG=C sort | LANG=C uniq > {output}""",
+                          index=self.index, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
