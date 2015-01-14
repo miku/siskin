@@ -41,7 +41,7 @@ class CrossrefHarvestChunk(CrossrefTask):
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
-    filter = luigi.Parameter(default='index', description='index, deposit, update')
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     max_retries = luigi.IntParameter(default=10, significant=False)
@@ -82,7 +82,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter()
-    filter = luigi.Parameter(default='index', description='index, deposit, update')
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
@@ -101,7 +101,7 @@ class CrossrefCombine(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='index', description='index, deposit, update')
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
@@ -123,7 +123,7 @@ class CrossrefItems(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='index', description='index, deposit, update')
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
@@ -150,7 +150,7 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='index', description='index, deposit, update')
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
