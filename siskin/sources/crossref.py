@@ -9,6 +9,7 @@ and other content items (books chapters, data, theses, technical reports)
 from thousands of scholarly and professional publishers around the globe.
 """
 
+from gluish.benchmark import timed
 from gluish.common import ElasticsearchMixin
 from gluish.format import TSV
 from gluish.intervals import monthly
@@ -47,6 +48,7 @@ class CrossrefHarvestChunk(CrossrefTask):
 
     max_retries = luigi.IntParameter(default=10, significant=False)
 
+    @timed
     def run(self):
         cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
@@ -108,6 +110,7 @@ class CrossrefCombine(CrossrefTask):
     def requires(self):
         return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
 
+    @timed
     def run(self):
         _, combined = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
@@ -130,6 +133,7 @@ class CrossrefItems(CrossrefTask):
     def requires(self):
         return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
 
+    @timed
     def run(self):
         with self.output().open('w') as output:
             for target in self.input():
@@ -157,6 +161,7 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     def requires(self):
         return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
 
+    @timed
     def run(self):
         shellout("curl -XDELETE {host}:{port}/{index} && sleep 5", host=self.es_host, port=self.es_port, index=self.index)
         shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().path)
@@ -176,6 +181,7 @@ class CrossrefISSNList(CrossrefTask):
     def requires(self):
         return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
 
+    @timed
     def run(self):
         output = shellout("""cat "{input}" | jq '.ISSN[]' 2> /dev/null | LANG=C sort | LANG=C uniq > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
