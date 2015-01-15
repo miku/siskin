@@ -212,7 +212,7 @@ class CrossrefContainerList(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class CrossrefSolrized(CrossrefTask):
+class CrossrefSolrizedJson(CrossrefTask):
     """ A first stab at JSON to JSON transformation. """
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
@@ -226,6 +226,25 @@ class CrossrefSolrized(CrossrefTask):
     @timed
     def run(self):
         output = shellout("ottily -s {script} {input} > {output}", input=self.input().path, script=self.assets('crossref.js'))
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class CrossrefSolrizedCSV(CrossrefTask):
+    """ A first stab at JSON to CSV transformation. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    index = luigi.Parameter(default='crossref')
+
+    def requires(self):
+        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
+
+    @timed
+    def run(self):
+        output = shellout("ottily -s {script} {input} > {output}", input=self.input().path, script=self.assets('crossref-csv.js'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
