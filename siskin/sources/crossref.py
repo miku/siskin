@@ -171,8 +171,31 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class CrossrefISSNList(CrossrefTask):
-    """ Just export a list of ISSNs. (real 19m39.194s) """
+class CrossrefAttributeList(CrossrefTask):
+    """ Just export a list of a single attribute. Multiple values are written one per line.
+    Results are sorted and deduplicated. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    index = luigi.Parameter(default='crossref')
+    attribute = luigi.Parameter(default='ISSN', description='URL, DOI, type, indexed.datestamp, publisher')
+
+    def requires(self):
+        return CrossrefIndex(begin=self.begin, date=self.date, filter=self.filter)
+
+    @timed
+    def run(self):
+        output = shellout("""estab -indices {index} -f "{attribute}" -1 | LANG=C grep -v NOT_AVAILABLE | LANG=C sort | LANG=C uniq > {output}""",
+                          attribute=self.attribute, index=self.index, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefContainerList(CrossrefTask):
+    """ Output (DOI, title, container-title) list. """
+
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
@@ -183,8 +206,7 @@ class CrossrefISSNList(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("""estab -indices {index} -f "ISSN" -1 | LANG=C grep -v NOT_AVAILABLE | LANG=C sort | LANG=C uniq > {output}""",
-                          index=self.index, input=self.input().path)
+        output = shellout("""estab -indices {index} -f "DOI title container-title" > {output}""", index=self.index, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
