@@ -189,3 +189,22 @@ class CrossrefISSNList(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefSolrized(CrossrefTask):
+    """ A first stab at JSON to JSON transformation. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    index = luigi.Parameter(default='crossref')
+
+    def requires(self):
+        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
+
+    @timed
+    def run(self):
+        output = shellout("ottily -s {script} {input} > {output}", input=self.input().path, script=self.assets('crossref.js'))
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
