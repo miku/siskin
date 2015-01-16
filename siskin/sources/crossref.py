@@ -212,40 +212,51 @@ class CrossrefContainerList(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class CrossrefSolrizedJson(CrossrefTask):
-    """ A first stab at JSON to JSON transformation. """
+class CrossrefElasticJson(CrossrefTask):
+    """ A first stab at JSON to JSON transformation for Elasticsearch. """
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
+    limit = luigi.IntParameter(default=0)
 
     def requires(self):
         return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
 
     @timed
     def run(self):
-        output = shellout("ottily -s {script} {input} > {output}", input=self.input().path, script=self.assets('crossref.js'))
+        output = shellout("ottily -l {limit} -s {script} {input} > {output}",
+                          input=self.input().path, script=self.assets('crossref.es.js'), limit=self.limit)
         luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class CrossrefSolrizedCSV(CrossrefTask):
-    """ A first stab at JSON to CSV transformation. """
+class CrossrefSolrJson(CrossrefTask):
+    """ A first stab at JSON to JSON transformation for Solr. """
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
+    limit = luigi.IntParameter(default=0)
 
     def requires(self):
         return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
 
     @timed
     def run(self):
-        output = shellout("ottily -s {script} {input} > {output}", input=self.input().path, script=self.assets('crossref-csv.js'))
-        luigi.File(output).move(self.output().path)
+        output = shellout("ottily -l {limit} -s {script} {input} > {output}",
+                          input=self.input().path, script=self.assets('crossref.solr.js'), limit=self.limit)
+        with self.output().open('w') as out:
+            out.write("[")
+            with open(output) as handle:
+                for i, line in enumerate(handle):
+                    if i > 0:
+                        out.write(",")
+                    out.write(line.strip())
+            out.write("]\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='solr.json'))
