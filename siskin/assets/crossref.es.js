@@ -96,7 +96,14 @@ if ("author" in obj) {
 }
 doc["author2"] = authors;
 doc["topic"] = obj["subject"];
-doc["publishDateSort"] = obj["issued"]["date-parts"][0][0];
+
+// address https://issues.apache.org/jira/browse/SOLR-6626
+var pds = obj["issued"]["date-parts"][0][0];
+if (pds != null) {
+	doc["publishDateSort"] = obj["issued"]["date-parts"][0][0];
+} else {
+	doc["publishDateSort"] = "";
+}
 
 var dates = [];
 for (var i = 0; i < obj["issued"]["date-parts"].length; i++) {
