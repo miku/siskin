@@ -231,7 +231,7 @@ class CrossrefElasticJson(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefSolrJson(CrossrefTask):
     """ A first stab at JSON to JSON transformation for Solr. """
