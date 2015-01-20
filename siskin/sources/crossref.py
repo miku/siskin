@@ -249,14 +249,28 @@ class CrossrefSolrJson(CrossrefTask):
     def run(self):
         output = shellout("ottily -l {limit} -s {script} {input} > {output}",
                           input=self.input().path, script=self.assets('crossref.solr.js'), limit=self.limit)
-        with self.output().open('w') as out:
-            out.write("[")
-            with open(output) as handle:
-                for i, line in enumerate(handle):
-                    if i > 0:
-                        out.write(",")
-                    out.write(line.strip())
-            out.write("]\n")
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='solr.json'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefSolrIndexingPerformance(CrossrefTask):
+    """ Generate an indexing performance profile for Crossref and SOLR. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    limit = luigi.IntParameter(default=1000000)
+    host = luigi.Parameter(default='localhost')
+    port = luigi.IntParameter(default=8983)
+
+    def requires(self):
+        return CrossrefSolrJson(begin=self.begin, date=self.date, filter=self.filter, limit=self.limit)
+
+    @timed
+    def run(self):
+        output = shellout("solrbulk-tune -limit {limit} -host {host} -port {port} -verbose {input} > {output}",
+                          limit=self.limit, host=self.host, port=self.port, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
