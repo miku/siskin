@@ -119,4 +119,17 @@ if ("subtitle" in obj && obj["subtitle"].length > 0) {
     doc["title"] = obj["title"][0];
 }
 
+// add catch-all field
+var fields = [];
+if (doc["author2"] != null) {
+    fields = doc["author2"];
+}
+if (doc["topic"] != null) {
+    fields = fields.concat(doc["topic"]);
+}
+var other = [doc["title"], doc["publisher"], doc["hierarchy_parent_title"]];
+fields = fields.concat(other);
+
+doc["allfields"] = fields.join(" ")
+
 output = JSON.stringify(doc);
