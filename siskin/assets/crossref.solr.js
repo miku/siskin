@@ -72,30 +72,40 @@ var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 var obj = JSON.parse(input);
 var doc = {}
 
+// renamed fields
 doc["id"] = "ai049" + Base64.encode(obj["URL"]);
 doc["source_id"] = "049";
 doc["url"] = obj["URL"];
 doc["record_id"] = obj["DOI"];
 doc["publisher"] = obj["publisher"];
+doc["issn"] = obj["ISSN"];
+
+// TODO: find or create suitable index fields
 // doc["journalVolume"] = obj["volume"];
 // doc["journalIssue"] = obj["issue"];
 // doc["journalPage"] = obj["page"];
 
-if (obj["type"] == "journal-article") {
+// only one type for now
+if ("type" in obj && obj["type"] == "journal-article") {
     doc["format"] = "ElectronicArticle";
 }
 
+// assume only one container-title
 if ("container-title" in obj) {
     doc["hierarchy_parent_title"] = obj["container-title"][0];
 }
 
+// all authors go into "author2" for now
 var authors = [];
 if ("author" in obj) {
     for (var i = 0; i < obj["author"].length; i++) {
         authors.push(obj["author"][i]["family"] + ", " + obj["author"][i]["given"]);
     }
 }
+
 doc["author2"] = authors;
+
+// topic is an array
 doc["topic"] = obj["subject"];
 
 // address https://issues.apache.org/jira/browse/SOLR-6626
@@ -106,13 +116,14 @@ if (pds != null) {
     doc["publishDateSort"] = "";
 }
 
+// collect dates
 var dates = [];
 for (var i = 0; i < obj["issued"]["date-parts"].length; i++) {
     dates.push(obj["issued"]["date-parts"][i].join(", "));
 }
 doc["publishDate"] = dates;
 
-doc["issn"] = obj["ISSN"];
+// title and subtitle
 if ("subtitle" in obj && obj["subtitle"].length > 0) {
     doc["title"] = obj["title"][0] + " : " + obj["subtitle"][0];
 } else {
@@ -121,15 +132,23 @@ if ("subtitle" in obj && obj["subtitle"].length > 0) {
 
 // add catch-all field
 var fields = [];
-if (doc["author2"] != null) {
-    fields = doc["author2"];
-}
-if (doc["topic"] != null) {
+fields = fields.concat(doc["author2"]);
+if ("topic" in doc) {
     fields = fields.concat(doc["topic"]);
 }
-var other = [doc["title"], doc["publisher"], doc["hierarchy_parent_title"]];
+if ("issn" in doc) {
+    fields = fields.concat(doc["issn"]);
+}
+var other = [
+    doc["title"],
+    doc["publisher"],
+    doc["hierarchy_parent_title"],
+    doc["record_id"],
+    doc["publishDateSort"]
+];
 fields = fields.concat(other);
 
 doc["allfields"] = fields.join(" ")
 
+// serialize
 output = JSON.stringify(doc);
