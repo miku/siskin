@@ -274,3 +274,32 @@ class CrossrefSolrIndexingPerformance(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefSolrIndex(CrossrefTask):
+    """ Index into solr. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    limit = luigi.IntParameter(default=0)
+
+    w = luigi.IntParameter(default=8, description='solrbulk worker', significant=False)
+    size = luigi.IntParameter(default=10000, description='solrbulk batch size', significant=False)
+
+    host = luigi.Parameter(default='localhost')
+    port = luigi.IntParameter(default=8983)
+
+    def requires(self):
+        return CrossrefSolrJson(begin=self.begin, date=self.date, filter=self.filter, limit=self.limit)
+
+    @timed
+    def run(self):
+        output = shellout("solrbulk -host {host} -port {port} -reset",
+                          host=self.host, port=self.port, input=self.input().path)
+        output = shellout("solrbulk -host {host} -port {port} -w {w} -size {size} {input}",
+                          host=self.host, port=self.port, input=self.input().path)
+        with self.output().open('w'):
+            pass
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
