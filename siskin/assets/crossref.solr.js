@@ -129,6 +129,8 @@ if ("subtitle" in obj && obj["subtitle"].length > 0) {
 } else {
     doc["title"] = obj["title"][0];
 }
+doc["title_full"] = (obj["title"].join(" ") + obj["subtitle"].join(" ")).trim()
+doc["title_short"] = obj["title"][0]
 
 // add catch-all field
 var fields = [];
