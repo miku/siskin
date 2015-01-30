@@ -48,7 +48,7 @@ if sys.version_info < (2, 7):
     install_requires.append('importlib==1.0.2')
 
 setup(name='siskin',
-      version='0.0.91',
+      version='0.0.93',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
