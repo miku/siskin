@@ -39,7 +39,7 @@ class ArxivHarvestChunk(OAIHarvestChunk, ArxivTask):
     end = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="http://export.arxiv.org/oai2", significant=False)
     prefix = luigi.Parameter(default="oai_dc", significant=False)
-    delay = luigi.IntParameter(default=20)
+    delay = luigi.IntParameter(default=60)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
