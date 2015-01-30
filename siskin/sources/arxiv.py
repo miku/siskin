@@ -18,7 +18,7 @@ From: https://groups.google.com/forum/#!topic/arxiv-api/aOacIt6KD2E
 
 from gluish.benchmark import timed
 from gluish.common import OAIHarvestChunk
-from gluish.interval import monthly
+from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout, date_range
 from siskin.task import DefaultTask
