@@ -67,6 +67,7 @@ import datetime
 import difflib
 import elasticsearch
 import glob
+import json
 import luigi
 import operator
 import os
