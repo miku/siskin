@@ -71,7 +71,6 @@ import json
 import luigi
 import operator
 import os
-import pandas as pd
 import pymarc
 import re
 import shelve
@@ -1430,9 +1429,8 @@ class OpacDisplayFlag(BSZTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class SnapshotWithCache(BSZTask):
-    """
-    Snapshot with ODF processed.
-    Only the visible ones remain (ODF != 1).
+    """ More lightweight version. A bit slower (about 13%).
+        Snapshot with ODF processed. Only the visible ones remain (ODF != 1).
     """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
@@ -1444,20 +1442,18 @@ class SnapshotWithCache(BSZTask):
 
     @timed
     def run(self):
-        with self.input().get('snapshot').open() as handle:
-            snapshot = pd.read_csv(handle, sep='\t',
-                                   names=('ppn', 'epn', 'date', 'sigel'),
-                                   dtype={'ppn': pd.np.str, 'epn': pd.np.str})
+        ignorelist = set()
         with self.input().get('odf').open() as handle:
-            odflist = pd.read_csv(handle, sep='\t',
-                                  names=('ppn', 'odf', 'comment'),
-                                  dtype={'ppn': pd.np.str, 'odf': pd.np.str})
+            for row in handle.iter_tsv(cols=('ppn', 'odf', 'comment')):
+                if row.odf == "1":
+                    ignorelist.add(row.ppn)
 
-        merged = pd.merge(snapshot, odflist, how='left')
-        active = merged[merged.odf == "0"]
         with self.output().open('w') as output:
-            active.to_csv(output, columns=('ppn', 'epn', 'date', 'odf', 'comment'),
-                          sep='\t', index=False, header=False)
+            with self.input().get('snapshot').open() as handle:
+                for row in handle.iter_tsv(cols=('ppn', 'epn', 'date', 'sigel')):
+                    if row.ppn in ignorelist:
+                        continue
+                    output.write_tsv(row.ppn, row.epn, row.date, '0', 'OK')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
