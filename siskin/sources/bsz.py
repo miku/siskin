@@ -75,7 +75,6 @@ import pandas as pd
 import pymarc
 import re
 import shelve
-import simplejson as json
 import string
 import sys
 import tarfile
