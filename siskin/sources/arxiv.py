@@ -33,7 +33,7 @@ class ArxivTask(DefaultTask):
         return monthly(date=self.date)
 
 class ArxivHarvestChunk(OAIHarvestChunk, ArxivTask):
-    """ Harvest all files in chunks. """
+    """ Harvest a chunk. """
 
     begin = luigi.DateParameter(default=datetime.date.today())
     end = ClosestDateParameter(default=datetime.date.today())
@@ -45,12 +45,7 @@ class ArxivHarvestChunk(OAIHarvestChunk, ArxivTask):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
 class ArxivHarvest(luigi.WrapperTask, ArxivTask):
-    """ Harvest BVB, cut all dates to the first of month. Example:
-    2013-05-12 .. 2013-09-11 would be translated to
-    2013-05-01 .. 2013-09-01
-
-    Note: About 10G in total?
-    """
+    """ Harvest arxiv. """
     begin = luigi.DateParameter(default=datetime.date(2007, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="http://export.arxiv.org/oai2", significant=False)
