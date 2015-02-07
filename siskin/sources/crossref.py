@@ -150,6 +150,24 @@ class CrossrefItems(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class CrossrefUniqItems(CrossrefTask):
+    """ Raw deduplication of crossref items. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    rows = luigi.IntParameter(default=1000, significant=False)
+
+    def requires(self):
+        return CrossrefItems(begin=self.begin, date=self.date(), rows=self.rows, filter=self.filter)
+
+    @timed
+    def run(self):
+        output = shellout("sort {input} | uniq > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """ Vanilla records. """
 
@@ -294,12 +312,78 @@ class CrossrefSolrIndex(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("solrbulk -host {host} -port {port} -reset",
-                          host=self.host, port=self.port, input=self.input().path)
-        output = shellout("solrbulk -host {host} -port {port} -w {w} -size {size} {input}",
-                          host=self.host, port=self.port, input=self.input().path)
+        output = shellout("solrbulk -host {host} -port {port} -reset", host=self.host, port=self.port, input=self.input().path)
+        output = shellout("solrbulk -host {host} -port {port} -w {w} -size {size} {input}", host=self.host, port=self.port, input=self.input().path)
         with self.output().open('w'):
             pass
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefHarvestGeneric(CrossrefTask):
+    """ Basic harvest of members, funders, etc. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='members')
+
+    rows = luigi.IntParameter(default=1000, significant=False)
+    max_retries = luigi.IntParameter(default=10, significant=False)
+
+    @timed
+    def run(self):
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
+        cache.sess.mount('http://', adapter)
+
+        rows, offset = self.rows, 0
+
+        with self.output().open('w') as output:
+            while True:
+                params = {"rows": rows, "offset": offset}
+                url = 'http://api.crossref.org/%s?%s' % (self.kind, urllib.urlencode(params))
+                body = cache.get(url)
+                try:
+                    content = json.loads(body)
+                except ValueError as err:
+                    self.logger.debug(err)
+                    self.logger.debug(body)
+                    raise
+                items = content["message"]["items"]
+                self.logger.debug("%s: %s" % (url, len(items)))
+                if len(items) == 0:
+                    break
+                output.write(body)
+                output.write("\n")
+                offset += rows
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefGenericItems(CrossrefTask):
+    """
+    Flatten and deduplicate. Stub.
+    """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='members')
+
+    rows = luigi.IntParameter(default=1000, significant=False)
+
+    def requires(self):
+        return CrossrefHarvestGeneric(begin=self.begin, date=self.closest(), rows=self.rows)
+
+    @timed
+    def run(self):
+        with self.output().open('w') as output:
+            with self.input().open() as handle:
+                for line in handle:
+                    content = json.loads(line)
+                    if not content.get("status") == "ok":
+                        raise RuntimeError("invalid response status")
+                    items = content["message"]["items"]
+                    for item in items:
+                        output.write(json.dumps(item))
+                        output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
