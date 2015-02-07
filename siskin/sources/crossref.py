@@ -158,11 +158,11 @@ class CrossrefUniqItems(CrossrefTask):
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date(), rows=self.rows, filter=self.filter)
+        return CrossrefItems(begin=self.begin, date=self.date, rows=self.rows, filter=self.filter)
 
     @timed
     def run(self):
-        output = shellout("sort {input} | uniq > {output}", input=self.input().path)
+        output = shellout("TMPDIR={tmpdir} sort {input} | uniq > {output}", tmpdir=tempfile.gettempdir(), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
