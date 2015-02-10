@@ -25,7 +25,7 @@ install_requires = [
     'gspread==0.2.1',
     'jsonpath-rw==1.3.0',
     'logilab-common==0.61.0',
-    'luigi==1.0.20',
+    'luigi==1.0.23',
     'marcx==0.1.17',
     'nose==1.3.3',
     'ply==3.4',
