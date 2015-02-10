@@ -21,7 +21,7 @@ install_requires = [
     'colorama==0.3.3',
     'decorator==3.4.0',
     'elasticsearch==1.3.0',
-    'gluish==0.1.70',
+    'gluish==0.1.71',
     'gspread==0.2.1',
     'jsonpath-rw==1.3.0',
     'logilab-common==0.61.0',
