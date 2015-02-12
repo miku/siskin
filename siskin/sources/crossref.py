@@ -18,6 +18,7 @@ from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
 import datetime
+import elasticsearch
 import json
 import luigi
 import os
@@ -177,11 +178,22 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
 
     @timed
     def run(self):
-        shellout("curl -XDELETE {host}:{port}/{index} && sleep 5", host=self.es_host, port=self.es_port, index=self.index)
+        es = elasticsearch.Elasticsearch()
+        shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
+        mapping = {
+            'default': {
+                'date_detection': False,
+                '_id': {
+                    'path': 'URL'
+                },
+            }
+        }
+        es.indices.create(index=self.index)
+        es.indices.put_mapping(index='bsz', doc_type='default', body=mapping)
         shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().path)
         with self.output().open('w'):
             pass
@@ -230,68 +242,22 @@ class CrossrefContainerList(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class CrossrefElasticJson(CrossrefTask):
-    """ A first stab at JSON to JSON transformation for Elasticsearch. """
-
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    index = luigi.Parameter(default='crossref')
-    limit = luigi.IntParameter(default=0)
-
-    def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
-
-    @timed
-    def run(self):
-        output = shellout("ottily -l {limit} -s {script} {input} > {output}",
-                          input=self.input().path, script=self.assets('crossref.es.js'), limit=self.limit)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 class CrossrefSolrJson(CrossrefTask):
     """ A first stab at JSON to JSON transformation for Solr. """
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    index = luigi.Parameter(default='crossref')
-    limit = luigi.IntParameter(default=0)
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
 
     @timed
     def run(self):
-        output = shellout("ottily -l {limit} -s {script} {input} > {output}",
-                          input=self.input().path, script=self.assets('crossref.solr.js'), limit=self.limit)
-        luigi.File(output).move(self.output().path)
+        raise NotImplementedError("Use span manually for now. Crossref input: %s" % self.input().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class CrossrefSolrIndexingPerformance(CrossrefTask):
-    """ Generate an indexing performance profile for Crossref and SOLR. """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    limit = luigi.IntParameter(default=1000000)
-    host = luigi.Parameter(default='localhost')
-    port = luigi.IntParameter(default=8983)
-
-    def requires(self):
-        return CrossrefSolrJson(begin=self.begin, date=self.date, filter=self.filter, limit=self.limit)
-
-    @timed
-    def run(self):
-        output = shellout("solrbulk-tune -limit {limit} -host {host} -port {port} -verbose {input} > {output}",
-                          limit=self.limit, host=self.host, port=self.port, input=self.input().path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class CrossrefSolrIndex(CrossrefTask):
     """ Index into solr. """
