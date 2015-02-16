@@ -138,6 +138,9 @@ class CrossrefItems(CrossrefTask):
 
     @timed
     def run(self):
+        """ Drop seen urls from stream. If memory gets out of hand with a set()
+        consider bloom filter? """
+        seen = set()
         with self.output().open('w') as output:
             for target in self.input():
                 with target.open() as handle:
@@ -147,8 +150,13 @@ class CrossrefItems(CrossrefTask):
                             raise RuntimeError("invalid response status")
                         items = content["message"]["items"]
                         for item in items:
+                            url = item.get("URL")
+                            if url in seen:
+                                continue
                             output.write(json.dumps(item))
                             output.write("\n")
+                            if not url is None:
+                                seen.add(url)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
