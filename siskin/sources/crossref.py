@@ -82,7 +82,9 @@ class CrossrefHarvestChunk(CrossrefTask):
 
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
-    Harvest everything in incremental steps.
+    Harvest everything in incremental steps. Yield the targets sorted by date,
+    the latest chunks first. This way we can simply drop outdated records in later
+    steps.
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter()
@@ -91,8 +93,8 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
 
     def requires(self):
         dates = date_range(self.begin, self.end, 1, 'months')
-        for i, _ in enumerate(dates[:-1]):
-            yield CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
+        tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter) for i, _ in enumerate(dates[:-1])]
+        return reversed(tasks)
 
     def output(self):
         return self.input()
