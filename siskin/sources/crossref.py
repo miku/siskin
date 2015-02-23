@@ -45,8 +45,8 @@ class CrossrefHarvestChunk(CrossrefTask):
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    rows = luigi.IntParameter(default=1000, significant=False)
 
+    rows = luigi.IntParameter(default=1000, significant=False)
     max_retries = luigi.IntParameter(default=10, significant=False)
 
     @timed
@@ -66,8 +66,7 @@ class CrossrefHarvestChunk(CrossrefTask):
                 try:
                     content = json.loads(body)
                 except ValueError as err:
-                    self.logger.debug(err)
-                    self.logger.debug(body)
+		    self.logger.debug("%s: %s" % (err, body))
                     raise
                 items = content["message"]["items"]
                 self.logger.debug("%s: %s" % (url, len(items)))
@@ -82,46 +81,24 @@ class CrossrefHarvestChunk(CrossrefTask):
 
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
-    Harvest everything in incremental steps. Yield the targets sorted by date,
+    Harvest everything in incremental (1 month) steps. Yield the targets sorted by date,
     the latest chunks first. This way we can simply drop outdated records in later
     steps.
     """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    end = luigi.DateParameter()
+    end = luigi.DateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
         dates = date_range(self.begin, self.end, 1, 'months')
-        tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter) for i, _ in enumerate(dates[:-1])]
+	tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
+		 for i, _ in enumerate(dates[:-1])]
         return reversed(tasks)
 
     def output(self):
         return self.input()
-
-class CrossrefCombine(CrossrefTask):
-    """
-    Combine all harvested files into a single LDJ file.
-    Might contain dups, since `from-index-date` and `until-index-date` are
-    both inclusive.
-    """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    rows = luigi.IntParameter(default=1000, significant=False)
-
-    def requires(self):
-        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
-
-    @timed
-    def run(self):
-        _, combined = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=combined)
-        luigi.File(combined).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefItems(CrossrefTask):
     """
@@ -145,7 +122,7 @@ class CrossrefItems(CrossrefTask):
                     for line in handle:
                         content = json.loads(line)
                         if not content.get("status") == "ok":
-                            raise RuntimeError("invalid response status")
+			    raise RuntimeError("invalid response status: %s" % content)
                         items = content["message"]["items"]
                         for item in items:
                             output.write(json.dumps(item))
