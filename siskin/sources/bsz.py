@@ -57,7 +57,7 @@ from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ILNParameter
 from gluish.path import copyregions
-from gluish.utils import shellout, memoize, random_string, nwise
+from gluish.utils import shellout, memoize, random_string, nwise, date_range
 from luigi import date_interval
 from siskin.configuration import Config
 from siskin.sources.gnd import GNDRelations, GNDDatabase
@@ -792,6 +792,7 @@ class BSZDumpTask(BSZTask):
 class LiberoCacheDump(BSZDumpTask):
     """
     Dump the liberocache database locally for faster access (per ILN).
+    Cleanup existing archives before starting a new dump.
     """
     begin = luigi.DateParameter(default=BSZTask.SONDERABZUG)
     end = luigi.DateParameter(default=datetime.date.today())
@@ -799,6 +800,17 @@ class LiberoCacheDump(BSZDumpTask):
 
     @timed
     def run(self):
+        self.logger.debug("Purging previous dumps...")
+        dates = date_range(self.begin, self.end - datetime.timedelta(days=1), 1, 'days')
+        for end in dates:
+            task = LiberoCacheDump(begin=self.begin, end=end, iln=self.iln)
+            try:
+                os.remove(task.output().path)
+                self.logger.debug("Removed %s" % task.output().path)
+            except OSError as err:
+                if not err.errno == 2:
+                    raise
+
         db_name = self.mappings().get('iln_libero_id').get(self.iln)
         if db_name is None:
             raise RuntimeError("no mapping found from ILN to LIBERO-ID")
