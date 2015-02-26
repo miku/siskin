@@ -44,4 +44,4 @@ class DegruyterPaths(DegruyterTask):
         self.input().move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
