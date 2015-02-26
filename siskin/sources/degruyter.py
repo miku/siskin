@@ -22,6 +22,7 @@ from siskin.configuration import Config
 from siskin.task import DefaultTask
 import luigi
 import tempfile
+import shutil
 
 config = Config.instance()
 
