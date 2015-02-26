@@ -16,7 +16,7 @@ ftp-pattern = some*glob*pattern.zip
 from gluish.benchmark import timed
 from gluish.common import FTPMirror
 from gluish.format import TSV
-from gluish.intervals import hourly
+from gluish.intervals import daily
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import luigi
@@ -28,7 +28,7 @@ class DegruyterTask(DefaultTask):
 
 class DegruyterPaths(DegruyterTask):
     """ A list of Degruyter ile paths (via FTP). """
-    indicator = luigi.Parameter(default=hourly(fmt='%s'))
+    indicator = luigi.Parameter(default=daily(fmt='%s'))
 
     def requires(self):
         host = config.get('degruyter', 'ftp-host')
