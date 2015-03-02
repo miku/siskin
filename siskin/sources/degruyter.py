@@ -29,7 +29,7 @@ import tempfile
 config = Config.instance()
 
 class DegruyterTask(DefaultTask):
-    TAG = 'degryter'
+    TAG = 'degruyter'
 
 class DegruyterPaths(DegruyterTask):
     """ A list of Degruyter ile paths (via FTP). """
