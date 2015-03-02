@@ -66,7 +66,7 @@ class CrossrefHarvestChunk(CrossrefTask):
                 try:
                     content = json.loads(body)
                 except ValueError as err:
-		    self.logger.debug("%s: %s" % (err, body))
+                    self.logger.debug("%s: %s" % (err, body))
                     raise
                 items = content["message"]["items"]
                 self.logger.debug("%s: %s" % (url, len(items)))
@@ -93,8 +93,8 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
 
     def requires(self):
         dates = date_range(self.begin, self.end, 1, 'months')
-	tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
-		 for i, _ in enumerate(dates[:-1])]
+        tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
+                for i, _ in enumerate(dates[:-1])]
         return reversed(tasks)
 
     def output(self):
@@ -122,7 +122,7 @@ class CrossrefItems(CrossrefTask):
                     for line in handle:
                         content = json.loads(line)
                         if not content.get("status") == "ok":
-			    raise RuntimeError("invalid response status: %s" % content)
+                            raise RuntimeError("invalid response status: %s" % content)
                         items = content["message"]["items"]
                         for item in items:
                             output.write(json.dumps(item))
@@ -148,6 +148,40 @@ class CrossrefUniqItems(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefISSNList(CrossrefTask):
+    """ Just dump a list of all ISSN values. With dups and all. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+
+    def requires(self):
+        return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
+
+    @timed
+    def run(self):
+        output = shellout("jq -r '.ISSN[]' {input} 2> /dev/null > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefUniqISSNList(CrossrefTask):
+    """ Just dump a list of all ISSN values. Sorted and uniq. """
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+
+    def requires(self):
+        return CrossrefISSNList(begin=self.begin, date=self.date, filter=self.filter)
+
+    @timed
+    def run(self):
+        output = shellout("sort -u {input} > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """ Vanilla records. """
@@ -333,3 +367,60 @@ class CrossrefGenericItems(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefCoverage(CrossrefTask):
+    """ Determine coverage of ISSNs. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    rows = luigi.IntParameter(default=1000, significant=False)
+
+    hfile = luigi.Parameter(description='path to a holdings file')
+
+    def requires(self):
+        return CrossrefUniqISSNList(begin=self.begin, date=self.date, filter=self.filter)
+
+    def run(self):
+        """ This contains things, that would better be factored out in separate tasks. """
+        titles = {}
+        output = shellout("span-gh-dump {hfile} > {output}", hfile=self.hfile)
+        with luigi.File(output, format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('issn', 'title')):
+                titles[row.issn] = row.title
+
+        held_issns = set()
+        output = shellout("xmlstarlet sel -t -v '//issn' {hfile} | sort | uniq > {output}", hfile=self.hfile)
+        with luigi.File(output, format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('issn',)):
+                held_issns.add(row.issn)
+
+        crossref_issns = set()
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('issn',)):
+                crossref_issns.add(row.issn)
+
+        covered = held_issns.intersection(crossref_issns)
+        not_in_crossref = held_issns.difference(crossref_issns)
+
+        covered_percentage = (100.0 / len(held_issns)) * len(covered)
+
+        stats = {
+            "in-holdings": len(held_issns),
+            "in-crossref": len(crossref_issns),
+            "covered": len(covered),
+            "covered-percentage": covered_percentage,
+            "not-covered": len(not_in_crossref),
+        }
+
+        with self.output().open('w') as output:
+            for issn in covered:
+                output.write_tsv("COVERED", issn, titles[issn])
+            for issn in not_in_crossref:
+                output.write_tsv("NOT_COVERED", issn, titles[issn])
+
+        # with self.output().open('w') as output:
+        #     output.write(json.dumps(stats))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True, ext='tsv'), format=TSV)
