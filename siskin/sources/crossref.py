@@ -370,16 +370,13 @@ class CrossrefGenericItems(CrossrefTask):
 
 class CrossrefCoverage(CrossrefTask):
     """ Determine coverage of ISSNs. """
-
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    rows = luigi.IntParameter(default=1000, significant=False)
 
-    hfile = luigi.Parameter(description='path to a holdings file')
+    isil = luigi.Parameter()
+    hfile = luigi.Parameter(description='path to a holdings file', significant=False)
 
     def requires(self):
-        return CrossrefUniqISSNList(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefUniqISSNList(date=self.date)
 
     def run(self):
         """ This contains things, that would better be factored out in separate tasks. """
@@ -423,4 +420,4 @@ class CrossrefCoverage(CrossrefTask):
         #     output.write(json.dumps(stats))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext='tsv'), format=TSV)
+        return luigi.LocalTarget(path=self.path(), format=TSV)
