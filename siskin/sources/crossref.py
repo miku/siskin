@@ -369,10 +369,12 @@ class CrossrefGenericItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefCoverage(CrossrefTask):
-    """ Determine coverage of ISSNs. """
+    """ Determine coverage of ISSNs. Coverage means, there is at least one
+    article with a given ISSN in crossref. Not included in the analysis
+    are actual articles and coverage ranges. """
     date = ClosestDateParameter(default=datetime.date.today())
 
-    isil = luigi.Parameter()
+    isil = luigi.Parameter(description='isil, for meaningful file names')
     hfile = luigi.Parameter(description='path to a holdings file', significant=False)
 
     def requires(self):
@@ -381,43 +383,28 @@ class CrossrefCoverage(CrossrefTask):
     def run(self):
         """ This contains things, that would better be factored out in separate tasks. """
         titles = {}
-        output = shellout("span-gh-dump {hfile} > {output}", hfile=self.hfile)
-        with luigi.File(output, format=TSV).open() as handle:
+        with luigi.File(shellout("span-gh-dump {hfile} > {output}", hfile=self.hfile), format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('issn', 'title')):
                 titles[row.issn] = row.title
 
-        held_issns = set()
-        output = shellout("xmlstarlet sel -t -v '//issn' {hfile} | sort | uniq > {output}", hfile=self.hfile)
-        with luigi.File(output, format=TSV).open() as handle:
+        issns_held = set()
+        with luigi.File(shellout("xmlstarlet sel -t -v '//issn' {hfile} | sort | uniq > {output}", hfile=self.hfile), format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('issn',)):
-                held_issns.add(row.issn)
+                issns_held.add(row.issn)
 
-        crossref_issns = set()
+        issns_crossref = set()
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('issn',)):
-                crossref_issns.add(row.issn)
+                issns_crossref.add(row.issn)
 
-        covered = held_issns.intersection(crossref_issns)
-        not_in_crossref = held_issns.difference(crossref_issns)
-
-        covered_percentage = (100.0 / len(held_issns)) * len(covered)
-
-        stats = {
-            "in-holdings": len(held_issns),
-            "in-crossref": len(crossref_issns),
-            "covered": len(covered),
-            "covered-percentage": covered_percentage,
-            "not-covered": len(not_in_crossref),
-        }
+        covered = issns_held.intersection(issns_crossref)
 
         with self.output().open('w') as output:
-            for issn in covered:
-                output.write_tsv("COVERED", issn, titles[issn])
-            for issn in not_in_crossref:
-                output.write_tsv("NOT_COVERED", issn, titles[issn])
-
-        # with self.output().open('w') as output:
-        #     output.write(json.dumps(stats))
+            for issn in issns_held:
+                if issn in covered:
+                    output.write_tsv("COVERED", issn, titles[issn])
+                else:
+                    output.write_tsv("NOT_COVERED", issn, titles[issn])
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
