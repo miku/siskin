@@ -362,20 +362,12 @@ class NEPSnapshot(NEPTask):
 
 class NEPSubjectFilterCodes(NEPTask):
     """
-    Download from a Google Spreadsheet. Values are assumed to be in the
-    **first column** of worksheet #2 (TODO: make this more robust).
+    Take a file from assets and use as
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        gc = gspread.login(config.get('core', 'google-username'),
-                           config.get('core', 'google-password'))
-        doc = gc.open_by_key(config.get('core', 'google-docs-key'))
-        sheet = doc.get_worksheet(2)
-        with self.output().open('w') as output:
-            for code in sheet.col_values(1):
-                if code:
-                    output.write_tsv(code)
+        luigi.File(self.assets("nep_subject_filter_codes.tsv")).copy(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
