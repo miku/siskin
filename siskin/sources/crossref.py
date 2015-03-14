@@ -33,7 +33,7 @@ class CrossrefTask(DefaultTask):
     TAG = 'crossref'
 
     def closest(self):
-        """ Do monthly updates. """
+        """ Update frequency. """
         return monthly(date=self.date)
 
 class CrossrefHarvestChunk(CrossrefTask):
@@ -81,20 +81,28 @@ class CrossrefHarvestChunk(CrossrefTask):
 
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
-    Harvest everything in incremental (1 month) steps. Yield the targets sorted by date,
+    Harvest everything in incremental steps. Yield the targets sorted by date,
     the latest chunks first. This way we can simply drop outdated records in later
     steps.
     """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    update = luigi.Parameter(default='monthly', description='daily, weekly or monthly')
 
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
-        dates = date_range(self.begin, self.end, 1, 'months')
+        if self.update not in ('daily', 'weekly', 'monthly'):
+            raise RuntimeError('update can be daily weekly or monthly')
+        intervals = {
+            'daily': date_range(self.begin, self.end, 1, 'days'),
+            'weeky': date_range(self.begin, self.end, 1, 'weeks'),
+            'monthly': date_range(self.begin, self.end, 1, 'months')
+        }
+        dates = intervals[self.update]
         tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
-                for i, _ in enumerate(dates[:-1])]
+                 for i, _ in enumerate(dates[:-1])]
         return reversed(tasks)
 
     def output(self):
@@ -105,7 +113,7 @@ class CrossrefItems(CrossrefTask):
     Combine all harvested files into a single LDJ file.
     Flatten and deduplicate. Stub.
     """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
@@ -133,7 +141,7 @@ class CrossrefItems(CrossrefTask):
 
 class CrossrefUniqItems(CrossrefTask):
     """ Raw deduplication of crossref items. """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     rows = luigi.IntParameter(default=1000, significant=False)
@@ -151,7 +159,7 @@ class CrossrefUniqItems(CrossrefTask):
 
 class CrossrefISSNList(CrossrefTask):
     """ Just dump a list of all ISSN values. With dups and all. """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
@@ -168,7 +176,7 @@ class CrossrefISSNList(CrossrefTask):
 
 class CrossrefUniqISSNList(CrossrefTask):
     """ Just dump a list of all ISSN values. Sorted and uniq. """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
@@ -186,7 +194,7 @@ class CrossrefUniqISSNList(CrossrefTask):
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """ Vanilla records. """
 
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
@@ -219,7 +227,7 @@ class CrossrefAttributeList(CrossrefTask):
     """ Just export a list of a single attribute. Multiple values are written one per line.
     Results are sorted and deduplicated. """
 
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
@@ -240,7 +248,7 @@ class CrossrefAttributeList(CrossrefTask):
 class CrossrefContainerList(CrossrefTask):
     """ Output (DOI, title, container-title) list. """
 
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
@@ -259,7 +267,7 @@ class CrossrefContainerList(CrossrefTask):
 class CrossrefSolrJson(CrossrefTask):
     """ A first stab at JSON to JSON transformation for Solr. """
 
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
@@ -276,7 +284,7 @@ class CrossrefSolrJson(CrossrefTask):
 class CrossrefSolrIndex(CrossrefTask):
     """ Index into solr. """
 
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     limit = luigi.IntParameter(default=0)
@@ -302,7 +310,7 @@ class CrossrefSolrIndex(CrossrefTask):
 
 class CrossrefHarvestGeneric(CrossrefTask):
     """ Basic harvest of members, funders, etc. """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='members')
 
@@ -343,7 +351,7 @@ class CrossrefGenericItems(CrossrefTask):
     """
     Flatten and deduplicate. Stub.
     """
-    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='members')
 
