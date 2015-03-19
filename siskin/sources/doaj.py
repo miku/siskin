@@ -71,3 +71,20 @@ class DOAJDump(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class DOAJRaw(DOAJTask):
+    """ Strip index information from dump. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    host = luigi.Parameter(default='doaj.org', significant=False)
+    port = luigi.IntParameter(default=80, significant=False)
+    url_prefix = luigi.Parameter(default='query', significant=False)
+
+    def requires(self):
+        return DOAJDump()
+
+    def run(self):
+        output = shellout("jq -M -c '._source' {input} > {output}", input=self.input().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
