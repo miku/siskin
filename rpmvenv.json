@@ -1,0 +1,25 @@
+{
+    "extensions": {
+        "enabled": [
+            "python_venv",
+            "blocks"
+        ]
+    },
+    "core": {
+        "group": "Application/System",
+        "license": "MIT",
+        "name": "siskin",
+        "source": "siskin",
+        "summary": "Various sources and workflows.",
+        "version": "0.0.95"
+    },
+    "python_venv": {
+        "name": "siskin",
+        "path": "/tmp/venv"
+    },
+    "blocks": {
+        "desc": [
+            "Various sources and workflows."
+        ]
+    } 
+}
