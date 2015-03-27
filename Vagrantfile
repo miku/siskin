@@ -4,8 +4,8 @@
 $script = <<SETUP_SCRIPT
 
 # Adjust versions here ...
-ELASTICSEARCH_VERSION=1.3.2
-MARCTOOLS_VERSION=1.5.5
+ELASTICSEARCH_VERSION=1.5.0
+MARCTOOLS_VERSION=1.6.2
 
 # Download Elasticsearch and install
 ES_RPM=elasticsearch-$ELASTICSEARCH_VERSION.noarch.rpm
@@ -53,7 +53,7 @@ yum install -y wget
 yum install -y yaz
 
 # The packaging infrastructure (https://github.com/jordansissel/fpm)
-gem install fpm
+# gem install fpm
 
 # upgrade setuptools
 pip install -U setuptools
