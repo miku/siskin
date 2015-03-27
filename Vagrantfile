@@ -48,6 +48,7 @@ yum install -y ruby-devel
 yum install -y tar
 yum install -y tree
 yum install -y unzip
+yum install -y vim
 yum install -y wget
 yum install -y yaz
 
