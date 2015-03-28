@@ -45,6 +45,7 @@ yum install -y python-pip
 yum install -y rpm-build
 yum install -y rsync
 yum install -y ruby-devel
+yum install -y sqlite-devel
 yum install -y tar
 yum install -y tree
 yum install -y unzip
