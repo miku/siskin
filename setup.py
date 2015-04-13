@@ -26,6 +26,7 @@ install_requires = [
     'jsonpath-rw==1.3.0',
     'logilab-common==0.61.0',
     'luigi==1.1.2',
+    'lxml==3.4.2',
     'marcx==0.1.17',
     'nose==1.3.3',
     'ply==3.4',
