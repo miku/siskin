@@ -41,7 +41,9 @@ class HoldingsFile(HoldingsTask):
     isil = luigi.Parameter(default='DE-15')
 
     def run(self):
-        encoded = urllib.urlencode({'default-graph-uri': '', 'format': 'application/json', 'query': query_for_isil(self.isil)})
+        encoded = urllib.urlencode({'default-graph-uri': '',
+            'format': 'application/json', 'query': query_for_isil(self.isil)})
+
         url = "%s?%s" % (config.get('holdings', 'sparql-endpoint'), encoded)
         r = requests.get(url)
         response = json.loads(r.text)
