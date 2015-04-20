@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # ignore global arguments
     for param in ('local-scheduler', 'lock', 'lock-pid-dir', 'workers',
-		  'logging-conf-file', 'scheduler-host', 'scheduler-port'):
+          'logging-conf-file', 'scheduler-host', 'scheduler-port'):
         kwargs.pop(param, None)
 
     task_klass = Register.get_task_cls(taskname)
