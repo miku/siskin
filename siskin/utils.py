@@ -63,7 +63,7 @@ def get_task_import_cache():
         from siskin.sources import *
         from siskin.workflows import *
         with open(path, 'w') as output:
-            task_import_cache = dict([(name, klass.__module__) for name, klass in Register.get_reg().iteritems()])
+            task_import_cache = dict([(name, Register.get_task_cls(name).__module__) for name in Register.task_names()])
             json.dump(task_import_cache, output)
 
     if task_import_cache is None:
