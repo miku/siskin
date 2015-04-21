@@ -11,11 +11,11 @@
         "name": "siskin",
         "source": "siskin",
         "summary": "Various sources and workflows.",
-        "version": "0.0.95"
+        "version": "0.0.96"
     },
     "python_venv": {
         "name": "siskin",
-        "path": "/tmp/venv"
+        "path": "/tmp/siskin_venv"
     },
     "blocks": {
         "desc": [
