@@ -28,7 +28,7 @@ import urllib
 
 class CrossrefTask(DefaultTask):
     """
-    Crossref source, http://www.crossref.org/
+    Crossref related tasks. See: http://www.crossref.org/
     """
     TAG = 'crossref'
 
