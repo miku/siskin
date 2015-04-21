@@ -46,6 +46,8 @@ class HoldingsFile(HoldingsTask):
 
         url = "%s?%s" % (config.get('holdings', 'sparql-endpoint'), encoded)
         r = requests.get(url)
+        if r.status_code >= 400:
+            raise RuntimeError('%s on %s' % (r.status_code, url))
         response = json.loads(r.text)
         bindings = response['results']['bindings']
 
@@ -55,7 +57,7 @@ class HoldingsFile(HoldingsTask):
             raise RuntimeError('ambiguous holdings found for %s' % self.isil)
 
         holdings_url = bindings[0]['path']['value']
-        output = shellout("""curl "{url}" > {output}""", url=holdings_url)
+        output = shellout("""curl --fail "{url}" > {output}""", url=holdings_url)
         luigi.File(output).move(self.output().path)
 
     def output(self):
