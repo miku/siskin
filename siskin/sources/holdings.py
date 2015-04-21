@@ -12,12 +12,16 @@ from siskin.task import DefaultTask
 import datetime
 import json
 import luigi
+import re
 import requests
 import urllib
 
 config = Config.instance()
 
 def query_for_isil(isil):
+    if not re.match('[0-9a-zA-Z-]+', isil):
+	raise RuntimeError('invalid ISIL: %s' % isil)
+
     return """
     prefix lobid: <http://purl.org/lobid/lv#>
     prefix amsl: <http://vocab.ub.uni-leipzig.de/amsl/>
