@@ -87,10 +87,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit or update')
     update = luigi.Parameter(default='month', description='days, weeks or months')
-
-    rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
@@ -110,8 +107,6 @@ class CrossrefItems(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
         return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
@@ -138,8 +133,6 @@ class CrossrefUniqItems(CrossrefTask):
     """ Raw deduplication of crossref items. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
         return CrossrefItems(begin=self.begin, date=self.date, rows=self.rows, filter=self.filter)
@@ -156,7 +149,6 @@ class CrossrefISSNList(CrossrefTask):
     """ Just dump a list of all ISSN values. With dups and all. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     def requires(self):
         return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
@@ -173,7 +165,6 @@ class CrossrefUniqISSNList(CrossrefTask):
     """ Just dump a list of all ISSN values. Sorted and uniq. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     def requires(self):
         return CrossrefISSNList(begin=self.begin, date=self.date, filter=self.filter)
@@ -191,7 +182,6 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
 
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
@@ -224,9 +214,8 @@ class CrossrefAttributeList(CrossrefTask):
 
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
-    attribute = luigi.Parameter(default='ISSN', description='URL, DOI, type, indexed.datestamp, publisher')
+    attribute = luigi.Parameter(default='ISSN', description='URL, DOI, type, indexed.datestamp, publisher, ...')
 
     def requires(self):
         return CrossrefIndex(begin=self.begin, date=self.date, filter=self.filter)
@@ -245,7 +234,6 @@ class CrossrefContainerList(CrossrefTask):
 
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
@@ -264,7 +252,6 @@ class CrossrefSolrJson(CrossrefTask):
 
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     def requires(self):
         return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
@@ -281,7 +268,6 @@ class CrossrefSolrIndex(CrossrefTask):
 
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
     limit = luigi.IntParameter(default=0)
 
     w = luigi.IntParameter(default=8, description='solrbulk worker', significant=False)
@@ -308,9 +294,6 @@ class CrossrefHarvestGeneric(CrossrefTask):
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='members')
-
-    rows = luigi.IntParameter(default=1000, significant=False)
-    max_retries = luigi.IntParameter(default=10, significant=False)
 
     @timed
     def run(self):
@@ -349,8 +332,6 @@ class CrossrefGenericItems(CrossrefTask):
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='members')
-
-    rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
         return CrossrefHarvestGeneric(begin=self.begin, date=self.closest(), rows=self.rows)
