@@ -19,8 +19,12 @@ import urllib
 config = Config.instance()
 
 def query_for_isil(isil):
+    """
+    For a given ISIL, return the path to the corresponding
+    holdings file in AMSL.
+    """
     if not re.match('[0-9a-zA-Z-]+', isil):
-	raise RuntimeError('invalid ISIL: %s' % isil)
+        raise RuntimeError('invalid ISIL: %s' % isil)
 
     return """
     prefix lobid: <http://purl.org/lobid/lv#>
@@ -52,6 +56,7 @@ class HoldingsFile(HoldingsTask):
         r = requests.get(url)
         if r.status_code >= 400:
             raise RuntimeError('%s on %s' % (r.status_code, url))
+
         response = json.loads(r.text)
         bindings = response['results']['bindings']
 
