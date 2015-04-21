@@ -87,13 +87,13 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
-    update = luigi.Parameter(default='month', description='days, weeks or months')
+    update = luigi.Parameter(default='months', description='days, weeks or months')
 
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
             raise RuntimeError('update can only be: days, weeks or months')
         dates = date_range(self.begin, self.end, 1, self.update)
-        tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
+        tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1])
                  for i in range(len(dates) - 1)]
         return reversed(tasks)
 
@@ -109,7 +109,7 @@ class CrossrefItems(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefHarvest(begin=self.begin, end=self.closest(), rows=self.rows, filter=self.filter)
+        return CrossrefHarvest(begin=self.begin, end=self.closest())
 
     @timed
     def run(self):
@@ -135,7 +135,7 @@ class CrossrefUniqItems(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date, rows=self.rows, filter=self.filter)
+        return CrossrefItems(begin=self.begin, date=self.date)
 
     @timed
     def run(self):
@@ -151,7 +151,7 @@ class CrossrefISSNList(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefUniqItems(begin=self.begin, date=self.date)
 
     @timed
     def run(self):
@@ -167,7 +167,7 @@ class CrossrefUniqISSNList(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefISSNList(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefISSNList(begin=self.begin, date=self.date)
 
     @timed
     def run(self):
@@ -178,14 +178,16 @@ class CrossrefUniqISSNList(CrossrefTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
-    """ Vanilla records. """
+    """
+    Vanilla records into elasticsearch.
+    """
 
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     index = luigi.Parameter(default='crossref')
 
     def requires(self):
-        return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
+        return CrossrefUniqItems(begin=self.begin, date=self.date)
 
     @timed
     def run(self):
@@ -208,89 +210,10 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class CrossrefAttributeList(CrossrefTask):
-    """ Just export a list of a single attribute. Multiple values are written one per line.
-    Results are sorted and deduplicated. """
-
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    index = luigi.Parameter(default='crossref')
-    attribute = luigi.Parameter(default='ISSN', description='URL, DOI, type, indexed.datestamp, publisher, ...')
-
-    def requires(self):
-        return CrossrefIndex(begin=self.begin, date=self.date, filter=self.filter)
-
-    @timed
-    def run(self):
-        output = shellout("""estab -indices {index} -f "{attribute}" -1 | LANG=C grep -v NOT_AVAILABLE | LANG=C sort | LANG=C uniq > {output}""",
-                          attribute=self.attribute, index=self.index, input=self.input().path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class CrossrefContainerList(CrossrefTask):
-    """ Output (DOI, title, container-title) list. """
-
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    index = luigi.Parameter(default='crossref')
-
-    def requires(self):
-        return CrossrefIndex(begin=self.begin, date=self.date, filter=self.filter)
-
-    @timed
-    def run(self):
-        output = shellout("""estab -indices {index} -f "DOI title container-title" > {output}""", index=self.index, input=self.input().path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class CrossrefSolrJson(CrossrefTask):
-    """ A first stab at JSON to JSON transformation for Solr. """
-
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return CrossrefUniqItems(begin=self.begin, date=self.date, filter=self.filter)
-
-    @timed
-    def run(self):
-        raise NotImplementedError("Use span manually for now. Crossref input: %s" % self.input().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class CrossrefSolrIndex(CrossrefTask):
-    """ Index into solr. """
-
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    limit = luigi.IntParameter(default=0)
-
-    w = luigi.IntParameter(default=8, description='solrbulk worker', significant=False)
-    size = luigi.IntParameter(default=10000, description='solrbulk batch size', significant=False)
-
-    host = luigi.Parameter(default='localhost')
-    port = luigi.IntParameter(default=8983)
-
-    def requires(self):
-        return CrossrefSolrJson(begin=self.begin, date=self.date, filter=self.filter, limit=self.limit)
-
-    @timed
-    def run(self):
-        output = shellout("solrbulk -host {host} -port {port} -reset", host=self.host, port=self.port, input=self.input().path)
-        output = shellout("solrbulk -host {host} -port {port} -w {w} -size {size} {input}", host=self.host, port=self.port, input=self.input().path)
-        with self.output().open('w'):
-            pass
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class CrossrefHarvestGeneric(CrossrefTask):
-    """ Basic harvest of members, funders, etc. """
+    """
+    Basic harvest of members, funders, etc.
+    """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='members')
@@ -334,7 +257,7 @@ class CrossrefGenericItems(CrossrefTask):
     kind = luigi.Parameter(default='members')
 
     def requires(self):
-        return CrossrefHarvestGeneric(begin=self.begin, date=self.closest(), rows=self.rows)
+        return CrossrefHarvestGeneric(begin=self.begin, date=self.closest(), kind=self.kind)
 
     @timed
     def run(self):
@@ -353,9 +276,11 @@ class CrossrefGenericItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefCoverage(CrossrefTask):
-    """ Determine coverage of ISSNs. Coverage means, there is at least one
+    """
+    Determine coverage of ISSNs. Coverage means, there is at least one
     article with a given ISSN in crossref. Not included in the analysis
-    are actual articles and coverage ranges. """
+    are actual articles and coverage ranges.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     isil = luigi.Parameter(description='isil, for meaningful file names')
@@ -365,14 +290,18 @@ class CrossrefCoverage(CrossrefTask):
         return CrossrefUniqISSNList(date=self.date)
 
     def run(self):
-        """ This contains things, that would better be factored out in separate tasks. """
+        """
+        TODO(miku): This contains things, that would better be factored out in separate tasks.
+        """
         titles = {}
-        with luigi.File(shellout("span-gh-dump {hfile} > {output}", hfile=self.hfile), format=TSV).open() as handle:
+        output = shellout("span-gh-dump {hfile} > {output}", hfile=self.hfile)
+        with luigi.File(output, format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('issn', 'title')):
                 titles[row.issn] = row.title
 
         issns_held = set()
-        with luigi.File(shellout("xmlstarlet sel -t -v '//issn' {hfile} | sort | uniq > {output}", hfile=self.hfile), format=TSV).open() as handle:
+        output = shellout("xmlstarlet sel -t -v '//issn' {hfile} | sort | uniq > {output}", hfile=self.hfile)
+        with luigi.File(output, format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('issn',)):
                 issns_held.add(row.issn)
 
