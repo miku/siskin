@@ -87,22 +87,17 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-    update = luigi.Parameter(default='monthly', description='daily, weekly or monthly')
+    filter = luigi.Parameter(default='deposit', description='index, deposit or update')
+    update = luigi.Parameter(default='month', description='days, weeks or months')
 
     rows = luigi.IntParameter(default=1000, significant=False)
 
     def requires(self):
-        if self.update not in ('daily', 'weekly', 'monthly'):
-            raise RuntimeError('update can be daily weekly or monthly')
-        intervals = {
-            'daily': date_range(self.begin, self.end, 1, 'days'),
-            'weeky': date_range(self.begin, self.end, 1, 'weeks'),
-            'monthly': date_range(self.begin, self.end, 1, 'months')
-        }
-        dates = intervals[self.update]
+        if self.update not in ('days', 'weeks', 'months'):
+            raise RuntimeError('update can only be: days, weeks or months')
+        dates = date_range(self.begin, self.end, 1, self.update)
         tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1], rows=self.rows, filter=self.filter)
-                 for i, _ in enumerate(dates[:-1])]
+                 for i, in range(len(dates) - 1)]
         return reversed(tasks)
 
     def output(self):
