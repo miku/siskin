@@ -72,8 +72,7 @@ class CrossrefHarvestChunk(CrossrefTask):
                 self.logger.debug("%s: %s" % (url, len(items)))
                 if len(items) == 0:
                     break
-                output.write(body)
-                output.write("\n")
+                output.write(body + "\n")
                 offset += rows
 
     def output(self):
