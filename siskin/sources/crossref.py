@@ -138,7 +138,9 @@ class CrossrefUniqItems(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("TMPDIR={tmpdir} sort {input} | uniq > {output}", tmpdir=tempfile.gettempdir(), input=self.input().path)
+        output = shellout("lloyd-map -keys 'DOI, deposited.timestamp' {input} > {output}", input=self.input().path)
+        output = shellout("sort -uk1,1 {input} | cut -f3- > {output}", input=output)
+        output = shellout("cat {input} | lloyd-permute {file} > {output}", input=output, file=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
