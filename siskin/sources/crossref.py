@@ -320,3 +320,10 @@ class CrossrefCoverage(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefDOIResponses(CrossrefTask):
+    """
+    For each DOI in crossref, make a GET API request to doi.org and record the
+    results.
+    """
+    pass
