@@ -138,7 +138,8 @@ class CrossrefUniqItems(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("lloyd-uniq -key DOI {input} > {output}", input=self.input().path)
+        output = shellout("TMPDIR={tmpdir} lloyd-uniq -verbose -key DOI {input} > {output}",
+                          input=self.input().path, tmpdir=tempfile.tempdir)
         luigi.File(output).move(self.output().path)
 
     def output(self):
