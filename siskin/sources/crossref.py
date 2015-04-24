@@ -94,7 +94,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
         dates = date_range(self.begin, self.end, 1, self.update)
         tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1])
                  for i in range(len(dates) - 1)]
-        return reversed(tasks)
+        return sorted(tasks)
 
     def output(self):
         return self.input()
