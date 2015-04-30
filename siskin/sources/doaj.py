@@ -44,7 +44,7 @@ class DOAJDump(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     host = luigi.Parameter(default='doaj.org', significant=False)
-    port = luigi.IntParameter(default=80, significant=False)
+    port = luigi.IntParameter(default=443, significant=False)
     url_prefix = luigi.Parameter(default='query', significant=False)
 
     batch_size = luigi.IntParameter(default=1000, significant=False)
@@ -55,7 +55,7 @@ class DOAJDump(DOAJTask):
     def run(self):
         """ Connect to ES and issue queries. TODO: See if they support scan. """
         hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
-        es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries)
+	es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
         with self.output().open('w') as output:
             offset, total = 0, 0
             while offset <= total:
