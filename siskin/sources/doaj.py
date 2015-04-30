@@ -55,7 +55,7 @@ class DOAJDump(DOAJTask):
     def run(self):
         """ Connect to ES and issue queries. TODO: See if they support scan. """
         hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
-	es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
+        es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
         with self.output().open('w') as output:
             offset, total = 0, 0
             while offset <= total:
