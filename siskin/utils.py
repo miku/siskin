@@ -7,7 +7,6 @@ Various utilities.
 
 from __future__ import print_function
 from gluish import colors
-from gluish.common import IndexIdList, IndexFieldList
 from luigi.task import Register, flatten
 import cStringIO as StringIO
 from siskin import __version__
