@@ -16,7 +16,7 @@ except:
 install_requires = [
     'BeautifulSoup==3.2.1',
     'MySQL-python==1.2.5',
-    'argparse==1.2.1',
+    'argparse>=1.2',
     'astroid==1.1.1',
     'colorama==0.3.3',
     'decorator==3.4.0',
@@ -51,7 +51,7 @@ if sys.version_info < (2, 7):
     install_requires.append('importlib==1.0.2')
 
 setup(name='siskin',
-      version='0.0.97',
+      version='0.0.98',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
