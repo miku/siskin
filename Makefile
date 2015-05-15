@@ -56,3 +56,9 @@ vm-package: clean /vargant/dist
 	git pull origin master
 	fpm --force --verbose -s python -t rpm .
 	cp python-*.rpm /vagrant/dist
+
+# ----
+
+siskin.pex:
+	pex -r <(pip freeze|grep -v wsgiref) --python=python2.6 -o siskin.pex
+
