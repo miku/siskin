@@ -15,13 +15,12 @@ except:
 
 install_requires = [
     'BeautifulSoup==3.2.1',
-    'MySQL-python==1.2.5',
     'argparse>=1.2',
     'astroid==1.1.1',
     'colorama==0.3.3',
     'decorator==3.4.0',
     'elasticsearch==1.3.0',
-    'gluish==0.1.75',
+    'gluish==0.1.76',
     'gspread==0.2.2',
     'jsonpath-rw==1.3.0',
     'logilab-common==0.61.0',
