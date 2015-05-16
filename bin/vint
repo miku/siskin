@@ -16,8 +16,10 @@ import sys
 def cli():
     pass
 
-@click.argument('taskname', nargs=-1)
-@cli.command()
+@click.argument('taskname', nargs=-1, type=click.UNPROCESSED)
+@cli.command(context_settings=dict(
+    ignore_unknown_options=True,
+))
 def do(taskname):
     task_import_cache, path = get_task_import_cache()
     if taskname in task_import_cache:
@@ -28,9 +30,10 @@ def do(taskname):
         except OSError:
             pass
 
-        import siskin
-        locals().update(siskin.sources.__dict__)
-        locals().update(siskin.workflows.__dict__)
+        from siskin import sources
+        locals().update(sources.__dict__)
+        from siskin import workflows
+        locals().update(workflows.__dict__)
 
     sys.argv = [sys.argv[0]] + sys.argv[2:]
     luigi.run()
