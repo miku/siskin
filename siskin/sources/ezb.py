@@ -11,11 +11,11 @@ Configuration keys:
 url = http://example.org/file/61f1456.tab
 """
 
-from gluish.common import ElasticsearchMixin
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import ElasticsearchMixin
 import csv
 import datetime
 import json

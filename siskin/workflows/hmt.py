@@ -8,13 +8,13 @@ Data reconciliation, with target artefacts and precision reports.
 """
 
 from __future__ import print_function
-from gluish.common import ElasticsearchMixin
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.sources.naxos import NaxosJson
 from siskin.task import DefaultTask
+from siskin.utils import ElasticsearchMixin
 import datetime
 import itertools
 import json

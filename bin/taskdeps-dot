@@ -10,7 +10,6 @@ Usage: taskdeps-dot TASKNAME
 Example outputs album: http://imgur.com/a/12Dag
 """
 from __future__ import print_function
-from gluish.common import IndexIdList, IndexFieldList
 from gluish.utils import pairwise, random_string
 from luigi.task import id_to_name_and_params
 from luigi.task import Register

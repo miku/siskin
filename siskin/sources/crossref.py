@@ -10,13 +10,12 @@ from thousands of scholarly and professional publishers around the globe.
 """
 
 from gluish.benchmark import timed
-from gluish.common import ElasticsearchMixin
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
-from siskin.utils import URLCache
+from siskin.utils import URLCache, ElasticsearchMixin
 import datetime
 import elasticsearch
 import json

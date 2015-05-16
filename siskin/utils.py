@@ -8,11 +8,13 @@ Various utilities.
 from __future__ import print_function
 from gluish import colors
 from luigi.task import Register, flatten
-import cStringIO as StringIO
 from siskin import __version__
+
+import cStringIO as StringIO
 import errno
 import hashlib
 import json
+import luigi
 import os
 import pprint
 import requests
@@ -109,3 +111,10 @@ class URLCache(object):
 
         with open(self.get_cache_file(url)) as handle:
             return handle.read()
+
+class ElasticsearchMixin(luigi.Task):
+    """ A small mixin for tasks that require an ES connection. """
+    es_host = luigi.Parameter(default='localhost', significant=False,
+                              description='elasticsearch host')
+    es_port = luigi.IntParameter(default=9200, significant=False,
+                                 description='elasticsearch port')

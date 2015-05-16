@@ -7,7 +7,7 @@ GND-related tasks.
 
 from elasticsearch import helpers as eshelpers
 from gluish.benchmark import timed
-from gluish.common import ElasticsearchMixin, Executable, Directory
+from gluish.common import Executable, Directory
 from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
@@ -17,6 +17,7 @@ from gluish.path import iterfiles
 from gluish.utils import shellout, random_string
 from siskin.sources.dbpedia import DBPGNDLinks, DBPDepictions
 from siskin.task import DefaultTask
+from siskin.utils import ElasticsearchMixin
 import BeautifulSoup
 import collections
 import cPickle as pickle

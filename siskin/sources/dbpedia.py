@@ -6,13 +6,14 @@ DBPedia related tasks.
 """
 
 from gluish.benchmark import timed
-from gluish.common import Directory, Executable, ElasticsearchMixin
+from gluish.common import Directory, Executable
 from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.path import iterfiles
 from gluish.utils import shellout, random_string
 from siskin.task import DefaultTask
+from siskin.utils import ElasticsearchMixin
 import collections
 import datetime
 import elasticsearch
