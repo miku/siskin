@@ -63,10 +63,10 @@ vm-package: clean /vargant/dist
 # ----
 
 taskdo.pex:
-	pex -r <(pip freeze|grep -v wsgiref) --python=python2.6 -c taskdo -o taskdo.pex
+	pex -vv -r <(pip freeze|grep -v wsgiref) --python=python2.6 -c taskdo -o taskdo.pex
 
 luigid.pex:
-	pex -r <(pip freeze|grep -v wsgiref) --python=python2.6 -c luigid -o luigid.pex
+	pex -vv -r <(pip freeze|grep -v wsgiref) --python=python2.6 -c luigid -o luigid.pex
 
 
 pex: taskdo.pex luigid.pex
