@@ -7,7 +7,7 @@ clean:
 	rm -rf siskin.egg-info
 	rm -rf build/ dist/
 	rm -rf python-*.rpm
-	rm -f siskin.pex
+	rm -f *.pex
 
 # packaging via vagrant
 PORT = 2222
@@ -62,6 +62,11 @@ vm-package: clean /vargant/dist
 
 # ----
 
-siskin.pex:
-	pex -r <(pip freeze|grep -v wsgiref) --python=python2.6 -o siskin.pex
+taskdo.pex:
+	pex -r <(pip freeze|grep -v wsgiref) --python=python2.6 -c taskdo -o taskdo.pex
 
+luigid.pex:
+	pex -r <(pip freeze|grep -v wsgiref) --python=python2.6 -c luigid -o luigid.pex
+
+
+pex: taskdo.pex luigid.pex
