@@ -68,6 +68,9 @@ setup(name='siskin',
                                'assets/*.txt',
                                'assets/ambience/*']},
       scripts=[
+        # one script to replace them all
+        'bin/vint',
+
         'bin/taskcat',
         'bin/taskcp',
         'bin/taskdeps-dot',
