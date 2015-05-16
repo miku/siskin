@@ -34,11 +34,13 @@ def generate_tasks_manual():
     from siskin.workflows import *
 
     output = StringIO.StringIO()
-    task_tuples = sorted(Register.get_reg().iteritems())
+    # task_tuples = sorted(Register.get_reg().iteritems())
+    task_names = Register.task_names()
     output.write(MAN_HEADER)
-    output.write('  {0} tasks found\n\n'.format(len(task_tuples)))
+    output.write('  {0} tasks found\n\n'.format(len(task_names)))
 
-    for name, klass in task_tuples:
+    for name in task_names:
+        klass = Register.get_task_cls(name)
         doc = klass.__doc__ or colors.red("@todo: docs")
         output.write('{0} {1}\n'.format(colors.green(name), doc))
 
@@ -64,7 +66,7 @@ def get_task_import_cache():
         from siskin.sources import *
         from siskin.workflows import *
         with open(path, 'w') as output:
-            task_import_cache = dict([(name, Register.get_task_cls(name).__module__) for name in Register.task_names()])
+            task_import_cache = dict([(name, Register.get_task_cls(name).__module__) for name in Register.task_names() if name[0].isupper()])
             json.dump(task_import_cache, output)
 
     if task_import_cache is None:
