@@ -216,6 +216,8 @@ class CrossrefHarvestGeneric(CrossrefTask):
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='members')
+
+    rows = luigi.IntParameter(default=1000, significant=False)
     max_retries = luigi.IntParameter(default=10, significant=False)
 
     @timed
