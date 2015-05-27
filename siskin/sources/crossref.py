@@ -61,12 +61,22 @@ class CrossrefHarvestChunk(CrossrefTask):
             while True:
                 params = {"rows": rows, "offset": offset, "filter": filter}
                 url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
-                body = cache.get(url)
-                try:
-                    content = json.loads(body)
-                except ValueError as err:
-                    self.logger.debug("%s: %s" % (err, body))
-                    raise
+                for attempt in range(1, 3):
+                    body = cache.get(url)
+                    try:
+                        content = json.loads(body)
+                    except ValueError as err:
+                        # retry by removing a possibly broken cache entry
+                        if attempt == 2:
+                            self.logger.debug("URL was %s" % url)
+                            self.logger.debug(err)
+                            self.logger.debug(body[:100])
+                            raise
+                        if os.path.exists(cache.get_cache_file(url)):
+                            self.logger.debug("trying to recover by removing cached entry")
+                            os.remove(cache.get_cache_file(url))
+                    else:
+                        break
                 items = content["message"]["items"]
                 self.logger.debug("%s: %s" % (url, len(items)))
                 if len(items) == 0:
@@ -232,15 +242,22 @@ class CrossrefHarvestGeneric(CrossrefTask):
             while True:
                 params = {"rows": rows, "offset": offset}
                 url = 'http://api.crossref.org/%s?%s' % (self.kind, urllib.urlencode(params))
-                body = cache.get(url)
-                try:
-                    content = json.loads(body)
-                except ValueError as err:
-                    self.logger.debug("URL was %s" % url)
-                    self.logger.debug("rm %s" % cache.get_cache_file(url))
-                    self.logger.debug(err)
-                    self.logger.debug(body[:100])
-                    raise
+                for attempt in range(1, 3):
+                    body = cache.get(url)
+                    try:
+                        content = json.loads(body)
+                    except ValueError as err:
+                        if attempt == 2:
+                            self.logger.debug("URL was %s" % url)
+                            self.logger.debug(err)
+                            self.logger.debug(body[:100])
+                            raise
+                        # retry by removing a possibly broken cache entry
+                        if os.path.exists(cache.get_cache_file(url)):
+                            self.logger.debug("trying to recover by removing cached entry")
+                            os.remove(cache.get_cache_file(url))
+                    else:
+                        break
                 items = content["message"]["items"]
                 self.logger.debug("%s: %s" % (url, len(items)))
                 if len(items) == 0:
