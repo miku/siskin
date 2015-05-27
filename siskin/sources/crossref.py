@@ -236,8 +236,10 @@ class CrossrefHarvestGeneric(CrossrefTask):
                 try:
                     content = json.loads(body)
                 except ValueError as err:
+                    self.logger.debug("URL was %s" % url)
+                    self.logger.debug("rm %s" % cache.get_cache_file(url))
                     self.logger.debug(err)
-                    self.logger.debug(body)
+                    self.logger.debug(body[:100])
                     raise
                 items = content["message"]["items"]
                 self.logger.debug("%s: %s" % (url, len(items)))
