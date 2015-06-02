@@ -66,7 +66,6 @@ class CrossrefHarvestChunk(CrossrefTask):
                     try:
                         content = json.loads(body)
                     except ValueError as err:
-                        # retry by removing a possibly broken cache entry
                         if attempt == 2:
                             self.logger.debug("URL was %s" % url)
                             self.logger.debug(err)
@@ -252,7 +251,6 @@ class CrossrefHarvestGeneric(CrossrefTask):
                             self.logger.debug(err)
                             self.logger.debug(body[:100])
                             raise
-                        # retry by removing a possibly broken cache entry
                         if os.path.exists(cache.get_cache_file(url)):
                             self.logger.debug("trying to recover by removing cached entry")
                             os.remove(cache.get_cache_file(url))
