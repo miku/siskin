@@ -17,13 +17,11 @@ from gluish.benchmark import timed
 from gluish.common import FTPMirror
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
-import os
 import tempfile
 
 config = Config.instance()
@@ -44,29 +42,9 @@ class GBISync(GBITask):
                          password=config.get('gbi', 'ftp-password'),
                          pattern=config.get('gbi', 'ftp-pattern'))
 
-    def run(self):
-        self.input().move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class GBIInventory(GBITask):
-    """ Just a list of all files of a dump. """
-    date = ClosestDateParameter(default=datetime.date.today())
-
     @timed
     def run(self):
-        """ Hardcode directory for now.
-        TODO(miku): replace this with ftp sync.
-        """
-        home = config.get('core', 'home', Config.NO_DEFAULT)
-        directory = os.path.join(home, self.TAG, 'issue-5093')
-        if not os.path.exists(directory):
-            raise RuntimeError('dump dir not found: %s' % directory)
-        with self.output().open('w') as output:
-            for path in iterfiles(directory):
-                output.write_tsv(path)
+        self.input().move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
