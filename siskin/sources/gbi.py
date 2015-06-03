@@ -14,6 +14,7 @@ ftp-pattern = some*glob*pattern.zip
 """
 
 from gluish.benchmark import timed
+from gluish.common import FTPMirror
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
@@ -32,6 +33,23 @@ class GBITask(DefaultTask):
 
     def closest(self):
         return datetime.date(2015, 6, 1)
+
+class GBISync(GBITask):
+    """ Sync. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return FTPMirror(host=config.get('gbi', 'ftp-host'),
+                         username=config.get('gbi', 'ftp-username'),
+                         password=config.get('gbi', 'ftp-password'),
+                         pattern=config.get('gbi', 'ftp-pattern'))
+
+    def run(self):
+        self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class GBIInventory(GBITask):
     """ Just a list of all files of a dump. """
@@ -58,7 +76,7 @@ class GBIXMLCombined(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return GBIInventory(date=self.date)
+       return GBISync(date=self.date)
 
     @timed
     def run(self):
