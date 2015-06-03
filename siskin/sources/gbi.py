@@ -65,7 +65,10 @@ class GBIXMLCombined(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                shellout("unzip -p {path} \*.xml 2> /dev/null | iconv -f latin-1 -t utf-8 >> {output}",
+                shellout("""unzip -p {path} \*.xml 2> /dev/null |
+                            iconv -f iso-8859-1 -t utf-8 |
+                            LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                            LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' >> {output}""",
                          output=stopover, path=row.path, ignoremap={1: 'OK', 9: 'ignoring broken zip'})
         luigi.File(stopover).move(self.output().path)
 
