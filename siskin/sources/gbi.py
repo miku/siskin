@@ -49,12 +49,62 @@ class GBISync(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class GBIXMLCombined(GBITask):
-    """ Extract all XML files and concat them. """
+# --*-- lynd sketch --*--
+
+# package gbi
+
+# type Group struct {
+#     Date  lynd.Date `default:"2010-01-01"`
+#     Group string    `default:"wiwi"`
+# }
+
+# func (task Groups) Requires() interface{} {
+#     return GBIInventory{Date: task.Date}
+# }
+
+# func (task Groups) Run() error {
+#     for fields := range lynd.In(task).StringFields() {
+#         group := strings.Split(fields[0], "/")[-2]
+#         if group == task.Group {
+#             lynd.Out(task).WriteTabs(fields[0])
+#         }
+#     }
+#     lynd.Out(task).Flush()
+# }
+
+# func (task Groups) Output() Target {
+#     return lynd.AutoTarget(task)
+# }
+
+class GBIGroup(GBITask):
+    """ Find groups (subdirs). These are not part of the metadata. """
     date = ClosestDateParameter(default=datetime.date.today())
+    group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
 
     def requires(self):
-       return GBISync(date=self.date)
+        return GBIInventory(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('path',)):
+                    group = row.path.split('/')[-2]
+                    if group == self.group:
+                        output.write_tsv(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+
+class GBIXMLCombined(GBITask):
+    """
+    Extract all XML files and concat them. Inject a <x-group> tag, which
+    carries the "collection" from the directory name into the metadata.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
+
+    def requires(self):
+       return GBIGroup(date=self.date, group=self.group)
 
     @timed
     def run(self):
@@ -64,8 +114,10 @@ class GBIXMLCombined(GBITask):
                 shellout("""unzip -p {path} \*.xml 2> /dev/null |
                             iconv -f iso-8859-1 -t utf-8 |
                             LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
-                            LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' >> {output}""",
-                         output=stopover, path=row.path, ignoremap={1: 'OK', 9: 'ignoring broken zip'})
+                            LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+                            LC_ALL=C sed -e 's@</Document>@<x-group>{group}</x-group></Document>@' >> {output}""",
+                         output=stopover, path=row.path, group=self.group,
+                         ignoremap={1: 'OK', 9: 'ignoring broken zip'})
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
