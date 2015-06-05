@@ -82,7 +82,7 @@ class GBIGroup(GBITask):
     group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
 
     def requires(self):
-        return GBIInventory(date=self.date)
+        return GBISync(date=self.date)
 
     def run(self):
         with self.input().open() as handle:
