@@ -95,7 +95,7 @@ class GBIGroup(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
-class GBIXMLCombined(GBITask):
+class GBIXMLGroup(GBITask):
     """
     Extract all XML files and concat them. Inject a <x-group> tag, which
     carries the "collection" from the directory name into the metadata.
@@ -118,6 +118,26 @@ class GBIXMLCombined(GBITask):
                             LC_ALL=C sed -e 's@</Document>@<x-group>{group}</x-group></Document>@' >> {output}""",
                          output=stopover, path=row.path, group=self.group,
                          ignoremap={1: 'OK', 9: 'ignoring broken zip'})
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+
+class GBIXML(GBITask):
+    """
+    Extract all XML files and concat them. Inject a <x-group> tag, which
+    carries the "collection" from the directory name into the metadata.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+       return [GBIXMLGroup(date=self.date, group=group) for group in ['wiwi', 'fzs', 'sowi', 'recht']]
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
