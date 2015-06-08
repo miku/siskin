@@ -54,8 +54,8 @@ class GBISync(GBITask):
 # package gbi
 
 # type Group struct {
-#     Date  lynd.Date `default:"2010-01-01"`
-#     Group string    `default:"wiwi"`
+#     Date  lynd.Date   `default:"2010-01-01"`
+#     Group lynd.String `default:"wiwi"`
 # }
 
 # func (task Groups) Requires() interface{} {
