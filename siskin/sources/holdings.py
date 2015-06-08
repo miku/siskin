@@ -71,3 +71,15 @@ class HoldingsFile(HoldingsTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
+class HoldingsFinc(HoldingsTask, luigi.WrapperTask):
+    """ Download finc-related holdings. """
+
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def requires(self):
+        isils = ['DE-15', 'DE-14', 'DE-105', 'DE-Ch1', 'DE-Gla1', 'DE-Bn3']
+        return [HoldingsFile(isil=isil, date=self.date) for isil in isils]
+
+    def output(self):
+        return self.input()
