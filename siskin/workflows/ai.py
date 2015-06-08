@@ -3,10 +3,12 @@
 from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.sources.crossref import CrossrefItems
 from siskin.sources.degruyter import DegruyterXML
 from siskin.sources.doaj import DOAJDump
 from siskin.sources.gbi import GBIXML
+from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorXML
 from siskin.task import DefaultTask
 import datetime
@@ -25,7 +27,7 @@ class DownloadFile(AITask):
     url = luigi.Parameter()
 
     def run(self):
-        output = shellout("""curl "{url}" > {output}""", url=url)
+        output = shellout("""curl "{url}" > {output}""", url=self.url)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True))
