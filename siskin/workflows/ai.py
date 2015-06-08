@@ -1,13 +1,14 @@
 # coding: utf-8
 
+from gluish.common import Executable
+from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
 from siskin.sources.crossref import CrossrefItems
 from siskin.sources.degruyter import DegruyterXML
 from siskin.sources.doaj import DOAJDump
 from siskin.sources.gbi import GBIXML
 from siskin.sources.jstor import JstorXML
 from siskin.task import DefaultTask
-from gluish.intervals import weekly
-from gluish.parameter import ClosestDateParameter
 import datetime
 import luigi
 
