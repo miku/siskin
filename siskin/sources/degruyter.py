@@ -17,10 +17,12 @@ from gluish.benchmark import timed
 from gluish.common import FTPMirror
 from gluish.format import TSV
 from gluish.intervals import daily
+from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+import datetime
 import luigi
 import re
 import shutil
@@ -31,9 +33,12 @@ config = Config.instance()
 class DegruyterTask(DefaultTask):
     TAG = 'degruyter'
 
+    def closest(self):
+        return datetime.date(2015, 4, 1)
+
 class DegruyterPaths(DegruyterTask):
     """ A list of Degruyter ile paths (via FTP). """
-    indicator = luigi.Parameter(default=daily().strftime('%s'))
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         host = config.get('degruyter', 'ftp-host')
@@ -54,6 +59,8 @@ class DegruyterPaths(DegruyterTask):
 class DegruyterXMLFiles(DegruyterTask):
     """ Extract all XML files from Degruyter dump. """
 
+    date = ClosestDateParameter(default=datetime.date.today())
+
     def requires(self):
         return DegruyterPaths()
 
@@ -71,8 +78,10 @@ class DegruyterXMLFiles(DegruyterTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
-class DegruyterXMLCombine(DegruyterTask):
+class DegruyterXML(DegruyterTask):
     """ Synthesize a single XML file from all article XML files. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return DegruyterXMLFiles()

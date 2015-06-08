@@ -50,7 +50,7 @@ class JstorPaths(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class JstorXMLCombined(JstorTask):
+class JstorXML(JstorTask):
     """ Extract all XML files from Jstor dump. """
     date = ClosestDateParameter(default=datetime.date.today())
 

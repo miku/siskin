@@ -1,0 +1,38 @@
+# coding: utf-8
+
+from siskin.sources.crossref import CrossrefItems
+from siskin.sources.degruyter import DegruyterXML
+from siskin.sources.doaj import DOAJDump
+from siskin.sources.gbi import GBIXML
+from siskin.sources.jstor import JstorXML
+from siskin.task import DefaultTask
+from gluish.intervals import weekly
+import datetime
+import luigi
+
+class AITask(DefaultTask):
+    TAG = 'ai'
+
+    def closest(self):
+        return weekly(self.date)
+
+class AIIntermediateSchema(AITask):
+    """ Create an intermediate schema record from all AI sources. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefItems(date=self.date),
+            'degruyter': DegruyterXML(date=self.date),
+            'doaj': DOAJDump(date=self.date),
+            'genios': GBIXML(date=self.date),
+            'jstor': JstorXML(date=self.date),
+        }
+
+    def run(self):
+        for name, target in self.input().iteritems():
+            print(name, target)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
