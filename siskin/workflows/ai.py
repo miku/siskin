@@ -7,6 +7,7 @@ from siskin.sources.gbi import GBIXML
 from siskin.sources.jstor import JstorXML
 from siskin.task import DefaultTask
 from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
 import datetime
 import luigi
 
@@ -19,7 +20,7 @@ class AITask(DefaultTask):
 class AIIntermediateSchema(AITask):
     """ Create an intermediate schema record from all AI sources. """
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
