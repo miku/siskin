@@ -30,7 +30,7 @@ class AIIntermediateSchema(AITask):
             'doaj': DOAJDump(date=self.date),
             'genios': GBIXML(date=self.date),
             'jstor': JstorXML(date=self.date),
-	    '_': Executable(name='span', message='http://git.io/vI8NV'),
+            '_': Executable(name='span', message='http://git.io/vI8NV'),
         }
 
     def run(self):
