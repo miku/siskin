@@ -136,6 +136,25 @@ class CrossrefItems(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class CrossrefUniq(CrossrefTask):
+    """ Compact file, keep only most recent entries. """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+	return CrossrefItems(begin=self.begin, date=self.date)
+
+    @timed
+    def run(self):
+	output = shellout("ldjtab -key DOI {input} > {output}", input=self.input().path)
+	output = shellout("tac {input} | sort -u -k1,1 -k2n | cut -f2 > {output}", input=output)
+	output = shellout("bash {filterfile} {lines} {input} > {output}", filterfile=self.assets('filterfile'),
+			  line=output, input=self.input().path)
+	luigi.File(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class CrossrefUniqItems(CrossrefTask):
     """ Raw deduplication of crossref items. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
