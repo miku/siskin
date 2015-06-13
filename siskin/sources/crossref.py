@@ -142,18 +142,18 @@ class CrossrefUniq(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	return CrossrefItems(begin=self.begin, date=self.date)
+        return CrossrefItems(begin=self.begin, date=self.date)
 
     @timed
     def run(self):
-	output = shellout("ldjtab -key DOI {input} > {output}", input=self.input().path)
-	output = shellout("tac {input} | sort -u -k1,1 -k2n | cut -f2 > {output}", input=output)
-	output = shellout("bash {filterfile} {lines} {input} > {output}", filterfile=self.assets('filterfile'),
-			  line=output, input=self.input().path)
-	luigi.File(output).move(self.output().path)
+        output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=self.input().path)
+        linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' > {output}", input=output)
+        output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
+                          linenumbers=linenumbers, input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefUniqItems(CrossrefTask):
     """ Raw deduplication of crossref items. """
