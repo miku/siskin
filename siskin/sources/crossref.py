@@ -135,7 +135,7 @@ class CrossrefItems(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
-class CrossrefUniq(CrossrefTask):
+class CrossrefUniqItems(CrossrefTask):
     """ Compact file, keep only most recent entries. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -153,23 +153,6 @@ class CrossrefUniq(CrossrefTask):
         output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=infile)
         linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n > {output}", input=output)
         output = shellout("filterline {linenumbers} {input} > {output}", linenumbers=linenumbers, input=infile)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class CrossrefUniqItems(CrossrefTask):
-    """ Raw deduplication of crossref items. """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date)
-
-    @timed
-    def run(self):
-        output = shellout("TMPDIR={tmpdir} lloyd-uniq -verbose -key DOI {input} > {output}",
-                          input=self.input().path, tmpdir=tempfile.tempdir)
         luigi.File(output).move(self.output().path)
 
     def output(self):
