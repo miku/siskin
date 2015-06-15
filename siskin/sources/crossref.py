@@ -10,6 +10,7 @@ from thousands of scholarly and professional publishers around the globe.
 """
 
 from gluish.benchmark import timed
+from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
@@ -142,14 +143,18 @@ class CrossrefUniq(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefItems(begin=self.begin, date=self.date)
+        return {
+            'items': CrossrefItems(begin=self.begin, date=self.date),
+            'ldjtab': Executable(name='ldjtab'),
+            'filterline': Executable(name='filterline'),
+        }
 
     @timed
     def run(self):
-        output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=self.input().path)
+        infile = self.input().get('items').path
+        output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=infile)
         linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n > {output}", input=output)
-        output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
-                          linenumbers=linenumbers, input=self.input().path)
+        output = shellout("filterline {linenumbers} {input} > {output}", linenumbers=linenumbers, input=infile)
         luigi.File(output).move(self.output().path)
 
     def output(self):
