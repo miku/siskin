@@ -141,18 +141,16 @@ class CrossrefUniqItems(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'items': CrossrefItems(begin=self.begin, date=self.date),
-            'ldjtab': Executable(name='ldjtab'),
-            'filterline': Executable(name='filterline'),
-        }
+	return {'items': CrossrefItems(begin=self.begin, date=self.date),
+		'ldjtab': Executable(name='ldjtab')}
 
     @timed
     def run(self):
         infile = self.input().get('items').path
         output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=infile)
         linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n > {output}", input=output)
-        output = shellout("filterline {linenumbers} {input} > {output}", linenumbers=linenumbers, input=infile)
+	output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
+			  linenumbers=linenumbers, input=infile)
         luigi.File(output).move(self.output().path)
 
     def output(self):
