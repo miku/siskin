@@ -89,9 +89,7 @@ class CrossrefHarvestChunk(CrossrefTask):
 
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
-    Harvest everything in incremental steps. Yield the targets sorted by date,
-    the latest chunks first. This way we can simply drop outdated records in later
-    steps.
+    Harvest everything in incremental steps. Yield the targets sorted by date (ascending).
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
