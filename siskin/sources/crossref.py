@@ -141,14 +141,25 @@ class CrossrefUniqItems(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	return {'items': CrossrefItems(begin=self.begin, date=self.date),
-		'ldjtab': Executable(name='ldjtab')}
+        return {'items': CrossrefItems(begin=self.begin, date=self.date),
+                'ldjtab': Executable(name='ldjtab')}
 
     @timed
     def run(self):
-        infile = self.input().get('items').path
-        output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=infile)
+        """
+        TODO(miku): make this more incremental, do not ldjtab on the whole file,
+                    could save 30% of processing time.
+        """
+        input = self.input().get('items').path
+        output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=input)
         linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n > {output}", input=output)
+        output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
+                          linenumbers=linenumbers, input=input)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class CrossrefIntermediateSchema(CrossrefTask):
     """ Convert to intermediate format via span. """
 
