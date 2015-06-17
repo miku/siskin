@@ -14,7 +14,7 @@ ftp-pattern = some*glob*pattern.zip
 """
 
 from gluish.benchmark import timed
-from gluish.common import FTPMirror
+from gluish.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import daily
 from gluish.parameter import ClosestDateParameter
@@ -75,3 +75,20 @@ class DegruyterXML(DegruyterTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+
+class DegruyterIntermediateSchema(DegruyterTask):
+    """ Convert to intermediate format via span. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+               'file': DegruyterXML(date=self.date)}
+
+    @timed
+    def run(self):
+        output = shellout("span-import -i degruyter {input} > {output}", input=self.input().get('file').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))

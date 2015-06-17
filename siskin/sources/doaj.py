@@ -5,6 +5,7 @@ Directory of Open Access Journals.
 """
 
 from gluish.benchmark import timed
+from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -68,6 +69,23 @@ class DOAJDump(DOAJTask):
                     output.write("%s\n" % json.dumps(doc))
                 total = total or result['hits']['total']
                 offset += self.batch_size
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class DOAJIntermediateSchema(DOAJTask):
+    """ Convert to intermediate format via span. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+               'file': DOAJDump(date=self.date)}
+
+    @timed
+    def run(self):
+        output = shellout("span-import -i doaj {input} > {output}", input=self.input().get('file').path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))

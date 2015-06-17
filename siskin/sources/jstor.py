@@ -11,7 +11,7 @@ ftp-pattern = *
 """
 
 from gluish.benchmark import timed
-from gluish.common import FTPMirror
+from gluish.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -67,3 +67,20 @@ class JstorXML(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+
+class JstorIntermediateSchema(JstorTask):
+    """ Convert to intermediate format via span. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+               'file': JstorXML(date=self.date)}
+
+    @timed
+    def run(self):
+        output = shellout("span-import -i jstor {input} > {output}", input=self.input().get('file').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))

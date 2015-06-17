@@ -142,7 +142,7 @@ class CrossrefUniqItems(CrossrefTask):
 
     def requires(self):
         return {'items': CrossrefItems(begin=self.begin, date=self.date),
-                'ldjtab': Executable(name='ldjtab')}
+                'ldjtab': Executable(name='ldjtab', message="https://github.com/miku/ldjtab")}
 
     @timed
     def run(self):
