@@ -21,7 +21,7 @@ install_requires = [
     'click==4.0',
     'decorator==3.4.0',
     'elasticsearch==1.3.0',
-    'gluish==0.1.77',
+    'gluish==0.1.78',
     'gspread==0.2.2',
     'jsonpath-rw==1.3.0',
     'logilab-common==0.61.0',
