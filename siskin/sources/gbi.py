@@ -49,13 +49,17 @@ class GBISync(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-# --*-- lynd sketch --*--
+# --*-- commercial break --*--
+#
+# This is a sketch, how the below task might be implemented in a type-safe
+# language. There are 598 chars in the Go version, 723 in the Python version.
+#
 
 # package gbi
 
 # type Group struct {
 #     Date  lynd.Date   `default:"2010-01-01"`
-#     Group lynd.String `default:"wiwi"`
+#     Group lynd.String `default:"wiwi" help:"wiwi, fzs, sowi, recht"`
 # }
 
 # func (task Groups) Requires() interface{} {
@@ -69,11 +73,11 @@ class GBISync(GBITask):
 #             lynd.Out(task).WriteTabs(fields[0])
 #         }
 #     }
-#     lynd.Out(task).Flush()
+#     return lynd.Out(task).Flush()
 # }
 
 # func (task Groups) Output() Target {
-#     return lynd.AutoTarget(task)
+#     return lynd.AutoTargetFormat(task, lynd.TSV)
 # }
 
 class GBIGroup(GBITask):
