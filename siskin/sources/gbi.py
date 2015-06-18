@@ -51,8 +51,9 @@ class GBISync(GBITask):
 
 # --*-- commercial break --*--
 #
-# This is a sketch, how the below task might be implemented in a type-safe
-# language. There are 598 chars in the Go version, 723 in the Python version.
+# This is a sketch, how the task below might be implemented in a type-safe
+# language with a fictional library called lynd.
+# Go: 598 chars, Python: 723 chars.
 #
 
 # package gbi
