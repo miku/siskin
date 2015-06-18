@@ -159,7 +159,7 @@ class GBIIntermediateSchema(GBITask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i genios {input} >> {output}", input=self.input().get('file').path)
+        output = shellout("span-import -i genios {input} > {output}", input=self.input().get('file').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
