@@ -62,7 +62,8 @@ class JstorXML(JstorTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                shellout("unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path, ignoremap={1: 'OK'})
+                shellout("unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path,
+                         ignoremap={1: 'OK', 9: 'skipping broken zipfile'})
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
