@@ -19,6 +19,7 @@ from gluish.path import iterfiles
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+import collections
 import datetime
 import luigi
 import re
@@ -46,6 +47,30 @@ class JstorPaths(JstorTask):
 
     def run(self):
         self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class JstorJournals(JstorTask):
+    """ WIP: Group Jstor data by journal. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return JstorPaths(date=self.date)
+
+    def run(self):
+        journals = collections.defaultdict(list)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                parts = row.path.split('/')
+                shipment, filename = parts[-2], parts[-1]
+                parts = filename.split('_')
+                name, date = parts[0], parts[1]
+                journals[name].append(shipment)
+                shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}:"$4}}' >> {output} """,
+                         input=row.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
