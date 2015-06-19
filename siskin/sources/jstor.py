@@ -71,12 +71,15 @@ class JstorJournals(JstorTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class JstorLatest(JstorTask):
-    """ Get a list of latest Jstor article versions. """
+    """
+    Get a list of latest Jstor article versions.
+    TODO(miku): make this faster by extracting all relevant members from an archive at once.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return JstorJournals(date=self.date)
-    
+
     @timed
     def run(self):
         """ Expect input to be sorted, so tac will actually be a perfect rewind. """
