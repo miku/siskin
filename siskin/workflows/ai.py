@@ -13,6 +13,7 @@ from siskin.sources.jstor import JstorIntermediateSchema
 from siskin.task import DefaultTask
 import datetime
 import luigi
+import tempfile
 
 class AITask(DefaultTask):
     TAG = 'ai'
@@ -47,7 +48,7 @@ class AIIntermediateSchema(AITask):
         ]
 
     def run(self):
-        _, stopover = tempfile.mkdtemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
