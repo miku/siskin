@@ -90,7 +90,7 @@ class JstorXML(JstorTask):
     Create an latest snapshot of the latest data.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    batch = luigi.IntParameter(default=4096, significant=False)
+    batch = luigi.IntParameter(default=2048, significant=False)
 
     def requires(self):
         return JstorLatestMembers(date=self.date)
