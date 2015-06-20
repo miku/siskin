@@ -107,10 +107,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
         return self.input()
 
 class CrossrefItems(CrossrefTask):
-    """
-    Combine all harvested files into a single LDJ file.
-    Flatten and deduplicate. Stub.
-    """
+    """ Combine all harvested files into a single LDJ file. This file will contain dups. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -147,8 +144,7 @@ class CrossrefUniqItems(CrossrefTask):
     @timed
     def run(self):
         """
-        TODO(miku): make this more incremental, do not ldjtab on the whole file,
-                    could save 30% of processing time.
+        TODO(miku): make this more incremental, do not ldjtab on the whole file, could save 30% of processing time.
         """
         input = self.input().get('items').path
         output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=input)
@@ -364,10 +360,3 @@ class CrossrefCoverage(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class CrossrefDOIResponses(CrossrefTask):
-    """
-    For each DOI in crossref, make a GET API request to doi.org and record the
-    results.
-    """
-    pass

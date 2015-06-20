@@ -57,7 +57,9 @@ class DegruyterPaths(DegruyterTask):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
 class DegruyterXML(DegruyterTask):
-    """ Extract all XML files from Jstor dump. """
+    """
+    Extract all XML files from Jstor dump. TODO(miku): Check all subdirs, not just SSH.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
