@@ -4,6 +4,7 @@ from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from gluish.format import TSV
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -48,11 +49,21 @@ class AIISSNStats(AITask):
         }
 
     def run(self):
-        for k1, k2 in itertools.permutations(self.input().keys(), r=2):
-            print(k1, k2)
+        def loadset(target):
+            s = set()
+            with target.open() as handle:
+                for row in handle.iter_tsv(cols=('issn',)):
+                    s.add(row.issn)
+            return s
+
+        with self.output().open('w') as output:
+            for k1, k2 in itertools.combinations(self.input().keys(), 2):
+                s1 = loadset(self.input().get(k1))
+                s2 = loadset(self.input().get(k2))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class AIIntermediateSchema(AITask):
     """ Create an intermediate schema record from all AI sources. """
