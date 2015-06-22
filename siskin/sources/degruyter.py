@@ -94,3 +94,22 @@ class DegruyterIntermediateSchema(DegruyterTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class DegruyterISSNList(DegruyterTask):
+    """ List of ISSNs. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+       return DegruyterIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '.["rft.issn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
