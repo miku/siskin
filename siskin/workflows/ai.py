@@ -4,14 +4,15 @@ from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.sources.crossref import CrossrefIntermediateSchema
-from siskin.sources.degruyter import DegruyterIntermediateSchema
-from siskin.sources.doaj import DOAJIntermediateSchema
-from siskin.sources.gbi import GBIIntermediateSchema
+from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
+from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
+from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
+from siskin.sources.gbi import GBIIntermediateSchema, GBIISSNList
 from siskin.sources.holdings import HoldingsFile
-from siskin.sources.jstor import JstorIntermediateSchema
+from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.task import DefaultTask
 import datetime
+import itertools
 import luigi
 import tempfile
 
@@ -32,6 +33,26 @@ class DownloadFile(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True))
+
+class AIISSNStats(AITask):
+    """ Match ISSN lists. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'gbi': GBIISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date)
+        }
+
+    def run(self):
+        for k1, k2 in itertools.permutations(self.input().keys(), r=2):
+            print(k1, k2)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class AIIntermediateSchema(AITask):
     """ Create an intermediate schema record from all AI sources. """
