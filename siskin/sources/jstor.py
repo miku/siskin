@@ -108,7 +108,7 @@ class JstorXML(JstorTask):
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
 class JstorIntermediateSchema(JstorTask):
     """ Convert to intermediate format via span. """
@@ -126,3 +126,21 @@ class JstorIntermediateSchema(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class JstorISSNList(JstorTask):
+    """ A list of JSTOR ISSNs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return JstorIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '.["rft.issn"]' {input} >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"]' {input} >> {output} """, input=self.input().path, output=stopover)
+        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
