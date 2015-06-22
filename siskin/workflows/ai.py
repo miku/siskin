@@ -65,6 +65,37 @@ class AIISSNStats(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class AIISSNOverlaps(AITask):
+    """ Match ISSN lists. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'gbi': GBIISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date)
+        }
+
+    def run(self):
+        def loadset(target):
+            s = set()
+            with target.open() as handle:
+                for row in handle.iter_tsv(cols=('issn',)):
+                    s.add(row.issn)
+            return s
+
+        with self.output().open('w') as output:
+            for k1, k2 in itertools.combinations(self.input().keys(), 2):
+                s1 = loadset(self.input().get(k1))
+                s2 = loadset(self.input().get(k2))
+                for issn in sorted(s1.intersection(s2)):
+                    output.write_tsv(k1, k2, issn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class AIIntermediateSchema(AITask):
     """ Create an intermediate schema record from all AI sources. """
 
