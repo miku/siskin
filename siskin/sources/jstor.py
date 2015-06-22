@@ -137,8 +137,8 @@ class JstorISSNList(JstorTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"]' {input} >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"]' {input} >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.issn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 
