@@ -173,6 +173,23 @@ class CrossrefIntermediateSchema(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class CrossrefDOIList(CrossrefTask):
+    """ A list of Crossref DOIs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """, input=self.input().path, output=stopover)
+        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class CrossrefISSNList(CrossrefTask):
     """ Just dump a list of all ISSN values. With dups and all. """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
