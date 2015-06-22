@@ -12,6 +12,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import ElasticsearchMixin
 import datetime
 import elasticsearch
 import json
@@ -71,6 +72,50 @@ class DOAJDump(DOAJTask):
                     output.write("%s\n" % json.dumps(doc))
                 total = total or result['hits']['total']
                 offset += self.batch_size
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class DOAJJson(DOAJTask):
+    """ An indexable JSON. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+       return DOAJDump(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("jq -r -c '._source' {input} > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class DOAJIndex(DOAJTask, ElasticsearchMixin):
+    """ Index. """
+    date = ClosestDateParameter(default=datetime.date.today())
+    index = luigi.Parameter(default='doaj')
+
+    def requires(self):
+       return DOAJJson(date=self.date)
+
+    @timed
+    def run(self):
+        es = elasticsearch.Elasticsearch()
+        shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
+        mapping = {
+            'default': {
+                'date_detection': False,
+                '_id': {
+                    'path': 'URL'
+                },
+            }
+        }
+        es.indices.create(index=self.index)
+        es.indices.put_mapping(index='bsz', doc_type='default', body=mapping)
+        shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().path)
+        with self.output().open('w'):
+            pass
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
