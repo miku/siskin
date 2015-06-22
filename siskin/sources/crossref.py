@@ -148,7 +148,7 @@ class CrossrefUniqItems(CrossrefTask):
         """
         input = self.input().get('items').path
         output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=input)
-        linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n > {output}", input=output)
+        linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n | uniq > {output}", input=output)
         output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
                           linenumbers=linenumbers, input=input)
         luigi.File(output).move(self.output().path)
