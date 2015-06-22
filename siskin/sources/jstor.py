@@ -144,3 +144,36 @@ class JstorISSNList(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class JstorCrossrefMatching(JstorTask):
+    """ See, whether there are overlapping ISSN in Jstor and Crossref. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        from siskin.sources.crossref import CrossrefUniqISSNList
+        return {'jstor': JstorISSNList(date=self.date),
+                'crossref': CrossrefUniqISSNList(date=self.date)}
+
+    @timed
+    def run(self):
+        jstor, crossref = set(), set()
+        with self.input().get('jstor').open() as handle:
+            for row in handle.iter_tsv(cols=('issn',)):
+                issn = row.issn.strip()
+                if not issn or issn == "null":
+                    continue
+                jstor.add(issn)
+
+        with self.input().get('crossref').open() as handle:
+            for row in handle.iter_tsv(cols=('issn',)):
+                issn = row.issn.strip()
+                if not issn or issn == "null":
+                    continue
+                crossref.add(issn)
+
+        with self.output().open('w') as output:
+            for issn in jstor.intersection(crossref):
+                output.write_tsv(issn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
