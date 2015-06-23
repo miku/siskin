@@ -96,24 +96,50 @@ class AIISSNOverlaps(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class AIIntermediateSchema(AITask):
-    """ Create an intermediate schema record from all AI sources. """
+class AIExport(AITask):
+    """ Create a SOLR-importable file. """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [
-            CrossrefIntermediateSchema(date=self.date),
-            DegruyterIntermediateSchema(date=self.date),
-            DOAJIntermediateSchema(date=self.date),
-            GBIIntermediateSchema(date=self.date),
-            JstorIntermediateSchema(date=self.date),
-        ]
+        return {
+            'crossref': CrossrefIntermediateSchema(date=self.date),
+            'degruyter': DegruyterIntermediateSchema(date=self.date),
+            'doaj': DOAJIntermediateSchema(date=self.date),
+            'gbi': GBIIntermediateSchema(date=self.date),
+            'jstor' : JstorIntermediateSchema(date=self.date),
+
+            'DE-105': HoldingsFile(isil='DE-105', date=self.closest()),
+            'DE-14': HoldingsFile(isil='DE-14', date=self.closest()),
+            'DE-15': HoldingsFile(isil='DE-15', date=self.closest()),
+            'DE-Bn3': HoldingsFile(isil='DE-Bn3', date=self.closest()),
+            'DE-Ch1': HoldingsFile(isil='DE-Ch1', date=self.closest()),
+            'DE-Gla1': HoldingsFile(isil='DE-Gla1', date=self.closest()),
+            'DE-Zi4': HoldingsFile(isil='DE-Zi4', date=self.closest()),
+            # 'DE-J59': HoldingsFile(isil='DE-J59', date=self.closest()),
+
+            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/8P6JtB'),
+
+            'app': Executable(name='span-export', message='http://git.io/vI8NV'),
+        }
 
     def run(self):
+        """ TODO(miku): filter DOAJ ISSNs """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+
+        shellout("span-export -any DE-15 {input} >> {output}", input=self.input().get('gbi').path, output=stopover)
+        shellout("span-export -any DE-15 {input} >> {output}", input=self.input().get('doaj').path, output=stopover)
+
+        hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4')
+        files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input() if k in hkeys])
+
+        fkeys = ('DE-15-FID',)
+        lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input() if k in fkeys])
+
+        for source in ('crossref', 'jstor', 'degruyter'):
+            shellout("span-export {files} {lists} {input} >> {output}", files=files,
+                     lists=lists, input=self.input().get(source).path, output=stopover)
+
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
