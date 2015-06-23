@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from gluish.benchmark import timed
 from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -29,12 +30,27 @@ class DownloadFile(AITask):
     date = luigi.DateParameter(default=datetime.date.today())
     url = luigi.Parameter()
 
+    @timed
     def run(self):
-        output = shellout("""curl --fail "{url}" > {output}""", url=self.url)
+        output = shellout("""curl -L --fail "{url}" > {output}""", url=self.url)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True))
+        return luigi.LocalTarget(path=self.path(ext='file', digest=True))
+
+class DownloadAndUnzipFile(AITask):
+    """ Download a file and unzip it. TODO(miku): move this out here. """
+    date = luigi.DateParameter(default=datetime.date.today())
+    url = luigi.Parameter()
+
+    @timed
+    def run(self):
+        output = shellout("""curl -L --fail "{url}" > {output}""", url=self.url)
+        output = shellout("""unzip -qq -p {input} > {output}""", input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='file', digest=True))
 
 class AIISSNStats(AITask):
     """ Match ISSN lists. """
@@ -49,6 +65,7 @@ class AIISSNStats(AITask):
             'jstor': JstorISSNList(date=self.date)
         }
 
+    @timed
     def run(self):
         def loadset(target):
             s = set()
@@ -79,6 +96,7 @@ class AIISSNOverlaps(AITask):
             'jstor': JstorISSNList(date=self.date)
         }
 
+    @timed
     def run(self):
         def loadset(target):
             s = set()
@@ -96,6 +114,28 @@ class AIISSNOverlaps(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIIntermediateSchema(AITask):
+    """ Create an intermediate schema record from all AI sources. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [CrossrefIntermediateSchema(date=self.date),
+                DegruyterIntermediateSchema(date=self.date),
+                DOAJIntermediateSchema(date=self.date),
+                GBIIntermediateSchema(date=self.date),
+                JstorIntermediateSchema(date=self.date)]
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkdtemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class AIExport(AITask):
     """ Create a SOLR-importable file. """
@@ -116,14 +156,15 @@ class AIExport(AITask):
             'DE-Bn3': HoldingsFile(isil='DE-Bn3', date=self.closest()),
             'DE-Ch1': HoldingsFile(isil='DE-Ch1', date=self.closest()),
             'DE-Gla1': HoldingsFile(isil='DE-Gla1', date=self.closest()),
-            # 'DE-Zi4': HoldingsFile(isil='DE-Zi4', date=self.closest()),
-            # 'DE-J59': HoldingsFile(isil='DE-J59', date=self.closest()),
 
+            'DE-Zi4': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Ld0LCw'),
+            'DE-J59': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/44xEbF'),
             'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/8P6JtB'),
 
             'app': Executable(name='span-export', message='http://git.io/vI8NV'),
         }
 
+    @timed
     def run(self):
         """ TODO(miku): filter DOAJ ISSNs """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
