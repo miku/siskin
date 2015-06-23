@@ -115,7 +115,7 @@ class AIExport(AITask):
             'DE-Bn3': HoldingsFile(isil='DE-Bn3', date=self.closest()),
             'DE-Ch1': HoldingsFile(isil='DE-Ch1', date=self.closest()),
             'DE-Gla1': HoldingsFile(isil='DE-Gla1', date=self.closest()),
-            'DE-Zi4': HoldingsFile(isil='DE-Zi4', date=self.closest()),
+            # 'DE-Zi4': HoldingsFile(isil='DE-Zi4', date=self.closest()),
             # 'DE-J59': HoldingsFile(isil='DE-J59', date=self.closest()),
 
             'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/8P6JtB'),
