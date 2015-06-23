@@ -129,7 +129,7 @@ class AIIntermediateSchema(AITask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkdtemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
