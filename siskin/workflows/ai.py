@@ -132,10 +132,10 @@ class AIExport(AITask):
         shellout("span-export -any DE-15 {input} >> {output}", input=self.input().get('doaj').path, output=stopover)
 
         hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4')
-        files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input() if k in hkeys])
+        files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input().items() if k in hkeys])
 
         fkeys = ('DE-15-FID',)
-        lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input() if k in fkeys])
+        lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input().items() if k in fkeys])
 
         for source in ('crossref', 'jstor', 'degruyter'):
             shellout("span-export {files} {lists} {input} >> {output}", files=files,
