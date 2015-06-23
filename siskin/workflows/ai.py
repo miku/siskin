@@ -138,7 +138,7 @@ class AIExport(AITask):
         lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input().items() if k in fkeys])
 
         for source in ('crossref', 'jstor', 'degruyter'):
-            shellout("span-export {files} {lists} {input} >> {output}", files=files,
+            shellout("span-export -skip {files} {lists} {input} >> {output}", files=files,
                      lists=lists, input=self.input().get(source).path, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
