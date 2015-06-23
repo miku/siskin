@@ -30,7 +30,8 @@ class DownloadFile(AITask):
     url = luigi.Parameter()
 
     def run(self):
-        output = shellout("""curl "{url}" > {output}""", url=self.url)
+        output = shellout("""curl --fail "{url}" > {output}""", url=self.url)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True))
