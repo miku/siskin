@@ -44,7 +44,7 @@ class DOAJCSV(DOAJTask):
         return luigi.LocalTarget(path=self.path(ext='csv'))
 
 class DOAJDump(DOAJTask):
-    """ Complete DOAJ Elasticsearch dump. """
+    """ Complete DOAJ Elasticsearch dump. For a slightly filtered version see: DOAJFiltered. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     host = luigi.Parameter(default='doaj.org', significant=False)
@@ -76,12 +76,46 @@ class DOAJDump(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class DOAJFiltered(DOAJDump):
+    """ Filter DOAJ by ISSN in assets. Slow. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DOAJDump(date=self.date)
+
+    @timed
+    def run(self):
+        excludes = set()
+        with open(self.assets('028_doaj_filter.tsv')) as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                excludes.add(line.replace("-", ""))
+
+        with self.output().open('w') as output:
+            with self.input().open() as handle:
+                for line in handle:
+                    record, skip = json.loads(line), False
+                    for issn in record["_source"]["index"]["issn"]:
+                        issn = issn.replace("-", "").strip()
+                        if issn in excludes:
+                            skip = True
+                            break
+                    if skip:
+                        continue
+                    output.write(line)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class DOAJJson(DOAJTask):
     """ An indexable JSON. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return DOAJDump(date=self.date)
+       return DOAJFiltered(date=self.date)
 
     @timed
     def run(self):
@@ -127,7 +161,7 @@ class DOAJIntermediateSchema(DOAJTask):
 
     def requires(self):
        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': DOAJDump(date=self.date)}
+               'file': DOAJFiltered(date=self.date)}
 
     @timed
     def run(self):
@@ -181,7 +215,7 @@ class DOAJRaw(DOAJTask):
     url_prefix = luigi.Parameter(default='query', significant=False)
 
     def requires(self):
-        return DOAJDump()
+        return DOAJFiltered()
 
     def run(self):
         output = shellout("jq -M -c '._source' {input} > {output}", input=self.input().path)
