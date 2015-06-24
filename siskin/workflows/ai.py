@@ -170,7 +170,7 @@ class AIExport(AITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         shellout("span-export -any DE-15 {input} >> {output}", input=self.input().get('gbi').path, output=stopover)
-        shellout("span-export -any DE-15 {input} >> {output}", input=self.input().get('doaj').path, output=stopover)
+        shellout("span-export -any DE-15 -any DE-14 {input} >> {output}", input=self.input().get('doaj').path, output=stopover)
 
         hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59')
         files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input().items() if k in hkeys])
