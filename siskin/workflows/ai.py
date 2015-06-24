@@ -166,7 +166,7 @@ class AIExport(AITask):
 
     @timed
     def run(self):
-        """ TODO(miku): filter DOAJ ISSNs """
+        """ TODO(miku): Externalize source / ISIL matrix and filter method (e.g. holdings, list, any, ...) """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         shellout("span-export -any DE-15 {input} >> {output}", input=self.input().get('gbi').path, output=stopover)
