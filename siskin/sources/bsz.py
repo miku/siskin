@@ -875,12 +875,12 @@ class FincMappingDump(BSZTask):
                     cc.execute("""INSERT INTO finc_mapping
                                   (finc_id, source_id, record_id, created_at, status) VALUES (?, ?, ?, ?, ?)""", row)
                 cc.connection.commit()
-
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_fm_finc_id ON finc_mapping (finc_id)""")
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_fm_record_id ON finc_mapping (record_id)""")
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_fm_source_id ON finc_mapping (source_id)""")
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_fm_created_at ON finc_mapping (created_at)""")
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_fm_source_id_record_id ON finc_mapping (source_id, record_id)""")
+                cc.connection.commit()
 
             luigi.File(stopover).move(self.output().path)
 
@@ -924,6 +924,7 @@ class ISBNDump(BSZTask):
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_isbn_finc_id ON isbn (finc_id)""")
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_isbn_isbn ON isbn (isbn)""")
                 cc.execute("""CREATE INDEX IF NOT EXISTS idx_isbn_updated_at ON isbn (updated_at)""")
+                cc.connection.commit()
 
             luigi.File(stopover).move(self.output().fn)
 

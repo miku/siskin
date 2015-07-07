@@ -6,11 +6,13 @@ Directory of Open Access Journals.
 
 from gluish.benchmark import timed
 from gluish.common import Executable
+from gluish.database import sqlite3db
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config
+from siskin.sources.bsz import FincMappingDump
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin
 import datetime
@@ -222,3 +224,22 @@ class DOAJRaw(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+
+class DOAJFincIDAlignment(DOAJTask):
+    """ FincID alignment. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return FincMappingDump(date=self.closest())
+
+    def run(self):
+        with sqlite3db(self.input().path) as conn:
+            with self.output().open('w') as output:
+                conn.execute("""SELECT finc_id, record_id FROM finc_mapping WHERE source_id = ?""", ('28',))
+                for row in conn.fetchall():
+                    output.write(row[0], 'ai-28-%s' % row[1])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
