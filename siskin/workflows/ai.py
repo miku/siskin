@@ -166,11 +166,11 @@ class AIExport(AITask):
 
     @timed
     def run(self):
-        """ TODO(miku): Externalize source / ISIL matrix and filter method (e.g. holdings, list, any, ...) """
+        """ TODO(miku): Externalize source / ISIL matrix and filter method (e.g. holdings, list, any, ...)."""
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
-        shellout("span-export -z -any DE-15 {input} >> {output}", input=self.input().get('gbi').path, output=stopover)
-        shellout("span-export -z -any DE-15 -any DE-14 {input} >> {output}", input=self.input().get('doaj').path, output=stopover)
+        shellout("span-export -any DE-15 {input} | gzip >> {output}", input=self.input().get('gbi').path, output=stopover)
+        shellout("span-export -any DE-15 -any DE-14 {input} | gzip >> {output}", input=self.input().get('doaj').path, output=stopover)
 
         hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59')
         files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input().items() if k in hkeys])
@@ -179,7 +179,7 @@ class AIExport(AITask):
         lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input().items() if k in fkeys])
 
         for source in ('crossref', 'jstor', 'degruyter'):
-            shellout("span-export -z -skip {files} {lists} {input} >> {output}", files=files,
+            shellout("span-export -skip {files} {lists} {input} | gzip >> {output}", files=files,
                      lists=lists, input=self.input().get(source).path, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
