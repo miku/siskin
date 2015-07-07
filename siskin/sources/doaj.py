@@ -239,7 +239,7 @@ class DOAJFincIDAlignment(DOAJTask):
             with self.output().open('w') as output:
                 conn.execute("""SELECT finc_id, record_id FROM finc_mapping WHERE source_id = ?""", ('28',))
                 for row in conn.fetchall():
-                    output.write(row[0], 'ai-28-%s' % row[1])
+                    output.write_tsv(row[0], 'ai-28-%s' % row[1])
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(), format=TSV)
