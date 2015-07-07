@@ -150,15 +150,15 @@ class AIExport(AITask):
             'gbi': GBIIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
 
-            'DE-105': HoldingsFile(isil='DE-105', date=self.closest()),
-            'DE-14': HoldingsFile(isil='DE-14', date=self.closest()),
-            'DE-15': HoldingsFile(isil='DE-15', date=self.closest()),
-            'DE-Bn3': HoldingsFile(isil='DE-Bn3', date=self.closest()),
-            'DE-Ch1': HoldingsFile(isil='DE-Ch1', date=self.closest()),
-            'DE-Gla1': HoldingsFile(isil='DE-Gla1', date=self.closest()),
-
+            'DE-105': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Gq199T'),
+            'DE-14': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Tz3vbk'),
+            'DE-15': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/inyKLr'),
+            'DE-Bn3': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/oq8LDD'),
+            'DE-Ch1': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/uJwoUf'),
+            'DE-Gla1': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/6506Dz'),
             'DE-Zi4': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Ld0LCw'),
             'DE-J59': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/44xEbF'),
+
             'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/8P6JtB'),
 
             'app': Executable(name='span-export', message='http://git.io/vI8NV'),
