@@ -80,6 +80,7 @@ class DegruyterXML(DegruyterTask):
     Extract all XML files from Jstor dump. TODO(miku): Check all subdirs, not just SSH.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    group = luigi.Parameter(default='SSH', description='Nationallizenz_Zeitschriften, Nationallizenz_Jahrbuecher')
 
     def requires(self):
         return DegruyterPaths(date=self.date)
@@ -89,7 +90,7 @@ class DegruyterXML(DegruyterTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                if not '/SSH/' in row.path:
+                if not '/%s/' % self.group in row.path:
                     continue
                 shellout("unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path, ignoremap={1: 'OK'})
         luigi.File(stopover).move(self.output().path)
