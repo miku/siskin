@@ -56,6 +56,25 @@ class DegruyterPaths(DegruyterTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
+class DegruyterMembers(DegruyterTask):
+    """ Extract a full list of archive members. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DegruyterPaths(date=self.date)
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' >> {output} """,
+                         preserve_whitespace=True, input=row.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class DegruyterXML(DegruyterTask):
     """
     Extract all XML files from Jstor dump. TODO(miku): Check all subdirs, not just SSH.
