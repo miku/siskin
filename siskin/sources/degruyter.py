@@ -92,7 +92,8 @@ class DegruyterXML(DegruyterTask):
             for row in handle.iter_tsv(cols=('path',)):
                 if not '/%s/' % self.group in row.path:
                     continue
-                shellout("unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path, ignoremap={1: 'OK'})
+                shellout("unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path,
+                         ignoremap={1: 'OK', 9: 'skip corrupt file'})
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
