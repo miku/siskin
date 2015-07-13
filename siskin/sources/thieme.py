@@ -2,10 +2,11 @@
 
 from gluish.common import OAIHarvestChunk
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import date_range
+from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
 import datetime
 import luigi
+import tempfile
 
 class ThiemeTask(DefaultTask):
     """ Thieme connect. """
@@ -46,3 +47,26 @@ class ThiemeHarvest(luigi.WrapperTask, ThiemeTask):
 
     def output(self):
         return self.input()
+
+class ThiemeCombine(ThiemeTask):
+    """ Combine files. Simple cat files and leave span-import the rest. """
+
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
+    end = luigi.DateParameter(default=datetime.date.today())
+    url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
+    prefix = luigi.Parameter(default="tm", significant=False)
+    collection = luigi.Parameter(default='journalarticles')
+    delay = luigi.IntParameter(default=2, significant=False)
+
+    def requires(self):
+        """ Only require up to the last full month. """
+        return ThiemeHarvest(begin=self.begin, end=self.end, url=self.url, prefix=self.prefix, collection=self.collection, delay=self.delay)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True, ext="xml"))
