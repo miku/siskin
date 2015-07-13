@@ -20,7 +20,7 @@ class ThiemeHarvestChunk(OAIHarvestChunk, ThiemeTask):
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
     prefix = luigi.Parameter(default="tm", significant=False)
     collection = luigi.Parameter(default='journalarticles')
-    delay = luigi.IntParameter(default=10, significant=False)
+    delay = luigi.IntParameter(default=2, significant=False)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
@@ -32,7 +32,7 @@ class ThiemeHarvest(luigi.WrapperTask, ThiemeTask):
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
     prefix = luigi.Parameter(default="tm", significant=False)
     collection = luigi.Parameter(default='journalarticles')
-    delay = luigi.IntParameter(default=10, significant=False)
+    delay = luigi.IntParameter(default=2, significant=False)
 
     def requires(self):
         """ Only require up to the last full month. """
