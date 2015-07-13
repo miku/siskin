@@ -8,6 +8,8 @@ Turn task dependencies into pretty graphs.
 Usage: taskdeps-dot TASKNAME
 
 Example outputs album: http://imgur.com/a/12Dag
+
+TODO(miku): Group tasks of the same family, if they exceed a certain number.
 """
 from __future__ import print_function
 from gluish.utils import pairwise, random_string
