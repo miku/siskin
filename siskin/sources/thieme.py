@@ -18,7 +18,7 @@ class ThiemeHarvestChunk(OAIHarvestChunk, ThiemeTask):
     begin = luigi.DateParameter(default=datetime.date.today())
     end = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
-    prefix = luigi.Parameter(default="tm", significant=False)
+    prefix = luigi.Parameter(default="tm", significant=True)
     collection = luigi.Parameter(default='journalarticles')
     delay = luigi.IntParameter(default=2, significant=False)
 
@@ -30,7 +30,7 @@ class ThiemeHarvest(luigi.WrapperTask, ThiemeTask):
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
-    prefix = luigi.Parameter(default="tm", significant=False)
+    prefix = luigi.Parameter(default="tm", significant=True)
     collection = luigi.Parameter(default='journalarticles')
     delay = luigi.IntParameter(default=2, significant=False)
 
@@ -54,7 +54,7 @@ class ThiemeCombine(ThiemeTask):
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
-    prefix = luigi.Parameter(default="tm", significant=False)
+    prefix = luigi.Parameter(default="tm", significant=True)
     collection = luigi.Parameter(default='journalarticles')
     delay = luigi.IntParameter(default=2, significant=False)
 
