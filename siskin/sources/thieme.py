@@ -26,7 +26,7 @@ class ThiemeHarvestChunk(OAIHarvestChunk, ThiemeTask):
 
 class ThiemeHarvest(luigi.WrapperTask, ThiemeTask):
     """ Harvest Thieme. """
-    begin = luigi.DateParameter(default=datetime.date(2010, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
     prefix = luigi.Parameter(default="tm", significant=False)
@@ -39,7 +39,7 @@ class ThiemeHarvest(luigi.WrapperTask, ThiemeTask):
         end = datetime.date(self.end.year, self.end.month, 1)
         if end < self.begin:
             raise RuntimeError('Invalid range: %s - %s' % (begin, end))
-        dates = date_range(begin, end, 7, 'days')
+        dates = date_range(begin, end, 1, 'months')
         for i, _ in enumerate(dates[:-1]):
             yield ThiemeHarvestChunk(begin=dates[i], end=dates[i + 1], url=self.url,
                                      prefix=self.prefix, collection=self.collection, delay=self.delay)
