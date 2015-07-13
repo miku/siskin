@@ -32,12 +32,23 @@ def iterdeps(task):
         tn, tp = id_to_name_and_params(task.task_id)
         dn, dp = id_to_name_and_params(dependency.task_id)
 
-        # TODO: obfuscate password keys
-        t = "%s\n%s" % (tn, '\n'.join(tp.values()))
-        d = "%s\n%s" % (dn, '\n'.join(dp.values()))
+        tt = (tn, frozenset(tp.items()))
+        dd = (dn, frozenset(dp.items()))
 
-        g[t].add(d)
+        g[tt].add(dd)
         iterdeps(dependency)
+
+def simpleformat(graph):
+    """ Format graph as dot. Omit parameters - makes some graphs much smaller. Example: http://imgur.com/a/hxJqv """
+    s = 'digraph %s {' % random_string()
+    for task, deps in g.iteritems():
+        for dep in deps:
+            s = s + """\t"%s" [fontname="Helvetica"]; """ % task[0]
+            s = s + """\t"%s" [fontname="Helvetica"]; """ % dep[0]
+            s = s + """\t"%s" -> "%s"; """ % (task[0], dep[0])
+            s = s + "\n"
+    s = s + '}'
+    return s
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -57,10 +68,4 @@ if __name__ == '__main__':
     task = klass(**kwargs)
     iterdeps(task)
 
-    print('digraph %s {' % random_string())
-    for key, values in g.iteritems():
-        for value in values:
-            print("""\t"%s" [fontname="Helvetica"]; """ % key)
-            print("""\t"%s" [fontname="Helvetica"]; """ % value)
-            print("""\t"%s" -> "%s"; """ % (key, value))
-    print('}')
+    print(simpleformat(g))
