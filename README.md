@@ -145,9 +145,11 @@ Another scraped and transformed data source.
 
 ----
 
-![SAMerged](https://cdn.mediacru.sh/o0ui7QRSMYyW.png)
+![AIIntermediateSchema](https://raw.githubusercontent.com/miku/siskin/master/docs/catalog/AIIntermediateSchema.png)
 
-A deduplication task.
+![AIExport](https://raw.githubusercontent.com/miku/siskin/master/docs/catalog/AIExport.png)
+
+Taken from [article index](https://finc.info/de/Archive/268) workflow.
 
 ----
 
