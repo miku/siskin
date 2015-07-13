@@ -59,7 +59,6 @@ class ThiemeCombine(ThiemeTask):
     delay = luigi.IntParameter(default=2, significant=False)
 
     def requires(self):
-        """ Only require up to the last full month. """
         return ThiemeHarvest(begin=self.begin, end=self.end, url=self.url, prefix=self.prefix, collection=self.collection, delay=self.delay)
 
     def run(self):
