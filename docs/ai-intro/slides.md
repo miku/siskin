@@ -11,7 +11,7 @@ MARTIN CZYGAN UBL 2015-07-16 10:00
 * first things first
 * short introduction to the DEPENDENCY GRAPH
 * high performance FILE CONVERSIONS
-* LICENCE HANDLING
+* LICENSE HANDLING
 * solr and memcachedb UPDATES
 
 
@@ -19,8 +19,8 @@ MARTIN CZYGAN UBL 2015-07-16 10:00
 
 Most of the software here is work-in-progress.
 
-With project AI UBL tries to act like a startup in a corporate
-environment, which is a nice contradiction.
+With "project AI" UBL tries to act like a startup in a corporate
+environment, which is cute.
 
 ![](img/blitz.png)
 
@@ -32,6 +32,46 @@ First commit:
 commits per day - every day. One committer.
 
 Finc SVN repository at the same time: 673 commits, 10 committers.
+
+
+## Disclaimers
+
+Can't you be more *entschleunigt*, you ask?
+
+Have a look at:
+
+http://www.slideshare.net/f.lohmeier/big-bibliographic-data-sca-ds-project-meeting-20150612/17
+
+* FINC - Works fine with 100M records
+* d:swarm - scalability issues, about 4M records per day!
+
+We would need 25 days for a single update with d:swarm.
+
+Making things performant is not trivial. Even *Avantgarde Labs*
+struggle.
+
+Bear with me, I'll tell you all my secrets.
+
+
+## Disclaimers
+
+I am really sorry, but ...
+
+* the software will change,
+* the update process will change and
+* components will change.
+
+Possible goal: Get AI close to the competitors ASAP.
+
+{~Pxxxx Cxxxxxx is a vast cross-disciplinary index containing
+millions of journal articles, e-books and more from a wide range of
+information providers, available in a single search.~}
+
+{~Der Pxxxx Cxxxxxx-Index umfasst ca. 400 Mio. Datensätze~}
+
+From: https://de.wikipedia.org/wiki/Pxxxx_Cxxxxxx
+
+We are already 25% there.
 
 
 ## CentOS
