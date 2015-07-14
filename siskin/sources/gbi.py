@@ -136,7 +136,8 @@ class GBIXML(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return [GBIXMLGroup(date=self.date, group=group) for group in ['wiwi', 'fzs', 'sowi', 'recht']]
+        """ Note: ingore broken 'sowi' for now. """
+        return [GBIXMLGroup(date=self.date, group=group) for group in ['wiwi', 'fzs', 'recht']]
 
     @timed
     def run(self):
