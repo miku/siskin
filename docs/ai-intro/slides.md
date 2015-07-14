@@ -33,6 +33,7 @@ commits per day - every day. One committer.
 
 Finc SVN repository at the same time: 673 commits, 10 committers.
 
+
 ## CentOS
 
 ![](img/heart.png)
