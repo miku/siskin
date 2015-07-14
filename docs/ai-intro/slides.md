@@ -29,7 +29,9 @@ First commit:
 > b5262ff 2015-01-06 | add crossref stub [Martin Czygan]
 
 1090 commits across about 10 projects since then. That's about 5.5
-commits per day - every day. Or 7.7 commits per weekday. One person.
+commits per day - every day. One committer.
+
+Finc SVN repository at the same time: 673 commits, 10 committers.
 
 ## CentOS
 
