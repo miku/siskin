@@ -3,6 +3,7 @@
 from gluish.common import OAIHarvestChunk
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+from gluish.intervals import weekly
 from siskin.task import DefaultTask
 import datetime
 import luigi
@@ -11,6 +12,9 @@ import tempfile
 class ThiemeTask(DefaultTask):
     """ Thieme connect. """
     TAG = 'thieme'
+
+    def closest(self):
+        return weekly(date=self.date)
 
 class ThiemeHarvestChunk(OAIHarvestChunk, ThiemeTask):
     """ Harvest all files in chunks. """
@@ -28,7 +32,7 @@ class ThiemeHarvestChunk(OAIHarvestChunk, ThiemeTask):
 class ThiemeHarvest(luigi.WrapperTask, ThiemeTask):
     """ Harvest Thieme. """
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
     prefix = luigi.Parameter(default="tm", significant=True)
     collection = luigi.Parameter(default='journalarticles')
@@ -52,7 +56,7 @@ class ThiemeCombine(ThiemeTask):
     """ Combine files. Simple cat files and leave span-import the rest. """
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
     prefix = luigi.Parameter(default="tm", significant=True)
     collection = luigi.Parameter(default='journalarticles')
