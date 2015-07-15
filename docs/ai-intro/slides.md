@@ -60,7 +60,7 @@ I am really sorry, but ...
 ![](img/heart.png)
 
 * nothing but ♥ ♥ ♥
-* https://asciinema.org/a/2gpcfhapf4bxv7lya2voo3egh
+* https://asciinema.org/a/2gpcfhapf4bxv7lya2voo3egh (1min)
 
 ```sh
 $ python -c "import sys; print(sys.version)"
@@ -72,7 +72,7 @@ $ python -c "import sys; print(sys.version)"
 ## CentOS
 
 * install Python 2.7 sensibly on CentOS 6.5
-* https://asciinema.org/a/0nl1cc9hh5lezhshv8rsm4r09
+* https://asciinema.org/a/doscnk3acy9t6k0cqzprcyyns (14min)
 
 After this process you have installed
 
