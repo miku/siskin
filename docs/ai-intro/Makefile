@@ -3,3 +3,6 @@ all:
 
 clean:
 	rm -rf presentation
+
+go:
+	vimdeck --header-font cybermedium slides.md
