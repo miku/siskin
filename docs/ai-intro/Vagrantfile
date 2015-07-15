@@ -39,7 +39,7 @@ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
 sudo /usr/local/bin/python2.7 ez_setup.py
 sudo /usr/local/bin/easy_install-2.7 pip
 
-[ ! -e "/etc/profile.d/python.sh" ] && sudo sh -c 'echo "export PATH=\"/usr/local/bin:$PATH\"" > /etc/profile.d/python.sh'
+[ ! -e "/etc/profile.d/extrapath.sh" ] && sudo sh -c 'echo "export PATH=\"/usr/local/bin:/usr/local/sbin:$PATH\"" > /etc/profile.d/extrapath.sh'
 
 #      _     _    _
 #  ___(_)___| | _(_)_ __
