@@ -1,9 +1,16 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$script = <<SCRIPT
+sudo rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+date > /etc/vagrant_provisioned_at
+SCRIPT
+
+
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
   config.vm.box = "chef/centos-6.5"
+  config.vm.provision "shell", inline: $script
 end
