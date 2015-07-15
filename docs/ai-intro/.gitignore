@@ -1,4 +1,6 @@
 presentation/*
 metrics/*
-siskin.ini
 notes.md
+siskin.ini
+client.cfg
+logging.ini
