@@ -68,6 +68,13 @@ $ python -c "import sys; print(sys.version)"
 [GCC 4.4.7 20120313 (Red Hat 4.4.7-4)]
 ```
 
+
+## CentOS
+
+* install Python 2.7 sensibly on CentOS 6.5
+* https://asciinema.org/a/0nl1cc9hh5lezhshv8rsm4r09
+
+
 ## Dependencies
 
 ![](img/mtc.png)
