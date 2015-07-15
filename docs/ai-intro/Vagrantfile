@@ -5,22 +5,49 @@ $script = <<SCRIPT
 sudo rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 sudo yum -y update
 
-# Setup Python 2.7
+# Python 2.7
 sudo yum groupinstall -y 'development tools'
 sudo yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
 
 cd /tmp
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz
-xz -d Python-2.7.9.tar.xz
-tar -xvf Python-2.7.9.tar
+tar xf Python-2.7.9.tar.xz
 cd Python-2.7.9
-./configure --prefix=/usr/local
-make && make altinstall
-cd
+./configure --prefix=/usr/local && make && make altinstall
+
+# desired result: root sees system, user sees local
+#
+# $ sudo which python
+# /usr/bin/python
+#
+# $ which python
+# /usr/local/bin/python
+#
+cd /usr/local/bin
+ln -s python2.7 python
+ln -s python2.7-config python-config
+
+# setuptools and pip
+cd /tmp
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+sudo /usr/local/bin/python2.7 ez_setup.py
+sudo /usr/local/bin/easy_install-2.7 pip
+
+# adjust PATH, so /usr/local/bin/python wins
+[ ! -e "/etc/profile.d/python.sh" ] && sudo sh -c 'echo "export PATH=\"/usr/local/bin:$PATH\"" > /etc/profile.d/python.sh'
+
+# prepare native python deps
+sudo yum install -y libxml2 libxslt libxml2-devel libxslt-devel
+
+# install deptree management
+# check by running:
+#
+#     $ taskversion
+#
+sudo -i pip install siskin
 
 date > /etc/vagrant_provisioned_at
 SCRIPT
-
 
 VAGRANTFILE_API_VERSION = "2"
 
