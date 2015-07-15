@@ -22,7 +22,7 @@ sudo yum -y update
 #
 sudo yum groupinstall -y 'development tools'
 sudo yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
-sudo yum install -y vim tmux
+sudo yum install -y vim tmux bash-completion tree
 
 cd /tmp
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz
@@ -49,6 +49,11 @@ sudo /usr/local/bin/easy_install-2.7 pip
 #
 sudo yum install -y libxml2 libxslt libxml2-devel libxslt-devel
 sudo -i pip install siskin
+
+# bash completion
+sudo mkdir -p /etc/bash_completion.d/
+sudo wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
+sudo chmod +x /etc/bash_completion.d/siskin_completion.sh
 
 #    __      _
 #   /__\_  _| |_ _ __ __ _
