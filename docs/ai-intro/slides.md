@@ -102,3 +102,11 @@ It's on pypi, you can install it with:
 ```sh
 $ pip install siskin
 ```
+
+
+## Dependencies
+
+The siskin tools installs a couple of commands, all prefixed with
+`task-`.
+
+A first look: https://asciinema.org/a/399w4eolzkfpiroavkfdewy6j (1m)
