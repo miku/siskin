@@ -2,10 +2,24 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
+
+#                  _
+#   ___ _ __   ___| |
+#  / _ \ '_ \ / _ \ |
+# |  __/ |_) |  __/ |
+#  \___| .__/ \___|_|
+#      |_|
+#
 sudo rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 sudo yum -y update
 
-# Python 2.7
+#    ___       _   _
+#   / _ \_   _| |_| |__   ___  _ __
+#  / /_)/ | | | __| '_ \ / _ \| '_ \
+# / ___/| |_| | |_| | | | (_) | | | |
+# \/     \__, |\__|_| |_|\___/|_| |_|
+#        |___/
+#
 sudo yum groupinstall -y 'development tools'
 sudo yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
 sudo yum install -y vim tmux
@@ -16,36 +30,43 @@ tar xf Python-2.7.9.tar.xz
 cd Python-2.7.9
 ./configure --prefix=/usr/local && make && make altinstall
 
-# desired result: root sees system, user sees local
-#
-# $ sudo which python
-# /usr/bin/python
-#
-# $ which python
-# /usr/local/bin/python
-#
 cd /usr/local/bin
 ln -s python2.7 python
 ln -s python2.7-config python-config
 
-# setuptools and pip
 cd /tmp
 wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
 sudo /usr/local/bin/python2.7 ez_setup.py
 sudo /usr/local/bin/easy_install-2.7 pip
 
-# adjust PATH, so /usr/local/bin/python wins
 [ ! -e "/etc/profile.d/python.sh" ] && sudo sh -c 'echo "export PATH=\"/usr/local/bin:$PATH\"" > /etc/profile.d/python.sh'
 
-# prepare native python deps
+#      _     _    _
+#  ___(_)___| | _(_)_ __
+# / __| / __| |/ / | '_ \
+# \__ \ \__ \   <| | | | |
+# |___/_|___/_|\_\_|_| |_|
+#
 sudo yum install -y libxml2 libxslt libxml2-devel libxslt-devel
-
-# install deptree management
-# check by running:
-#
-#     $ taskversion
-#
 sudo -i pip install siskin
+
+#    __      _
+#   /__\_  _| |_ _ __ __ _
+#  /_\ \ \/ / __| '__/ _` |
+# //__  >  <| |_| | | (_| |
+# \__/ /_/\_\\__|_|  \__,_|
+
+# extra tools required by siskin
+sudo yum install -y jq xmlstarlet
+
+# our tools required by siskin
+sudo yum install -y https://github.com/miku/esbulk/releases/download/v0.3.3/esbulk-0.3.3-0.x86_64.rpm
+sudo yum install -y https://github.com/miku/ldjtab/releases/download/v0.1.3/ldjtab-0.1.3-0.x86_64.rpm
+sudo yum install -y https://github.com/miku/memcldj/releases/download/v1.2.0/memcldj-1.2.0-0.x86_64.rpm
+sudo yum install -y https://github.com/miku/solrbulk/releases/download/v0.1.5.3/solrbulk-0.1.5.3-0.x86_64.rpm
+sudo yum install -y https://github.com/miku/span/releases/download/v0.1.44/span-0.1.44-0.x86_64.rpm
+sudo yum install -y https://github.com/miku/hurrly/releases/download/v0.1.3/hurrly-0.1.3-0.x86_64.rpm
+sudo yum install -y https://github.com/miku/filterline/releases/download/v0.1.3/filterline-0.1.3-0.x86_64.rpm
 
 date > /etc/vagrant_provisioned_at
 SCRIPT
