@@ -60,7 +60,7 @@ I am really sorry, but ...
 ![](img/heart.png)
 
 * nothing but ♥ ♥ ♥
-* https://asciinema.org/a/2gpcfhapf4bxv7lya2voo3egh (1min)
+* https://asciinema.org/a/2gpcfhapf4bxv7lya2voo3egh (1m)
 
 ```sh
 $ python -c "import sys; print(sys.version)"
@@ -72,14 +72,16 @@ $ python -c "import sys; print(sys.version)"
 ## CentOS
 
 * install Python 2.7 sensibly on CentOS 6.5
-* https://asciinema.org/a/doscnk3acy9t6k0cqzprcyyns (14min)
+* https://asciinema.org/a/doscnk3acy9t6k0cqzprcyyns (14m)
 
 After this process you have installed
 
 * Python 2.7.9
 * siskin and all dependencies
 
-To make siskin work, we need a config file for FTP credential and such. Copy and adjust:
+To make siskin work, we need a config file for FTP credential and such. Copy and adjust.
+
+* https://asciinema.org/a/03hc9oo8dpyyc6j01gilta4l5 (30s)
 
 ```sh
 $ sudo cp /vagrant/siskin.ini /etc/siskin/
