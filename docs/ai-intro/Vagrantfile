@@ -22,7 +22,7 @@ sudo yum -y update
 #
 sudo yum groupinstall -y 'development tools'
 sudo yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
-sudo yum install -y vim tmux bash-completion tree
+sudo yum install -y vim tmux bash-completion tree lftp
 
 cd /tmp
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz
