@@ -72,7 +72,7 @@ $ python -c "import sys; print(sys.version)"
 ## CentOS
 
 * install Python 2.7 sensibly on CentOS 6.5
-* https://asciinema.org/a/doscnk3acy9t6k0cqzprcyyns (14m)
+* https://asciinema.org/a/29915dmloarfkj2qkp6z7l5zm (13m)
 
 After this process you have installed
 
