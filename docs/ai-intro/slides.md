@@ -74,6 +74,17 @@ $ python -c "import sys; print(sys.version)"
 * install Python 2.7 sensibly on CentOS 6.5
 * https://asciinema.org/a/0nl1cc9hh5lezhshv8rsm4r09
 
+After this process you have installed
+
+* Python 2.7.9
+* siskin and all dependencies
+
+To make siskin work, we need a config file for FTP credential and such. Copy and adjust:
+
+```sh
+$ sudo cp /vagrant/siskin.ini /etc/siskin/
+```
+
 
 ## Dependencies
 
