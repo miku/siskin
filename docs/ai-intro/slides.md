@@ -120,7 +120,8 @@ My development cycle:
 1. write a few tasks in Python, Shell, etc., e.g. for Jstor, Thieme, ...
 2. test them locally
 3. if they work and are fast enough, commit and go to 1.
-4. if they work, but are slow, find ways to speed up things
+4. if they work, but are slow, [find](http://unix.stackexchange.com/q/88651/376)
+   [ways](http://unix.stackexchange.com/q/209404/376) to [speed up](https://golang.org/doc/effective_go.html#parallel) [things](https://asciinema.org/a/5id2uazhw5faykujavgzns3mo?autoplay=1)
 
 On occasion, run *AIExport* and *AIIntermediateSchema* and upload results into
 SOLR and memcachedb as updates.
