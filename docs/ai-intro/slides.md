@@ -8,28 +8,31 @@ MARTIN CZYGAN UBL 2015-07-16 10:00
 # Roadmap
 
 * a few DISCLAIMERS
-* first things first
-* short introduction to the DEPENDENCY GRAPH
-* high performance FILE CONVERSIONS
+* CENTOS
+* modeling workflows with a DEPENDENCY GRAPH
+* FILE CONVERSIONS
 * LICENSE HANDLING
 * solr and memcachedb UPDATES
+
+
+## Goal
+
+Overview, not every detail.
+
 
 
 ## Disclaimers
 
 Most of the software here is work-in-progress.
 
-With "project AI" UBL seems to try to act like a startup in a
-corporate environment, which is cute.
-
-![](img/blitz.png)
-
 First commit:
 
 > b5262ff 2015-01-06 | add crossref stub [Martin Czygan]
 
-1090 commits across about 10 projects since then. That's about 5.5
-commits per day - every day.
+First demo 2015-01-28.
+
+1090 commits across about 10 projects since then. That's about 5.5 commits per
+day.
 
 Finc SVN repository at the same time: 673 commits, 10 committers.
 
@@ -57,10 +60,8 @@ I am really sorry, but ...
 
 ## CentOS
 
-![](img/heart.png)
-
-* nothing but ♥ ♥ ♥
-* https://asciinema.org/a/2gpcfhapf4bxv7lya2voo3egh (1m)
+* no Python 2.7
+* EPEL for more packages
 
 ```sh
 $ python -c "import sys; print(sys.version)"
@@ -85,28 +86,48 @@ To make siskin work, we need a config file for FTP credential and such. Copy and
 
 ```sh
 $ sudo cp /vagrant/siskin.ini /etc/siskin/
+$ sudo cp /vagrant/{client.cfg,logging.ini} /etc/luigi/
 ```
 
 
-## Dependencies
+# DAG
 
-![](img/mtc.png)
+The dependency graph (DAG) is the overall structure, that helps to build
+complex workflows. Similar to a "make for data".
 
-The dependency graph is the overall structure, that allow us to build
-complex workflows.
+The python project is called [siskin](https://github.com/miku/siskin), and is based on [luigi](https://github.com/spotify/luigi).
 
-The python project is called [siskin](https://github.com/miku/siskin).
-
-It's on pypi, you can install it with:
+It's on pypi (Python package index), you can install it with:
 
 ```sh
 $ pip install siskin
 ```
 
+Example graphs for AI:
 
-## Dependencies
+* http://i.imgur.com/T1Ju4iF.png
+* http://i.imgur.com/gdyC1sJ.png
 
-The siskin tools installs a couple of commands, all prefixed with
-`task-`.
+Some more in the [docs](https://github.com/miku/siskin/tree/master/docs/catalog), e.g.
+[DBPCategoryExtensionGND](https://github.com/miku/siskin/blob/master/docs/catalog/DBPCategoryExtensionGND.pdf).
+
+
+# DAG
+
+My development cycle:
+
+1. write a few tasks in Python, Shell, etc., e.g. for Jstor, Thieme, ...
+2. test them locally (next slide)
+3. if they work and are fast enough, commit and go to 1.
+4. if they work, but are slow, find ways to speed up things
+
+On occasion, run "AIExport" and "AIIntermediateSchema" and upload results into
+SOLR and memcachedb as updates.
+
+
+# DAG
+
+The siskin package contains a couple of commands, all prefixed with
+"task", e.g. "taskdo", "taskredo", "taskrm", "taskcat", ...
 
 A first look: https://asciinema.org/a/399w4eolzkfpiroavkfdewy6j (1m)
