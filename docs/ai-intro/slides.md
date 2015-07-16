@@ -73,7 +73,8 @@ $ python -c "import sys; print(sys.version)"
 ## CentOS
 
 * install Python 2.7 sensibly on CentOS 6.5
-* https://asciinema.org/a/29915dmloarfkj2qkp6z7l5zm (13m)
+* https://github.com/miku/siskin/blob/master/docs/ai-intro/Vagrantfile
+* https://asciinema.org/a/01i19zplnnisg9gfcn5s3kwta (13m)
 
 After this process you have installed
 
@@ -130,4 +131,98 @@ SOLR and memcachedb as updates.
 The siskin package contains a couple of commands, all prefixed with
 "task", e.g. "taskdo", "taskredo", "taskrm", "taskcat", ...
 
-A first look: https://asciinema.org/a/399w4eolzkfpiroavkfdewy6j (1m)
+A first look: https://asciinema.org/a/8hxtcpi1x72uzs3v63gy88m4m (6m)
+
+
+# DAG
+
+Advantages:
+
+* most things happen in files, no database to setup or copy or share
+* system is in a defined state most of the time (a task is either done or not)
+* can evolve, start with some ineffiecient but working, improve over time
+
+
+# CONVERSIONS
+
+For larger file format conversions (e.g. Degruyter XML -> Intermediate Schema JSON)
+Python alone is to slow.
+
+For this performance critical parts I chose Go. These conversions are
+mostly in a project named [span](http://github.com/miku/span).
+
+
+# SPAN
+
+span know two commands:
+
+* span-import
+* span-export
+
+Odd names, since there is not database or something.
+
+
+# LICENSE HANDLING
+
+span-export can work with holding files.
+
+```sh
+span-export -f DE-15:path/to/x.xml -f DE-14:path/to/y.xml -l DE-15-FID:/path/to/issn.list
+```
+
+# SOLR UPDATES
+
+Little command line tool: [solrbulk](http://github.com/miku/solrbulk).
+
+Uploads (indexes) documents into SOLR in bulk and in parallel.
+
+People love it already:
+
+> "Nice! This'll let me replace a (uglier) somewhat similar set of scripts I cludged together." 22.05.2015
+
+> "awesome thanks! I keep hand rolling the same crappy utils that do the same thing, glad somebody finally got time to create something more generic!" 01.06.2015
+
+If you need something like this for ES: [esbulk](http://github.com/miku/esbulk).
+
+
+# BLOB UPDATES
+
+Little command line tool: [memcldj](http://github.com/miku/memcldj).
+
+Stands for memcache and line-delimited JSON.
+
+Has retry built-in, so it usually runs fine with 100M records is one Go.
+
+
+# Summary
+
+Install python package and little command line tools.
+
+Create SOLR and intermediate schema files:
+
+```sh
+$ taskdo AIExport
+$ taskdo AIIntermediateSchema
+```
+
+Upload to SOLR and blob:
+
+```sh
+$ solrbulk -host 173.19.112.21 -port 8085 -z /media/mtc/Ether/siskin-data/ai/AIExport/date-2015-07-06.ldj.gz
+$ memcldj -w 4 -verbose -key finc.record_id -addr 173.19.112.98:12345 $(taskoutput AIIntermediateSchema)
+```
+
+Wait.
+
+
+# Summary
+
+Still things to do:
+
+* I would love to see core luigi concepts implemented in Go, because this
+  would simplify deployment.
+
+* More documentation and rules for collaboration.
+
+* ...
+
