@@ -22,7 +22,6 @@ sudo yum -y update
 #
 sudo yum groupinstall -y 'development tools'
 sudo yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
-sudo yum install -y vim tmux bash-completion tree lftp
 
 cd /tmp
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz
@@ -61,8 +60,8 @@ sudo chmod +x /etc/bash_completion.d/siskin_completion.sh
 # //__  >  <| |_| | | (_| |
 # \__/ /_/\_\\__|_|  \__,_|
 #
-# extra tools required by siskin
-sudo yum install -y jq xmlstarlet
+# extra tools required by siskin or just useful
+sudo yum install -y jq xmlstarlet lftp vim tmux bash-completion tree
 
 # our tools required by siskin
 sudo yum install -y https://github.com/miku/esbulk/releases/download/v0.3.3/esbulk-0.3.3-0.x86_64.rpm
