@@ -13,6 +13,10 @@ set -e -u
 
 args=("$@")
 
+# first, check if tasks exists
+OUTPUT=$(taskoutput "$@")
+
+# then extract file name
 OUTPUT=$(taskoutput "$@"|tail -1)
 
 if [[ ! -f "$OUTPUT" ]]; then
