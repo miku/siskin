@@ -46,7 +46,7 @@ Have a look at:
 http://www.slideshare.net/f.lohmeier/big-bibliographic-data-sca-ds-project-meeting-20150612/17
 
 * "finc" - works fine with 100M records
-* d:swarm - scalability issues, about 4M records per day!
+* d:swarm - scalability issues, about 4M records per day
 
 
 ## Disclaimers
@@ -118,18 +118,18 @@ Some more in the [docs](https://github.com/miku/siskin/tree/master/docs/catalog)
 My development cycle:
 
 1. write a few tasks in Python, Shell, etc., e.g. for Jstor, Thieme, ...
-2. test them locally (next slide)
+2. test them locally
 3. if they work and are fast enough, commit and go to 1.
 4. if they work, but are slow, find ways to speed up things
 
-On occasion, run "AIExport" and "AIIntermediateSchema" and upload results into
+On occasion, run *AIExport* and *AIIntermediateSchema* and upload results into
 SOLR and memcachedb as updates.
 
 
 # DAG
 
 The siskin package contains a couple of commands, all prefixed with
-"task", e.g. "taskdo", "taskredo", "taskrm", "taskcat", ...
+`task`, e.g. `taskdo`, `taskredo`, `taskrm`, `taskcat`, ...
 
 A first look: https://asciinema.org/a/8hxtcpi1x72uzs3v63gy88m4m (6m)
 
@@ -140,7 +140,7 @@ Advantages:
 
 * most things happen in files, no database to setup or copy or share
 * system is in a defined state most of the time (a task is either done or not)
-* can evolve, start with some ineffiecient but working, improve over time
+* can evolve, start with some inefficient but working, improve over time
 
 
 # CONVERSIONS
@@ -154,12 +154,12 @@ mostly in a project named [span](http://github.com/miku/span).
 
 # SPAN
 
-span know two commands:
+span knows two commands:
 
 * span-import
 * span-export
 
-Odd names, since there is not database or something.
+Odd names, since there is no database or something.
 
 
 # LICENSE HANDLING
@@ -198,7 +198,7 @@ Little command line tool: [memcldj](http://github.com/miku/memcldj).
 
 Stands for memcache and line-delimited JSON.
 
-Has retry built-in, so it usually runs fine with 100M records is one Go.
+Has retry built-in, so it usually runs fine with 100M records is one go.
 
 
 # Summary
