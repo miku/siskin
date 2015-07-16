@@ -98,7 +98,7 @@ complex workflows. Similar to a "make for data".
 
 The python project is called [siskin](https://github.com/miku/siskin), and is based on [luigi](https://github.com/spotify/luigi).
 
-It's on pypi (Python package index), you can install it with:
+It's on [pypi](https://pypi.python.org/pypi/siskin) (Python package index), you can install it with:
 
 ```sh
 $ pip install siskin
