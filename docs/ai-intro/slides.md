@@ -170,17 +170,22 @@ span-export can work with holding files.
 span-export -f DE-15:path/to/x.xml -f DE-14:path/to/y.xml -l DE-15-FID:/path/to/issn.list
 ```
 
+
 # SOLR UPDATES
 
 Little command line tool: [solrbulk](http://github.com/miku/solrbulk).
 
 Uploads (indexes) documents into SOLR in bulk and in parallel.
 
+----
+
 People love it already:
 
 > "Nice! This'll let me replace a (uglier) somewhat similar set of scripts I cludged together." 22.05.2015
 
 > "awesome thanks! I keep hand rolling the same crappy utils that do the same thing, glad somebody finally got time to create something more generic!" 01.06.2015
+
+----
 
 If you need something like this for ES: [esbulk](http://github.com/miku/esbulk).
 
