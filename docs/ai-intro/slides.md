@@ -181,9 +181,11 @@ Uploads (indexes) documents into SOLR in bulk and in parallel.
 
 People love it already:
 
-> "Nice! This'll let me replace a (uglier) somewhat similar set of scripts I cludged together." 22.05.2015
+> "Nice! This'll let me replace a (uglier) somewhat similar
+   set of scripts I cludged together." 22.05.2015
 
-> "awesome thanks! I keep hand rolling the same crappy utils that do the same thing, glad somebody finally got time to create something more generic!" 01.06.2015
+> "awesome thanks! I keep hand rolling the same crappy utils that do the same thing,
+   glad somebody finally got time to create something more generic!" 01.06.2015
 
 ----
 
@@ -213,8 +215,10 @@ $ taskdo AIIntermediateSchema
 Upload to SOLR and blob:
 
 ```sh
-$ solrbulk -host 173.19.112.21 -port 8085 -z /media/mtc/Ether/siskin-data/ai/AIExport/date-2015-07-06.ldj.gz
-$ memcldj -w 4 -verbose -key finc.record_id -addr 173.19.112.98:12345 $(taskoutput AIIntermediateSchema)
+$ solrbulk -host 173.19.112.21 -port 8085 -z \
+    /media/mtc/Ether/siskin-data/ai/AIExport/date-2015-07-06.ldj.gz
+$ memcldj -w 4 -verbose -key finc.record_id \
+    -addr 173.19.112.98:12345 $(taskoutput AIIntermediateSchema)
 ```
 
 Wait.
