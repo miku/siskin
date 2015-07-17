@@ -150,13 +150,19 @@ class GBIXML(GBITask):
         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
 class GBIIntermediateSchema(GBITask):
-    """ Convert GBI to intermediate format via span. """
+    """
+    Convert GBI to intermediate format via span. If group is empty,
+    create intermediate schema of all groups.
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    group = luigi.Parameter(default='any')
 
     def requires(self):
-       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': GBIXML(date=self.date)}
+        if self.group == "any":
+            return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': GBIXML(date=self.date)}
+        else:
+            return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': GBIXMLGroup(date=self.date)}
 
     @timed
     def run(self):
