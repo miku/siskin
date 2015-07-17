@@ -156,7 +156,7 @@ class GBIIntermediateSchema(GBITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='all')
+    group = luigi.Parameter(default='all', description='wiwi, fzs, sowi, recht')
 
     def requires(self):
         if self.group == "all":
