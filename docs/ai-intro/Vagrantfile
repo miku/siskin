@@ -49,7 +49,6 @@ sudo /usr/local/bin/easy_install-2.7 pip
 sudo yum install -y libxml2 libxslt libxml2-devel libxslt-devel
 sudo -i pip install siskin
 
-# bash completion
 sudo mkdir -p /etc/bash_completion.d/
 sudo wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
 sudo chmod +x /etc/bash_completion.d/siskin_completion.sh
