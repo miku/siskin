@@ -159,10 +159,11 @@ class GBIIntermediateSchema(GBITask):
     group = luigi.Parameter(default='all', description='wiwi, fzs, sowi, recht')
 
     def requires(self):
+        span = Executable(name='span-import', message='http://git.io/vI8NV')
         if self.group == "all":
-            return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': GBIXML(date=self.date)}
+            return {'span': span, 'file': GBIXML(date=self.date)}
         else:
-            return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': GBIXMLGroup(date=self.date)}
+            return {'span': span, 'file': GBIXMLGroup(date=self.date, group=self.group)}
 
     @timed
     def run(self):
