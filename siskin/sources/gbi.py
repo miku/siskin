@@ -151,15 +151,15 @@ class GBIXML(GBITask):
 
 class GBIIntermediateSchema(GBITask):
     """
-    Convert GBI to intermediate format via span. If group is empty,
-    create intermediate schema of all groups.
+    Convert GBI to intermediate format via span.
+    If group is 'all', create intermediate schema of all groups.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='any')
+    group = luigi.Parameter(default='all')
 
     def requires(self):
-        if self.group == "any":
+        if self.group == "all":
             return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': GBIXML(date=self.date)}
         else:
             return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': GBIXMLGroup(date=self.date)}
