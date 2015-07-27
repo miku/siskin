@@ -45,8 +45,86 @@ class DOAJCSV(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
 
+class DOAJChunk(DOAJTask):
+    """
+    Retrieve a chunk of data from DOAJ. Mitigates HTTP 502 and 504 errors from DOAJ.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    offset = luigi.IntParameter(default=0)
+    size = luigi.IntParameter(default=100000, description="must be a multiple of batch_size")
+
+    host = luigi.Parameter(default='doaj.org', significant=False)
+    port = luigi.IntParameter(default=443, significant=False)
+    url_prefix = luigi.Parameter(default='query', significant=False)
+
+    batch_size = luigi.IntParameter(default=500, significant=False)
+    timeout = luigi.IntParameter(default=120, significant=False)
+    max_retries = luigi.IntParameter(default=10, significant=False)
+
+    @timed
+    def run(self):
+        """ Connect to ES and issue queries. TODO: See if they support scan. """
+        hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
+        es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
+        with self.output().open('w') as output:
+            offset, total = self.offset, self.offset + self.size
+            while offset <= total:
+                self.logger.debug(json.dumps({'offset': offset, 'total': total}))
+                result = es.search(body={'constant_score':
+                                   {'query': {'match_all': {}}}},
+                                   index=('journal', 'article'),
+                                   size=self.batch_size, from_=offset)
+                if len(result['hits']['hits']) == 0:
+                    break
+                for doc in result['hits']['hits']:
+                    output.write("%s\n" % json.dumps(doc))
+                total = total or result['hits']['total']
+                offset += self.batch_size
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class DOAJChunkedDump(DOAJTask):
+    """ Retrieve DOAJ in chunks. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    host = luigi.Parameter(default='doaj.org', significant=False)
+    port = luigi.IntParameter(default=443, significant=False)
+    url_prefix = luigi.Parameter(default='query', significant=False)
+
+    batch_size = luigi.IntParameter(default=1000, significant=False)
+    timeout = luigi.IntParameter(default=60, significant=False)
+    max_retries = luigi.IntParameter(default=3, significant=False)
+
+    size = luigi.IntParameter(default=100000, significant=False)
+
+    def requires(self):
+        hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
+        es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
+        result = es.search(body={'constant_score':
+                           {'query': {'match_all': {}}}},
+                           index=('journal', 'article'), size=1, from_=0)
+        offset, total = 0, result['hits']['total']
+        while offset < total:
+            yield DOAJChunk(host=self.host, port=self.port, url_prefix=self.url_prefix, batch_size=self.batch_size,
+                            timeout=self.timeout, max_retries=self.max_retries, offset=offset, size=self.size)
+            offset += self.size
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class DOAJDump(DOAJTask):
-    """ Complete DOAJ Elasticsearch dump. For a slightly filtered version see: DOAJFiltered. """
+    """
+    Complete DOAJ Elasticsearch dump. For a slightly filtered version see: DOAJFiltered.
+    Deprecated: One task to download 8G is more fragile, that 8 tasks downloading 1G each.
+    See: DOAJChunkedDump.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     host = luigi.Parameter(default='doaj.org', significant=False)
@@ -224,7 +302,6 @@ class DOAJRaw(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 
 class DOAJFincIDAlignment(DOAJTask):
     """ FincID alignment. """
