@@ -12,6 +12,10 @@ import tempfile
 import warnings
 warnings.filterwarnings("ignore")
 
+# https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning
+import urllib3
+urllib3.disable_warnings()
+
 __version__ = '0.0.113'
 
 config = Config.instance()
