@@ -63,11 +63,7 @@ setup(name='siskin',
       ],
       package_dir={'siskin': 'siskin'},
       # adjust the globs here (http://stackoverflow.com/a/3712682/89391)
-      package_data={'siskin': ['assets/*.xsl',
-                               'assets/*.php',
-                               'assets/*.conf',
-                               'assets/*.txt',
-                               'assets/ambience/*']},
+      package_data={'siskin': ['assets/*']},
       scripts=[
         # one script to replace them all
         'bin/vint',
