@@ -92,11 +92,11 @@ class DOAJChunkedDump(DOAJTask):
     port = luigi.IntParameter(default=443, significant=False)
     url_prefix = luigi.Parameter(default='query', significant=False)
 
-    batch_size = luigi.IntParameter(default=1000, significant=False)
-    timeout = luigi.IntParameter(default=60, significant=False)
-    max_retries = luigi.IntParameter(default=3, significant=False)
+    batch_size = luigi.IntParameter(default=500, significant=False)
+    timeout = luigi.IntParameter(default=120, significant=False)
+    max_retries = luigi.IntParameter(default=10, significant=False)
 
-    size = luigi.IntParameter(default=100000, significant=False)
+    size = luigi.IntParameter(default=10000, significant=False, description='size of a chunk')
 
     def requires(self):
         hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
