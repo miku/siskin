@@ -18,7 +18,6 @@ install_requires = [
     'argparse>=1.2',
     'astroid==1.1.1',
     'colorama==0.3.3',
-    'click==4.0',
     'decorator==3.4.0',
     'elasticsearch==1.3.0',
     'gluish==0.1.79',
@@ -65,9 +64,6 @@ setup(name='siskin',
       # adjust the globs here (http://stackoverflow.com/a/3712682/89391)
       package_data={'siskin': ['assets/*']},
       scripts=[
-        # one script to replace them all
-        'bin/vint',
-
         'bin/taskcat',
         'bin/taskcp',
         'bin/taskdeps-dot',
