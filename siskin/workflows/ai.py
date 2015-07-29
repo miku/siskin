@@ -166,19 +166,25 @@ class AIExport(AITask):
 
     @timed
     def run(self):
-        """ TODO(miku): Externalize source / ISIL matrix and filter method (e.g. holdings, list, any, ...)."""
+        """
+        TODO(miku): Move source/ISIL matrix and filter method out of here.
+        """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
-        shellout("span-export -any DE-15 {input} | gzip >> {output}", input=self.input().get('gbi').path, output=stopover)
-        shellout("span-export -any DE-15 -any DE-14 {input} | gzip >> {output}", input=self.input().get('doaj').path, output=stopover)
+        # DE-15 and DE-14 get DOAJ
+        shellout("""span-export -any DE-15 -any DE-14 {input} | gzip >> {output}""",
+                 input=self.input().get('doaj').path, output=stopover)
 
+        # prepare holding file -f arguments for span-export
         hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59')
         files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input().items() if k in hkeys])
 
+        # prepare issn list -l arguments for span-export
         fkeys = ('DE-15-FID',)
         lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input().items() if k in fkeys])
 
-        for source in ('crossref', 'jstor', 'degruyter'):
+        # apply both filters on following sources
+        for source in ('crossref', 'degruyter', 'gbi'):
             shellout("span-export -skip {files} {lists} {input} | gzip >> {output}", files=files,
                      lists=lists, input=self.input().get(source).path, output=stopover)
 
