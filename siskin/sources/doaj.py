@@ -20,6 +20,7 @@ import elasticsearch
 import json
 import luigi
 import tempfile
+import time
 
 config = Config.instance()
 
@@ -138,20 +139,34 @@ class DOAJDump(DOAJTask):
     @timed
     def run(self):
         """ Connect to ES and issue queries. TODO: See if they support scan. """
+        max_backoff_retry = 10
+        backoff_interval_s = 0.05
+
         hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
         es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
         with self.output().open('w') as output:
             offset, total = 0, 0
             while offset <= total:
-                self.logger.debug(json.dumps({'offset': offset, 'total': total}))
-                result = es.search(body={'constant_score':
-                                   {'query': {'match_all': {}}}},
-                                   index=('journal', 'article'),
-                                   size=self.batch_size, from_=offset)
-                for doc in result['hits']['hits']:
-                    output.write("%s\n" % json.dumps(doc))
-                total = total or result['hits']['total']
-                offset += self.batch_size
+                for i in range(1, max_backoff_retry + 1):
+                    self.logger.debug(json.dumps({'attempt': i, 'offset': offset, 'total': total}))
+
+                    try:
+                        result = es.search(body={'constant_score':
+                                           {'query': {'match_all': {}}}},
+                                           index=('journal', 'article'),
+                                           size=self.batch_size, from_=offset)
+                    except Exception as err:
+                        if i == max_backoff_retry:
+                            raise
+                        time.sleep(backoff_interval_s)
+                        backoff_interval_s = 2 * backoff_interval_s
+                        continue
+
+                    for doc in result['hits']['hits']:
+                        output.write("%s\n" % json.dumps(doc))
+                    total = total or result['hits']['total']
+                    offset += self.batch_size
+                    break
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
