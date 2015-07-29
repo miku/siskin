@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 import urllib3
 urllib3.disable_warnings()
 
-__version__ = '0.0.114'
+__version__ = '0.0.115'
 
 config = Config.instance()
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())
