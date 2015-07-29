@@ -19,11 +19,22 @@ urllib3.disable_warnings()
 __version__ = '0.0.116'
 
 config = Config.instance()
+
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())
+
+DEFAULT_LOG_DIR = '/var/log/siskin'
+logdir = config.get('core', 'logdir', DEFAULT_LOG_DIR)
 
 if not os.path.exists(tempfile.tempdir):
     try:
         os.makedirs(tempfile.tempdir, 1777)
     except OSError as err:
         print('temp dir does not exists and we cannot create it: {0}'.format(tempfile.tempdir))
+        sys.exit(1)
+
+if not os.path.exists(logdir):
+    try:
+        os.makedirs(logdir, 1777)
+    except OSError as err:
+        print('log dir does not exists and we cannot create it: {0}'.format(logdir))
         sys.exit(1)

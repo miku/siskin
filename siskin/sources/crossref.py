@@ -23,6 +23,7 @@ import json
 import luigi
 import os
 import requests
+import siskin
 import tempfile
 import urllib
 
@@ -167,7 +168,8 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i crossref {input} > {output}", input=self.input().get('file').path)
+        output = shellout("span-import -verbose -i crossref {input} 2>> {logdir}/CrossrefIntermediateSchema.log > {output}",
+                          input=self.input().get('file').path, logdir=siskin.logdir)
         luigi.File(output).move(self.output().path)
 
     def output(self):
