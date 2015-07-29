@@ -1804,8 +1804,7 @@ class Lookup(BSZTask):
         self.logger.debug("\n\n{output}".format(output=open(output).read()))
 
         if len(epns) == 0:
-            self.logger.info('# No EPN to consider between {begin} and {end}'.format(
-                  self.begin, self.end))
+            self.logger.info('# No EPN to consider between {begin} and {end}'.format(begin=self.begin, end=self.end))
 
         for epn in sorted(epns):
             self.logger.info('# trace in deletions for EPN (epn, iln, date): %s' % (epn))
