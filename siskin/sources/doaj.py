@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=F0401,W0232,E1101,C0103,C0301
+# pylint: disable=F0401,W0232,E1101,C0103,C0301,W0223,E1123,R0904,E1103
 """
 Directory of Open Access Journals.
 """
@@ -77,11 +77,10 @@ class DOAJDump(DOAJTask):
                     self.logger.debug(json.dumps({'attempt': i, 'offset': offset, 'total': total}))
 
                     try:
-                        result = es.search(body={'constant_score':
-                                           {'query': {'match_all': {}}}},
+                        result = es.search(body={'constant_score': {'query': {'match_all': {}}}},
                                            index=('journal', 'article'),
                                            size=self.batch_size, from_=offset)
-                    except Exception as err:
+                    except Exception:
                         if i == max_backoff_retry:
                             raise
                         time.sleep(backoff_interval_s)
@@ -136,7 +135,7 @@ class DOAJJson(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return DOAJFiltered(date=self.date)
+        return DOAJFiltered(date=self.date)
 
     @timed
     def run(self):
@@ -152,7 +151,7 @@ class DOAJIndex(DOAJTask, ElasticsearchMixin):
     index = luigi.Parameter(default='doaj')
 
     def requires(self):
-       return DOAJJson(date=self.date)
+        return DOAJJson(date=self.date)
 
     @timed
     def run(self):
@@ -181,8 +180,8 @@ class DOAJIntermediateSchema(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': DOAJFiltered(date=self.date)}
+        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+                'file': DOAJFiltered(date=self.date)}
 
     @timed
     def run(self):
