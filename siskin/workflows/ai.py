@@ -175,6 +175,9 @@ class AIExport(AITask):
         shellout("""span-export -any DE-15 -any DE-14 {input} | gzip >> {output}""",
                  input=self.input().get('doaj').path, output=stopover)
 
+        # JSTOR detached from all for now, cf. #5472
+        shellout("""span-export {input} | gzip >> {output}""", input=self.input().get('jstor').path, output=stopover)
+
         # prepare holding file -f arguments for span-export
         hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59')
         files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input().items() if k in hkeys])
