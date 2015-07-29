@@ -168,8 +168,8 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -verbose -i crossref {input} 2>> {logdir}/CrossrefIntermediateSchema.log > {output}",
-                          input=self.input().get('file').path, logdir=siskin.logdir)
+        output = shellout("span-import -verbose -i crossref {input} 2>> {logfile} > {output}",
+                          input=self.input().get('file').path, logfile=self.logfile)
         luigi.File(output).move(self.output().path)
 
     def output(self):

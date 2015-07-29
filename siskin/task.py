@@ -10,6 +10,7 @@ from siskin.configuration import Config
 import logging
 import os
 import random
+import siskin
 
 config = Config.instance()
 
@@ -26,3 +27,9 @@ class DefaultTask(BaseTask):
     def logger(self):
         # logging uses singleton internally, so no worries
         return logging.getLogger('siskin')
+
+    @property
+    def logfile(self):
+        """ A logfile per task for stderr redirects. """
+        name = self.taskdir().split('/')[-1]
+        return os.path.join(config.get('core', 'logdir', siskin.DEFAULT_LOG_DIR), '%s.log' % name)
