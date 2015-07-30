@@ -1039,7 +1039,7 @@ class XPNHistory(BSZTask):
                 history.append({'date': value,
                                 'id': self.id,
                                 'kind': self.kind,
-                                'printable': '%s\n' % record})
+                                'printable': record.as_json(indent=4)})
 
         with self.output().open('w') as output:
             json.dump(history, output, indent=4)
