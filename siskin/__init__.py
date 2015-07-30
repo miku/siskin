@@ -29,12 +29,12 @@ if not os.path.exists(tempfile.tempdir):
     try:
         os.makedirs(tempfile.tempdir, 1777)
     except OSError as err:
-        print('temp dir does not exists and we cannot create it: {0}'.format(tempfile.tempdir))
+        print('core.tempdir does not exists and we cannot create it: {0}'.format(tempfile.tempdir))
         sys.exit(1)
 
 if not os.path.exists(logdir):
     try:
         os.makedirs(logdir, 1777)
     except OSError as err:
-        print('log dir does not exists and we cannot create it: {0}'.format(logdir))
+        print('core.logdir does not exists and we cannot create it: {0}'.format(logdir))
         sys.exit(1)
