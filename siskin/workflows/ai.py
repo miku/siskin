@@ -195,3 +195,15 @@ class AIExport(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class AIUpdate(AITask, luigi.WrapperTask):
+    """
+    Just a wrapper task.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+	return [AIExport(date=self.date), AIIntermediateSchema(date=self.date)]
+
+    def output(self):
+	return self.input()
