@@ -16,7 +16,7 @@ class DOITask(DefaultTask):
     TAG = 'doi'
 
     def closest(self):
-    return monthly(self.date)
+        return monthly(self.date)
 
 class DOICheck(DOITask):
     """
@@ -25,12 +25,12 @@ class DOICheck(DOITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-    return {'input': CrossrefDOIList(date=self.date),
-        'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly')}
+        return {'input': CrossrefDOIList(date=self.date),
+                'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly')}
 
     def run(self):
-    output = shellout("hurrly -w 64 < {input} | gzip > {output}", input=self.input().get('input').path)
-    luigi.File(output).move(self.output().path)
+        output = shellout("hurrly -w 64 < {input} | gzip > {output}", input=self.input().get('input').path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-    return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
