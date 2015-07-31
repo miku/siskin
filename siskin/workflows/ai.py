@@ -198,12 +198,12 @@ class AIExport(AITask):
 
 class AIUpdate(AITask, luigi.WrapperTask):
     """
-    Just a wrapper task.
+    Just a wrapper task for updates, refs #5702.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	return [AIExport(date=self.date), AIIntermediateSchema(date=self.date)]
+        return [AIExport(date=self.date), AIIntermediateSchema(date=self.date)]
 
     def output(self):
-	return self.input()
+        return self.input()
