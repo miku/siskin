@@ -21,6 +21,16 @@ class DOITask(DefaultTask):
 class DOICheck(DOITask):
     """
     Harvest DOI redirects from doi.org API.
+
+    ---- FYI ----
+
+    It is highly recommended that you put a static entry into /etc/hosts
+    for doi.org while `hurrly` is running.
+
+    As of 2015-07-31 doi.org resolves to six servers. Just choose one.
+
+        $ nslookup doi.org
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
