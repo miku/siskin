@@ -180,12 +180,13 @@ class CrossrefDOIList(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefIntermediateSchema(date=self.date)
+        return {'input': CrossrefIntermediateSchema(date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """, input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 
@@ -198,11 +199,12 @@ class CrossrefISSNList(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefUniqItems(begin=self.begin, date=self.date)
+        return {'input': CrossrefUniqItems(begin=self.begin, date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):
-        output = shellout("jq -r '.ISSN[]' {input} 2> /dev/null > {output}", input=self.input().path)
+        output = shellout("jq -r '.ISSN[]' {input} 2> /dev/null > {output}", input=self.input().get('input').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
