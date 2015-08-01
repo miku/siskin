@@ -75,7 +75,7 @@ class DOIBlacklist(DOITask):
                  input=self.input().path, output=stopover)
         shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
                  input=self.input().path, output=stopover)
-        output = shellout("sort -S50% -u {input} | cut -f4 > {output}", input=stopover)
+        output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):
