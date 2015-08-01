@@ -26,7 +26,7 @@ class DOITask(DefaultTask):
     def closest(self):
         return monthly(self.date)
 
-class DOICheck(DOITask):
+class DOIHarvest(DOITask):
     """
     Harvest DOI redirects from doi.org API.
 
@@ -67,7 +67,7 @@ class DOIBlacklist(DOITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return DOICheck(date=self.date)
+        return DOIHarvest(date=self.date)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
