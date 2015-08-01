@@ -2,13 +2,14 @@
 
 from gluish.benchmark import timed
 from gluish.common import Executable
+from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from gluish.format import TSV
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
+from siskin.sources.doi import DOIBlacklist
 from siskin.sources.gbi import GBIIntermediateSchema, GBIISSNList
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
@@ -161,6 +162,7 @@ class AIExport(AITask):
 
             'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/8P6JtB'),
 
+            'blacklist': DOIBlacklist(date=self.date),
             'app': Executable(name='span-export', message='http://git.io/vI8NV'),
         }
 
@@ -172,11 +174,12 @@ class AIExport(AITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         # DE-15 and DE-14 get DOAJ
-        shellout("""span-export -any DE-15 -any DE-14 {input} | gzip >> {output}""",
-                 input=self.input().get('doaj').path, output=stopover)
+        shellout("""span-export -doi-blacklist {blacklist} -any DE-15 -any DE-14 {input} | gzip >> {output}""",
+                 blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path, output=stopover)
 
         # JSTOR detached from all for now, cf. #5472
-        shellout("""span-export {input} | gzip >> {output}""", input=self.input().get('jstor').path, output=stopover)
+        shellout("""span-export -doi-blacklist {blacklist} {input} | gzip >> {output}""", input=self.input().get('jstor').path,
+                 output=stopover, blacklist=self.input().get('blacklist').path)
 
         # prepare holding file -f arguments for span-export
         hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59')
@@ -188,8 +191,8 @@ class AIExport(AITask):
 
         # apply both filters on following sources
         for source in ('crossref', 'degruyter', 'gbi'):
-            shellout("span-export -skip {files} {lists} {input} | gzip >> {output}", files=files,
-                     lists=lists, input=self.input().get(source).path, output=stopover)
+            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | gzip >> {output}", files=files,
+                     blacklist=self.input().get('blacklist').path, lists=lists, input=self.input().get(source).path, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
 
