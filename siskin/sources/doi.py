@@ -50,7 +50,7 @@ class DOIBlacklist(DOITask):
     Create a blacklist of DOIs. Possible cases:
 
     1. A DOI redirects to http://www.crossref.org/deleted_DOI.html
-    2. A DOI API lookup results in a HTTP 4XX.
+    2. A DOI API lookup does not return a HTTP 200.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
