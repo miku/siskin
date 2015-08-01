@@ -35,6 +35,9 @@ class DOICheck(DOITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        """
+        If we have more DOI sources, we could add them as requirements here.
+        """
         return {'input': CrossrefDOIList(date=self.date),
                 'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly')}
 
