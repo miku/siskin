@@ -185,8 +185,8 @@ class AIExport(AITask):
 
         def format_args(flagname, isils):
             """ Helper to create args like -f DE-15:/path/to/target -f DE-14:/path/to/target ..."""
-            args = ["%s:%s" % (isil, self.input().get(key).path) for isil in isils]
-            return "%s %s" % (flagname, " ".join(args))
+            args = ["%s %s:%s" % (flagname, isil, self.input().get(key).path) for isil in isils]
+            return " ".join(args)
 
         files = format_args("-f", ['DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59'])
         lists = format_args("-l", ['DE-15-FID'])
