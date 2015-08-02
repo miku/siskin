@@ -1,7 +1,10 @@
 SHELL := /bin/bash
 
-help:
-	@echo "make clean"
+dist:
+	python setup.py sdist
+
+upload: dist
+	python setup.py sdist upload
 
 clean:
 	rm -rf siskin.egg-info
