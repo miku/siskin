@@ -51,7 +51,7 @@ install_requires = [
 ]
 
 setup(name='siskin',
-      version='0.0.117',
+      version='0.0.118',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
