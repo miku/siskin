@@ -17,6 +17,8 @@ try:
 except:
     from distutils.core import setup
 
+from siskin import __version__
+
 install_requires = [
     'BeautifulSoup==3.2.1',
     'argparse>=1.2',
@@ -51,7 +53,7 @@ install_requires = [
 ]
 
 setup(name='siskin',
-      version='0.0.118',
+      version=__version__,
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
