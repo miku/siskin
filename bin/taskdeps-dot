@@ -7,10 +7,9 @@ Turn task dependencies into pretty graphs.
 
 Usage: taskdeps-dot TASKNAME
 
-Example outputs album: http://imgur.com/a/12Dag
-
-TODO(miku): Group tasks of the same family, if they exceed a certain number.
+Example outputs images: http://imgur.com/a/12Dag, http://i.imgur.com/8bFvSvN.gif
 """
+
 from __future__ import print_function
 from gluish.utils import pairwise, random_string
 from luigi.task import id_to_name_and_params

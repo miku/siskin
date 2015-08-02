@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # report disk usage for a certain task
+set -eu
 
 if [ $# -eq 0 ]; then
     du -hs $(taskhome)

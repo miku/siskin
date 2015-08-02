@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Display, whether a task is done or not.
+set -eu
 
 OUTPUT=$(taskoutput "$@" 2> /dev/null)
 

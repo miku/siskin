@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Remove an index including its trace in the update_log
+set -eu
 
 if [ "$#" -le 0 ]; then
     echo "Usage: taskindex-delete INDEX"

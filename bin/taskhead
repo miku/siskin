@@ -9,7 +9,8 @@
 #     $ taskhead Events --iln 10
 #
 
-set -e -u
+set -eu
+set -o pipefail
 
 args=("$@")
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -u
+set -eu
 
 xopen() {
     if hash gnome-open 2> /dev/null; then

@@ -9,7 +9,7 @@
 #     $ taskcat Events --iln 10
 #
 
-set -e -u
+set -eu
 
 # first, check if tasks exists
 OUTPUT=$(taskoutput "$@")
