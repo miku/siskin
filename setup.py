@@ -8,6 +8,10 @@ siskin is a set of tasks for library metadata management.
 
 import sys
 
+if sys.version_info < (2, 7) or sys.version_info.major > 2:
+    print("siskin runs with python 2.7 or higher, but not with python 3 yet")
+    sys.exit(1)
+
 try:
     from setuptools import setup
 except:
@@ -46,9 +50,6 @@ install_requires = [
     'wsgiref==0.1.2',
 ]
 
-if sys.version_info < (2, 7):
-    install_requires.append('importlib==1.0.2')
-
 setup(name='siskin',
       version='0.0.117',
       description='Various sources and workflows.',
@@ -61,7 +62,6 @@ setup(name='siskin',
         'siskin.workflows'
       ],
       package_dir={'siskin': 'siskin'},
-      # adjust the globs here (http://stackoverflow.com/a/3712682/89391)
       package_data={'siskin': ['assets/*']},
       scripts=[
         'bin/taskcat',
