@@ -175,24 +175,27 @@ class AIExport(AITask):
 
         # DE-15 and DE-14 get DOAJ
         shellout("""span-export -doi-blacklist {blacklist} -any DE-15 -any DE-14 {input} | gzip >> {output}""",
-                 blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path, output=stopover)
+                 blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path,
+                 output=stopover)
 
         # JSTOR detached from all for now, cf. #5472
-        shellout("""span-export -doi-blacklist {blacklist} {input} | gzip >> {output}""", input=self.input().get('jstor').path,
-                 output=stopover, blacklist=self.input().get('blacklist').path)
+        shellout("""span-export -doi-blacklist {blacklist} {input} | gzip >> {output}""",
+                 blacklist=self.input().get('blacklist').path, input=self.input().get('jstor').path,
+                 output=stopover)
 
-        # prepare holding file -f arguments for span-export
-        hkeys = ('DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59')
-        files = " ".join(["-f %s:%s" % (k, v.path) for k, v in self.input().items() if k in hkeys])
+        def format_args(flagname, isils):
+            """ Helper to create args like -f DE-15:/path/to/target -f DE-14:/path/to/target ..."""
+            args = ["%s:%s" % (isil, self.input().get(key).path) for isil in isils]
+            return "%s %s" % (flagname, " ".join(args))
 
-        # prepare issn list -l arguments for span-export
-        fkeys = ('DE-15-FID',)
-        lists = " ".join(["-l %s:%s" % (k, v.path) for k, v in self.input().items() if k in fkeys])
+        files = format_args("-f", ['DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59'])
+        lists = format_args("-l", ['DE-15-FID'])
 
-        # apply both filters on following sources
+        # apply holdings and issn filters on sources
         for source in ('crossref', 'degruyter', 'gbi'):
-            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | gzip >> {output}", files=files,
-                     blacklist=self.input().get('blacklist').path, lists=lists, input=self.input().get(source).path, output=stopover)
+            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | gzip >> {output}",
+                     blacklist=self.input().get('blacklist').path, files=files, lists=lists,
+                     input=self.input().get(source).path, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
 
