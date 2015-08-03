@@ -40,11 +40,10 @@ if __name__ == '__main__':
 
     # workaround for #1
     ignore = ['--local-scheduler', '--no-lock', '--parallel-scheduling',
-	      '--assistant', '--scheduler-record-task-history']
+              '--assistant', '--scheduler-record-task-history']
     args = [arg for arg in sys.argv[2:] if not arg in ignore]
 
-    kwargs = dict((k.lstrip('--').replace('-', '_'), v)
-		   for k, v in pairwise(args))
+    kwargs = dict((k.lstrip('--').replace('-', '_'), v) for k, v in pairwise(args))
 
     # ignore global arguments
     for param in ('local-scheduler', 'lock', 'lock-pid-dir', 'workers',
