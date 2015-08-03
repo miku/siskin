@@ -3,4 +3,10 @@
 set -eu
 set -o pipefail
 
-ls -lah $(taskoutput "$@" 2> /dev/null|tail -1)
+OUTPUT=$(taskoutput "$@" 2> /dev/null|tail -1)
+
+if [ -n "$OUTPUT" ]; then
+    ls -lah "$OUTPUT"
+else
+    exit 1
+fi
