@@ -60,8 +60,12 @@ if __name__ == '__main__':
         print('no such task: %s' % taskname, file=sys.stderr)
         sys.exit(1)
 
-    # TODO: below code only works with options with parameters
-    kwargs = dict((k.lstrip('--').replace('-', '_'), v) for k, v in pairwise(sys.argv[2:]))
+    # workaround for #1
+    ignore = ['--local-scheduler', '--no-lock', '--parallel-scheduling',
+              '--assistant', '--scheduler-record-task-history']
+    args = [arg for arg in sys.argv[2:] if not arg in ignore]
+
+    kwargs = dict((k.lstrip('--').replace('-', '_'), v) for k, v in pairwise(args))
 
     klass = Register.get_task_cls(taskname)
     task = klass(**kwargs)
