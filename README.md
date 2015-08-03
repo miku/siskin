@@ -10,7 +10,12 @@ Installation
 
 Python 2.7 required.
 
-    $ pip install --upgrade siskin
+    $ pip install -U siskin
+
+Add configuration files:
+
+* `/etc/siskin/siskin.ini` - example: [siskin.example.ini](https://github.com/miku/siskin/blob/master/siskin.example.ini)
+* `/etc/luigi/client.cfg` - docs: [luigi configuration](http://luigi.readthedocs.org/en/latest/configuration.html)
 
 Run
 ---
