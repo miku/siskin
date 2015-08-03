@@ -1,15 +1,8 @@
 #!/bin/bash
 
-# Just like `cat` but takes a taskname as arguments. The task must have been
-# completed successfully before you can `cat` it.
-#
-# Examples
-#
-#     $ taskcat EBLDates
-#     $ taskcat Events --iln 10
-#
-
 set -eu
+
+# TODO(miku): following two checks are not the right way.
 
 # first, check if tasks exists
 OUTPUT=$(taskoutput "$@")

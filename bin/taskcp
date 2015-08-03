@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# copy task output
-# split args into [HEAD] [LAST] (HEAD is the task name + parameters, LAST the destination)
-
 set -eu
 
 LEN=$(($#-1))
