@@ -148,8 +148,10 @@ class AIExport(AITask):
             'crossref': CrossrefIntermediateSchema(date=self.date),
             'degruyter': DegruyterIntermediateSchema(date=self.date),
             'doaj': DOAJIntermediateSchema(date=self.date),
-            'gbi': GBIIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
+
+	    'gbi-fzs': GBIIntermediateSchema(date=self.date, group='fzs'),
+	    'gbi-wiwi': GBIIntermediateSchema(date=self.date, group='wiwi'),
 
             'DE-105': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Gq199T'),
             'DE-14': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Tz3vbk'),
@@ -192,7 +194,7 @@ class AIExport(AITask):
         lists = format_args("-l", ['DE-15-FID'])
 
         # apply holdings and issn filters on sources
-        for source in ('crossref', 'degruyter', 'gbi'):
+	for source in ('crossref', 'degruyter', 'gbi-fzs', 'gbi-wiwi'):
             shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | gzip >> {output}",
                      blacklist=self.input().get('blacklist').path, files=files, lists=lists,
                      input=self.input().get(source).path, output=stopover)
