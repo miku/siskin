@@ -381,3 +381,20 @@ class CrossrefCoverage(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class CrossrefMemberVsPublisher(CrossrefTask):
+    """
+    List member names and publisher, #4833.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefItems(date=self.date)
+
+    def run(self):
+        output = shellout("jq -r '[.DOI, .publisher, .member] | @csv' {input} > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
