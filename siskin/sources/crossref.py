@@ -148,7 +148,7 @@ class CrossrefUniqItems(CrossrefTask):
         TODO(miku): make this more incremental, do not ldjtab on the whole file, could save 30% of processing time.
         """
         input = self.input().get('items').path
-        output = shellout("ldjtab -padlength 10 -key DOI {input} > {output}", input=input)
+        output = shellout("ldjtab -padlength 10 -key DOI {input} | sort -S50% -u > {output}", input=input)
         linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n | uniq > {output}", input=output)
         output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
                           linenumbers=linenumbers, input=input)
