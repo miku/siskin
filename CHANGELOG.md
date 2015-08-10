@@ -1,3 +1,13 @@
+0.0.119 2015-08-10
+------------------
+
+* ai: gzip AIIntermediateSchema
+* crossref: parallel extraction messes up order; alternative fix: http://git.io/v3YZG
+* ai: reduce gbi set, refs #5093
+* crossref: add adhoc task, CrossrefMemberVsPublisher, refs #4833
+* docs: update README, Vagrantfile
+* scripts: various fixes in taskdeps-dot, taskdir, taskls, taskoutput, completion
+
 0.0.118 2015-08-02
 ------------------
 
