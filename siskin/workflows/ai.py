@@ -132,11 +132,11 @@ class AIIntermediateSchema(AITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} | gzip >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class AIExport(AITask):
     """ Create a SOLR-importable file. """
