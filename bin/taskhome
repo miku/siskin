@@ -3,6 +3,13 @@
 
 from __future__ import print_function
 from siskin.configuration import Config
+import ConfigParser
+import sys
 
 if __name__ == '__main__':
-    print(Config.instance().get('core', 'home'))
+    try:
+	config = Config.instance()
+	print(config.get('core', 'homes'))
+    except ConfigParser.Error as err:
+	print('Invalid configuration @%s: %s' % (config._config_paths, err), file=sys.stderr)
+	sys.exit(1)
