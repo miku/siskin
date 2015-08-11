@@ -17,8 +17,12 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning
-import urllib3
-urllib3.disable_warnings()
+# wrap into try-except, since at install-time urllib3 might not be installed yet
+try:
+    import urllib3
+    urllib3.disable_warnings()
+except ImportError:
+    pass
 
 __version__ = '0.0.119'
 
