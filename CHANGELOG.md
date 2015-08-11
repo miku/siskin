@@ -1,3 +1,14 @@
+0.0.122 2015-08-11
+------------------
+
+* scripts: fix typo
+
+0.0.121 2015-08-11
+------------------
+
+* docs: do not use pip cache
+* scripts: taskhome should fail more gracefully
+
 0.0.120 2015-08-11
 ------------------
 
