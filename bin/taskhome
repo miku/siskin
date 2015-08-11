@@ -9,7 +9,7 @@ import sys
 if __name__ == '__main__':
     try:
         config = Config.instance()
-        print(config.get('core', 'homes'))
+        print(config.get('core', 'home'))
     except ConfigParser.Error as err:
         print('Invalid configuration @%s: %s' % (config._config_paths, err), file=sys.stderr)
         sys.exit(1)
