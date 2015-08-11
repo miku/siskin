@@ -27,11 +27,11 @@ cd /tmp
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz
 tar xf Python-2.7.9.tar.xz
 cd Python-2.7.9
-./configure --prefix=/usr/local && make && make altinstall
+./configure --prefix=/usr/local && make && sudo make altinstall
 
 cd /usr/local/bin
-ln -s python2.7 python
-ln -s python2.7-config python-config
+sudo ln -s python2.7 python
+sudo ln -s python2.7-config python-config
 
 cd /tmp
 wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
