@@ -1,3 +1,9 @@
+0.0.120 2015-08-11
+------------------
+
+* setup: at install time urllib3 might not be available
+* ai: detach degruyter from all but DE-15, refs #4731
+
 0.0.119 2015-08-10
 ------------------
 

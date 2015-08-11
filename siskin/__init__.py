@@ -24,7 +24,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '0.0.119'
+__version__ = '0.0.120'
 
 config = Config.instance()
 
