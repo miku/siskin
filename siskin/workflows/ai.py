@@ -183,7 +183,7 @@ class AIExport(AITask):
         # DE-15 gets DeGruyter, cf. #4731
         shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} {input} | gzip >> {output}""",
                  blacklist=self.input().get('blacklist').path, holding=self.input().get('DE-15').path,
-                 input=self.input.get('degruyter'), output=stopover)
+                 input=self.input().get('degruyter').path, output=stopover)
 
         # JSTOR detached from all for now, cf. #5472
         shellout("""span-export -doi-blacklist {blacklist} {input} | gzip >> {output}""",
