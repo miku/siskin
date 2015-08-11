@@ -180,6 +180,11 @@ class AIExport(AITask):
                  blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path,
                  output=stopover)
 
+        # DE-15 gets DeGruyter, cf. #4731
+        shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} {input} | gzip >> {output}""",
+                 blacklist=self.input().get('blacklist').path, holding=self.input().get('DE-15').path,
+                 input=self.input.get('degruyter'), output=stopover)
+
         # JSTOR detached from all for now, cf. #5472
         shellout("""span-export -doi-blacklist {blacklist} {input} | gzip >> {output}""",
                  blacklist=self.input().get('blacklist').path, input=self.input().get('jstor').path,
@@ -187,14 +192,14 @@ class AIExport(AITask):
 
         def format_args(flagname, isils):
             """ Helper to create args like -f DE-15:/path/to/target -f DE-14:/path/to/target ..."""
-	    args = ["%s %s:%s" % (flagname, isil, self.input().get(isil).path) for isil in isils]
+            args = ["%s %s:%s" % (flagname, isil, self.input().get(isil).path) for isil in isils]
             return " ".join(args)
 
         files = format_args("-f", ['DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59'])
         lists = format_args("-l", ['DE-15-FID'])
 
         # apply holdings and issn filters on sources
-        for source in ('crossref', 'degruyter', 'gbi-fzs', 'gbi-wiwi'):
+        for source in ('crossref', 'gbi-fzs', 'gbi-wiwi'):
             shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | gzip >> {output}",
                      blacklist=self.input().get('blacklist').path, files=files, lists=lists,
                      input=self.input().get(source).path, output=stopover)
