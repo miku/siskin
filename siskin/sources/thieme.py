@@ -3,7 +3,7 @@
 from gluish.common import OAIHarvestChunk
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
-from gluish.intervals import weekly
+from gluish.intervals import monthly
 from siskin.task import DefaultTask
 import datetime
 import luigi
@@ -14,7 +14,7 @@ class ThiemeTask(DefaultTask):
     TAG = 'thieme'
 
     def closest(self):
-        return weekly(date=self.date)
+	return monthly(date=self.date)
 
 class ThiemeHarvestChunk(OAIHarvestChunk, ThiemeTask):
     """ Harvest all files in chunks. """
