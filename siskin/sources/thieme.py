@@ -56,9 +56,9 @@ class ThiemeCombine(ThiemeTask):
     """ Combine files. Simple cat files and leave span-import the rest. """
 
     begin = luigi.DateParameter(default=datetime.date(1970, 1, 1))
-    end = ClosestDateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
-    prefix = luigi.Parameter(default="tm", significant=True)
+    prefix = luigi.Parameter(default="tm")
     collection = luigi.Parameter(default='journalarticles')
     delay = luigi.IntParameter(default=2, significant=False)
 
@@ -72,4 +72,4 @@ class ThiemeCombine(ThiemeTask):
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext="xml"))
+        return luigi.LocalTarget(path=self.path(ext="xml"))
