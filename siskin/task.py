@@ -32,4 +32,4 @@ class DefaultTask(BaseTask):
     def logfile(self):
         """ A logfile per task for stderr redirects. """
         name = self.taskdir().split('/')[-1]
-        return os.path.join(config.get('core', 'logdir', siskin.DEFAULT_LOG_DIR), '%s.log' % name)
+        return os.path.join(config.get('core', 'logdir', '/var/log/siskin'), '%s.log' % name)
