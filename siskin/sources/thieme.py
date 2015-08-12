@@ -63,7 +63,8 @@ class ThiemeCombine(ThiemeTask):
     delay = luigi.IntParameter(default=2, significant=False)
 
     def requires(self):
-        return ThiemeHarvest(begin=self.begin, end=self.end, url=self.url, prefix=self.prefix, collection=self.collection, delay=self.delay)
+        return ThiemeHarvest(begin=self.begin, end=self.closest(), url=self.url, prefix=self.prefix,
+                             collection=self.collection, delay=self.delay)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
