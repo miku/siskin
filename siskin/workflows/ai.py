@@ -125,7 +125,8 @@ class AIIntermediateSchema(AITask):
         return [CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
-                GBIIntermediateSchema(date=self.date),
+                GBIIntermediateSchema(date=self.date, group='fzs'),
+                GBIIntermediateSchema(date=self.date, group='wiwi'),
                 JstorIntermediateSchema(date=self.date)]
 
     @timed
