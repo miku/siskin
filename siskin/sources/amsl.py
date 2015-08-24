@@ -31,7 +31,7 @@ class AMSLSparql(AMSLTask):
     url = luigi.Parameter(description='sparql query endpoint url', significant=False)
 
     def run(self):
-	self.logger.debug("Running query on %s ..." % self.url)
+       self.logger.debug("Running query on %s ..." % self.url)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path())
+       return luigi.LocalTarget(path=self.path())
