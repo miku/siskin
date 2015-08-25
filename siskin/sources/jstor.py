@@ -144,3 +144,20 @@ class JstorISSNList(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class JstorDOIList(JstorTask):
+    """ A list of JSTOR DOIs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return JstorIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '.doi' {input} | grep -v null >> {output} """, input=self.input().path, output=stopover)
+        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
