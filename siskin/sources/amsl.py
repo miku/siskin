@@ -35,6 +35,7 @@ class AMSLISILForSourceID(AMSLTask):
 
     date = luigi.DateParameter(default=datetime.date.today())
     source_id = luigi.Parameter(default='0')
+    format = luigi.Parameter(default='json')
     url = luigi.Parameter(default=config.get('amsl', 'endpoint'),
                           description='sparql query endpoint url', significant=False)
 
@@ -43,12 +44,12 @@ class AMSLISILForSourceID(AMSLTask):
             template = handle.read()
         qs = template.replace("SOURCE_ID", self.source_id)
 
-        r = requests.get("%s?%s" % (self.url, urllib.urlencode({'query': qs, 'format': 'json'})))
+        r = requests.get("%s?%s" % (self.url, urllib.urlencode({'query': qs, 'format': self.format})))
         if not r.status_code == 200:
             raise RuntimeError("%s %s" % (r.status_code, r.text))
 
         with self.output().open('w') as output:
-            output.write(r.text.strip())
+            output.write(r.text.encode('utf-8').strip())
 
     def output(self):
-       return luigi.LocalTarget(path=self.path(ext='json'))
+       return luigi.LocalTarget(path=self.path(ext=self.format))
