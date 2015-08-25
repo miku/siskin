@@ -6,32 +6,49 @@ Electronic Resource Management System Based on Linked Data Technologies.
 
 http://amsl.technology
 
-Managing electronic resources has become a distinctive and important task for
-libraries in recent years. The diversity of resources, changing licensing
-policies and new business models of the publishers, consortial acquisition and
-modern web scale discovery technologies have turned the market place of
-scientific information into a complex and multidimensional construct. A state-
-of-the-art management of electronic resources is dependent on flexible data
-models and the capability to integrate most heterogeneous data sources.
+Config:
+
+[amsl]
+
+endpoint = http://111.11.111.111:8890/sparql
+
 """
 
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
+import json
 import luigi
+import requests
+import urllib
+
+config = Config.instance()
 
 class AMSLTask(DefaultTask):
     TAG = 'amsl'
 
-class AMSLSparql(AMSLTask):
-    """ Query amsl with SPARQL. """
+class AMSLISILForSourceID(AMSLTask):
+    """
+    Query amsl to find ISILs for source ID. This will dump the raw query
+    results.
+    """
 
     date = luigi.DateParameter(default=datetime.date.today())
-    query = luigi.Parameter(description='SPARQL query')
-    format = luigi.Parameter(default='json')
-    url = luigi.Parameter(description='sparql query endpoint url', significant=False)
+    source_id = luigi.Parameter(default='0')
+    url = luigi.Parameter(default=config.get('amsl', 'endpoint'),
+                          description='sparql query endpoint url', significant=False)
 
     def run(self):
-       self.logger.debug("Running query on %s ..." % self.url)
+        with open(self.assets('amsl.collections.sparql')) as handle:
+            template = handle.read()
+        qs = template.replace("SOURCE_ID", self.source_id)
+
+        r = requests.get("%s?%s" % (self.url, urllib.urlencode({'query': qs, 'format': 'json'})))
+        if not r.status_code == 200:
+            raise RuntimeError("%s %s" % (r.status_code, r.text))
+
+        with self.output().open('w') as output:
+            output.write(r.text.strip())
 
     def output(self):
-       return luigi.LocalTarget(path=self.path())
+       return luigi.LocalTarget(path=self.path(ext='json'))

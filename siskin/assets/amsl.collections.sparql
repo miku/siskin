@@ -1,0 +1,67 @@
+PREFIX gndo: <http://d-nb.info/standards/elementset/gnd#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX sf: <http://www.opengis.net/ont/sf#>
+PREFIX rdau: <http://rdaregistry.info/Elements/u/>
+PREFIX sysbase: <http://ns.ontowiki.net/SysBase/>
+PREFIX gr: <http://purl.org/goodrelations/v1#>
+PREFIX yago: <http://dbpedia.org/class/yago/>
+PREFIX populatedplaces: <http://dbpedia.org/ontology/PopulatedPlace/>
+PREFIX org: <http://www.w3.org/ns/org#>
+PREFIX dbpedia-datatype: <http://dbpedia.org/datatype/>
+PREFIX sushi: <http://vocab.ub.uni-leipzig.de/sushi/>
+PREFIX gml: <http://www.opengis.net/gml/>
+PREFIX lobid: <http://purl.org/lobid/lv#>
+PREFIX umbel: <http://umbel.org/umbel/rc/>
+PREFIX counter: <http://vocab.ub.uni-leipzig.de/counter/>
+PREFIX daia: <http://purl.org/ontology/daia/>
+PREFIX schema: <http://schema.org/>
+PREFIX terms: <http://vocab.ub.uni-leipzig.de/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX str: <http://exslt.org/strings>
+PREFIX vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+PREFIX vann: <http://purl.org/vocab/vann/>
+PREFIX sioct: <http://rdfs.org/sioc/types#>
+PREFIX rdavocab: <http://rdvocab.info/>
+PREFIX marcrole: <http://id.loc.gov/vocabulary/relators/>
+PREFIX lib: <http://purl.org/library/>
+PREFIX isbd: <http://iflastandards.info/ns/isbd/elements/>
+PREFIX grs: <http://www.georss.org/georss/>
+PREFIX gnd: <http://d-nb.info/standards/elementset/gnd#>
+PREFIX doap: <http://usefulinc.com/ns/doap#>
+PREFIX dnb_intern: <http://dnb.de/>
+PREFIX dbpprop: <http://dbpedia.org/property/>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX cc: <http://creativecommons.org/ns#>
+PREFIX aiiso: <http://purl.org/vocab/aiiso/schema#>
+PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+PREFIX geonames: <http://www.geonames.org/ontology#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX sysont: <http://ns.ontowiki.net/SysOnt/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX amsl: <http://vocab.ub.uni-leipzig.de/amsl/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select ?source ?sourceID ?collection ?collectionLabel ?collectionID ?library
+
+from <http://amsl.technology/discovery/> 
+from <http://amsl.technology/discovery/metadata-usage/>
+
+where {
+?source amsl:sourceID ?sourceID , "SOURCE_ID" .
+?collection amsl:includedInMetadataSource ?source ;
+rdfs:label ?collectionLabel ;
+amsl:metadataUsedByLibrary ?library .
+OPTIONAL {?collection amsl:collectionID ?collectionID }
+}
+
+ORDER BY ?source ?collection ?library
+
+LIMIT 500
