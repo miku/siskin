@@ -49,19 +49,17 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX amsl: <http://vocab.ub.uni-leipzig.de/amsl/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-select ?source ?sourceID ?collection ?collectionLabel ?collectionID ?library
+SELECT ?sourceID ?collection ?collectionLabel ?collectionID ?library
 
-from <http://amsl.technology/discovery/> 
-from <http://amsl.technology/discovery/metadata-usage/>
+FROM <http://amsl.technology/discovery/>
+FROM <http://amsl.technology/discovery/metadata-usage/>
 
-where {
-?source amsl:sourceID ?sourceID , "SOURCE_ID" .
-?collection amsl:includedInMetadataSource ?source ;
-rdfs:label ?collectionLabel ;
-amsl:metadataUsedByLibrary ?library .
-OPTIONAL {?collection amsl:collectionID ?collectionID }
+WHERE {
+    ?source amsl:sourceID ?sourceID , "SOURCE_ID" .
+    ?collection amsl:includedInMetadataSource ?source ;
+    rdfs:label ?collectionLabel ;
+    amsl:metadataUsedByLibrary ?library .
+    OPTIONAL {?collection amsl:collectionID ?collectionID }
 }
 
-ORDER BY ?source ?collection ?library
-
-LIMIT 500
+LIMIT 1000000
