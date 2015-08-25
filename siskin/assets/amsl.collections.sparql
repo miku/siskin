@@ -62,4 +62,3 @@ WHERE {
     OPTIONAL {?collection amsl:collectionID ?collectionID }
 }
 
-LIMIT 1000000
