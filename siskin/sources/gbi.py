@@ -11,6 +11,8 @@ ftp-username = username
 ftp-password = password
 ftp-path = /
 ftp-pattern = some*glob*pattern.zip
+
+scp-src = username@ftp.example.de:/home/gbi
 """
 
 from gluish.benchmark import timed
@@ -22,6 +24,7 @@ from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
+import os
 import tempfile
 
 config = Config.instance()
@@ -31,6 +34,27 @@ class GBITask(DefaultTask):
 
     def closest(self):
         return datetime.date(2015, 6, 1)
+
+class GBIDropbox(GBITask):
+    """
+    Pull down GBI dropbox content.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return Executable('scp', message='https://en.wikipedia.org/wiki/Secure_copy')
+
+    def run(self):
+        target = tempfile.mkdtemp(prefix='siskin-')
+        shellout("scp -rCpq {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
+        if not os.path.exists(self.taskdir()):
+            os.makedirs(self.taskdir())
+        shellout("mv {target} {output}", target=target, output=os.path.join(self.taskdir(), 'c'))
+        with self.output().open('w') as output:
+            pass
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='indicator'))
 
 class GBISync(GBITask):
     """ Sync. """
