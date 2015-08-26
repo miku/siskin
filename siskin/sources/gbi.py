@@ -19,6 +19,7 @@ from gluish.benchmark import timed
 from gluish.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
+from gluish.path import iterfiles
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
@@ -49,12 +50,14 @@ class GBIDropbox(GBITask):
         shellout("scp -rCpq {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
-        shellout("mv {target} {output}", target=target, output=os.path.join(self.taskdir(), 'c'))
+        dst = os.path.join(self.taskdir(), 'mirror')
+        shellout("mv {target} {output}", target=target, output=dst)
         with self.output().open('w') as output:
-            pass
+            for path in iterfiles(dst):
+                output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='indicator'))
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class GBISync(GBITask):
     """ Sync. """
