@@ -15,6 +15,7 @@ from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, ElasticsearchMixin
 import datetime
@@ -108,18 +109,28 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
         return self.input()
 
 class CrossrefItems(CrossrefTask):
-    """ Combine all harvested files into a single LDJ file. This file will contain dups. """
+    """ Combine all harvested files into a single LDJ file. This file will contain dups.
+    """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefHarvest(begin=self.begin, end=self.closest())
+        return {'harvest': CrossrefHarvest(begin=self.begin, end=self.closest()),
+                'degruyter-doi': DegruyterDOIList(date=self.date)}
 
     @timed
     def run(self):
-        """ Extract all items from chunks. """
+        """ Extract all items from chunks. Perform additional filtering. """
+        doi_excludes = set()
+        with self.input().get('degruyter-doi').open() as handle:
+            for line in handle:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                doi_excludes.add(stripped)
+
         with self.output().open('w') as output:
-            for target in self.input():
+            for target in self.input().get('harvest'):
                 with target.open() as handle:
                     for line in handle:
                         content = json.loads(line)
@@ -127,6 +138,8 @@ class CrossrefItems(CrossrefTask):
                             raise RuntimeError("invalid response status: %s" % content)
                         items = content["message"]["items"]
                         for item in items:
+                            if item.get('DOI') in doi_excludes:
+                                continue
                             output.write(json.dumps(item))
                             output.write("\n")
 
@@ -381,7 +394,6 @@ class CrossrefCoverage(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
 
 class CrossrefMemberVsPublisher(CrossrefTask):
     """

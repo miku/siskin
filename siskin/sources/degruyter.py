@@ -134,3 +134,21 @@ class DegruyterISSNList(DegruyterTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DegruyterDOIList(DegruyterTask):
+    """ A list of Degryter DOIs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'input': DegruyterIntermediateSchema(date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """, input=self.input().get('input').path, output=stopover)
+        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
