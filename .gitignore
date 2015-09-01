@@ -49,3 +49,4 @@ docs/_build/
 .vagrant
 vagrant.key
 dist
+Updates.md

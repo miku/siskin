@@ -168,7 +168,7 @@ Odd names, since there is no database or something.
 span-export can work with holding files.
 
 ```sh
-span-export -f DE-15:path/to/x.xml -f DE-14:path/to/y.xml -l DE-15-FID:/path/to/issn.list
+span-export -f DE-15:a/b.xml -f DE-14:a/c.xml -l DE-15-FID:a/d.issnlist file.is > file.ldj
 ```
 
 
