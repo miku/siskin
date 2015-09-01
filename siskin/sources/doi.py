@@ -8,7 +8,7 @@ authority for the ISO standard (ISO 26324) for the DOI system.
 """
 
 from gluish.common import Executable
-from gluish.intervals import monthly
+from gluish.intervals import yearly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.sources.crossref import CrossrefDOIList
@@ -24,7 +24,7 @@ class DOITask(DefaultTask):
     TAG = 'doi'
 
     def closest(self):
-        return monthly(self.date)
+        return yearly(self.date)
 
 class DOIHarvest(DOITask):
     """
