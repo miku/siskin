@@ -1,3 +1,14 @@
+0.0.124 2015-09-01
+------------------
+
+* ai: break down gbi for intermediate schema
+* amls: stub, stub SPARQL query
+* crossref: filter out some DOI (too) early, refs #5824
+* docs: add another AIExport graph
+* gbi: sync from gbi dropbox
+* jstor: add DOI list, refs #5824
+* thieme: monthly interval, fixes
+
 0.0.123 2015-08-12
 ------------------
 
