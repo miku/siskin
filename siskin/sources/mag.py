@@ -55,3 +55,57 @@ class MAGDump(MAGTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="zip"))
+
+class MAGFile(MAGTask):
+    """
+    Download a single file. Possible files:
+
+    Affiliations.zip
+    Authors.zip
+    ConferenceInstances.zip
+    ConferenceSeries.zip
+    FieldsOfStudy.zip
+    Journals.zip
+    PaperAuthorAffiliations.zip
+    PaperKeywords.zip
+    PaperReferences.zip
+    Papers.zip
+    PaperUrls.zip
+
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    file = luigi.Parameter(default='Papers.zip')
+
+    def run(self):
+        output = shellout("""curl https://academicgraph.blob.core.windows.net/graph-{date}/{file} > {output}""",
+                          date=self.closest(), file=self.file)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zip"))
+
+class MAGFiles(MAGTask, luigi.WrapperTask):
+    """ Download all files separately. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        files = [
+            'Affiliations.zip',
+            'Authors.zip',
+            'ConferenceInstances.zip',
+            'ConferenceSeries.zip',
+            'FieldsOfStudy.zip',
+            'Journals.zip',
+            'PaperAuthorAffiliations.zip',
+            'PaperKeywords.zip',
+            'PaperReferences.zip',
+            'Papers.zip',
+            'PaperUrls.zip',
+        ]
+        for file in files:
+            yield MAGFile(file=file)
+
+    def output(self):
+        return self.input()
