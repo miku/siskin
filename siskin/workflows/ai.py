@@ -144,7 +144,8 @@ class AIIntermediateSchema(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [CrossrefIntermediateSchema(date=self.date),
+        return [Executable(name='pigz', message='http://zlib.net/pigz/')
+                CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
                 GBIIntermediateSchema(date=self.date, group='fzs'),
@@ -155,7 +156,7 @@ class AIIntermediateSchema(AITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} | gzip >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} | pigz >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
