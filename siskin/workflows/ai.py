@@ -144,7 +144,7 @@ class AIIntermediateSchema(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [Executable(name='pigz', message='http://zlib.net/pigz/')
+        return [Executable(name='pigz', message='http://zlib.net/pigz/'),
                 CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
