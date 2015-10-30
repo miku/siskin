@@ -69,10 +69,11 @@ class DOIHarvest(DOITask):
         If we have more DOI sources, we could add them as requirements here.
         """
         return {'input': CrossrefDOIList(date=self.date),
-                'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly')}
+                'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly'),
+                'pigz': Executable(name='pigz', message='http://zlib.net/pigz/')}
 
     def run(self):
-        output = shellout("hurrly -w 64 < {input} | gzip > {output}", input=self.input().get('input').path)
+        output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

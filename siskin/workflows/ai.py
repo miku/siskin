@@ -190,6 +190,7 @@ class AIExport(AITask):
 
             'blacklist': DOIBlacklist(date=self.date),
             'app': Executable(name='span-export', message='http://git.io/vI8NV'),
+            'pigz': Executable(name='pigz', message='http://zlib.net/pigz/'),
         }
 
     @timed
@@ -200,17 +201,17 @@ class AIExport(AITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         # DE-15 and DE-14 get DOAJ
-        shellout("""span-export -doi-blacklist {blacklist} -any DE-15 -any DE-14 {input} | gzip >> {output}""",
+        shellout("""span-export -doi-blacklist {blacklist} -any DE-15 -any DE-14 {input} | pigz >> {output}""",
                  blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path,
                  output=stopover)
 
         # DE-15 gets DeGruyter, cf. #4731
-        shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} {input} | gzip >> {output}""",
+        shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} {input} | pigz >> {output}""",
                  blacklist=self.input().get('blacklist').path, holding=self.input().get('DE-15').path,
                  input=self.input().get('degruyter').path, output=stopover)
 
         # JSTOR detached from all for now, cf. #5472
-        shellout("""span-export -doi-blacklist {blacklist} {input} | gzip >> {output}""",
+        shellout("""span-export -doi-blacklist {blacklist} {input} | pigz >> {output}""",
                  blacklist=self.input().get('blacklist').path, input=self.input().get('jstor').path,
                  output=stopover)
 
@@ -224,7 +225,7 @@ class AIExport(AITask):
 
         # apply holdings and issn filters on sources
         for source in ('crossref', 'gbi-fzs', 'gbi-wiwi'):
-            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | gzip >> {output}",
+            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | pigz >> {output}",
                      blacklist=self.input().get('blacklist').path, files=files, lists=lists,
                      input=self.input().get(source).path, output=stopover)
 
