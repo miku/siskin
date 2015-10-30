@@ -155,7 +155,7 @@ class AIIntermediateSchema(AITask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
+        for target in self.input()[1:]:
             shellout("cat {input} | pigz >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
