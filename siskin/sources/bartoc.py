@@ -16,12 +16,12 @@ class BartocTask(DefaultTask):
         return yearly(self.date)
 
 class BartocDump(BartocTask):
-    """ Dump JSON. """
+    """ Dump JSON. http://bartoc.org/en/node/761 """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("curl -sL http://bartoc.org/download/json > {output}")
+        output = shellout("""wget -O {output} 'http://bartoc.org/en/download/json?download=1&eid=767' """)
         with open(output) as handle:
             try:
                 _ = json.load(handle)
