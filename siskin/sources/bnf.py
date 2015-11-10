@@ -53,6 +53,20 @@ class BNFTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+class BNFHarvest(BNFTask):
+    """
+    Harvest BNF. Gallica.
+    """
+    def requires(self):
+        return Executable(name='oaimi', message='https://github.com/miku/oaimi')
+
+    def run(self):
+        output = shellout("oaimi -root collection -verbose -set gallica:typedoc:partitions http://oai.bnf.fr/oai2/OAIHandler > {output}")
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
 class BNFHarvestChunk(BNFTask):
     """ Harvest all files in chunks. """
     begin = luigi.DateParameter(default=datetime.date(2011, 1, 1))

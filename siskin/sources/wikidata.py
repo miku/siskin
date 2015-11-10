@@ -27,7 +27,8 @@ from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout, memoize
+from gluish.utils import shellout
+from siskin.utils import memoize
 from siskin.task import DefaultTask
 import BeautifulSoup
 import datetime

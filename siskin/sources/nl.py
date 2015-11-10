@@ -39,12 +39,12 @@ google-docs-key = crypticstring
 """
 
 from siskin.benchmark import timed
-from gluish.common import Directory
-from gluish.esindex import CopyToIndex
+# from gluish.common import Directory
+from luigi.contrib.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
+from siskin.utils import iterfiles
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask

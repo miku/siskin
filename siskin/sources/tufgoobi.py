@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
 
-from gluish.common import OAIHarvestChunk
+from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from siskin.task import DefaultTask
@@ -38,26 +38,44 @@ class TUFGoobiTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
-class TUFGoobiCombine(TUFGoobiTask):
-    """ Digital library via Goobi (#3207) """
-    begin = luigi.DateParameter(default=datetime.date(2000, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    prefix = luigi.Parameter(default="oai_dc", significant=False)
-    url = luigi.Parameter(default="http://digital.ub.tu-freiberg.de/oai", significant=False)
-    collection = luigi.Parameter(default=None, significant=False)
-
+class TUFGoobiDump(TUFGoobiTask):
+    """
+    Complete dump.
+    """
     def requires(self):
-        return OAIHarvestChunk(begin=self.begin, end=self.date,
-                               prefix=self.prefix, url=self.url,
-                               collection=self.collection)
+        return Executable(name='oaimi', message='https://github.com/miku/oaimi')
 
     def run(self):
-        output = shellout("xsltproc {stylesheet} {input} > {output}",
-                          input=self.input().path,
-                          stylesheet=self.assets('OAIDCtoMARCXML.xsl'))
-        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}",
-                          input=output)
+        output = shellout("""
+            cat <(echo '<collection xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">')
+                <(oaimi -verbose http://digital.ub.tu-freiberg.de/oai)
+                <(echo '</collection>') > {output}""")
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
+# class TUFGoobiCombine(TUFGoobiTask):
+#     """ Digital library via Goobi (#3207) """
+#     begin = luigi.DateParameter(default=datetime.date(2000, 1, 1))
+#     date = ClosestDateParameter(default=datetime.date.today())
+#     prefix = luigi.Parameter(default="oai_dc", significant=False)
+#     url = luigi.Parameter(default="http://digital.ub.tu-freiberg.de/oai", significant=False)
+#     collection = luigi.Parameter(default=None, significant=False)
+
+#     def requires(self):
+#         return OAIHarvestChunk(begin=self.begin, end=self.date,
+#                                prefix=self.prefix, url=self.url,
+#                                collection=self.collection)
+
+#     def run(self):
+#         output = shellout("xsltproc {stylesheet} {input} > {output}",
+#                           input=self.input().path,
+#                           stylesheet=self.assets('OAIDCtoMARCXML.xsl'))
+#         output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}",
+#                           input=output)
+#         luigi.File(output).move(self.output().path)
+
+#     def output(self):
+#         return luigi.LocalTarget(path=self.path(ext='mrc'))

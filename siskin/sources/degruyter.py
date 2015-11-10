@@ -40,8 +40,8 @@ from siskin.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import daily
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from siskin.utils import iterfiles
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime

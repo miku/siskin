@@ -24,8 +24,7 @@
 #
 
 from siskin.benchmark import timed
-from gluish.common import OAIHarvestChunk
-from gluish.esindex import CopyToIndex
+from luigi.contrib.esindex import CopyToIndex
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -40,6 +39,23 @@ class DOABTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+class DOABDump(DOABTask):
+    """
+    Unfiltered dump.
+    """
+    def requires(self):
+        return Executable(name='oaimi', message='https://github.com/miku/oaimi')
+
+    def run(self):
+        output = shellout("""
+            cat <(echo '<collection xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">')
+                <(oaimi -verbose -prefix marcxml http://www.doabooks.org/oai)
+                <(echo '</collection>') > {output}""")
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
 class DOABCombine(DOABTask):
     """ Combine the chunks for a date range into a single file.
     The filename will carry a name, that will only include year
@@ -52,9 +68,7 @@ class DOABCombine(DOABTask):
     collection = luigi.Parameter(default=None, significant=False)
 
     def requires(self):
-        return OAIHarvestChunk(begin=self.begin, end=self.date,
-                               prefix=self.prefix, url=self.url,
-                               collection=self.collection)
+        return DOABDump()
 
     @timed
     def run(self):

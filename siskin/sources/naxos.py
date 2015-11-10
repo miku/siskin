@@ -38,8 +38,8 @@ ftp-filepath = /path/to/marc-nml-gesamt.zip
 
 from __future__ import print_function
 from siskin.benchmark import timed
-from gluish.common import FTPFile
-from gluish.esindex import CopyToIndex
+from siskin.common import FTPFile
+from luigi.contrib.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config

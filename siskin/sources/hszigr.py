@@ -32,7 +32,7 @@ scp-src = [user@server:[port]]/path/to/file/{tag}/*mrc
 """
 
 from siskin.benchmark import timed
-from gluish.esindex import CopyToIndex
+from luigi.contrib.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config
