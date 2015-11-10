@@ -28,7 +28,7 @@ Wikipedia related.
 """
 
 from elasticsearch import helpers as eshelpers
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV

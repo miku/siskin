@@ -28,7 +28,7 @@ Fuzzy deduplication related tasks.
 """
 
 from elasticsearch import helpers as eshelpers
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly

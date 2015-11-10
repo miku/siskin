@@ -27,7 +27,7 @@
 Europeana NT.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.format import TSV
 from gluish.path import iterfiles
 from gluish.utils import shellout

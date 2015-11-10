@@ -31,7 +31,7 @@ Listings on a similar topic are grouped into categories
 which can then include smaller categories.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

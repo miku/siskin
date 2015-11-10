@@ -28,12 +28,12 @@ Gallica.
 """
 
 from __future__ import print_function
-from gluish.benchmark import timed
-from gluish.esindex import CopyToIndex
+from siskin.benchmark import timed
+from luigi.contrib.esindex import CopyToIndex
 from gluish.intervals import monthly
 from gluish.oai import oai_harvest
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
+from siskin.utils import iterfiles
 from gluish.utils import date_range, shellout
 from siskin.task import DefaultTask
 import BeautifulSoup

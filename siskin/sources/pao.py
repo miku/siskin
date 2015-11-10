@@ -35,7 +35,7 @@ deletions = [user@server:[port]]/path/to/paodel.mrc
 
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter

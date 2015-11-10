@@ -34,7 +34,7 @@ scp-src = [user@server:[port]]/path/to/*.mrc
 
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.path import iterfiles

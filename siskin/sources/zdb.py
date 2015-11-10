@@ -22,7 +22,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

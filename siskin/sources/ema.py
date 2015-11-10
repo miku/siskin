@@ -33,7 +33,7 @@ Configuration keys:
 scp-src = [user@server:[port]]/path/to/file.mrc
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

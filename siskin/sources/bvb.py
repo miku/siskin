@@ -27,7 +27,7 @@
 BVB via OAI.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import OAIHarvestChunk
 from gluish.esindex import CopyToIndex
 from gluish.intervals import monthly

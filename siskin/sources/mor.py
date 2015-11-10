@@ -38,8 +38,8 @@ ftp-pattern = *
 
 """
 
-from gluish.benchmark import timed
-from gluish.common import FTPMirror
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
 from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

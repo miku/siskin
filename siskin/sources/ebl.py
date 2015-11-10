@@ -47,16 +47,17 @@ glob-add = *leip_Content_Add_*.mrc
 glob-delete = *leip_Content_Delete_*.mrc
 """
 
-from gluish.benchmark import timed
-from gluish.common import FTPMirror, Executable
-from gluish.database import sqlite3db
-from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout, memoize
+from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.common import FTPMirror, Executable
 from siskin.configuration import Config
+from siskin.database import sqlitedb
 from siskin.task import DefaultTask
+from siskin.utils import memoize
 import base64
 import datetime
 import luigi
@@ -318,7 +319,7 @@ class EBLSnapshot(EBLTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with sqlite3db(self.input().get('db').path) as cursor:
+        with sqlitedb(self.input().get('db').path) as cursor:
             with self.input().get('surface').open() as handle:
                 with open(stopover, 'wb') as output:
                     for row in handle.iter_tsv(cols=('id', 'date')):

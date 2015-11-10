@@ -33,8 +33,8 @@ ftp-path = /
 ftp-pattern = *
 """
 
-from gluish.benchmark import timed
-from gluish.common import FTPMirror, Executable
+from siskin.benchmark import timed
+from siskin.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -125,7 +125,9 @@ class JstorXML(JstorTask):
             for archive, items in groups:
                 for chunk in nwise(items, n=self.batch):
                     margs = " ".join(["'%s'" % item.member.replace('[', r'\[').replace(']', r'\]') for item in chunk])
-                    shellout("unzip -qq -c {archive} {members} >> {output}", archive=archive, members=margs, output=stopover)
+                    shellout("""unzip -qq -c {archive} {members} |
+                                sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' >> {output}""",
+                                archive=archive, members=margs, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
 

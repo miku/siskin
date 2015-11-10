@@ -32,7 +32,7 @@ open access, peer-reviewed journals.
 http://doaj.org
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.database import sqlite3db
 from gluish.format import TSV

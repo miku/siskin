@@ -30,7 +30,7 @@ This group of task worked once, but OSO completely redesigned their site,
 so there tasks will fail now.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV

@@ -27,7 +27,7 @@
 Yago.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.intervals import yearly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

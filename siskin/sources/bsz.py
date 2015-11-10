@@ -71,7 +71,7 @@ extra = 2014-04-13:/path/to/extra.tar.gz, 2014-04-18:/path/to/another/shipment.t
 
 from __future__ import print_function
 from elasticsearch import helpers as eshelpers
-from gluish.benchmark import timed, Timer
+from siskin.benchmark import timed, Timer
 from gluish.colors import dim, red, green
 from gluish.common import Executable
 from gluish.database import sqlite3db, mysqldb

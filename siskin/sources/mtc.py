@@ -27,7 +27,7 @@
 Music Treasury Collection.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import quarterly

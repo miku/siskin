@@ -27,7 +27,7 @@
 SWB Open Data.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.database import sqlite3db
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV

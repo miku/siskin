@@ -27,7 +27,7 @@
 IMDB.
 """
 
-from gluish.common import FTPMirror
+from siskin.common import FTPMirror
 from gluish.intervals import hourly
 from siskin.task import DefaultTask
 import luigi

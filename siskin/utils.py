@@ -28,18 +28,21 @@ Various utilities.
 """
 
 from __future__ import print_function
-from gluish import colors
 from luigi.task import Register, flatten
 from siskin import __version__
-
+import collections
 import cStringIO as StringIO
 import errno
+import functools
 import hashlib
+import itertools
 import json
 import luigi
 import os
 import pprint
+import random
 import requests
+import string
 import sys
 import tempfile
 
@@ -50,6 +53,45 @@ MAN_HEADER = r"""
 
 + Siskin
 """
+
+class memoize(object):
+    '''Decorator. Caches a function's return value each time it is called.
+    If called later with the same arguments, the cached value is returned
+    (not reevaluated).
+    '''
+    def __init__(self, func):
+        self.func = func
+        self.cache = {}
+    def __call__(self, *args):
+        if not isinstance(args, collections.Hashable):
+            # uncacheable. a list, for instance.
+            # better to not cache than blow up.
+            return self.func(*args)
+        if args in self.cache:
+            return self.cache[args]
+        else:
+            value = self.func(*args)
+            self.cache[args] = value
+            return value
+    def __repr__(self):
+        '''Return the function's docstring.'''
+        return self.func.__doc__
+    def __get__(self, obj, objtype):
+        '''Support instance methods.'''
+        return functools.partial(self.__call__, obj)
+
+def iterfiles(directory='.', fun=None):
+    """
+    Yield paths below a directory, optionally filter the path through a function
+    given in `fun`.
+    """
+    if fun is None:
+        fun = lambda path: True
+    for root, dirs, files in os.walk(directory):
+        for f in files:
+            path = os.path.join(root, f)
+            if fun(path):
+                yield path
 
 def generate_tasks_manual():
     """ Return a formatted listing of all tasks with their descriptions. """
@@ -64,19 +106,43 @@ def generate_tasks_manual():
 
     for name in task_names:
         klass = Register.get_task_cls(name)
-        doc = klass.__doc__ or colors.red("@todo: docs")
-        output.write('{0} {1}\n'.format(colors.green(name), doc))
+        doc = klass.__doc__ or "@TODO: docs"
+        output.write('{0} {1}\n'.format(name, doc))
 
         try:
             deps = flatten(klass().requires())
         except Exception:
             # TODO: tasks that have required arguments will fail here
-            formatted = colors.yellow("\tUnavailable since task has required parameters.")
+            formatted = "\tUnavailable since task has required parameters."
         else:
             formatted = '\t{0}'.format(pprint.pformat(deps).replace('\n', '\n\t'))
-        output.write(colors.magenta('\n\tDependencies ({0}):\n\n{1}\n\n'.format(len(deps), formatted)))
+        output.write('\n\tDependencies ({0}):\n\n{1}\n\n'.format(len(deps), formatted))
 
     return output.getvalue()
+
+def random_string(length=16):
+    """
+    Return a random string (upper and lowercase letters) of length `length`,
+    defaults to 16.
+    """
+    return ''.join(random.choice(string.letters) for _ in range(length))
+
+def pairwise(obj):
+    """ Iterator over a iterable in steps of two. """
+    iterable = iter(obj)
+    return itertools.izip(iterable, iterable)
+
+
+def nwise(iterable, n=2):
+    """
+    Generalized :func:`pairwise`.
+    Split an iterable after every `n` items.
+    """
+    i = iter(iterable)
+    piece = tuple(itertools.islice(i, n))
+    while piece:
+        yield piece
+        piece = tuple(itertools.islice(i, n))
 
 def get_task_import_cache():
     """

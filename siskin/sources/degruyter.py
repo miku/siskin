@@ -35,8 +35,8 @@ ftp-pattern = some*glob*pattern.zip
 
 """
 
-from gluish.benchmark import timed
-from gluish.common import FTPMirror, Executable
+from siskin.benchmark import timed
+from siskin.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import daily
 from gluish.parameter import ClosestDateParameter

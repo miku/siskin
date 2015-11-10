@@ -31,7 +31,7 @@ and other content items (books chapters, data, theses, technical reports)
 from thousands of scholarly and professional publishers around the globe.
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly

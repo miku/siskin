@@ -52,7 +52,7 @@ mute = 2014-01-01, 2014-05-07
 
 """
 
-from gluish.benchmark import timed
+from siskin.benchmark import timed
 from gluish.common import Directory, FTPMirror
 from gluish.esindex import CopyToIndex
 from gluish.format import TSV

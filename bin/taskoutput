@@ -28,9 +28,9 @@ Find the output of (most) tasks.
 """
 
 from __future__ import print_function
-from gluish.utils import pairwise
 from luigi.task import Register
 from siskin.utils import get_task_import_cache
+from siskin.utils import pairwise
 import collections
 import importlib
 import os
