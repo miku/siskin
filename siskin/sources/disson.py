@@ -23,12 +23,11 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
 
-from siskin.benchmark import timed
-from gluish.common import OAIHarvestChunk, Executable
-from gluish.esindex import CopyToIndex
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import date_range, shellout
+from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
 from siskin.task import DefaultTask
 import datetime
 import luigi

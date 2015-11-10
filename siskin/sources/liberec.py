@@ -33,13 +33,13 @@ Configuration keys:
 src = [user@server:[port]]/path/to/directory
 """
 
-from gluish.common import Directory
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from siskin.common import Directory
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import luigi
 

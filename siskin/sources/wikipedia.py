@@ -28,13 +28,13 @@ Wikipedia related.
 """
 
 from elasticsearch import helpers as eshelpers
-from siskin.benchmark import timed
 from gluish.common import Executable
-from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin
 import collections

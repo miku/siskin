@@ -36,14 +36,14 @@ ftp-password = password
 ftp-path = /path/to/file.mrc
 """
 
-from siskin.benchmark import timed
-from gluish.common import FTPFile
-from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
-from gluish.path import copyregions
-from siskin.task import DefaultTask
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.common import FTPFile
 from siskin.configuration import Config
+from siskin.task import DefaultTask
+from siskin.utils import copyregions
 import datetime
 import luigi
 import tempfile

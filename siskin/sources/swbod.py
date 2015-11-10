@@ -27,14 +27,14 @@
 SWB Open Data.
 """
 
-from siskin.benchmark import timed
-from gluish.database import sqlite3db
-from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from gluish.path import copyregions
-from siskin.task import DefaultTask
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.database import sqlitedb
+from siskin.task import DefaultTask
+from siskin.utils import copyregions
 import BeautifulSoup
 import collections
 import datetime
@@ -302,7 +302,7 @@ class SWBOpenDataSnapshotMarc(SWBOpenDataTask):
                 sdb = SWBOpenDataSeekMapDB(date=dateobj)
                 luigi.build([marc, sdb], local_scheduler=True)
                 with open(marc.output().path) as handle:
-                    with sqlite3db(sdb.output().path) as cursor:
+                    with sqlitedb(sdb.output().path) as cursor:
                         idset = df[df.date == date].id.values.tolist()
                         limit, offset = self.limit, 0
                         while True:

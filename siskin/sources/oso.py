@@ -30,15 +30,15 @@ This group of task worked once, but OSO completely redesigned their site,
 so there tasks will fail now.
 """
 
-from siskin.benchmark import timed
-from gluish.database import sqlite3db
-from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles, copyregions
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.database import sqlitedb
 from siskin.task import DefaultTask
+from siskin.utils import copyregions, iterfiles
 import BeautifulSoup
 import datetime
 import luigi
@@ -172,7 +172,7 @@ class OSOSnapshot(OSOTask):
         with self.input().get('surface').open() as handle:
             with self.output().open('w') as output:
                 with self.input().get('file').open() as fh:
-                    with sqlite3db(self.input().get('seekmap').path) as cursor:
+                    with sqlitedb(self.input().get('seekmap').path) as cursor:
                         regions = []
                         for row in handle.iter_tsv(cols=('id', 'date')):
                             cursor.execute("SELECT offset, length FROM seekmap where id = ?", (row.id,))

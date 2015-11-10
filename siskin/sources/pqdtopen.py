@@ -27,9 +27,9 @@
 PQDT Open.
 """
 
-from gluish.common import OAIHarvestChunk
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 import datetime
 import luigi
@@ -45,9 +45,8 @@ class PQDTSync(PQDTTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return OAIHarvestChunk(begin=self.begin, end=self.date,
-                               url='http://pqdtoai.proquest.com/OAIHandler',
-                               prefix='oai_dc')
+        output = shellout("oaimi -verbose http://pqdtoai.proquest.com/OAIHandler > {output}")
+        luigi.File(output).move(self.output().path)
 
     def run(self):
         self.input().copy(self.output().path)

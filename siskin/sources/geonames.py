@@ -22,13 +22,14 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
 
-from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.intervals import quarterly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout, nwise
+from gluish.utils import shellout
+from siskin.benchmark import timed
 from siskin.sources.gnd import GNDGeonames
 from siskin.task import DefaultTask
+from siskin.utils import nwise
 import datetime
 import luigi
 import tempfile

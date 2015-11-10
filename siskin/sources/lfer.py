@@ -38,16 +38,16 @@ pattern = ".*SA-MARCcomb-lfer-(?P<year>\d\d)(?P<month>\d\d)(?P<day>\d\d).tar.gz"
 
 """
 
-from siskin.benchmark import timed
-from gluish.common import Directory
-from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import hourly
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.common import Directory
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import json
 import luigi

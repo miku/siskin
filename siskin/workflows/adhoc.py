@@ -29,7 +29,6 @@ A place for one time tasks and quick write-ups.
 
 from elasticsearch import helpers as eshelpers
 from gluish.format import TSV
-from gluish.utils import itervalues
 from siskin.task import DefaultTask
 import datetime
 import elasticsearch

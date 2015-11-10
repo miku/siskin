@@ -28,12 +28,12 @@ Homepage: http://www.textgrid.de/ueber-textgrid/digitale-bibliothek/
 License: http://creativecommons.org/licenses/by/3.0/de/
 """
 
-from gluish.common import Directory
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from siskin.common import Directory
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import luigi
 import os

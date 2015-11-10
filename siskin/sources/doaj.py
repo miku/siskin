@@ -34,7 +34,7 @@ http://doaj.org
 
 from siskin.benchmark import timed
 from gluish.common import Executable
-from gluish.database import sqlite3db
+from siskin.database import sqlitedb
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
@@ -282,7 +282,7 @@ class DOAJFincIDAlignment(DOAJTask):
         return FincMappingDump(date=self.closest())
 
     def run(self):
-        with sqlite3db(self.input().path) as conn:
+        with sqlitedb(self.input().path) as conn:
             with self.output().open('w') as output:
                 conn.execute("""SELECT finc_id, record_id FROM finc_mapping WHERE source_id = ?""", ('28',))
                 for row in conn.fetchall():

@@ -27,15 +27,15 @@
 Music Treasury Collection.
 """
 
-from siskin.benchmark import timed
-from gluish.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.intervals import quarterly
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles, wc
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
 from lxml import etree
+from siskin.benchmark import timed
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles, wc
 import BeautifulSoup
 import cStringIO
 import datetime

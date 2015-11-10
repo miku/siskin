@@ -71,19 +71,18 @@ extra = 2014-04-13:/path/to/extra.tar.gz, 2014-04-18:/path/to/another/shipment.t
 
 from __future__ import print_function
 from elasticsearch import helpers as eshelpers
-from siskin.benchmark import timed, Timer
-from gluish.colors import dim, red, green
 from gluish.common import Executable
-from gluish.database import sqlite3db, mysqldb
 from gluish.format import TSV
 from gluish.intervals import weekly
-from gluish.parameter import ILNParameter
-from gluish.path import copyregions
-from gluish.utils import shellout, memoize, random_string, nwise, date_range
+from gluish.utils import shellout
 from luigi import date_interval
+from siskin.benchmark import timed
 from siskin.configuration import Config
+from siskin.database import sqlitedb, mysqldb
+from siskin.parameter import ILNParameter
 from siskin.sources.gnd import GNDRelations, GNDDatabase
 from siskin.task import DefaultTask
+from siskin.utils import memoize, random_string, nwise, date_range, copyregions
 import collections
 import datetime
 import difflib
@@ -104,6 +103,21 @@ import urllib
 
 config = Config.instance()
 SeekInfo = collections.namedtuple('SeekInfo', ['offset', 'length'])
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def dim(s): return "%s%s%s" % (bcolors.HEADER, s, bcolors.ENDC)
+def red(s): return "%s%s%s" % (bcolors.FAIL, s, bcolors.ENDC)
+def green(s): return "%s%s%s" % (bcolors.OKGREEN, s, bcolors.ENDC)
 
 # ==============================================================================
 #
@@ -469,7 +483,7 @@ class SARegionalCopy(BSZTask):
 
     @timed
     def run(self):
-        with sqlite3db(self.input().get('db').fn) as cursor:
+        with sqlitedb(self.input().get('db').fn) as cursor:
             with self.input().get('idlist').open() as fh:
                 idset = set(r.id for r in fh.iter_tsv(cols=('id', 'X')))
             # todo: sqli!
@@ -819,7 +833,7 @@ class LiberoCacheDump(BSZTask):
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT record_id, content from libero_cache WHERE db_name = '%s' """ % (db_name,))
             _, stopover = tempfile.mkstemp(prefix='siskin-')
-            with sqlite3db(stopover) as cc:
+            with sqlitedb(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS libero_cache (record_id TEXT PRIMARY KEY, content TEXT)""")
                 for i, row in enumerate(cursor):
                     if i % 250000 == 0 and i > 0:
@@ -845,7 +859,7 @@ class LiberoCacheCopy(BSZTask):
             cursor.execute("""SET NET_WRITE_TIMEOUT = 600""")
             cursor.execute("""SELECT record_id, db_name, content FROM libero_cache""")
             _, stopover = tempfile.mkstemp(prefix='siskin-')
-            with sqlite3db(stopover) as cc:
+            with sqlitedb(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS libero_cache
                               (record_id TEXT, db_name TEXT, content TEXT, PRIMARY KEY (record_id, db_name))""")
                 for i, row in enumerate(cursor):
@@ -885,7 +899,7 @@ class FincMappingDump(BSZTask):
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT finc_id, source_id, record_id, created, status FROM finc_mapping""")
             _, stopover = tempfile.mkstemp(prefix='siskin-')
-            with sqlite3db(stopover) as cc:
+            with sqlitedb(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS finc_mapping
                               (finc_id INTEGER PRIMARY KEY,
                               source_id INTEGER, record_id TEXT,
@@ -935,7 +949,7 @@ class ISBNDump(BSZTask):
         with mysqldb(url, stream=True) as cursor:
             cursor.execute("""SELECT finc_id, isbn, updated FROM isbn""")
             _, stopover = tempfile.mkstemp(prefix='siskin-')
-            with sqlite3db(stopover) as cc:
+            with sqlitedb(stopover) as cc:
                 cc.execute("""CREATE TABLE IF NOT EXISTS isbn (finc_id INTEGER, isbn TEXT,
                               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) """)
                 for i, row in enumerate(cursor):
@@ -1235,7 +1249,7 @@ class Record(BSZTask):
 
     @timed
     def run(self):
-        with sqlite3db(self.input().get('seekmap-db').path) as cursor:
+        with sqlitedb(self.input().get('seekmap-db').path) as cursor:
             cursor.execute("SELECT offset, length FROM seekmap WHERE id = ?",
                            (self.id,))
             result = cursor.fetchone()
@@ -1402,7 +1416,7 @@ class OpacDisplayFlag(BSZTask):
 
         cached_ppns = set()
         with self.output().open('w') as output:
-            with sqlite3db(self.input().get('dump').path) as cursor:
+            with sqlitedb(self.input().get('dump').path) as cursor:
                 cursor.execute('SELECT record_id, content FROM libero_cache')
                 rows = cursor.fetchall()
                 for row in rows:
@@ -1668,19 +1682,19 @@ class BSZIndex(BSZTask):
         garbage.add(current_db)
         garbage.add(output)
 
-        with sqlite3db(current_db) as cc:
+        with sqlitedb(current_db) as cc:
             currentkv = cc.execute('SELECT key, value from store').fetchall()
 
         # find outdated docs (ppns)
         outdated = set()
-        with sqlite3db(desired_db) as dc:
+        with sqlitedb(desired_db) as dc:
             for id, current_date in currentkv:
                 result = dc.execute('SELECT value from store where key = ?', (id,)).fetchone()
                 if result is not None:
                     if not current_date == result[0]:
                         outdated.add(id)
 
-        with sqlite3db(desired_db) as cc:
+        with sqlitedb(desired_db) as cc:
             desiredkv = cc.execute('SELECT key from store').fetchall()
 
         desired = set((kv[0] for kv in desiredkv))
@@ -1758,7 +1772,7 @@ class BSZIndex(BSZTask):
 
                 _, stopover = tempfile.mkstemp(prefix='siskin-')
 
-                with sqlite3db(sdb.output().path) as cursor:
+                with sqlitedb(sdb.output().path) as cursor:
                     with raw.output().open() as handle:
                         with open(stopover, 'w') as so:
                             cursor.execute("""
@@ -2240,7 +2254,7 @@ class BSZGNDClusterBirthProfession(BSZTask):
     @timed
     def run(self):
         with self.input().get('refs').open() as handle:
-            with sqlite3db(self.input().get('db').path) as cursor:
+            with sqlitedb(self.input().get('db').path) as cursor:
                 with self.output().open('w') as output:
                     for row in handle.iter_tsv(cols=('gnd',)):
                         cursor.execute("""
@@ -2290,7 +2304,7 @@ class BSZGNDClusterActivityProfession(BSZTask):
     @timed
     def run(self):
         with self.input().get('refs').open() as handle:
-            with sqlite3db(self.input().get('db').path) as cursor:
+            with sqlitedb(self.input().get('db').path) as cursor:
                 with self.output().open('w') as output:
                     for row in handle.iter_tsv(cols=('gnd',)):
                         cursor.execute("""

@@ -33,14 +33,15 @@ ftp-path = /
 ftp-pattern = *
 """
 
-from siskin.benchmark import timed
-from siskin.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout, nwise
+from gluish.utils import shellout
+from siskin.benchmark import timed
+from siskin.common import FTPMirror, Executable
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import nwise
 import datetime
 import itertools
 import luigi

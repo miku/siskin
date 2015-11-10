@@ -28,18 +28,18 @@ GND-related tasks.
 """
 
 from elasticsearch import helpers as eshelpers
-from siskin.benchmark import timed
-from gluish.common import Executable, Directory
-from gluish.database import sqlite3db
-from gluish.esindex import CopyToIndex
+from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
-from gluish.utils import shellout, random_string
+from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.common import Directory
+from siskin.database import sqlitedb
 from siskin.sources.dbpedia import DBPGNDLinks, DBPDepictions
 from siskin.task import DefaultTask
-from siskin.utils import ElasticsearchMixin
+from siskin.utils import ElasticsearchMixin, random_string, iterfiles
 import BeautifulSoup
 import collections
 import cPickle as pickle
@@ -164,7 +164,7 @@ class GNDCacheDB(GNDTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         pattern = re.compile("""rdf:about="http://d-nb.info/gnd/([0-9X-]+)">""")
 
-        with sqlite3db(stopover) as cursor:
+        with sqlitedb(stopover) as cursor:
             cursor.execute("""CREATE TABLE gnd (id text  PRIMARY KEY, content blob)""")
             cursor.execute("""CREATE INDEX IF NOT EXISTS idx_gnd_id ON gnd (id)""")
 
@@ -851,7 +851,7 @@ class GNDDepictions(GNDTask):
     def run(self):
         kv = shellout(""" tabtokv -f "1,3" -o {output} {input}""", input=self.input().get('dbppics').path)
         with self.input().get('gndto').open() as handle:
-            with sqlite3db(kv) as cursor:
+            with sqlitedb(kv) as cursor:
                 with self.output().open('w') as output:
                     for row in handle.iter_tsv(cols=('dbp', 'gnd')):
                         cursor.execute("""select value from store where key = ?""", (row.dbp,))
@@ -953,7 +953,7 @@ class GNDDatabase(GNDTask):
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with sqlite3db(stopover) as cursor:
+        with sqlitedb(stopover) as cursor:
             for relation, target in self.input().iteritems():
                 table = relation.replace(':', '_')
                 cursor.execute("""CREATE TABLE IF NOT EXISTS %s (s TEXT, o TEXT)""" % table)

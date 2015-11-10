@@ -27,7 +27,7 @@
 Gutenberg metadata.
 """
 
-from gluish.esindex import CopyToIndex
+from luigi.contrib.esindex import CopyToIndex
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

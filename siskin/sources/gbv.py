@@ -38,13 +38,13 @@ Requirements:
     * elasticsearch
 """
 
-from siskin.benchmark import timed
-from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import luigi
 import tempfile

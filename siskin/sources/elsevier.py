@@ -33,11 +33,11 @@ Configuration keys:
 scp-src = [user@server:[port]]/path/to/file.bin
 """
 
-from siskin.benchmark import timed
 from gluish.common import Executable
-from gluish.esindex import CopyToIndex
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime

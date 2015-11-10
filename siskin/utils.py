@@ -28,6 +28,7 @@ Various utilities.
 """
 
 from __future__ import print_function
+from dateutil import relativedelta
 from luigi.task import Register, flatten
 from siskin import __version__
 import collections
@@ -53,6 +54,40 @@ MAN_HEADER = r"""
 
 + Siskin
 """
+
+def wc(path):
+    """
+    Like `wc -l`.
+    """
+    with open(path) as handle:
+        num_lines = sum(1 for line in handle)
+    return num_lines
+
+def date_range(start_date, end_date, increment, period):
+    """
+    Generate `date` objects between `start_date` and `end_date` in `increment`
+    `period` intervals.
+    """
+    result = []
+    nxt = start_date
+    delta = relativedelta.relativedelta(**{period:increment})
+    while nxt <= end_date:
+        result.append(nxt)
+        nxt += delta
+    return result
+
+def copyregions(src, dst, seekmap):
+    """
+    Copy regions of a source file to a target. The regions are given in the
+    iterable `seekmap`, which must contain (offset, length) tuples.
+
+    `src` (r) and `dst` (w) must be open files handles.
+
+    More: http://stackoverflow.com/q/18551592/89391
+    """
+    for offset, length in sorted(seekmap):
+        src.seek(offset)
+        dst.write(src.read(length))
 
 class memoize(object):
     '''Decorator. Caches a function's return value each time it is called.

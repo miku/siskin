@@ -27,15 +27,15 @@
 DBPedia related tasks.
 """
 
-from siskin.benchmark import timed
-from gluish.common import Directory, Executable
-from gluish.database import sqlite3db
-from gluish.esindex import CopyToIndex
+from gluish.common import Executable
 from gluish.format import TSV
-from gluish.path import iterfiles
-from gluish.utils import shellout, random_string
+from gluish.utils import shellout
+from luigi.contrib.esindex import CopyToIndex
+from siskin.benchmark import timed
+from siskin.common import Directory
+from siskin.database import sqlitedb
 from siskin.task import DefaultTask
-from siskin.utils import ElasticsearchMixin
+from siskin.utils import ElasticsearchMixin, random_string, iterfiles
 import collections
 import datetime
 import elasticsearch
@@ -342,7 +342,7 @@ class DBPSkosDB(DBPTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with sqlite3db(stopover) as cursor:
+        with sqlitedb(stopover) as cursor:
             cursor.execute(""" CREATE TABLE IF NOT EXISTS tree (node TEXT, parent TEXT) """)
             cursor.connection.commit()
             with self.input().open() as handle:
@@ -404,7 +404,7 @@ class DBPSkosRootPath(DBPTask):
     @timed
     def run(self):
         with self.input().get('cats').open() as handle:
-            with sqlite3db(self.input().get('db').path) as cursor:
+            with sqlitedb(self.input().get('db').path) as cursor:
                 with self.output().open('w') as output:
                     for i, row in enumerate(handle.iter_tsv(cols=('category',))):
                         if i % 100000 == 0:

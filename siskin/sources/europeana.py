@@ -27,11 +27,11 @@
 Europeana NT.
 """
 
-from siskin.benchmark import timed
 from gluish.format import TSV
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from siskin.benchmark import timed
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import glob
 import luigi
 import os

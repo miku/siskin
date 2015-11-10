@@ -28,7 +28,7 @@ VIAF-related tasks.
 """
 
 from siskin.benchmark import timed
-from gluish.esindex import CopyToIndex
+from luigi.contrib.esindex import CopyToIndex
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

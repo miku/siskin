@@ -37,14 +37,14 @@ ftp-pattern = some*glob*pattern.zip
 scp-src = username@ftp.example.de:/home/gbi
 """
 
-from siskin.benchmark import timed
-from siskin.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from gluish.path import iterfiles
 from gluish.utils import shellout
+from siskin.benchmark import timed
+from siskin.common import FTPMirror, Executable
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import luigi
 import os
