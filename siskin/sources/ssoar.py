@@ -46,18 +46,21 @@ class SSOARTask(DefaultTask):
 class SSOARDump(SSOARTask):
     """ Dump SSOAR. """
 
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='oai_dc')
+
     def requires(self):
         return Executable(name='oaimi', message='https://github.com/miku/oaimi')
 
     def run(self):
         output = shellout("""
             cat <(echo '<collection xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">')
-                <(oaimi -verbose -prefix marcxml http://www.ssoar.info/OAIHandler/request)
-                <(echo '</collection>') > {output}""")
+		<(oaimi -verbose -prefix {format} http://www.ssoar.info/OAIHandler/request)
+		<(echo '</collection>') > {output}""", format=self.format)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+	return luigi.LocalTarget(path=self.path(ext='xml'))
 
 class SSOARCombine(SSOARTask):
     """ Combine the chunks for a date range into a single file.
