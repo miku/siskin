@@ -27,10 +27,11 @@
 SSOAR.
 """
 
-from siskin.benchmark import timed
+from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout, date_range
+from siskin.benchmark import timed
 from siskin.task import DefaultTask
 import datetime
 import luigi
