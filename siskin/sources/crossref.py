@@ -149,6 +149,20 @@ class CrossrefWorks(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+class CrossrefWorksItems(CrossrefTask):
+    """ Only the items, without any addition check. """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefWorks(begin=self.begin, date=self.closest())
+
+    def run(self):
+        output = shellout("unpigz -c {input} | jq -c -r '.message.items[]' | pigz -c > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class CrossrefItems(CrossrefTask):
     """ Combine all harvested files into a single LDJ file. This file will contain dups.
