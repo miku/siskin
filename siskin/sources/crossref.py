@@ -33,7 +33,7 @@ from thousands of scholarly and professional publishers around the globe.
 
 from siskin.benchmark import timed
 from gluish.common import Executable
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
@@ -122,13 +122,33 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
             raise RuntimeError('update can only be: days, weeks or months')
-        dates = date_range(self.begin, self.end, 1, self.update)
+        dates = [dt for dt in date_range(self.begin, self.end, 1, self.update)]
         tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1])
                  for i in range(len(dates) - 1)]
         return sorted(tasks)
 
     def output(self):
         return self.input()
+
+class CrossrefWorks(CrossrefTask):
+    """
+    Harvest raw works API responses.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefHarvest(begin=self.begin, end=self.closest())
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} | pigz -c >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 
 class CrossrefItems(CrossrefTask):
     """ Combine all harvested files into a single LDJ file. This file will contain dups.
