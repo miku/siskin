@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding: utf-8
 #
 #  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -33,6 +32,7 @@ Config:
 [amsl]
 
 endpoint = http://111.11.111.111:8890/sparql
+isil-rel = https://hello.example/static/about.json
 
 """
 
@@ -75,3 +75,19 @@ class AMSLISILForSourceID(AMSLTask):
 
     def output(self):
        return luigi.LocalTarget(path=self.path(ext=self.format))
+
+class AMSLCollections(AMSLTask):
+    """ Get a list of ISIL, source and collection choices via JSON API. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        link = config.get('amsl', 'isil-rel')
+        r = requests.get(link)
+        if r.status_code is not 200:
+            raise RuntimeError("failed %s: %s", (link, r.text[:200]))
+        with self.output().open('w') as output:
+            output.write(r.text)
+
+    def output(self):
+       return luigi.LocalTarget(path=self.path())
