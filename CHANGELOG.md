@@ -1,3 +1,29 @@
+0.0.126 2015-11-17
+------------------
+
+This is a canary.
+
+* ssoar: add format parameter
+* crossref: jq for messages (kind of slow)
+* amsl: isil relations api example
+* crossref: add CrossrefWorks tasks
+* ssoar: fix imports
+* the great refactoring continues
+* a first round of updates (gluish, oai, es)
+* bartoc: hardcode json dump url
+* add source: bartoc, A multilingual, interdisciplinary Terminology Registry for Knowledge Organization Systems
+* histbest: use oaimi, keep oai_dc for now
+* ai: skip the first item
+* ai: fix list
+* replace gzip with pigz (ongoing)
+* ai: use pigz
+* mag: support separate downloads
+* new source: mag
+* arxiv: simplify harvest with oaimi
+* update LICENCE
+* thieme: test case for oaimi (https://github.com/miku/oaimi)
+* crossref: allow sort to use more memory
+
 0.0.125 2015-09-01
 ------------------
 
