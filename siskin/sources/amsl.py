@@ -82,12 +82,8 @@ class AMSLCollections(AMSLTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        link = config.get('amsl', 'isil-rel')
-        r = requests.get(link)
-        if r.status_code is not 200:
-            raise RuntimeError("failed %s: %s", (link, r.text[:200]))
-        with self.output().open('w') as output:
-            output.write(r.text)
+        output = shellout("""curl --fail "{link}" > {output} """, link=config.get('amsl', 'isil-rel'))
+        luigi.File(output).move(self.output().path)
 
     def output(self):
        return luigi.LocalTarget(path=self.path())
