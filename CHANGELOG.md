@@ -1,3 +1,9 @@
+0.0.127 2015-11-20
+------------------
+
+* ai: use ISSN FID 20151005.csv
+* amsl: use curl for AMSLCollections
+
 0.0.126 2015-11-17
 ------------------
 
