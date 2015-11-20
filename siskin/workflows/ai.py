@@ -186,7 +186,7 @@ class AIExport(AITask):
             'DE-Zi4': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Ld0LCw'),
             'DE-J59': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/44xEbF'),
 
-            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/8P6JtB'),
+            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/tm6U9D'),
 
             'blacklist': DOIBlacklist(date=self.date),
             'app': Executable(name='span-export', message='http://git.io/vI8NV'),
