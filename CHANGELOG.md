@@ -1,3 +1,9 @@
+0.0.128 2015-11-26
+------------------
+
+* attach DE-15-FID to doaj, refs #6524, #4983
+* amsl: remove obsolete SPARQL access
+
 0.0.127 2015-11-20
 ------------------
 
