@@ -68,14 +68,12 @@ class GBIDropbox(GBITask):
         return Executable('scp', message='https://en.wikipedia.org/wiki/Secure_copy')
 
     def run(self):
-        target = tempfile.mkdtemp(prefix='siskin-')
-        shellout("scp -rCpq {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
+        target = os.path.join(self.taskdir(), 'mirror')
+        shellout("mkdir -p {target} && scp -rCpq {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
-        dst = os.path.join(self.taskdir(), 'mirror')
-        shellout("mv {target} {output}", target=target, output=dst)
         with self.output().open('w') as output:
-            for path in iterfiles(dst):
+            for path in iterfiles(target):
                 output.write_tsv(path)
 
     def output(self):
