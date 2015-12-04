@@ -201,9 +201,9 @@ class AIExport(AITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         # DE-15 and DE-14 get DOAJ, cf. #6524, #4983
-        shellout("""span-export -doi-blacklist {blacklist} -any DE-540 -any DE-15-FID -any DE-15 -any DE-14 {input} | pigz >> {output}""",
+        shellout("""span-export -doi-blacklist {blacklist} -any DE-540 -l DE-15-FID:{issns} -any DE-15 -any DE-14 {input} | pigz >> {output}""",
                  blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path,
-                 output=stopover)
+                 issns=self.input().get('DE-15-FID').path, output=stopover)
 
         # DE-15 gets DeGruyter, cf. #4731
         shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} {input} | pigz >> {output}""",
