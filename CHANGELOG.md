@@ -1,3 +1,9 @@
+0.0.130 2015-12-04
+------------------
+
+gbi: do not use extra dir for syncing
+ai: doaj adjust fid, refs. #6524
+
 0.0.129 2015-12-01
 ------------------
 
