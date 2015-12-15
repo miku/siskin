@@ -79,55 +79,6 @@ class GBIDropbox(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class GBISync(GBITask):
-    """ Sync. """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return FTPMirror(host=config.get('gbi', 'ftp-host'),
-                         username=config.get('gbi', 'ftp-username'),
-                         password=config.get('gbi', 'ftp-password'),
-                         pattern=config.get('gbi', 'ftp-pattern'))
-
-    @timed
-    def run(self):
-        self.input().move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-# --*-- commercial break --*--
-#
-# This is a sketch, how the task below might be implemented in a type-safe
-# language with a fictional library called lynd.
-# Go: 598 chars, Python: 723 chars.
-#
-
-# package gbi
-
-# type Group struct {
-#     Date  lynd.Date   `default:"2010-01-01"`
-#     Group lynd.String `default:"wiwi" help:"wiwi, fzs, sowi, recht"`
-# }
-
-# func (task Groups) Requires() interface{} {
-#     return GBIInventory{Date: task.Date}
-# }
-
-# func (task Groups) Run() error {
-#     for fields := range lynd.In(task).StringFields() {
-#         group := strings.Split(fields[0], "/")[-2]
-#         if group == task.Group {
-#             lynd.Out(task).WriteTabs(fields[0])
-#         }
-#     }
-#     return lynd.Out(task).Flush()
-# }
-
-# func (task Groups) Output() Target {
-#     return lynd.AutoTargetFormat(task, lynd.TSV)
-# }
-
 class GBIGroup(GBITask):
     """ Find groups (subdirs). These are not part of the metadata. """
     date = ClosestDateParameter(default=datetime.date.today())
