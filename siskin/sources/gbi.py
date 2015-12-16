@@ -105,7 +105,7 @@ class GBIZipWithZips(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class GBIUnzipMatroshkas(GBITask):
+class GBIMatryoshka(GBITask):
     """
     Unzips all zips nested in zip files into a single big XML file.
     The DB attribute should carry the originating filename, e.g. DB="BLIS" for BLIS.ZIP.
