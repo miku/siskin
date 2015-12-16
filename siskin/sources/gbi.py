@@ -50,6 +50,7 @@ import luigi
 import os
 import tempfile
 import zipfile
+import shutil
 
 config = Config.instance()
 
@@ -104,6 +105,36 @@ class GBIZipWithZips(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+class GBIUnzipMatroshkas(GBITask):
+    """
+    Unzips all zips nested in zip files into a single big XML file.
+    The DB attribute should carry the originating filename, e.g. DB="BLIS" for BLIS.ZIP.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIZipWithZips(date=self.date)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                dirname = tempfile.mkdtemp(prefix='siskin-')
+                shellout("unzip -q -d {dir} {zipfile}", dir=dirname, zipfile=row.path)
+                for path in iterfiles(dirname):
+                    if not path.endswith('.zip'):
+                        continue
+                    shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
+                                iconv -f iso-8859-1 -t utf-8 |
+                                LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                                LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin></Document>@'>> {stopover} """,
+                                zipfile=path, stopover=stopover, origin=os.path.basename(row.path))
+                shutil.rmtree(dirname)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 #
 # Below tasks are DEPRECATED and will be removed shortly.
