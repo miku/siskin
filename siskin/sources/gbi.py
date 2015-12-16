@@ -79,112 +79,119 @@ class GBIDropbox(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class GBIGroup(GBITask):
-    """ Find groups (subdirs). These are not part of the metadata. """
-    date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
-
-    def requires(self):
-        return GBISync(date=self.date)
-
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle.iter_tsv(cols=('path',)):
-                    group = row.path.split('/')[-2]
-                    if group == self.group:
-                        output.write_tsv(row.path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
-
-class GBIXMLGroup(GBITask):
+class GBIUnzipNestedFile(GBITask):
     """
-    Extract all XML files and concat them. Inject a <x-group> tag, which
-    carries the "collection" from the directory name into the metadata.
+    Unpack nested file.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
+    def requires(self)
+        pass
 
-    def requires(self):
-       return GBIGroup(date=self.date, group=self.group)
+# class GBIGroup(GBITask):
+#     """ Find groups (subdirs). These are not part of the metadata. """
+#     date = ClosestDateParameter(default=datetime.date.today())
+#     group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
 
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                shellout("""unzip -p {path} \*.xml 2> /dev/null |
-                            iconv -f iso-8859-1 -t utf-8 |
-                            LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
-                            LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                            LC_ALL=C sed -e 's@</Document>@<x-group>{group}</x-group></Document>@' >> {output}""",
-                         output=stopover, path=row.path, group=self.group,
-                         ignoremap={1: 'OK', 9: 'ignoring broken zip'})
-        luigi.File(stopover).move(self.output().path)
+#     def requires(self):
+#         return GBISync(date=self.date)
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+#     def run(self):
+#         with self.input().open() as handle:
+#             with self.output().open('w') as output:
+#                 for row in handle.iter_tsv(cols=('path',)):
+#                     group = row.path.split('/')[-2]
+#                     if group == self.group:
+#                         output.write_tsv(row.path)
 
-class GBIXML(GBITask):
-    """
-    Extract all XML files and concat them. Inject a <x-group> tag, which
-    carries the "collection" from the directory name into the metadata.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
+#     def output(self):
+#         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
-    def requires(self):
-        """ Note: ingore broken 'sowi' for now. """
-        return [GBIXMLGroup(date=self.date, group=group) for group in ['wiwi', 'fzs', 'recht']]
+# class GBIXMLGroup(GBITask):
+#     """
+#     Extract all XML files and concat them. Inject a <x-group> tag, which
+#     carries the "collection" from the directory name into the metadata.
+#     """
+#     date = ClosestDateParameter(default=datetime.date.today())
+#     group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
 
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+#     def requires(self):
+#        return GBIGroup(date=self.date, group=self.group)
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+#     @timed
+#     def run(self):
+#         _, stopover = tempfile.mkstemp(prefix='siskin-')
+#         with self.input().open() as handle:
+#             for row in handle.iter_tsv(cols=('path',)):
+#                 shellout("""unzip -p {path} \*.xml 2> /dev/null |
+#                             iconv -f iso-8859-1 -t utf-8 |
+#                             LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+#                             LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+#                             LC_ALL=C sed -e 's@</Document>@<x-group>{group}</x-group></Document>@' >> {output}""",
+#                          output=stopover, path=row.path, group=self.group,
+#                          ignoremap={1: 'OK', 9: 'ignoring broken zip'})
+#         luigi.File(stopover).move(self.output().path)
 
-class GBIIntermediateSchema(GBITask):
-    """
-    Convert GBI to intermediate format via span.
-    If group is 'all', create intermediate schema of all groups.
-    """
+#     def output(self):
+#         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
-    date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='all', description='wiwi, fzs, sowi, recht')
+# class GBIXML(GBITask):
+#     """
+#     Extract all XML files and concat them. Inject a <x-group> tag, which
+#     carries the "collection" from the directory name into the metadata.
+#     """
+#     date = ClosestDateParameter(default=datetime.date.today())
 
-    def requires(self):
-        span = Executable(name='span-import', message='http://git.io/vI8NV')
-        if self.group == "all":
-            return {'span': span, 'file': GBIXML(date=self.date)}
-        else:
-            return {'span': span, 'file': GBIXMLGroup(date=self.date, group=self.group)}
+#     def requires(self):
+#         """ Note: ingore broken 'sowi' for now. """
+#         return [GBIXMLGroup(date=self.date, group=group) for group in ['wiwi', 'fzs', 'recht']]
 
-    @timed
-    def run(self):
-        output = shellout("span-import -i genios {input} > {output}", input=self.input().get('file').path)
-        luigi.File(output).move(self.output().path)
+#     @timed
+#     def run(self):
+#         _, stopover = tempfile.mkstemp(prefix='siskin-')
+#         for target in self.input():
+#             shellout("cat {input} >> {output}", input=target.path, output=stopover)
+#         luigi.File(stopover).move(self.output().path)
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+#     def output(self):
+#         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
-class GBIISSNList(GBITask):
-    """ A list of JSTOR ISSNs. """
-    date = ClosestDateParameter(default=datetime.date.today())
+# class GBIIntermediateSchema(GBITask):
+#     """
+#     Convert GBI to intermediate format via span.
+#     If group is 'all', create intermediate schema of all groups.
+#     """
 
-    def requires(self):
-        return GBIIntermediateSchema(date=self.date)
+#     date = ClosestDateParameter(default=datetime.date.today())
+#     group = luigi.Parameter(default='all', description='wiwi, fzs, sowi, recht')
 
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        output = shellout("""sort -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+#     def requires(self):
+#         span = Executable(name='span-import', message='http://git.io/vI8NV')
+#         if self.group == "all":
+#             return {'span': span, 'file': GBIXML(date=self.date)}
+#         else:
+#             return {'span': span, 'file': GBIXMLGroup(date=self.date, group=self.group)}
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+#     @timed
+#     def run(self):
+#         output = shellout("span-import -i genios {input} > {output}", input=self.input().get('file').path)
+#         luigi.File(output).move(self.output().path)
+
+#     def output(self):
+#         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+# class GBIISSNList(GBITask):
+#     """ A list of JSTOR ISSNs. """
+#     date = ClosestDateParameter(default=datetime.date.today())
+
+#     def requires(self):
+#         return GBIIntermediateSchema(date=self.date)
+
+#     @timed
+#     def run(self):
+#         _, stopover = tempfile.mkstemp(prefix='siskin-')
+#         shellout("""jq -r '.["rft.issn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+#         shellout("""jq -r '.["rft.eissn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+#         output = shellout("""sort -u {input} > {output} """, input=stopover)
+#         luigi.File(output).move(self.output().path)
+
+#     def output(self):
+#         return luigi.LocalTarget(path=self.path(), format=TSV)
