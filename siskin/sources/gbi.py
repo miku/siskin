@@ -69,7 +69,7 @@ class GBIDropbox(GBITask):
 
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
-        shellout("mkdir -p {target} && scp -rCpq {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
+        shellout("mkdir -p {target} && rsync -avzP {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
         with self.output().open('w') as output:
