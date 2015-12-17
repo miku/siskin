@@ -50,3 +50,4 @@ docs/_build/
 vagrant.key
 dist
 Updates.md
+tmp/
