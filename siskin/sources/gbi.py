@@ -35,6 +35,8 @@ ftp-path = /
 ftp-pattern = some*glob*pattern.zip
 
 scp-src = username@ftp.example.de:/home/gbi
+
+dump = /mirror/gbi/zy.zip /mirror/gbi/zz.zip
 """
 
 from gluish.format import TSV
@@ -68,7 +70,7 @@ class GBIDropbox(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return Executable('scp', message='https://en.wikipedia.org/wiki/Secure_copy')
+        return Executable('rsync', message='https://rsync.samba.org/')
 
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
@@ -102,6 +104,17 @@ class GBIZipWithZips(GBITask):
                                 output.write_tsv(row.path)
                         except zipfile.BadZipfile as err:
                             self.logger.warn("%s: %s" % (row.path, err))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GBIDump(GBITask):
+    """
+    List of GBI dump nested zips relative to the GBIDropbox taskdir.
+    """
+    def run(self):
+        dbox = GBIDropbox()
+        print([os.path.join(dbox.taskdir(), path) for path in config.get('gbi', 'dump').split()])
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
