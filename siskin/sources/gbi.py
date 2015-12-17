@@ -38,7 +38,7 @@ scp-src = username@ftp.example.de:/home/gbi
 """
 
 from gluish.format import TSV
-from gluish.intervals import monthly
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
@@ -59,13 +59,13 @@ class GBITask(DefaultTask):
     TAG = '048'
 
     def closest(self):
-        return monthly(self.date)
+        return weekly(self.date)
 
 class GBIDropbox(GBITask):
     """
     Pull down GBI dropbox content.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return Executable('scp', message='https://en.wikipedia.org/wiki/Secure_copy')
