@@ -127,10 +127,8 @@ class GBIMatryoshka(GBITask):
     attribute should carry the originating filename, e.g. DB="BLIS" for
     BLIS.ZIP. The outer zipfile came is injected as `<x-origin>`.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
-
     def requires(self):
-        return GBIZipWithZips(date=self.date)
+        return GBIDump()
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
