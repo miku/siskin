@@ -129,7 +129,8 @@ class GBIMatryoshka(GBITask):
                                 iconv -f iso-8859-1 -t utf-8 |
                                 LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                                 LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin></Document>@' | gzip -c >> {stopover} """,
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin></Document>@' |
+                                pigz -c >> {stopover} """,
                                 zipfile=path, stopover=stopover, origin=os.path.basename(row.path))
                 shutil.rmtree(dirname)
         luigi.File(stopover).move(self.output().path)
