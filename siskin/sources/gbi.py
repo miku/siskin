@@ -114,7 +114,9 @@ class GBIDump(GBITask):
     """
     def run(self):
         dbox = GBIDropbox()
-        print([os.path.join(dbox.taskdir(), path) for path in config.get('gbi', 'dump').split()])
+        with self.output().open('w') as output:
+            for path in config.get('gbi', 'dump').split():
+                output.write_tsv(os.path.join(dbox.taskdir(), path))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
