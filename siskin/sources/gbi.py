@@ -51,6 +51,7 @@ from siskin.utils import iterfiles
 import datetime
 import luigi
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -127,6 +128,8 @@ class GBIMatryoshka(GBITask):
     attribute should carry the originating filename, e.g. DB="BLIS" for
     BLIS.ZIP. The outer zipfile came is injected as `<x-origin>`.
     """
+    issue = luigi.Parameter(default='20151101T000000', description='tag to use as "Dateiissue" for dump')
+
     def requires(self):
         return GBIDump()
 
@@ -143,14 +146,52 @@ class GBIMatryoshka(GBITask):
                                 iconv -f iso-8859-1 -t utf-8 |
                                 LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                                 LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin></Document>@' |
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' |
                                 pigz -c >> {stopover} """,
-                                zipfile=path, stopover=stopover, origin=os.path.basename(row.path))
+                                zipfile=path, stopover=stopover, origin=os.path.basename(row.path), issue=self.issue)
                 shutil.rmtree(dirname)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
+class GBIUpdates(GBITask):
+    """
+    Collect all updates since a given date in a single file.
+    """
+    since = luigi.Parameter(default='20151101000000')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIDropbox()
+
+    def run(self):
+        """
+        kons_sachs_X_20150508090205_Y.zip
+        """
+        pattern = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+
+        with self.input().open() as handle:
+            for row in sorted(handle.iter_tsv(cols=('path',))):
+                match = pattern.search(row.path)
+                if not match:
+                    continue
+                filedate = match.group(1)
+                if filedate < self.since:
+                    continue
+                isodate = filedate[:8] + "T" + filedate[8:]
+                shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
+                            iconv -f iso-8859-1 -t utf-8 |
+                            LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                            LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+                            LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' >> {stopover} """,
+                            zipfile=row.path, stopover=stopover, origin=os.path.basename(row.path), issue=isodate)
+
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 #
 # Below tasks are DEPRECATED and will be removed shortly.
