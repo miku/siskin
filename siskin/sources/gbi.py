@@ -37,7 +37,7 @@ ftp-pattern = some*glob*pattern.zip
 scp-src = username@ftp.example.de:/home/gbi
 """
 
-from gluish.format import TSV, Gzip
+from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -130,14 +130,14 @@ class GBIMatryoshka(GBITask):
                                 iconv -f iso-8859-1 -t utf-8 |
                                 LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                                 LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin></Document>@'
-                                >> {stopover} """,
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin></Document>@' |
+                                pigz -c >> {stopover} """,
                                 zipfile=path, stopover=stopover, origin=os.path.basename(row.path))
                 shutil.rmtree(dirname)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
 #
 # Below tasks are DEPRECATED and will be removed shortly.
