@@ -128,7 +128,7 @@ class GBIMatryoshka(GBITask):
     attribute should carry the originating filename, e.g. DB="BLIS" for
     BLIS.ZIP. The outer zipfile came is injected as `<x-origin>`.
     """
-    issue = luigi.Parameter(default='20151101T000000', description='tag to use as "Dateiissue" for dump')
+    issue = luigi.Parameter(default='20151102T000000', description='tag to use as "Dateissue" for dump')
 
     def requires(self):
         return GBIDump()
@@ -159,7 +159,7 @@ class GBIUpdates(GBITask):
     """
     Collect all updates since a given date in a single file.
     """
-    since = luigi.Parameter(default='20151101000000')
+    since = luigi.Parameter(default='20151101000000', description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
