@@ -193,6 +193,14 @@ class GBIUpdates(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
+
+class GBISnapshot(GBITask):
+    """
+    A snapshot of all current GBI records. Collect all update ID and DB
+    and ignore those in den dump file.
+    """
+    pass
+
 #
 # Below tasks are DEPRECATED and will be removed shortly.
 #
