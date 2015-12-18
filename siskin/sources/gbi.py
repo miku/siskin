@@ -68,7 +68,7 @@ class GBIDropbox(GBITask):
     """
     Pull down GBI dropbox content.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return Executable('rsync', message='https://rsync.samba.org/')
@@ -131,11 +131,11 @@ class GBIMatryoshka(GBITask):
     issue = luigi.Parameter(default='20151102T000000', description='tag to use as "Dateissue" for dump')
 
     def requires(self):
-        return GBIDump()
+        return {'dump': GBIDump(), 'sync': GBIDropbox()}
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
+        with self.input().get('dump').open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 dirname = tempfile.mkdtemp(prefix='siskin-')
                 shellout("unzip -q -d {dir} {zipfile}", dir=dirname, zipfile=row.path)
