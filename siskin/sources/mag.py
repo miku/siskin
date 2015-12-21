@@ -21,6 +21,7 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
+#
 # Microsoft Academic Graph
 #
 # TOS: http://research.microsoft.com/en-us/um/redmond/projects/mag/license.txt
@@ -30,6 +31,7 @@
 # * http://research.microsoft.com/en-us/projects/mag/
 # * https://academicgraph.blob.core.windows.net/graph/index.html?eulaaccept=on
 #
+# Number of papers as of November 2015: 120887833, ~37 with DOI
 
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
