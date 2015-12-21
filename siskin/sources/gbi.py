@@ -193,13 +193,25 @@ class GBIUpdates(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
+class GBIRawIntermediateSchema(GBITask):
+    """
+    Convert dump and updates into a single preliminary intermediate schema.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
 
-class GBISnapshot(GBITask):
-    """
-    A snapshot of all current GBI records. Collect all update ID and DB
-    and ignore those in den dump file.
-    """
-    pass
+    def requires(self):
+        return {'updates': GBIUpdates(date=self.date), 'dump': GBIMatryoshka()}
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("span-import -i genios <(unpigz -c {input}) >> {output}",
+                 input=self.input().get('dump').path, output=stopover)
+        shellout("span-import -i genios {input} >> {output}",
+                 input=self.input().get('updates').path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 #
 # Below tasks are DEPRECATED and will be removed shortly.
