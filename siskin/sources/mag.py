@@ -135,3 +135,19 @@ class MAGPaperDomains(MAGTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="txt.gz"))
+
+class MAGDOIList(MAGTask):
+    """
+    List of DOI in this dataset.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return MAGFile(date=self.date, name='Papers')
+
+    def run(self):
+        output = shellout(""" unpigz -c {input} | LC_ALL=C grep -o "10\.[a-zA-Z0-9./]*" | pigz -c > {output} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="txt.gz"))
