@@ -73,54 +73,61 @@ class MAGDump(MAGTask):
 
 class MAGFile(MAGTask):
     """
-    Download a single file. Possible files:
+    Listing archive: MicrosoftAcademicGraph.zip
 
-    Affiliations
-    Authors
-    ConferenceInstances
-    ConferenceSeries
-    FieldsOfStudy
-    Journals
-    PaperAuthorAffiliations
-    PaperKeywords
-    PaperReferences
-    Papers
-    PaperUrls
+    --
+    Path = MicrosoftAcademicGraph.zip
+    Type = zip
+    64-bit = +
+    Physical Size = 29698421155
 
+       Date      Time    Attr         Size   Compressed  Name
+    ------------------- ----- ------------ ------------  ------------------------
+    2015-11-16 15:45:20 ....A       770185       296305  Affiliations.txt
+    2015-11-16 15:48:48 ....A   3037120573   1472531330  Authors.txt
+    2015-11-16 15:45:22 ....A     10346759      3502468  ConferenceInstances.txt
+    2015-11-16 15:45:20 ....A        79774        26235  Conferences.txt
+    2015-11-16 15:45:20 ....A      1508780       713334  FieldsOfStudy.txt
+    2015-11-16 15:45:22 ....A      1002313       369790  Journals.txt
+    2015-06-11 22:34:30 ....A         9641         3998  license.txt
+    2015-11-16 16:03:48 ....A  18017900470   4298547230  PaperAuthorAffiliations.txt
+    2015-11-16 15:51:32 ....A   5329643052   1839341847  PaperKeywords.txt
+    2015-11-16 16:21:14 ....A  18094921016   7421585112  PaperReferences.txt
+    2015-11-16 16:27:50 ....A  27419818455   8967796102  Papers.txt
+    2015-11-16 16:22:22 ....A  27259393790   5693705196  PaperUrls.txt
+    2015-08-30 17:21:24 ....A         1309          484  readme.txt
+    ------------------- ----- ------------ ------------  ------------------------
+                               99172516117  29698419431  13 files, 0 folders
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    file = luigi.Parameter(default='Papers.zip')
+    name = luigi.Parameter(default='Papers')
+
+    def requires(self):
+        return MAGDump(date=self.date)
 
     def run(self):
-        output = shellout("""curl https://academicgraph.blob.core.windows.net/graph-{date}/{file} > {output}""",
-                          date=self.closest(), file=self.file)
+        output = shellout("7z e -so {dump} {name}.txt | pigz -c > {output}", dump=self.input().path, name=self.name)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="zip"))
+        return luigi.LocalTarget(path=self.path(ext="txt.gz"))
 
-class MAGFiles(MAGTask, luigi.WrapperTask):
-    """ Download all files separately. """
-
+class MAGPaperDomains(MAGTask):
+    """
+    Domain distribution of Paper URLs.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        files = [
-            'Affiliations',
-            'Authors',
-            'ConferenceInstances',
-            'ConferenceSeries',
-            'FieldsOfStudy',
-            'Journals',
-            'PaperAuthorAffiliations',
-            'PaperKeywords',
-            'PaperReferences',
-            'Papers',
-            'PaperUrls',
-        ]
-        for file in files:
-            yield MAGFile(file=file)
+        return MAGFile(name='PaperUrls', date=self.date)
+
+    def run(self):
+        output = shellout("""
+            unpigz -c {file} | LC_ALL=C grep -o "http[s]*://[^/]*" |
+            LC_ALL=C sed -e 's@http[s]*://@@g' | LC_ALL=C sort -S50% |
+            uniq -c | sort -nr > {output} """, file=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-        return self.input()
+        return luigi.LocalTarget(path=self.path(ext="txt.gz"))
