@@ -41,7 +41,21 @@ class MAGTask(DefaultTask):
     TAG = 'mag'
 
     def closest(self):
-        return datetime.date(2015, 8, 20)
+        return datetime.date(2015, 11, 6)
+
+class MAGDates(MAGTask):
+    """ Extract dates. """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""
+            curl "https://academicgraph.blob.core.windows.net/graph/index.html?eulaaccept=on" |
+            grep "<li>" | grep -o "20[0-9][0-9]-[01][1-9]-[012][0-9]" | sort -u > {output} """)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
 
 class MAGDump(MAGTask):
     """ Dump file. """
@@ -49,8 +63,9 @@ class MAGDump(MAGTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl https://academicgraph.blob.core.windows.net/graph-{date}/MicrosoftAcademicGraph.zip > {output}""",
-                          date=self.closest())
+        output = shellout("""
+            curl https://academicgraph.blob.core.windows.net/graph-{date}/MicrosoftAcademicGraph.zip > {output}""",
+            date=self.closest())
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -60,17 +75,17 @@ class MAGFile(MAGTask):
     """
     Download a single file. Possible files:
 
-    Affiliations.zip
-    Authors.zip
-    ConferenceInstances.zip
-    ConferenceSeries.zip
-    FieldsOfStudy.zip
-    Journals.zip
-    PaperAuthorAffiliations.zip
-    PaperKeywords.zip
-    PaperReferences.zip
-    Papers.zip
-    PaperUrls.zip
+    Affiliations
+    Authors
+    ConferenceInstances
+    ConferenceSeries
+    FieldsOfStudy
+    Journals
+    PaperAuthorAffiliations
+    PaperKeywords
+    PaperReferences
+    Papers
+    PaperUrls
 
     """
 
@@ -92,17 +107,17 @@ class MAGFiles(MAGTask, luigi.WrapperTask):
 
     def requires(self):
         files = [
-            'Affiliations.zip',
-            'Authors.zip',
-            'ConferenceInstances.zip',
-            'ConferenceSeries.zip',
-            'FieldsOfStudy.zip',
-            'Journals.zip',
-            'PaperAuthorAffiliations.zip',
-            'PaperKeywords.zip',
-            'PaperReferences.zip',
-            'Papers.zip',
-            'PaperUrls.zip',
+            'Affiliations',
+            'Authors',
+            'ConferenceInstances',
+            'ConferenceSeries',
+            'FieldsOfStudy',
+            'Journals',
+            'PaperAuthorAffiliations',
+            'PaperKeywords',
+            'PaperReferences',
+            'Papers',
+            'PaperUrls',
         ]
         for file in files:
             yield MAGFile(file=file)
