@@ -33,9 +33,12 @@
 
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
+
+config = Config.instance()
 
 class MAGTask(DefaultTask):
     TAG = 'mag'
@@ -125,8 +128,9 @@ class MAGPaperDomains(MAGTask):
     def run(self):
         output = shellout("""
             unpigz -c {file} | LC_ALL=C grep -o "http[s]*://[^/]*" |
-            LC_ALL=C sed -e 's@http[s]*://@@g' | LC_ALL=C sort -S50% |
-            uniq -c | sort -nr > {output} """, file=self.input().path)
+            LC_ALL=C sed -e 's@http[s]*://@@g' | TMPDIR={tmpdir} LC_ALL=C sort -S50% |
+            uniq -c | sort -nr > {output} """,
+            tmpdir=config.get('core', 'tempdir'), file=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
