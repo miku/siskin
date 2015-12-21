@@ -104,7 +104,6 @@ class MAGFile(MAGTask):
     ------------------- ----- ------------ ------------  ------------------------
                                99172516117  29698419431  13 files, 0 folders
     """
-
     date = ClosestDateParameter(default=datetime.date.today())
     name = luigi.Parameter(default='Papers')
 
@@ -149,6 +148,23 @@ class MAGDOIList(MAGTask):
 
     def run(self):
         output = shellout(""" unpigz -c {input} | LC_ALL=C grep -o "10\.[a-zA-Z0-9./]*" | pigz -c > {output} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="txt.gz"))
+
+class MAGKeywordDistribution(MAGTask):
+    """
+    Keyword distribution.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return MAGFile(date=self.date, name='PaperKeywords')
+
+    def run(self):
+        output = shellout("unpigz -c {input} | cut -f2 | TMPDIR={tmpdir} sort -S50% | uniq -c | sort -nr | pigz -c > {output}",
+                          input=self.input().path, tmpdir=config.get('core', 'tempdir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
