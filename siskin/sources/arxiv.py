@@ -42,9 +42,12 @@ from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
+
+config = Config.instance()
 
 class ArxivTask(DefaultTask):
     """ Base task. """
@@ -62,7 +65,8 @@ class ArxivCombine(ArxivTask):
         return Executable(name='oaimi', message='https://github.com/miku/oaimi')
 
     def run(self):
-        output = shellout("oaimi -root records -prefix {prefix} -verbose {url} > {output}", prefix=self.prefix, url=self.url)
+        output = shellout("oaimi -cache {dir} -root records -prefix {prefix} -verbose {url} > {output}",
+                          prefix=self.prefix, url=self.url, dir=config.get('core', 'oaimicache'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
