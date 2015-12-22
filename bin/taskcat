@@ -41,8 +41,16 @@ if [[ ! -f "$OUTPUT" ]]; then
     fi
 fi
 
+
+
 if [[ "$OUTPUT" == *mrc ]]; then
-    yaz-marcdump $OUTPUT
+    yaz-marcdump "$OUTPUT"
+elif [[ "$OUTPUT" == *gz ]]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        gzcat "$OUTPUT"
+    else
+        zcat "$OUTPUT"
+    fi
 else
-    cat $OUTPUT
+    cat "$OUTPUT"
 fi
