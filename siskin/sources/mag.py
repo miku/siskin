@@ -32,6 +32,87 @@
 # * https://academicgraph.blob.core.windows.net/graph/index.html?eulaaccept=on
 #
 # Number of papers as of November 2015: 120887833, ~37 with DOI
+#
+# Schema
+# Affiliations
+#
+#     Affiliation ID
+#     Affiliation name
+#
+# Authors
+#
+#     Author ID
+#     Author name
+#
+# Conference
+#
+#     Conference ID
+#     Short name (abbreviation)
+#     Full name
+#
+# ConferenceInstances
+#
+#     Conference ID
+#     Conference instance ID
+#     Short name (abbreviation)
+#     Full name
+#     Location
+#     Official conference URL
+#     Conference start date
+#     Conference end date
+#     Conference abstract registration date
+#     Conference submission deadline date
+#     Conference notification due date
+#     Conference final version due date
+#
+# FieldsOfStudy
+#
+#     Field of study ID
+#     Field of study name
+#
+# Journals
+#
+#     Journal ID
+#     Journal name
+#
+# Papers
+#
+#     Paper ID
+#     Original paper title
+#     Normalized paper title
+#     Paper publish year
+#     Paper publish date
+#     Paper Document Object Identifier (DOI)
+#     Original venue name
+#     Normalized venue name
+#     Journal ID mapped to venue name
+#     Conference series ID mapped to venue name
+#     Paper rank
+#
+# PaperAuthorAffiliations
+#
+#     Paper ID
+#     Author ID
+#     Affiliation ID
+#     Original affiliation name
+#     Normalized affiliation name
+#     Author sequence number
+#
+# PaperKeywords
+#
+#     Paper ID
+#     Keyword name
+#     Field of study ID mapped to keyword
+#
+# PaperReferences
+#
+#     Paper ID
+#     Paper reference ID
+#
+# PaperUrls
+#
+#     Paper ID
+#     URL
 
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
