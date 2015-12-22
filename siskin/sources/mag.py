@@ -228,7 +228,7 @@ class MAGDOIList(MAGTask):
         return MAGFile(date=self.date, name='Papers')
 
     def run(self):
-        output = shellout(""" unpigz -c {input} | LC_ALL=C grep -o "10\.[a-zA-Z0-9./]*" | pigz -c > {output} """, input=self.input().path)
+        output = shellout(""" unpigz -c {input} | LC_ALL=C grep -E -o "10\.\S*" | LC_ALL=C sort -S50% | pigz -c > {output} """, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

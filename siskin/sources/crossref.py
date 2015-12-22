@@ -255,7 +255,8 @@ class CrossrefDOIList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """, input=self.input().get('input').path, output=stopover)
+        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
+                 input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 

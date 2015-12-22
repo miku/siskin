@@ -204,14 +204,14 @@ class GBIRawIntermediateSchema(GBITask):
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("span-import -i genios <(unpigz -c {input}) >> {output}",
+        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}",
                  input=self.input().get('dump').path, output=stopover)
-        shellout("span-import -i genios {input} >> {output}",
+        shellout("span-import -i genios {input} | pigz -c >> {output}",
                  input=self.input().get('updates').path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 #
 # Below tasks are DEPRECATED and will be removed shortly.
