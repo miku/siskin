@@ -159,7 +159,7 @@ class GBIUpdates(GBITask):
     """
     Collect all updates since a given date in a single file.
     """
-    since = luigi.Parameter(default='20151101000000', description='used in filename comparison')
+    since = luigi.DateParameter(default=datetime.date(2015, 11, 1), description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -167,10 +167,13 @@ class GBIUpdates(GBITask):
 
     def run(self):
         """
-        kons_sachs_X_20150508090205_Y.zip
+	Files look like: kons_sachs_X_20150508090205_Y.zip
+	We extract the date string and compare the filedate to `self.since`.
         """
         pattern = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
         _, stopover = tempfile.mkstemp(prefix='siskin-')
+
+	since = self.since.strftime('%Y%m%d%H%M%S')
 
         with self.input().open() as handle:
             for row in sorted(handle.iter_tsv(cols=('path',))):
@@ -178,7 +181,7 @@ class GBIUpdates(GBITask):
                 if not match:
                     continue
                 filedate = match.group(1)
-                if filedate < self.since:
+		if filedate < since:
                     continue
                 isodate = filedate[:8] + "T" + filedate[8:]
                 shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
