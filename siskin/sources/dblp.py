@@ -46,3 +46,18 @@ class DBLPDownload(DBLPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
+class DBLPDOIList(DBLPTask):
+    """ QnD doi list. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DBLPDownload()
+
+    def run(self):
+        output = shellout("""grep "doi.org" {input} | sed -e 's@<ee>http://dx.doi.org/@@g' | sed -e 's@</ee>@@g' | sort -S50% > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
