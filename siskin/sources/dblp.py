@@ -56,8 +56,9 @@ class DBLPDOIList(DBLPTask):
         return DBLPDownload()
 
     def run(self):
-        output = shellout("""grep "doi.org" {input} | sed -e 's@<ee>http://dx.doi.org/@@g' | sed -e 's@</ee>@@g' | sort -S50% > {output}""", input=self.input().path)
+        output = shellout("""LC_ALL=C grep "doi.org" {input} | LC_ALL=C sed -e 's@<ee>http://dx.doi.org/@@g' |
+                             LC_ALL=C sed -e 's@</ee>@@g' | LC_ALL=C sort -S50% > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path())
