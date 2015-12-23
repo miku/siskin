@@ -58,6 +58,8 @@ import zipfile
 
 config = Config.instance()
 
+UPDATE_FILENAME_REGEX = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
+
 class GBITask(DefaultTask):
     TAG = '048'
 
@@ -127,6 +129,7 @@ class GBIMatryoshka(GBITask):
     Unzips all zips nested in zip files into a single big XML file. The DB
     attribute should carry the originating filename, e.g. DB="BLIS" for
     BLIS.ZIP. The outer zipfile came is injected as `<x-origin>`.
+    Unzip v6 (2009) or higher is required.
     """
     issue = luigi.Parameter(default='20151102T000000', description='tag to use as "Dateissue" for dump')
 
@@ -155,6 +158,36 @@ class GBIMatryoshka(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
+class GBIUpdateList(GBITask):
+    """
+    All GBI files that contain updates.
+    """
+    since = luigi.DateParameter(default=datetime.date(2015, 11, 1), description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIDropbox(date=self.date)
+
+    def run(self):
+        """
+        TODO(miku): externalize the pattern.
+        """
+        since = self.since.strftime('%Y%m%d%H%M%S')
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in sorted(handle.iter_tsv(cols=('path',))):
+                    match = UPDATE_FILENAME_REGEX.search(row.path)
+                    if not match:
+                        continue
+                    filedate = match.group(1)
+                    if filedate < since:
+                        continue
+                    output.write_tsv(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
 class GBIUpdates(GBITask):
     """
     Collect all updates since a given date in a single file.
@@ -163,26 +196,19 @@ class GBIUpdates(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GBIDropbox()
+        return GBIUpdateList(date=self.date, since=self.since)
 
     def run(self):
         """
-	Files look like: kons_sachs_X_20150508090205_Y.zip
-	We extract the date string and compare the filedate to `self.since`.
+        Files look like: kons_sachs_XYZ_20150508090205_Y.zip
+        We extract the date string and compare the filedate to `self.since`.
         """
-        pattern = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-
-	since = self.since.strftime('%Y%m%d%H%M%S')
 
         with self.input().open() as handle:
             for row in sorted(handle.iter_tsv(cols=('path',))):
-                match = pattern.search(row.path)
-                if not match:
-                    continue
+                match = UPDATE_FILENAME_REGEX.search(row.path)
                 filedate = match.group(1)
-		if filedate < since:
-                    continue
                 isodate = filedate[:8] + "T" + filedate[8:]
                 shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
                             iconv -f iso-8859-1 -t utf-8 |
