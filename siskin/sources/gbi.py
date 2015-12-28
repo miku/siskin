@@ -66,6 +66,27 @@ class GBITask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
+    def group(self, filename):
+        """
+        Given a filename, like `Recht-Law_NOV_2015.zip` return a canonical group name.
+        The group name is then resolved to a collection during [span-import](http://git.io/vEMXR).
+        """
+        if re.search('recht', filename, re.IGNORECASE):
+            return 'recht'
+        if re.search('SOWI', filename):
+            return 'sowi'
+        if re.search('TECHN', filename):
+            return 'technik'
+        if re.search('FZS', filename, re.IGNORECASE):
+            return 'fzs'
+        if re.search('WIWI', filename):
+            return 'wiwi'
+        if re.search('PSYN', filename):
+            return 'psyn'
+        if re.search('_lit_', filename):
+            return 'lit'
+        raise RuntimeError('cannot determine group attribute from: %s' % filename)
+
 class GBIDropbox(GBITask):
     """
     Pull down GBI dropbox content.
@@ -126,14 +147,25 @@ class GBIDump(GBITask):
 
 class GBIMatryoshka(GBITask):
     """
-    Unzips all zips nested in zip files into a single big XML file. The DB
-    attribute should carry the originating filename, e.g. DB="BLIS" for
-    BLIS.ZIP. The outer zipfile came is injected as `<x-origin>`.
-    Unzip v6 (2009) or higher is required.
+    Unzips nested zip files into a single XML file.
+
+    The DB attribute should carry the originating filename, e.g. DB="BLIS" for BLIS.ZIP.
+
+    The outer zipfile name is injected as `<x-origin>`.
+
+    The `<x-group>` is derived from the outer zipfile name.
+
+    Unzip v6 (w/ 7z) or higher is required.
     """
-    issue = luigi.Parameter(default='20151102T000000', description='tag to use as "Dateissue" for dump')
+    issue = luigi.Parameter(default='20151102T000000',
+                            description='tag to use as artificial "Dateissue" for dump')
 
     def requires(self):
+        """
+        Dump is a list of nested zip files, beloging to a dump,
+        might come from scanning the file system (GBIZipWithZips)
+        or configuration (GBIDump).
+        """
         return {'dump': GBIDump(), 'sync': GBIDropbox()}
 
     def run(self):
@@ -145,13 +177,14 @@ class GBIMatryoshka(GBITask):
                 for path in iterfiles(dirname):
                     if not path.endswith('.zip'):
                         continue
+                    origin = os.path.basename(row.path)
                     shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
                                 iconv -f iso-8859-1 -t utf-8 |
                                 LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                                 LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' |
-                                pigz -c >> {stopover} """,
-                                zipfile=path, stopover=stopover, origin=os.path.basename(row.path), issue=self.issue)
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' |
+                                pigz -c >> {stopover} """, zipfile=path, stopover=stopover,
+                                origin=origin, group=self.group(origin), issue=self.issue)
                 shutil.rmtree(dirname)
         luigi.File(stopover).move(self.output().path)
 
@@ -210,12 +243,13 @@ class GBIUpdates(GBITask):
                 match = UPDATE_FILENAME_REGEX.search(row.path)
                 filedate = match.group(1)
                 isodate = filedate[:8] + "T" + filedate[8:]
+                origin = os.path.basename(row.path)
                 shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
                             iconv -f iso-8859-1 -t utf-8 |
                             LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                             LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                            LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' >> {stopover} """,
-                            zipfile=row.path, stopover=stopover, origin=os.path.basename(row.path), issue=isodate)
+                            LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' >> {stopover} """,
+                            zipfile=row.path, stopover=stopover, origin=origin, group=self.group(origin), issue=isodate)
 
         luigi.File(stopover).move(self.output().path)
 
