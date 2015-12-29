@@ -166,14 +166,14 @@ class GBIMatryoshka(GBITask):
         might come from scanning the file system (GBIZipWithZips)
         or configuration (GBIDump).
         """
-        return {'dump': GBIDump(), 'sync': GBIDropbox()}
+        return {'dump': GBIDump(), 'sync': GBIDropbox(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().get('dump').open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 dirname = tempfile.mkdtemp(prefix='siskin-')
-                shellout("unzip -q -d {dir} {zipfile}", dir=dirname, zipfile=row.path)
+                shellout("7z x -o{dir} {zipfile}", dir=dirname, zipfile=row.path)
                 for path in iterfiles(dirname):
                     if not path.endswith('.zip'):
                         continue
