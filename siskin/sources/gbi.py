@@ -276,9 +276,9 @@ class GBIRawIntermediateSchema(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-class GBISnapshot(GBITask):
+class GBISnapshotLines(GBITask):
     """
-    Extract ID and issue and compact.
+    Extract the line numbers that make up the current snapshot.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -286,15 +286,15 @@ class GBISnapshot(GBITask):
         return GBIRawIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout(r"""filterline <(jq -r '[.["finc.record_id"], .["x.indicator"]]|@csv' <(unpigz -c {input})
-                                           | tr -d '"'
-                                           | sed -e 's/,/\t/g'
-                                           | awk '{{print NR "\t"$0}}'
-                                           | LC_ALL=C sort -S50% -nk2,2 -nk3,3 -r
-                                           | LC_ALL=C sort -S50% -nrk2,2 -u
-                                           | LC_ALL=C cut -f1
-                                           | LC_ALL=C sort -S50% -n)
-                                         <(unpigz -c {input}) | pigz -c > {output} """, input=self.input().path)
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input})
+                              | tr -d '"'
+                              | sed -e 's/,/\t/g'
+                              | awk '{{print NR "\t"$0}}'
+                              | LC_ALL=C sort -S50% -nk2,2 -nk3,3 -r
+                              | LC_ALL=C sort -S50% -nrk2,2 -u
+                              | LC_ALL=C cut -f1
+                              | LC_ALL=C sort -S50% -n > {output} """, input=self.input().path)
+
         luigi.File(output).move(self.output().path)
 
     def output(self):
