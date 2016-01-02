@@ -31,7 +31,7 @@
 # * http://research.microsoft.com/en-us/projects/mag/
 # * https://academicgraph.blob.core.windows.net/graph/index.html?eulaaccept=on
 #
-# Number of papers as of November 2015: 120887833, ~37 with DOI
+# Number of papers as of November 2015: 120887833, ~37M with DOI
 #
 # Schema
 # Affiliations
