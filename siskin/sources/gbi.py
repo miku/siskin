@@ -295,10 +295,11 @@ class GBIRawIntermediateSchema(GBITask):
     Convert dump and updates into a single preliminary intermediate schema.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
     def requires(self):
         return [GBIUpdatesRawIntermediateSchema(date=self.date),
-                GBIDumpRawIntermediateSchema(date=self.date)]
+                GBIDumpRawIntermediateSchema(issue=self.issue)]
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
