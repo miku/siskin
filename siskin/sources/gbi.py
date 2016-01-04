@@ -59,6 +59,7 @@ import zipfile
 config = Config.instance()
 
 UPDATE_FILENAME_REGEX = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
+DUMP_TAG = '20151102T000000'
 
 class GBITask(DefaultTask):
     TAG = '048'
@@ -157,8 +158,7 @@ class GBIMatryoshka(GBITask):
 
     Unzip v6 (w/ 7z) or higher is required.
     """
-    issue = luigi.Parameter(default='20151102T000000',
-                            description='tag to use as artificial "Dateissue" for dump')
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
     def requires(self):
         """
@@ -256,6 +256,40 @@ class GBIUpdates(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
+class GBIDumpRawIntermediateSchema(GBITask):
+    """
+    Convert dump and updates into a single preliminary intermediate schema.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+
+    def requires(self):
+        return GBIMatryoshka(issue=self.issue)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GBIUpdatesRawIntermediateSchema(GBITask):
+    """
+    Convert dump and updates into a single preliminary intermediate schema.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIUpdates(date=self.date)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("span-import -i genios {input} | pigz -c >> {output}", input=self.input().path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 class GBIRawIntermediateSchema(GBITask):
     """
     Convert dump and updates into a single preliminary intermediate schema.
@@ -263,14 +297,13 @@ class GBIRawIntermediateSchema(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'updates': GBIUpdates(date=self.date), 'dump': GBIMatryoshka()}
+        return [GBIUpdatesRawIntermediateSchema(date=self.date),
+                GBIDumpRawIntermediateSchema(date=self.date)]
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}",
-                 input=self.input().get('dump').path, output=stopover)
-        shellout("span-import -i genios {input} | pigz -c >> {output}",
-                 input=self.input().get('updates').path, output=stopover)
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
