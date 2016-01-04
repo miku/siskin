@@ -300,7 +300,8 @@ class GBIDumpIndicator(GBITask):
         return GBIDumpRawIntermediateSchema(issue=self.issue)
 
     def run(self):
-        output = shellout("""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | pigz -c > {output}""",
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) |
+                              tr -d '"' | tr , '\t' | awk '{{print NR"\tdump\t"$0}}' | pigz -c > {output}""",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -317,7 +318,8 @@ class GBIUpdateIndicator(GBITask):
         return GBIUpdatesRawIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | pigz -c > {output}""",
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) |
+                              tr -d '"' | tr , '\t' | awk '{{print NR"\tupdate\t"$0}}' | pigz -c > {output}""",
                           input=self.input().path)
         luigi.File(output).move(self.output().path)
 
