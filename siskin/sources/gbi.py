@@ -39,7 +39,7 @@ scp-src = username@ftp.example.de:/home/gbi
 dump = /mirror/gbi/zy.zip /mirror/gbi/zz.zip
 """
 
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -289,6 +289,41 @@ class GBIUpdatesRawIntermediateSchema(GBITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GBIDumpIndicator(GBITask):
+    """
+    Extract id and indicator for dump.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+
+    def requires(self):
+        return GBIDumpRawIntermediateSchema(issue=self.issue)
+
+    def run(self):
+        output = shellout("""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | pigz -c > {output}""",
+                          input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+
+class GBIUpdateIndicator(GBITask):
+    """
+    Extract id and indicator from update.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIUpdatesRawIntermediateSchema(date=self.date)
+
+    def run(self):
+        output = shellout("""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | pigz -c > {output}""",
+                          input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+
 
 class GBIRawIntermediateSchema(GBITask):
     """
