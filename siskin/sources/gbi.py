@@ -59,6 +59,7 @@ import zipfile
 config = Config.instance()
 
 UPDATE_FILENAME_REGEX = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
+FIRST_UPDATE = datetime.date(2015, 11, 1)
 DUMP_TAG = '20151102T000000'
 
 class GBITask(DefaultTask):
@@ -195,7 +196,7 @@ class GBIUpdateList(GBITask):
     """
     All GBI files that contain updates.
     """
-    since = luigi.DateParameter(default=datetime.date(2015, 11, 1), description='used in filename comparison')
+    since = luigi.DateParameter(default=FIRST_UPDATE, description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -326,6 +327,25 @@ class GBIUpdateIndicator(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
 
+class GBIIndicator(GBITask):
+    """
+    Combine indicators.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [GBIUpdateIndicator(date=self.date),
+                GBIDumpIndicator(issue=self.issue)]
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}")
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
 
 class GBIRawIntermediateSchema(GBITask):
     """
