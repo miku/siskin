@@ -355,14 +355,23 @@ class GBISnapshotNext(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GBIIndicator(date=self.date, issue=self.issue)
+        return {'indicator': GBIIndicator(date=self.date, issue=self.issue),
+                'update': GBIUpdatesRawIntermediateSchema(date=self.date),
+                'dump': GBIDumpRawIntermediateSchema(issue=self.issue)}
 
     def run(self):
-        output = shellout(r"""LC_ALL=C sort -S50% -k3,3 -k4,4 -r <(unpigz -c {input}) | pigz -c > {output} """, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        output = shellout("""LC_ALL=C sort -S50% -k3,3 -k4,4 -r <(unpigz -c {input}) | LC_ALL=C sort -S50% -uk3,3 | pigz -c > {output} """, input=self.input().get('indicator').path)
+        from_dump = shellout("""grep "[[:space:]]dump[[:space:]]" <(unpigz -c {input}) | cut -f1 | LC_ALL=C sort -nu | pigz -c > {output}""", input=output)
+        from_update = shellout("""grep "[[:space:]]update[[:space:]]" <(unpigz -c {input}) | cut -f1 | LC_ALL=C sort -nu | pigz -c > {output}""", input=output)
+
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("filterline <(unpigz -c {lines}) <(unpigz {input}) | pigz -c >> {output} ", input=self.input().get('dump').path, lines=from_dump, output=stopover)
+        shellout("filterline <(unpigz -c {lines}) <(unpigz {input}) | pigz -c >> {output} ", input=self.input().get('update').path, lines=from_update, output=stopover)
+
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path('tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class GBIRawIntermediateSchema(GBITask):
     """
