@@ -365,8 +365,8 @@ class GBISnapshotNext(GBITask):
         from_update = shellout("""grep "[[:space:]]update[[:space:]]" <(unpigz -c {input}) | cut -f1 | LC_ALL=C sort -nu | pigz -c > {output}""", input=output)
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("filterline <(unpigz -c {lines}) <(unpigz {input}) | pigz -c >> {output} ", input=self.input().get('dump').path, lines=from_dump, output=stopover)
-        shellout("filterline <(unpigz -c {lines}) <(unpigz {input}) | pigz -c >> {output} ", input=self.input().get('update').path, lines=from_update, output=stopover)
+        shellout("filterline <(unpigz -c {lines}) <(unpigz -c {input}) | pigz -c >> {output} ", input=self.input().get('dump').path, lines=from_dump, output=stopover)
+        shellout("filterline <(unpigz -c {lines}) <(unpigz -c {input}) | pigz -c >> {output} ", input=self.input().get('update').path, lines=from_update, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
 
