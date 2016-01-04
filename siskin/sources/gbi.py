@@ -347,6 +347,23 @@ class GBIIndicator(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
 
+class GBISnapshotNext(GBITask):
+    """
+    Next snapshot.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIIndicator(date=self.date, issue=self.issue)
+
+    def run(self):
+        output = shellout(r"""LC_ALL=C sort -S50% -k3,3 -k4,4 -r <(unpigz -c {input}) | pigz -c > {output} """, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path('tsv.gz'))
+
 class GBIRawIntermediateSchema(GBITask):
     """
     Convert dump and updates into a single preliminary intermediate schema.
