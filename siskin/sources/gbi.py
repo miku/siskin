@@ -28,15 +28,8 @@ GBI publisher.
 
 [gbi]
 
-ftp-host = host.name
-ftp-username = username
-ftp-password = password
-ftp-path = /
-ftp-pattern = some*glob*pattern.zip
-
 scp-src = username@ftp.example.de:/home/gbi
 
-dump = /mirror/gbi/zy.zip /mirror/gbi/zz.zip
 """
 
 from gluish.format import TSV, Gzip
@@ -58,9 +51,23 @@ import zipfile
 
 config = Config.instance()
 
+# Pattern for files containing updates. Change processing code too, if you change this pattern.
 UPDATE_FILENAME_REGEX = re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
-FIRST_UPDATE = datetime.date(2015, 11, 1)
-DUMP_TAG = '20151102T000000'
+
+# DUMP_DATE is used to ignore earlier updates
+DUMP_DATE = datetime.date(2015, 11, 1)
+
+# Files belonging to a dump, relative to GBIDropbox.taskdir()
+DUMP_FILES = [
+    'mirror/gbi/FZS_NOV_2015.zip',
+    'mirror/gbi/PSYN_NOV_2015.zip',
+    'mirror/gbi/SOWI_NOV_2015.zip',
+    'mirror/gbi/TECHN_NOV_2015.zip',
+    'mirror/gbi/WIWI_NOV_2015.zip',
+]
+
+# derived string representation
+DUMP_TAG = DUMP_DATE.strftime('%Y%m%dT%H%M%S')
 
 class GBITask(DefaultTask):
     TAG = '048'
@@ -145,7 +152,7 @@ class GBIDump(GBITask):
     def run(self):
         dropbox = GBIDropbox()
         with self.output().open('w') as output:
-            for path in config.get('gbi', 'dump').split():
+            for path in DUMP_FILES:
                 abspath = os.path.join(dropbox.taskdir(), path)
                 output.write_tsv(abspath)
 
@@ -194,9 +201,9 @@ class GBIMatryoshka(GBITask):
 
 class GBIUpdateList(GBITask):
     """
-    All GBI files that contain updates since a given date (cf. FIRST_UPDATE).
+    All GBI files that contain updates since a given date (cf. DUMP_DATE).
     """
-    since = luigi.DateParameter(default=FIRST_UPDATE, description='used in filename comparison')
+    since = luigi.DateParameter(default=DUMP_DATE, description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
