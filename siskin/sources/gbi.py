@@ -231,7 +231,11 @@ class GBIUpdates(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GBIUpdateList(date=self.date, since=self.since)
+        return {
+            'filelist': GBIUpdateList(date=self.date, since=self.since),
+            'iconv': Executable(name='iconv'),
+            'unzip': Executable(name='unzip'),
+        }
 
     def run(self):
         """
@@ -239,7 +243,7 @@ class GBIUpdates(GBITask):
         """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
-        with self.input().open() as handle:
+        with self.input().get('filelist').open() as handle:
             for row in sorted(handle.iter_tsv(cols=('path',))):
                 match = UPDATE_FILENAME_REGEX.search(row.path)
                 filedate = match.group(1)
@@ -264,11 +268,15 @@ class GBIDumpIntermediateSchema(GBITask):
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
     def requires(self):
-        return GBIMatryoshka(issue=self.issue)
+        return {
+            'file': GBIMatryoshka(issue=self.issue),
+            'span-import': Executable(name='span-import'),
+            'pigz': Executable(name='pigz'),
+        }
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().path, output=stopover)
+        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().get('file').path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
@@ -281,11 +289,15 @@ class GBIUpdateIntermediateSchema(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GBIUpdates(date=self.date)
+        return {
+            'file': GBIUpdates(date=self.date),
+            'span-import': Executable(name='span-import'),
+            'pigz': Executable(name='pigz'),
+        }
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("span-import -i genios {input} | pigz -c >> {output}", input=self.input().path, output=stopover)
+        shellout("span-import -i genios {input} | pigz -c >> {output}", input=self.input().get('file').path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
@@ -305,7 +317,11 @@ class GBIDumpIndicator(GBITask):
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
     def requires(self):
-        return GBIDumpRawIntermediateSchema(issue=self.issue)
+        return {
+            'file': GBIDumpIntermediateSchema(issue=self.issue),
+            'jq': Executable(name='jq'),
+            'pigz': Executable(name='pigz'),
+        }
 
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) |
@@ -369,7 +385,9 @@ class GBIIntermediateSchema(GBITask):
     def requires(self):
         return {'indicator': GBIIndicator(date=self.date, issue=self.issue),
                 'update': GBIUpdateIntermediateSchema(date=self.date),
-                'dump': GBIDumpIntermediateSchema(issue=self.issue)}
+                'dump': GBIDumpIntermediateSchema(issue=self.issue),
+                'pigz': Executable(name='pigz'),
+                'filterline': Executable(name='filterline', message='https://github.com/miku/filterline')}
 
     def run(self):
         """
@@ -402,10 +420,7 @@ class GBIISSNList(GBITask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        output = shellout("""jq -r '.["rft.issn"][]' <(unpigz -c {input}) 2> /dev/null | sort -u >> {output} """, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
