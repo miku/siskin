@@ -354,7 +354,7 @@ class GBIDumpIndicator(GBITask):
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) |
                               tr -d '"' | tr , '\t' | awk '{{print NR"\tdump\t"$0}}' | pigz -c > {output}""",
-                          input=self.input().path)
+                          input=self.input().get('file').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -372,12 +372,16 @@ class GBIUpdateIndicator(GBITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GBIUpdatesRawIntermediateSchema(date=self.date)
+        return {
+            'file': GBIUpdatesRawIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq'),
+            'pigz': Executable(name='pigz'),
+        }
 
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) |
                               tr -d '"' | tr , '\t' | awk '{{print NR"\tupdate\t"$0}}' | pigz -c > {output}""",
-                          input=self.input().path)
+                          input=self.input().get('file').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
