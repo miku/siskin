@@ -66,6 +66,7 @@ class GBITask(DefaultTask):
     TAG = '048'
 
     def closest(self):
+        """ Update weekly. """
         return weekly(self.date)
 
     def group(self, filename):
@@ -112,7 +113,7 @@ class GBIDropbox(GBITask):
 
 class GBIZipWithZips(GBITask):
     """
-    List of files, that contains itself zip files.
+    List files, that contain itself zip files.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -138,26 +139,25 @@ class GBIDump(GBITask):
     """
     List of GBI dump nested zips relative to the GBIDropbox taskdir.
     """
+    def requires(self):
+        return GBIDropbox()
+
     def run(self):
-        dbox = GBIDropbox()
+        dropbox = GBIDropbox()
         with self.output().open('w') as output:
             for path in config.get('gbi', 'dump').split():
-                output.write_tsv(os.path.join(dbox.taskdir(), path))
+                abspath = os.path.join(dropbox.taskdir(), path)
+                output.write_tsv(abspath)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 class GBIMatryoshka(GBITask):
     """
-    Unzips nested zip files into a single XML file.
-
-    The DB attribute should carry the originating filename, e.g. DB="BLIS" for BLIS.ZIP.
-
-    The outer zipfile name is injected as `<x-origin>`.
-
-    The `<x-group>` is derived from the outer zipfile name.
-
-    Unzip v6 (w/ 7z) or higher is required.
+    Unzips nested zip files into a *single* XML file. The "DB" attribute should carry
+    the originating filename, e.g. DB="BLIS" for BLIS.ZIP. The outer zipfile name is
+    injected as `<x-origin>`. The `<x-group>` is derived from the outer zipfile
+    name via `self.group(filename)`.
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
@@ -167,11 +167,11 @@ class GBIMatryoshka(GBITask):
         might come from scanning the file system (GBIZipWithZips)
         or configuration (GBIDump).
         """
-        return {'dump': GBIDump(), 'sync': GBIDropbox(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
+        return {'filelist': GBIDump(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().get('dump').open() as handle:
+        with self.input().get('filelist').open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 dirname = tempfile.mkdtemp(prefix='siskin-')
                 shellout("7z x -o{dir} {zipfile}", dir=dirname, zipfile=row.path)
@@ -194,7 +194,7 @@ class GBIMatryoshka(GBITask):
 
 class GBIUpdateList(GBITask):
     """
-    All GBI files that contain updates.
+    All GBI files that contain updates since a given date (cf. FIRST_UPDATE).
     """
     since = luigi.DateParameter(default=FIRST_UPDATE, description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -224,7 +224,8 @@ class GBIUpdateList(GBITask):
 
 class GBIUpdates(GBITask):
     """
-    Collect all updates since a given date in a single file.
+    Collect all updates since a given date in a single XML file.
+    Inject `<x-origin>`, `<x-group>` and `<x-issue>` accordingly.
     """
     since = luigi.DateParameter(default=datetime.date(2015, 11, 1), description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -235,7 +236,6 @@ class GBIUpdates(GBITask):
     def run(self):
         """
         Files look like: kons_sachs_XYZ_20150508090205_Y.zip
-        We extract the date string and compare the filedate to `self.since`.
         """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
@@ -257,9 +257,9 @@ class GBIUpdates(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
-class GBIDumpRawIntermediateSchema(GBITask):
+class GBIDumpIntermediateSchema(GBITask):
     """
-    Convert dump and updates into a single preliminary intermediate schema.
+    Convert a dump into a single preliminary intermediate schema.
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
@@ -274,9 +274,9 @@ class GBIDumpRawIntermediateSchema(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-class GBIUpdatesRawIntermediateSchema(GBITask):
+class GBIUpdateIntermediateSchema(GBITask):
     """
-    Convert dump and updates into a single preliminary intermediate schema.
+    Convert updates into a single preliminary intermediate schema.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -294,6 +294,13 @@ class GBIUpdatesRawIntermediateSchema(GBITask):
 class GBIDumpIndicator(GBITask):
     """
     Extract id and indicator for dump.
+
+    1   dump    ai-48-QkxJU19fMTk4ODQyNzUwNjcxNTEyMjA5NzIxMTQ3OTE0NDUxODQ   20151102T000000
+    2   dump    ai-48-QkxJU19fMTk4ODQyODQwODA1MTgxODEyMTEzNjE4MTgyMDIxMTQ   20151102T000000
+    3   dump    ai-48-QkxJU19fMTk4ODQyOTMxMTYxODE0NDUxNDU5MTQxMTE1MTMxMzU   20151102T000000
+    4   dump    ai-48-QkxJU19fMTk4ODE0MTA2NDkxNTE0MTE2MjEyMTI5MzE5NTMyMDE   20151102T000000
+    5   dump    ai-48-QkxJU19fMTk4ODE2MzA2NjE1MTg1MTkxNTE4MTE4OTIwODEzNTI   20151102T000000
+    ...
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
 
@@ -312,6 +319,11 @@ class GBIDumpIndicator(GBITask):
 class GBIUpdateIndicator(GBITask):
     """
     Extract id and indicator from update.
+
+    1   update  ai-48-VVJfX1VSLjIwMTUuMjEuTC4wMQ    20151101T072840
+    2   update  ai-48-RklOUl9fRlIuMjAxNS4yMS5MLjAx  20151101T072840
+    3   update  ai-48-RElCQV9fMjAxNTExMDIxNg    20151101T072840
+    4   update  ai-48-RElCQV9fMjAxNTExMDIyMw    20151101T072840
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -347,20 +359,25 @@ class GBIIndicator(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
 
-class GBISnapshotNext(GBITask):
+class GBIIntermediateSchema(GBITask):
     """
-    Next snapshot.
+    A shapshot of GBI in intermediate format. Generation takes a few minutes on an update.
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {'indicator': GBIIndicator(date=self.date, issue=self.issue),
-                'update': GBIUpdatesRawIntermediateSchema(date=self.date),
-                'dump': GBIDumpRawIntermediateSchema(issue=self.issue)}
+                'update': GBIUpdateIntermediateSchema(date=self.date),
+                'dump': GBIDumpIntermediateSchema(issue=self.issue)}
 
     def run(self):
+        """
+        Get a list of lines `from_dump` and `from_update`, that should be kept, then use
+        `filterline` to extract these lines quickly.
+        """
         output = shellout("""LC_ALL=C sort -S50% -k3,3 -k4,4 -r <(unpigz -c {input}) | LC_ALL=C sort -S50% -uk3,3 | pigz -c > {output} """, input=self.input().get('indicator').path)
+
         from_dump = shellout("""grep "[[:space:]]dump[[:space:]]" <(unpigz -c {input}) | cut -f1 | LC_ALL=C sort -nu | pigz -c > {output}""", input=output)
         from_update = shellout("""grep "[[:space:]]update[[:space:]]" <(unpigz -c {input}) | cut -f1 | LC_ALL=C sort -nu | pigz -c > {output}""", input=output)
 
@@ -373,158 +390,21 @@ class GBISnapshotNext(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-class GBIRawIntermediateSchema(GBITask):
-    """
-    Convert dump and updates into a single preliminary intermediate schema.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
-
-    def requires(self):
-        return [GBIUpdatesRawIntermediateSchema(date=self.date),
-                GBIDumpRawIntermediateSchema(issue=self.issue)]
-
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
-
-class GBISnapshotLines(GBITask):
-    """
-    Extract the line numbers that make up the current snapshot.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return GBIRawIntermediateSchema(date=self.date)
-
-    def run(self):
-        output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input})
-                              | tr -d '"'
-                              | sed -e 's/,/\t/g'
-                              | awk '{{print NR "\t"$0}}'
-                              | LC_ALL=C sort -S50% -nk2,2 -nk3,3 -r
-                              | LC_ALL=C sort -S50% -nrk2,2 -u
-                              | LC_ALL=C cut -f1
-                              | LC_ALL=C sort -S50% -n > {output} """, input=self.input().path)
-
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path('ldj.gz'))
-
-#
-# Below tasks are DEPRECATED and will be removed shortly.
-#
-
-class GBIGroup(GBITask):
-    """ Find groups (subdirs). These are not part of the metadata. """
-    date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
-
-    def requires(self):
-        return GBISync(date=self.date)
-
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle.iter_tsv(cols=('path',)):
-                    group = row.path.split('/')[-2]
-                    if group == self.group:
-                        output.write_tsv(row.path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
-
-class GBIXMLGroup(GBITask):
-    """
-    Extract all XML files and concat them. Inject a <x-group> tag, which
-    carries the "collection" from the directory name into the metadata.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='wiwi', description='wiwi, fzs, sowi, recht')
-
-    def requires(self):
-       return GBIGroup(date=self.date, group=self.group)
-
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                shellout("""unzip -p {path} \*.xml 2> /dev/null |
-                            iconv -f iso-8859-1 -t utf-8 |
-                            LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
-                            LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                            LC_ALL=C sed -e 's@</Document>@<x-group>{group}</x-group></Document>@' >> {output}""",
-                         output=stopover, path=row.path, group=self.group,
-                         ignoremap={1: 'OK', 9: 'ignoring broken zip'})
-        luigi.File(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
-
-class GBIXML(GBITask):
-    """
-    Extract all XML files and concat them. Inject a <x-group> tag, which
-    carries the "collection" from the directory name into the metadata.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        """ Note: ingore broken 'sowi' for now. """
-        return [GBIXMLGroup(date=self.date, group=group) for group in ['wiwi', 'fzs', 'recht']]
-
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
-
-class GBIIntermediateSchema(GBITask):
-    """
-    Convert GBI to intermediate format via span.
-    If group is 'all', create intermediate schema of all groups.
-    """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default='all', description='wiwi, fzs, sowi, recht')
-
-    def requires(self):
-        span = Executable(name='span-import', message='http://git.io/vI8NV')
-        if self.group == "all":
-            return {'span': span, 'file': GBIXML(date=self.date)}
-        else:
-            return {'span': span, 'file': GBIXMLGroup(date=self.date, group=self.group)}
-
-    @timed
-    def run(self):
-        output = shellout("span-import -i genios {input} > {output}", input=self.input().get('file').path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 class GBIISSNList(GBITask):
-    """ A list of JSTOR ISSNs. """
+    """
+    Generate a list of ISSNs.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GBIIntermediateSchema(date=self.date)
+        return GBIIntermediateSchema(issue=self.issue, date=self.date)
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.issn"][]' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 
