@@ -159,6 +159,27 @@ class GBIDump(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+class GBIGroupList(GBITask):
+    """
+    Create a simple two column list of groups and DBNAME.
+    """
+
+    def requires(self):
+        return GBIDump()
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                group = self.group(row.path)
+                shellout(r""" unzip -l {input} | awk '{{print $4}}' | grep "zip$" | cut -d '.' -f1 | awk '{{ print "{group}\t"$0 }}' >> {output}""",
+                         group=group, input=row.path, output=stopover)
+
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GBIMatryoshka(GBITask):
     """
     Unzips nested zip files into a *single* XML file. The "DB" attribute should carry
