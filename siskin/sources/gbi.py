@@ -373,7 +373,7 @@ class GBIUpdateIndicator(GBITask):
 
     def requires(self):
         return {
-            'file': GBIUpdatesRawIntermediateSchema(date=self.date),
+            'file': GBIUpdatesIntermediateSchema(date=self.date),
             'jq': Executable(name='jq'),
             'pigz': Executable(name='pigz'),
         }
