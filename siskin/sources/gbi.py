@@ -490,29 +490,26 @@ class SetEncoder(json.JSONEncoder):
 class GBIMergeMaps(GBITask):
     """
     Merge package information (DB, package) and Sigel information into a single
-    data structure, where each DB name is mapped to a list of Sigils.
+    data structure, where each Sigel is mapped to a list of DB names.
 
     Requires both (mostly) static files to be available as assets.
 
     Example:
+        {
+          "DE-L229": [
+            "ZAAA",
+            "SBAN",
+            "TAWI",
+            "BIKE",
+            ...
+            "INDB"
+          ],
+          "DE-D161": [
+            "ZAAA",
+            "SBAN",
+            ...
         ...
-        "KUST": [
-            "DE-Pl11",
-            "DE-L189"
-        ],
-        "EWK": [
-            "DE-L189",
-            "DE-14",
-            "DE-15",
-            "DE-Brt1",
-            "DE-Zi4",
-            "DE-520",
-            "DE-Ch1",
-            "DE-Zwi2",
-            "DE-105",
-            "DE-Mit1"
-        ],
-        ...
+        }
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -527,7 +524,7 @@ class GBIMergeMaps(GBITask):
                 for sigel, packages in sigil_package.iteritems():
                     for package in packages:
                         if package == row.package:
-                            merged[row.db].add(sigel)
+                            merged[sigel].add(row.db)
 
         with self.output().open('w') as output:
             output.write(json.dumps(merged, cls=SetEncoder))
