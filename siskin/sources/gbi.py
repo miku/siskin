@@ -492,6 +492,8 @@ class GBIMergeMaps(GBITask):
     Merge package information (DB, package) and Sigel information into a single
     data structure, where each DB name is mapped to a list of Sigils.
 
+    Requires both (mostly) static files to be available as assets.
+
     Example:
         ...
         "KUST": [
