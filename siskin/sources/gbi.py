@@ -531,3 +531,27 @@ class GBIMergeMaps(GBITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'), format=TSV)
+
+class GBIPackageList(GBITask):
+    """
+    Return a list of packages for a given Sigel.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    sigel = luigi.Parameter(default='DE-15')
+
+    def requires(self):
+        return GBIMergeMaps(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            merged = json.load(handle)
+
+        if self.sigel not in merged:
+            raise RuntimeError('unknown isil: %s, available: %s' % (self.sigel, ', '.join(merged.keys())))
+
+        with self.output().open('w') as output:
+            for name in merged[self.sigel]:
+                output.write_tsv(name)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
