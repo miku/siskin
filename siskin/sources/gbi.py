@@ -58,7 +58,9 @@ from siskin.common import FTPMirror, Executable
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+import collections
 import datetime
+import json
 import luigi
 import os
 import re
@@ -474,3 +476,59 @@ class GBIISSNList(GBITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+#
+# Experimental tasks
+#
+
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+class GBIMergeMaps(GBITask):
+    """
+    Merge package information (DB, package) and Sigel information into a single
+    data structure, where each DB name is mapped to a list of Sigils.
+
+    Example:
+        ...
+        "KUST": [
+            "DE-Pl11",
+            "DE-L189"
+        ],
+        "EWK": [
+            "DE-L189",
+            "DE-14",
+            "DE-15",
+            "DE-Brt1",
+            "DE-Zi4",
+            "DE-520",
+            "DE-Ch1",
+            "DE-Zwi2",
+            "DE-105",
+            "DE-Mit1"
+        ],
+        ...
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        with open(self.assets('gbi_package_sigel_map.json')) as handle:
+            sigil_package = json.load(handle)
+
+        merged = collections.defaultdict(set)
+
+        with luigi.File(self.assets('gbi_package_db_mapping.tsv'), format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('package', 'db')):
+                for sigel, packages in sigil_package.iteritems():
+                    for package in packages:
+                        if package == row.package:
+                            merged[row.db].add(sigel)
+
+        with self.output().open('w') as output:
+            output.write(json.dumps(merged, cls=SetEncoder))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'), format=TSV)
