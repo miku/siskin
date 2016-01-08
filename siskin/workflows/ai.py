@@ -21,6 +21,34 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
+#
+# Aggregated Index workflows
+#
+# Configuration and filter notes
+#
+# Filters are sets of records and these sets should be combinable.
+# Imaginary configuration structure:
+#
+# {
+#     "DE-15": {
+#         "filters": {
+#             "and": {
+#                 "or": {
+#                     "holdings": {
+#                         "file": "/path/to/h.xml"
+#                     },
+#                     "source": {
+#                         "id": "333"
+#                     },
+#                 }
+#                 "collections": {
+#                     "file": "/path/to/collection/list"
+#                 },
+#             }
+#         }
+#     }
+# }
+#
 
 from siskin.benchmark import timed
 from gluish.common import Executable
