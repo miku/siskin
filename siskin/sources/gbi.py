@@ -178,26 +178,115 @@ class GBIDump(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class GBIGroupList(GBITask):
-    """
-    Create a simple two column list of groups and DBNAME.
-    """
+#
+# introduce fulltext-reference split
+#
 
+class GBIFulltextDump(GBITask):
+    """
+    Filename of the fulltext dump.
+    """
     def requires(self):
         return GBIDump()
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                group = self.group(row.path)
-                shellout(r""" unzip -l {input} | awk '{{print $4}}' | grep "zip$" | cut -d '.' -f1 | awk '{{ print "{group}\t"$0 }}' >> {output}""",
-                         group=group, input=row.path, output=stopover)
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('path',)):
+                    if not 'FZS_' in row.path:
+                        continue
+                    output.write_tsv(row.path)
+                    # we expect only one file
+                    break
 
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GBIReferenceDump(GBITask):
+    """
+    Filenames of the reference dumps.
+    """
+    def requires(self):
+        return GBIDump()
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('path',)):
+                    if 'FZS_' in row.path:
+                        continue
+                    output.write_tsv(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GBIFulltextXML(GBITask):
+    """
+    Unzips nested zip files into a *single* XML file.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+
+    def requires(self):
+        return {'filelist': GBIFulltextDump(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().get('filelist').open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                dirname = tempfile.mkdtemp(prefix='siskin-')
+                shellout("7z x -o{dir} {zipfile}", dir=dirname, zipfile=row.path)
+                for path in iterfiles(dirname):
+                    if not path.endswith('.zip'):
+                        continue
+                    origin = os.path.basename(row.path)
+                    shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
+                                iconv -f iso-8859-1 -t utf-8 |
+                                LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                                LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' |
+                                pigz -c >> {stopover} """, zipfile=path, stopover=stopover,
+                                origin=origin, group=self.group(origin), issue=self.issue)
+                shutil.rmtree(dirname)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
+class GBIReferenceXML(GBITask):
+    """
+    Unzips nested zip files into a *single* XML file.
+    """
+    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+
+    def requires(self):
+        return {'filelist': GBIReferenceDump(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().get('filelist').open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                dirname = tempfile.mkdtemp(prefix='siskin-')
+                shellout("7z x -o{dir} {zipfile}", dir=dirname, zipfile=row.path)
+                for path in iterfiles(dirname):
+                    if not path.endswith('.zip'):
+                        continue
+                    origin = os.path.basename(row.path)
+                    shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
+                                iconv -f iso-8859-1 -t utf-8 |
+                                LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                                LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' |
+                                pigz -c >> {stopover} """, zipfile=path, stopover=stopover,
+                                origin=origin, group=self.group(origin), issue=self.issue)
+                shutil.rmtree(dirname)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
+#
+# below tasks are mostly deprecated and will be removed soon
+#
 
 class GBIMatryoshka(GBITask):
     """
@@ -480,6 +569,26 @@ class GBIISSNList(GBITask):
 #
 # Experimental tasks
 #
+class GBIGroupList(GBITask):
+    """
+    Create a simple two column list of groups and DBNAME.
+    """
+
+    def requires(self):
+        return GBIDump()
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                group = self.group(row.path)
+                shellout(r""" unzip -l {input} | awk '{{print $4}}' | grep "zip$" | cut -d '.' -f1 | awk '{{ print "{group}\t"$0 }}' >> {output}""",
+                         group=group, input=row.path, output=stopover)
+
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
