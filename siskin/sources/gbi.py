@@ -301,7 +301,7 @@ class GBIUpdate(GBITask):
                 shellout(""" unzip -p {input} | iconv -f iso-8859-1 -t utf-8 |
                              LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                              LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                             LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' >> {output}""",
+                             LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>TBA</x-group><x-issue>{issue}</x-issue></Document>@' >> {output}""",
                              input=row.path, origin=row.path, issue=filedate, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
@@ -315,13 +315,30 @@ class GBIUpdateIntermediateSchema(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
-    db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
         return GBIUpdate(since=self.since, date=self.date)
 
     def run(self):
-        output = shellout("""span-import -i genios {input} | jq -r -c '. | select(.["x.package"] == "{db}")' > {output}""", db=self.db, input=self.input().path)
+        output = shellout("""span-import -i genios {input} > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
+class GBIUpdateIntermediateSchemaFiltered(GBITask):
+    """
+    Filter out items for a given database.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    db = luigi.Parameter(description='name of the database to extract')
+
+    def requires(self):
+        return GBIUpdateIntermediateSchema(since=self.since, date=self.date)
+
+    def run(self):
+        output = shellout("""jq -r -c '. | select(.["x.package"] == "{db}")' {input} > {output}""", db=self.db, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
