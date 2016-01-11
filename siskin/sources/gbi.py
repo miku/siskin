@@ -315,12 +315,13 @@ class GBIUpdateIntermediateSchema(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
         return GBIUpdate(since=self.since, date=self.date)
 
     def run(self):
-        output = shellout("span-import -i genios {input} > {output}", input=self.input().path)
+        output = shellout("""span-import -i genios {input} | jq '. | select(.["x.package"] == "{db}")' > {output}""", db=self.db, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
