@@ -47,6 +47,13 @@ To create an intermediate schema for fulltext of reference items, use the `kind`
 
 The matrix is hand-compiled from data made available by the publisher.
 
+TODO(miku):
+
+Try to segment data by database, so updates can be calculated much quicker.
+
+Example: Extract and keep zipfiles of DBs. For each DB convert to IS. Quicker
+for other stats per database as well.
+
 [gbi]
 
 scp-src = username@ftp.example.de:/home/gbi
