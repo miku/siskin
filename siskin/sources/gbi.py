@@ -354,10 +354,11 @@ class GBIDumpIndicator(GBITask):
     ...
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
         return {
-            'file': GBIDumpIntermediateSchema(issue=self.issue),
+            'file': GBIDumpIntermediateSchema(issue=self.issue, kind=self.kind),
             'jq': Executable(name='jq'),
             'pigz': Executable(name='pigz'),
         }
@@ -381,10 +382,11 @@ class GBIUpdateIndicator(GBITask):
     4   update  ai-48-RElCQV9fMjAxNTExMDIyMw    20151101T072840
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
         return {
-            'file': GBIUpdateIntermediateSchema(date=self.date),
+            'file': GBIUpdateIntermediateSchema(date=self.date, kind=self.kind),
             'jq': Executable(name='jq'),
             'pigz': Executable(name='pigz'),
         }
@@ -404,10 +406,11 @@ class GBIIndicator(GBITask):
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
-        return [GBIUpdateIndicator(date=self.date),
-                GBIDumpIndicator(issue=self.issue)]
+        return [GBIUpdateIndicator(date=self.date, kind=self.kind),
+                GBIDumpIndicator(issue=self.issue, kind=self.kind)]
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -424,11 +427,12 @@ class GBIIntermediateSchema(GBITask):
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
-        return {'indicator': GBIIndicator(date=self.date, issue=self.issue),
-                'update': GBIUpdateIntermediateSchema(date=self.date),
-                'dump': GBIDumpIntermediateSchema(issue=self.issue),
+        return {'indicator': GBIIndicator(date=self.date, issue=self.issue, kind=self.kind),
+                'update': GBIUpdateIntermediateSchema(date=self.date, kind=self.kind),
+                'dump': GBIDumpIntermediateSchema(issue=self.issue, kind=self.kind),
                 'pigz': Executable(name='pigz'),
                 'filterline': Executable(name='filterline', message='https://github.com/miku/filterline')}
 
@@ -457,9 +461,10 @@ class GBIISSNList(GBITask):
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
-        return GBIIntermediateSchema(issue=self.issue, date=self.date)
+        return GBIIntermediateSchema(issue=self.issue, date=self.date, kind=self.kind)
 
     @timed
     def run(self):
