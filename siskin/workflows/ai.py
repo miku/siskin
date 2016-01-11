@@ -60,7 +60,7 @@ from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSN
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.doi import DOIBlacklist
-from siskin.sources.gbi import GBIIntermediateSchema, GBIISSNList
+# from siskin.sources.gbi import GBIIntermediateSchema, GBIISSNList
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.task import DefaultTask
@@ -112,7 +112,7 @@ class AIISSNStats(AITask):
             'crossref': CrossrefUniqISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
-            'gbi': GBIISSNList(date=self.date),
+            # 'gbi': GBIISSNList(date=self.date),
             'jstor': JstorISSNList(date=self.date)
         }
 
@@ -143,7 +143,7 @@ class AIISSNOverlaps(AITask):
             'crossref': CrossrefUniqISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
-            'gbi': GBIISSNList(date=self.date),
+            # 'gbi': GBIISSNList(date=self.date),
             'jstor': JstorISSNList(date=self.date)
         }
 
@@ -201,7 +201,7 @@ class AIExport(AITask):
             'doaj': DOAJIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
 
-            'gbi': GBIIntermediateSchema(date=self.date),
+            # 'gbi': GBIIntermediateSchema(date=self.date),
 
             'DE-105': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Gq199T'),
             'DE-14': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Tz3vbk'),
@@ -247,7 +247,7 @@ class AIExport(AITask):
         lists = format_args("-l", ['DE-15-FID'])
 
         # apply holdings and issn filters on sources
-        for source in ('crossref', 'gbi'):
+        for source in ('crossref'):
             shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | pigz >> {output}",
                      blacklist=self.input().get('blacklist').path, files=files, lists=lists,
                      input=self.input().get(source).path, output=stopover)
