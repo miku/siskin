@@ -229,6 +229,7 @@ class GBIUpdateList(GBITask):
     """
     since = luigi.DateParameter(default=DUMP_DATE, description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
         return GBIDropbox(date=self.date)
@@ -248,6 +249,10 @@ class GBIUpdateList(GBITask):
                     filedate = match.group(1)
                     if filedate < since:
                         continue
+                    if self.kind == 'fulltext' and not '_fzs_' in row.path:
+                        continue
+                    if self.kind == 'reference' and '_fzs_' in row.path:
+                        continue
                     output.write_tsv(row.path)
 
     def output(self):
@@ -260,10 +265,11 @@ class GBIUpdates(GBITask):
     """
     since = luigi.DateParameter(default=datetime.date(2015, 11, 1), description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
         return {
-            'filelist': GBIUpdateList(date=self.date, since=self.since),
+            'filelist': GBIUpdateList(date=self.date, since=self.since, kind=self.kind),
             'iconv': Executable(name='iconv'),
             'unzip': Executable(name='unzip'),
         }
@@ -297,10 +303,11 @@ class GBIDumpIntermediateSchema(GBITask):
     Convert a dump into a single preliminary intermediate schema.
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
         return {
-            'file': GBIMatryoshka(issue=self.issue),
+            'file': GBIXML(issue=self.issue, kind=self.kind),
             'span-import': Executable(name='span-import'),
             'pigz': Executable(name='pigz'),
         }
@@ -318,10 +325,11 @@ class GBIUpdateIntermediateSchema(GBITask):
     Convert updates into a single preliminary intermediate schema.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
         return {
-            'file': GBIUpdates(date=self.date),
+            'file': GBIUpdates(date=self.date, kind=self.kind),
             'span-import': Executable(name='span-import'),
             'pigz': Executable(name='pigz'),
         }
