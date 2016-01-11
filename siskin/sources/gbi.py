@@ -253,6 +253,79 @@ class GBIDumpIntermediateSchema(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class GBIUpdateList(GBITask):
+    """
+    All GBI files that contain updates since a given date.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIDropbox(date=self.date)
+
+    def run(self):
+        since = self.since.strftime('%Y%m%d%H%M%S')
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in sorted(handle.iter_tsv(cols=('path',))):
+                    match = UPDATES.get('pattern').search(row.path)
+                    if not match:
+                        continue
+                    filedate = match.group(1)
+                    if filedate < since:
+                        continue
+                    output.write_tsv(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GBIUpdate(GBITask):
+    """
+    Concatenate updates.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIUpdateList(date=self.date)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in sorted(handle.iter_tsv(cols=('path',))):
+                match = UPDATES.get('pattern').search(row.path)
+                if not match:
+                    continue
+                filedate = match.group(1)
+                shellout(""" unzip -p {input} | iconv -f iso-8859-1 -t utf-8 |
+                             LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                             LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
+                             LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' >> {output}""",
+                             input=row.path, origin=row.path, issue=filedate, output=stopover)
+
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
+class GBIUpdateIntermediateSchema(GBITask):
+    """
+    Convert the combined updates to ischema.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIUpdate(since=self.since, date=self.date)
+
+    def run(self):
+        output = shellout("span-import -i genios {input} > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
