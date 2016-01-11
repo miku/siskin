@@ -165,6 +165,8 @@ class GBIDump(GBITask):
     """
     List of GBI dump nested zips relative to the GBIDropbox taskdir.
     """
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
+
     def requires(self):
         return GBIDropbox()
 
@@ -172,94 +174,27 @@ class GBIDump(GBITask):
         dropbox = GBIDropbox()
         with self.output().open('w') as output:
             for path in DUMP_FILES:
+                if self.kind == "fulltext" and not 'FZS_' in path:
+                    continue
+                if self.kind == "reference" and 'FZS_' in path:
+                    continue
+
                 abspath = os.path.join(dropbox.taskdir(), path)
                 output.write_tsv(abspath)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-#
-# introduce fulltext-reference split
-#
-
-class GBIFulltextDump(GBITask):
+class GBIXML(GBITask):
     """
-    Filename of the fulltext dump.
-    """
-    def requires(self):
-        return GBIDump()
-
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle.iter_tsv(cols=('path',)):
-                    if not 'FZS_' in row.path:
-                        continue
-                    output.write_tsv(row.path)
-                    # we expect only one file
-                    break
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
-
-class GBIReferenceDump(GBITask):
-    """
-    Filenames of the reference dumps.
-    """
-    def requires(self):
-        return GBIDump()
-
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle.iter_tsv(cols=('path',)):
-                    if 'FZS_' in row.path:
-                        continue
-                    output.write_tsv(row.path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
-
-class GBIFulltextXML(GBITask):
-    """
-    Unzips nested zip files into a *single* XML file.
+    Base class to convert nested zipfile into a single file.
     """
     issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
+    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
 
     def requires(self):
-        return {'filelist': GBIFulltextDump(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
-
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().get('filelist').open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                dirname = tempfile.mkdtemp(prefix='siskin-')
-                shellout("7z x -o{dir} {zipfile}", dir=dirname, zipfile=row.path)
-                for path in iterfiles(dirname):
-                    if not path.endswith('.zip'):
-                        continue
-                    origin = os.path.basename(row.path)
-                    shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
-                                iconv -f iso-8859-1 -t utf-8 |
-                                LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
-                                LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' |
-                                pigz -c >> {stopover} """, zipfile=path, stopover=stopover,
-                                origin=origin, group=self.group(origin), issue=self.issue)
-                shutil.rmtree(dirname)
-        luigi.File(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
-
-class GBIReferenceXML(GBITask):
-    """
-    Unzips nested zip files into a *single* XML file.
-    """
-    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
-
-    def requires(self):
-        return {'filelist': GBIReferenceDump(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
+        return {'filelist': GBIDump(kind=self.kind),
+                '7z': Executable(name='7z', message='http://www.7-zip.org/')}
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -287,46 +222,6 @@ class GBIReferenceXML(GBITask):
 #
 # below tasks are mostly deprecated and will be removed soon
 #
-
-class GBIMatryoshka(GBITask):
-    """
-    Unzips nested zip files into a *single* XML file. The "DB" attribute should carry
-    the originating filename, e.g. DB="BLIS" for BLIS.ZIP. The outer zipfile name is
-    injected as `<x-origin>`. The `<x-group>` is derived from the outer zipfile
-    name via `self.group(filename)`.
-    """
-    issue = luigi.Parameter(default=DUMP_TAG, description='tag to use as artificial "Dateissue" for dump')
-
-    def requires(self):
-        """
-        Dump is a list of nested zip files, beloging to a dump,
-        might come from scanning the file system (GBIZipWithZips)
-        or configuration (GBIDump).
-        """
-        return {'filelist': GBIDump(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
-
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().get('filelist').open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                dirname = tempfile.mkdtemp(prefix='siskin-')
-                shellout("7z x -o{dir} {zipfile}", dir=dirname, zipfile=row.path)
-                for path in iterfiles(dirname):
-                    if not path.endswith('.zip'):
-                        continue
-                    origin = os.path.basename(row.path)
-                    shellout("""unzip -p {zipfile} \*.xml 2> /dev/null |
-                                iconv -f iso-8859-1 -t utf-8 |
-                                LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
-                                LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                                LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' |
-                                pigz -c >> {stopover} """, zipfile=path, stopover=stopover,
-                                origin=origin, group=self.group(origin), issue=self.issue)
-                shutil.rmtree(dirname)
-        luigi.File(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
 class GBIUpdateList(GBITask):
     """
