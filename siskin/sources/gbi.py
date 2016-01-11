@@ -35,11 +35,15 @@ Two variants.
 
 Metadata w/ fulltext is bundled FZS, references the others.
 
+For fulltext, we take a Sigel-Package matrix and information about which
+database belong to which package and calculate coverage from there.
+
 For references, we reject all by default and only allow those items, which are
 covered by a licence.
 
-For fulltext, we take a Sigel-Package matrix and information about which
-database belong to which package and calculate coverage from there.
+To create an intermediate schema for fulltext of reference items, use the `kind` parameter:
+
+    $ taskdo GBIIntermediateSchema --kind fulltext
 
 The matrix is hand-compiled from data made available by the publisher.
 
