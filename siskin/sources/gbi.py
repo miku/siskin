@@ -321,7 +321,7 @@ class GBIUpdateIntermediateSchema(GBITask):
         return GBIUpdate(since=self.since, date=self.date)
 
     def run(self):
-        output = shellout("""span-import -i genios {input} | jq '. | select(.["x.package"] == "{db}")' > {output}""", db=self.db, input=self.input().path)
+        output = shellout("""span-import -i genios {input} | jq -r -c '. | select(.["x.package"] == "{db}")' > {output}""", db=self.db, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
