@@ -393,9 +393,6 @@ class GBIAllDatabases(GBITask, luigi.WrapperTask):
             for row in handle.iter_tsv(cols=('package', 'db')):
                 databases.add(row.db)
 
-        databases.remove('DST')
-        databases.remove('EXFO')
-
         for name in databases:
             yield GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=name)
 
