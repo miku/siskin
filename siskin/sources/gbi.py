@@ -216,9 +216,13 @@ class GBIDumpXML(GBITask):
                     archive = row.path
 
         if archive is None:
-            raise RuntimeError('no such db: %s' % (self.db))
+            # an non-existent database name amount to an empty dump file
+            self.logger.debug('no such db: %s' % self.db)
+            with self.output().open('w') as output:
+                pass
+            return
 
-        dbzip = shellout("unzip -p {archive} {db}.zip > {output}", archive=archive, db=self.db)
+        dbzip = shellout("7z x -so {archive} {db}.zip 2> /dev/null > {output}", archive=archive, db=self.db)
         output = shellout("""unzip -p {dbzip} \*.xml 2> /dev/null |
                              iconv -f iso-8859-1 -t utf-8 |
                              LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
@@ -320,11 +324,11 @@ class GBIUpdateIntermediateSchema(GBITask):
         return GBIUpdate(since=self.since, date=self.date)
 
     def run(self):
-        output = shellout("""span-import -i genios {input} > {output}""", input=self.input().path)
+        output = shellout("""span-import -i genios {input} | pigz -c > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class GBIUpdateIntermediateSchemaFiltered(GBITask):
     """
@@ -338,11 +342,65 @@ class GBIUpdateIntermediateSchemaFiltered(GBITask):
         return GBIUpdateIntermediateSchema(since=self.since, date=self.date)
 
     def run(self):
-        output = shellout("""jq -r -c '. | select(.["x.package"] == "{db}")' {input} > {output}""", db=self.db, input=self.input().path)
+        output = shellout("""jq -r -c '. | select(.["x.package"] == "{db}")' <(unpigz -c {input}) | pigz -c > {output}""",
+                          db=self.db, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GBIDatabase(GBITask):
+    """
+    Combine dump and updates for a given database.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    db = luigi.Parameter(description='name of the database to extract')
+
+    def requires(self):
+        return {
+            'dump': GBIDumpIntermediateSchema(issue=self.issue, db=self.db),
+            'update': GBIUpdateIntermediateSchemaFiltered(since=self.since, date=self.date, db=self.db)
+        }
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for source, target in self.input().iteritems():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GBIAllDatabases(GBITask, luigi.WrapperTask):
+    """
+    Just a wrapper to prepare all databases.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        databases = set()
+
+        with luigi.File(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('package', 'db')):
+                databases.add(row.db)
+
+        with luigi.File(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('package', 'db')):
+                databases.add(row.db)
+
+        databases.remove('DST')
+        databases.remove('EXFO')
+
+        for name in databases:
+            yield GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=name)
+
+    def output(self):
+        return self.input()
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -382,7 +440,7 @@ class GBIMergeMaps(GBITask):
 
         merged = collections.defaultdict(set)
 
-        with luigi.File(self.assets('gbi_package_db_mapping.tsv'), format=TSV).open() as handle:
+        with luigi.File(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('package', 'db')):
                 for sigel, packages in sigil_package.iteritems():
                     for package in packages:
