@@ -83,9 +83,17 @@ import zipfile
 
 config = Config.instance()
 
+# UPDATE and DUMP are addition configuration that might move into siskin.ini,
+# once it is stable
+
 UPDATES = {
-    # Pattern for files containing updates. Change processing code too, if you change this pattern.
-    "pattern": re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip')
+    # Patterns for files containing updates. Change processing code too, if you
+    # change this pattern, since it will depend on the capture group.
+    "pattern": re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip'),
+    "patterns": {
+        "fulltext": re.compile(r'kons_sachs_fzs_([0-9]{14,14})_.*.zip'),
+        "references": re.compile(r'kons_sachs_(?!fzs)[^_]+_([0-9]{14,14})_.*.zip'),
+    }
 }
 
 DUMP = {
@@ -181,19 +189,18 @@ class GBIDumpDatabaseList(GBITask):
     """
     A list of all database names, as seen they occur in the zipfiles, both dump and updates.
     """
+    kind = luigi.Parameter(default='fulltext')
+
     def requires(self):
-        return {'fulltext': GBIDump(kind='fulltext'),
-                'references': GBIDump(kind='references')}
+        return GBIDump(kind=self.kind)
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for kind, target in self.input().iteritems():
-            with target.open() as handle:
-                for row in handle.iter_tsv(cols=('path',)):
-                    shellout(r""" unzip -l {input} | awk '{{print $4}}' | grep "zip$" | cut -d '.' -f1 | awk '{{ print "{kind}\t{input}\t"$0 }}' >> {output}""",
-                             kind=kind, input=row.path, output=stopover)
-
-        luigi.File(stopover).move(self.output().path)
+        output = shellout(r""" unzip -l {input} |
+                               awk '{{print $4}}' |
+                               grep "zip$" |
+                               cut -d '.' -f1 |
+                               awk '{{ print "{kind}\t{input}\t"$0 }}' >> {output}""", kind=self.kind, input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -264,6 +271,7 @@ class GBIUpdateList(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
         return GBIDropbox(date=self.date)
@@ -274,7 +282,7 @@ class GBIUpdateList(GBITask):
         with self.input().open() as handle:
             with self.output().open('w') as output:
                 for row in sorted(handle.iter_tsv(cols=('path',))):
-                    match = UPDATES.get('pattern').search(row.path)
+                    match = UPDATES['patterns'][self.kind].search(row.path)
                     if not match:
                         continue
                     filedate = match.group(1)
@@ -292,9 +300,10 @@ class GBIUpdateDatabaseList(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        return GBIUpdateList(date=self.date, since=self.since)
+        return GBIUpdateList(date=self.date, since=self.since, kind=self.kind)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -310,19 +319,43 @@ class GBIUpdateDatabaseList(GBITask):
 
 class GBIDatabaseList(GBITask):
     """
-    All database names, that occur, either in dump, update, reference or fulltext.
+    All database names, that occur, either in dump, update.
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        return {'dump': GBIDumpDatabaseList(), 'update': GBIUpdateDatabaseList(date=self.date, since=self.since)}
+        return {'dump': GBIDumpDatabaseList(kind=self.kind),
+                'update': GBIUpdateDatabaseList(date=self.date, since=self.since, kind=self.kind)}
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         output = shellout("cat <(cut -f3 {dump}) {update} | sort -u > {output}",
                           dump=self.input().get('dump').path, update=self.input().get('update').path)
         luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GBIDatabaseType(GBITask):
+    """
+    Database-Type mapping generated directly from raw data.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'fulltext': GBIDatabaseList(date=self.date, since=self.since, kind='fulltext'),
+                'references': GBIDatabaseList(date=self.date, since=self.since, kind='references')}
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout(r"""cat {input} | awk '{{ print $0"\treferences"}}' >> {output}""",
+                 input=self.input().get('references').path, output=stopover)
+        shellout(r"""cat {input} | awk '{{ print $0"\tfulltext"}}' >> {output}""",
+                 input=self.input().get('fulltext').path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
