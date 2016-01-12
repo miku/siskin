@@ -33,8 +33,7 @@ Example outputs images: http://imgur.com/a/12Dag, http://i.imgur.com/8bFvSvN.gif
 """
 
 from __future__ import print_function
-from gluish.utils import pairwise, random_string
-from luigi.task import id_to_name_and_params
+from siskin.utils import pairwise, random_string
 from luigi.task import Register
 from siskin.sources import *
 from siskin.workflows import *
@@ -50,13 +49,10 @@ def iterdeps(task):
     Collect dependencies recursively and store them in the global graph `g`.
     """
     for dependency in task.deps():
-        tn, tp = id_to_name_and_params(task.task_id)
-        dn, dp = id_to_name_and_params(dependency.task_id)
+        taskname = (task.task_id,)
+        depname = (dependency.task_id,)
 
-        tt = (tn, frozenset(tp.items()))
-        dd = (dn, frozenset(dp.items()))
-
-        g[tt].add(dd)
+        g[taskname].add(depname)
         iterdeps(dependency)
 
 def simpleformat(graph):
