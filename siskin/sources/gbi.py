@@ -105,7 +105,7 @@ DUMP = {
 
 class GBITask(DefaultTask):
     TAG = '048'
-    DUMPTAG = DUMP['date'].strftime("%Y%m%dT%H%M%S")
+    DUMPTAG = DUMP['date'].strftime("%Y%m%d%H%M%S")
 
     def closest(self):
         """ Update weekly. """
@@ -177,12 +177,13 @@ class GBIDump(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class GBIDatabaseList(GBITask):
+class GBIDumpDatabaseList(GBITask):
     """
-    A list of all database names, as seen they occur in the zipfiles.
+    A list of all database names, as seen they occur in the zipfiles, both dump and updates.
     """
     def requires(self):
-        return {'fulltext': GBIDump(kind='fulltext'), 'references': GBIDump(kind='references')}
+        return {'fulltext': GBIDump(kind='fulltext'),
+                'references': GBIDump(kind='references')}
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -205,7 +206,7 @@ class GBIDumpXML(GBITask):
     db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
-        return {'dblist': GBIDatabaseList(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
+        return {'dblist': GBIDumpDatabaseList(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
 
     def run(self):
         archive = None
@@ -283,6 +284,48 @@ class GBIUpdateList(GBITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GBIUpdateDatabaseList(GBITask):
+    """
+    A list of databases contained in the updates. New databases might be added
+    and only be visible in the updates.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GBIUpdateList(date=self.date, since=self.since)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                shellout(""" unzip -p {input} | grep -o 'DB="[^"]*' | sed -e 's/DB="//g' >> {output} """,
+                         input=row.path, output=stopover)
+        output = shellout("sort -u {input} > {output} && rm {input}", input=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GBIDatabaseList(GBITask):
+    """
+    All database names, that occur, either in dump, update, reference or fulltext.
+    """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'dump': GBIDumpDatabaseList(), 'update': GBIUpdateDatabaseList(date=self.date, since=self.since)}
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        output = shellout("cat <(cut -f3 {dump}) {update} | sort -u > {output}",
+                          dump=self.input().get('dump').path, update=self.input().get('update').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class GBIUpdate(GBITask):
     """
@@ -383,18 +426,11 @@ class GBIAllDatabases(GBITask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        databases = set()
-
-        with luigi.File(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
-            for row in handle.iter_tsv(cols=('package', 'db')):
-                databases.add(row.db)
-
-        with luigi.File(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
-            for row in handle.iter_tsv(cols=('package', 'db')):
-                databases.add(row.db)
-
-        for name in databases:
-            yield GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=name)
+        prerequisite = GBIDatabaseList()
+        luigi.build([prerequisite])
+        with prerequisite.output().open() as handle:
+            for row in handle.iter_tsv(cols=('db',)):
+                yield GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=row.db)
 
     def output(self):
         return self.input()
