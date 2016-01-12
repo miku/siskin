@@ -167,7 +167,7 @@ class GBIDump(GBITask):
     """
     List of GBI dump nested zips relative to the GBIDropbox taskdir.
     """
-    kind = luigi.Parameter(default='fulltext', description='fulltext or reference')
+    kind = luigi.Parameter(default='fulltext', description='fulltext or references')
 
     def requires(self):
         return GBIDropbox()
@@ -195,12 +195,15 @@ class GBIDumpDatabaseList(GBITask):
         return GBIDump(kind=self.kind)
 
     def run(self):
-        output = shellout(r""" unzip -l {input} |
-                               awk '{{print $4}}' |
-                               grep "zip$" |
-                               cut -d '.' -f1 |
-                               awk '{{ print "{kind}\t{input}\t"$0 }}' >> {output}""", kind=self.kind, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                shellout(r"""unzip -l {input} |
+                             awk '{{print $4}}' |
+                             grep "zip$" |
+                             cut -d '.' -f1 |
+                             awk '{{ print "{kind}\t{input}\t"$0 }}' >> {output}""", kind=self.kind, input=row.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
