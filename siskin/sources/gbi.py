@@ -471,7 +471,46 @@ class GBIDatabaseTable(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class GBIAllDatabases(GBITask, luigi.WrapperTask):
+class GBIISSNDatabase(GBITask):
+    """
+    Record ISSN per record per database.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    db = luigi.Parameter(description='name of the database to extract')
+
+    def requires(self):
+        return GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=self.db)
+
+    def run(self):
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]?] | @csv' <(unpigz -c {input}) |
+                              tr -d '"' |
+                              tr ',' '\t' | awk '{{ print "{db}\t"$0 }}'> {output}""", input=self.input().path, db=self.db)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
+    """
+    Just a wrapper to prepare all databases.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        prerequisite = GBIDatabaseList()
+        luigi.build([prerequisite])
+        with prerequisite.output().open() as handle:
+            for row in handle.iter_tsv(cols=('db',)):
+                yield GBIISSNDatabase(issue=self.issue, since=self.since, date=self.date, db=row.db)
+
+    def output(self):
+        return self.input()
+
+class GBIDatabaseWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare all databases.
     """
