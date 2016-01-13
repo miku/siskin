@@ -59,6 +59,7 @@ Assumptions: A database is either reference or fulltext related, never both.
 [gbi]
 
 scp-src = username@ftp.example.de:/home/gbi
+rsync-options = -e XXX -avzP
 
 """
 
@@ -150,7 +151,9 @@ class GBIDropbox(GBITask):
 
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
-        shellout("mkdir -p {target} && rsync -avzP {src} {target}", src=config.get('gbi', 'scp-src'), target=target)
+        shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
+                 rsync_options=config.get('gbi', 'rsync-options', '-avzP'),
+                 src=config.get('gbi', 'scp-src'), target=target)
 
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
