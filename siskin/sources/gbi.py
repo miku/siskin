@@ -89,7 +89,6 @@ config = Config.instance()
 UPDATES = {
     # Patterns for files containing updates. Change processing code too, if you
     # change this pattern, since it will depend on the capture group.
-    "pattern": re.compile(r'kons_sachs_[a-z]*_([0-9]{14,14})_.*.zip'),
     "patterns": {
         "fulltext": re.compile(r'kons_sachs_fzs_([0-9]{14,14})_.*.zip'),
         "references": re.compile(r'kons_sachs_(?!fzs)[^_]+_([0-9]{14,14})_.*.zip'),
