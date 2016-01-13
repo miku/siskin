@@ -545,12 +545,14 @@ class GBIPublicationTitleOverview(GBITask):
                 'fulltext': GBIPublicationTitleWrapper(issue=self.issue, since=self.since, date=self.date, kind='fulltext')}
 
     def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for kind, targets in self.input().iteritems():
             for target in targets:
-                shellout("cat {input}", input=target.path)
+                shellout(""" cat {input} | awk '{{ print "{kind}\t"$0 }}' >> {output} """, input=target.path, output=stopover, kind=kind)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return self.input()
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     """
