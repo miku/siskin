@@ -492,9 +492,69 @@ class GBIISSNDatabase(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GBIPublicationTitleDatabase(GBITask):
+    """
+    Extract publication title per database.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    db = luigi.Parameter(description='name of the database to extract')
+
+    def requires(self):
+        return GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=self.db)
+
+    def run(self):
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.jtitle"]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
+                              tr -d '"' |
+                              tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GBIPublicationTitleWrapper(GBITask, luigi.WrapperTask):
+    """
+    Just a wrapper to prepare publication title lists.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        prerequisite = GBIDatabaseList(kind=self.kind)
+        luigi.build([prerequisite])
+        with prerequisite.output().open() as handle:
+            for row in handle.iter_tsv(cols=('db',)):
+                yield GBIPublicationTitleDatabase(issue=self.issue, since=self.since, date=self.date, db=row.db)
+
+    def output(self):
+        return self.input()
+
+class GBIPublicationTitleOverview(GBITask):
+    """
+    Just combine all publication titles.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'references': GBIPublicationTitleWrapper(issue=self.issue, since=self.since, date=self.date, kind='references'),
+                'fulltext': GBIPublicationTitleWrapper(issue=self.issue, since=self.since, date=self.date, kind='fulltext')}
+
+    def run(self):
+        for kind, targets in self.input().iteritems():
+            for target in targets:
+                shellout("cat {input}", input=target.path)
+
+    def output(self):
+        return self.input()
+
 class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     """
-    Just a wrapper to prepare all databases.
+    Just a wrapper to prepare ISSN lists.
     """
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
