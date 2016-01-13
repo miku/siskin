@@ -198,8 +198,8 @@ class GBIDumpDatabaseList(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                shellout(r"""unzip -l {input} |
-                             awk '{{print $4}}' |
+                shellout(r"""7z l {input} |
+                             awk '{{print $6}}' |
                              grep "zip$" |
                              cut -d '.' -f1 |
                              awk '{{ print "{kind}\t{input}\t"$0 }}' >> {output}""", kind=self.kind, input=row.path, output=stopover)
