@@ -49,8 +49,8 @@ def iterdeps(task):
     Collect dependencies recursively and store them in the global graph `g`.
     """
     for dependency in task.deps():
-        taskname = (task.task_id,)
-        depname = (dependency.task_id,)
+        taskname = (task.task_family,)
+        depname = (dependency.task_family,)
 
         g[taskname].add(depname)
         iterdeps(dependency)
