@@ -484,7 +484,7 @@ class GBIISSNDatabase(GBITask):
         return GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=self.db)
 
     def run(self):
-        output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]?] | @csv' <(unpigz -c {input}) |
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
                               tr -d '"' |
                               tr ',' '\t' | awk '{{ print "{db}\t"$0 }}'> {output}""", input=self.input().path, db=self.db)
         luigi.File(output).move(self.output().path)
@@ -499,9 +499,10 @@ class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        prerequisite = GBIDatabaseList()
+        prerequisite = GBIDatabaseList(kind=self.kind)
         luigi.build([prerequisite])
         with prerequisite.output().open() as handle:
             for row in handle.iter_tsv(cols=('db',)):
@@ -517,9 +518,10 @@ class GBIDatabaseWrapper(GBITask, luigi.WrapperTask):
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        prerequisite = GBIDatabaseList()
+        prerequisite = GBIDatabaseList(kind=self.kind)
         luigi.build([prerequisite])
         with prerequisite.output().open() as handle:
             for row in handle.iter_tsv(cols=('db',)):
@@ -527,6 +529,58 @@ class GBIDatabaseWrapper(GBITask, luigi.WrapperTask):
 
     def output(self):
         return self.input()
+
+class GBIISSNStats(GBITask):
+    """
+    For each database list the percentage of records that have an ISSN.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        return GBIDatabaseISSNWrapper(issue=self.issue, since=self.since, date=self.date, kind=self.kind)
+
+    def run(self):
+        issn_pattern = re.compile(r'[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]')
+        with self.output().open('w') as output:
+            for target in self.input():
+                stats = collections.defaultdict(int)
+                issns = set()
+                with target.open() as handle:
+                    try:
+                        for row in handle.iter_tsv():
+                            if len(row) < 3:
+                                stats['skipped'] += 1
+                                continue
+                            db, id, issn = row[0], row[1], row[2]
+
+                            stats['db'] = db
+                            stats['total'] += 1
+                            if issn == 'NOT_AVAILABLE':
+                                stats['noissn'] += 1
+                            else:
+                                stats['issn'] += 1
+                                issns.add(issn)
+                                if issn_pattern.search(issn):
+                                    stats['valid'] += 1
+                                else:
+                                    stats['invalid'] += 1
+
+                        stats['issncount'] = len(issns)
+                        if stats['total'] > 0:
+                            stats['withissn_percentage'] = '%0.2f' % (100.0 / stats['total'] * stats['issn'])
+                        else:
+                            stats['withissn_percentage'] = 0
+                        output.write_tsv(stats['db'], 'ok', stats['total'], stats['withissn_percentage'], stats['issncount'],
+                                         stats['issn'], stats['noissn'], stats['valid'], stats['invalid'], stats['skipped'])
+                    except Exception as err:
+                        output.write_tsv(stats['db'], 'err', 0, 0, 0, 0, 0, 0, 0, 0)
+                        self.logger.debug(err)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
