@@ -365,6 +365,20 @@ class GBIDatabaseType(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GBIPackageMap(GBITask):
+    """
+    Relate a package to a database name. The same database can belong to
+    multiple packages.
+
+    Combine information derived from Excel files with evidence from filesystem.
+    """
+
+    def run(self):
+        raise RuntimeError("not implemeneted")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GBIUpdate(GBITask):
     """
     Concatenate updates.
@@ -722,6 +736,33 @@ class GBIPackageList(GBITask):
         with self.output().open('w') as output:
             for name in merged[self.sigel]:
                 output.write_tsv(name)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GBIDumpGroupList(GBITask):
+    """
+    Create a simple two column list of groups and DBNAME.
+    This is what is statically stashed at `gbi_package_db_map_references`.
+
+    Note: `gbi_package_db_map_fulltext` is derived from Excel.
+
+    ATM, for kind=fulltext, this is not really useful.
+    """
+    kind = luigi.Parameter(default='references')
+
+    def requires(self):
+        return GBIDump(kind=self.kind)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                group = self.group(row.path)
+                shellout(r""" unzip -l {input} | awk '{{print $4}}' | grep "zip$" | cut -d '.' -f1 | awk '{{ print "{group}\t"$0 }}' >> {output}""",
+                         group=group, input=row.path, output=stopover)
+
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
