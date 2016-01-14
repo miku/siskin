@@ -58,6 +58,17 @@ Assumptions:
 
 * A database is either reference or fulltext related, never both.
 
+A few examples:
+
+Database, that are existent in updates, but not dump:
+
+    $ comm -23 <(taskcat GBIUpdateDatabaseList|sort) <(taskcat GBIDumpDatabaseList|cut -f3|sort)
+    EXFO
+    FLWA
+    FSA
+
+Configuration:
+
 [gbi]
 
 scp-src = username@ftp.example.de:/home/gbi
@@ -156,6 +167,8 @@ class GBIDropbox(GBITask):
 class GBIDump(GBITask):
     """
     List of GBI dump nested zips relative to the GBIDropbox taskdir.
+
+    Note: Different for fulltext or references.
     """
     kind = luigi.Parameter(default='fulltext', description='fulltext or references')
 
@@ -177,7 +190,9 @@ class GBIDump(GBITask):
 
 class GBIDumpDatabaseList(GBITask):
     """
-    A list of all database names, as seen they occur in the zipfiles, both dump and updates.
+    A list of all database names in data dump, as seen they occur in the zipfiles.
+
+    Note: Different for fulltext or references.
     """
     kind = luigi.Parameter(default='fulltext')
 
@@ -200,26 +215,27 @@ class GBIDumpDatabaseList(GBITask):
 
 class GBIDumpXML(GBITask):
     """
-    Extract a single Database from a dump file. It does not matter, whether
-    fulltext or reference.
+    Extract a single Database from a dump file.
+
+    Note: DB can be fulltext or references.
     """
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
-	return {'dblist-fulltext': GBIDumpDatabaseList(kind='fulltext'),
-		'dblist-references': GBIDumpDatabaseList(kind='references'),
-		'7z': Executable(name='7z', message='http://www.7-zip.org/')}
+        return {'dblist-fulltext': GBIDumpDatabaseList(kind='fulltext'),
+                'dblist-references': GBIDumpDatabaseList(kind='references'),
+                '7z': Executable(name='7z', message='http://www.7-zip.org/')}
 
     def run(self):
         archive = None
 
-	with self.input().get('dblist-fulltext').open() as handle:
-	    for row in handle.iter_tsv(cols=('kind', 'path', 'db')):
-		if row.db == self.db:
-		    archive = row.path
+        with self.input().get('dblist-fulltext').open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'path', 'db')):
+                if row.db == self.db:
+                    archive = row.path
 
-	with self.input().get('dblist-references').open() as handle:
+        with self.input().get('dblist-references').open() as handle:
             for row in handle.iter_tsv(cols=('kind', 'path', 'db')):
                 if row.db == self.db:
                     archive = row.path
@@ -246,7 +262,7 @@ class GBIDumpXML(GBITask):
 
 class GBIDumpIntermediateSchema(GBITask):
     """
-    Convert the XML for DB into IS.
+    Convert dump XML for DB into IS.
     """
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     db = luigi.Parameter(description='name of the database to extract')
@@ -269,6 +285,8 @@ class GBIDumpIntermediateSchema(GBITask):
 class GBIUpdateList(GBITask):
     """
     All GBI files that contain updates since a given date.
+
+    Note: Different for fulltext or references.
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -298,6 +316,8 @@ class GBIUpdateDatabaseList(GBITask):
     """
     A list of databases contained in the updates. New databases might be added
     and only be visible in the updates.
+
+    Note: Different for fulltext or references.
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -321,6 +341,8 @@ class GBIUpdateDatabaseList(GBITask):
 class GBIDatabaseList(GBITask):
     """
     All database names, that occur, either in dump, update.
+
+    Note: Different for fulltext or references.
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
@@ -342,6 +364,8 @@ class GBIDatabaseList(GBITask):
 class GBIDatabaseType(GBITask):
     """
     Database-Type mapping generated directly from raw data.
+
+    Contains info about all databases, from dumps, updates, references and fulltexts.
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
