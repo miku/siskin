@@ -46,7 +46,7 @@ For fulltext, we take a Sigel-Kind-Package matrix and information about which
 database belong to which package and calculate coverage from there.
 
 For references, we reject all by default and only allow those items, which are
-covered by a licence.
+covered by a licence. Might change in the future.
 
 Assets:
 
