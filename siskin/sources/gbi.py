@@ -96,6 +96,8 @@ UPDATES = {
     }
 }
 
+# These files must be nested zips. If this changes, change the dependent tasks
+# business logic as well.
 DUMP = {
     "files": {
         "fulltext": [
@@ -367,17 +369,45 @@ class GBIDatabaseType(GBITask):
 
 class GBIPackageMap(GBITask):
     """
-    Relate a package to a database name. The same database can belong to
-    multiple packages.
+    Relate a package (e.g. Wirtschaftswissenschaften) to a database name (e.g. IHSL)
+    The same database can belong to multiple packages.
 
     Combine information derived from Excel files with evidence from filesystem.
+
+    Example output:
+
+        {
+          ...
+          "IAC": [
+            "Wirtschaftswissenschaften",
+            "Sozialwissenschaften"
+          ],
+          "PASS": [
+            "Wirtschaftswissenschaften"
+          ],
+          ...
+        }
+
     """
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        raise RuntimeError("not implemeneted")
+        pkgmap = collections.defaultdict(set)
+
+        with luigi.File(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('package', 'db')):
+                pkgmap[row.db].add(row.package)
+
+        with luigi.File(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('package', 'db')):
+                pkgmap[row.db].add(row.package)
+
+        with self.output().open('w') as output:
+            json.dump(pkgmap, output, cls=SetEncoder)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='json'))
 
 class GBIUpdate(GBITask):
     """
