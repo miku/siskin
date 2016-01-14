@@ -371,15 +371,16 @@ class GBIUpdate(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        return GBIUpdateList(date=self.date)
+        return GBIUpdateList(date=self.date, kind=self.kind)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in sorted(handle.iter_tsv(cols=('path',))):
-                match = UPDATES.get('pattern').search(row.path)
+                match = UPDATES['patterns'][self.kind].search(row.path)
                 if not match:
                     continue
                 filedate = match.group(1)
@@ -400,13 +401,17 @@ class GBIUpdateIntermediateSchema(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        return GBIUpdate(since=self.since, date=self.date)
+        return [GBIUpdate(since=self.since, date=self.date, kind='fulltext'),
+                GBIUpdate(since=self.since, date=self.date, kind='references')]
 
     def run(self):
-        output = shellout("""span-import -i genios {input} | pigz -c > {output}""", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("""span-import -i genios {input} | pigz -c >> {output}""", input=target.path)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
