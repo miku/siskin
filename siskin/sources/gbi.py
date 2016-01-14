@@ -128,28 +128,6 @@ class GBITask(DefaultTask):
         """ Update weekly. """
         return weekly(self.date)
 
-    def group(self, filename):
-        """
-        Given a filename, like `Recht-Law_NOV_2015.zip` return a canonical group name.
-        The group name is then resolved to a collection during [span-import](http://git.io/vEMXR).
-        This is deprecated and will be removed soon.
-        """
-        if re.search('recht', filename, re.IGNORECASE):
-            return 'recht'
-        if re.search('SOWI', filename):
-            return 'sowi'
-        if re.search('TECHN', filename):
-            return 'technik'
-        if re.search('FZS', filename, re.IGNORECASE):
-            return 'fzs'
-        if re.search('WIWI', filename):
-            return 'wiwi'
-        if re.search('PSYN', filename):
-            return 'psyn'
-        if re.search('_lit_', filename):
-            return 'lit'
-        raise RuntimeError('cannot determine group attribute from: %s' % filename)
-
 class GBIDropbox(GBITask):
     """
     Pull down GBI dropbox content.
@@ -258,8 +236,8 @@ class GBIDumpXML(GBITask):
                              iconv -f iso-8859-1 -t utf-8 |
                              LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                              LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
-                             LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>{group}</x-group><x-issue>{issue}</x-issue></Document>@' |
-                             pigz -c >> {output} """, dbzip=dbzip, origin=archive, group=self.group(archive), issue=self.issue)
+                             LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' |
+                             pigz -c >> {output} """, dbzip=dbzip, origin=archive, issue=self.issue)
 
         luigi.File(output).move(self.output().path)
 
@@ -782,33 +760,6 @@ class GBIPackageList(GBITask):
         with self.output().open('w') as output:
             for name in merged[self.sigel]:
                 output.write_tsv(name)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class GBIDumpGroupList(GBITask):
-    """
-    Create a simple two column list of groups and DBNAME.
-    This is what is statically stashed at `gbi_package_db_map_references`.
-
-    Note: `gbi_package_db_map_fulltext` is derived from Excel.
-
-    ATM, for kind=fulltext, this is not really useful.
-    """
-    kind = luigi.Parameter(default='references')
-
-    def requires(self):
-        return GBIDump(kind=self.kind)
-
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                group = self.group(row.path)
-                shellout(r""" unzip -l {input} | awk '{{print $4}}' | grep "zip$" | cut -d '.' -f1 | awk '{{ print "{group}\t"$0 }}' >> {output}""",
-                         group=group, input=row.path, output=stopover)
-
-        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
