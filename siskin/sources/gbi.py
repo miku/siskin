@@ -28,33 +28,35 @@ GBI publisher.
 
 Workflow sketch:
 
-Two variants.
+Two kinds:
 
 * Fulltext
 * References
 
-Metadata w/ fulltext is bundled FZS, references the others.
+Two shipment types:
 
-For fulltext, we take a Sigel-Package matrix and information about which
+* Dump
+* Update
+
+Fulltext is called FZS.
+
+TODO:
+
+For fulltext, we take a Sigel-Kind-Package matrix and information about which
 database belong to which package and calculate coverage from there.
 
 For references, we reject all by default and only allow those items, which are
 covered by a licence.
 
-To create an intermediate schema for fulltext of reference items, use the `kind` parameter:
+Assets:
 
-    $ taskdo GBIIntermediateSchema --kind fulltext
+* gbi_package_db_map_fulltext.tsv
+* gbi_package_db_map_refs.tsv
+* gbi_package_sigel_map.json
 
-The matrix is hand-compiled from data made available by the publisher.
+Assumptions:
 
-TODO(miku):
-
-Try to segment data by database, so updates can be calculated much quicker.
-
-Example: Extract and keep zipfiles of DBs. For each DB convert to IS. Quicker
-for other stats per database as well.
-
-Assumptions: A database is either reference or fulltext related, never both.
+* A database is either reference or fulltext related, never both.
 
 [gbi]
 
@@ -214,18 +216,26 @@ class GBIDumpDatabaseList(GBITask):
 
 class GBIDumpXML(GBITask):
     """
-    Extract a single Database from a dump file.
+    Extract a single Database from a dump file. It does not matter, whether
+    fulltext or reference.
     """
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
-        return {'dblist': GBIDumpDatabaseList(), '7z': Executable(name='7z', message='http://www.7-zip.org/')}
+	return {'dblist-fulltext': GBIDumpDatabaseList(kind='fulltext'),
+		'dblist-references': GBIDumpDatabaseList(kind='references'),
+		'7z': Executable(name='7z', message='http://www.7-zip.org/')}
 
     def run(self):
         archive = None
 
-        with self.input().get('dblist').open() as handle:
+	with self.input().get('dblist-fulltext').open() as handle:
+	    for row in handle.iter_tsv(cols=('kind', 'path', 'db')):
+		if row.db == self.db:
+		    archive = row.path
+
+	with self.input().get('dblist-references').open() as handle:
             for row in handle.iter_tsv(cols=('kind', 'path', 'db')):
                 if row.db == self.db:
                     archive = row.path
