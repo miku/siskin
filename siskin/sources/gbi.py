@@ -116,7 +116,12 @@ DUMP = {
 }
 
 class GBITask(DefaultTask):
+    """
+    GBI task.
+    """
     TAG = '048'
+
+    # DUMPTAG: the most recent update date as string.
     DUMPTAG = DUMP['date'].strftime("%Y%m%d%H%M%S")
 
     def closest(self):
@@ -127,6 +132,7 @@ class GBITask(DefaultTask):
         """
         Given a filename, like `Recht-Law_NOV_2015.zip` return a canonical group name.
         The group name is then resolved to a collection during [span-import](http://git.io/vEMXR).
+        This is deprecated and will be removed soon.
         """
         if re.search('recht', filename, re.IGNORECASE):
             return 'recht'
