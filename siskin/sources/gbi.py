@@ -401,7 +401,6 @@ class GBIUpdateIntermediateSchema(GBITask):
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
-    kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
         return [GBIUpdate(since=self.since, date=self.date, kind='fulltext'),
