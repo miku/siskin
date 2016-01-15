@@ -58,14 +58,20 @@ class JstorTask(DefaultTask):
         return weekly(self.date)
 
 class JstorPaths(JstorTask):
-    """ Sync. """
+    """
+    Sync.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=10, significant=False)
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=config.get('jstor', 'ftp-host'),
                          username=config.get('jstor', 'ftp-username'),
                          password=config.get('jstor', 'ftp-password'),
-                         pattern=config.get('jstor', 'ftp-pattern'))
+                         pattern=config.get('jstor', 'ftp-pattern'),
+                         max_retries=self.max_retries,
+                         timeout=self.timeout)
 
     def run(self):
         self.input().move(self.output().path)

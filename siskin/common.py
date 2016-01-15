@@ -50,6 +50,8 @@ class FTPMirror(CommonTask):
     pattern = luigi.Parameter(default='*', description="e.g. '*leip_*.zip'")
     base = luigi.Parameter(default='.')
     indicator = luigi.Parameter(default=random_string())
+    max_retries = luigi.IntParameter(default=5, significant=False)
+    timeout = luigi.IntParameter(default=10, significant=False, description='timeout in seconds')
 
     def requires(self):
         return Executable(name='lftp', message='http://lftp.yar.ru/')
@@ -67,14 +69,16 @@ class FTPMirror(CommonTask):
             os.makedirs(target)
 
         command = """lftp -u {username},{password}
-        -e "set net:max-retries 5; set net:timeout 10; mirror --verbose=0
+        -e "set net:max-retries {max_retries}; set net:timeout {timeout}; mirror --verbose=0
         --only-newer -I {pattern} {base} {target}; exit" {host}"""
 
         shellout(command, host=self.host, username=pipes.quote(self.username),
                  password=pipes.quote(self.password),
                  pattern=pipes.quote(self.pattern),
                  target=pipes.quote(target),
-                 base=pipes.quote(self.base))
+                 base=pipes.quote(self.base),
+                 max_retries=self.max_retries,
+                 timeout=self.timeout)
 
         with self.output().open('w') as output:
             for path in iterfiles(target):
