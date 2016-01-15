@@ -57,11 +57,15 @@ class CrossrefTask(DefaultTask):
     TAG = 'crossref'
 
     def closest(self):
-        """ Update frequency. """
+        """
+        Update frequency.
+        """
         return monthly(date=self.date)
 
 class CrossrefHarvestChunk(CrossrefTask):
     """
+    Harvest a slice of Crossref.
+
     API docs can be found under: http://api.crossref.org/
 
     The output file is line delimited JSON, just the concatenated responses.
@@ -71,10 +75,15 @@ class CrossrefHarvestChunk(CrossrefTask):
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     rows = luigi.IntParameter(default=1000, significant=False)
-    max_retries = luigi.IntParameter(default=10, significant=False)
+    max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
+    attempts = luigi.IntParameter(default=3, description='number of attempts to GET an URL that failed')
 
     @timed
     def run(self):
+        """
+        The API sometimes returns a 504 or other error. We therefore cache all HTTP requests
+        locally with a simple URLCache and re-attempt a URL a couple of times.
+        """
         cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
         cache.sess.mount('http://', adapter)
@@ -86,12 +95,12 @@ class CrossrefHarvestChunk(CrossrefTask):
             while True:
                 params = {"rows": rows, "offset": offset, "filter": filter}
                 url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
-                for attempt in range(1, 3):
+                for attempt in range(1, self.attempts):
                     body = cache.get(url)
                     try:
                         content = json.loads(body)
                     except ValueError as err:
-                        if attempt == 2:
+                        if attempt == self.attempts - 1:
                             self.logger.debug("URL was %s" % url)
                             self.logger.debug(err)
                             self.logger.debug(body[:100])
@@ -150,7 +159,9 @@ class CrossrefWorks(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class CrossrefWorksItems(CrossrefTask):
-    """ Only the items, without any addition check. """
+    """
+    Extract the message items from raw responses. No additional check for valid message status.
+    """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -165,7 +176,10 @@ class CrossrefWorksItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class CrossrefItems(CrossrefTask):
-    """ Combine all harvested files into a single LDJ file. This file will contain dups.
+    """
+    Combine all harvested files into a single LDJ file. This file will contain dups.
+
+    Invalid DOIs are filtered out here. A non-ok status message yields an error.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -176,7 +190,9 @@ class CrossrefItems(CrossrefTask):
 
     @timed
     def run(self):
-        """ Extract all items from chunks. Perform additional filtering. """
+        """
+        Extract all items from chunks. Perform additional filtering.
+        """
         doi_excludes = set()
         with self.input().get('degruyter-doi').open() as handle:
             for line in handle:
@@ -203,11 +219,16 @@ class CrossrefItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefUniqItems(CrossrefTask):
-    """ Compact file, keep only most recent entries. """
+    """
+    Compact file, keep only most the recent entry for an ID.
+    """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        """
+        TODO(miku): Get rid of ldjtab and use jq, possible in parallel.
+        """
         return {'items': CrossrefItems(begin=self.begin, date=self.date),
                 'ldjtab': Executable(name='ldjtab', message="https://github.com/miku/ldjtab")}
 
@@ -227,8 +248,9 @@ class CrossrefUniqItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefIntermediateSchema(CrossrefTask):
-    """ Convert to intermediate format via span. """
-
+    """
+    Convert to intermediate format via span.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -245,7 +267,9 @@ class CrossrefIntermediateSchema(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class CrossrefDOIList(CrossrefTask):
-    """ A list of Crossref DOIs. """
+    """
+    A list of Crossref DOIs.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -264,7 +288,9 @@ class CrossrefDOIList(CrossrefTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class CrossrefISSNList(CrossrefTask):
-    """ Just dump a list of all ISSN values. With dups and all. """
+    """
+    Just dump a list of all ISSN values. With dups and all.
+    """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -281,7 +307,9 @@ class CrossrefISSNList(CrossrefTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class CrossrefUniqISSNList(CrossrefTask):
-    """ Just dump a list of all ISSN values. Sorted and uniq. """
+    """
+    Just dump a list of all ISSN values. Sorted and uniq.
+    """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -300,7 +328,6 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """
     Vanilla records into elasticsearch.
     """
-
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     index = luigi.Parameter(default='crossref')
