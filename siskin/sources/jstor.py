@@ -93,6 +93,9 @@ class JstorMembers(JstorTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
+                if not row.path.endswith('.zip'):
+                    self.logger.debug('skipping: %s' % row.path)
+                    continue
                 shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' | sort >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
