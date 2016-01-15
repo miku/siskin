@@ -74,7 +74,9 @@ class JstorPaths(JstorTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class JstorMembers(JstorTask):
-    """ Extract a full list of archive members. """
+    """
+    Extract a full list of archive members.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -85,7 +87,7 @@ class JstorMembers(JstorTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' >> {output} """,
+                shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' | sort >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
@@ -93,7 +95,14 @@ class JstorMembers(JstorTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class JstorLatestMembers(JstorTask):
-    """ Find the latest archive members for all article ids. """
+    """
+    Find the latest archive members for all article ids.
+
+    The path names are like XXX_YYYY-MM-DD-HH-MM-SS/jjjj/yyyy-mm-dd/id/id.xml.
+
+    This way, it is possible to sort the shipments by date, run `tac` and
+    only keep the latest entries.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -101,7 +110,9 @@ class JstorLatestMembers(JstorTask):
 
     @timed
     def run(self):
-        """ Expect input to be sorted, so tac will actually be a perfect rewind. """
+        """
+        Expect input to be sorted by shipment date, so tac will actually be a perfect rewind.
+        """
         output = shellout("tac {input} | sort -S 50% -u -k2,2 | sort -S 50% -k1,1 > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
@@ -110,7 +121,7 @@ class JstorLatestMembers(JstorTask):
 
 class JstorXML(JstorTask):
     """
-    Create an latest snapshot of the latest data.
+    Create a snapshot of the latest data.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     batch = luigi.IntParameter(default=512, significant=False)
@@ -136,7 +147,9 @@ class JstorXML(JstorTask):
         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
 
 class JstorIntermediateSchema(JstorTask):
-    """ Convert to intermediate format via span. """
+    """
+    Convert to intermediate format via span.
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -153,7 +166,9 @@ class JstorIntermediateSchema(JstorTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class JstorISSNList(JstorTask):
-    """ A list of JSTOR ISSNs. """
+    """
+    A list of JSTOR ISSNs.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -162,8 +177,8 @@ class JstorISSNList(JstorTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.issn"][]?' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]?' {input} 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 
@@ -171,7 +186,9 @@ class JstorISSNList(JstorTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class JstorDOIList(JstorTask):
-    """ A list of JSTOR DOIs. """
+    """
+    A list of JSTOR DOIs.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
