@@ -623,6 +623,71 @@ class GBIPublicationTitleOverview(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class GBITitleDatabase(GBITask):
+    """
+    Extract title per database, also ISSN.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    db = luigi.Parameter(description='name of the database to extract')
+
+    def requires(self):
+        return GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=self.db)
+
+    def run(self):
+        output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]? // "NOT_AVAILABLE", .["rft.atitle"]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
+                              tr -d '"' |
+                              tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GBITitleWrapper(GBITask, luigi.WrapperTask):
+    """
+    Just a wrapper to prepare title lists.
+
+    Note: fulltext or reference.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        prerequisite = GBIDatabaseList(kind=self.kind)
+        luigi.build([prerequisite])
+        with prerequisite.output().open() as handle:
+            for row in handle.iter_tsv(cols=('db',)):
+                yield GBITitleDatabase(issue=self.issue, since=self.since, date=self.date, db=row.db)
+
+    def output(self):
+        return self.input()
+
+class GBITitleList(GBITask):
+    """
+    Just a wrapper to prepare title lists.
+
+    Note: fulltext or reference.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        return GBITitleWrapper(issue=self.issue, since=self.since, date=self.date, kind=self.kind)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare ISSN lists.
