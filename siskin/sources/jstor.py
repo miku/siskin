@@ -146,14 +146,14 @@ class JstorXML(JstorTask):
             for archive, items in groups:
                 for chunk in nwise(items, n=self.batch):
                     margs = " ".join(["'%s'" % item.member.replace('[', r'\[').replace(']', r'\]') for item in chunk])
-                    shellout("""unzip -qq -c {archive} {members} |
-                                sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' >> {output}""",
+                    shellout("""unzip -p {archive} {members} |
+                                sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
                                 archive=archive, members=margs, output=stopover)
 
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
 
 class JstorIntermediateSchema(JstorTask):
     """
@@ -168,11 +168,11 @@ class JstorIntermediateSchema(JstorTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i jstor {input} > {output}", input=self.input().get('file').path)
+        output = shellout("span-import -i jstor <(unpigz -c {input}) | pigz -c > {output}", input=self.input().get('file').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class JstorISSNList(JstorTask):
     """
