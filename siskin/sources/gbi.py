@@ -63,9 +63,14 @@ A few examples:
 Database, that are existent in updates, but not dump:
 
     $ comm -23 <(taskcat GBIUpdateDatabaseList|sort) <(taskcat GBIDumpDatabaseList|cut -f3|sort)
+    CHAN
+    CIOD
     EXFO
     FLWA
     FSA
+    PCW
+    TEC
+    WEN
 
 Configuration:
 
