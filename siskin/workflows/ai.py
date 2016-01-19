@@ -176,14 +176,13 @@ class AIIntermediateSchema(AITask):
                 CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
-                GBIIntermediateSchema(date=self.date),
                 JstorIntermediateSchema(date=self.date)]
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input()[1:]:
-            shellout("cat {input} | pigz >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
@@ -200,8 +199,6 @@ class AIExport(AITask):
             'degruyter': DegruyterIntermediateSchema(date=self.date),
             'doaj': DOAJIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
-
-            # 'gbi': GBIIntermediateSchema(date=self.date),
 
             'DE-105': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Gq199T'),
             'DE-14': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Tz3vbk'),
@@ -227,16 +224,12 @@ class AIExport(AITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         # DE-15 and DE-14 get DOAJ, cf. #6524, #4983
-        shellout("""span-export -doi-blacklist {blacklist} -any DE-540 -l DE-15-FID:{issns} -any DE-15 -any DE-14 {input} | pigz >> {output}""",
+        shellout("""span-export -doi-blacklist {blacklist} -any DE-540 -l DE-15-FID:{issns} -any DE-15 -any DE-14 <(unpigz -c {input}) | pigz >> {output}""",
                  blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path, issns=self.input().get('DE-15-FID').path, output=stopover)
 
         # DE-15 gets DeGruyter, cf. #4731
-        shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} {input} | pigz >> {output}""",
+        shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} <(unpigz -c {input}) | pigz >> {output}""",
                  blacklist=self.input().get('blacklist').path, holding=self.input().get('DE-15').path, input=self.input().get('degruyter').path, output=stopover)
-
-        # JSTOR detached from all for now, cf. #5472
-        shellout("""span-export -doi-blacklist {blacklist} {input} | pigz >> {output}""",
-                 blacklist=self.input().get('blacklist').path, input=self.input().get('jstor').path, output=stopover)
 
         def format_args(flagname, isils):
             """ Helper to create args like -f DE-15:/path/to/target -f DE-14:/path/to/target ..."""
@@ -247,8 +240,8 @@ class AIExport(AITask):
         lists = format_args("-l", ['DE-15-FID'])
 
         # apply holdings and issn filters on sources
-        for source in ('crossref'):
-            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} {input} | pigz >> {output}",
+        for source in ['crossref', 'jstor']:
+            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} <(unpigz -c {input}) | pigz -c >> {output}",
                      blacklist=self.input().get('blacklist').path, files=files, lists=lists,
                      input=self.input().get(source).path, output=stopover)
 

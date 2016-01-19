@@ -559,8 +559,7 @@ class GBIISSNDatabase(GBITask):
 
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
-                              tr -d '"' |
-                              tr ',' '\t' | awk '{{ print "{db}\t"$0 }}'> {output}""", input=self.input().path, db=self.db)
+                              tr -d '"' | tr ',' '\t' | awk '{{ print "{db}\t"$0 }}'> {output}""", input=self.input().path, db=self.db)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -580,8 +579,7 @@ class GBIPublicationTitleDatabase(GBITask):
 
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.jtitle"]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
-                              tr -d '"' |
-                              tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
+                              tr -d '"' | tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -642,8 +640,7 @@ class GBITitleDatabase(GBITask):
 
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]? // "NOT_AVAILABLE", .["rft.atitle"]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
-                              tr -d '"' |
-                              tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
+                              tr -d '"' | tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
         luigi.File(output).move(self.output().path)
 
     def output(self):

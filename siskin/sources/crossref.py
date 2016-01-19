@@ -259,7 +259,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -verbose -i crossref {input} 2>> {logfile} > {output}",
+        output = shellout("span-import -verbose -i crossref {input} 2>> {logfile} | pigz -c > {output}",
                           input=self.input().get('file').path, logfile=self.logfile)
         luigi.File(output).move(self.output().path)
 
@@ -279,7 +279,7 @@ class CrossrefDOIList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.doi' {input} | grep -v "null" | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
+        shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
                  input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
