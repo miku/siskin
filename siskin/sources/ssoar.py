@@ -55,12 +55,12 @@ class SSOARDump(SSOARTask):
     def run(self):
         output = shellout("""
             cat <(echo '<collection xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">')
-		<(oaimi -verbose -prefix {format} http://www.ssoar.info/OAIHandler/request)
-		<(echo '</collection>') > {output}""", format=self.format)
+                <(oaimi -verbose -prefix {format} http://www.ssoar.info/OAIHandler/request)
+                <(echo '</collection>') > {output}""", format=self.format)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 class SSOARCombine(SSOARTask):
     """ Combine the chunks for a date range into a single file.
