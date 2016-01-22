@@ -47,8 +47,8 @@ class FactbookXML(FactbookTask):
 
     def run(self):
         url = 'http://jmatchparser.sourceforge.net/factbook/data/factbook.xml.gz'
-        output = shellout("curl --connect-timeout 10 {url} | gunzip -c > {output}", url=url)
+        output = shellout("curl --connect-timeout 10 {url} > {output}", url=url)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
