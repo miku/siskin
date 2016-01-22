@@ -52,6 +52,7 @@ class FTPMirror(CommonTask):
     indicator = luigi.Parameter(default=random_string())
     max_retries = luigi.IntParameter(default=5, significant=False)
     timeout = luigi.IntParameter(default=10, significant=False, description='timeout in seconds')
+    exclude_glob = luigi.Parameter(default="", significant=False, description='globs to exclude')
 
     def requires(self):
         return Executable(name='lftp', message='http://lftp.yar.ru/')
@@ -68,9 +69,13 @@ class FTPMirror(CommonTask):
         if not os.path.exists(target):
             os.makedirs(target)
 
+        exclude_glob = ""
+        if not self.exclude_glob == "":
+            exclude_glob = "--exclude-glob %s" % self.exclude_glob
+
         command = """lftp -u {username},{password}
         -e "set net:max-retries {max_retries}; set net:timeout {timeout}; mirror --verbose=0
-        --only-newer -I {pattern} {base} {target}; exit" {host}"""
+        --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
 
         shellout(command, host=self.host, username=pipes.quote(self.username),
                  password=pipes.quote(self.password),
@@ -78,7 +83,8 @@ class FTPMirror(CommonTask):
                  target=pipes.quote(target),
                  base=pipes.quote(self.base),
                  max_retries=self.max_retries,
-                 timeout=self.timeout)
+                 timeout=self.timeout,
+                 exclude_glob=exclude_glob)
 
         with self.output().open('w') as output:
             for path in iterfiles(target):
