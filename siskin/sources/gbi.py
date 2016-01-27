@@ -526,6 +526,31 @@ class GBIDatabase(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class GBIIntermediateSchemaByKind(GBITask):
+    """
+    Combine all  references or fulltext databases into a single intermediate schema document.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        prereq = GBIDatabaseList(kind=self.kind)
+        luigi.build([prereq])
+        with prereq.output().open() as handle:
+            for row in handle.iter_tsv(cols=('db',)):
+                yield GBIDatabase(db=row.db, issue=self.issue, since=self.since, date=self.date)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {intpu} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 class GBIDatabaseTable(GBITask):
     """
     For a given database name, extract the ID and date.
