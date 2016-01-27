@@ -261,3 +261,23 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
     def output(self):
         return self.input()
+
+class AICoverage(AITask):
+    """
+    Ad-hoc task to run coverage tests with new [iscov](https://github.com/miku/istools).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefIntermediateSchema(date=self.date),
+            'degruyter': DegruyterIntermediateSchema(date=self.date),
+            'doaj': DOAJIntermediateSchema(date=self.date),
+            'jstor' : JstorIntermediateSchema(date=self.date),
+        }
+
+    def run(self):
+        pass
+
+    def run(self):
+        return luigi.LocalTarget(path=self.path())
