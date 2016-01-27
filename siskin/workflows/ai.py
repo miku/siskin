@@ -274,6 +274,9 @@ class AICoverage(AITask):
             'degruyter': DegruyterIntermediateSchema(date=self.date),
             'doaj': DOAJIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
+            'gbi-references': GBIIntermediateSchemaByKind(kind='references')
+
+            # add holding files here ...
         }
 
     def run(self):
