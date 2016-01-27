@@ -476,7 +476,7 @@ class GBIUpdateIntermediateSchema(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("""span-import -i genios {input} | pigz -c >> {output}""", input=target.path)
+            shellout("""span-import -i genios {input} | pigz -c >> {output}""", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
