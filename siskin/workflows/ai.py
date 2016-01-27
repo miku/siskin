@@ -60,7 +60,7 @@ from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSN
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.doi import DOIBlacklist
-# from siskin.sources.gbi import GBIIntermediateSchema, GBIISSNList
+from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.task import DefaultTask
