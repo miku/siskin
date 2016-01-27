@@ -21,7 +21,7 @@ class BartocDump(BartocTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""wget -O {output} 'http://bartoc.org/en/download/json?download=1&eid=767' """)
+        output = shellout("""wget -O {output} 'http://bartoc.org/en/download/json?download=1&eid=3224' """)
         with open(output) as handle:
             try:
                 _ = json.load(handle)
