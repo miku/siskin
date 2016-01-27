@@ -545,7 +545,7 @@ class GBIIntermediateSchemaByKind(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {intpu} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
