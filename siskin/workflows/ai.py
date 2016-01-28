@@ -277,15 +277,14 @@ class AICoverage(AITask):
             'doaj': DOAJIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
             'gbi-references': GBIIntermediateSchemaByKind(kind='references')
-            # add holding files here ...
         }
 
     def run(self):
-        print("manual guide")
-        print("------------\n")
-
+        _, stopover = tempfile.mkstemp(prefix='siskin')
         for k, v in self.input().iteritems():
-            print("""iscov -file %s -format %s <(unpigz -c %s) > %s.cov """ % (self.file, self.format, v.path, k))
+            shellout(r"""iscov -file {file} -format {format} <(unpigz -c {input}) | awk '{{ print $0"\t{key}" }} >> {output}""",
+                     file=self.file, format=self.format, input=v.path, key=k, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
