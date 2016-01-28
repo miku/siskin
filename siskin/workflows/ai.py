@@ -274,7 +274,6 @@ class AICoverage(AITask):
         return {
             'crossref': CrossrefIntermediateSchema(date=self.date),
             'degruyter': DegruyterIntermediateSchema(date=self.date),
-            'doaj': DOAJIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
             'gbi-references': GBIIntermediateSchemaByKind(kind='references')
         }
@@ -287,4 +286,4 @@ class AICoverage(AITask):
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(digest=True))
