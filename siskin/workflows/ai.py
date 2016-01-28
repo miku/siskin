@@ -267,6 +267,8 @@ class AICoverage(AITask):
     Ad-hoc task to run coverage tests with new [iscov](https://github.com/miku/istools).
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    file = luigi.Parameter(description='path to holding file')
+    format = luigi.Parameter(default='kbart', description='holding file format: kbart, ovid, google')
 
     def requires(self):
         return {
@@ -283,7 +285,7 @@ class AICoverage(AITask):
         print("------------\n")
 
         for k, v in self.input().iteritems():
-            print("""iscov -file FILE -format FMT <(unpigz -c %s) > %s.cov """ % (v.path, k))
+            print("""iscov -file %s -format %s <(unpigz -c %s) > %s.cov """ % (self.file, self.format, v.path, k))
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
