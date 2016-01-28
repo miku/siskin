@@ -285,5 +285,5 @@ class AICoverage(AITask):
         for k, v in self.input().iteritems():
             print("""iscov -file FILE -format FMT <(unpigz -c %s) > %s.cov """ % (v.path, k))
 
-    def run(self):
+    def output(self):
         return luigi.LocalTarget(path=self.path())
