@@ -264,7 +264,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class CrossrefDOIList(CrossrefTask):
     """
