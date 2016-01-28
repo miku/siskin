@@ -275,12 +275,15 @@ class AICoverage(AITask):
             'doaj': DOAJIntermediateSchema(date=self.date),
             'jstor' : JstorIntermediateSchema(date=self.date),
             'gbi-references': GBIIntermediateSchemaByKind(kind='references')
-
             # add holding files here ...
         }
 
     def run(self):
-        pass
+        print("manual guide")
+        print("------------\n")
+
+        for k, v in self.input().iteritems():
+            print("""iscov -file FILE -format FMT <(unpigz -c %s) > %s.cov """ % (v.path, k))
 
     def run(self):
         return luigi.LocalTarget(path=self.path())
