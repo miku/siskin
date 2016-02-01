@@ -49,9 +49,9 @@ class ThiemeCombine(ThiemeTask):
         return Executable(name='oaimi', message='https://github.com/miku/oaimi')
 
     def run(self):
-        output = shellout("oaimi -root records -prefix {prefix} -set {collection} -verbose {url} > {output}",
+        output = shellout("oaimi -root records -prefix {prefix} -set {collection} -verbose {url} | pigz -c > {output}",
                           prefix=self.prefix, collection=self.collection, url=self.url)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="xml"))
+        return luigi.LocalTarget(path=self.path(ext="xml.gz"))
