@@ -64,6 +64,7 @@ from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.task import DefaultTask
+import collections
 import datetime
 import itertools
 import luigi
@@ -286,4 +287,49 @@ class AICoverage(AITask):
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True))
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+
+class AICoverageReport(AITask):
+    """
+    Human readable coverage report.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    file = luigi.Parameter(description='path to holding file')
+    format = luigi.Parameter(default='kbart', description='holding file format: kbart, ovid, google')
+
+    def requires(self):
+        return AICoverage(date=self.date, file=self.file, format=self.format)
+
+    def run(self):
+        counter = collections.Counter()
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('id', 'valid', 'source')):
+                counter["%s:%s" % (row.source, row.valid)] += 1
+                counter[row.source] += 1
+
+        sources = set()
+        for k, v in counter.iteritems():
+            if ":" in k:
+                continue
+            sources.add(k)
+
+        with self.output().open('w') as output:
+            s = "Coverage report for %s (%s) as of %s" % (self.file, self.format, self.date)
+            output.write(s + "\n")
+            output.write("=" * len(s) + "\n\n")
+            summary = collections.Counter()
+            for source in sorted(sources):
+                total = counter[source]
+                valid = counter["%s:true" % source]
+                covered = 100.0 / total * valid
+                output.write("%s is %s covered by given holding file, %s out of %s records could be attached.\n" % (source, covered, valid, total))
+
+                summary["total"] += total
+                summary["valid"] += valid
+
+            covered = 100.0 / summary["total"] * summary["valid"]
+            output.write("Coverage over sources: %s (%s/%s)" % (covered, summary["total"], summary["valid"]))
+            output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
