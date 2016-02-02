@@ -315,21 +315,21 @@ class AICoverageReport(AITask):
 
         with self.output().open('w') as output:
             s = "Coverage report for %s (%s) as of %s" % (self.file, self.format, self.date)
-            output.write(s + "\n")
+            output.write("\n" + s + "\n")
             output.write("=" * len(s) + "\n\n")
             summary = collections.Counter()
             for source in sorted(sources):
                 total = counter[source]
                 valid = counter["%s:true" % source]
                 covered = 100.0 / total * valid
-                output.write("* %s is %s%% covered by given holding file (%s/%s)\n" % (source, covered, valid, total))
+                output.write("* %s is %0.2f%% covered (%s/%s)\n" % (source, covered, valid, total))
 
                 summary["total"] += total
                 summary["valid"] += valid
 
             covered = 100.0 / summary["total"] * summary["valid"]
-            output.write("Coverage over sources: %s%% (%s/%s)" % (covered, summary["total"], summary["valid"]))
-            output.write("\n")
+            output.write("\nCoverage across sources: %0.2f%% (%s/%s)" % (covered, summary["valid"], summary["total"]))
+            output.write("\n\n")
             output.write("No liability assumed.\n")
 
     def output(self):
