@@ -280,7 +280,7 @@ class AICoverage(AITask):
         }
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
         for k, v in self.input().iteritems():
             shellout(r"""iscov -file {file} -format {format} <(unpigz -c {input}) | awk '{{ print $0"\t{key}" }}' >> {output}""",
                      file=self.file, format=self.format, input=v.path, key=k, output=stopover)
