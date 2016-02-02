@@ -322,14 +322,15 @@ class AICoverageReport(AITask):
                 total = counter[source]
                 valid = counter["%s:true" % source]
                 covered = 100.0 / total * valid
-                output.write("%s is %s covered by given holding file, %s out of %s records could be attached.\n" % (source, covered, valid, total))
+                output.write("* %s is %s%% covered by given holding file (%s/%s)\n" % (source, covered, valid, total))
 
                 summary["total"] += total
                 summary["valid"] += valid
 
             covered = 100.0 / summary["total"] * summary["valid"]
-            output.write("Coverage over sources: %s (%s/%s)" % (covered, summary["total"], summary["valid"]))
+            output.write("Coverage over sources: %s%% (%s/%s)" % (covered, summary["total"], summary["valid"]))
             output.write("\n")
+            output.write("No liability assumed.\n")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
