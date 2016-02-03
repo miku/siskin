@@ -1,3 +1,30 @@
+0.0.134 2016-02-04
+------------------
+
+ai: basic Coverage report
+thieme: gzip result
+crossref: number of attempts is not significant
+gbi: generate intermediate schema by kind
+gbi: fix zero output for update intermediate schema
+bartoc: urls are not stable
+common: add exclude_glob option to FTPMirror
+factbook: do not uncompress
+ssoar: fix whitespace
+ai: compress various intermediate results
+jstor: unpigz intermediate schema output
+gbi: adjust docs, dump/update db gap
+jstor: compress xml and intermediate schema
+add journaltocs
+gbi: extract some titles, refs. #6832
+crossref: docs
+gbi: update docs
+gbi: note on which axes a task operates, kind, update/dump
+gbi: do not carry the group, use more reliable DB names
+gbi: GBIDumpXML should not care about references or fulltext separation
+gbi: probably sufficient sigel-map
+gbi: GBIPackageMap
+gbi: note where the mappings come from, GBIDumpGroupList
+
 0.0.130 2015-12-04
 ------------------
 
