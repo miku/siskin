@@ -33,6 +33,7 @@ Config:
 
 isil-rel = https://x.com/static/about.json
 holdings = https://x.com/inhouseservices/list?do=holdings
+uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 
 """
 
@@ -112,7 +113,7 @@ class AMSLHoldingsFile(AMSLTask):
 
         for holding in holdings:
             if holding["ISIL"] == self.isil:
-                link = "https://live.amsl.technology/OntoWiki/files/get?setResource=%s" % holding['DokumentURI']
+                link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding['DokumentURI'])
                 zipf = shellout("curl --fail {link} > {output} ", link=link)
                 output = shellout("unzip -p {input} >> {output}", input=zipf, output=stopover)
         
