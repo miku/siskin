@@ -42,6 +42,7 @@ from siskin.task import DefaultTask
 import datetime
 import json
 import luigi
+import tempfile
 
 config = Config.instance()
 
@@ -58,7 +59,7 @@ class AMSLCollections(AMSLTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-       return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path())
 
 class AMSLHoldings(AMSLTask):
     """
@@ -67,11 +68,11 @@ class AMSLHoldings(AMSLTask):
     date = luigi.Parameter(default=datetime.date.today())
 
     def run(self):
-	output = shellout(""" curl --fail "{link}" > {output} """, link=config.get('amsl', 'holdings'))
-	luigi.File(output).move(self.output().path)
+        output = shellout(""" curl --fail "{link}" > {output} """, link=config.get('amsl', 'holdings'))
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-       return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path())
 
 class AMSLHoldingsISILList(AMSLTask):
     """
@@ -80,37 +81,42 @@ class AMSLHoldingsISILList(AMSLTask):
     date = luigi.Parameter(default=datetime.date.today())
 
     def requires(self):
-	return AMSLHoldings(date=self.date)
+        return AMSLHoldings(date=self.date)
 
     def run(self):
-	output = shellout("jq -r '.[].ISIL' {input} | sort > {output}", input=self.input().path)
-	luigi.File(output).move(self.output().path)
+        output = shellout("jq -r '.[].ISIL' {input} | sort > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-       return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path())
 
 class AMSLHoldingsFile(AMSLTask):
     """
     Access AMSL files/get?setResource= facilities.
+
+    The output is probably zipped.
+
+    One ISIL can have multiple files. No constraint on the format.
     """
     isil = luigi.Parameter(description='ISIL, case sensitive')
     date = luigi.Parameter(default=datetime.date.today())
 
     def requires(self):
-	return AMSLHoldings(date=self.date)
+        return AMSLHoldings(date=self.date)
 
     def run(self):
-	with self.input().open() as handle:
-	    holdings = json.load(handle)
+        with self.input().open() as handle:
+            holdings = json.load(handle)
 
-	for holding in holdings:
-	    if holding["ISIL"] == self.isil:
-		link = "https://live.amsl.technology/OntoWiki/files/get?setResource=%s" % holding['DokumentURI']
-		output = shellout("curl --fail {link} > {output} ", link=link)
-		luigi.File(output).move(self.output().path)
-		break
-	else:
-	    raise RuntimeError('cannot find ISIL in AMSL holdings API: %s' % self.isil)
+        _, stopover = tempfile.mkstemp('siskin-')
+
+        for holding in holdings:
+            if holding["ISIL"] == self.isil:
+                link = "https://live.amsl.technology/OntoWiki/files/get?setResource=%s" % holding['DokumentURI']
+                zipf = shellout("curl --fail {link} > {output} ", link=link)
+                output = shellout("unzip -p {input} >> {output}", input=zipf, output=stopover)
+        
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-       return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path())
