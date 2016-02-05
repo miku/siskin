@@ -175,6 +175,7 @@ class CrossrefItems(CrossrefTask):
                         items = content["message"]["items"]
                         for item in items:
                             if item.get('DOI') in doi_excludes:
+                                self.logger.debug("excluding %s via blacklist" % item.get("DOI"))
                                 continue
                             output.write(json.dumps(item))
                             output.write("\n")
