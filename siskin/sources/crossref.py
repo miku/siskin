@@ -31,12 +31,12 @@ and other content items (books chapters, data, theses, technical reports)
 from thousands of scholarly and professional publishers around the globe.
 """
 
-from siskin.benchmark import timed
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+from siskin.benchmark import timed
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, ElasticsearchMixin
