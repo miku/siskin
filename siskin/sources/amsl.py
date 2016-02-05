@@ -44,6 +44,7 @@ import datetime
 import json
 import luigi
 import tempfile
+import zipfile
 
 config = Config.instance()
 
@@ -97,7 +98,9 @@ class AMSLHoldingsFile(AMSLTask):
 
     The output is probably zipped.
 
-    One ISIL can have multiple files. No constraint on the format.
+    One ISIL can have multiple files.
+
+    If the file is Zipped, it will be decompressed.
     """
     isil = luigi.Parameter(description='ISIL, case sensitive')
     date = luigi.Parameter(default=datetime.date.today())
@@ -114,9 +117,14 @@ class AMSLHoldingsFile(AMSLTask):
         for holding in holdings:
             if holding["ISIL"] == self.isil:
                 link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding['DokumentURI'])
-                zipf = shellout("curl --fail {link} > {output} ", link=link)
-                output = shellout("unzip -p {input} >> {output}", input=zipf, output=stopover)
-        
+                downloaded = shellout("curl --fail {link} > {output} ", link=link)
+                try:
+                    _ = zipfile.ZipFile(downloaded)
+                    output = shellout("unzip -p {input} >> {output}", input=downloaded, output=stopover)
+                except zipfile.BadZipfile:
+                    # at least the file is not a zip.
+                    output = shellout("cat {input} >> {output}", input=downloaded, output=stopover)
+
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
