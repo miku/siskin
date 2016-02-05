@@ -139,49 +139,117 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     def output(self):
         return self.input()
 
-class CrossrefItems(CrossrefTask):
+class CrossrefChunkItems(CrossrefTask):
     """
-    Combine all harvested files into a single LDJ file. This file will contain dups.
+    Extract the message items, per chunk.
+    """
+    begin = luigi.DateParameter()
+    end = luigi.DateParameter()
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
-    Invalid DOIs are filtered out here. A non-ok status message yields an error.
+    def requires(self):
+        return CrossrefHarvestChunk(begin=self.begin, end=self.end, filter=self.filter)
+
+    def run(self):
+        output = shellout("jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+class CrossrefWorks(CrossrefTask):
+    """
+    Harvest raw works API responses. Concat and gzip.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'harvest': CrossrefHarvest(begin=self.begin, end=self.closest()),
-                'degruyter-doi': DegruyterDOIList(date=self.date)}
+        return CrossrefHarvest(begin=self.begin, end=self.closest())
 
-    @timed
     def run(self):
-        """
-        Extract all items from chunks. Perform additional filtering.
-        """
-        doi_excludes = set()
-        with self.input().get('degruyter-doi').open() as handle:
-            for line in handle:
-                stripped = line.strip()
-                if not stripped:
-                    continue
-                doi_excludes.add(stripped)
-
-        with self.output().open('w') as output:
-            for target in self.input().get('harvest'):
-                with target.open() as handle:
-                    for line in handle:
-                        content = json.loads(line)
-                        if not content.get("status") == "ok":
-                            raise RuntimeError("invalid response status: %s" % content)
-                        items = content["message"]["items"]
-                        for item in items:
-                            if item.get('DOI') in doi_excludes:
-                                self.logger.debug("excluding %s via blacklist" % item.get("DOI"))
-                                continue
-                            output.write(json.dumps(item))
-                            output.write("\n")
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} | pigz -c >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+class CrossrefItems(CrossrefTask):
+    """
+    Extract the message items from raw responses. No validity checks (e.g. message status == ok).
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefWorks(begin=self.begin, date=self.closest())
+
+    def run(self):
+        output = shellout("unpigz -c {input} | jq -c -r '.message.items[]?' | pigz -c > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+class CrossrefLineDOI(CrossrefTask):
+    """
+    Extract the line number and DOI for a given chunk. Work per chunk, so updates can work incrementally.
+    """
+    begin = luigi.DateParameter()
+    end = luigi.DateParameter()
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+
+    def requires(self):
+        return CrossrefChunkItems(begin=self.begin, end=self.end, filter=self.filter)
+
+    def run(self):
+        output = shellout("jq -r '.DOI' <(unpigz -c {input}) | cat -n > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefLineDOIWrapper(CrossrefTask):
+    """
+    Run DOI and line extraction for each chunk.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    end = luigi.DateParameter(default=datetime.date.today())
+    update = luigi.Parameter(default='months', description='days, weeks or months')
+
+    def requires(self):
+        if self.update not in ('days', 'weeks', 'months'):
+            raise RuntimeError('update can only be: days, weeks or months')
+        dates = [dt for dt in date_range(self.begin, self.end, 1, self.update)]
+        tasks = [CrossrefLineDOI(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
+        return sorted(tasks)
+
+    def output(self):
+        return self.input()
+
+class CrossrefLineDOICombined(CrossrefTask):
+    """
+    Combine all extracted DOI and lines numbers from chunk files.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    end = luigi.DateParameter(default=datetime.date.today())
+    update = luigi.Parameter(default='months', description='days, weeks or months')
+
+    def requires(self):
+        return CrossrefLineDOIWrapper(begin=self.begin, end=self.end, update=self.update)
+
+    def run(self):
+        with self.output().open('w') as output:
+            for target in self.input():
+                with target.open() as handle:
+                    for row in handle:
+                        lineno, doi = row.split()
+                        output.write_tsv(target.path, lineno, doi)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class CrossrefUniqItems(CrossrefTask):
     """
@@ -194,7 +262,7 @@ class CrossrefUniqItems(CrossrefTask):
         """
         TODO(miku): Get rid of ldjtab and use jq, possible in parallel.
         """
-        return {'items': CrossrefItems(begin=self.begin, date=self.date),
+        return {'items': CrossrefWorksItems(begin=self.begin, date=self.date),
                 'ldjtab': Executable(name='ldjtab', message="https://github.com/miku/ldjtab")}
 
     @timed
