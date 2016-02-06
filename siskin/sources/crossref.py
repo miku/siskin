@@ -232,6 +232,7 @@ class CrossrefLineDOIWrapper(CrossrefTask):
 class CrossrefLineDOICombined(CrossrefTask):
     """
     Combine all extracted DOI and lines numbers from chunk files.
+    Format: filename lineno DOI.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
