@@ -205,11 +205,11 @@ class CrossrefLineDOI(CrossrefTask):
         return CrossrefChunkItems(begin=self.begin, end=self.end, filter=self.filter)
 
     def run(self):
-        output = shellout(r"""jq -r '.DOI' <(unpigz -c {input}) | awk '{{print NR"\t{input}\t"$0 }}' > {output}""", input=self.input().path)
+        output = shellout(r"""jq -r '.DOI?' <(unpigz -c {input}) | awk '{{print NR"\t{input}\t"$0 }}' | pigz -c > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
 
 class CrossrefLineDOIWrapper(CrossrefTask):
     """
@@ -241,19 +241,13 @@ class CrossrefLineDOICombined(CrossrefTask):
         return CrossrefLineDOIWrapper(begin=self.begin, end=self.end)
 
     def run(self):
-        with self.output().open('w') as output:
-            for target in self.input():
-                with target.open() as handle:
-                    for line in handle:
-                        fields = line.strip().split()
-                        if not len(fields) == 2:
-                            self.logger.warning("invalid line in %s: %s" % (target.path, line))
-                            continue
-                        lineno, doi = fields
-                        output.write_tsv(target.path, lineno, doi)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
 
 class CrossrefDOITable(CrossrefTask):
     """
@@ -267,11 +261,13 @@ class CrossrefDOITable(CrossrefTask):
         return CrossrefLineDOICombined(begin=self.begin, end=self.end)
 
     def run(self):
-        output = shellout("""LC_ALL=C sort -k1,1 -S35% {input} | tac | LC_ALL=C sort -S35% -u -k3,3 > {output}""", input=self.input().path)
+        output = shellout("""
+            LC_ALL=C sort -k2,2 -S35% <(unpigz -c {input}) | tac | LC_ALL=C sort -S35% -u -k3,3 | pigz -c > {output}""",
+            input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
 
 class CrossrefUniqItems(CrossrefTask):
     """
