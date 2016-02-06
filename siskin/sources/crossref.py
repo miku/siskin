@@ -206,7 +206,7 @@ class CrossrefLineDOI(CrossrefTask):
 
     def run(self):
         output = shellout("""
-            jq -r '.DOI' <(unpigz -c {input}) | cat -n | awk '{{print "{input}"$0 }}' > {output}
+            jq -r '.DOI' <(unpigz -c {input}) | cat -n | awk '{{print "{input} $0" }}' > {output}
         """, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
