@@ -247,7 +247,7 @@ class CrossrefLineDOICombined(CrossrefTask):
                     for line in handle:
                         fields = line.strip().split()
                         if not len(fields) == 2:
-                            self.logger.warning("invalid line: %s" % line)
+                            self.logger.warning("invalid line in %s: %s" % (target.path, line))
                             continue
                         lineno, doi = fields
                         output.write_tsv(target.path, lineno, doi)
