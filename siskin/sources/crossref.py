@@ -236,10 +236,9 @@ class CrossrefLineDOICombined(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
-    update = luigi.Parameter(default='months', description='days, weeks or months')
 
     def requires(self):
-        return CrossrefLineDOIWrapper(begin=self.begin, end=self.end, update=self.update)
+        return CrossrefLineDOIWrapper(begin=self.begin, end=self.end)
 
     def run(self):
         with self.output().open('w') as output:
@@ -252,6 +251,24 @@ class CrossrefLineDOICombined(CrossrefTask):
                             continue
                         lineno, doi = fields
                         output.write_tsv(target.path, lineno, doi)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefDOITable(CrossrefTask):
+    """
+    Create a table of current crossref DOIs along with their origin. Output
+    contains each DOI only once, accociated with the most recent version.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    end = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefLineDOICombined(begin=self.begin, end=self.end)
+
+    def run(self):
+        output = shellout("""LC_ALL=C sort -k1,1 -S35% {input} | tac | LC_ALL=C sort -S35% -u -k3,3 > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
