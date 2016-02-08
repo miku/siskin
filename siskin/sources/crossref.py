@@ -289,6 +289,29 @@ class CrossrefSortedDOITable(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+
+class CrossrefUniqItemsRedux(CrossrefTask):
+    """
+    What is left to do: filter the correct lines here.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    end = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefSortedDOITable(begin=self.begin, end=self.end)
+
+    def run(self):
+        filelines = collections.defaultdict(list)
+        with self.input().open() as handle:
+            for line in handle:
+                lineno, filename = line.strip().split('\t')
+                filelines[filename].append(lineno)
+
+        for filename, linenos in filelines.interitems():
+            pass
+
+    def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
 
 class CrossrefUniqItems(CrossrefTask):
