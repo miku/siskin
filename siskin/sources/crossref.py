@@ -200,7 +200,23 @@ class CrossrefItems(CrossrefTask):
 class CrossrefLineDOI(CrossrefTask):
     """
     Extract the line number and DOI for a given chunk. Work per chunk, so updates can work incrementally.
+
+    TODO: Sort by filename is mostly correct. Case 10.1177/0959353515613812:
+
+    13046   ... CrossrefChunkItems/begin-2016-01-01-end-2016-02-01-filter-deposit.ldj.gz 10.1177/0959353515613812
+    3548977 ... CrossrefChunkItems/begin-2016-01-01-end-2016-02-01-filter-deposit.ldj.gz 10.1177/0959353515613812
+
+    Both docs come in a single API harvest slice, but they differ slightly: https://gist.github.com/miku/c9e892343d8b0acb49cf
+
+    Document in line #3548977 would be the most recent, current implementation finds:
+
+        $ taskcat CrossrefDOITable | LC_ALL=C grep -F "10.1177/0959353515613812"
+        3548977 ... CrossrefChunkItems/begin-2016-01-01-end-2016-02-01-filter-deposit.ldj.gz 10.1177/0959353515613812
+
+    So by using tac we get the correct answer here, but it would probably be
+    more robust, to use the `timestamp` of the record.
     """
+
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
