@@ -272,6 +272,25 @@ class CrossrefDOITable(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
 
+class CrossrefSortedDOITable(CrossrefTask):
+    """
+    Sort the CrossrefDOITable (TODO: move into a single task).
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    end = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefDOITable(begin=self.begin, end=self.end)
+
+    def run(self):
+        output = shellout("""
+            TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -nk1,1 <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
+            tmpdir=config.get('core', 'tempdir'), input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+
 class CrossrefUniqItems(CrossrefTask):
     """
     Compact file, keep only most the recent entry for an ID.
