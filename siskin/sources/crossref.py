@@ -323,11 +323,13 @@ class CrossrefUniqItemsRedux(CrossrefTask):
                     self.logger.info("filtering out %s lines" % len(linenumbers))
 
                     # filter lines from file
-                    shellout("filterline {lines} <(gunzip -c {file}) | gzip -c >> {output}",
-                             lines=tmp, file=previous_filename, output=stopover)
+                    input = shellout("unpigz -c {file} > {output}", file=previous_filename)
+                    shellout("filterline {lines} {input} | pigz -c >> {output}",
+                             filterline=self.assets('filterline'), lines=tmp, input=input, output=stopover)
 
                     try:
                         os.remove(tmp)
+                        os.remove(input)
                     except Exception as err:
                         self.logger.warning(err)
 
