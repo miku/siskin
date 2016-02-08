@@ -284,7 +284,7 @@ class CrossrefSortedDOITable(CrossrefTask):
 
     def run(self):
         output = shellout("""
-            TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -nk1,1 <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
+            TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -k1,1n <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
             tmpdir=config.get('core', 'tempdir'), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
