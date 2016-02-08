@@ -37,6 +37,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
+from siskin.configuration import Config
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, ElasticsearchMixin
@@ -49,6 +50,8 @@ import requests
 import siskin
 import tempfile
 import urllib
+
+config = Config.instance()
 
 class CrossrefTask(DefaultTask):
     """
@@ -262,8 +265,8 @@ class CrossrefDOITable(CrossrefTask):
 
     def run(self):
         output = shellout("""
-            LC_ALL=C sort -k2,2 -S35% <(unpigz -c {input}) | tac | LC_ALL=C sort -S35% -u -k3,3 | pigz -c > {output}""",
-            input=self.input().path)
+            TMPDIR={tmpdir} LC_ALL=C sort -k2,2 -S35% <(TMPDIR={tmpdir} unpigz -c {input}) | tac | TMPDIR={tmpdir} LC_ALL=C sort -S35% -u -k3,3 | pigz -c > {output}""",
+            tmpdir=config.get('core', 'tempdir'), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
