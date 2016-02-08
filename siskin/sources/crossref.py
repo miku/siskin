@@ -396,12 +396,11 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     def requires(self):
        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': CrossrefUniqItems(date=self.date)}
+               'file': CrossrefUniqItemsRedux(end=self.date)}
 
     @timed
     def run(self):
-        output = shellout("span-import -verbose -i crossref {input} 2>> {logfile} | pigz -c > {output}",
-                          input=self.input().get('file').path, logfile=self.logfile)
+        output = shellout("span-import -i crossref <(unpigz -c {input}) | pigz -c > {output}", input=self.input().get('file').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
