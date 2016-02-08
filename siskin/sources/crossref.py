@@ -41,6 +41,7 @@ from siskin.configuration import Config
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, ElasticsearchMixin
+import collections
 import datetime
 import elasticsearch
 import json
@@ -302,17 +303,43 @@ class CrossrefUniqItemsRedux(CrossrefTask):
         return CrossrefSortedDOITable(begin=self.begin, end=self.end)
 
     def run(self):
-        filelines = collections.defaultdict(list)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+
+        previous_filename = None
+        linenumbers = []
+
         with self.input().open() as handle:
             for line in handle:
                 lineno, filename = line.strip().split('\t')
-                filelines[filename].append(lineno)
 
-        for filename, linenos in filelines.interitems():
-            pass
+                if previous_filename and previous_filename != filename:
+
+                    # write line numbers to a file
+                    _, tmp = tempfile.mkstemp(prefix='siskin-')
+                    with luigi.File(tmp, format=TSV).open('w') as handle:
+                        for ln in linenumbers:
+                            handle.write_tsv(ln)
+
+                    self.logger.info("filtering out %s lines" % len(linenumbers))
+
+                    # filter lines from file
+                    shellout("filterline {lines} <(gunzip -c {file}) | gzip -c >> {output}",
+                             lines=tmp, file=previous_filename, output=stopover)
+
+                    try:
+                        os.remove(tmp)
+                    except Exception as err:
+                        self.logger.warning(err)
+
+                    linenumbers = []
+
+                linenumbers.append(lineno)
+                previous_filename = filename
+
+        luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class CrossrefUniqItems(CrossrefTask):
     """
