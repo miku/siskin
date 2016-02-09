@@ -236,7 +236,7 @@ class CrossrefLineDOIWrapper(CrossrefTask):
     Run DOI and line extraction for each chunk.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
     update = luigi.Parameter(default='months', description='days, weeks or months')
 
     def requires(self):
@@ -255,7 +255,7 @@ class CrossrefLineDOICombined(CrossrefTask):
     Format: filename lineno DOI.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return CrossrefLineDOIWrapper(begin=self.begin, end=self.end)
@@ -275,7 +275,7 @@ class CrossrefDOITable(CrossrefTask):
     contains each DOI only once, accociated with the most recent version.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return CrossrefLineDOICombined(begin=self.begin, end=self.end)
@@ -294,7 +294,7 @@ class CrossrefSortedDOITable(CrossrefTask):
     Sort the CrossrefDOITable (TODO: move into a single task).
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return CrossrefDOITable(begin=self.begin, end=self.end)
@@ -313,7 +313,7 @@ class CrossrefUniqItemsRedux(CrossrefTask):
     What is left to do: filter the correct lines here.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    end = luigi.DateParameter(default=datetime.date.today())
+    end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return CrossrefSortedDOITable(begin=self.begin, end=self.end)
