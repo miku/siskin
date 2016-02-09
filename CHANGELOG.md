@@ -1,50 +1,50 @@
 0.0.135 2016-02-08
 ------------------
 
-crossref: plug over to CrossrefUniqItemsRedux
-crossref: explain, why not all records of the most recent harvest slice are present in the snapshot
-crossref: decompress input to work around broken pipes / write error 32
-crossref: CrossrefUniqItemsRedux filtering
-crossref: use tmpdir from config [Martin Czygan]
-crossref: compress and simplify [Martin Czygan]
-crossref: get rid of cat -n [Martin Czygan]
-crossref: CrossrefLineDOI, carry over filename [Martin Czygan]
-crossref: add CrossrefDOITable [Martin Czygan]
-crossref: allow empty fields, which indicate missing DOIs [Martin Czygan]
-crossref: source might have invalid lines [Martin Czygan]
-crossref: move towards chunk processing for smaller updates [Martin Czygan]
-crossref: remove unused tasks [Martin Czygan]
-amsl: allow both zipped and non-zipped kbart [Martin Czygan]
-amsl: move prefix into config [Martin Czygan]
-amsl: isil can have multiple downloads [Martin Czygan]
-amsl: api access, AMSLHoldingsFile, AMSLHoldingsISILList, AMSLHoldings [Martin Czygan]
+* crossref: plug over to CrossrefUniqItemsRedux
+* crossref: explain, why not all records of the most recent harvest slice are present in the snapshot
+* crossref: decompress input to work around broken pipes / write error 32
+* crossref: CrossrefUniqItemsRedux filtering
+* crossref: use tmpdir from config [Martin Czygan]
+* crossref: compress and simplify [Martin Czygan]
+* crossref: get rid of cat -n [Martin Czygan]
+* crossref: CrossrefLineDOI, carry over filename [Martin Czygan]
+* crossref: add CrossrefDOITable [Martin Czygan]
+* crossref: allow empty fields, which indicate missing DOIs [Martin Czygan]
+* crossref: source might have invalid lines [Martin Czygan]
+* crossref: move towards chunk processing for smaller updates [Martin Czygan]
+* crossref: remove unused tasks [Martin Czygan]
+* amsl: allow both zipped and non-zipped kbart [Martin Czygan]
+* amsl: move prefix into config [Martin Czygan]
+* amsl: isil can have multiple downloads [Martin Czygan]
+* amsl: api access, AMSLHoldingsFile, AMSLHoldingsISILList, AMSLHoldings [Martin Czygan]
 
 0.0.134 2016-02-04
 ------------------
 
-ai: basic Coverage report
-thieme: gzip result
-crossref: number of attempts is not significant
-gbi: generate intermediate schema by kind
-gbi: fix zero output for update intermediate schema
-bartoc: urls are not stable
-common: add exclude_glob option to FTPMirror
-factbook: do not uncompress
-ssoar: fix whitespace
-ai: compress various intermediate results
-jstor: unpigz intermediate schema output
-gbi: adjust docs, dump/update db gap
-jstor: compress xml and intermediate schema
-add journaltocs
-gbi: extract some titles, refs. #6832
-crossref: docs
-gbi: update docs
-gbi: note on which axes a task operates, kind, update/dump
-gbi: do not carry the group, use more reliable DB names
-gbi: GBIDumpXML should not care about references or fulltext separation
-gbi: probably sufficient sigel-map
-gbi: GBIPackageMap
-gbi: note where the mappings come from, GBIDumpGroupList
+* ai: basic Coverage report
+* thieme: gzip result
+* crossref: number of attempts is not significant
+* gbi: generate intermediate schema by kind
+* gbi: fix zero output for update intermediate schema
+* bartoc: urls are not stable
+* common: add exclude_glob option to FTPMirror
+* factbook: do not uncompress
+* ssoar: fix whitespace
+* ai: compress various intermediate results
+* jstor: unpigz intermediate schema output
+* gbi: adjust docs, dump/update db gap
+* jstor: compress xml and intermediate schema
+* add journaltocs
+* gbi: extract some titles, refs. #6832
+* crossref: docs
+* gbi: update docs
+* gbi: note on which axes a task operates, kind, update/dump
+* gbi: do not carry the group, use more reliable DB names
+* gbi: GBIDumpXML should not care about references or fulltext separation
+* gbi: probably sufficient sigel-map
+* gbi: GBIPackageMap
+* gbi: note where the mappings come from, GBIDumpGroupList
 
 0.0.130 2015-12-04
 ------------------
