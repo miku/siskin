@@ -258,7 +258,7 @@ class CrossrefLineDOICombined(CrossrefTask):
     end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefLineDOIWrapper(begin=self.begin, end=self.end)
+        return CrossrefLineDOIWrapper(begin=self.begin, end=self.closest())
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -278,7 +278,7 @@ class CrossrefDOITable(CrossrefTask):
     end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefLineDOICombined(begin=self.begin, end=self.end)
+        return CrossrefLineDOICombined(begin=self.begin, end=self.closest())
 
     def run(self):
         output = shellout("""
@@ -297,7 +297,7 @@ class CrossrefSortedDOITable(CrossrefTask):
     end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefDOITable(begin=self.begin, end=self.end)
+        return CrossrefDOITable(begin=self.begin, end=self.closest())
 
     def run(self):
         output = shellout("""
@@ -316,7 +316,7 @@ class CrossrefUniqItemsRedux(CrossrefTask):
     end = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefSortedDOITable(begin=self.begin, end=self.end)
+        return CrossrefSortedDOITable(begin=self.begin, end=self.closest())
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
