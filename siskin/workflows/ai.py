@@ -212,6 +212,8 @@ class AILicensing(AITask):
             'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
             'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
             'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
+
+            # 'DE-15-FID': DownloadFile(...),
         }
 
     @timed
@@ -220,6 +222,28 @@ class AILicensing(AITask):
             pass
 
         # $ islabel -kbart DE-15:{x} -kbart DE-14:{x} is.ldj > is.lic.ldj
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class AICollectionsFilter(AITask):
+    """
+    For each record, see if an ISIL actually is interested in the collection.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'is': AILicensing(date=self.date),
+            # 'collections': AMSLCollectionAPIResponse(...)
+        }
+
+    @timed
+    def run(self):
+        """
+        TODO: Filter here by comparing collection names.
+        """
+        pass
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
