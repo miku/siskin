@@ -181,6 +181,49 @@ class AIIntermediateSchema(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class AILicensing(AITask):
+    """
+    Label intermediate schema records with ISIL. Coverage is given by holding files.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        """
+        Intermediate schema files and holdings.
+        """
+        return {
+            'crossref': CrossrefIntermediateSchema(date=self.date),
+            'degruyter': DegruyterIntermediateSchema(date=self.date),
+            'doaj': DOAJIntermediateSchema(date=self.date),
+            'jstor': JstorIntermediateSchema(date=self.date),
+
+            'DE-105': AMSLHoldingsFile(isil='DE-105'),
+            'DE-14': AMSLHoldingsFile(isil='DE-14'),
+            'DE-15': AMSLHoldingsFile(isil='DE-15'),
+            'DE-1972': AMSLHoldingsFile(isil='DE-1972'),
+            'DE-8': AMSLHoldingsFile(isil='DE-8'),
+            'DE-Bn3': AMSLHoldingsFile(isil='DE-Bn3'),
+            'DE-Brt1': AMSLHoldingsFile(isil='DE-Brt1'),
+            'DE-Ch1': AMSLHoldingsFile(isil='DE-Ch1'),
+            'DE-D117': AMSLHoldingsFile(isil='DE-D117'),
+            'DE-D161': AMSLHoldingsFile(isil='DE-D161'),
+            'DE-Gla1': AMSLHoldingsFile(isil='DE-Gla1'),
+            'DE-J59': AMSLHoldingsFile(isil='DE-J59'),
+            'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
+            'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
+            'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
+        }
+
+    @timed
+    def run(self):
+        for k, v in self.input().iteritems():
+            pass
+
+        # $ islabel -kbart DE-15:{x} -kbart DE-14:{x} is.ldj > is.lic.ldj
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 class AIExport(AITask):
     """ Create a SOLR-importable file. """
 
