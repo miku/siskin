@@ -396,7 +396,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     def requires(self):
        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': CrossrefUniqItemsRedux(end=self.date)}
+               'file': CrossrefUniqItemsRedux(date=self.date)}
 
     @timed
     def run(self):
