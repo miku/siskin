@@ -236,13 +236,13 @@ class CrossrefLineDOIWrapper(CrossrefTask):
     Run DOI and line extraction for each chunk.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    end = ClosestDateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     update = luigi.Parameter(default='months', description='days, weeks or months')
 
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
             raise RuntimeError('update can only be: days, weeks or months')
-        dates = [dt for dt in date_range(self.begin, self.end, 1, self.update)]
+        dates = [dt for dt in date_range(self.begin, self.date, 1, self.update)]
         tasks = [CrossrefLineDOI(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
         return sorted(tasks)
 
