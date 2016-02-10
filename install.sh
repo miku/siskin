@@ -2,6 +2,11 @@
 #
 # Siskin install script. Also good for updates.
 #
+# TODO:
+#
+# - EPEL is needed on CentOS for xmlstarlet, jq, and potentially more.
+# - github API limit while running ./install.sh over and over
+#
 
 set -o pipefail
 
@@ -49,10 +54,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     elif [ -f /etc/redhat-release ]; then
         echo "Usings rpms."
 
+        yum -y install epel-release
+        yum update
         yum groupinstall -y 'development tools'
-        yum install -y jq xmlstarlet lftp vim tmux bash-completion tree
-
-        hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
+        yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
 
         install_latest_rpm "miku/span"
         install_latest_rpm "miku/solrbulk"
@@ -78,6 +83,8 @@ else
 fi
 
 echo "Installing siskin..."
+
+yum install -y python-pip
 
 hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is in EPEL."; exit 1; }
 
