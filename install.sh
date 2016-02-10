@@ -30,6 +30,7 @@ fi
 echo "Installing command line tools..."
 
 hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
+hash wget 2> /dev/null || { echo >&2 "wget is required."; exit 1; }
 
 # install_latest_deb installs latest deb, given a username/repository on github.com.
 install_latest_deb() {
