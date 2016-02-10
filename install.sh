@@ -9,19 +9,31 @@
 # 2. We use the Github API to find latest versions of packages.
 #    If you hit the API limit (normally you should not), sit back and wait.
 #
-# TODO: CentOS 6 (must add Python 2.7), Ubuntu, Mac OS X (must be precompiled)
-#
 
 set -o pipefail
 
 if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
-  exit
+  then echo "superuser only"
+  exit 1
 fi
 
 echo "installing command line tools..."
 
-yum install -y wget curl
+# install curl and wget first
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    if [ -f /etc/debian_version ]; then
+        apt-get install -y wget curl
+    elif [ -f /etc/redhat-release ]; then
+        yum install -y wget curl
+    else
+        echo "not supported: %OSTYPE" && exit 1
+    fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # leave a note, if the curl/wget check fails
+    echo >&2 "note: on Mac OS X, you can use homebrew (http://brew.sh/) to install wget and curl with: brew install wget curl"; exit 1;
+else
+    echo "not supported: %OSTYPE" && exit 1
+fi
 
 # we don't stop on yum failure, so check explictly
 hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
@@ -33,6 +45,10 @@ install_latest_deb() {
         echo "latest_deb_url expects an argument"
         exit 1
     fi
+
+    # if we failed to install jq, complain here
+    hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
+
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "deb")
     RC=$?; if [[ $RC != 0 ]]; then
         echo "cannot find latest package for $1, maybe hit API limits?"
@@ -47,6 +63,10 @@ install_latest_rpm() {
         echo "latest_rpm_url expects an argument"
         exit 1
     fi
+
+    # if we failed to install jq, complain here
+    hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
+
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "rpm")
     RC=$?; if [[ $RC != 0 ]]; then
         echo "cannot find latest package for $1, maybe hit API limits?"
@@ -77,6 +97,9 @@ centos_6_install_python_27() {
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
 
+        apt-get install -y build-essential gcc make autoconf flex bison binutils
+        apt-get install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-dev python-dev libxslt1-dev libsqlite3-dev
+
         install_latest_deb "miku/span"
         install_latest_deb "miku/solrbulk"
         install_latest_deb "miku/memcldj"
@@ -85,7 +108,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_deb "miku/oaimi"
 
     elif [ -f /etc/redhat-release ]; then
-
+        # extract CentOS version
         VERSION=$(rpm -q --queryformat '%{VERSION}' centos-release)
 
         if [[ ! ("$VERSION" == "6" || "$VERSION" == "7") ]]; then
@@ -113,24 +136,45 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_rpm "miku/esbulk"
         install_latest_rpm "miku/oaimi"
     else
-        echo "TODO: [linux] using binaries... " && exit 1
+        echo "not supported: %OSTYPE" && exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "TODO: [osx] using binaries... " && exit 1
+    hash go 2> /dev/null || { echo >&2 "Go (http://golang.org/) is required."; exit 1; }
+    go get -u -v https://github.com/miku/span/cmd/...
+    go get -u -v https://github.com/miku/solrbulk/cmd/...
+    go get -u -v https://github.com/miku/memcldj/cmd/...
+    go get -u -v https://github.com/miku/hurrly/cmd/...
+    go get -u -v https://github.com/miku/esbulk/cmd/...
+    go get -u -v https://github.com/miku/oaimi/cmd/...
 else
     echo "not supported: %OSTYPE" && exit 1
 fi
 
 echo "installing siskin..."
 
-yum install -y python-pip
+# install pip
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    if [ -f /etc/debian_version ]; then
+        apt-get install -y python-pip
+    elif [ -f /etc/redhat-release ]; then
+        yum install -y python-pip
+    else
+        echo "not supported: %OSTYPE" && exit 1
+    fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    hash pip 2> /dev/null || {
+        echo "Run: brew install python"; exit 1;
+    }
+else
+    echo "not supported: %OSTYPE" && exit 1
+fi
 
+# ensure pip is installed
 hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is in EPEL."; exit 1; }
 
 pip install -U siskin
 
 echo "setting up configuration..."
-
 mkdir /etc/siskin
 mkdir /etc/luigi
 
@@ -139,7 +183,6 @@ wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/mas
 wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
 
 echo "setting up autocomplete..."
-
 sudo mkdir -p /etc/bash_completion.d/
 sudo wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
 sudo chmod +x /etc/bash_completion.d/siskin_completion.sh
