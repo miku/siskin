@@ -27,13 +27,13 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     elif [ -f /etc/redhat-release ]; then
         yum install -y wget curl
     else
-        echo "not supported: %OSTYPE" && exit 1
+        echo "not supported: $OSTYPE" && exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     # leave a note, if the curl/wget check fails
     echo >&2 "note: on Mac OS X, you can use homebrew (http://brew.sh/) to install wget and curl with: brew install wget curl"; exit 1;
 else
-    echo "not supported: %OSTYPE" && exit 1
+    echo "not supported: $OSTYPE" && exit 1
 fi
 
 # we don't stop on yum failure, so check explictly
@@ -142,7 +142,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_rpm "miku/esbulk"
         install_latest_rpm "miku/oaimi"
     else
-        echo "not supported: %OSTYPE" && exit 1
+        echo "not supported: $OSTYPE" && exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     hash go 2> /dev/null || { echo >&2 "Go (http://golang.org/) is required."; exit 1; }
@@ -153,7 +153,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     go get -u -v https://github.com/miku/esbulk/cmd/...
     go get -u -v https://github.com/miku/oaimi/cmd/...
 else
-    echo "not supported: %OSTYPE" && exit 1
+    echo "not supported: $OSTYPE" && exit 1
 fi
 
 echo "installing siskin..."
@@ -165,14 +165,14 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     elif [ -f /etc/redhat-release ]; then
         yum install -y python-pip
     else
-        echo "not supported: %OSTYPE" && exit 1
+        echo "not supported: $OSTYPE" && exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     hash pip 2> /dev/null || {
         echo "Run: brew install python"; exit 1;
     }
 else
-    echo "not supported: %OSTYPE" && exit 1
+    echo "not supported: $OSTYPE" && exit 1
 fi
 
 # ensure pip is installed
