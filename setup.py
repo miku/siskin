@@ -63,6 +63,7 @@ install_requires = [
     'pylint>=1.2.1',
     'pymarc>=3.0.1',
     'pyparsing>=2.0.3',
+    'pymysql>=0.7',
     'python-dateutil>=2.2',
     'pytz>=2014.4',
     'requests>=2.5.1',
