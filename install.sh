@@ -48,3 +48,9 @@ elif [[ "$OSTYPE" == "freebsd"* ]]; then
 else
     exit 1
 fi
+
+echo <<HERE
+  \. _(9>
+    \==_)
+     -'=
+HERE
