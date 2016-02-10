@@ -68,7 +68,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         echo "Usings rpms."
 
         yum install -y epel-release
-        yum update
+        yum update -y
         yum groupinstall -y 'development tools'
         yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
 
