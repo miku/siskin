@@ -17,6 +17,12 @@ Add configuration files:
 * `/etc/siskin/siskin.ini` - example: [siskin.example.ini](https://github.com/miku/siskin/blob/master/siskin.example.ini)
 * `/etc/luigi/client.cfg` - docs: [luigi configuration](http://luigi.readthedocs.org/en/latest/configuration.html)
 
+----
+
+In progress: Installation script:
+
+    $ curl -sL https://git.io/vg2iq | sh
+
 Run
 ---
 
