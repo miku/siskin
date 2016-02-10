@@ -9,10 +9,8 @@
 # 2. We use the Github API to find latest versions of packages.
 #    If you hit the API limit (normally you should not), sit back and wait.
 #
-# TODO:
+# TODO: CentOS 6 (must add Python 2.7), Ubuntu, Mac OS X (must be precompiled)
 #
-# Automatically setup up configuration under /etc/siskin and /etc/luigi with
-# sane defaults and dummies.
 
 set -o pipefail
 
@@ -29,6 +27,9 @@ fi
 
 echo "Installing command line tools..."
 
+yum install -y wget curl
+
+# we don't stop on yum failure, so check explictly
 hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
 hash wget 2> /dev/null || { echo >&2 "wget is required."; exit 1; }
 
