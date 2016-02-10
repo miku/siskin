@@ -19,12 +19,6 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-PYVER=$(python -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
-
-if [[ "$PYVER" != "2.7" ]]; then
-    echo "Python 2.7 required" && exit 1
-fi
-
 echo "installing command line tools..."
 
 yum install -y wget curl
