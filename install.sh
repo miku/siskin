@@ -61,6 +61,24 @@ install_latest_rpm() {
     yum install -y "$URL"
 }
 
+# centos_6_install_python_27 install Pytohn 2.7 safely with altinstall.
+centos_6_install_python_27() {
+    yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
+    cd /tmp
+    wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tar.xz
+    tar xf Python-2.7.11.tar.xz
+    cd Python-2.7.11
+    ./configure --prefix=/usr/local && make && make altinstall
+    cd /usr/local/bin
+    ln -s python2.7 python
+    ln -s python2.7-config python-config
+    cd /tmp
+    wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+    /usr/local/bin/python2.7 ez_setup.py
+    /usr/local/bin/easy_install-2.7 pip
+    [ ! -e "/etc/profile.d/extrapath.sh" ] && sh -c 'echo "export PATH=\"/usr/local/bin:/usr/local/sbin:$PATH\"" > /etc/profile.d/extrapath.sh'
+}
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
 
@@ -75,22 +93,25 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 
         VERSION=$(rpm -q --queryformat '%{VERSION}' centos-release)
 
-        if [[ "$VERSION" == "7" ]]; then
-            yum install -y epel-release
-            yum update -y
-            yum groupinstall -y 'development tools'
-            yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
-
-            install_latest_rpm "miku/span"
-            install_latest_rpm "miku/solrbulk"
-            install_latest_rpm "miku/memcldj"
-            install_latest_rpm "miku/hurrly"
-            install_latest_rpm "miku/esbulk"
-            install_latest_rpm "miku/oaimi"
-        else
-            echo "not yet supported: $VERSION"
-            exit 1
+        if [[ ! ("$VERSION" == "6" || "$VERSION" == "7") ]]; then
+            echo "only CentOS 6 and 7 support implemented" && exit 1
         fi
+
+        if [[ "$VERSION" == "6" ]]; then
+            centos_6_install_python_27
+        fi
+
+        yum install -y epel-release
+        yum update -y
+        yum groupinstall -y 'development tools'
+        yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
+
+        install_latest_rpm "miku/span"
+        install_latest_rpm "miku/solrbulk"
+        install_latest_rpm "miku/memcldj"
+        install_latest_rpm "miku/hurrly"
+        install_latest_rpm "miku/esbulk"
+        install_latest_rpm "miku/oaimi"
     else
         echo "TODO: [linux] using binaries... " && exit 1
     fi
