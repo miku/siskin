@@ -13,6 +13,8 @@ fi
 
 echo "Installing command line tools..."
 
+hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
+
 # install_latest_deb installs latest deb, given a username/repository on github.com.
 install_latest_deb() {
     if [ $# -eq 0 ]; then
@@ -50,6 +52,8 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         yum groupinstall -y 'development tools'
         yum install -y jq xmlstarlet lftp vim tmux bash-completion tree
 
+        hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
+
         install_latest_rpm "miku/span"
         install_latest_rpm "miku/solrbulk"
         install_latest_rpm "miku/memcldj"
@@ -76,9 +80,6 @@ fi
 echo "Installing siskin..."
 
 hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is in EPEL."; exit 1; }
-hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
-hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
-hash cc 2> /dev/null || { echo >&2 "A C compiler is required."; exit 1; }
 
 pip install -U siskin
 
