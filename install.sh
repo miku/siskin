@@ -47,6 +47,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     elif [ -f /etc/redhat-release ]; then
         echo "Usings rpms."
 
+        yum groupinstall -y 'development tools'
         yum install -y jq xmlstarlet lftp vim tmux bash-completion tree
 
         install_latest_rpm "miku/span"
