@@ -2,11 +2,17 @@
 #
 # Siskin install script. Also good for updates.
 #
+# Notes:
+#
+# 1. EPEL is added.
+#
+# 2. We use the Github API to find latest versions of packages.
+#    If you hit the API limit (normally you should not), sit back and wait.
+#
 # TODO:
 #
-# - EPEL is needed on CentOS for xmlstarlet, jq, and potentially more.
-# - github API limit while running ./install.sh over and over, script must stop here
-#
+# Automatically setup up configuration under /etc/siskin and /etc/luigi with
+# sane defaults and dummies.
 
 set -o pipefail
 
