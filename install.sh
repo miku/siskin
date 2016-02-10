@@ -5,19 +5,11 @@
 
 set -eo pipefail
 
-echo "Installing siskin..."
-
 PYVER=$(python -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
 
 if [[ "$PYVER" != "2.7" ]]; then
     echo "Python 2.7 required" && exit 1
 fi
-
-hash pip 2> /dev/null || { echo >&2 "pip is required."; exit 1; }
-hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
-hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
-
-pip install -U siskin
 
 echo "Installing command line tools..."
 
@@ -79,6 +71,15 @@ elif [[ "$OSTYPE" == "freebsd"* ]]; then
 else
     exit 1
 fi
+
+echo "Installing siskin..."
+
+hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is in EPEL."; exit 1; }
+hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
+hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
+hash cc 2> /dev/null || { echo >&2 "A C compiler is required."; exit 1; }
+
+pip install -U siskin
 
 cat <<EOF
   \. _(9>
