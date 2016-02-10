@@ -5,7 +5,7 @@
 # TODO:
 #
 # - EPEL is needed on CentOS for xmlstarlet, jq, and potentially more.
-# - github API limit while running ./install.sh over and over
+# - github API limit while running ./install.sh over and over, script must stop here
 #
 
 set -o pipefail
@@ -84,6 +84,7 @@ elif [[ "$OSTYPE" == "win32" ]]; then
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
     echo "Using binaries."
 else
+    echo "Unsupported OS."
     exit 1
 fi
 
