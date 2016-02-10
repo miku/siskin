@@ -22,6 +22,7 @@ echo "installing command line tools..."
 # install curl and wget first
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
+        apt-get update -y
         apt-get install -y wget curl
     elif [ -f /etc/redhat-release ]; then
         yum install -y wget curl
@@ -54,7 +55,12 @@ install_latest_deb() {
         echo "cannot find latest package for $1, maybe hit API limits?"
         exit $RC;
     fi
-    curl -o- "$URL" | dpkg --install
+
+    # dpkg cannot handle urls?
+    mkdir -p /tmp
+    wget -O /tmp/transit.deb "$URL"
+    dpkg -i -y /tmp/transit.deb
+    rm -f /tmp/transit.deb
 }
 
 # install_latest_rpm rinstalls latest rpm, given a username/repository on github.com.
