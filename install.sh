@@ -99,10 +99,15 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 
         if [[ "$VERSION" == "6" ]]; then
             centos_6_install_python_27
+            rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+            yum update -y
         fi
 
-        yum install -y epel-release
-        yum update -y
+        if [[ "$VERSION" == "7" ]]; then
+            yum install -y epel-release
+            yum update -y
+        fi
+
         yum groupinstall -y 'development tools'
         yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
 
