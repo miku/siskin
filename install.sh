@@ -115,6 +115,11 @@ echo "Setting up configuration."
 mkdir /etc/siskin
 mkdir /etc/luigi
 
+wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/client.cfg
+wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
+wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
+
+echo "Adjust configuration at will."
 
 cat <<EOF
   \. _(9>
