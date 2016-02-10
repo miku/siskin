@@ -110,6 +110,12 @@ hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is i
 
 pip install -U siskin
 
+echo "Setting up configuration."
+
+mkdir /etc/siskin
+mkdir /etc/luigi
+
+
 cat <<EOF
   \. _(9>
     \==_)
