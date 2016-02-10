@@ -73,17 +73,24 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 
     elif [ -f /etc/redhat-release ]; then
 
-        yum install -y epel-release
-        yum update -y
-        yum groupinstall -y 'development tools'
-        yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
+        VERSION=$(rpm -q --queryformat '%{VERSION}' centos-release)
 
-        install_latest_rpm "miku/span"
-        install_latest_rpm "miku/solrbulk"
-        install_latest_rpm "miku/memcldj"
-        install_latest_rpm "miku/hurrly"
-        install_latest_rpm "miku/esbulk"
-        install_latest_rpm "miku/oaimi"
+        if [[ "$VERSION" == "7" ]]; then
+            yum install -y epel-release
+            yum update -y
+            yum groupinstall -y 'development tools'
+            yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
+
+            install_latest_rpm "miku/span"
+            install_latest_rpm "miku/solrbulk"
+            install_latest_rpm "miku/memcldj"
+            install_latest_rpm "miku/hurrly"
+            install_latest_rpm "miku/esbulk"
+            install_latest_rpm "miku/oaimi"
+        else
+            echo "not yet supported: $VERSION"
+            exit 1
+        fi
     else
         echo "TODO: [linux] using binaries... " && exit 1
     fi
