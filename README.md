@@ -8,18 +8,7 @@ Various tasks for metadata handling.
 Installation
 ------------
 
-Python 2.7 required.
-
-    $ pip install -U siskin
-
-Add configuration files:
-
-* `/etc/siskin/siskin.ini` - example: [siskin.example.ini](https://github.com/miku/siskin/blob/master/siskin.example.ini)
-* `/etc/luigi/client.cfg` - docs: [luigi configuration](http://luigi.readthedocs.org/en/latest/configuration.html)
-
-----
-
-In progress: Installation script:
+At moment CentOS 7 only (CentOS 6, Ubuntu and OS X in progress):
 
     $ curl -sL https://git.io/vg2iq | sudo sh
 
@@ -30,9 +19,9 @@ List tasks:
 
     $ tasknames
 
-Run task:
+Run simple task:
 
-    $ taskdo AIUpdate
+    $ taskdo WikipediaTitles --language pcd
 
 Evolving workflows
 ------------------
