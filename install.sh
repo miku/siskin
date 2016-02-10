@@ -49,8 +49,8 @@ else
     exit 1
 fi
 
-echo <<HERE
+cat <<EOF
   \. _(9>
     \==_)
      -'=
-HERE
+EOF
