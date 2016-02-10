@@ -10,6 +10,11 @@
 
 set -o pipefail
 
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
 PYVER=$(python -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
 
 if [[ "$PYVER" != "2.7" ]]; then
