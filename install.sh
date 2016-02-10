@@ -57,10 +57,8 @@ install_latest_deb() {
     fi
 
     # dpkg cannot handle urls?
-    mkdir -p /tmp
-    wget -O /tmp/transit.deb "$URL"
-    dpkg -i /tmp/transit.deb
-    rm -f /tmp/transit.deb
+    mkdir -p $TMPDIR
+    wget -O $TMPDIR/transit.deb "$URL" && dpkg -i $TMPDIR/transit.deb && rm -f $TMPDIR/transit.deb
 }
 
 # install_latest_rpm rinstalls latest rpm, given a username/repository on github.com.
@@ -84,18 +82,21 @@ install_latest_rpm() {
 # centos_6_install_python_27 install Pytohn 2.7 safely with altinstall.
 centos_6_install_python_27() {
     yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
-    cd /tmp
-    wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tar.xz
+
+    cd $TMPDIR
+    wget -O Python-2.7.11.tar.xz https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tar.xz
     tar xf Python-2.7.11.tar.xz
     cd Python-2.7.11
     ./configure --prefix=/usr/local && make && make altinstall
     cd /usr/local/bin
     ln -s python2.7 python
     ln -s python2.7-config python-config
-    cd /tmp
+    cd $TMPDIR
+
     wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
     /usr/local/bin/python2.7 ez_setup.py
     /usr/local/bin/easy_install-2.7 pip
+
     [ ! -e "/etc/profile.d/extrapath.sh" ] && sh -c 'echo "export PATH=\"/usr/local/bin:/usr/local/sbin:$PATH\"" > /etc/profile.d/extrapath.sh'
     source /etc/profile.d/extrapath.sh
 }
