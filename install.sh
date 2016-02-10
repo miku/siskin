@@ -59,7 +59,7 @@ install_latest_deb() {
     # dpkg cannot handle urls?
     mkdir -p /tmp
     wget -O /tmp/transit.deb "$URL"
-    dpkg -i -y /tmp/transit.deb
+    dpkg -i /tmp/transit.deb
     rm -f /tmp/transit.deb
 }
 
