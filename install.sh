@@ -32,6 +32,10 @@ install_latest_deb() {
         exit 1
     fi
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "deb")
+    RC=$?; if [[ $RC != 0 ]]; then
+        echo "Error finding latest package for $1, maybe hit API limits?"
+        exit $RC;
+    fi
     curl -o- "$URL" | dpkg --install
 }
 
@@ -42,6 +46,10 @@ install_latest_rpm() {
         exit 1
     fi
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "rpm")
+    RC=$?; if [[ $RC != 0 ]]; then
+        echo "Error finding latest package for $1, maybe hit API limits?"
+        exit $RC;
+    fi
     yum install -y "$URL"
 }
 
