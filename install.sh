@@ -67,7 +67,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     elif [ -f /etc/redhat-release ]; then
         echo "Usings rpms."
 
-        yum -y install epel-release
+        yum install -y epel-release
         yum update
         yum groupinstall -y 'development tools'
         yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
