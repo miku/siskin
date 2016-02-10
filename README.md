@@ -8,7 +8,7 @@ Various tasks for metadata handling.
 Installation
 ------------
 
-At moment CentOS 7 only (CentOS 6, Ubuntu and OS X in progress):
+At the moment CentOS 7 only (CentOS 6, Ubuntu and OS X in progress):
 
     $ curl -sL https://git.io/vg2iq | sudo sh
 
