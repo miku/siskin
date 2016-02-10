@@ -25,7 +25,7 @@ if [[ "$PYVER" != "2.7" ]]; then
     echo "Python 2.7 required" && exit 1
 fi
 
-echo "Installing command line tools..."
+echo "installing command line tools..."
 
 yum install -y wget curl
 
@@ -41,7 +41,7 @@ install_latest_deb() {
     fi
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "deb")
     RC=$?; if [[ $RC != 0 ]]; then
-        echo "Error finding latest package for $1, maybe hit API limits?"
+        echo "cannot find latest package for $1, maybe hit API limits?"
         exit $RC;
     fi
     curl -o- "$URL" | dpkg --install
@@ -55,7 +55,7 @@ install_latest_rpm() {
     fi
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "rpm")
     RC=$?; if [[ $RC != 0 ]]; then
-        echo "Error finding latest package for $1, maybe hit API limits?"
+        echo "cannot find latest package for $1, maybe hit API limits?"
         exit $RC;
     fi
     yum install -y "$URL"
@@ -63,7 +63,6 @@ install_latest_rpm() {
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
-        echo "Usings debs."
 
         install_latest_deb "miku/span"
         install_latest_deb "miku/solrbulk"
@@ -73,7 +72,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_deb "miku/oaimi"
 
     elif [ -f /etc/redhat-release ]; then
-        echo "Usings rpms."
 
         yum install -y epel-release
         yum update -y
@@ -87,24 +85,15 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_rpm "miku/esbulk"
         install_latest_rpm "miku/oaimi"
     else
-        echo "Using binaries."
+        echo "TODO: [linux] using binaries... " && exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "[OS X] Using binaries."
-elif [[ "$OSTYPE" == "cygwin" ]]; then
-    echo "Not supported." && exit 1
-elif [[ "$OSTYPE" == "msys" ]]; then
-    echo "Not supported." && exit 1
-elif [[ "$OSTYPE" == "win32" ]]; then
-    echo "Not supported." && exit 1
-elif [[ "$OSTYPE" == "freebsd"* ]]; then
-    echo "Using binaries."
+    echo "TODO: [osx] using binaries... " && exit 1
 else
-    echo "Unsupported OS."
-    exit 1
+    echo "not supported: %OSTYPE" && exit 1
 fi
 
-echo "Installing siskin..."
+echo "installing siskin..."
 
 yum install -y python-pip
 
@@ -112,7 +101,7 @@ hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is i
 
 pip install -U siskin
 
-echo "Setting up configuration."
+echo "setting up configuration..."
 
 mkdir /etc/siskin
 mkdir /etc/luigi
@@ -121,7 +110,11 @@ wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/mast
 wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
 wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
 
-echo "Adjust configuration at will."
+echo "setting up autocomplete..."
+
+sudo mkdir -p /etc/bash_completion.d/
+sudo wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
+sudo chmod +x /etc/bash_completion.d/siskin_completion.sh
 
 cat <<EOF
   \. _(9>
