@@ -3,7 +3,7 @@
 # Siskin install script. Also good for updates.
 #
 
-set -eo pipefail
+set -o pipefail
 
 PYVER=$(python -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
 
@@ -32,7 +32,7 @@ install_latest_rpm() {
         exit 1
     fi
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "rpm")
-    yum install -y "$URL"
+    yum install --replacepkgs -y "$URL"
 }
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
