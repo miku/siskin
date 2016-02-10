@@ -71,6 +71,7 @@ centos_6_install_python_27() {
     /usr/local/bin/python2.7 ez_setup.py
     /usr/local/bin/easy_install-2.7 pip
     [ ! -e "/etc/profile.d/extrapath.sh" ] && sh -c 'echo "export PATH=\"/usr/local/bin:/usr/local/sbin:$PATH\"" > /etc/profile.d/extrapath.sh'
+    source /etc/profile.d/extrapath.sh
 }
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
