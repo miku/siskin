@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Siskin install script. Also good for updates.
 #
