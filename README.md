@@ -21,7 +21,7 @@ Add configuration files:
 
 In progress: Installation script:
 
-    $ curl -sL https://git.io/vg2iq | sh
+    $ curl -sL https://git.io/vg2iq | sudo sh
 
 Run
 ---
