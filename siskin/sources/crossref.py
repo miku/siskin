@@ -308,7 +308,7 @@ class CrossrefSortedDOITable(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
 
-class CrossrefUniqItemsRedux(CrossrefTask):
+class CrossrefUniqItems(CrossrefTask):
     """
     What is left to do: filter the correct lines here.
     """
@@ -359,35 +359,6 @@ class CrossrefUniqItemsRedux(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-class CrossrefUniqItems(CrossrefTask):
-    """
-    Compact file, keep only most the recent entry for an ID.
-    """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        """
-        TODO(miku): Get rid of ldjtab and use jq, possible in parallel.
-        """
-        return {'items': CrossrefWorksItems(begin=self.begin, date=self.date),
-                'ldjtab': Executable(name='ldjtab', message="https://github.com/miku/ldjtab")}
-
-    @timed
-    def run(self):
-        """
-        TODO(miku): make this more incremental, do not ldjtab on the whole file, could save 30% of processing time.
-        """
-        input = self.input().get('items').path
-        output = shellout("ldjtab -padlength 10 -key DOI {input} | sort -S50% -u > {output}", input=input)
-        linenumbers = shellout("tac {input} | sort -u -k1,1 | cut -f2 | sed 's/^0*//' | sort -n | uniq > {output}", input=output)
-        output = shellout("bash {filterline} {linenumbers} {input} > {output}", filterline=self.assets('filterline'),
-                          linenumbers=linenumbers, input=input)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 class CrossrefIntermediateSchema(CrossrefTask):
     """
     Convert to intermediate format via span.
@@ -396,7 +367,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     def requires(self):
        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': CrossrefUniqItemsRedux(date=self.date)}
+               'file': CrossrefUniqItems(date=self.date)}
 
     @timed
     def run(self):
