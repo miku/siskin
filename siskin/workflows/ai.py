@@ -48,6 +48,7 @@ from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.sources.amsl import AMSLHoldingsFile
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -219,7 +220,7 @@ class AILicensing(AITask):
     @timed
     def run(self):
         for k, v in self.input().iteritems():
-            pass
+            print(k, v)
 
         # $ islabel -kbart DE-15:{x} -kbart DE-14:{x} is.ldj > is.lic.ldj
 
