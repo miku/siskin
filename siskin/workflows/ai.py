@@ -48,7 +48,7 @@ from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.sources.amsl import AMSLHoldingsFile
+from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -60,6 +60,7 @@ from siskin.task import DefaultTask
 import collections
 import datetime
 import itertools
+import json
 import luigi
 import tempfile
 
@@ -182,9 +183,9 @@ class AIIntermediateSchema(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-class AILicensing(AITask):
+class AIFilterConfig(AITask):
     """
-    Label intermediate schema records with ISIL. Coverage is given by holding files.
+    Create a filter configuration from AMSL.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -193,11 +194,6 @@ class AILicensing(AITask):
         Intermediate schema files and holdings.
         """
         return {
-            'crossref': CrossrefIntermediateSchema(date=self.date),
-            'degruyter': DegruyterIntermediateSchema(date=self.date),
-            'doaj': DOAJIntermediateSchema(date=self.date),
-            'jstor': JstorIntermediateSchema(date=self.date),
-
             'DE-105': AMSLHoldingsFile(isil='DE-105'),
             'DE-14': AMSLHoldingsFile(isil='DE-14'),
             'DE-15': AMSLHoldingsFile(isil='DE-15'),
@@ -213,19 +209,34 @@ class AILicensing(AITask):
             'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
             'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
             'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
-
             # 'DE-15-FID': DownloadFile(...),
+            'collections': AMSLCollections(),
         }
 
     @timed
     def run(self):
+        with self.input().get('collections').open() as handle:
+            cfilter = json.load(handle)
+
+        byisil = collections.defaultdict(set)
+
+        for item in cfilter:
+            byisil[item.get("isil_str")].add(item.get("collectionLabel").strip())
+
+        filterconf = {}
         for k, v in self.input().iteritems():
-            print(k, v)
+            if not k.startswith("DE-"):
+                continue
+            filterconf[k] = {"and": [{"holding": {"file": v.path}}, {"collection": list(byisil[k])}]}
+
+        with self.output().open('w') as output:
+            output.write(json.dumps(filterconf))
+            output.write("\n")
 
         # $ islabel -kbart DE-15:{x} -kbart DE-14:{x} is.ldj > is.lic.ldj
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='json'))
 
 class AICollectionsFilter(AITask):
     """
