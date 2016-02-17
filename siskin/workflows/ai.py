@@ -216,6 +216,9 @@ class AIFilterConfig(AITask):
 
     @timed
     def run(self):
+        """
+        Filter assembly.
+        """
         with self.input().get('collections').open() as handle:
             cfilter = json.load(handle)
 
@@ -229,8 +232,8 @@ class AIFilterConfig(AITask):
             if not k.startswith("DE-"):
                 continue
             if os.path.getsize(v.path) < 10:
-            	self.logger.debug("skipping empty file: %s" % v.path)
-            	continue
+                self.logger.debug("skipping probably empty file: %s" % v.path)
+                continue
             # filterconf[k] = {"and": [{"holding": {"file": v.path}}, {"collection": list(byisil[k])}]}
             filterconf[k] = {"holdings": {"file": v.path}}
 
