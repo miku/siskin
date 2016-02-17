@@ -62,6 +62,7 @@ import datetime
 import itertools
 import json
 import luigi
+import os
 import tempfile
 
 class AITask(DefaultTask):
@@ -227,7 +228,11 @@ class AIFilterConfig(AITask):
         for k, v in self.input().iteritems():
             if not k.startswith("DE-"):
                 continue
-            filterconf[k] = {"and": [{"holding": {"file": v.path}}, {"collection": list(byisil[k])}]}
+            if os.path.getsize(v.path) < 10:
+            	self.logger.debug("skipping empty file: %s" % v.path)
+            	continue
+            # filterconf[k] = {"and": [{"holding": {"file": v.path}}, {"collection": list(byisil[k])}]}
+            filterconf[k] = {"holdings": {"file": v.path}}
 
         with self.output().open('w') as output:
             output.write(json.dumps(filterconf))
