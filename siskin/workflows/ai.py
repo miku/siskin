@@ -250,14 +250,7 @@ class AIFilterConfig(AITask):
             'DE-105': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -291,14 +284,7 @@ class AIFilterConfig(AITask):
             'DE-14': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -332,14 +318,7 @@ class AIFilterConfig(AITask):
             'DE-15': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -373,14 +352,7 @@ class AIFilterConfig(AITask):
             'DE-1972': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -413,15 +385,8 @@ class AIFilterConfig(AITask):
             },
             'DE-8': {
                 'or': [
-                    {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                                        {
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -455,14 +420,7 @@ class AIFilterConfig(AITask):
             'DE-Bn3': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -496,14 +454,7 @@ class AIFilterConfig(AITask):
             'DE-Brt1': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -537,14 +488,7 @@ class AIFilterConfig(AITask):
             'DE-Ch1': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -578,14 +522,7 @@ class AIFilterConfig(AITask):
             'DE-D117': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -619,14 +556,7 @@ class AIFilterConfig(AITask):
             'DE-D161': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -660,14 +590,7 @@ class AIFilterConfig(AITask):
             'DE-Gla1': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -701,14 +624,7 @@ class AIFilterConfig(AITask):
             'DE-Ki95': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -742,14 +658,7 @@ class AIFilterConfig(AITask):
             'DE-Rs1': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
@@ -783,14 +692,7 @@ class AIFilterConfig(AITask):
             'DE-Zi4': {
                 'or': [
                     {
-                        'and': [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'any': {}
-                            }
-                        ]
+                        'source': ['28']
                     },
                     {
                         'and': [
