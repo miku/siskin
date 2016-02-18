@@ -1,5 +1,5 @@
 {
-  "DE-Brt1": {
+  "DE-14": {
     "or": [
       {
         "and": [
@@ -12,7 +12,7 @@
           },
           {
             "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Brt1.tsv"
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-14.tsv"
             }
           }
         ]
@@ -52,187 +52,7 @@
           },
           {
             "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Brt1.tsv"
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "DE-J59": {
-    "or": [
-      {
-        "and": [
-          {
-            "source": [
-              "49",
-              "50",
-              "55"
-            ]
-          },
-          {
-            "holdings": {
-              "file": null
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "holdings": {
-              "file": null
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "DE-Zi4": {
-    "or": [
-      {
-        "and": [
-          {
-            "source": [
-              "49",
-              "50",
-              "55"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Zi4.tsv"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Zi4.tsv"
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "DE-105": {
-    "or": [
-      {
-        "and": [
-          {
-            "source": [
-              "49",
-              "50",
-              "55"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-105.tsv"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-105.tsv"
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-14.tsv"
             }
           }
         ]
@@ -479,126 +299,6 @@
       }
     ]
   },
-  "DE-14": {
-    "or": [
-      {
-        "and": [
-          {
-            "source": [
-              "49",
-              "50",
-              "55"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-14.tsv"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-14.tsv"
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "DE-Rs1": {
-    "or": [
-      {
-        "and": [
-          {
-            "source": [
-              "49",
-              "50",
-              "55"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Rs1.tsv"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Rs1.tsv"
-            }
-          }
-        ]
-      }
-    ]
-  },
   "DE-Ch1": {
     "or": [
       {
@@ -724,66 +424,6 @@
       }
     ]
   },
-  "DE-Ki95": {
-    "or": [
-      {
-        "and": [
-          {
-            "source": [
-              "49",
-              "50",
-              "55"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Ki95.tsv"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Ki95.tsv"
-            }
-          }
-        ]
-      }
-    ]
-  },
   "DE-8": {
     "or": [
       {
@@ -898,6 +538,306 @@
           {
             "holdings": {
               "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Bn3.tsv"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-105": {
+    "or": [
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-105.tsv"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-105.tsv"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Brt1": {
+    "or": [
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Brt1.tsv"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Brt1.tsv"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Zi4": {
+    "or": [
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Zi4.tsv"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Zi4.tsv"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Rs1": {
+    "or": [
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Rs1.tsv"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Rs1.tsv"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Ki95": {
+    "or": [
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Ki95.tsv"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "/Volumes/Data/siskin-data/amsl/AMSLHoldingsFile/date-2016-02-18-isil-DE-Ki95.tsv"
             }
           }
         ]
