@@ -435,6 +435,26 @@ class CrossrefUniqISSNList(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class CrossrefDOIAndISSNList(CrossrefTask):
+    """
+    A list of Crossref DOIs with their ISSNs.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'input': CrossrefIntermediateSchema(date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' <(unpigz -c {input}) | LC_ALL=C sort -S50% > {output} """,
+                 input=self.input().get('input').path, output=stopover)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='csv'))
+
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """
     Vanilla records into elasticsearch.
