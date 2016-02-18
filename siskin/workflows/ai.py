@@ -187,6 +187,11 @@ class AIIntermediateSchema(AITask):
 class AIFilterConfig(AITask):
     """
     Create a filter configuration from AMSL.
+
+    The filterconfig dictionary should be built from AMSL data only: holdings
+    and collections, and information about which source or collection uses
+    which method of labeling.
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -229,6 +234,7 @@ class AIFilterConfig(AITask):
 
             $ time span-tag -c docs/filterconf.json <(taskcat JstorIntermediateSchema) > output.ldj
             ...
+
         About 10k records/s without parallelism.
         """
         isils = ['DE-105', 'DE-14', 'DE-15', 'DE-1972', 'DE-8', 'DE-Bn3', 'DE-Brt1', 'DE-Ch1', 'DE-D117',
@@ -237,6 +243,7 @@ class AIFilterConfig(AITask):
 
         # map ISIL to relevant file (holdings or ISSN list)
         filemap = {}
+
         for k, v in self.input().iteritems():
             if k in isils:
                 if os.path.getsize(v.path) < 10:
@@ -244,8 +251,6 @@ class AIFilterConfig(AITask):
                     continue
                 filemap[k] = v.path
 
-        # manually build filterconf, TODO(miku): this should be assembled
-        # purely from AMSL data e.g. via collections
         filterconf = {
             'DE-105': {
                 'or': [
@@ -913,3 +918,22 @@ class AICoverageReport(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+
+class AICoverageISSN(AITask):
+    """
+    For all AI sources and all holding files, find the number
+    (perc) of ISSNs in the holding file, that we have some reach to.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date)
+        }
+
+    def run(self):
+        print(self.input())
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
