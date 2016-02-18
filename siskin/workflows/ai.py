@@ -224,6 +224,12 @@ class AIFilterConfig(AITask):
     def run(self):
         """
         Filter assembly.
+
+        Create a filterconfig, then run:
+
+            $ time span-tag -c docs/filterconf.json <(taskcat JstorIntermediateSchema) > output.ldj
+            ...
+        About 10k records/s without parallelism.
         """
         isils = ['DE-105', 'DE-14', 'DE-15', 'DE-1972', 'DE-8', 'DE-Bn3', 'DE-Brt1', 'DE-Ch1', 'DE-D117',
                  'DE-D161', 'DE-Gla1', 'DE-J59', 'DE-Ki95', 'DE-Rs1', 'DE-Zi4',
