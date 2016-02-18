@@ -233,7 +233,7 @@ class AIFilterConfig(AITask):
         filemap = {}
         for k, v in self.input().iteritems():
             if k in isils:
-                if os.path.getsize(v.path) == 0:
+                if os.path.getsize(v.path) < 10:
                     self.logger.debug("skipping empty file: %s" % v.path)
                     continue
                 filemap[k] = v.path
@@ -576,37 +576,6 @@ class AIFilterConfig(AITask):
                             {
                                 'holdings': {
                                     'file': filemap.get('DE-Gla1')
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            'DE-J59': {
-                'or': [
-                    {
-                        'and': [
-                            {
-                                'source': ['49', '50', '55']
-                            },
-                            {
-                                'holdings': {
-                                    'file': filemap.get('DE-J59')
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        'and': [
-                            {
-                                'source': ['48']
-                            },
-                            {
-                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
-                            },
-                            {
-                                'holdings': {
-                                    'file': filemap.get('DE-J59')
                                 }
                             }
                         ]
