@@ -411,7 +411,7 @@ class CrossrefISSNList(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("jq -r '.ISSN[]' {input} 2> /dev/null > {output}", input=self.input().get('input').path)
+	output = shellout("jq -r '.ISSN[]' <(unpigz -c {input}) 2> /dev/null > {output}", input=self.input().get('input').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
