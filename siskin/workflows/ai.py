@@ -195,6 +195,7 @@ class AIFilterConfig(AITask):
         Intermediate schema files and holdings.
         """
         return {
+            # holding files
             'DE-105': AMSLHoldingsFile(isil='DE-105'),
             'DE-14': AMSLHoldingsFile(isil='DE-14'),
             'DE-15': AMSLHoldingsFile(isil='DE-15'),
@@ -210,8 +211,13 @@ class AIFilterConfig(AITask):
             'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
             'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
             'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
-            # 'DE-15-FID': DownloadFile(...),
+
+            # issn list
+            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/tm6U9D'),
+
+            # collection names per ISIL (TODO)
             'collections': AMSLCollections(),
+
         }
 
     @timed
@@ -219,23 +225,493 @@ class AIFilterConfig(AITask):
         """
         Filter assembly.
         """
-        with self.input().get('collections').open() as handle:
-            cfilter = json.load(handle)
+        isils = ['DE-105', 'DE-14', 'DE-15', 'DE-1972', 'DE-8', 'DE-Bn3', 'DE-Brt1', 'DE-Ch1', 'DE-D117',
+                 'DE-D161', 'DE-Gla1', 'DE-J59', 'DE-Ki95', 'DE-Rs1', 'DE-Zi4',
+                 'DE-15-FID']
 
-        byisil = collections.defaultdict(set)
-
-        for item in cfilter:
-            byisil[item.get("isil_str")].add(item.get("collectionLabel").strip())
-
-        filterconf = {}
+        # map ISIL to relevant file (holdings or ISSN list)
+        filemap = {}
         for k, v in self.input().iteritems():
-            if not k.startswith("DE-"):
-                continue
-            if os.path.getsize(v.path) < 10:
-                self.logger.debug("skipping probably empty file: %s" % v.path)
-                continue
-            # filterconf[k] = {"and": [{"holding": {"file": v.path}}, {"collection": list(byisil[k])}]}
-            filterconf[k] = {"holdings": {"file": v.path}}
+            if k in isils:
+                if os.path.getsize(v.path) == 0:
+                    self.logger.debug("skipping empty file: %s" % v.path)
+                    continue
+                filemap[k] = v.path
+
+        # manually build filterconf, TODO(miku): this should be assembled
+        # purely from AMSL data e.g. via collections
+        filterconf = {
+            'DE-105': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-105')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-105')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-14': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-14')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-14')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-15': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-15')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-15')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-1972': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-1972')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-1972')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-8': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-8')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-8')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Bn3': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Bn3')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Bn3')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Brt1': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Brt1')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Brt1')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Ch1': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Ch1')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Ch1')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-D117': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-D117')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-D117')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-D161': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-D161')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-D161')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Gla1': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Gla1')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Gla1')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-J59': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-J59')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-J59')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Ki95': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Ki95')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Ki95')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Rs1': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Rs1')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Rs1')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-Zi4': {
+                'or': [
+                    {
+                        'and': [
+                            {
+                                'source': ['49', '50', '55']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Zi4')
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        'and': [
+                            {
+                                'source': ['48']
+                            },
+                            {
+                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                            },
+                            {
+                                'holdings': {
+                                    'file': filemap.get('DE-Zi4')
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'DE-15-FID': {
+                'issn': {
+                    'file': filemap.get('DE-15-FID')
+                }
+            }
+        }
 
         with self.output().open('w') as output:
             output.write(json.dumps(filterconf))
