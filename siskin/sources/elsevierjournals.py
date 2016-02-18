@@ -30,7 +30,7 @@ Configuration keys:
 
 [elsevierjournals]
 
-ftp-host = host.name
+ftp-host = sftp://host.name
 ftp-username = username
 ftp-password = password
 ftp-path = /
