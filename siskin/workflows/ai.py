@@ -676,9 +676,16 @@ class AIFilterConfig(AITask):
                 ]
             },
             'DE-15-FID': {
-                'issn': {
-                    'file': filemap.get('DE-15-FID')
-                }
+                'and': [
+                    {
+                        'source': ['28']
+                    },
+                    {
+                        'issn': {
+                            'file': filemap.get('DE-15-FID')
+                        }
+                    }
+                ]
             }
         }
 

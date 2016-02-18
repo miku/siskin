@@ -360,9 +360,18 @@
     ]
   },
   "DE-15-FID": {
-    "issn": {
-      "file": "/Volumes/Data/siskin-data/ai/DownloadFile/3ce313511c6e58ff8a25d980d359c0548e7f02df.file"
-    }
+    "and": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "issn": {
+          "file": "/Volumes/Data/siskin-data/ai/DownloadFile/3ce313511c6e58ff8a25d980d359c0548e7f02df.file"
+        }
+      }
+    ]
   },
   "DE-D117": {
     "or": [
