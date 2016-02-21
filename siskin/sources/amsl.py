@@ -112,7 +112,7 @@ class AMSLHoldingsFile(AMSLTask):
         with self.input().open() as handle:
             holdings = json.load(handle)
 
-        _, stopover = tempfile.mkstemp('siskin-')
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         for holding in holdings:
             if holding["ISIL"] == self.isil:
