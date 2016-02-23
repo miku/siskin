@@ -175,9 +175,9 @@ wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/mas
 wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
 
 echo "setting up autocomplete..."
-sudo mkdir -p /etc/bash_completion.d/
-sudo wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
-sudo chmod +x /etc/bash_completion.d/siskin_completion.sh
+mkdir -p /etc/bash_completion.d/
+wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
+chmod +x /etc/bash_completion.d/siskin_completion.sh
 
 cat <<EOF
   \. _(9>
