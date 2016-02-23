@@ -98,7 +98,7 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 if row.path.endswith('tar'):
-                    shellout("tar -xf {tarfile} -C {dir}", tarfile=row.path, dir=self.taskdir())
+                    shellout("tar -xvf {tarfile} -C {dir}", tarfile=row.path, dir=self.taskdir())
 
         with self.output().open('w') as output:
             for path in iterfiles(self.taskdir()):
