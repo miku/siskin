@@ -39,17 +39,19 @@ ftp-pattern = *
 """
 
 from gluish.common import Executable
+from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from gluish.format import TSV
-from siskin.common import FTPMirror
 from luigi.contrib.esindex import CopyToIndex
 from siskin.benchmark import timed
+from siskin.common import FTPMirror
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import luigi
+import os
 
 config = Config.instance()
 
@@ -78,6 +80,29 @@ class ElsevierJournalsPaths(ElsevierJournalsTask):
 
     def run(self):
         self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class ElsevierJournalsExpand(ElsevierJournalsTask):
+    """
+    Expand all tar files.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return ElsevierJournalsPaths(date=self.date)
+
+    def run(self):
+        shellout("mkdir -p {dir}", dir=self.taskdir())
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith('tar'):
+                    shellout("tar -xf {tarfile} -C {dir}", tarfile=row.path, dir=self.taskdir())
+
+        with self.output().open('w') as output:
+            for path in iterfiles(self.taskdir()):
+                output.write_tsv(path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
