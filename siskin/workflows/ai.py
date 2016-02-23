@@ -254,50 +254,48 @@ class AIFilterConfig(AITask):
                     continue
                 filemap[k] = v.path
 
-        # doi blacklist
-        blacklist = []
-        with self.input().get('doi-blacklist').open() as handle:
-            for line in (string.strip(line) for line in handle):
-                if line == "":
-                    continue
-                blacklist.append(line)
-
         def defaults(isil):
             """ TODO(miku): move to AMSL. """
             return {
-                'or': [
+                'and': [
                     {
                         'not': {
-                            'doi': blacklist,
+                            'doi': {
+                                'file': self.input().get('doi-blacklist').path,
+                            }
                         }
                     },
                     {
-                        'source': ['28']
-                    },
-                    {
-                        'and': [
+                        "or": [
                             {
-                                'source': ['49', '50', '55']
+                                'source': ['28']
                             },
                             {
-                                'holdings': {
-                                    'file': filemap.get(isil)
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        'and': [
-                            {
-                                'source': ['48']
+                                'and': [
+                                    {
+                                        'source': ['49', '50', '55']
+                                    },
+                                    {
+                                        'holdings': {
+                                            'file': filemap.get(isil)
+                                        }
+                                    }
+                                ]
                             },
                             {
-                                'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
-                            },
-                            {
-                                'holdings': {
-                                    'file': filemap.get(isil)
-                                }
+                                'and': [
+                                    {
+                                        'source': ['48']
+                                    },
+                                    {
+                                        'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                                    },
+                                    {
+                                        'holdings': {
+                                            'file': filemap.get(isil)
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     }
