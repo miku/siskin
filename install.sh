@@ -13,8 +13,8 @@
 set -o pipefail
 
 if [ "$EUID" -ne 0 ]
-  then echo "superuser only"
-  exit 1
+    then echo "superuser only"
+    exit 1
 fi
 
 echo "installing command line tools..."
@@ -29,9 +29,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     else
         echo "not supported: $OSTYPE" && exit 1
     fi
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # leave a note, if the curl/wget check fails
-    echo >&2 "note: on Mac OS X, you can use homebrew (http://brew.sh/) to install wget and curl with: brew install wget curl"; exit 1;
 else
     echo "not supported: $OSTYPE" && exit 1
 fi
@@ -145,14 +142,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     else
         echo "not supported: $OSTYPE" && exit 1
     fi
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    hash go 2> /dev/null || { echo >&2 "Go (http://golang.org/) is required."; exit 1; }
-    go get -u -v https://github.com/miku/span/cmd/...
-    go get -u -v https://github.com/miku/solrbulk/cmd/...
-    go get -u -v https://github.com/miku/memcldj/cmd/...
-    go get -u -v https://github.com/miku/hurrly/cmd/...
-    go get -u -v https://github.com/miku/esbulk/cmd/...
-    go get -u -v https://github.com/miku/oaimi/cmd/...
 else
     echo "not supported: $OSTYPE" && exit 1
 fi
@@ -168,10 +157,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     else
         echo "not supported: $OSTYPE" && exit 1
     fi
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    hash pip 2> /dev/null || {
-        echo "Run: brew install python"; exit 1;
-    }
 else
     echo "not supported: $OSTYPE" && exit 1
 fi
