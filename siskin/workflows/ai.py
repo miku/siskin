@@ -566,6 +566,26 @@ class AICoverageISSN(AITask):
 class AIISSNCoverageReport(AITask):
     """
     For all ISILs, see what percentage of ISSN are covered in AI.
+
+    Example report:
+
+    DE-105  52.65
+    DE-14   53.06
+    DE-15   53.41
+    DE-1972 43.99
+    DE-8    52.94
+    DE-Bn3  50.53
+    DE-Brt1 43.99
+    DE-Ch1  52.35
+    DE-D117 43.99
+    DE-D161 51.88
+    DE-Gla1 51.88
+    DE-Ki95 54.08
+    DE-L229 50.83
+    DE-Pl11 43.99
+    DE-Rs1  51.11
+    DE-Zi4  52.45
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -581,7 +601,7 @@ class AIISSNCoverageReport(AITask):
 
     def run(self):
         with self.output().open('w') as output:
-            for isil, target in self.input().iteritems():
+            for isil, target in sorted(self.input().iteritems()):
                 counter = collections.Counter()
                 with target.open() as handle:
                     for line in handle:
