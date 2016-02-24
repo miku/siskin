@@ -48,7 +48,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
-from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections
+from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections, AMSLHoldingsISILList
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -63,6 +63,7 @@ import itertools
 import json
 import luigi
 import os
+import re
 import string
 import tempfile
 
@@ -515,15 +516,84 @@ class AICoverageISSN(AITask):
     (perc) of ISSNs in the holding file, that we have some reach to.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(default='DE-15')
 
     def requires(self):
         return {
             'crossref': CrossrefUniqISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date)
+            'jstor': JstorISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'file': AMSLHoldingsFile(isil=self.isil),
         }
 
     def run(self):
-        print(self.input())
+        issns = collections.defaultdict(set)
+
+        with self.input().get('file').open() as handle:
+            for row in handle:
+                fields = row.strip().split('\t')
+                if len(fields) < 3:
+                    continue
+
+                if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[1]):
+                    issns['file'].add(fields[1])
+
+                if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[2]):
+                    issns['file'].add(fields[2])
+
+        sources = ['crossref', 'jstor', 'degruyter', 'doaj']
+
+        for source in sources:
+            with self.input().get(source).open() as handle:
+                for row in handle:
+                    issns[source].add(row.strip())
+
+        with self.output().open('w') as output:
+            for issn in sorted(issns['file']):
+                fields = []
+                for source in sources:
+                    if issn in issns[source]:
+                        fields.append(source)
+                if len(fields) == 0:
+                    output.write_tsv(issn, "NOT_FOUND")
+                else:
+                    output.write_tsv(issn, "|".join(fields))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIISSNCoverageReport(AITask):
+    """
+    For all ISILs, see what percentage of ISSN are covered in AI.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        prerequisite = AMSLHoldingsISILList(date=self.date)
+        luigi.build([prerequisite])
+        isils = set()
+        with prerequisite.output().open() as handle:
+            for isil in (string.strip(line) for line in handle):
+                isils.add(isil)
+
+        return dict((isil, AICoverageISSN(date=self.date, isil=isil)) for isil in isils)
+
+    def run(self):
+        with self.output().open('w') as output:
+            for isil, target in self.input().iteritems():
+                counter = collections.Counter()
+                with target.open() as handle:
+                    for line in handle:
+                        if 'NOT_FOUND' in line:
+                            counter['miss'] += 1
+                        else:
+                            counter['hits'] += 1
+                total = counter['hits'] + counter['miss']
+                if total == 0:
+                    continue
+                ratio = (100.0 / total) * counter['hits']
+                output.write_tsv(isil, '%0.2f' % ratio)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
