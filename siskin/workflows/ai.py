@@ -350,16 +350,16 @@ class AILicensing(AITask):
 
     def requires(self):
         return {
-	    'is': AIIntermediateSchema(date=self.date),
-	    'config': AIFilterConfig(date=self.date),
+            'is': AIIntermediateSchema(date=self.date),
+            'config': AIFilterConfig(date=self.date),
         }
 
     def run(self):
-	output = shellout("span-tag -c {config} {input} > {output}", config=config, input=self.input().get('is').path)
-	luigi.File(output).move(self.output().path)
+        output = shellout("span-tag -c {config} {input} > {output}", config=config, input=self.input().get('is').path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class AIExportNext(AITask):
     """
@@ -368,14 +368,14 @@ class AIExportNext(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	return AILicensing(date=self.date)
+        return AILicensing(date=self.date)
 
     def run(self):
-	output = shellout("span-solr {input} > {output}", input=self.input().path)
-	luigi.File(output).move(self.output().path)
+        output = shellout("span-solr {input} > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class AIExport(AITask):
     """ Create a SOLR-importable file. """
