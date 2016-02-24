@@ -244,8 +244,8 @@ class DOAJISSNList(DOAJTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().get('input').path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().get('input').path, output=stopover)
+        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 
