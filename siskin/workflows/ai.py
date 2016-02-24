@@ -355,7 +355,8 @@ class AILicensing(AITask):
         }
 
     def run(self):
-        output = shellout("span-tag -c {config} {input} > {output}", config=self.input().get('config').path, input=self.input().get('is').path)
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('is').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
