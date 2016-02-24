@@ -342,27 +342,40 @@ class AIFilterConfig(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
-class AICollectionsFilter(AITask):
+class AILicensing(AITask):
     """
-    For each record, see if an ISIL actually is interested in the collection.
+    Take intermediate schema and attach ISILs.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'is': AILicensing(date=self.date),
-            # 'collections': AMSLCollectionAPIResponse(...)
+	    'is': AIIntermediateSchema(date=self.date),
+	    'config': AIFilterConfig(date=self.date),
         }
 
-    @timed
     def run(self):
-        """
-        TODO: Filter here by comparing collection names.
-        """
-        pass
+	output = shellout("span-tag -c {config} {input} > {output}", config=config, input=self.input().get('is').path)
+	luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+	return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class AIExportNext(AITask):
+    """
+    Next iteration of AI export.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+	return AILicensing(date=self.date)
+
+    def run(self):
+	output = shellout("span-solr {input} > {output}", input=self.input().path)
+	luigi.File(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class AIExport(AITask):
     """ Create a SOLR-importable file. """
