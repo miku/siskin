@@ -448,8 +448,8 @@ class CrossrefDOIAndISSNList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' <(unpigz -c {input}) | LC_ALL=C sort -S50% > {output} """,
-                 input=self.input().get('input').path, output=stopover)
+        output = shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' <(unpigz -c {input}) | LC_ALL=C sort -S50% > {output} """,
+                          input=self.input().get('input').path, output=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):
