@@ -287,7 +287,40 @@ class CrossrefDOITable(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+
+class CrossrefDOITableClean(CrossrefTask):
+    """
+    Clean the DOI table from DOIs, that are blacklisted (in crossref but leading nowhere).
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        from siskin.sources.doi import DOIBlacklist
+        return {
+            'table': CrossrefDOITable(begin=self.begin, date=self.date),
+            'blacklist': DOIBlacklist(date=self.date),
+        }
+
+    def run(self):
+        blacklisted = set()
+        with self.input().get('blacklist').open() as handle:
+            for line in (line.strip() for line in handle):
+                blacklisted.add(line)
+
+        with self.input().get('table').open() as handle:
+            with self.output().open('w') as output:
+                for line in (line.strip() for line in handle):
+                    parts = line.split('\t')
+                    if len(parts) < 3:
+                        continue
+                    if parts[2] in blacklisted:
+                        continue
+                    output.write(line)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
 
 class CrossrefSortedDOITable(CrossrefTask):
     """
@@ -297,7 +330,7 @@ class CrossrefSortedDOITable(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return CrossrefDOITable(begin=self.begin, date=self.closest())
+        return CrossrefDOITableClean(begin=self.begin, date=self.closest())
 
     def run(self):
         output = shellout("""
@@ -448,8 +481,10 @@ class CrossrefDOIAndISSNList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        output = shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' <(unpigz -c {input}) | LC_ALL=C sort -S50% > {output} """,
-                          input=self.input().get('input').path, output=stopover)
+        temp = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
+        output = shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
+                          input=temp, output=stopover)
+        os.remove(temp)
         luigi.File(output).move(self.output().path)
 
     def output(self):
