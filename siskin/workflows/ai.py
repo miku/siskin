@@ -361,11 +361,11 @@ class AIExportNext(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-        output = shellout("span-solr {input} > {output}", input=self.input().path)
+        output = shellout("span-solr <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class AIExport(AITask):
     """ Create a SOLR-importable file. """
