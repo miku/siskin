@@ -317,7 +317,7 @@ class CrossrefDOITableClean(CrossrefTask):
                         continue
                     if parts[2] in blacklisted:
                         continue
-                    output.write(line)
+                    output.write(line + "\n")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
