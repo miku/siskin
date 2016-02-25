@@ -259,50 +259,39 @@ class AIFilterConfig(AITask):
         def defaults(isil):
             """ TODO(miku): move to AMSL. """
             return {
-                'and': [
-                    {
-                        'not': {
-                            'doi': {
-                                'file': self.input().get('doi-blacklist').path,
-                            }
+                "or": [
+                        {
+                            'source': ['28']
+                        },
+                        {
+                            'and': [
+                                {
+                                    'source': ['49', '50', '55']
+                                },
+                                {
+                                    'holdings': {
+                                        'file': filemap.get(isil)
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            'and': [
+                                {
+                                    'source': ['48']
+                                },
+                                {
+                                    'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
+                                },
+                                {
+                                    'holdings': {
+                                        'file': filemap.get(isil)
+                                    }
+                                }
+                            ]
                         }
-                    },
-                    {
-                        "or": [
-                            {
-                                'source': ['28']
-                            },
-                            {
-                                'and': [
-                                    {
-                                        'source': ['49', '50', '55']
-                                    },
-                                    {
-                                        'holdings': {
-                                            'file': filemap.get(isil)
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'and': [
-                                    {
-                                        'source': ['48']
-                                    },
-                                    {
-                                        'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
-                                    },
-                                    {
-                                        'holdings': {
-                                            'file': filemap.get(isil)
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
+                    ]
+                }
 
         filterconf = {
             'DE-105': defaults('DE-105'),
