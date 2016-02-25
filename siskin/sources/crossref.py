@@ -183,7 +183,6 @@ class CrossrefLineDOI(CrossrefTask):
     So by using tac we should get the correct answer here, but it might probably
     be more robust, to use `timestamp` or some inherent attribute of the record
     for ordering.
-
     """
 
     begin = luigi.DateParameter()
@@ -221,7 +220,7 @@ class CrossrefLineDOIWrapper(CrossrefTask):
 class CrossrefLineDOICombined(CrossrefTask):
     """
     Combine all extracted DOI and lines numbers from chunk files.
-    Format: filename lineno DOI.
+    Columns: filename lineno DOI.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -293,7 +292,7 @@ class CrossrefDOITableClean(CrossrefTask):
 
 class CrossrefSortedDOITable(CrossrefTask):
     """
-    Sort the CrossrefDOITable (TODO: move into a single task).
+    Sort the CrossrefDOITable by filename and line number.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -312,7 +311,7 @@ class CrossrefSortedDOITable(CrossrefTask):
 
 class CrossrefUniqItems(CrossrefTask):
     """
-    What is left to do: filter the correct lines here.
+    What is left to do for calculating a Crossref snapshot: filter out the relevant lines.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -321,6 +320,10 @@ class CrossrefUniqItems(CrossrefTask):
         return CrossrefSortedDOITable(begin=self.begin, date=self.closest())
 
     def run(self):
+        """
+        We write line numbers to a separate file (L). We temporarily extract
+        the chunk file as well (F). Then we can run `filterline L F`.
+        """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         previous_filename = None
@@ -329,10 +332,7 @@ class CrossrefUniqItems(CrossrefTask):
         with self.input().open() as handle:
             for line in handle:
                 lineno, filename = line.strip().split('\t')
-
                 if previous_filename and previous_filename != filename:
-
-                    # write line numbers to a file
                     _, tmp = tempfile.mkstemp(prefix='siskin-')
                     with luigi.File(tmp, format=TSV).open('w') as handle:
                         for ln in linenumbers:
@@ -340,7 +340,6 @@ class CrossrefUniqItems(CrossrefTask):
 
                     self.logger.info("filtering out %s lines" % len(linenumbers))
 
-                    # filter lines from file
                     input = shellout("unpigz -c {file} > {output}", file=previous_filename)
                     shellout("filterline {lines} {input} | pigz -c >> {output}",
                              filterline=self.assets('filterline'), lines=tmp, input=input, output=stopover)
