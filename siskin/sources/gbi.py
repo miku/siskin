@@ -131,6 +131,13 @@ DUMP = {
     "date": datetime.date(2015, 11, 1),
 }
 
+class SetEncoder(json.JSONEncoder):
+    """ Helper to encode python sets into JSON lists. """
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
 class GBITask(DefaultTask):
     """
     GBI task.
