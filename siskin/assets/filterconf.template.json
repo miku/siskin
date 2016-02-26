@@ -1,0 +1,1238 @@
+{
+  "DE-14": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-15": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)",
+              "Genios (Recht)",
+              "Genios (Psychologie)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-D161": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Gla1": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-1972": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Ch1": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-15-FID": {
+    "and": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "issn": {
+          "file": "{{ file }}"
+        }
+      }
+    ]
+  },
+  "DE-D117": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-8": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48",
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Bn3": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-105": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Brt1": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Zi4": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)",
+              "Genios (Psychologie)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Rs1": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "package": [
+              "BEFO",
+              "BLIS",
+              "CEAB",
+              "DZI",
+              "ECON",
+              "ESTE",
+              "FOGR",
+              "HOLZ",
+              "HWWA",
+              "IFOK",
+              "IFOL",
+              "IHSL",
+              "INFO",
+              "IWPR",
+              "KOEL",
+              "KUSE",
+              "MIND",
+              "PSYT",
+              "SOFI",
+              "SOLI",
+              "WAO",
+              "XPSY"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48"
+            ]
+          },
+          {
+            "not": {
+              "package": [
+                "BEFO",
+                "BLIS",
+                "CEAB",
+                "DZI",
+                "ECON",
+                "ESTE",
+                "FOGR",
+                "HOLZ",
+                "HWWA",
+                "IFOK",
+                "IFOL",
+                "IHSL",
+                "INFO",
+                "IWPR",
+                "KOEL",
+                "KUSE",
+                "MIND",
+                "PSYT",
+                "SOFI",
+                "SOLI",
+                "WAO",
+                "XPSY"
+              ]
+            }
+          },
+          {
+            "collection": [
+              "Genios (Wirtschaftswissenschaften)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "DE-Ki95": {
+    "or": [
+      {
+        "source": [
+          "28"
+        ]
+      },
+      {
+        "and": [
+          {
+            "source": [
+              "48",
+              "49",
+              "50",
+              "55"
+            ]
+          },
+          {
+            "holdings": {
+              "file": "{{ file }}"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
