@@ -535,7 +535,7 @@ class GBIDatabase(GBITask):
 
 class GBIIntermediateSchemaByKind(GBITask):
     """
-    Combine all  references or fulltext databases into a single intermediate schema document.
+    Combine all references or fulltext databases into a single intermediate schema document.
     """
     issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
