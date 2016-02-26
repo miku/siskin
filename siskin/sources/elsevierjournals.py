@@ -106,7 +106,6 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
 
         with self.output().open('w') as output:
             for dirName, subdirList, fileList in os.walk(self.taskdir()):
-                print('Found directory: %s' % dirName)
                 for fname in fileList:
                     output.write_tsv(os.path.join(dirName, fname))
 
@@ -155,11 +154,12 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                         doc = BeautifulStoneSoup(fh.read())
 
                     # all information for a single intermediate schema is accessible here
+                    # TODO: date, issue, volume, pages
                     intermediate = {
                         'finc.format': 'ElectronicArticle',
                         'finc.mega_collection': 'Elsevier Journals',
                         'finc.source_id': '85',
-                        "rft.genre": "article",
+                        'rft.genre': 'article',
                         'rft.issn': [node.text for node in issue.findAll('ce:issn')],
                         'doi': doc.find('ce:doi').text,
                         'rtf.atitle': doc.find('ce:title').text,
