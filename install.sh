@@ -120,7 +120,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         fi
 
         if [[ "$VERSION" == "6" ]]; then
-            centos_6_install_python_27
+            PYVERSION=$(python -c 'import sys; print("%s.%s" % (sys.version_info[0], sys.version_info[1]))')
+            if [ $PYVERSION != "2.7" ]; then
+                centos_6_install_python_27
+            fi
             rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
             yum update -y
         fi
