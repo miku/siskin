@@ -172,6 +172,7 @@ class AIIntermediateSchema(AITask):
     def requires(self):
         return [Executable(name='pigz', message='http://zlib.net/pigz/'),
                 GBIIntermediateSchemaByKind(kind='references', date=self.date),
+                GBIIntermediateSchemaByKind(kind='fulltext', date=self.date),
                 CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
