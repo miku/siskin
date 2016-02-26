@@ -167,17 +167,27 @@ hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is i
 pip install -U siskin
 
 echo "setting up configuration..."
-mkdir /etc/siskin
-mkdir /etc/luigi
+mkdir -p /etc/siskin
+mkdir -p /etc/luigi
 
-wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/client.cfg
-wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
-wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
+if [ ! -f "/etc/luigi/client.cfg" ]; then
+    wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/client.cfg
+fi
+if [ ! -f "/etc/luigi/logging.ini" ]; then
+    wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
+fi
+if [ ! -f "/etc/siskin/siskin.ini" ]; then
+    wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
+fi
 
 echo "setting up autocomplete..."
-mkdir -p /etc/bash_completion.d/
-wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
-chmod +x /etc/bash_completion.d/siskin_completion.sh
+if [ ! -f "/etc/siskin/siskin.ini" ]; then
+    mkdir -p /etc/bash_completion.d/
+    wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
+    chmod +x /etc/bash_completion.d/siskin_completion.sh
+else
+    echo "already done."
+fi
 
 cat <<EOF
   \. _(9>
