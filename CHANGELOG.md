@@ -1,3 +1,41 @@
+0.0.137 2016-02-26
+------------------
+
+* ai: switch to next pipeline
+* ai: include gbi full texts
+* ai: add templated filter config stub: AIFilterConfigNext
+* ai: compress export
+* crossref: docs
+* gbi: remove obsolete tasks
+* crossref: remove obsolete tasks
+* ai: simplify span-tag config
+* crossref: exclude blacklisted dois, where it's cheap
+* crossref: fix CrossrefDOIAndISSNList
+* ai: i/o gz
+* ai: AIISSNCoverageReport, sort output
+* doaj: fix issn extraction
+* 85: expand, be verbose
+* install: remove obsolete sudo
+* ai: add gbi references
+* remove OSX from install
+* amsl: use tmp prefix
+* ai: more stats on holdings, AICoverageISSN stub
+* crossref: use unpigz
+* crossref: prepare doi, issn list
+* 85: add protocol hint, #6975
+* docs: filterconf
+* ai: 28, any
+* ai: remove J59 with missing holding file for now
+* ai: filterconf example
+* add elsevier journals, 85
+* ai: skip probably empty holding files from AMSL
+* ai: skip suspiciously small files, when assembling config
+* crossref: remove obsolete task
+* install: various updates
+* update README
+* move config into etc
+* install: udpate TODOs
+
 0.0.135 2016-02-08
 ------------------
 
