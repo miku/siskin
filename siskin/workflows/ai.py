@@ -228,147 +228,6 @@ class AIFilterConfig(AITask):
     @timed
     def run(self):
         """
-        Filter assembly.
-
-        Create a filterconfig, then run:
-
-            $ time span-tag -c docs/filterconf.json <(taskcat JstorIntermediateSchema) > output.ldj
-            ...
-
-        """
-        isils = ['DE-105', 'DE-14', 'DE-15', 'DE-1972', 'DE-8', 'DE-Bn3', 'DE-Brt1', 'DE-Ch1', 'DE-D117',
-                 'DE-D161', 'DE-Gla1', 'DE-J59', 'DE-Ki95', 'DE-Rs1', 'DE-Zi4',
-                 'DE-15-FID']
-
-        # map ISIL to relevant file (holdings or ISSN list)
-        filemap = {}
-
-        for k, v in self.input().iteritems():
-            if k in isils:
-                if os.path.getsize(v.path) < 10:
-                    self.logger.debug("skipping empty file: %s" % v.path)
-                    continue
-                filemap[k] = v.path
-
-        # at licensing time, the mega_collection should contain the package
-        # name, at least for the database, for which we can map db names to
-        # packages (cf. https://git.io/v2ECx), refs. #5621, #5539, #5624
-
-        def defaults(isil):
-            """ TODO(miku): move to AMSL. """
-            return {
-                "or": [
-                        {
-                            'source': ['28']
-                        },
-                        {
-                            'and': [
-                                {
-                                    'source': ['49', '50', '55']
-                                },
-                                {
-                                    'holdings': {
-                                        'file': filemap.get(isil)
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            'and': [
-                                {
-                                    'source': ['48']
-                                },
-                                {
-                                    'package': ['BEFO', 'BLIS', 'CEAB', 'DZI', 'ECON', 'ESTE', 'FOGR', 'HOLZ', 'HWWA', 'IFOK', 'IFOL', 'IHSL', 'INFO', 'IWPR', 'KOEL', 'KUSE', 'MIND', 'PSYT', 'SOFI', 'SOLI', 'WAO', 'XPSY']
-                                },
-                                {
-                                    'holdings': {
-                                        'file': filemap.get(isil)
-                                    }
-                                }
-                            ]
-                        },
-                    ]
-                }
-
-        filterconf = {
-            'DE-105': defaults('DE-105'),
-            'DE-14': defaults('DE-14'),
-            'DE-15': defaults('DE-15'),
-            'DE-1972': defaults('DE-1972'),
-            'DE-8': defaults('DE-8'),
-            'DE-Bn3': defaults('DE-Bn3'),
-            'DE-Brt1': defaults('DE-Brt1'),
-            'DE-Ch1': defaults('DE-Ch1'),
-            'DE-D117': defaults('DE-D117'),
-            'DE-D161': defaults('DE-D161'),
-            'DE-Gla1': defaults('DE-Gla1'),
-            'DE-Ki95': defaults('DE-Ki95'),
-            'DE-Rs1': defaults('DE-Rs1'),
-            'DE-Zi4': defaults('DE-Zi4'),
-            'DE-15-FID': {
-                'and': [
-                    {
-                        'source': ['28']
-                    },
-                    {
-                        'issn': {
-                            'file': filemap.get('DE-15-FID')
-                        }
-                    }
-                ]
-            }
-        }
-
-        with self.output().open('w') as output:
-            output.write(json.dumps(filterconf))
-            output.write("\n")
-
-        # $ islabel -kbart DE-15:{x} -kbart DE-14:{x} is.ldj > is.lic.ldj
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
-
-class AIFilterConfigNext(AITask):
-    """
-    Create a filter configuration from AMSL.
-
-    The filterconfig dictionary should be built from AMSL data only: holdings
-    and collections, and information about which source or collection uses
-    which method of labeling.
-
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        """
-        Intermediate schema files and holdings.
-        """
-        return {
-            # holding files
-            'DE-105': AMSLHoldingsFile(isil='DE-105'),
-            'DE-14': AMSLHoldingsFile(isil='DE-14'),
-            'DE-15': AMSLHoldingsFile(isil='DE-15'),
-            'DE-1972': AMSLHoldingsFile(isil='DE-1972'),
-            'DE-8': AMSLHoldingsFile(isil='DE-8'),
-            'DE-Bn3': AMSLHoldingsFile(isil='DE-Bn3'),
-            'DE-Brt1': AMSLHoldingsFile(isil='DE-Brt1'),
-            'DE-Ch1': AMSLHoldingsFile(isil='DE-Ch1'),
-            'DE-D117': AMSLHoldingsFile(isil='DE-D117'),
-            'DE-D161': AMSLHoldingsFile(isil='DE-D161'),
-            'DE-Gla1': AMSLHoldingsFile(isil='DE-Gla1'),
-            'DE-J59': AMSLHoldingsFile(isil='DE-J59'),
-            'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
-            'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
-            'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
-
-            # issn list
-            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/tm6U9D'),
-        }
-
-    @timed
-    def run(self):
-        """
         Build a filter from a template. Fill in the missing files.
         """
         with open(self.assets('filterconf.template.json')) as handle:
@@ -391,7 +250,7 @@ class AIFilterConfigNext(AITask):
 
 class AILicensing(AITask):
     """
-    Take intermediate schema and attach ISILs.
+    Take intermediate schema and a config and attach ISILs accordingly.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -409,7 +268,7 @@ class AILicensing(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
-class AIExportNext(AITask):
+class AIExport(AITask):
     """
     Next iteration of AI export.
     """
@@ -421,68 +280,6 @@ class AIExportNext(AITask):
     def run(self):
         output = shellout("span-solr <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
-
-class AIExport(AITask):
-    """ Create a SOLR-importable file. """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'crossref': CrossrefIntermediateSchema(date=self.date),
-            'degruyter': DegruyterIntermediateSchema(date=self.date),
-            'doaj': DOAJIntermediateSchema(date=self.date),
-            'jstor' : JstorIntermediateSchema(date=self.date),
-
-            'DE-105': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Gq199T'),
-            'DE-14': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Tz3vbk'),
-            'DE-15': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/inyKLr'),
-            'DE-Bn3': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/oq8LDD'),
-            'DE-Ch1': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/uJwoUf'),
-            'DE-Gla1': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/6506Dz'),
-            'DE-Zi4': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/Ld0LCw'),
-            'DE-J59': DownloadAndUnzipFile(date=self.date, url='https://goo.gl/44xEbF'),
-
-            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/tm6U9D'),
-
-            'blacklist': DOIBlacklist(date=self.date),
-            'app': Executable(name='span-export', message='http://git.io/vI8NV'),
-            'pigz': Executable(name='pigz', message='http://zlib.net/pigz/'),
-        }
-
-    @timed
-    def run(self):
-        """
-        TODO(miku): Move source/ISIL matrix and filter method out of here.
-        """
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-
-        # DE-15 and DE-14 get DOAJ, cf. #6524, #4983
-        shellout("""span-export -doi-blacklist {blacklist} -any DE-540 -l DE-15-FID:{issns} -any DE-15 -any DE-14 <(unpigz -c {input}) | pigz >> {output}""",
-                 blacklist=self.input().get('blacklist').path, input=self.input().get('doaj').path, issns=self.input().get('DE-15-FID').path, output=stopover)
-
-        # DE-15 gets DeGruyter, cf. #4731
-        shellout("""span-export -doi-blacklist {blacklist} -skip -f DE-15:{holding} <(unpigz -c {input}) | pigz >> {output}""",
-                 blacklist=self.input().get('blacklist').path, holding=self.input().get('DE-15').path, input=self.input().get('degruyter').path, output=stopover)
-
-        def format_args(flagname, isils):
-            """ Helper to create args like -f DE-15:/path/to/target -f DE-14:/path/to/target ..."""
-            args = ["%s %s:%s" % (flagname, isil, self.input().get(isil).path) for isil in isils]
-            return " ".join(args)
-
-        files = format_args("-f", ['DE-105', 'DE-14', 'DE-15', 'DE-Bn3', 'DE-Ch1', 'DE-Gla1', 'DE-Zi4', 'DE-J59'])
-        lists = format_args("-l", ['DE-15-FID'])
-
-        # apply holdings and issn filters on sources
-        for source in ['crossref', 'jstor']:
-            shellout("span-export -doi-blacklist {blacklist} -skip {files} {lists} <(unpigz -c {input}) | pigz -c >> {output}",
-                     blacklist=self.input().get('blacklist').path, files=files, lists=lists,
-                     input=self.input().get(source).path, output=stopover)
-
-        luigi.File(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
