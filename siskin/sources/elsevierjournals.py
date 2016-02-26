@@ -38,6 +38,7 @@ ftp-pattern = *
 
 """
 
+from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
@@ -49,9 +50,12 @@ from siskin.common import FTPMirror
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+import collections
 import datetime
+import json
 import luigi
 import os
+import re
 
 config = Config.instance()
 
@@ -101,8 +105,82 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
                     shellout("tar -xvf {tarfile} -C {dir}", tarfile=row.path, dir=self.taskdir())
 
         with self.output().open('w') as output:
-            for path in iterfiles(self.taskdir()):
-                output.write_tsv(path)
+            for dirName, subdirList, fileList in os.walk(self.taskdir()):
+                print('Found directory: %s' % dirName)
+                for fname in fileList:
+                    output.write_tsv(os.path.join(dirName, fname))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
+    """
+    All in one task for now.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    tag = luigi.Parameter(default='SAXC0000000000002')
+
+    def requires(self):
+        return ElsevierJournalsExpand(date=self.date)
+
+    def run(self):
+        patterns = {
+            'dataset': re.compile('(?P<base>.*)/(?P<tag>%s)/dataset.xml' % self.tag),
+            'issue': re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/issue.xml' % self.tag),
+            'main': re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag),
+        }
+
+        doctree = collections.defaultdict(list)
+
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                for name, pattern in patterns.iteritems():
+                    match = pattern.match(row.path)
+                    if not match:
+                        continue
+
+                    gd = match.groupdict()
+                    if name == "main":
+                        issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
+                        doctree[issuepath].append(row.path)
+
+        # doctree is a of the format: {"issue.xml": ["main.xml", "main.xml", ....]}
+        with self.output().open('w') as output:
+            for issuepath, docs in doctree.iteritems():
+                with open(issuepath) as handle:
+                    issue = BeautifulStoneSoup(handle.read())
+
+                for docpath in docs:
+                    with open(docpath) as fh:
+                        doc = BeautifulStoneSoup(fh.read())
+
+                    # all information for a single intermediate schema is accessible here
+                    intermediate = {
+                        'finc.format': 'ElectronicArticle',
+                        'finc.mega_collection': 'Elsevier Journals',
+                        'finc.source_id': '85',
+                        "rft.genre": "article",
+                        'rft.issn': [node.text for node in issue.findAll('ce:issn')],
+                        'doi': doc.find('ce:doi').text,
+                        'rtf.atitle': doc.find('ce:title').text,
+                    }
+                    if doc.find('ce:abstract'):
+                        intermediate['abstract'] = doc.find('ce:abstract').getText()[8:],
+
+                    rawauthors = doc.findAll('ce:author')
+                    authors = []
+                    for author in rawauthors:
+                        authors.append({'rft.au': author.find('ce:surname').text + ", " + author.find('ce:given-name').text})
+                    intermediate['authors'] = authors
+
+                    rawkeywords = doc.findAll('ce:keywords')
+                    keywords = []
+                    for kw in rawkeywords:
+                        keywords.append(kw.find('ce:text').text)
+                    intermediate['x.subjects'] = keywords
+
+                    output.write(json.dumps(intermediate))
+                    output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
