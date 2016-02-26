@@ -257,7 +257,7 @@ class AILicensing(AITask):
     def requires(self):
         return {
             'is': AIIntermediateSchema(date=self.date),
-            'config': AIFilterConfigNext(date=self.date),
+            'config': AIFilterConfig(date=self.date),
         }
 
     def run(self):
