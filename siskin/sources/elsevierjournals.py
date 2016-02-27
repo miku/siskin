@@ -50,6 +50,7 @@ from siskin.common import FTPMirror
 from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+import base64
 import collections
 import datetime
 import json
@@ -134,22 +135,36 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
         # doctree groups main files under issue files: {"issue.xml": ["main.xml", "main.xml", ....]}
         doctree = collections.defaultdict(list)
 
+        # the dataset.xml contains the journal titles
+        datasetpath = None
+
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 if not pattern.match(row.path):
                     continue
 
+                if not datasetpath:
+                    datasetpath = "%s/dataset.xml" % '/'.join(row.path.split('/')[:-4])
+
                 issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
                 doctree[issuepath].append(row.path)
+
+        with open(datasetpath) as handle:
+            dataset = BeautifulStoneSoup(handle.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
+
+        # map ISSN to journal title
+        titlemap = {}
+        for props in dataset.findAll('journal-issue-properties'):
+            titlemap[props.find('issn').text] = props.find('collection-title').text
 
         with self.output().open('w') as output:
             for issuepath, docs in doctree.iteritems():
                 with open(issuepath) as handle:
-                    issue = BeautifulStoneSoup(handle.read())
+                    issue = BeautifulStoneSoup(handle.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
 
                 for docpath in docs:
                     with open(docpath) as fh:
-                        doc = BeautifulStoneSoup(fh.read())
+                        doc = BeautifulStoneSoup(fh.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
 
                     intermediate = {
                         'finc.format': 'ElectronicArticle',
@@ -158,8 +173,12 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                         'rft.genre': 'article',
                         'rft.issn': [node.text for node in issue.findAll('ce:issn')],
                         'doi': doc.find('ce:doi').text,
+                        'url': ['http://dx.doi.org/%s' % doc.find('ce:doi').text],
                         'rtf.atitle': doc.find('ce:title').text,
                     }
+
+                    intermediate['rft.jtitle'] = titlemap[intermediate['rft.issn'][0]]
+                    intermediate['finc.record_id'] = base64.b64encode(intermediate['url'][0]).rstrip("=")
 
                     if doc.find('ce:abstract'):
                         abstract = doc.find('ce:abstract').getText()
