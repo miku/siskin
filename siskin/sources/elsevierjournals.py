@@ -129,21 +129,19 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
             'main': re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag),
         }
 
+        # doctree groups main files under issue files: {"issue.xml": ["main.xml", "main.xml", ....]}
         doctree = collections.defaultdict(list)
 
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 for name, pattern in patterns.iteritems():
                     match = pattern.match(row.path)
-                    if not match:
+                    if not match or name != "main":
                         continue
 
-                    gd = match.groupdict()
-                    if name == "main":
-                        issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
-                        doctree[issuepath].append(row.path)
+                    issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
+                    doctree[issuepath].append(row.path)
 
-        # doctree is a of the format: {"issue.xml": ["main.xml", "main.xml", ....]}
         with self.output().open('w') as output:
             for issuepath, docs in doctree.iteritems():
                 with open(issuepath) as handle:
@@ -153,8 +151,6 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                     with open(docpath) as fh:
                         doc = BeautifulStoneSoup(fh.read())
 
-                    # all information for a single intermediate schema is accessible here
-                    # TODO: date, issue, volume, pages
                     intermediate = {
                         'finc.format': 'ElectronicArticle',
                         'finc.mega_collection': 'Elsevier Journals',
@@ -164,20 +160,48 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                         'doi': doc.find('ce:doi').text,
                         'rtf.atitle': doc.find('ce:title').text,
                     }
-                    if doc.find('ce:abstract'):
-                        intermediate['abstract'] = doc.find('ce:abstract').getText()[8:],
 
-                    rawauthors = doc.findAll('ce:author')
+                    if doc.find('ce:abstract'):
+                        abstract = doc.find('ce:abstract').getText()
+                        if abstract.startswith('Abstract'):
+                            abstract = abstract.replace('Abstract', '', 1)
+                        if abstract.startswith(u'Highlights•'):
+                            abstract = abstract.replace(u'Highlights•', '', 1)
+                        abstract = abstract.replace(u'•', ' ')
+                        intermediate['abstract'] = abstract
+
                     authors = []
-                    for author in rawauthors:
+                    for author in doc.findAll('ce:author'):
                         authors.append({'rft.au': author.find('ce:surname').text + ", " + author.find('ce:given-name').text})
                     intermediate['authors'] = authors
 
-                    rawkeywords = doc.findAll('ce:keywords')
                     keywords = []
-                    for kw in rawkeywords:
+                    for kw in doc.findAll('ce:keywords'):
                         keywords.append(kw.find('ce:text').text)
                     intermediate['x.subjects'] = keywords
+
+                    # page numbers
+                    for item in issue.findAll('ce:include-item'):
+                        doi = item.find('ce:doi').text
+                        if doi == intermediate['doi']:
+                            first, last = item.find('ce:first-page'), item.find('ce:last-page')
+                            if first:
+                                intermediate['rft.spage'] = first.text
+                            if last:
+                                intermediate['rft.epage'] = last.text
+                            if first and last:
+                                try:
+                                    intermediate['rft.pages'] = str(int(last.text) - int(first.text))
+                                except ValueError as err:
+                                    self.logger.warning('cannot parse page number %s: %s-%s' % (doi, first.text, last.text))
+
+                    # volume, issue, date
+                    if issue.find('vol-first'):
+                        intermediate['rft.volume'] = issue.find('vol-first').text
+                    if issue.find('iss-first'):
+                        intermediate['rft.issue'] = issue.find('iss-first').text
+                    if issue.find('start-date'):
+                        intermediate['rft.date'] = issue.find('start-date').text
 
                     output.write(json.dumps(intermediate))
                     output.write("\n")
