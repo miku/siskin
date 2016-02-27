@@ -259,7 +259,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
 
 class ElsevierJournalsSolr(ElsevierJournalsTask):
     """
-    Create something solr importable.
+    Create something solr importable. Attach a single ISIL to all records.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     tag = luigi.Parameter(default='SAXC0000000000002')
