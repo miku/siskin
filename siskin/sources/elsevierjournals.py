@@ -94,6 +94,7 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
     Expand all tar files.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    tag = luigi.Parameter(default='SAXC0000000000002')
 
     def requires(self):
         return ElsevierJournalsPaths(date=self.date)
@@ -102,6 +103,8 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
         shellout("mkdir -p {dir}", dir=self.taskdir())
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
+                if not self.tag in row.path:
+                    continue
                 if row.path.endswith('tar'):
                     shellout("tar -xvf {tarfile} -C {dir}", tarfile=row.path, dir=self.taskdir())
 
@@ -127,7 +130,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     tag = luigi.Parameter(default='SAXC0000000000002')
 
     def requires(self):
-        return ElsevierJournalsExpand(date=self.date)
+        return ElsevierJournalsExpand(date=self.date, tag=self.tag)
 
     def run(self):
         pattern = re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag)
@@ -136,29 +139,37 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
         doctree = collections.defaultdict(list)
 
         # the dataset.xml contains the journal titles
-        datasetpath = None
+        datasetpath = os.path.join(os.path.dirname(self.input().path), self.tag, 'dataset.xml')
+        self.logger.info('dataset: %s' % datasetpath)
 
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 if not pattern.match(row.path):
                     continue
 
-                if not datasetpath:
-                    datasetpath = "%s/dataset.xml" % '/'.join(row.path.split('/')[:-4])
-
                 issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
-                doctree[issuepath].append(row.path)
+                if os.path.exists(issuepath):
+                    doctree[issuepath].append(row.path)
+                else:
+                    self.logger.warning('issue.xml not in expected place for %s' % row.path)
+
+        if not doctree:
+            raise RuntimeError('no documents found')
 
         with open(datasetpath) as handle:
             dataset = BeautifulStoneSoup(handle.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
 
         # map ISSN to journal title
-        titlemap = {}
+        titlemap = collections.defaultdict(str)
         for props in dataset.findAll('journal-issue-properties'):
-            titlemap[props.find('issn').text] = props.find('collection-title').text
+            try:
+                titlemap[props.find('issn').text] = props.find('collection-title').text
+            except AttributeError as err:
+                self.logger.warning('cannot find issn or collection title: %s, %s, %s' % (props.find('issn'), props.find('collection-title'), err))
 
         with self.output().open('w') as output:
             for issuepath, docs in doctree.iteritems():
+
                 with open(issuepath) as handle:
                     issue = BeautifulStoneSoup(handle.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
 
@@ -174,8 +185,10 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                         'rft.issn': [node.text for node in issue.findAll('ce:issn')],
                         'doi': doc.find('ce:doi').text,
                         'url': ['http://dx.doi.org/%s' % doc.find('ce:doi').text],
-                        'rtf.atitle': doc.find('ce:title').text,
                     }
+
+                    if doc.find('ce:title'):
+                        intermediate['rtf.atitle'] = doc.find('ce:title').text
 
                     intermediate['rft.jtitle'] = titlemap[intermediate['rft.issn'][0]]
                     intermediate['finc.record_id'] = base64.b64encode(intermediate['url'][0]).rstrip("=")
@@ -186,12 +199,22 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                             abstract = abstract.replace('Abstract', '', 1)
                         if abstract.startswith(u'Highlights•'):
                             abstract = abstract.replace(u'Highlights•', '', 1)
+                        if abstract.startswith(u'SummaryBackground'):
+                            abstract = abstract.replace(u'SummaryBackground', '', 1)
                         abstract = abstract.replace(u'•', ' ')
                         intermediate['abstract'] = abstract
 
                     authors = []
                     for author in doc.findAll('ce:author'):
-                        authors.append({'rft.au': author.find('ce:surname').text + ", " + author.find('ce:given-name').text})
+                        au = {}
+                        given, surname = author.find('ce:given-name'), author.find('ce:surname')
+                        if given:
+                            au.update({'rft.aufirst': given.text})
+                        if surname:
+                            au.update({'rft.aulast': surname.text})
+                        if surname and given:
+                            au.update({'rft.au': surname.text + ", " + given.text})
+                        authors.append(au)
                     intermediate['authors'] = authors
 
                     keywords = []
@@ -205,12 +228,12 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                         if doi == intermediate['doi']:
                             first, last = item.find('ce:first-page'), item.find('ce:last-page')
                             if first:
-                                intermediate['rft.spage'] = first.text
+                                intermediate['rft.spage'] = ''.join(c for c in first.text if c.isdigit())
                             if last:
-                                intermediate['rft.epage'] = last.text
+                                intermediate['rft.epage'] = ''.join(c for c in last.text if c.isdigit())
                             if first and last:
                                 try:
-                                    intermediate['rft.pages'] = str(int(last.text) - int(first.text))
+                                    intermediate['rft.pages'] = str(int(intermediate['rft.epage']) - int(intermediate['rft.spage']))
                                 except ValueError as err:
                                     self.logger.warning('cannot parse page number %s: %s-%s' % (doi, first.text, last.text))
 
