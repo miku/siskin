@@ -115,6 +115,12 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
 class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     """
     All in one task for now.
+
+    Test indexing:
+
+        $ span-solr $(taskoutput ElsevierJournalsIntermediateSchema) > x.ldj
+        $ solrbulk x.ldj
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     tag = luigi.Parameter(default='SAXC0000000000002')
