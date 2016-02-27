@@ -129,24 +129,18 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
         return ElsevierJournalsExpand(date=self.date)
 
     def run(self):
-        patterns = {
-            'dataset': re.compile('(?P<base>.*)/(?P<tag>%s)/dataset.xml' % self.tag),
-            'issue': re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/issue.xml' % self.tag),
-            'main': re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag),
-        }
+        pattern = re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag)
 
         # doctree groups main files under issue files: {"issue.xml": ["main.xml", "main.xml", ....]}
         doctree = collections.defaultdict(list)
 
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                for name, pattern in patterns.iteritems():
-                    match = pattern.match(row.path)
-                    if not match or name != "main":
-                        continue
+                if not pattern.match(row.path):
+                    continue
 
-                    issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
-                    doctree[issuepath].append(row.path)
+                issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
+                doctree[issuepath].append(row.path)
 
         with self.output().open('w') as output:
             for issuepath, docs in doctree.iteritems():
