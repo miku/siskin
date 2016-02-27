@@ -188,7 +188,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                     }
 
                     if doc.find('ce:title'):
-                        intermediate['rtf.atitle'] = doc.find('ce:title').text
+                        intermediate['rft.atitle'] = doc.find('ce:title').text
 
                     intermediate['rft.jtitle'] = titlemap[intermediate['rft.issn'][0]]
                     intermediate['finc.record_id'] = base64.b64encode(intermediate['url'][0]).rstrip("=")
@@ -247,6 +247,24 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
 
                     output.write(json.dumps(intermediate))
                     output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class ElsevierJournalsSolr(ElsevierJournalsTask):
+    """
+    Create something solr importable.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    tag = luigi.Parameter(default='SAXC0000000000002')
+
+    def requires(self):
+        return ElsevierJournalsIntermediateSchema(date=self.date, tag=self.tag)
+
+    def run(self):
+        output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') {input} > {output}""", input=self.input().path)
+        output = shellout("span-solr {input} > {output}", input=output)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
