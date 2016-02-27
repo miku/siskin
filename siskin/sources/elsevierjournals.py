@@ -44,7 +44,6 @@ from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from luigi.contrib.esindex import CopyToIndex
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.configuration import Config
@@ -83,6 +82,7 @@ class ElsevierJournalsPaths(ElsevierJournalsTask):
                          max_retries=self.max_retries,
                          timeout=self.timeout)
 
+    @timed
     def run(self):
         self.input().move(self.output().path)
 
@@ -99,6 +99,7 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
     def requires(self):
         return ElsevierJournalsPaths(date=self.date)
 
+    @timed
     def run(self):
         shellout("mkdir -p {dir}", dir=self.taskdir())
         with self.input().open() as handle:
@@ -132,6 +133,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     def requires(self):
         return ElsevierJournalsExpand(date=self.date, tag=self.tag)
 
+    @timed
     def run(self):
         pattern = re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag)
 
@@ -185,6 +187,9 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                         'rft.issn': [node.text for node in issue.findAll('ce:issn')],
                         'doi': doc.find('ce:doi').text,
                         'url': ['http://dx.doi.org/%s' % doc.find('ce:doi').text],
+                        'languages': ['eng'],
+                        'ris.type': 'EJOUR',
+                        'version': '0.9',
                     }
 
                     if doc.find('ce:title'):
@@ -234,6 +239,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                             if first and last:
                                 try:
                                     intermediate['rft.pages'] = str(int(intermediate['rft.epage']) - int(intermediate['rft.spage']))
+                                    intermediate['rft.tpages'] = intermediate['rft.pages']
                                 except ValueError as err:
                                     self.logger.warning('cannot parse page number %s: %s-%s' % (doi, first.text, last.text))
 
@@ -261,6 +267,7 @@ class ElsevierJournalsSolr(ElsevierJournalsTask):
     def requires(self):
         return ElsevierJournalsIntermediateSchema(date=self.date, tag=self.tag)
 
+    @timed
     def run(self):
         output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') {input} > {output}""", input=self.input().path)
         output = shellout("span-solr {input} > {output}", input=output)
