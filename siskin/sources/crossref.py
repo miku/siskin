@@ -364,6 +364,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     """
     Convert to intermediate format via span.
     """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
