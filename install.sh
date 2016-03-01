@@ -102,7 +102,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
 
         apt-get install -y build-essential gcc make autoconf flex bison binutils
-        apt-get install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-dev python-dev libxslt1-dev libsqlite3-dev
+        apt-get install -y pigz jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-dev python-dev libxslt1-dev libsqlite3-dev
 
         install_latest_deb "miku/span"
         install_latest_deb "miku/solrbulk"
@@ -134,7 +134,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         fi
 
         yum groupinstall -y 'development tools'
-        yum install -y jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
+        yum install -y pigz jq xmlstarlet lftp vim tmux bash-completion tree libxml2 libxml2-devel python-devel libxslt-devel sqlite-devel
 
         install_latest_rpm "miku/span"
         install_latest_rpm "miku/solrbulk"
