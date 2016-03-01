@@ -1,3 +1,11 @@
+0.0.138 2016-03-01
+------------------
+
+* 85: a direct approach to intermediate schema generation
+* ai: fix extension
+* install: skip python 2.7 installation, if already done
+* install: do not overwrite existing config files
+
 0.0.137 2016-02-26
 ------------------
 
