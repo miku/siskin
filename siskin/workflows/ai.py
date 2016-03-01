@@ -170,6 +170,9 @@ class AIIntermediateSchema(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        """
+        TODO(miku): Dynamic dependencies based on holding file.
+        """
         return [Executable(name='pigz', message='http://zlib.net/pigz/'),
                 GBIIntermediateSchemaByKind(kind='references', date=self.date),
                 GBIIntermediateSchemaByKind(kind='fulltext', date=self.date),
