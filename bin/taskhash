@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Hacky: Calculate checksum of the source code of a Python class and
+use it to name tasks, that may need to be recomputed.
+
+Currently, it prints out hash and full taskname.
+
+42eb25a1b3925e332de69780229299407a1ef983    siskin.workflows.ai.AICoverage
+bb1a3873f4e6d6e6fff291bac52bb6845ae36d30    siskin.workflows.ai.AICoverageISSN
+...
+
+TODO: keep a record of changes somewhere on the fs.
+"""
+
+from siskin.utils import get_task_import_cache
+from luigi.task import Register
+import inspect
+import importlib
+import hashlib
+
+if __name__ == '__main__':
+    task_import_cache, _ = get_task_import_cache()
+    for klassname, modulename in sorted(task_import_cache.iteritems()):
+        module = importlib.import_module(modulename)
+        klass = getattr(module, klassname)
+        sha1 = hashlib.sha1()
+        sha1.update(inspect.getsource(klass))
+        print("%s\t%s.%s" % (sha1.hexdigest(), modulename, klassname))
