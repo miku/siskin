@@ -30,85 +30,84 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "not": {
+                  "package": [
+                    "BEFO",
+                    "BLIS",
+                    "CEAB",
+                    "DZI",
+                    "ECON",
+                    "ESTE",
+                    "FOGR",
+                    "HOLZ",
+                    "HWWA",
+                    "IFOK",
+                    "IFOL",
+                    "IHSL",
+                    "INFO",
+                    "IWPR",
+                    "KOEL",
+                    "KUSE",
+                    "MIND",
+                    "PSYT",
+                    "SOFI",
+                    "SOLI",
+                    "WAO",
+                    "XPSY"
+                  ]
+                }
+              },
+              {
+                "collection": [
+                  "Genios (Fachzeitschriften)",
+                  "Genios (Wirtschaftswissenschaften)",
+                  "Genios (Sozialwissenschaften)"
+                ]
+              }
             ]
           }
         ]
@@ -146,89 +145,92 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)",
-              "Genios (Recht)",
-              "Genios (Psychologie)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)",
-              "Genios (Recht)",
-              "Genios (Psychologie)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)",
+                      "Genios (Recht)",
+                      "Genios (Psychologie)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)",
+                      "Genios (Recht)",
+                      "Genios (Psychologie)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -291,83 +293,86 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -430,85 +435,88 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -610,83 +618,86 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -724,85 +735,88 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -840,85 +854,88 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -956,87 +973,90 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)",
-              "Genios (Psychologie)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)",
-              "Genios (Sozialwissenschaften)",
-              "Genios (Psychologie)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)",
+                      "Genios (Psychologie)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)",
+                      "Genios (Sozialwissenschaften)",
+                      "Genios (Psychologie)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -1074,83 +1094,45 @@
             ]
           },
           {
-            "package": [
-              "BEFO",
-              "BLIS",
-              "CEAB",
-              "DZI",
-              "ECON",
-              "ESTE",
-              "FOGR",
-              "HOLZ",
-              "HWWA",
-              "IFOK",
-              "IFOL",
-              "IHSL",
-              "INFO",
-              "IWPR",
-              "KOEL",
-              "KUSE",
-              "MIND",
-              "PSYT",
-              "SOFI",
-              "SOLI",
-              "WAO",
-              "XPSY"
-            ]
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)"
-            ]
-          },
-          {
-            "holdings": {
-              "file": "{{ file }}"
-            }
-          }
-        ]
-      },
-      {
-        "and": [
-          {
-            "source": [
-              "48"
-            ]
-          },
-          {
-            "not": {
-              "package": [
-                "BEFO",
-                "BLIS",
-                "CEAB",
-                "DZI",
-                "ECON",
-                "ESTE",
-                "FOGR",
-                "HOLZ",
-                "HWWA",
-                "IFOK",
-                "IFOL",
-                "IHSL",
-                "INFO",
-                "IWPR",
-                "KOEL",
-                "KUSE",
-                "MIND",
-                "PSYT",
-                "SOFI",
-                "SOLI",
-                "WAO",
-                "XPSY"
-              ]
-            }
-          },
-          {
-            "collection": [
-              "Genios (Fachzeitschriften)",
-              "Genios (Wirtschaftswissenschaften)"
+            "or": [
+              {
+                "and": [
+                  {
+                    "not": {
+                      "package": [
+                        "BEFO",
+                        "BLIS",
+                        "CEAB",
+                        "DZI",
+                        "ECON",
+                        "ESTE",
+                        "FOGR",
+                        "HOLZ",
+                        "HWWA",
+                        "IFOK",
+                        "IFOL",
+                        "IHSL",
+                        "INFO",
+                        "IWPR",
+                        "KOEL",
+                        "KUSE",
+                        "MIND",
+                        "PSYT",
+                        "SOFI",
+                        "SOLI",
+                        "WAO",
+                        "XPSY"
+                      ]
+                    }
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)"
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
