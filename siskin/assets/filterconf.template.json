@@ -56,13 +56,13 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)",
-	      "Genios (Sozialwissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -106,7 +106,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)",
               "Genios (Sozialwissenschaften)"
             ]
@@ -172,15 +172,15 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)",
-	      "Genios (Sozialwissenschaften)",
-	      "Genios (Recht)",
-	      "Genios (Psychologie)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)",
+              "Genios (Recht)",
+              "Genios (Psychologie)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -224,7 +224,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)",
               "Genios (Sozialwissenschaften)",
               "Genios (Recht)",
@@ -317,12 +317,12 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -366,7 +366,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)"
             ]
           }
@@ -456,13 +456,13 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)",
-	      "Genios (Sozialwissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -506,7 +506,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)",
               "Genios (Sozialwissenschaften)"
             ]
@@ -636,12 +636,12 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -685,7 +685,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)"
             ]
           }
@@ -750,13 +750,13 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)",
-	      "Genios (Sozialwissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -800,7 +800,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)",
               "Genios (Sozialwissenschaften)"
             ]
@@ -866,13 +866,13 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)",
-	      "Genios (Sozialwissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -916,7 +916,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)",
               "Genios (Sozialwissenschaften)"
             ]
@@ -982,14 +982,14 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)",
-	      "Genios (Sozialwissenschaften)",
-	      "Genios (Psychologie)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)",
+              "Genios (Sozialwissenschaften)",
+              "Genios (Psychologie)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -1033,7 +1033,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)",
               "Genios (Sozialwissenschaften)",
               "Genios (Psychologie)"
@@ -1100,12 +1100,12 @@
             ]
           },
           {
-	    "collection": [
-	      "Genios (Fachzeitschriften)",
-	      "Genios (Wirtschaftswissenschaften)"
-	    ]
-	  },
-	  {
+            "collection": [
+              "Genios (Fachzeitschriften)",
+              "Genios (Wirtschaftswissenschaften)"
+            ]
+          },
+          {
             "holdings": {
               "file": "{{ file }}"
             }
@@ -1149,7 +1149,7 @@
           },
           {
             "collection": [
-	      "Genios (Fachzeitschriften)",
+              "Genios (Fachzeitschriften)",
               "Genios (Wirtschaftswissenschaften)"
             ]
           }
