@@ -249,7 +249,13 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                     if issue.find('iss-first'):
                         intermediate['rft.issue'] = issue.find('iss-first').text
                     if issue.find('start-date'):
-                        intermediate['rft.date'] = issue.find('start-date').text
+                        date = issue.find('start-date').text
+                        if len(date) == 4:
+                            intermediate['rft.date'] = "%s-01-01" % (date)
+                        elif len(date) == 6:
+                            intermediate['rft.date'] = "%s-%s-01" % (date[:4], date[4:6])
+                        else:
+                            raise ValueError("unknown date format: %s" % date)
 
                     output.write(json.dumps(intermediate))
                     output.write("\n")
