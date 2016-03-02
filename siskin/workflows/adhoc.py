@@ -29,7 +29,9 @@ A place for one time tasks and quick write-ups.
 
 from elasticsearch import helpers as eshelpers
 from gluish.format import TSV
+from siskin.sources.crossref import CrossrefDOIAndISSNList
 from siskin.task import DefaultTask
+import csv
 import datetime
 import elasticsearch
 import json
@@ -72,6 +74,46 @@ class DOIList(AdhocTask):
                                      pubyear.encode(self.encoding),
                                      title.encode(self.encoding),
                                      subtitle.encode(self.encoding))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefWebOfScienceMatch(AdhocTask):
+    """
+    Find all ISSNs for Web of Science export.
+    """
+    file = luigi.Parameter(description='web of science csv')
+
+    def requires(self):
+        return CrossrefDOIAndISSNList()
+
+    def run(self):
+        wos = set()
+
+        with open(self.file) as handle:
+            for line in handle:
+                wos.add(line.strip().lower())
+
+        found = set()
+
+        with self.input().open() as handle:
+
+            with self.output().open('w') as output:
+                pass
+
+            with open(self.output().path, 'wb') as csvfile:
+                csvwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                for line in handle:
+                    parts = [s.strip('"') for s in line.strip().split(',')]
+                    doi, issns = parts[0].lower(), parts[1:]
+                    if doi in wos:
+                        csvwriter.writerow(['OK', doi] + issns)
+                        # output.write_tsv('OK', doi, *issns)
+                        found.add(doi)
+
+                for id in wos.difference(found):
+                    csvwriter.writerow(['NOT_FOUND', id])
+                    # output.write_tsv('NOT_FOUND', id)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
