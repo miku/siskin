@@ -1,3 +1,20 @@
+0.0.139 2016-03-02
+------------------
+
+* ai: filterconf: 50, DE-15 only, w/o holdings
+* ai: filterconf: use one subtree per source (48)
+* ai: filterconf formatting
+* ai: adjust filterconf template, refs. #7111
+* taskhash: stub to report changed implementations of tasks (e.g. for recomputation)
+* adhoc: simplify CrossrefWebOfScienceMatch
+* 85: span-solr expects YYYY-MM-DD format
+* adhoc: match a list of web of science dois against crossref
+* bin: do not run tree, if task output needs parameters
+* installation test: add centos-7.2
+* ai: add todo regarding source switches
+* crossref: add begin parameter to AIIntermediateSchema
+* install: install pigz
+
 0.0.138 2016-03-01
 ------------------
 
