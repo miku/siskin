@@ -43,6 +43,7 @@ import sys
 
 # task -> deps graph
 g = collections.defaultdict(set)
+seen = set()
 
 def iterdeps(task):
     """
@@ -53,7 +54,9 @@ def iterdeps(task):
         depname = (dependency.task_family,)
 
         g[taskname].add(depname)
-        iterdeps(dependency)
+        if dependency not in seen:
+        	seen.add(dependency)
+        	iterdeps(dependency)
 
 def simpleformat(graph):
     """ Format graph as dot. Omit parameters - makes some graphs much smaller. Example: http://imgur.com/a/hxJqv """
