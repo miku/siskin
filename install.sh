@@ -39,7 +39,7 @@ hash wget 2> /dev/null || { echo >&2 "wget is required."; exit 1; }
 # install_latest_deb installs latest deb release, given a username/repository on github.com.
 install_latest_deb() {
     if [ $# -eq 0 ]; then
-        echo "latest_deb_url expects an argument"
+        echo "install_latest_deb expects a username/repository as argument"
         exit 1
     fi
 
@@ -60,7 +60,7 @@ install_latest_deb() {
 # install_latest_rpm installs latest rpm release, given a username/repository on github.com.
 install_latest_rpm() {
     if [ $# -eq 0 ]; then
-        echo "latest_rpm_url expects an argument"
+        echo "install_latest_rpm expects a username/repository as argument"
         exit 1
     fi
 
