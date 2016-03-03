@@ -17,8 +17,6 @@ if [ "$EUID" -ne 0 ]
     exit 1
 fi
 
-echo "installing command line tools..."
-
 # install curl and wget first
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
@@ -33,11 +31,11 @@ else
     echo "not supported: $OSTYPE" && exit 1
 fi
 
-# we don't stop on yum failure, so check explictly
+# we don't stop on yum failure (yum seems to return 1 if everything is up to date), so check here explictly
 hash curl 2> /dev/null || { echo >&2 "curl is required."; exit 1; }
 hash wget 2> /dev/null || { echo >&2 "wget is required."; exit 1; }
 
-# install_latest_deb installs latest deb, given a username/repository on github.com.
+# install_latest_deb installs latest deb release, given a username/repository on github.com.
 install_latest_deb() {
     if [ $# -eq 0 ]; then
         echo "latest_deb_url expects an argument"
@@ -58,7 +56,7 @@ install_latest_deb() {
     wget -O $TMPDIR/transit.deb "$URL" && dpkg -i $TMPDIR/transit.deb && rm -f $TMPDIR/transit.deb
 }
 
-# install_latest_rpm rinstalls latest rpm, given a username/repository on github.com.
+# install_latest_rpm installs latest rpm release, given a username/repository on github.com.
 install_latest_rpm() {
     if [ $# -eq 0 ]; then
         echo "latest_rpm_url expects an argument"
@@ -149,8 +147,6 @@ else
     echo "not supported: $OSTYPE" && exit 1
 fi
 
-echo "installing siskin..."
-
 # install pip
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
@@ -169,31 +165,17 @@ hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is i
 
 pip install -U siskin
 
-echo "setting up configuration..."
+# setup configuration
 mkdir -p /etc/siskin
 mkdir -p /etc/luigi
 
-if [ ! -f "/etc/luigi/client.cfg" ]; then
-    wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/client.cfg
-fi
-if [ ! -f "/etc/luigi/logging.ini" ]; then
-    wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
-fi
-if [ ! -f "/etc/siskin/siskin.ini" ]; then
-    wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
-fi
+[ ! -f "/etc/luigi/client.cfg" ] && wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/client.cfg
+[ ! -f "/etc/luigi/logging.ini" ] && wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
+[ ! -f "/etc/siskin/siskin.ini" ] && wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
 
-echo "setting up autocomplete..."
-if [ ! -f "/etc/siskin/siskin.ini" ]; then
+# setup bash completion for task names
+if [ ! -f "/etc/bash_completion.d/siskin_completion.sh" ]; then
     mkdir -p /etc/bash_completion.d/
     wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
     chmod +x /etc/bash_completion.d/siskin_completion.sh
-else
-    echo "already done."
 fi
-
-cat <<EOF
-  \. _(9>
-    \==_)
-     -'=
-EOF
