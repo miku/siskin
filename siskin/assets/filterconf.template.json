@@ -1083,6 +1083,47 @@
           },
           {
             "or": [
+{
+                "and": [
+                  {
+                    "package": [
+                      "BEFO",
+                      "BLIS",
+                      "CEAB",
+                      "DZI",
+                      "ECON",
+                      "ESTE",
+                      "FOGR",
+                      "HOLZ",
+                      "HWWA",
+                      "IFOK",
+                      "IFOL",
+                      "IHSL",
+                      "INFO",
+                      "IWPR",
+                      "KOEL",
+                      "KUSE",
+                      "MIND",
+                      "PSYT",
+                      "SOFI",
+                      "SOLI",
+                      "WAO",
+                      "XPSY"
+                    ]
+                  },
+                  {
+                    "collection": [
+                      "Genios (Fachzeitschriften)",
+                      "Genios (Wirtschaftswissenschaften)"
+                    ]
+                  },
+                  {
+                    "holdings": {
+                      "file": "{{ file }}"
+                    }
+                  }
+                ]
+              },
               {
                 "and": [
                   {
