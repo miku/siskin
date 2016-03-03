@@ -71,6 +71,7 @@ class AMSLCollectionsISIL(AMSLTask):
     """
     date = luigi.DateParameter(default=datetime.date.today())
     isil = luigi.Parameter(description='ISIL, case sensitive')
+    shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
 
     def requires(self):
         return AMSLCollections(date=self.date)
@@ -80,7 +81,7 @@ class AMSLCollectionsISIL(AMSLTask):
             c = json.load(handle)
         scmap = collections.defaultdict(set)
         for item in c:
-            if not item['shardLabel_str']:
+            if not item['shardLabel_str'] == self.shard:
                 continue
             if not item['isil_str'] == self.isil:
                 continue
