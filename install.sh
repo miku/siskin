@@ -9,6 +9,7 @@
 # 2. We use the Github API to find latest versions of packages.
 #    If you hit the API limit (normally you should not), sit back and wait.
 #
+# No VM at hand? Enjoy a installation screencast: https://asciinema.org/a/bl0r257503bnhxrydz7ucm6if
 
 set -o pipefail
 
