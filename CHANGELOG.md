@@ -1,3 +1,17 @@
+0.0.140 2016-03-02
+------------------
+
+* crossref: CrossrefCollectionsDifference stub, diffs AMSL and crossref collections
+* install: add link to screencast
+* install: shorten install script
+* docs: add filtering pipeline image
+* ai: CrossrefCollections, refs. #6985
+* ai: adjust filterconf
+* ai: prepare assembly from AMSL, AIFilterConfigNext, AIFilterConfigISIL
+* amsl: AMSLCollectionsISIL, make shard a parameter
+* amsl: AMSLCollectionsISIL stub
+* utils: SetEncoder
+
 0.0.139 2016-03-02
 ------------------
 
