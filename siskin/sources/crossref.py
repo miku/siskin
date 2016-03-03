@@ -38,6 +38,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
 from siskin.configuration import Config
+from siskin.sources.amsl import AMSLCollections
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, ElasticsearchMixin
@@ -387,13 +388,47 @@ class CrossrefCollections(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': CrossrefUniqItems(begin=self.begin, date=self.date),
+        return {'input': CrossrefIntermediateSchema(begin=self.begin, date=self.date),
                 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):
         output = shellout("""jq -r '.["finc.mega_collection"]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""", input=self.input().get('input').path)
         luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class CrossrefCollectionsDifference(CrossrefTask):
+    """
+    Refs. #7049. Check list of collections against AMSL Crossref collections and
+    report difference.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefCollections(begin=self.begin, date=self.date),
+            'amsl': AMSLCollections(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        amsl = set()
+
+        with self.input().get('amsl').open() as handle:
+            items = json.load(handle)
+
+        for item in items:
+            if item['sourceID'] == '49':
+                amsl.add(item['collectionLabel'].strip())
+
+        with self.input().get('crossref').open() as handle:
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('name',)):
+                    if row.name not in amsl:
+                        output.write_tsv(row.name)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
