@@ -8,7 +8,7 @@ Various tasks for metadata handling.
 Installation
 ------------
 
-Tested on vanilla CentOS 6.7, 7.1 and Precise 64 boxes:
+Tested on vanilla CentOS 6.7, 7.1, 7.2 and Precise 64 boxes:
 
     $ curl -sL https://git.io/vg2iq | sudo bash
 
