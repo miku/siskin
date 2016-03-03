@@ -21,7 +21,6 @@ bb1a3873f4e6d6e6fff291bac52bb6845ae36d30    siskin.workflows.ai.AICoverageISSN
 """
 
 from __future__ import print_function
-from luigi.task import Register
 from siskin.utils import get_task_import_cache
 import hashlib
 import importlib
