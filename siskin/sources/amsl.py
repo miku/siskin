@@ -40,6 +40,8 @@ uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import SetEncoder
+import collections
 import datetime
 import json
 import luigi
@@ -59,6 +61,35 @@ class AMSLCollections(AMSLTask):
     def run(self):
         output = shellout("""curl --fail "{link}" > {output} """, link=config.get('amsl', 'isil-rel'))
         luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class AMSLCollectionsISIL(AMSLTask):
+    """
+    Per ISIL list of collections.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(description='ISIL, case sensitive')
+
+    def requires(self):
+        return AMSLCollections(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            c = json.load(handle)
+        scmap = collections.defaultdict(set)
+        for item in c:
+            if not item['shardLabel_str']:
+                continue
+            if not item['isil_str'] == self.isil:
+                continue
+            scmap[item['sourceID']].add(item['collectionLabel'].strip())
+        if not scmap:
+            raise RuntimeError('no collections found for ISIL: %s' % self.isil)
+
+        with self.output().open('w') as output:
+            output.write(json.dumps(scmap, cls=SetEncoder) + "\n")
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
