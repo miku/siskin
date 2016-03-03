@@ -48,7 +48,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
-from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections, AMSLHoldingsISILList
+from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections, AMSLHoldingsISILList, AMSLCollectionsISIL
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -190,6 +190,69 @@ class AIIntermediateSchema(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class AIFilterConfigISIL(AITask):
+    """
+    Next iteration of filtering, based on various AMSL responses.
+    Creates the filters for a single ISIL from AMSL.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(description='ISIL')
+
+    def requires(self):
+        return AMSLCollectionsISIL(isil=self.isil)
+
+    @timed
+    def run(self):
+        filters = []
+        with self.input().open() as handle:
+            c = json.load(handle)
+
+        for source, colls in c.iteritems():
+            doc = {
+                'and': [
+                    {
+                        'source': source
+                    },
+                    {
+                        'collections': colls
+                    }
+                ]
+            }
+            filters.append(doc)
+
+        with self.output().open('w') as output:
+            output.write(json.dumps({self.isil: {'or': filters}}))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+class AIFilterConfigNext(AITask):
+    """
+    Next iteration of filtering, based on various AMSL responses.
+    ISILs are hard-coded, but should come from the API as well.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'DE-15': AIFilterConfigISIL(isil='DE-15'),
+            'DE-14': AIFilterConfigISIL(isil='DE-14'),
+        }
+
+    @timed
+    def run(self):
+        config = {}
+        for isil, target in self.input().iteritems():
+            with target.open() as handle:
+                c = json.load(handle)
+                config[isil] = c[isil]
+
+        with self.output().open('w') as output:
+            output.write(json.dumps(config))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
 
 class AIFilterConfig(AITask):
     """
