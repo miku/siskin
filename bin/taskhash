@@ -2,29 +2,77 @@
 # coding: utf-8
 
 """
-Hacky: Calculate checksum of the source code of a Python class and
-use it to name tasks, that may need to be recomputed.
+Usage: taskhash [FILE]
+
+Without FILE, dump (hash, taskname) to stdout. Given a FILE in the same
+format, compare file and current hashes and print task names with modified
+hashes to stdout.
+
+----
+
+Hacky: Calculate checksum of the source code of a Python class and use it to
+name tasks, that may need to be recomputed.
 
 Currently, it prints out hash and full taskname.
 
 42eb25a1b3925e332de69780229299407a1ef983    siskin.workflows.ai.AICoverage
 bb1a3873f4e6d6e6fff291bac52bb6845ae36d30    siskin.workflows.ai.AICoverageISSN
 ...
-
-TODO: keep a record of changes somewhere on the fs.
 """
 
-from siskin.utils import get_task_import_cache
+from __future__ import print_function
 from luigi.task import Register
-import inspect
-import importlib
+from siskin.utils import get_task_import_cache
 import hashlib
+import importlib
+import inspect
+import sys
 
-if __name__ == '__main__':
+def calculate_task_hashes():
+    """
+    Create a list of (hash, taskname) tuples.
+    """
+    hashes = []
     task_import_cache, _ = get_task_import_cache()
     for klassname, modulename in sorted(task_import_cache.iteritems()):
         module = importlib.import_module(modulename)
         klass = getattr(module, klassname)
         sha1 = hashlib.sha1()
         sha1.update(inspect.getsource(klass))
-        print("%s\t%s.%s" % (sha1.hexdigest(), modulename, klassname))
+        hashes.append((sha1.hexdigest(), "%s.%s" % (modulename, klassname)))
+    return hashes
+
+def dump_hashes():
+    """
+    Dumps hash and full task name to stdout.
+    """
+    for hash, name in calculate_task_hashes():
+        print("%s\t%s" % (hash, name))
+
+def compare(filename):
+    """
+    Compare current hashes with previous hashes and dump differences.
+    """
+    fromfile = {}
+    with open(filename) as handle:
+        for line in handle:
+            parts = line.strip().split('\t')
+            if not len(parts) == 2:
+                raise ValueError('invalid format: got %s columns, want 2' % len(parts))
+            fromfile[parts[1]] = parts[0]
+
+    for hash, taskname in calculate_task_hashes():
+        if not fromfile[taskname] == hash:
+            print(taskname.split('.')[-1])
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2 and sys.argv[1] in ['-h', '-help']:
+        print(__doc__, file=sys.stderr)
+        sys.exit(0)
+    if len(sys.argv) == 1:
+        dump_hashes()
+        sys.exit(0)
+    if len(sys.argv) == 2:
+        compare(sys.argv[1])
+        sys.exit(0)
+    print(__doc__, file=sys.stderr)
