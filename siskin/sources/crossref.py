@@ -379,6 +379,25 @@ class CrossrefIntermediateSchema(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class CrossrefCollections(CrossrefTask):
+    """
+    A collection of crossref collections, refs. #6985.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'input': CrossrefUniqItems(begin=self.begin, date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+
+    @timed
+    def run(self):
+        output = shellout("""jq -r '.["finc.mega_collection"]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""", input=self.input().get('input').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class CrossrefDOIList(CrossrefTask):
     """
     A list of Crossref DOIs.
