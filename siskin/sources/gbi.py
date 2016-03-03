@@ -89,7 +89,7 @@ from siskin.benchmark import timed
 from siskin.common import FTPMirror, Executable
 from siskin.configuration import Config
 from siskin.task import DefaultTask
-from siskin.utils import iterfiles
+from siskin.utils import iterfiles, SetEncoder
 import collections
 import datetime
 import json
@@ -130,13 +130,6 @@ DUMP = {
     },
     "date": datetime.date(2015, 11, 1),
 }
-
-class SetEncoder(json.JSONEncoder):
-    """ Helper to encode python sets into JSON lists. """
-    def default(self, obj):
-        if isinstance(obj, set):
-            return list(obj)
-        return json.JSONEncoder.default(self, obj)
 
 class GBITask(DefaultTask):
     """

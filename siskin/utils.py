@@ -55,6 +55,13 @@ MAN_HEADER = r"""
 + Siskin
 """
 
+class SetEncoder(json.JSONEncoder):
+    """ Helper to encode python sets into JSON lists. """
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
 def wc(path):
     """
     Like `wc -l`.
