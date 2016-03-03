@@ -110,7 +110,6 @@ class AIISSNStats(AITask):
             'crossref': CrossrefUniqISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
-            # 'gbi': GBIISSNList(date=self.date),
             'jstor': JstorISSNList(date=self.date)
         }
 
