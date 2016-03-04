@@ -344,8 +344,24 @@ class AIDuplicates(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-        shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """,
-                 input=self.input().path)
+        output = shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """,
+                          input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIDuplicatesSortbyDOI(AITask):
+    """
+    Sort list by DOI.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AIDuplicates(date=self.date)
+
+    def run(self):
+        output = shellout("""LC_ALL=C sort -t , -k2,2 -S35% {input} > {output} """, input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
