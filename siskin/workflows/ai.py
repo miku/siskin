@@ -333,6 +333,22 @@ class AILicensing(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class AIDuplicates(AITask):
+    """
+    First attempt at a list of id, DOI, ISIL list for simple duplicate detection.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AILicensing(date=self.date)
+
+    def run(self):
+        shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class AIExport(AITask):
     """
     Next iteration of AI export.
