@@ -285,6 +285,7 @@ class AIFilterConfig(AITask):
             'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
             'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
             'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
+            'DE-Kn38': AMSLHoldingsFile(isil='DE-Kn38'),
 
             # issn list
             'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/tm6U9D'),

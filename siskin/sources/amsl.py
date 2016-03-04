@@ -148,7 +148,7 @@ class AMSLHoldingsFile(AMSLTask):
 
         for holding in holdings:
             if holding["ISIL"] == self.isil:
-                link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding['DokumentURI'])
+                link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding['HoldingFileURI'])
                 downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
