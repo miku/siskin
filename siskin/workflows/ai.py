@@ -343,7 +343,7 @@ class AIExport(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-        output = shellout("span-solr <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
