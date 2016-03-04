@@ -1,3 +1,15 @@
+0.0.141 2016-04-03
+------------------
+
+* ai: fix output name and dummy AIDuplicatesSortbyDOI
+* ai: add DE-Kn38 and use new amsl API
+* ai: AIDuplicates, fix input key
+* ai: dups stub
+* ai: from span 0.1.75, span-solr is called span-export
+* install: fix names
+* docs: AIExport.png
+* taskdeps-dot: do not visit deps twice
+
 0.0.140 2016-03-02
 ------------------
 
