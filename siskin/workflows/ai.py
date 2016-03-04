@@ -343,7 +343,8 @@ class AIDuplicates(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-        shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """)
+        shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """,
+                 input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
