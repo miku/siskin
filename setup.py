@@ -31,7 +31,7 @@ siskin is a set of tasks for library metadata management.
 import sys
 
 if sys.version_info < (2, 7) or sys.version_info.major > 2:
-    print("siskin runs with python 2.7 or higher, but not with python 3 yet")
+    print("siskin runs with Python 2.7 or higher, but not with Python 3 yet")
     sys.exit(1)
 
 try:
@@ -80,7 +80,7 @@ setup(name='siskin',
       description='Various sources and workflows.',
       url='https://github.com/miku/siskin',
       author='Martin Czygan',
-      author_email='martin.czygan@gmail.com',
+      author_email='martin.czygan@uni-leipzig.de',
       packages=[
         'siskin',
         'siskin.sources',
