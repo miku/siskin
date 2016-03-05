@@ -43,7 +43,7 @@
 #
 
 from gluish.common import Executable
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -188,7 +188,7 @@ class AIIntermediateSchema(AITask):
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class AIFilterConfigISIL(AITask):
     """
