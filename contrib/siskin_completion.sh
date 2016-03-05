@@ -23,9 +23,11 @@
 # siskin task name completion
 #
 # TODO(miku): autocomplete task parameters, too
+
+hash tasknames 2>/dev/null || { return 1; }
+
 _siskin_task_names()
 {
-    hash tasknames 2>/dev/null || { return 1; }
     local cur=${COMP_WORDS[COMP_CWORD]}
     COMPREPLY=( $(compgen -W "$(tasknames)" -- $cur) )
 }
