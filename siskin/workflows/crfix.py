@@ -75,17 +75,17 @@ class CRFixAuthors(CRFixTask):
                     authors = c.get("authors")
                     if authors:
                         for author in authors:
-                            if author["rft.au"]:
+                            if author.get("rft.au"):
                                 output.write_tsv(author["rft.au"].encode('utf-8'))
                                 continue
-                            if author["rft.aulast"] and author["rft.aufirst"]:
+                            if author.get("rft.aulast") and author.get("rft.aufirst"):
                                 name = author["rft.aufirst"].encode('utf-8') + " " + author["rft.aulast"].encode('utf-8')
                                 output.write_tsv(name)
                                 continue
-                            if author["rft.aulast"]:
+                            if author.get("rft.aulast"):
                                 output.write_tsv(author["rft.aulast"].encode('utf-8'))
                                 continue
-                            if author["rft.aufirst"]:
+                            if author.get("rft.aufirst"):
                                 output.write_tsv(author["rft.aufirst"].encode('utf-8'))
                                 continue
 
