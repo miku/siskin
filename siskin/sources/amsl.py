@@ -148,6 +148,10 @@ class AMSLHoldingsFile(AMSLTask):
 
         for holding in holdings:
             if holding["ISIL"] == self.isil:
+                # refs. #7142
+                if 'kbart' not in holding['HoldingFileURI'].lower():
+                    self.logger.debug("skipping non-KBART holding URI: %s" % holding['HoldingFileURI'])
+                    continue
                 link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding['HoldingFileURI'])
                 downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
