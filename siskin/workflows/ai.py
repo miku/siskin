@@ -25,21 +25,7 @@
 # Aggregated Index workflows
 # ==========================
 #
-# TODO:
-#
-# Split licensing and export format. Split span-export into:
-#
-# 1. Intermediate Schema (IS) + AMSL Holdings API -> Licenced IS
-# 2. Licenced IS + AMSL Collections API -> Filtered Licenced IS
-# 3. Filtered Licenced IS -> SOLR export
-#
-# Examples:
-#
-# $ islabel -file DE-15:path/to/holdings.kbart -issnlist DE-X:path/issn.list is.0.ldj > is.1.ldj
-# $ isfilter -collections DE-15:path/to/allowed.collections.txt is.1.ldj > is.2.ldj
-# $ span-export -o solr-flavor-19 is.2.ldj > solr.ldj
-#
-# Or something along those lines.
+# AMSL (api) + AIIntermediateSchema (sources) = AILicensing (isil) -> AIExport (for solr)
 #
 
 from gluish.common import Executable
