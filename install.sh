@@ -167,7 +167,8 @@ hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is i
 pip install --upgrade pip
 pip install --upgrade siskin
 
-# download file from master branch: https://raw.githubusercontent.com/miku/siskin/master/<PATH>
+# Download file from master branch: https://raw.githubusercontent.com/miku/siskin/master/<PATH>
+# Existing files are not overwritten.
 #
 #   $ tree etc
 #   etc
