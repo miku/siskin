@@ -64,7 +64,7 @@ install_latest_rpm() {
         exit 1
     fi
 
-    # if we failed to install jq, complain here
+    # if for some reason we failed to install jq bail out
     hash jq 2> /dev/null || { echo >&2 "jq is required."; exit 1; }
 
     URL=$(curl -s https://api.github.com/repos/$1/releases | jq '.[0].assets_url' | xargs curl -s | jq -r '.[].browser_download_url' | grep "rpm")
@@ -75,7 +75,7 @@ install_latest_rpm() {
     yum install -y "$URL"
 }
 
-# centos_6_install_python_27 install Pytohn 2.7 safely with altinstall.
+# centos_6_install_python_27 install Python 2.7 safely with altinstall.
 centos_6_install_python_27() {
     yum install -y zlib-dev openssl-devel sqlite-devel bzip2-devel xz-libs
 
@@ -165,19 +165,32 @@ fi
 hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is in EPEL."; exit 1; }
 
 pip install --upgrade pip
-pip install -U siskin
+pip install --upgrade siskin
 
-# setup configuration
-mkdir -p /etc/siskin
-mkdir -p /etc/luigi
+# download file from master branch: https://raw.githubusercontent.com/miku/siskin/master/<PATH>
+#
+#   $ tree etc
+#   etc
+#   ├── bash_completion.d
+#   │   └── siskin_completion.sh
+#   ├── luigi
+#   │   ├── client.cfg
+#   │   └── logging.ini
+#   └── siskin
+#       └── siskin.ini
+#
+download_file_from_github() {
+    BASE=https://raw.githubusercontent.com/miku/siskin/master
+    if [ "$#" -eq 0 ]; then
+        echo "download_config_file_from_github expects a path as argument, which is appended to $BASE"
+        exit 1
+    fi
+    mkdir -p $(basename "$1") && [ ! -f "$1" ] && wget -O "$1" "$BASE$1"
+}
 
-[ ! -f "/etc/luigi/client.cfg" ] && wget -O /etc/luigi/client.cfg https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/client.cfg
-[ ! -f "/etc/luigi/logging.ini" ] && wget -O /etc/luigi/logging.ini https://raw.githubusercontent.com/miku/siskin/master/etc/luigi/logging.ini
-[ ! -f "/etc/siskin/siskin.ini" ] && wget -O /etc/siskin/siskin.ini https://raw.githubusercontent.com/miku/siskin/master/etc/siskin/siskin.example.ini
+download_file_from_github "/etc/luigi/client.cfg"
+download_file_from_github "/etc/luigi/logging.ini"
+download_file_from_github "/etc/siskin/siskin.ini"
+download_file_from_github "/etc/bash_completion.d/siskin_completion.sh"
 
-# setup bash completion for task names
-if [ ! -f "/etc/bash_completion.d/siskin_completion.sh" ]; then
-    mkdir -p /etc/bash_completion.d/
-    wget -O /etc/bash_completion.d/siskin_completion.sh https://raw.githubusercontent.com/miku/siskin/master/contrib/siskin_completion.sh
-    chmod +x /etc/bash_completion.d/siskin_completion.sh
-fi
+chmod +x /etc/bash_completion.d/siskin_completion.sh
