@@ -186,7 +186,7 @@ download_file_from_github() {
         echo "download_config_file_from_github expects a path as argument, which is appended to $BASE"
         exit 1
     fi
-    mkdir -p $(basename "$1") && [ ! -f "$1" ] && wget -O "$1" "$BASE$1"
+    mkdir -p $(dirname "$1") && [ ! -f "$1" ] && wget -O "$1" "$BASE$1"
 }
 
 download_file_from_github "/etc/luigi/client.cfg"
