@@ -164,7 +164,6 @@ fi
 # ensure pip is installed
 hash pip 2> /dev/null || { echo >&2 "pip is required. On Centos, python-pip is in EPEL."; exit 1; }
 
-pip install --upgrade pip
 pip install --upgrade siskin
 
 # Download file from master branch: https://raw.githubusercontent.com/miku/siskin/master/<PATH>
