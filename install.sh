@@ -109,6 +109,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_deb "miku/hurrly"
         install_latest_deb "miku/esbulk"
         install_latest_deb "miku/oaimi"
+        install_latest_deb "miku/filterline"
 
     elif [ -f /etc/redhat-release ]; then
         # extract CentOS version
@@ -141,6 +142,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         install_latest_rpm "miku/hurrly"
         install_latest_rpm "miku/esbulk"
         install_latest_rpm "miku/oaimi"
+        install_latest_rpm "miku/filterline"
     else
         echo "not supported: $OSTYPE" && exit 1
     fi
