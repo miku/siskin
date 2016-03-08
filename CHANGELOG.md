@@ -1,4 +1,17 @@
-0.0.141 2016-04-03
+0.0.142 2016-03-08
+------------------
+
+* remove unused tests
+* install: ubuntu: allow 2G RAM, xml etree gcc was killed with 1G?
+* install: unify dir structure, move contrib to etc
+* crossref: actually pass begin parameter
+* amsl: skip non-kbart by name, refs. #7142
+* ai: update docs
+* crfix: accept missing keys
+* crfix: stub, possible mitigation of https://github.com/CrossRef/rest-api-doc/issues/67
+* ai: mark output as gzip
+
+0.0.141 2016-03-04
 ------------------
 
 * ai: fix output name and dummy AIDuplicatesSortbyDOI
