@@ -146,13 +146,21 @@ class AMSLHoldingsFile(AMSLTask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
+        # The property which contains the URI of the holding file.
+        urikey = 'HoldingFileURI'
+
         for holding in holdings:
             if holding["ISIL"] == self.isil:
+
+                if urikey not in holding:
+                    raise RuntimeError('possible AMSL API change, expected: %s, available keys: %s' % (urikey, holding.keys()))
+
                 # refs. #7142
-                if 'kbart' not in holding['DokumentURI'].lower():
-                    self.logger.debug("skipping non-KBART holding URI: %s" % holding['DokumentURI'])
+                if 'kbart' not in holding[urikey].lower():
+                    self.logger.debug("skipping non-KBART holding URI: %s" % holding[urikey])
                     continue
-                link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding['DokumentURI'])
+
+                link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding[urikey])
                 downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
