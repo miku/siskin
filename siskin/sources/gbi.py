@@ -390,47 +390,38 @@ class GBIDatabaseType(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class GBIPackageMap(GBITask):
+class GBIDatabaseMap(GBITask):
     """
-    Relate a package (e.g. Wirtschaftswissenschaften) to a database name (e.g. IHSL)
-    The same database can belong to multiple packages.
-
-    Combine information derived from Excel files with evidence from filesystem.
-
-    Example output:
-
-        {
-          ...
-          "IAC": [
-            "Wirtschaftswissenschaften",
-            "Sozialwissenschaften"
-          ],
-          "PASS": [
-            "Wirtschaftswissenschaften"
-          ],
-          ...
-        }
-
+    Create a map to use with span-import (assets/genios/dbmap.json).
     """
     since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
-    def run(self):
-        pkgmap = collections.defaultdict(set)
+    def requires(self):
+        return GBIDatabaseType(date=self.date, since=self.since)
 
-        with luigi.File(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
-            for row in handle.iter_tsv(cols=('package', 'db')):
-                pkgmap[row.db].add(row.package)
+    def run(self):
+        dbmap = collections.defaultdict(set)
 
         with luigi.File(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('package', 'db')):
-                pkgmap[row.db].add(row.package)
+                dbmap[row.db].add(row.package)
+                # Full text means Fachzeitschriften (FZS). FZS is a package as
+                # well as an indicator to treat these records according to
+                # license agreement.
+                dbmap[row.db].add('Fachzeitschriften')
+
+        with luigi.File(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('package', 'db')):
+                # Whereas reference databases are check along with a generic
+                # holding file later.
+                dbmap[row.db].add(row.package)
 
         with self.output().open('w') as output:
-            json.dump(pkgmap, output, cls=SetEncoder)
+            output.write(json.dumps(dbmap, cls=SetEncoder) + "\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class GBIUpdate(GBITask):
     """
