@@ -194,17 +194,7 @@ class AIFilterConfigISIL(AITask):
             c = json.load(handle)
 
         for source, colls in c.iteritems():
-            doc = {
-                'and': [
-                    {
-                        'source': source
-                    },
-                    {
-                        'collections': colls
-                    }
-                ]
-            }
-            filters.append(doc)
+            filters.append({'and': [{'source': source}, {'collections': colls}]})
 
         with self.output().open('w') as output:
             output.write(json.dumps({self.isil: {'or': filters}}))
