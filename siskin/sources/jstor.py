@@ -174,6 +174,28 @@ class JstorIntermediateSchema(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class JstorExport(JstorTask):
+    """
+    A SOLR-importable version of Jstor.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+	from siskin.workflows.ai import AIFilterConfig
+	return {
+	    'is': JstorIntermediateSchema(date=self.date),
+	    'config': AIFilterConfig(date=self.date)
+	}
+
+    @timed
+    def run(self):
+	output = shellout("span-tag -c {config} <(unpigz -c {input}) | span-export | pigz -c > {output}",
+			  input=self.input().get('file').path, config=self.input().get('config').path)
+	luigi.File(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 class JstorISSNList(JstorTask):
     """
     A list of JSTOR ISSNs.
