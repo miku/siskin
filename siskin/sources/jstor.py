@@ -183,7 +183,7 @@ class JstorExport(JstorTask):
     def requires(self):
 	from siskin.workflows.ai import AIFilterConfig
 	return {
-	    'is': JstorIntermediateSchema(date=self.date),
+	    'file': JstorIntermediateSchema(date=self.date),
 	    'config': AIFilterConfig(date=self.date)
 	}
 
