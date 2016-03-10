@@ -542,6 +542,31 @@ class GBIIntermediateSchemaByKind(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class GBIExportByKind(GBITask):
+    """
+    A SOLR-importable version of GBI, by kind.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        from siskin.workflows.ai import AIFilterConfig
+        return {
+            'file': GBIIntermediateSchemaByKind(issue=self.issue, since=self.since, date=self.date, kind=self.kind),
+            'config': AIFilterConfig(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | span-export | pigz -c > {output}",
+                          input=self.input().get('file').path, config=self.input().get('config').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 class GBIDatabaseTable(GBITask):
     """
     For a given database name, extract the ID and date.
