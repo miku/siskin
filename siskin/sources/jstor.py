@@ -181,20 +181,20 @@ class JstorExport(JstorTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	from siskin.workflows.ai import AIFilterConfig
-	return {
-	    'file': JstorIntermediateSchema(date=self.date),
-	    'config': AIFilterConfig(date=self.date)
-	}
+        from siskin.workflows.ai import AIFilterConfig
+        return {
+            'file': JstorIntermediateSchema(date=self.date),
+            'config': AIFilterConfig(date=self.date)
+        }
 
     @timed
     def run(self):
-	output = shellout("span-tag -c {config} <(unpigz -c {input}) | span-export | pigz -c > {output}",
-			  input=self.input().get('file').path, config=self.input().get('config').path)
-	luigi.File(output).move(self.output().path)
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | span-export | pigz -c > {output}",
+                          input=self.input().get('file').path, config=self.input().get('config').path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 class JstorISSNList(JstorTask):
     """
