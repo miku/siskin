@@ -750,6 +750,37 @@ class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     def output(self):
         return self.input()
 
+class GBIISSNList(GBITask):
+    """
+    A list of ISSN in GBI. About 400.
+    """
+    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='fulltext')
+
+    def requires(self):
+        return GBIDatabaseISSNWrapper(issue=self.issue, since=self.since, date=self.date, kind=self.kind)
+
+    def run(self):
+        issns = set()
+        for target in self.input():
+            with target.open() as handle:
+                for line in handle:
+                    parts = line.strip().split('\t')
+                    if len(parts) < 3:
+                        continue
+                    match = re.search('.*([0-9]{4}-[0-9]{3}[0-9X]).*', parts[2])
+                    if match:
+                        issns.add(match.group(1))
+
+        with self.output().open('w') as output:
+            for issn in sorted(issns):
+                output.write_tsv(issn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class GBIDatabaseWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare all databases.
