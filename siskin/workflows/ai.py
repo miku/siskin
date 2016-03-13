@@ -35,6 +35,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
+from siskin.configuration import Config
 from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections, AMSLHoldingsISILList, AMSLCollectionsISIL
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
@@ -56,6 +57,8 @@ import re
 import requests
 import string
 import tempfile
+
+config = Config.instance()
 
 class AITask(DefaultTask):
     TAG = 'ai'
