@@ -243,7 +243,7 @@ class URLCache(object):
             if r.status_code >= 400:
                 raise RuntimeError('%s on %s' % (r.status_code, url))
             with tempfile.NamedTemporaryFile(delete=False) as output:
-                output.write(r.text)
+                output.write(r.text.encode('utf-8'))
             os.rename(output.name, self.get_cache_file(url))
 
         with open(self.get_cache_file(url)) as handle:
