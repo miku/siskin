@@ -41,6 +41,7 @@ from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNL
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.doi import DOIBlacklist
 from siskin.sources.gbi import GBIIntermediateSchemaByKind
+from siskin.sources.gbi import GBIISSNList
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.task import DefaultTask
@@ -400,6 +401,7 @@ class AICoverageISSN(AITask):
             'jstor': JstorISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
+            'gbi': GBIISSNList(date=self.date),
             'file': AMSLHoldingsFile(isil=self.isil),
         }
 
@@ -418,7 +420,7 @@ class AICoverageISSN(AITask):
                 if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[2]):
                     issns['file'].add(fields[2])
 
-        sources = ['crossref', 'jstor', 'degruyter', 'doaj']
+        sources = ['crossref', 'jstor', 'degruyter', 'doaj', 'gbi']
 
         for source in sources:
             with self.input().get(source).open() as handle:
