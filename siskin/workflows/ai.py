@@ -28,6 +28,7 @@
 # AMSL (api) + AIIntermediateSchema (sources) = AILicensing (isil) -> AIExport (for solr)
 #
 
+from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
@@ -43,6 +44,7 @@ from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.task import DefaultTask
+from siskin.utils import URLCache
 import collections
 import datetime
 import itertools
@@ -50,6 +52,7 @@ import json
 import luigi
 import os
 import re
+import requests
 import string
 import tempfile
 
@@ -375,11 +378,23 @@ class AICoverageISSN(AITask):
     """
     For all AI sources and all holding files, find the number
     (perc) of ISSNs in the holding file, that we have some reach to.
+
+    Result looks something like this, indicating availablity and sources:
+
+    2091-2145   crossref|doaj
+    2091-2234   crossref
+    2091-2560   crossref
+    2091-2609   crossref
+    2091-2730   NOT_FOUND
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     isil = luigi.Parameter(default='DE-15')
 
     def requires(self):
+        """
+        TODO: Add GBI ISSN list.
+        """
         return {
             'crossref': CrossrefUniqISSNList(date=self.date),
             'jstor': JstorISSNList(date=self.date),
@@ -420,6 +435,51 @@ class AICoverageISSN(AITask):
                     output.write_tsv(issn, "NOT_FOUND")
                 else:
                     output.write_tsv(issn, "|".join(fields))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIISSNCoverageCatalogMatches(AITask):
+    """
+    For all ISSN, that are NOT_FOUND in AI, do a HTTP request to the current
+    catalog and scrape the number of results.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(default='DE-15')
+
+    def requires(self):
+        return AICoverageISSN(date=self.date, isil=self.isil)
+
+    def run(self):
+        if not self.isil == 'DE-15':
+            raise RuntimeError('not implemented except for DE-15')
+
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        adapter = requests.adapters.HTTPAdapter(max_retries=3)
+        cache.sess.mount('http://', adapter)
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
+                    if row.status == 'NOT_FOUND':
+                        link = 'https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN' % row.issn
+                        self.logger.info('fetch #%05d: %s' % (i, link))
+                        body = cache.get(link)
+                        if 'Keine Ergebnisse!' in body:
+                            output.write_tsv(row.issn, 'ERR_NOT_IN_CATALOG', link)
+                        else:
+                            soup = BeautifulSoup(body)
+                            rs = soup.findAll("div", {"class" : "floatleft"})
+                            if len(rs) == 0:
+                                output.write_tsv(row.issn, 'ERR_LAYOUT', link)
+                                continue
+                            first = rs[0]
+                            match = re.search(r'Treffer([0-9]+)-([0-9]+)von([0-9]+)', first.text)
+                            if match:
+                                total = match.group(3)
+                                output.write_tsv(row.issn, 'FOUND_RESULTS_%s' % total, link)
+                            else:
+                                output.write_tsv(row.issn, 'ERR_NO_MATCH', link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
