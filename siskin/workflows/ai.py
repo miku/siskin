@@ -519,13 +519,13 @@ class AIISSNCoverageSolrMatches(AITask):
             with self.output().open('w') as output:
                 for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
                     if row.status == 'NOT_FOUND':
-                        link = '%s/select?q=institution=%s+AND+issn:%s&wt=json' % (finc, self.isil, row.issn)
+                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (finc, self.isil, row.issn)
                         self.logger.info('fetch #%05d: %s' % (i, link))
                         body = cache.get(link)
                         content = json.loads(body)
                         output.write_tsv('finc', row.issn, content['response']['numFound'], link)
                     else:
-                        link = '%s/select?q=institution=%s+AND+issn:%s&wt=json' % (ai, self.isil, row.issn)
+                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (ai, self.isil, row.issn)
                         self.logger.info('fetch #%05d: %s' % (i, link))
                         body = cache.get(link)
                         content = json.loads(body)
@@ -545,9 +545,14 @@ class AIISSNDetailedCoverageReport(AITask):
         return AIISSNCoverageSolrMatches(date=self.date, isil=self.isil)
 
     def run(self):
+        import pandas as pd
+
+        metrics = collections.defaultdict(dict)
         df = pd.read_csv(self.input().path, sep='\t', names=['shard', 'issn', 'count'], usecols=[0, 1, 2])
+
         # number of articles per shard
-        print([sum(df[df.shard == shard]['count']) for shard in ['finc', 'ai']])
+        metrics['sum']['finc'] = sum(df[df.shard == 'finc']['count'])
+        metrics['sum']['ai'] = sum(df[df.shard == 'ai']['count'])
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
