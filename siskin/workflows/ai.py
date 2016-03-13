@@ -512,16 +512,24 @@ class AIISSNCoverageSolrMatches(AITask):
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         cache.sess.mount('http://', adapter)
 
-        prefix = config.get('ai', 'solr')
+        finc = config.get('ai', 'finc-solr')
+        ai = config.get('ai', 'ai-solr')
 
         with self.input().open() as handle:
             with self.output().open('w') as output:
                 for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
-                    link = '%s/select?q=issn:%s&wt=json' % (prefix, row.issn)
-                    self.logger.info('fetch #%05d: %s' % (i, link))
-                    body = cache.get(link)
-                    content = json.loads(body)
-                    output.write_tsv(row.issn, row.status, content['response']['numFound'], link)
+                    if row.status == 'NOT_FOUND':
+                        link = '%s/select?q=issn:%s&wt=json' % (finc, row.issn)
+                        self.logger.info('fetch #%05d: %s' % (i, link))
+                        body = cache.get(link)
+                        content = json.loads(body)
+                        output.write_tsv('finc', row.issn, content['response']['numFound'], link)
+                    else:
+                        link = '%s/select?q=issn:%s&wt=json' % (ai, row.issn)
+                        self.logger.info('fetch #%05d: %s' % (i, link))
+                        body = cache.get(link)
+                        content = json.loads(body)
+                        output.write_tsv('ai', row.issn, content['response']['numFound'], link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
