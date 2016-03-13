@@ -517,12 +517,11 @@ class AIISSNCoverageSolrMatches(AITask):
         with self.input().open() as handle:
             with self.output().open('w') as output:
                 for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
-                    if row.status == 'NOT_FOUND':
-                        link = '%s/select?q=issn:%s&wt=json' % (prefix, row.issn)
-                        self.logger.info('fetch #%05d: %s' % (i, link))
-                        body = cache.get(link)
-                        content = json.loads(body)
-                        output.write_tsv(row.issn, content['response']['numFound'], link)
+                    link = '%s/select?q=issn:%s&wt=json' % (prefix, row.issn)
+                    self.logger.info('fetch #%05d: %s' % (i, link))
+                    body = cache.get(link)
+                    content = json.loads(body)
+                    output.write_tsv(row.issn, row.status, content['response']['numFound'], link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
