@@ -494,6 +494,36 @@ class AIISSNCoverageCatalogMatches(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class AIISSNCoverageSolrMatches(AITask):
+    date = ClosestDateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(default='DE-15')
+
+    def requires(self):
+        return AICoverageISSN(date=self.date, isil=self.isil)
+
+    def run(self):
+        if not self.isil == 'DE-15':
+            raise RuntimeError('not implemented except for DE-15')
+
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        adapter = requests.adapters.HTTPAdapter(max_retries=3)
+        cache.sess.mount('http://', adapter)
+
+        prefix = config.get('ai', 'solr')
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
+                    if row.status == 'NOT_FOUND':
+                        link = '%s/select?q=issn:%s&wt=json' % (prefix, row.issn)
+                        self.logger.info('fetch #%05d: %s' % (i, link))
+                        body = cache.get(link)
+                        content = json.loads(body)
+                        output.write_tsv(row.issn, content['response']['numFound'], link)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class AIISSNCoverageReport(AITask):
     """
     For all ISILs, see what percentage of ISSN are covered in AI.
