@@ -443,6 +443,14 @@ class AIISSNCoverageCatalogMatches(AITask):
     """
     For all ISSN, that are NOT_FOUND in AI, do a HTTP request to the current
     catalog and scrape the number of results.
+
+    Example output:
+
+    0171-4880   FOUND_RESULTS_1 https://katalog.ub.uni-...
+    0171-5801   ERR_NOT_IN_CATALOG  https://katalog.ub....
+    0171-5860   FOUND_RESULTS_466   https://katalog.ub....
+    0171-7227   FOUND_RESULTS_2 https://katalog.ub.uni-...
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     isil = luigi.Parameter(default='DE-15')
