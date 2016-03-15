@@ -10,7 +10,7 @@ Installation
 
 Tested on vanilla CentOS 6.7, 7.1, 7.2 and Precise 64 boxes:
 
-    $ curl -sL https://git.io/vg2iq | sudo bash
+    $ curl -sL https://git.io/vg2iq | sudo -i bash
 
 Run
 ---
