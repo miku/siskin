@@ -270,7 +270,7 @@ class CrossrefDOITableClean(CrossrefTask):
         from siskin.sources.doi import DOIBlacklist
         return {
             'table': CrossrefDOITable(begin=self.begin, date=self.date),
-            'blacklist': DOIBlacklist(date=self.date),
+	    'blacklist': CrossrefDOIBlacklist(date=self.date),
         }
 
     def run(self):
@@ -624,3 +624,61 @@ class CrossrefGenericItems(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class CrossrefDOIHarvest(CrossrefTask):
+    """
+    Harvest DOI redirects from doi.org API. This is a long running task. It's
+    probably best to run this tasks complete separate from the rest and let
+    other processing pipelines use the result, as it is available.
+
+    ----
+
+    It is highly recommended that you put a static entry into /etc/hosts
+    for doi.org while `hurrly` is running.
+
+    As of 2015-07-31 doi.org resolves to six servers. Just choose one.
+
+	$ nslookup doi.org
+
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+	"""
+	If we have more DOI sources, we could add them as requirements here.
+	"""
+	return {'input': CrossrefDOIList(date=self.date),
+		'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly'),
+		'pigz': Executable(name='pigz', message='http://zlib.net/pigz/')}
+
+    def run(self):
+	output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
+	luigi.File(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+
+class CrossrefDOIBlacklist(CrossrefTask):
+    """
+    Create a blacklist of DOIs. Possible cases:
+
+    1. A DOI redirects to http://www.crossref.org/deleted_DOI.html or
+       most of these sites below crossref.org: https://gist.github.com/miku/6d754104c51fb553256d
+    2. A DOI API lookup does not return a HTTP 200.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+	return DOIHarvest(date=self.date)
+
+    def run(self):
+	_, stopover = tempfile.mkstemp(prefix='siskin-')
+	shellout("""LC_ALL=C zgrep -E "http(s)?://.*.crossref.org" {input} >> {output}""",
+		 input=self.input().path, output=stopover)
+	shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
+		 input=self.input().path, output=stopover)
+	output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
+	luigi.File(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path())

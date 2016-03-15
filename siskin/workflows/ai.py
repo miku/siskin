@@ -40,7 +40,6 @@ from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections, AMSLHoldingsI
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
-from siskin.sources.doi import DOIBlacklist
 from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.gbi import GBIISSNList
 from siskin.sources.holdings import HoldingsFile
