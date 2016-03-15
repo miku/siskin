@@ -261,6 +261,7 @@ class CrossrefDOITable(CrossrefTask):
 class CrossrefDOITableClean(CrossrefTask):
     """
     Clean the DOI table from DOIs, that are blacklisted (in crossref but leading nowhere).
+    TODO: Remove DOIBlacklist as dependency, since it is quite heavy.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
