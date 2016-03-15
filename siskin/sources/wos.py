@@ -7,6 +7,7 @@ Web of Science.
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 from siskin.sources.crossref import CrossrefDOIAndISSNList
+from siskin.sources.doaj import DOAJDOIList, DOAJISSNList
 from gluish.format import TSV
 import datetime
 import luigi
@@ -91,6 +92,102 @@ class WOSCrossrefMatch(WOSTask):
 
                 for id in wos.difference(found):
                     output.write_tsv('NOT_FOUND', id)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WOSMatchDOAJAndReferenceDOI(WOSTask):
+    """
+    For all references in WOS export, check if DOI is in DOAJ.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    file = luigi.Parameter(description='web of science doi list (references)', significant=False)
+
+    def requires(self):
+        return DOAJDOIList(date=self.date)
+
+    def run(self):
+        reference_dois = set()
+        with open(self.file) as handle:
+            for line in handle:
+                reference_dois.add(line.strip())
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for row in handle:
+                    parts = row.split('\t')
+                    if len(parts) < 0:
+                        continue
+                    doi = parts[0].strip()
+                    if doi in reference_dois:
+                        output.write_tsv('OPEN_ACCESS', doi)
+                    else:
+                        output.write_tsv('NOT_IN_DOAJ', doi)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WOSISSNForDOI(WOSTask):
+    """
+    Extract ISSN for a list of DOIs.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    file = luigi.Parameter(description='web of science doi list (references)', significant=False)
+
+    def requires(self):
+        return CrossrefDOIAndISSNList(date=self.date)
+
+    def run(self):
+        reference_dois = set()
+        with open(self.file) as handle:
+            for line in handle:
+                reference_dois.add(line.strip())
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for i, line in enumerate(handle):
+                    if i % 1000000 == 0:
+                        self.logger.info('checked %s dois' % i)
+                    line = line.replace('","', '\t').replace('"', '').strip()
+                    parts = line.split('\t')
+                    if len(parts) < 2:
+                        continue
+                    doi, issns = parts[0], parts[1:]
+                    if doi in reference_dois:
+                        output.write_tsv(doi, *issns)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class WOSISSNInDOAJ(WOSTask):
+    """
+    For all references in WOS export, check if DOI is in DOAJ.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    file = luigi.Parameter(description='web of science doi list (references)', significant=False)
+
+    def requires(self):
+        return {
+            'wos-doi-list': WOSISSNForDOI(file=self.file, date=self.date),
+            'doaj-issns': DOAJISSNList(date=self.date),
+        }
+
+    def run(self):
+        doaj_issns = set()
+        with self.input().get('doaj-issns').open() as handle:
+            for line in handle:
+                doaj_issns.add(line.strip())
+
+        with self.input().get('wos-doi-list').open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    fields = line.strip().split('\t')
+                    doi = fields[0]
+                    for issn in fields[1:]:
+                        if issn in doaj_issns:
+                            output.write_tsv('IN_DOAJ', doi, issn)
+                        else:
+                            output.write_tsv('NOT_IN_DOAJ', doi, issn)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
