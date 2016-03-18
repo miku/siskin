@@ -1,3 +1,35 @@
+0.0.144 2016-03-18
+------------------
+
+* install: test/installation for proxied env
+* install: add -i, so possible proxy settings are used
+* doi: remove doi tag, move tasks to crossref, for which this filter is used, anyway
+* wos: adhoc analysis for oa office
+* amsl: flip urikey
+* crossref: add TODO
+* ai: fix query
+* ai: run queries with institition filter on
+* ai: add gbi issns to AICoverageISSN
+* ai: AIISSNCoverageCatalogMatches stub
+* utils: encode utf-8
+* gbi: add GBIISSNList
+* wos: move CrossrefWebOfScienceMatch -> WOSCrossrefMatch
+* wos: issn list
+* crossref: process subs break pipes, sometimes
+* ai: save some lines
+* crossref: span-gh-dump is gone as well
+* ai: iscov is deprecated
+* gbi: solr-export by kind, stub
+* jstor: fix whitespace
+* jstor: fix key in JstorExport
+* jstor: JstorExport stub, test per-source solr-importable artifacts
+* amsl: warn explicitly about API changes
+* gbi: shorten config by using package names only
+* gbi: manually add KUSE
+* contrib: helpers and preparation scripts, that we do not need to deploy
+* gbi: add GBIDatabaseMap, generate dbmap for span (e.g. like https://git.io/v2ECx)
+* install: add missing filterline
+
 0.0.142 2016-03-08
 ------------------
 
