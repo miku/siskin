@@ -4,6 +4,11 @@ dist:
 	python setup.py sdist
 
 upload:
+	# https://pypi.python.org/pypi?%3Aaction=register_form
+	# $ cat ~/.pypirc
+	# [pypi]
+	# username:abc
+	# password:secret
 	python setup.py sdist upload
 
 clean:
