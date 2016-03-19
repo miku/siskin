@@ -24,4 +24,4 @@
 set -eu
 set -o pipefail
 
-taskcat "$@" | head -10
+taskcat "$@" | head -10
