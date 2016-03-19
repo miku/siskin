@@ -36,7 +36,6 @@ complete -F _siskin_task_names taskdeps-dot
 complete -F _siskin_task_names taskdir
 complete -F _siskin_task_names taskdo
 complete -F _siskin_task_names taskdu
-complete -F _siskin_task_names taskfast
 complete -F _siskin_task_names taskhead
 complete -F _siskin_task_names taskhelp
 complete -F _siskin_task_names taskless
