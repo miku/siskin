@@ -1,3 +1,14 @@
+0.0.147 2016-03-19
+------------------
+
+* bin/taskdu: fail if we cannot determine dir
+* completion: remove obsolete command
+* taskoutput: fix imports and friendlier reaction on spelling errors
+* bin: towards more robust scripts
+* bin/taskoutput: use luigis CmdlineParser
+* bin/taskdo: friendlier missing parameter error
+* completion: shells are not started in venvs; move tasknames into function
+
 0.0.146 2016-03-19
 ------------------
 
