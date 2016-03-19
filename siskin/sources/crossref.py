@@ -29,6 +29,14 @@ infrastructure to support more effective scholarly communications.
 Our citation-linking network today covers over 68 million journal articles
 and other content items (books chapters, data, theses, technical reports)
 from thousands of scholarly and professional publishers around the globe.
+
+Configuration
+-------------
+
+[crossref]
+
+doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
+
 """
 
 from gluish.common import Executable
@@ -261,25 +269,28 @@ class CrossrefDOITable(CrossrefTask):
 class CrossrefDOITableClean(CrossrefTask):
     """
     Clean the DOI table from DOIs, that are blacklisted (in crossref but leading nowhere).
-    TODO: Remove DOIBlacklist as dependency, since it is quite heavy.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        from siskin.sources.doi import DOIBlacklist
-        return {
-            'table': CrossrefDOITable(begin=self.begin, date=self.date),
-	    'blacklist': CrossrefDOIBlacklist(date=self.date),
-        }
+        return CrossrefDOITable(begin=self.begin, date=self.date)
 
     def run(self):
+        filepath = config.get('crossref', 'doi-blacklist', 'no-blacklist-available')
+
+        if filepath == 'no-blacklist-available':
+            self.logger.info("no DOI blacklist configured, cf. #5706")
+            self.input().copy(self.output().path)
+            return
+
         blacklisted = set()
-        with self.input().get('blacklist').open() as handle:
+
+        with open(filepath) as handle:
             for line in (line.strip() for line in handle):
                 blacklisted.add(line)
 
-        with self.input().get('table').open() as handle:
+        with self.input().open() as handle:
             with self.output().open('w') as output:
                 for line in (line.strip() for line in handle):
                     parts = line.split('\t')
@@ -638,25 +649,25 @@ class CrossrefDOIHarvest(CrossrefTask):
 
     As of 2015-07-31 doi.org resolves to six servers. Just choose one.
 
-	$ nslookup doi.org
+    $ nslookup doi.org
 
     """
-    date = ClosestDateParameter(default=datetime.date.today())
-
     def requires(self):
-	"""
-	If we have more DOI sources, we could add them as requirements here.
-	"""
-	return {'input': CrossrefDOIList(date=self.date),
-		'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly'),
-		'pigz': Executable(name='pigz', message='http://zlib.net/pigz/')}
+        """
+        If we have more DOI sources, we could add them as requirements here.
+        """
+        return {
+            'input': CrossrefDOIList(date=datetime.date.today()),
+            'hurrly': Executable(name='hurrly', message='http://github.com/miku/hurrly'),
+            'pigz': Executable(name='pigz', message='http://zlib.net/pigz/')
+        }
 
     def run(self):
-	output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
-	luigi.File(output).move(self.output().path)
+        output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
 
 class CrossrefDOIBlacklist(CrossrefTask):
     """
@@ -665,20 +676,20 @@ class CrossrefDOIBlacklist(CrossrefTask):
     1. A DOI redirects to http://www.crossref.org/deleted_DOI.html or
        most of these sites below crossref.org: https://gist.github.com/miku/6d754104c51fb553256d
     2. A DOI API lookup does not return a HTTP 200.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
 
+    The output of this task should be used as doi-blacklist in config.
+    """
     def requires(self):
-	return DOIHarvest(date=self.date)
+        return DOIHarvest(date=self.date)
 
     def run(self):
-	_, stopover = tempfile.mkstemp(prefix='siskin-')
-	shellout("""LC_ALL=C zgrep -E "http(s)?://.*.crossref.org" {input} >> {output}""",
-		 input=self.input().path, output=stopover)
-	shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
-		 input=self.input().path, output=stopover)
-	output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
-	luigi.File(output).move(self.output().path)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""LC_ALL=C zgrep -E "http(s)?://.*.crossref.org" {input} >> {output}""",
+             input=self.input().path, output=stopover)
+        shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
+             input=self.input().path, output=stopover)
+        output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path())
