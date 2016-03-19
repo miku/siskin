@@ -24,16 +24,14 @@
 #
 
 """
-Find the output of (most) tasks.
+Show task output, if it has a path.
 """
 
 from __future__ import print_function
-from luigi.task import Register
+from luigi.cmdline_parser import CmdlineParser
+from luigi.parameter import MissingParameterException
 from siskin.utils import get_task_import_cache
-from siskin.utils import pairwise
-import collections
 import importlib
-import os
 import sys
 
 if __name__ == '__main__':
@@ -56,43 +54,14 @@ if __name__ == '__main__':
         from siskin.sources import *
         from siskin.workflows import *
 
-    if not taskname in Register.task_names():
-        print('no such task: %s' % taskname, file=sys.stderr)
-        sys.exit(1)
-
-    # workaround for #1
-    ignore = ['--local-scheduler', '--no-lock', '--parallel-scheduling',
-              '--assistant', '--scheduler-record-task-history']
-    args = [arg for arg in sys.argv[2:] if not arg in ignore]
-
-    kwargs = dict((k.lstrip('--').replace('-', '_'), v) for k, v in pairwise(args))
-
-    # ignore global arguments
-    for param in ('local-scheduler', 'lock', 'lock-pid-dir', 'workers',
-                  'logging-conf-file', 'scheduler-host', 'scheduler-port'):
-        kwargs.pop(param, None)
-
-    task_klass = Register.get_task_cls(taskname)
-    typed_kwargs = dict()
-    for k, v in kwargs.iteritems():
+    try:
+        parser = CmdlineParser(sys.argv[1:])
+        output = parser.get_task_obj().output()
         try:
-            klass = getattr(task_klass, k).__class__
-            typed_kwargs[k] = klass().parse(v)
+            print(output.path)
         except AttributeError as err:
-            print('ignoring missed attribute {0}'.format(k))
-
-    task = task_klass(**typed_kwargs)
-    output = task.output()
-
-    if isinstance(output, collections.Iterable):
-        if isinstance(output, dict):
-            for key, target in output.iteritems():
-                print(target.fn, file=sys.stdout)
-        else:
-            for op in output:
-                try:
-                    print(op.path, file=sys.stdout)
-                except AttributeError:
-                    print(op, file=sys.stdout)
-    else:
-        print(output.path, file=sys.stdout)
+            print('output of task has no path', file=sys.stderr)
+            sys.exit(1)
+    except MissingParameterException as err:
+        print('missing parameter: %s' % err, file=sys.stderr)
+        sys.exit(1)
