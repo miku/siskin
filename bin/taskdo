@@ -27,6 +27,8 @@
 The main command line program to interact with the tasks.
 """
 
+from __future__ import print_function
+from luigi.parameter import MissingParameterException
 from siskin.utils import get_task_import_cache
 import importlib
 import luigi
@@ -50,4 +52,8 @@ if __name__ == '__main__':
         from siskin.sources import *
         from siskin.workflows import *
 
-    luigi.run()
+    try:
+        luigi.run()
+    except MissingParameterException as err:
+        print('missing parameter: %s' % err, file=sys.stderr)
+        sys.exit(1)
