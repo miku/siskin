@@ -1,3 +1,9 @@
+0.0.145 2016-03-19
+------------------
+
+* crossref: remove direct dependency on DOIBlacklist, allow file to be configured
+* ops: add sample crontab entry
+
 0.0.144 2016-03-18
 ------------------
 
