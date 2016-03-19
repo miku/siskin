@@ -30,44 +30,44 @@ from __future__ import print_function
 from luigi.cmdline_parser import CmdlineParser
 from luigi.parameter import MissingParameterException
 from luigi.task_register import TaskClassNotFoundException
+from pygments import highlight
+from pygments.formatters import TerminalFormatter
+from pygments.lexers import PythonLexer
 from siskin.utils import get_task_import_cache
 import importlib
 import inspect
 import os
 import sys
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import TerminalFormatter
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-	print('taskinspect TASKNAME', file=sys.stderr)
-	sys.exit(1)
+        print('taskinspect TASKNAME', file=sys.stderr)
+        sys.exit(1)
 
     taskname = sys.argv[1]
 
     # fast access through a bit of caching
     task_import_cache, path = get_task_import_cache()
     if taskname in task_import_cache:
-	importlib.import_module(task_import_cache[taskname])
+        importlib.import_module(task_import_cache[taskname])
     else:
-	try:
-	    os.remove(path)
-	except OSError:
-	    pass
+        try:
+            os.remove(path)
+        except OSError:
+            pass
 
-	from siskin.sources import *
-	from siskin.workflows import *
+        from siskin.sources import *
+        from siskin.workflows import *
 
     try:
-	parser = CmdlineParser(sys.argv[1:])
-	obj = parser.get_task_obj()
-	snippet = inspect.getsource(obj.__class__)
-	hlsnippet = highlight(snippet, PythonLexer(), TerminalFormatter())
-	print(hlsnippet)
+        parser = CmdlineParser(sys.argv[1:])
+        obj = parser.get_task_obj()
+        snippet = inspect.getsource(obj.__class__)
+        hlsnippet = highlight(snippet, PythonLexer(), TerminalFormatter())
+        print(hlsnippet)
     except MissingParameterException as err:
-	print('missing parameter: %s' % err, file=sys.stderr)
-	sys.exit(1)
+        print('missing parameter: %s' % err, file=sys.stderr)
+        sys.exit(1)
     except TaskClassNotFoundException as err:
-	print(err, file=sys.stderr)
-	sys.exit(1)
+        print(err, file=sys.stderr)
+        sys.exit(1)

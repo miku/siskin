@@ -2,7 +2,6 @@
 # coding: utf-8
 
 from __future__ import print_function
-from luigi.parameter import MissingParameterException
 from luigi.task import Register
 from siskin.benchmark import green, yellow
 from siskin.sources import *
