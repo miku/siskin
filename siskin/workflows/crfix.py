@@ -1,8 +1,8 @@
 # coding: utf-8
-#
+
 #  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
-#                 by The Finc Authors, http://finc.info
-#                 by Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                    The Finc Authors, http://finc.info
+#                    Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -20,7 +20,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-#
 
 """
 Possible mitigation of https://github.com/CrossRef/rest-api-doc/issues/67.
