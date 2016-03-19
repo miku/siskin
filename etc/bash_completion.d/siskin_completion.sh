@@ -39,6 +39,7 @@ complete -F _siskin_task_names taskdo
 complete -F _siskin_task_names taskdu
 complete -F _siskin_task_names taskhead
 complete -F _siskin_task_names taskhelp
+complete -F _siskin_task_names taskinspect
 complete -F _siskin_task_names taskless
 complete -F _siskin_task_names taskls
 complete -F _siskin_task_names taskopen
