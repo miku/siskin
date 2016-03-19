@@ -280,7 +280,12 @@ class CrossrefDOITableClean(CrossrefTask):
         filepath = config.get('crossref', 'doi-blacklist', 'no-blacklist-available')
 
         if filepath == 'no-blacklist-available':
-            self.logger.info("no DOI blacklist configured, cf. #5706")
+            self.logger.warning('no DOI blacklist configured, cf. #5706')
+            self.input().copy(self.output().path)
+            return
+
+        if not os.path.exists(filepath):
+            self.logger.warn('crossref DOI blacklist configured, but file is missing: %s' % filepath)
             self.input().copy(self.output().path)
             return
 
