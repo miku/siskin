@@ -15,8 +15,19 @@ Tested on vanilla CentOS 6.7, 7.1, 7.2 and Precise 64 boxes:
 Update
 ------
 
-For siskin updates a `pip install -U siskin` suffices. For a full update, run
-`curl -sL https://git.io/vg2iq | sudo -i bash` again.
+For siskin updates a
+
+```
+$ pip install -U siskin
+```
+
+suffices. For a full update, run
+
+```
+$ curl -sL https://git.io/vg2iq | sudo -i bash
+```
+
+again.
 
 Run
 ---
@@ -28,6 +39,10 @@ List tasks:
 Run simple task:
 
     $ taskdo WikipediaTitles --language pcd
+
+Documentation:
+
+    $ taskdocs | less -R
 
 Configure
 ---------
