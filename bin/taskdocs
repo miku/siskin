@@ -2,15 +2,16 @@
 # coding: utf-8
 
 from __future__ import print_function
+from luigi.parameter import MissingParameterException
 from luigi.task import Register
+from siskin.benchmark import green, yellow
 from siskin.sources import *
 from siskin.workflows import *
 import sys
-from siskin.benchmark import green, yellow
 
 if __name__ == '__main__':
     task_names = Register.task_names()
-    print('  {0} tasks found\n\n'.format(len(task_names)))
+    print('{0} tasks found\n'.format(len(task_names)))
 
     for name in task_names:
         if name.islower():
