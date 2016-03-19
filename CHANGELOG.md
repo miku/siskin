@@ -1,3 +1,8 @@
+0.0.146 2016-03-19
+------------------
+
+* crossref: allow misconfiguration of crossref.doi-blacklist
+
 0.0.145 2016-03-19
 ------------------
 
