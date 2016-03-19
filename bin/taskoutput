@@ -30,8 +30,10 @@ Show task output, if it has a path.
 from __future__ import print_function
 from luigi.cmdline_parser import CmdlineParser
 from luigi.parameter import MissingParameterException
+from luigi.task_register import TaskClassNotFoundException
 from siskin.utils import get_task_import_cache
 import importlib
+import os
 import sys
 
 if __name__ == '__main__':
@@ -64,4 +66,7 @@ if __name__ == '__main__':
             sys.exit(1)
     except MissingParameterException as err:
         print('missing parameter: %s' % err, file=sys.stderr)
+        sys.exit(1)
+    except TaskClassNotFoundException as err:
+        print(err, file=sys.stderr)
         sys.exit(1)
