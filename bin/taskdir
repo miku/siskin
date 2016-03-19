@@ -23,10 +23,12 @@
 #
 
 set -eu
+
 OUTPUT=$(taskoutput "$@")
+
 if [ "$?" -eq 0 ]; then
     dirname "$OUTPUT"
 else
-    echo "cannot determine task output"
+    echo "cannot determine task directory"
     exit 1
 fi

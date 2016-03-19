@@ -34,4 +34,4 @@ xopen() {
     fi
 }
 
-xopen $(taskoutput $@ 2> /dev/null)
+xopen $(taskoutput "$@")

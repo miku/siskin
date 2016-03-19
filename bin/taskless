@@ -25,10 +25,4 @@
 set -eu
 set -o pipefail
 
-args=("$@")
-
-if [ "${args[0]}" == "-N" ]; then
-    less -N $(taskoutput "${@:2}"|tail -1)
-else
-    less $(taskoutput "$@"|tail -1)
-fi
+taskcat "$@" | less

@@ -33,5 +33,5 @@ if __name__ == '__main__':
         config = Config.instance()
         print(config.get('core', 'home'))
     except ConfigParser.Error as err:
-        print('Invalid configuration @%s: %s' % (config._config_paths, err), file=sys.stderr)
+        print('invalid configuration @%s: %s' % (config._config_paths, err), file=sys.stderr)
         sys.exit(1)

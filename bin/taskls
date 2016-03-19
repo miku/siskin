@@ -25,7 +25,7 @@
 set -eu
 set -o pipefail
 
-OUTPUT=$(taskoutput "$@" 2> /dev/null|tail -1)
+OUTPUT=$(taskoutput "$@")
 
 if [ -n "$OUTPUT" ]; then
     ls -lah "$OUTPUT"
