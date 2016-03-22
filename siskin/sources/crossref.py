@@ -191,7 +191,13 @@ class CrossrefLineDOI(CrossrefTask):
     So by using tac we should get the correct answer here, but it might probably
     be more robust, to use `timestamp` or some inherent attribute of the record
     for ordering.
-    """
+
+    Q: DOI "10.1016/j.visres.2013.12.006" is in CrossrefChunkItems, but does not
+    get extracted here. Why?
+
+    A: 10.1016/j.visres.2013.12.006 is only an associated DOI, here a
+    "Corrigendum to" the original article, which has been published in a
+    subsequent volume. """
 
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
