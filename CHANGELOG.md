@@ -1,3 +1,17 @@
+0.0.148 2016-03-22
+------------------
+
+* crossref: add note on CrossrefChunkItems (HEAD, origin/master, origin/HEAD, master) [Martin Czygan]
+* bin/taskrm: fix [ [Martin Czygan]
+* update completion [Martin Czygan]
+* cleanup and new command: taskinspect [Martin Czygan]
+* bin/taskhead: fix whitespace [Martin Czygan]
+* taskdocs: minimalist manual [Martin Czygan]
+* update license headers [Martin Czygan]
+* update logging.ini [Martin Czygan]
+* update README [Martin Czygan]
+* Makefile: add note on pypi [Martin Czygan]
+
 0.0.147 2016-03-19
 ------------------
 
