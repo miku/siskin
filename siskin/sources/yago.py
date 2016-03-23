@@ -46,10 +46,9 @@ class YagoDump(YagoTask):
 
     @timed
     def run(self):
-        url = "http://www.mpi-inf.mpg.de/yago-naga/yago/download/yago/yago2s_ttl.7z"
+        url = "http://resources.mpi-inf.mpg.de/yago-naga/yago/download/yago/yago3_entire_tsv.7z"
         output = shellout("""wget --retry-connrefused -O {output} {url}""", url=url)
-        output = shellout("""7z e -so {input} 2> /dev/null > {output}""", input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ttl'))
+        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
