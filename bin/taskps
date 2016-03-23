@@ -46,6 +46,7 @@
 from __future__ import print_function
 import argparse
 import datetime
+import errno
 import json
 import requests
 import sys
@@ -59,19 +60,25 @@ if __name__ == '__main__':
         if ':' not in addr:
             addr = '%s:8082' % addr
 
-    print()
-    print('>> %s, %s' % (addr, datetime.datetime.now()))
-    print()
+    try:
+        print()
+        print('>> %s, %s' % (addr, datetime.datetime.now()))
+        print()
 
-    for status in ['DONE', 'RUNNING', 'PENDING', 'FAILED', 'DISABLED']:
-        print(status)
-        print('-' * len(status))
-        print()
-        data = {"status": status, "upstream_status": "", "search":""}
-        r = requests.get('http://%s/api/task_list' % addr, params={'data': json.dumps(data)})
-        if r.status_code >= 400:
-            raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
-        response = json.loads(r.text)
-        for task, props in sorted(response['response'].iteritems()):
-            print('* %s' % task)
-        print()
+        for status in ['RUNNING', 'PENDING', 'DONE', 'FAILED', 'DISABLED']:
+            print(status)
+            print('-' * len(status))
+            print()
+            data = {"status": status, "upstream_status": "", "search":""}
+            r = requests.get('http://%s/api/task_list' % addr, params={'data': json.dumps(data)})
+            if r.status_code >= 400:
+                raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
+            response = json.loads(r.text)
+            for task, props in sorted(response['response'].iteritems()):
+                print('* %s' % task)
+            print()
+    except IOError as err:
+        if err.errno == errno.EPIPE:
+            pass
+        else:
+            raise
