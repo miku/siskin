@@ -55,10 +55,15 @@ WHITELIST = [
 ]
 
 if __name__ == '__main__':
+    if len(sys.argv) >= 2 and sys.argv[1] in ('-h', '--help'):
+        print('Usage: TASKPURGE=YES taskpurge', file=sys.stderr)
+        sys.exit(1)
+
     dryrun = True
     if os.environ.get('TASKPURGE', 'NO').upper() in ('1', 'TRUE', 'YES'):
         dryrun = False
 
+    # a set of path matching the WHITELIST
     keep = set()
 
     try:
@@ -69,11 +74,15 @@ if __name__ == '__main__':
         for dir, _, _ in os.walk(home):
             for s in WHITELIST:
                 if s in dir:
+                    print('adding %s to whitelist' % dir, file=sys.stderr)
                     keep.add(dir)
                     break
 
         # create a whitelisted set of paths, that contain all the parent dirs as well
         whitelisted = set()
+
+        print('%s paths whitelisted' % len(keep), file=sys.stderr)
+        print('including whitelist parents...', file=sys.stderr)
 
         for path in keep:
             whitelisted.add(path)
@@ -83,6 +92,9 @@ if __name__ == '__main__':
             while p not in ('/', ''):
                 whitelisted.add(p)
                 p = os.path.dirname(p)
+
+        print('%s paths whitelisted' % len(whitelisted), file=sys.stderr)
+        print('purging...', file=sys.stderr)
 
         # actually run the purge
         for dir, _, _ in os.walk(home):
