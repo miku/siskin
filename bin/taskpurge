@@ -39,11 +39,19 @@ import re
 import sys
 
 WHITELIST = [
-    '028/DOAJDump',
-    '048/GBIDropbox',
-    'common/FTPMirror',
-    'crossref/CrossrefHarvestChunk',
-    'wikipedia/WikipediaArticleDump',
+    '/003/NEPCopy',
+    '/028/DOAJDump',
+    '/048/GBIDropbox',
+    '/common/FTPMirror',
+    '/crossref/CrossrefHarvestChunk',
+    '/dblp/DBLPDownload',
+    '/hackernews/HNCommentsDownload',
+    '/mag/MAGDump',
+    '/mag/MAGFile',
+    '/nl/NLSync',
+    '/wikipedia/WikipediaArticleDump',
+    '/yago/YagoDump',
+    '/zdb/ZDBDump',
 ]
 
 if __name__ == '__main__':
