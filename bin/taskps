@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Display done, running, pending and failed tasks in terminal.
+#
+# Poor man's top:
+#
+#     $ watch taskps localhost:8082
+#
+# ----
+#
+# curl -s http://localhost:8082/api/task_list -d 'data={"status":"PENDING","upstream_status":"","search":""}' | jq '.'
+#
+# DONE
+# ----
+#
+# * AIFilterConfig(date=2016-03-23)
+# * AIIntermediateSchema(date=2016-03-23)
+# * CrossrefIntermediateSchema(begin=2006-01-01, date=2016-03-23)
+# * CrossrefUniqItems(begin=2006-01-01, date=2016-03-23)
+# * DOAJFiltered(date=2016-03-23)
+# * DOAJIntermediateSchema(date=2016-03-23)
+# * DegruyterIntermediateSchema(date=2016-03-23)
+# * DegruyterXML(date=2016-03-23, group=SSH)
+# * Executable(name=pigz, message=http://zlib.net/pigz/)
+# * Executable(name=span-import, message=http://git.io/vI8NV)
+# * GBIIntermediateSchemaByKind(issue=20151101000000, since=2015-11-01, date=2016-03-23, kind=fulltext)
+# * GBIIntermediateSchemaByKind(issue=20151101000000, since=2015-11-01, date=2016-03-23, kind=references)
+# * JstorIntermediateSchema(date=2016-03-23)
+# * JstorXML(date=2016-03-23)
+#
+# RUNNING
+# -------
+#
+# * AILicensing(date=2016-03-23)
+#
+# PENDING
+# -------
+#
+# * AIExport(date=2016-03-23)
+#
+# FAILED
+# ------
+
+
+from __future__ import print_function
+import argparse
+import datetime
+import json
+import requests
+import sys
+
+if __name__ == '__main__':
+
+    addr = 'localhost:8082'
+
+    if len(sys.argv) >= 2:
+        addr = sys.argv[1]
+        if ':' not in addr:
+            addr = '%s:8082' % addr
+
+    print()
+    print('>> %s, %s' % (addr, datetime.datetime.now()))
+    print()
+
+    for status in ['DONE', 'RUNNING', 'PENDING', 'FAILED', 'DISABLED']:
+        print(status)
+        print('-' * len(status))
+        print()
+        data = {"status": status, "upstream_status": "", "search":""}
+        r = requests.get('http://%s/api/task_list' % addr, params={'data': json.dumps(data)})
+        if r.status_code >= 400:
+            raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
+        response = json.loads(r.text)
+        for task, props in sorted(response['response'].iteritems()):
+            print('* %s' % task)
+        print()
