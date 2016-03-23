@@ -65,3 +65,8 @@ Evolving workflows
 ------------------
 
 ![](http://i.imgur.com/8bFvSvN.gif)
+
+Monitor progress
+----------------
+
+* with `taskps` - https://asciinema.org/a/chm7kexyplj0tqalqqirz7dyh
