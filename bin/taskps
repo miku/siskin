@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
             response = json.loads(r.text)
             for task, props in sorted(response['response'].iteritems()):
-                print('* %s' % task)
+                print('%s\t* %s' % (status[0].lower(), task))
             print()
     except IOError as err:
         if err.errno == errno.EPIPE:
