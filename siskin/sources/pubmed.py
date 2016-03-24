@@ -62,3 +62,21 @@ class PubmedPaths(PubmedTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class PubmedDOIList(PubmedTask):
+    """
+    Extract rough DOI list from articles*.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return PubmedPaths(date=self.date)
+
+    @timed
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                print(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
