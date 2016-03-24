@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Show task output, if it has a path.
+Show task code.
 """
 
 from __future__ import print_function

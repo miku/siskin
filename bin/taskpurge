@@ -21,9 +21,12 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
-# During a software update processes and tasks change. Instead of keeping track of
-# all the things that need to be rebuilt, we purge everything, except a few tasks,
-# which take a long time to run (e.g. downloading 70G over HTTP or 300G over FTP).
+# ----
+#
+# During a software update, processes and tasks change. Instead of keeping track
+# of all the things that need to be rebuilt, we purge everything, except a few
+# tasks, which take a long time to run (e.g. downloading 70G over HTTP or 300G
+# over FTP, etc.).
 
 # The update process then looks like this:
 
