@@ -100,6 +100,9 @@ class AMSLCollectionsISILList(AMSLTask):
                 continue
             isils.add(item['isil_str'])
 
+        if len(isils) == 0:
+            raise RuntimeError('no isils found: maybe mispelled shard name?')
+
         with self.output().open('w') as output:
             for isil in sorted(isils):
                 output.write_tsv(isil)
