@@ -32,6 +32,7 @@ Config:
 
 isil-rel = https://x.com/static/about.json
 holdings = https://x.com/inhouseservices/list?do=holdings
+external-content-files = https://x.com/outboundservices/list?do=externalcontentfiles
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 
 """
@@ -59,6 +60,19 @@ class AMSLCollections(AMSLTask):
 
     def run(self):
         output = shellout("""curl --fail "{link}" > {output} """, link=config.get('amsl', 'isil-rel'))
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class AMSLContentFiles(AMSLTask):
+    """
+    Content files for collections (as alternative to holding files).
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""curl --fail "{link}" > {output} """, link=config.get('amsl', 'external-content-files'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
