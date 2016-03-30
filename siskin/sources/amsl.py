@@ -147,6 +147,29 @@ class AMSLContentFiles(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
+class AMSLCollectionsShardFilter(AMSLTask):
+    """
+    A per-shard list of collection entries.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
+
+    def requires(self):
+        return AMSLCollections(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            c = json.load(handle)
+
+        with self.output().open('w') as output:
+            for item in c:
+                if not item['shardLabel_str'] == self.shard:
+                    continue
+                output.write(json.dumps(item) + "\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class AMSLCollectionsISILList(AMSLTask):
     """
     A per-shard list of ISILs for which we get information from AMSL.
