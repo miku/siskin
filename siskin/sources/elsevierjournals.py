@@ -41,7 +41,6 @@ from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
-from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
@@ -63,14 +62,11 @@ class ElsevierJournalsTask(DefaultTask):
     """ Jstor base. """
     TAG = '085'
 
-    def closest(self):
-        return weekly(self.date)
-
 class ElsevierJournalsPaths(ElsevierJournalsTask):
     """
     Sync.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
     timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
@@ -93,11 +89,10 @@ class ElsevierJournalsExpand(ElsevierJournalsTask):
     """
     Expand all tar files.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
     tag = luigi.Parameter(default='SAXC0000000000002')
 
     def requires(self):
-        return ElsevierJournalsPaths(date=self.date)
+        return ElsevierJournalsPaths()
 
     @timed
     def run(self):
@@ -127,11 +122,10 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
         $ solrbulk x.ldj
 
     """
-    date = ClosestDateParameter(default=datetime.date.today())
     tag = luigi.Parameter(default='SAXC0000000000002')
 
     def requires(self):
-        return ElsevierJournalsExpand(date=self.date, tag=self.tag)
+        return ElsevierJournalsExpand(tag=self.tag)
 
     @timed
     def run(self):
@@ -269,11 +263,10 @@ class ElsevierJournalsSolr(ElsevierJournalsTask):
     """
     Create something solr importable. Attach a single ISIL to all records.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
     tag = luigi.Parameter(default='SAXC0000000000002')
 
     def requires(self):
-        return ElsevierJournalsIntermediateSchema(date=self.date, tag=self.tag)
+        return ElsevierJournalsIntermediateSchema(tag=self.tag)
 
     @timed
     def run(self):
@@ -289,7 +282,7 @@ class ElsevierJournalsSolrCombined(ElsevierJournalsTask):
     """
     Combine a set of tags into a single file.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         tags = [
@@ -302,7 +295,7 @@ class ElsevierJournalsSolrCombined(ElsevierJournalsTask):
             "SAXC0000000000015",
         ]
         for tag in tags:
-            yield ElsevierJournalsSolr(date=self.date, tag=tag)
+            yield ElsevierJournalsSolr(tag=tag)
 
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
