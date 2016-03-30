@@ -1,3 +1,20 @@
+0.0.150 2016-03-30
+------------------
+
+* 85: switch to daily, refs. #6975
+* 85: ad-hoc concat
+* 85: another date template
+* pubmed: stubs
+* bin: docs
+* taskps: grepable status
+* update README
+* taskps: handle broken pipe
+* taskpurge: extend whitelist
+* setup.py: add taskpurge
+* yago: do not uncompress
+* taskdo: catch missing task error
+* add taskpurge command
+
 0.0.149 2016-03-23
 ------------------
 
