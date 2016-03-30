@@ -37,6 +37,7 @@ uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 
 """
 
+from gluish.format import TSV
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.task import DefaultTask
@@ -77,6 +78,34 @@ class AMSLContentFiles(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
+class AMSLCollectionsISILList(AMSLTask):
+    """
+    A per-shard list of ISILs for which we get information from AMSL.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
+
+    def requires(self):
+        return AMSLCollections(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            c = json.load(handle)
+
+        isils = set()
+
+        for item in c:
+            if not item['shardLabel_str'] == self.shard:
+                continue
+            isils.add(item['isil_str'])
+
+        with self.output().open('w') as output:
+            for isil in sorted(isils):
+                output.write_tsv(isil)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class AMSLCollectionsISIL(AMSLTask):
     """
