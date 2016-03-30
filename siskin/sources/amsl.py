@@ -35,6 +35,74 @@ holdings = https://x.com/inhouseservices/list?do=holdings
 external-content-files = https://x.com/outboundservices/list?do=externalcontentfiles
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 
+----
+
+TODO:
+
+Goal: Assemble complete attachment information (source and collection level,
+holdings, lists and other filters) from AMSL API responses.
+
+E.g. given a collection API response:
+
+Filter relevant ISILs and extract source and collections
+
+```
+{
+    "DE-X": {
+        "and": [
+            {
+                "source": "123"
+            },
+            {
+                "collection": ["...", "...", ...]
+            }
+        ]
+    }
+}
+```
+
+If there is an entry in AMSLHoldings for that ISIL, include holdings file.
+
+```
+{
+    "DE-X": {
+        "and": [
+            {
+                "source": "123"
+            },
+            {
+                "collection": ["...", "...", ...]
+            },
+            {
+                "holdings": {
+                    "file": "..."
+                }
+            }
+        ]
+    }
+}
+```
+
+If there is an entry in content files for a given collection name, use that (and
+ignore / replace collection):
+
+```
+{
+    "DE-D13": {
+        "and": [
+            {
+                "source": "123"
+            },
+            {
+                "holdings": {
+                    "url": "url://to/content-file"
+                }
+            }
+        ]
+    }
+}
+```
+
 """
 
 from gluish.format import TSV
