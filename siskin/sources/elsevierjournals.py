@@ -55,6 +55,7 @@ import json
 import luigi
 import os
 import re
+import tempfile
 
 config = Config.instance()
 
@@ -278,6 +279,35 @@ class ElsevierJournalsSolr(ElsevierJournalsTask):
     def run(self):
         output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') {input} > {output}""", input=self.input().path)
         output = shellout("span-solr {input} > {output}", input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+
+class ElsevierJournalsSolrCombined(ElsevierJournalsTask):
+    """
+    Combine a set of tags into a single file.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        tags = [
+            "SAXC0000000000009",
+            "SAXC0000000000010",
+            "SAXC0000000000011",
+            "SAXC0000000000012",
+            "SAXC0000000000013",
+            "SAXC0000000000014",
+            "SAXC0000000000015",
+        ]
+        for tag in tags:
+            yield ElsevierJournalsSolr(date=self.date, tag=tag)
+
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
