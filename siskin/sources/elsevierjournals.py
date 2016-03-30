@@ -253,6 +253,8 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
                             intermediate['rft.date'] = "%s-01-01" % (date)
                         elif len(date) == 6:
                             intermediate['rft.date'] = "%s-%s-01" % (date[:4], date[4:6])
+                        elif len(date) == 8:
+                            intermediate['rft.date'] = "%s-%s-%s" % (date[:4], date[4:6], date[6:8])
                         else:
                             raise ValueError("unknown date format: %s" % date)
 
