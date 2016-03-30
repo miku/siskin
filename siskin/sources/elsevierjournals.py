@@ -259,6 +259,34 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class ElsevierJournalsIntermediateSchemaCombined(ElsevierJournalsTask):
+    """
+    Combine a set of tags into a single file.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        tags = [
+            "SAXC0000000000009",
+            "SAXC0000000000010",
+            "SAXC0000000000011",
+            "SAXC0000000000012",
+            "SAXC0000000000013",
+            "SAXC0000000000014",
+            "SAXC0000000000015",
+        ]
+        for tag in tags:
+            yield ElsevierJournalsIntermediateSchema(tag=tag)
+
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class ElsevierJournalsSolr(ElsevierJournalsTask):
     """
     Create something solr importable. Attach a single ISIL to all records.
