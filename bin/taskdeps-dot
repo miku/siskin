@@ -32,30 +32,42 @@ Example outputs images: http://imgur.com/a/12Dag, http://i.imgur.com/8bFvSvN.gif
 """
 
 from __future__ import print_function
-from siskin.utils import pairwise, random_string
+from luigi.cmdline_parser import CmdlineParser
+from luigi.parameter import MissingParameterException
 from luigi.task import Register
+from luigi.task_register import TaskClassNotFoundException
 from siskin.sources import *
 from siskin.workflows import *
 import collections
-import re
 import sys
 
 # task -> deps graph
 g = collections.defaultdict(set)
 seen = set()
 
+# These tasks are rendered with all parameters.
+INCLUDE_FULLY = set(['Executable', 'FTPMirror'])
+
 def iterdeps(task):
     """
     Collect dependencies recursively and store them in the global graph `g`.
     """
     for dependency in task.deps():
-        taskname = (task.task_family,)
-        depname = (dependency.task_family,)
+
+        if task.task_family in INCLUDE_FULLY:
+            taskname = (task.task_id,)
+        else:
+            taskname = (task.task_family,)
+
+        if dependency.task_family in INCLUDE_FULLY:
+            depname = (dependency.task_id,)
+        else:
+            depname = (dependency.task_family,)
 
         g[taskname].add(depname)
         if dependency not in seen:
-        	seen.add(dependency)
-        	iterdeps(dependency)
+            seen.add(dependency)
+            iterdeps(dependency)
 
 def simpleformat(graph):
     """ Format graph as dot. Omit parameters - makes some graphs much smaller. Example: http://imgur.com/a/hxJqv """
@@ -70,25 +82,14 @@ def simpleformat(graph):
     return s
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('taskdeps-dot TASKNAME', file=sys.stderr)
+    try:
+        parser = CmdlineParser(sys.argv[1:])
+        task = parser.get_task_obj()
+        iterdeps(task)
+        print(simpleformat(g))
+    except MissingParameterException as err:
+        print('missing parameter: %s' % err, file=sys.stderr)
         sys.exit(1)
-
-    taskname = sys.argv[1]
-
-    if not taskname in Register.task_names():
-        print('no such task: %s' % taskname, file=sys.stderr)
+    except TaskClassNotFoundException as err:
+        print(err, file=sys.stderr)
         sys.exit(1)
-
-    # workaround for #1
-    ignore = ['--local-scheduler', '--no-lock', '--parallel-scheduling',
-              '--assistant', '--scheduler-record-task-history']
-    args = [arg for arg in sys.argv[2:] if not arg in ignore]
-
-    kwargs = dict((k.lstrip('--').replace('-', '_'), v) for k, v in pairwise(args))
-
-    klass = Register.get_task_cls(taskname)
-    task = klass(**kwargs)
-    iterdeps(task)
-
-    print(simpleformat(g))
