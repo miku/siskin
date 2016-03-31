@@ -43,13 +43,14 @@ Vagrant.configure(2) do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+
+    # Customize the amount of memory on the VM:
+    # SOLR will -Xms1024m, so:
+    vb.memory = "2048"
+  end
   #
   # View the documentation for the provider you are using for more
   # information on available options.
@@ -78,6 +79,7 @@ Vagrant.configure(2) do |config|
 
     # 3. Install PHP
     sudo apt-get -y install php5 php5-dev php-pear php5-json php5-ldap php5-mcrypt php5-mysql php5-xsl php5-intl php5-gd
+    sudo php5enmod mcrypt
     sudo apt-get -y install php5-sybase
 
     # 4. Install the Java JDK
@@ -115,6 +117,10 @@ Vagrant.configure(2) do |config|
     sudo ln -s /usr/local/vufind2/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf
     sudo service apache2 restart
 
-    echo "Go to ==> http://localhost:8080/vufind"
+    echo "Next steps"
+    echo "----------"
+    echo
+    echo "* login and start vufind: cd /usr/local/vufind2 && ./vufind.sh start"
+    echo "* visit http://localhost:8080/vufind"
   SHELL
 end
