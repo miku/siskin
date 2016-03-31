@@ -1,0 +1,120 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure(2) do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://atlas.hashicorp.com/search.
+  config.vm.box = "ubuntu/trusty64"
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
+  # such as FTP and Heroku are also available. See the documentation at
+  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
+  # config.push.define "atlas" do |push|
+  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
+  # end
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get upgrade
+
+    # 1. Install Apache HTTP Server
+    sudo apt-get -y install apache2
+    sudo a2enmod rewrite
+    sudo /etc/init.d/apache2 force-reload
+
+    # 2. Install MySQL, no root password
+    DEBIAN_FRONTEND=noninteractive sudo -E apt-get -y install mysql-server
+
+    # 3. Install PHP
+    sudo apt-get -y install php5 php5-dev php-pear php5-json php5-ldap php5-mcrypt php5-mysql php5-xsl php5-intl php5-gd
+    sudo apt-get -y install php5-sybase
+
+    # 4. Install the Java JDK
+    sudo apt-get -y install default-jdk
+
+    # install vufind deb
+    wget "http://downloads.sourceforge.net/vufind/vufind_2.5.2.deb?use_mirror=osdn" -O vufind_2.5.2.deb
+    sudo dpkg -i vufind_2.5.2.deb
+
+    # ==> default: Selecting previously unselected package vufind2.
+    # ==> default: (Reading database ... 71444 files and directories currently installed.)
+    # ==> default: Preparing to unpack vufind_2.5.2.deb ...
+    # ==> default: Unpacking vufind2 (2.5.2) ...
+    # ==> default: Setting up vufind2 (2.5.2) ...
+    # ==> default: Module rewrite already enabled
+    # ==> default: VuFind has been found in /usr/local/vufind2.
+    # ==> default: Apache configuration written to /usr/local/vufind2/local/httpd-vufind.conf.
+    # ==> default: You now need to load this configuration into Apache.
+    # ==> default: You can do it in either of two ways:
+    # ==> default:     a) Add this line to your /etc/apache2/apache2.conf file:
+    # ==> default:        Include /usr/local/vufind2/local/httpd-vufind.conf
+    # ==> default:     b) Link the configuration to Apache's conf.d directory like this:
+    # ==> default:
+    # ==> default:        ln -s /usr/local/vufind2/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf
+    # ==> default:
+    # ==> default: Option b is preferable if your platform supports it,
+    # ==> default: but option a is more certain to be supported.
+    # ==> default: Once the configuration is linked, restart Apache.  You should now be able
+    # ==> default: to access VuFind at http://localhost/vufind
+    # ==> default: For proper use of command line tools, you should also ensure that your
+    # ==> default: VUFIND_HOME and VUFIND_LOCAL_DIR environment variables are set to
+    # ==> default: /usr/local/vufind2 and /usr/local/vufind2/local respectively.
+    # ==> default:  * Reloading web server apache2
+    # ==> default:  *
+    sudo ln -s /usr/local/vufind2/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf
+    sudo service apache2 restart
+
+    echo "Go to ==> http://localhost:8080/vufind"
+  SHELL
+end
