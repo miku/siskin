@@ -30,10 +30,8 @@ Config:
 
 [amsl]
 
-isil-rel = https://x.com/static/about.json
-holdings = https://x.com/inhouseservices/list?do=holdings
-external-content-files = https://x.com/outboundservices/list?do=externalcontentfiles
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
+base = https://example.com
 
 ----
 
@@ -122,30 +120,25 @@ config = Config.instance()
 class AMSLTask(DefaultTask):
     TAG = 'amsl'
 
-class AMSLCollections(AMSLTask):
-    """ Get a list of ISIL, source and collection choices via JSON API. """
-
+class AMSLService(AMSLTask):
+    """
+    Retrieve AMSL API response. Outbound: discovery, holdingsfiles, contentfiles, metadata_usage.
+    """
     date = luigi.DateParameter(default=datetime.date.today())
+    name = luigi.Parameter(default='outboundservices:discovery')
 
     def run(self):
-        output = shellout("""curl --fail "{link}" > {output} """, link=config.get('amsl', 'isil-rel'))
+        parts = self.name.split(':')
+        if not len(parts) == 2:
+            raise RuntimeError('name must be of the form realm:name, e.g. outboundservices:discovery')
+        realm, name = parts
+
+        link = '%s/%s/list?do=%s' % (config.get('amsl', 'base').rstrip('/'), realm, name)
+        output = shellout("""curl --fail "{link}" > {output} """, link=link)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
-
-class AMSLContentFiles(AMSLTask):
-    """
-    Content files for collections (as alternative to holding files).
-    """
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    def run(self):
-        output = shellout("""curl --fail "{link}" > {output} """, link=config.get('amsl', 'external-content-files'))
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(digest=True))
 
 class AMSLCollectionsShardFilter(AMSLTask):
     """
@@ -155,7 +148,7 @@ class AMSLCollectionsShardFilter(AMSLTask):
     shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
 
     def requires(self):
-        return AMSLCollections(date=self.date)
+        return AMSLService(date=self.date, name='outboundservices:discovery')
 
     def run(self):
         with self.input().open() as handle:
@@ -163,7 +156,7 @@ class AMSLCollectionsShardFilter(AMSLTask):
 
         with self.output().open('w') as output:
             for item in c:
-                if not item['shardLabel_str'] == self.shard:
+                if not item['shardLabel'] == self.shard:
                     continue
                 output.write(json.dumps(item) + "\n")
 
@@ -178,7 +171,7 @@ class AMSLCollectionsISILList(AMSLTask):
     shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
 
     def requires(self):
-        return AMSLCollections(date=self.date)
+        return AMSLService(date=self.date, name='outboundservices:discovery')
 
     def run(self):
         with self.input().open() as handle:
@@ -187,9 +180,9 @@ class AMSLCollectionsISILList(AMSLTask):
         isils = set()
 
         for item in c:
-            if not item['shardLabel_str'] == self.shard:
+            if not item['shardLabel'] == self.shard:
                 continue
-            isils.add(item['isil_str'])
+            isils.add(item['ISIL'])
 
         if len(isils) == 0:
             raise RuntimeError('no isils found: maybe mispelled shard name?')
@@ -210,16 +203,16 @@ class AMSLCollectionsISIL(AMSLTask):
     shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
 
     def requires(self):
-        return AMSLCollections(date=self.date)
+        return AMSLService(date=self.date, name='outboundservices:discovery')
 
     def run(self):
         with self.input().open() as handle:
             c = json.load(handle)
         scmap = collections.defaultdict(set)
         for item in c:
-            if not item['shardLabel_str'] == self.shard:
+            if not item['shardLabel'] == self.shard:
                 continue
-            if not item['isil_str'] == self.isil:
+            if not item['ISIL'] == self.isil:
                 continue
             scmap[item['sourceID']].add(item['collectionLabel'].strip())
         if not scmap:
@@ -231,19 +224,6 @@ class AMSLCollectionsISIL(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class AMSLHoldings(AMSLTask):
-    """
-    Download AMSL tasks.
-    """
-    date = luigi.Parameter(default=datetime.date.today())
-
-    def run(self):
-        output = shellout(""" curl --fail "{link}" > {output} """, link=config.get('amsl', 'holdings'))
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
-
 class AMSLHoldingsISILList(AMSLTask):
     """
     Return a list of ISILs that are returned by the API.
@@ -251,7 +231,7 @@ class AMSLHoldingsISILList(AMSLTask):
     date = luigi.Parameter(default=datetime.date.today())
 
     def requires(self):
-        return AMSLHoldings(date=self.date)
+        return AMSLService(date=self.date, name='outboundservices:holdingsfiles')
 
     def run(self):
         output = shellout("jq -r '.[].ISIL' {input} | sort > {output}", input=self.input().path)
@@ -274,7 +254,7 @@ class AMSLHoldingsFile(AMSLTask):
     date = luigi.Parameter(default=datetime.date.today())
 
     def requires(self):
-        return AMSLHoldings(date=self.date)
+        return AMSLService(date=self.date, name='outboundservices:holdingsfiles')
 
     def run(self):
         with self.input().open() as handle:
