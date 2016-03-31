@@ -273,3 +273,59 @@ class AMSLHoldingsFile(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
+class AMSLFilterConfig(AMSLTask):
+    """
+    Assemble attachment configuration from AMSL. WIP.
+    """
+    date = luigi.Parameter(default=datetime.date.today())
+    shard = luigi.Parameter(default='UBL-ai')
+
+    def requires(self):
+        return AMSLService(date=self.date, name='outboundservices:discovery')
+
+    def run(self):
+        with self.input().open() as handle:
+            items = json.load(handle)
+
+        tree = collections.defaultdict(dict)
+        # {
+        #   "DE-L229": {
+        #     "48": {
+        #       "collections": [
+        #         "Genios (Wirtschaftswissenschaften)",
+        #         "Genios (Fachzeitschriften)"
+        #       ],
+        #       "uris": [
+        #         "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS",
+        #         "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEL229"
+        #       ]
+        #     }
+        #   },
+        #   ...
+        #   "DE-540": {
+        #     "28": {
+        #       "collections": [
+        #         "DOAJ Directory of Open Access Journals"
+        #       ]
+        #     }
+        #   },
+        #   ...
+
+        for item in items:
+            if not item['shardLabel'] == self.shard:
+                continue
+
+            if not item['sourceID'] in tree[item['ISIL']]:
+                tree[item['ISIL']][item['sourceID']] = {'collections': set()}
+            tree[item['ISIL']][item['sourceID']]['collections'].add(item['collectionLabel'])
+
+            if item['evaluateHoldingsFileForLibrary'] == 'yes' and item['holdingsFileURI'].strip():
+                if not 'uris' in tree[item['ISIL']][item['sourceID']]:
+                    tree[item['ISIL']][item['sourceID']]['uris'] = set()
+                tree[item['ISIL']][item['sourceID']]['uris'].add(item['holdingsFileURI'])
+
+        print(json.dumps(tree, cls=SetEncoder))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
