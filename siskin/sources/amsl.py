@@ -247,7 +247,7 @@ class AMSLHoldingsFile(AMSLTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         # The property which contains the URI of the holding file. Might change.
-        urikey = 'HoldingFileURI'
+        urikey = 'holdingsFileURI'
 
         for holding in holdings:
             if holding["ISIL"] == self.isil:
