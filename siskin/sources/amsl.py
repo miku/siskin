@@ -224,22 +224,6 @@ class AMSLCollectionsISIL(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class AMSLHoldingsISILList(AMSLTask):
-    """
-    Return a list of ISILs that are returned by the API.
-    """
-    date = luigi.Parameter(default=datetime.date.today())
-
-    def requires(self):
-        return AMSLService(date=self.date, name='outboundservices:holdingsfiles')
-
-    def run(self):
-        output = shellout("jq -r '.[].ISIL' {input} | sort > {output}", input=self.input().path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
-
 class AMSLHoldingsFile(AMSLTask):
     """
     Access AMSL files/get?setResource= facilities.
