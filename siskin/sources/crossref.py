@@ -45,7 +45,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
 from siskin.configuration import Config
-from siskin.sources.amsl import AMSLCollections
+from siskin.sources.amsl import AMSLService
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, ElasticsearchMixin
@@ -432,7 +432,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
     def requires(self):
         return {
             'crossref': CrossrefCollections(begin=self.begin, date=self.date),
-            'amsl': AMSLCollections(date=self.date)
+            'amsl': AMSLService(date=self.date, name='outboundservices:discovery')
         }
 
     @timed

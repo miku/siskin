@@ -36,7 +36,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.configuration import Config
-from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollections, AMSLHoldingsISILList, AMSLCollectionsISIL
+from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollectionsISIL
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
