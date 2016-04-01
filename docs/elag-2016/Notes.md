@@ -1,5 +1,7 @@
-Notes
-=====
+BYOI
+====
+
+Build your own index.
 
 * http://goo.gl/Ao25cP
 
