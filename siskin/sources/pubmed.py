@@ -29,14 +29,21 @@ Pubmed PMC FTP.
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
+import glob
 import luigi
+import os
+
+config = Config.instance()
+FTP_HOME = os.path.join(config.get('core', 'home'), 'common/FTPMirror/4661460d9f3094fd94d861d2fca8c9498cdab40c')
 
 class PubmedTask(DefaultTask):
-    """ Jstor base. """
+    """ Pubmed base. """
     TAG = 'pubmed'
 
     def closest(self):
@@ -63,6 +70,28 @@ class PubmedPaths(PubmedTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class PubmedMetadataPaths(PubmedTask):
+    """
+    Sync metadata only (much faster).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=10, significant=False)
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+
+    def requires(self):
+        return FTPMirror(host='ftp.ncbi.nlm.nih.gov',
+                         base='/pub/pmc/',
+                         pattern='articles*tar.gz',
+                         max_retries=self.max_retries,
+                         timeout=self.timeout)
+
+    @timed
+    def run(self):
+        self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 class PubmedDOIList(PubmedTask):
     """
     Extract rough DOI list from articles*.
@@ -77,6 +106,50 @@ class PubmedDOIList(PubmedTask):
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 print(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class PubmedJournalList(PubmedTask):
+    """
+    Download journal list.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class PubmedJournalListReduced(PubmedTask):
+    """
+    Just a small excerpt (cols 1,3,4,9,10).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return PubmedJournalList(date=self.date)
+
+    def run(self):
+        output = shellout(r"""cat {input} | csvcut -c1,3,4,9,10 | tr ',' '\t' > {output}""", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class PubmedArticleXML(PubmedTask):
+    """
+    Just stream XML.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    base = luigi.Parameter(default=FTP_HOME)
+
+    def run(self):
+        for path in glob.glob(os.path.join(self.base, "articles*")):
+            print(path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
