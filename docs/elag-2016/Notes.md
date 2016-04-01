@@ -41,3 +41,10 @@ Tasks:
 
 ----
 
+Recreate and export VM:
+
+```
+$ vagrant destroy --forc
+$ vagrant up
+$ vagrant package --output byoi.box
+```
