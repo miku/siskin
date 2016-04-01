@@ -66,28 +66,28 @@ Vagrant.configure(2) do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    sudo apt-get update
-    sudo apt-get upgrade
+    apt-get update
+    apt-get upgrade
 
     # 1. Install Apache HTTP Server
-    sudo apt-get -y install apache2
-    sudo a2enmod rewrite
-    sudo /etc/init.d/apache2 force-reload
+    apt-get -y install apache2
+    a2enmod rewrite
+    /etc/init.d/apache2 force-reload
 
     # 2. Install MySQL, no root password
-    DEBIAN_FRONTEND=noninteractive sudo -E apt-get -y install mysql-server
+    DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server
 
     # 3. Install PHP
-    sudo apt-get -y install php5 php5-dev php-pear php5-json php5-ldap php5-mcrypt php5-mysql php5-xsl php5-intl php5-gd
-    sudo php5enmod mcrypt
-    sudo apt-get -y install php5-sybase
+    apt-get -y install php5 php5-dev php-pear php5-json php5-ldap php5-mcrypt php5-mysql php5-xsl php5-intl php5-gd
+    php5enmod mcrypt
+    apt-get -y install php5-sybase
 
     # 4. Install the Java JDK
-    sudo apt-get -y install default-jdk
+    apt-get -y install default-jdk
 
     # install vufind deb
     wget "http://downloads.sourceforge.net/vufind/vufind_2.5.2.deb?use_mirror=osdn" -O vufind_2.5.2.deb
-    sudo dpkg -i vufind_2.5.2.deb
+    dpkg -i vufind_2.5.2.deb
 
     # ==> default: Selecting previously unselected package vufind2.
     # ==> default: (Reading database ... 71444 files and directories currently installed.)
@@ -114,13 +114,13 @@ Vagrant.configure(2) do |config|
     # ==> default: /usr/local/vufind2 and /usr/local/vufind2/local respectively.
     # ==> default:  * Reloading web server apache2
     # ==> default:  *
-    sudo ln -s /usr/local/vufind2/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf
-    sudo service apache2 restart
+    ln -s /usr/local/vufind2/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf
+    service apache2 restart
 
     echo "Next steps"
     echo "----------"
     echo
-    echo "* login and start vufind: cd /usr/local/vufind2 && ./vufind.sh start"
+    echo "* login and start vufind (solr): cd /usr/local/vufind2 && ./vufind.sh start"
     echo "* visit http://localhost:8080/vufind"
   SHELL
 end
