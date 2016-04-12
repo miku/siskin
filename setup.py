@@ -114,4 +114,14 @@ setup(name='siskin',
         'bin/taskwc',
       ],
       install_requires=install_requires,
+      zip_safe=False,
+      classifier=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console'
+        'License :: GPLv3',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX',
+        'Programming Language :: Python',
+        'Topic :: Text Processing',
+      ],
 )
