@@ -1,3 +1,27 @@
+0.0.151 2016-04-12
+------------------
+
+* secure pypi uploads
+* add .editorconfig
+* update setup.py
+* pubmed: some stats additions
+* ignore generated vm packages
+* docs: add note on vm packaging
+* docs: remove sudo, since privileged is true by default (https://goo.gl/KGrIEs)
+* docs: elag-vm: more RAM, mcrypt fix
+* docs: add elag notes and vm provisioning script
+* taskdeps-dot: render certain tasks with full parameters
+* amsl, crossref: fix imports
+* amsl: stub for filterconf from API
+* amsl: remove obsolete task
+* amsl: use a single AMSLService tasks with API realm and name parameters
+* amsl: filter collection entries for a shard
+* amsl: notes and TODO
+* amsl: err on empty isil set
+* amsl: collect ISILs that appear in the collecions list for a given shard, AMSLCollectionsISILList
+* 85: intermediate schema combined (for blob)
+* amsl: content file api stub
+
 0.0.150 2016-03-30
 ------------------
 
