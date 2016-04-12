@@ -9,7 +9,9 @@ upload:
 	# [pypi]
 	# username:abc
 	# password:secret
-	python setup.py sdist upload
+	python setup.py sdist
+	twine upload dist/*
+
 
 clean:
 	rm -rf siskin.egg-info
