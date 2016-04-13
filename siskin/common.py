@@ -95,7 +95,7 @@ class FTPMirror(CommonTask):
             exclude_glob = "--exclude-glob %s" % self.exclude_glob
 
         command = """lftp -u {username},{password}
-        -e "set net:max-retries {max_retries}; set net:timeout {timeout}; set  mirror:parallel-directories 1; mirror --verbose=0
+        -e "set sftp:auto-confirm yes; set net:max-retries {max_retries}; set net:timeout {timeout}; set  mirror:parallel-directories 1; mirror --verbose=0
         --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
 
         shellout(command, host=self.host, username=pipes.quote(self.username),
