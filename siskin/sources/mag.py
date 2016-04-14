@@ -127,7 +127,7 @@ class MAGTask(DefaultTask):
     TAG = 'mag'
 
     def closest(self):
-        return datetime.date(2015, 11, 6)
+        return datetime.date(2016, 2, 5)
 
 class MAGDates(MAGTask):
     """ Extract dates. """
