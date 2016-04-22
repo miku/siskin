@@ -270,7 +270,7 @@ class AIFilterConfig(AITask):
             'DE-Kn38': AMSLHoldingsFile(isil='DE-Kn38'),
 
             # issn list
-            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/tm6U9D'),
+            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/azNQDG'),
         }
 
     @timed
