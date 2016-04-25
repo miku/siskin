@@ -274,7 +274,7 @@ class AMSLHoldingsFile(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class AMSLFilterConfig(AMSLTask):
+class AMSLFilterTree(AMSLTask):
     """
     Assemble attachment configuration from AMSL. WIP.
     """
@@ -320,12 +320,41 @@ class AMSLFilterConfig(AMSLTask):
                 tree[item['ISIL']][item['sourceID']] = {'collections': set()}
             tree[item['ISIL']][item['sourceID']]['collections'].add(item['collectionLabel'])
 
-            if item['evaluateHoldingsFileForLibrary'] == 'yes' and item['holdingsFileURI'].strip():
+            uri = item.get('holdingsFileURI')
+
+            if item['evaluateHoldingsFileForLibrary'] == 'yes' and uri and uri.strip():
                 if not 'uris' in tree[item['ISIL']][item['sourceID']]:
                     tree[item['ISIL']][item['sourceID']]['uris'] = set()
                 tree[item['ISIL']][item['sourceID']]['uris'].add(item['holdingsFileURI'])
 
-        print(json.dumps(tree, cls=SetEncoder))
+        with self.output().open('w') as output:
+            json.dump(tree, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+class AMSLFilterConfig(AMSLTask):
+    """
+    Build config for span.
+    """
+
+    date = luigi.Parameter(default=datetime.date.today())
+    shard = luigi.Parameter(default='UBL-ai')
+
+    def requires(self):
+        return AMSLFilterTree(date=self.date, shard=self.shard)
+
+    def run(self):
+        with self.input().open() as handle:
+            tree = json.load(handle)
+
+        for isil, setup in tree.iteritems():
+            for source, filters in setup.iteritems():
+                for uris in filters.get('uris', []):
+
+                print(isil, source, filters)
+
+        print(json.dumps(tree))
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
