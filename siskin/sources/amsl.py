@@ -351,8 +351,7 @@ class AMSLFilterConfig(AMSLTask):
         for isil, setup in tree.iteritems():
             for source, filters in setup.iteritems():
                 for uris in filters.get('uris', []):
-
-                print(isil, source, filters)
+                    print(isil, source, filters)
 
         print(json.dumps(tree))
 
