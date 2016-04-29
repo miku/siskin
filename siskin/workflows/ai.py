@@ -354,12 +354,13 @@ class AIExport(AITask):
     Next iteration of AI export.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, others: solr4vu13v{1,10}')
 
     def requires(self):
         return AILicensing(date=self.date)
 
     def run(self):
-        output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, version=self.version)
         luigi.File(output).move(self.output().path)
 
     def output(self):
