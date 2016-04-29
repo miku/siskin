@@ -38,7 +38,9 @@ import sys
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        raise RuntimeError('specify a task to run')
+        print('usage: taskdo TASKNAME [--param PARAM, ...]', file=sys.stderr)
+        sys.exit(1)
+
     taskname = sys.argv[1]
 
     task_import_cache, path = get_task_import_cache()
