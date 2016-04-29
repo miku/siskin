@@ -331,29 +331,4 @@ class AMSLFilterTree(AMSLTask):
             json.dump(tree, output, cls=SetEncoder)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
-
-class AMSLFilterConfig(AMSLTask):
-    """
-    Build config for span.
-    """
-
-    date = luigi.Parameter(default=datetime.date.today())
-    shard = luigi.Parameter(default='UBL-ai')
-
-    def requires(self):
-        return AMSLFilterTree(date=self.date, shard=self.shard)
-
-    def run(self):
-        with self.input().open() as handle:
-            tree = json.load(handle)
-
-        for isil, setup in tree.iteritems():
-            for source, filters in setup.iteritems():
-                for uris in filters.get('uris', []):
-                    print(isil, source, filters)
-
-        print(json.dumps(tree))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='json'))
