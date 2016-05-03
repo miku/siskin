@@ -277,6 +277,51 @@ class AMSLHoldingsFile(AMSLTask):
 class AMSLFilterTree(AMSLTask):
     """
     Assemble attachment configuration from AMSL. WIP.
+
+    Current discovery API response:
+
+        {
+            "shardLabel": "UBL-ai",
+            "sourceID": "49",
+            "collectionLabel": "Vilnius University Press (CrossRef)",
+            "productISIL": null,
+            "externalLinkToContentFile": null,
+            "contentFileLabel": null,
+            "contentFileURI": null,
+            "linkToContentFile": null,
+            "ISIL": "DE-Zi4",
+            "evaluateHoldingsFileForLibrary": "yes",
+            "holdingsFileLabel": "KBART_DE-Zi4",
+            "holdingsFileURI": "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEZi4",
+            "linkToHoldingsFile": "http://...."
+        }
+
+    We need a tree of filters for tagging:
+
+        {
+            "DE-Zi4": {
+                "or": [
+                    {
+                        "and": [
+                            {
+                                "sourceID": ["49"],
+                            },
+                            {
+                                "collection": ["Vilnius University Press (CrossRef)"]
+                            },
+                            {
+                                "holdings": {
+                                    "urls": [
+                                        "http://..."
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
     """
     date = luigi.Parameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai')
@@ -288,44 +333,46 @@ class AMSLFilterTree(AMSLTask):
         with self.input().open() as handle:
             items = json.load(handle)
 
-        tree = collections.defaultdict(dict)
-        # {
-        #   "DE-L229": {
-        #     "48": {
-        #       "collections": [
-        #         "Genios (Wirtschaftswissenschaften)",
-        #         "Genios (Fachzeitschriften)"
-        #       ],
-        #       "uris": [
-        #         "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS",
-        #         "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEL229"
-        #       ]
-        #     }
-        #   },
-        #   ...
-        #   "DE-540": {
-        #     "28": {
-        #       "collections": [
-        #         "DOAJ Directory of Open Access Journals"
-        #       ]
-        #     }
-        #   },
-        #   ...
+        # per isil configuration
+        isiltree = collections.defaultdict(set)
+
+        entry = collections.namedtuple('Entry', ['sid', 'cid', 'kind', 'url'])
 
         for item in items:
-            if not item['shardLabel'] == self.shard:
-                continue
+            isil, sid, cid = item.get('ISIL'), item.get('sourceID'), item.get('collectionLabel')
 
-            if not item['sourceID'] in tree[item['ISIL']]:
-                tree[item['ISIL']][item['sourceID']] = {'collections': set()}
-            tree[item['ISIL']][item['sourceID']]['collections'].add(item['collectionLabel'])
+            if item.get('evaluateHoldingsFileForLibrary', False):
+                if item.get('linkToHoldingsFile'):
+                    e = entry(sid=sid, cid=cid, kind='holding', url=item.get('linkToHoldingsFile'))
+                    isiltree[isil].add(e)
 
-            uri = item.get('holdingsFileURI')
+            if item.get('externalLinkToContentFile', False):
+                e = entry(sid=sid, cid=cid, kind='content', url=item.get('externalLinkToContentFile'))
+                isiltree[isil].add(e)
 
-            if item['evaluateHoldingsFileForLibrary'] == 'yes' and uri and uri.strip():
-                if not 'uris' in tree[item['ISIL']][item['sourceID']]:
-                    tree[item['ISIL']][item['sourceID']]['uris'] = set()
-                tree[item['ISIL']][item['sourceID']]['uris'].add(item['holdingsFileURI'])
+        # group by source
+        next = collections.defaultdict()
+
+        for isil, filters in isiltree.iteritems():
+            persource = collections.defaultdict(set)
+            for f in filters:
+                e = entry(*f)
+                persource[f.sid].add(f)
+            next[isil] = persource
+
+        # print(json.dumps(next, cls=SetEncoder))
+
+        # group by source and kind
+        tree = collections.defaultdict(dict)
+
+        for isil, siditems in next.iteritems():
+            for sid, items in siditems.iteritems():
+                kinds = collections.defaultdict(set)
+                for item in items:
+                    e = entry(*item)
+                    kinds[e.kind].add(item)
+
+                tree[isil][sid] = kinds
 
         with self.output().open('w') as output:
             json.dump(tree, output, cls=SetEncoder)
