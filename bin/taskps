@@ -65,7 +65,7 @@ if __name__ == '__main__':
         print('>> %s, %s' % (addr, datetime.datetime.now()))
         print()
 
-        for status in ['RUNNING', 'PENDING', 'DONE', 'FAILED', 'DISABLED']:
+        for status in ['RUNNING', 'FAILED', 'PENDING', 'DONE', 'DISABLED']:
             print(status)
             print('-' * len(status))
             print()
