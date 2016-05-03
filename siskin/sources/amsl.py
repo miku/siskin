@@ -274,54 +274,9 @@ class AMSLHoldingsFile(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-class AMSLFilterTree(AMSLTask):
+class AMSLBuckets(AMSLTask):
     """
     Assemble attachment configuration from AMSL. WIP.
-
-    Current discovery API response:
-
-        {
-            "shardLabel": "UBL-ai",
-            "sourceID": "49",
-            "collectionLabel": "Vilnius University Press (CrossRef)",
-            "productISIL": null,
-            "externalLinkToContentFile": null,
-            "contentFileLabel": null,
-            "contentFileURI": null,
-            "linkToContentFile": null,
-            "ISIL": "DE-Zi4",
-            "evaluateHoldingsFileForLibrary": "yes",
-            "holdingsFileLabel": "KBART_DE-Zi4",
-            "holdingsFileURI": "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEZi4",
-            "linkToHoldingsFile": "http://...."
-        }
-
-    We need a tree of filters for tagging:
-
-        {
-            "DE-Zi4": {
-                "or": [
-                    {
-                        "and": [
-                            {
-                                "sourceID": ["49"],
-                            },
-                            {
-                                "collection": ["Vilnius University Press (CrossRef)"]
-                            },
-                            {
-                                "holdings": {
-                                    "urls": [
-                                        "http://..."
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-
     """
     date = luigi.Parameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai')
@@ -333,95 +288,31 @@ class AMSLFilterTree(AMSLTask):
         with self.input().open() as handle:
             items = json.load(handle)
 
-        # per isil configuration
-        isiltree = collections.defaultdict(set)
-
-        entry = collections.namedtuple('Entry', ['sid', 'cid', 'kind', 'url'])
+        tree = collections.defaultdict(dict)
 
         for item in items:
+            if not item.get('shardLabel') == self.shard:
+                continue
+
             isil, sid, cid = item.get('ISIL'), item.get('sourceID'), item.get('collectionLabel')
+
+            if not sid in tree[isil]:
+                tree[isil][sid] = collections.defaultdict(set)
+
+            tree[isil][sid]['collections'].add(cid)
 
             if item.get('evaluateHoldingsFileForLibrary', False):
                 if item.get('linkToHoldingsFile'):
-                    e = entry(sid=sid, cid=cid, kind='holding', url=item.get('linkToHoldingsFile'))
-                    isiltree[isil].add(e)
+                    tree[isil][sid]['holdings'].add(item.get('linkToHoldingsFile'))
 
             if item.get('externalLinkToContentFile', False):
-                e = entry(sid=sid, cid=cid, kind='content', url=item.get('externalLinkToContentFile'))
-                isiltree[isil].add(e)
-
-        # group by source
-        next = collections.defaultdict()
-
-        for isil, filters in isiltree.iteritems():
-            persource = collections.defaultdict(set)
-            for f in filters:
-                e = entry(*f)
-                persource[f.sid].add(f)
-            next[isil] = persource
-
-        # print(json.dumps(next, cls=SetEncoder))
-
-        # group by source and kind
-        tree = collections.defaultdict(dict)
-
-        for isil, siditems in next.iteritems():
-            for sid, items in siditems.iteritems():
-                kinds = collections.defaultdict(set)
-                for item in items:
-                    e = entry(*item)
-                    kinds[e.kind].add(item)
-
-                tree[isil][sid] = kinds
+                tree[isil][sid]['contents'].add(item.get('externalLinkToContentFile'))
 
         with self.output().open('w') as output:
             json.dump(tree, output, cls=SetEncoder)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
-
-class AMSLBuckets(AMSLTask):
-    """
-    Assemble attachment configuration from AMSL. WIP.
-    """
-    date = luigi.Parameter(default=datetime.date.today())
-    shard = luigi.Parameter(default='UBL-ai')
-
-    def requires(self):
-	return AMSLService(date=self.date, name='outboundservices:discovery')
-
-    def run(self):
-	with self.input().open() as handle:
-	    items = json.load(handle)
-
-	tree = collections.defaultdict(dict)
-	entry = collections.namedtuple('Entry', ['sid', 'cid', 'kind', 'url'])
-
-	for item in items:
-	    if not item.get('shardLabel') == self.shard:
-		continue
-
-	    isil, sid, cid = item.get('ISIL'), item.get('sourceID'), item.get('collectionLabel')
-
-	    if not sid in tree[isil]:
-		tree[isil][sid] = collections.defaultdict(set)
-
-	    tree[isil][sid]['collections'].add(cid)
-
-	    if item.get('evaluateHoldingsFileForLibrary', False):
-		if item.get('linkToHoldingsFile'):
-		    e = entry(sid=sid, cid=cid, kind='holding', url=item.get('linkToHoldingsFile'))
-		    tree[isil][sid]['holdings'].add(e.url)
-
-	    if item.get('externalLinkToContentFile', False):
-		e = entry(sid=sid, cid=cid, kind='content', url=item.get('externalLinkToContentFile'))
-		tree[isil][sid]['contents'].add(e.url)
-
-	with self.output().open('w') as output:
-	    json.dump(tree, output, cls=SetEncoder)
-
-    def output(self):
-	return luigi.LocalTarget(path=self.path(ext='json'))
 
 class AMSLFilterConfig(AMSLTask):
     """
@@ -431,33 +322,33 @@ class AMSLFilterConfig(AMSLTask):
     shard = luigi.Parameter(default='UBL-ai')
 
     def requires(self):
-	return AMSLBuckets(date=self.date, shard=self.shard)
+        return AMSLBuckets(date=self.date, shard=self.shard)
 
     def run(self):
-	with self.input().open() as handle:
-	    items = json.load(handle)
+        with self.input().open() as handle:
+            items = json.load(handle)
 
-	filterconfig = collections.defaultdict(dict)
+        filterconfig = collections.defaultdict(dict)
 
-	# konjuctions (or-terms) per ISIL
-	konjs = collections.defaultdict(list)
+        # konjuctions (or-terms) per ISIL
+        konjs = collections.defaultdict(list)
 
-	for isil, blob in items.iteritems():
-	    for sid, filters in blob.iteritems():
-		terms = [{'sourceID': sid}]
+        for isil, blob in items.iteritems():
+            for sid, filters in blob.iteritems():
+                terms = [{'sourceID': sid}]
 
-		for name, c in filters.iteritems():
-		    if name == 'holdings' or name == 'contents':
-			terms.append({'holdings': {'urls': c}})
-		    if name == 'collections':
-			terms.append({'collections': c})
+                for name, c in filters.iteritems():
+                    if name == 'holdings' or name == 'contents':
+                        terms.append({'holdings': {'urls': c}})
+                    if name == 'collections':
+                        terms.append({'collections': c})
 
-		konjs[isil].append({'and': terms})
+                konjs[isil].append({'and': terms})
 
-	    filterconfig[isil]= {'or': konjs[isil]}
+            filterconfig[isil]= {'or': konjs[isil]}
 
-	with self.output().open('w') as output:
-	    json.dump(filterconfig, output)
+        with self.output().open('w') as output:
+            json.dump(filterconfig, output)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext='json'))
