@@ -354,7 +354,7 @@ class AIExport(AITask):
     Next iteration of AI export.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, others: solr4vu13v{1,10}')
+    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
         return AILicensing(date=self.date)
