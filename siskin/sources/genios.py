@@ -31,6 +31,13 @@ Genios:
 * Dump
 * Updates
 
+There is no package information in the raw XML.
+Options:
+
+* Build a database-package relation first.
+* During conversion, add package name manually.
+
+$ span-import -i genios -a '{"package": "xyz"}' file.zip
 """
 
 from gluish.format import TSV
