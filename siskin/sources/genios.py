@@ -226,3 +226,68 @@ class GeniosPackageInfoInverted(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
+
+class GeniosFZSMap(GeniosTask):
+    """
+    For the opaque FZS, gather the data from other sources, e.g. Excel files.
+    """
+
+    def run(self):
+        mapping = collections.defaultdict(set)
+        with open(self.assets('gbi_package_db_map_fulltext.tsv')) as handle:
+            for name, database in map(lambda line: line.split('\t'), (line.strip() for line in handle if not line.startswith('#'))):
+                mapping[database].add(name)
+
+        with self.output().open('w') as output:
+            json.dump(mapping, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+class GeniosMergedMap(GeniosTask):
+    """
+    Merge the FZS / other inferred mapping and the static FZS mapping into a single file.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [GeniosFZSMap(), GeniosPackageInfoInverted(date=self.date)]
+
+    def run(self):
+        merged = collections.defaultdict(set)
+
+        for target in self.input():
+            with target.open() as handle:
+                mapping = json.load(handle)
+            for db, names in mapping.iteritems():
+                for name in names:
+                    merged[db].add(name)
+
+        with self.output().open('w') as output:
+            json.dump(merged, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+class GeniosMissingPackageNames(GeniosTask):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosMergedMap(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.load(handle)
+
+        missing = set()
+
+        for db, names in doc.iteritems():
+            if len(names) == 1 and names[0] == 'Fachzeitschriften':
+                missing.add(db)
+
+        with self.output().open('w') as output:
+            for db in sorted(missing):
+                output.write_tsv(db)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
