@@ -63,6 +63,10 @@ An example shipment:
     /mirror/gbi/WIWI_NOV_2015.zip
     /mirror/gbi/PSYN_NOV_2015.zip
 
+FZS are fulltext items. The rest are references.
+The fulltext items still have subjects (e.g. WIWI,
+etc.) but that does not matter.
+
 Overlapping shipments, e.g. BLIS.zip is contained in SOWI and WIWI.
 
 Other shipments:
@@ -75,13 +79,18 @@ Other shipments:
 
 from gluish.format import TSV
 from gluish.utils import shellout
-from siskin.utils import iterfiles
 from siskin.common import Executable
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles, SetEncoder
+import collections
 import datetime
+import glob
+import json
 import luigi
 import os
+import re
+import tempfile
 
 config = Config.instance()
 
@@ -115,3 +124,105 @@ class GeniosDropbox(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GeniosPackageInfo(GeniosTask):
+    """
+    Derive package information from a given FTP mirror only.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosDropbox(date=self.date)
+
+    def run(self):
+        directory = os.path.join(self.requires().taskdir(), 'mirror', 'gbi')
+
+        metapkgs = {
+            'FZS': glob.glob(os.path.join(directory, '*FZS_NOV_2015.zip')),
+            'Psychologie': glob.glob(os.path.join(directory, '*PSYN_NOV_2015.zip')),
+            'Sozialwissenschaften': glob.glob(os.path.join(directory, '*SOWI_NOV_2015.zip')),
+            'Technik': glob.glob(os.path.join(directory, '*TECHN_NOV_2015.zip')),
+            'Wirtschaftswissenschaften': glob.glob(os.path.join(directory, '*WIWI_NOV_2015.zip')),
+        }
+
+        flatpkgs = {
+            'Recht': glob.glob(os.path.join(directory, '*Recht-Law_NOV_2015.zip')),
+        }
+
+        updates = {
+            'FZS': glob.glob(os.path.join(directory, 'kons_sachs_fzs_*zip')),
+            'LIT': glob.glob(os.path.join(directory, 'kons_sachs_lit_*zip')),
+            'Recht': glob.glob(os.path.join(directory, 'kons_sachs_recht_*zip')),
+        }
+
+        def metadbs(path):
+            """
+            Given the path to a meta-package, return a set of database names.
+            """
+            output = shellout(r""" unzip -l {input} | grep -Eo "[A-Z]+.zip" | sed -e 's/.zip//g' > {output}""", input=path)
+            dbs = set()
+            with open(output) as handle:
+                for db in map(str.strip, handle):
+                    dbs.add(db)
+            os.remove(output)
+            return dbs
+
+        def flatdbs(path):
+            """
+            Given the path to a flat-package, return a set of database names.
+            """
+            output = shellout(r""" unzip -p {input} | grep -Eo 'DB="[A-Z]*"' | sed -e 's/DB=//g' | tr -d '"' > {output}""", input=path)
+            dbs = set()
+            with open(output) as handle:
+                for db in map(str.strip, handle):
+                    dbs.add(db)
+            os.remove(output)
+            return dbs
+
+        pkgmap = collections.defaultdict(set)
+
+        for package, files in metapkgs.iteritems():
+            for path in files:
+                for db in metadbs(path):
+                    pkgmap[package].add(db)
+
+        for package, files in flatpkgs.iteritems():
+            for path in files:
+                print(path)
+                for db in flatdbs(path):
+                    pkgmap[package].add(db)
+
+        for package, files in updates.iteritems():
+            for path in files:
+                for db in flatdbs(path):
+                    pkgmap[package].add(db)
+
+        with self.output().open('w') as output:
+            json.dump(pkgmap, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+class GeniosPackageInfoInverted(GeniosTask):
+    """
+    Reverse the assignment from pkg name -> db to db -> []packages.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosPackageInfo(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.load(handle)
+
+        inverted = collections.defaultdict(set)
+        for pkg, dbs in doc.iteritems():
+            for db in dbs:
+                inverted[db].add(pkg)
+
+        with self.output().open('w') as output:
+            json.dump(inverted, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
