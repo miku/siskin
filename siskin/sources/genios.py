@@ -31,13 +31,46 @@ Genios:
 * Dump
 * Updates
 
+----
+
 There is no package information in the raw XML.
+
 Options:
 
 * Build a database-package relation first.
 * During conversion, add package name manually.
 
 $ span-import -i genios -a '{"package": "xyz"}' file.zip
+
+----
+
+Update file structure:
+
+* kons_sachs_fzs_20151118150428_all.zip
+* [id]_[group]_YYYYMMDDHHMMSS_[modifier].zip
+
+Groups: fzs, recht, lit
+
+Each record belongs to one database. A database can belong to one or more
+groups.
+
+An example shipment:
+
+    /mirror/gbi/SOWI_NOV_2015.zip
+    /mirror/gbi/TECHN_NOV_2015.zip
+    /mirror/gbi/FZS_NOV_2015.zip
+    /mirror/gbi/Recht-Law_NOV_2015.zip
+    /mirror/gbi/WIWI_NOV_2015.zip
+    /mirror/gbi/PSYN_NOV_2015.zip
+
+Overlapping shipments, e.g. BLIS.zip is contained in SOWI and WIWI.
+
+Other shipments:
+
+    /mirror/gbi/fzs_new_ejournals_wiso2016.zip
+    /mirror/gbi/ebooks_20160202.zip
+    /mirror/gbi/ebooks-wiso-Nov2015.zip
+
 """
 
 from gluish.format import TSV
