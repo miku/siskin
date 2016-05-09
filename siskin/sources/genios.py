@@ -138,7 +138,7 @@ class GeniosPackageInfo(GeniosTask):
         directory = os.path.join(self.requires().taskdir(), 'mirror', 'gbi')
 
         metapkgs = {
-            'FZS': glob.glob(os.path.join(directory, '*FZS_NOV_2015.zip')),
+            'Fachzeitschriften': glob.glob(os.path.join(directory, '*FZS_NOV_2015.zip')),
             'Psychologie': glob.glob(os.path.join(directory, '*PSYN_NOV_2015.zip')),
             'Sozialwissenschaften': glob.glob(os.path.join(directory, '*SOWI_NOV_2015.zip')),
             'Technik': glob.glob(os.path.join(directory, '*TECHN_NOV_2015.zip')),
@@ -150,7 +150,7 @@ class GeniosPackageInfo(GeniosTask):
         }
 
         updates = {
-            'FZS': glob.glob(os.path.join(directory, 'kons_sachs_fzs_*zip')),
+            'Fachzeitschriften': glob.glob(os.path.join(directory, 'kons_sachs_fzs_*zip')),
             'LIT': glob.glob(os.path.join(directory, 'kons_sachs_lit_*zip')),
             'Recht': glob.glob(os.path.join(directory, 'kons_sachs_recht_*zip')),
         }
