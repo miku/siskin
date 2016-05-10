@@ -36,7 +36,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.configuration import Config
-from siskin.sources.amsl import AMSLHoldingsFile, AMSLCollectionsISIL
+from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile, AMSLHoldingsISILList
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -182,120 +182,6 @@ class AIIntermediateSchema(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
-class AIFilterConfigISIL(AITask):
-    """
-    Next iteration of filtering, based on various AMSL responses.
-    Creates the filters for a single ISIL from AMSL.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(description='ISIL')
-
-    def requires(self):
-        return AMSLCollectionsISIL(isil=self.isil)
-
-    @timed
-    def run(self):
-        filters = []
-        with self.input().open() as handle:
-            c = json.load(handle)
-
-        for source, colls in c.iteritems():
-            filters.append({'and': [{'source': source}, {'collections': colls}]})
-
-        with self.output().open('w') as output:
-            output.write(json.dumps({self.isil: {'or': filters}}))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
-
-class AIFilterConfigNext(AITask):
-    """
-    Next iteration of filtering, based on various AMSL responses.
-    ISILs are hard-coded, but should come from the API as well.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'DE-15': AIFilterConfigISIL(isil='DE-15'),
-            'DE-14': AIFilterConfigISIL(isil='DE-14'),
-        }
-
-    @timed
-    def run(self):
-        config = {}
-        for isil, target in self.input().iteritems():
-            with target.open() as handle:
-                c = json.load(handle)
-                config[isil] = c[isil]
-
-        with self.output().open('w') as output:
-            output.write(json.dumps(config))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
-
-class AIFilterConfig(AITask):
-    """
-    Create a filter configuration from AMSL.
-
-    The filterconfig dictionary should be built from AMSL data only: holdings
-    and collections, and information about which source or collection uses
-    which method of labeling.
-
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        """
-        Intermediate schema files and holdings.
-        """
-        return {
-            # holding files
-            'DE-105': AMSLHoldingsFile(isil='DE-105'),
-            'DE-14': AMSLHoldingsFile(isil='DE-14'),
-            'DE-15': AMSLHoldingsFile(isil='DE-15'),
-            'DE-1972': AMSLHoldingsFile(isil='DE-1972'),
-            'DE-8': AMSLHoldingsFile(isil='DE-8'),
-            'DE-Bn3': AMSLHoldingsFile(isil='DE-Bn3'),
-            'DE-Brt1': AMSLHoldingsFile(isil='DE-Brt1'),
-            'DE-Ch1': AMSLHoldingsFile(isil='DE-Ch1'),
-            'DE-D117': AMSLHoldingsFile(isil='DE-D117'),
-            'DE-D161': AMSLHoldingsFile(isil='DE-D161'),
-            'DE-Gla1': AMSLHoldingsFile(isil='DE-Gla1'),
-            'DE-J59': AMSLHoldingsFile(isil='DE-J59'),
-            'DE-Ki95': AMSLHoldingsFile(isil='DE-Ki95'),
-            'DE-Rs1': AMSLHoldingsFile(isil='DE-Rs1'),
-            'DE-Zi4': AMSLHoldingsFile(isil='DE-Zi4'),
-            'DE-Kn38': AMSLHoldingsFile(isil='DE-Kn38'),
-
-            # issn list
-            'DE-15-FID': DownloadFile(date=self.date, url='https://goo.gl/azNQDG'),
-        }
-
-    @timed
-    def run(self):
-        """
-        Build a filter from a template. Fill in the missing files.
-        """
-        with open(self.assets('filterconf.template.json')) as handle:
-            template = json.load(handle)
-
-        config = {}
-
-        for isil, filtertree in template.iteritems():
-            template = json.dumps(filtertree)
-            if "{{ file }}" in template and isil not in self.input():
-                raise RuntimeError('isil %s seems to expect input file, but none given as dependency' % isil)
-            tree = template.replace("{{ file }}", self.input().get(isil).path)
-            config[isil] = json.loads(tree)
-
-        with self.output().open('w') as output:
-            output.write(json.dumps(config))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
-
 class AILicensing(AITask):
     """
     Take intermediate schema and a config and attach ISILs accordingly.
@@ -305,7 +191,7 @@ class AILicensing(AITask):
     def requires(self):
         return {
             'is': AIIntermediateSchema(date=self.date),
-            'config': AIFilterConfig(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
         }
 
     def run(self):
@@ -556,7 +442,6 @@ class AIISSNDetailedCoverageReport(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
 
 class AIISSNCoverageReport(AITask):
     """
