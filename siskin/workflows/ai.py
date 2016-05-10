@@ -36,7 +36,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.configuration import Config
-from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile, AMSLHoldingsISILList
+from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
@@ -439,61 +439,6 @@ class AIISSNDetailedCoverageReport(AITask):
         # number of articles per shard
         metrics['sum']['finc'] = sum(df[df.shard == 'finc']['count'])
         metrics['sum']['ai'] = sum(df[df.shard == 'ai']['count'])
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class AIISSNCoverageReport(AITask):
-    """
-    For all ISILs, see what percentage of ISSN are covered in AI.
-
-    Example report:
-
-    DE-105  52.65
-    DE-14   53.06
-    DE-15   53.41
-    DE-1972 43.99
-    DE-8    52.94
-    DE-Bn3  50.53
-    DE-Brt1 43.99
-    DE-Ch1  52.35
-    DE-D117 43.99
-    DE-D161 51.88
-    DE-Gla1 51.88
-    DE-Ki95 54.08
-    DE-L229 50.83
-    DE-Pl11 43.99
-    DE-Rs1  51.11
-    DE-Zi4  52.45
-
-    """
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    def requires(self):
-        prerequisite = AMSLHoldingsISILList(date=self.date)
-        luigi.build([prerequisite])
-        isils = set()
-        with prerequisite.output().open() as handle:
-            for isil in (string.strip(line) for line in handle):
-                isils.add(isil)
-
-        return dict((isil, AICoverageISSN(date=self.date, isil=isil)) for isil in isils)
-
-    def run(self):
-        with self.output().open('w') as output:
-            for isil, target in sorted(self.input().iteritems()):
-                counter = collections.Counter()
-                with target.open() as handle:
-                    for line in handle:
-                        if 'NOT_FOUND' in line:
-                            counter['miss'] += 1
-                        else:
-                            counter['hits'] += 1
-                total = counter['hits'] + counter['miss']
-                if total == 0:
-                    continue
-                ratio = (100.0 / total) * counter['hits']
-                output.write_tsv(isil, '%0.2f' % ratio)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
