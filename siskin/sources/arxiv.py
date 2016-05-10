@@ -35,6 +35,12 @@ From: https://groups.google.com/forum/#!topic/arxiv-api/aOacIt6KD2E
   and should not be used for full replication. The size of result sets is capped at a large but finite number.
   You should use OAI-PMH instead for your purposes.
 
+Config:
+
+[core]
+
+metha_dir = /path/to/dir
+
 """
 
 from gluish.common import Executable
@@ -61,12 +67,12 @@ class ArxivCombine(ArxivTask):
     prefix = luigi.Parameter(default="oai_dc", significant=False)
 
     def requires(self):
-        return Executable(name='oaimi', message='https://github.com/miku/oaimi')
+        return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        output = shellout("oaimi -cache {dir} -root records -prefix {prefix} -verbose {url} > {output}",
-                          prefix=self.prefix, url=self.url, dir=config.get('core', 'oaimicache'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
+        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="xml"))
+        return luigi.LocalTarget(path=self.path(ext="xml.gz"))

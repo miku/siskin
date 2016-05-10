@@ -21,13 +21,28 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
+"""
+Config:
+
+[core]
+
+metha_dir = /path/to/dir
+
+[thieme]
+
+oai = https://example.com/oai/provider
+"""
+
 from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
+
+config = Config.instance()
 
 class ThiemeTask(DefaultTask):
     """ Thieme connect. """
@@ -40,16 +55,16 @@ class ThiemeCombine(ThiemeTask):
     """ Combine files."""
 
     date = ClosestDateParameter(default=datetime.date.today())
-    url = luigi.Parameter(default="https://www.thieme-connect.de/oai/provider", significant=False)
+    url = luigi.Parameter(default=config.get('thieme', 'oai'), significant=False)
     prefix = luigi.Parameter(default="tm")
     collection = luigi.Parameter(default='journalarticles')
 
     def requires(self):
-        return Executable(name='oaimi', message='https://github.com/miku/oaimi')
+        return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        output = shellout("oaimi -root records -prefix {prefix} -set {collection} -verbose {url} | pigz -c > {output}",
-                          prefix=self.prefix, collection=self.collection, url=self.url)
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
+        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
