@@ -391,9 +391,9 @@ class AMSLFilterConfig(AMSLTask):
                 konjs[isil].append({'and': terms})
 
             if len(konjs[isil]) == 1:
-                filterconfig[isil]= konjs[isil]
+                filterconfig[isil] = konjs[isil][0]
             else:
-                filterconfig[isil]= {'or': konjs[isil]}
+                filterconfig[isil] = {'or': konjs[isil]}
 
             # FID has a special restriction via file
             if isil == 'DE-15-FID':
