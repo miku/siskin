@@ -316,7 +316,7 @@ class AMSLBuckets(AMSLTask):
 
 class AMSLFilterConfig(AMSLTask):
     """
-    Convert to filterconfig format.
+    Convert to filterconfig format. With hard-wired exceptions for various sources.
     """
     date = luigi.Parameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai')
@@ -333,8 +333,53 @@ class AMSLFilterConfig(AMSLTask):
         # konjuctions (or-terms) per ISIL
         konjs = collections.defaultdict(list)
 
+        # the presence of this tag marks FZS / fulltext
+        fzstag = 'Genios (Fachzeitschriften)'
+
         for isil, blob in items.iteritems():
             for sid, filters in blob.iteritems():
+
+                # special treatment for genios
+                if sid == "48":
+                    # first, match packages FZS packages (FZS + X)
+                    fzsterms = [{'sourceID': sid}]
+                    for name, c in filters.iteritems():
+                        if name == 'collections':
+                            if fzstag in c:
+                                c.remove(fzstag)
+                                fzsterms.append({'package': c})
+                                fzsterms.append({'package': [fzstag]})
+
+                    # then, match non FZS package, but also use holdings information
+                    refterms = [{'sourceID': sid}]
+                    for name, c in filters.iteritems():
+                        if name == 'holdings' or name == 'contents':
+                            refterms.append({'holdings': {'urls': c}})
+                        if name == 'collections':
+                            if not fzstag in c:
+                                refterms.append({'not': {'package': [fzstag]}})
+                                refterms.append({'package': c})
+
+                    konjs[isil].append({'or': [{"and": fzsterms}, {"and": refterms}]})
+                    continue
+
+                # if we have jstor content files, then do not use collections
+                if sid == "55":
+                    terms = [{'sourceID': sid}]
+                    if 'contents' in filters:
+                        for name, c in filters.iteritems():
+                            if name == 'holdings' or name == 'contents':
+                                terms.append({'holdings': {'urls': c}})
+                    else:
+                        for name, c in filters.iteritems():
+                            if name == 'holdings' or name == 'contents':
+                                terms.append({'holdings': {'urls': c}})
+                            if name == 'collections':
+                                terms.append({'collections': c})
+
+                    konjs[isil].append({'and': terms})
+                    continue
+
                 terms = [{'sourceID': sid}]
 
                 for name, c in filters.iteritems():
@@ -345,7 +390,25 @@ class AMSLFilterConfig(AMSLTask):
 
                 konjs[isil].append({'and': terms})
 
-            filterconfig[isil]= {'or': konjs[isil]}
+            if len(konjs[isil]) == 1:
+                filterconfig[isil]= konjs[isil]
+            else:
+                filterconfig[isil]= {'or': konjs[isil]}
+
+            # FID has a special restriction via file
+            if isil == 'DE-15-FID':
+                filterconfig[isil] = {
+                    'and': [
+                        {
+                            'issn': {
+                                'urls': [
+                                    'https://goo.gl/azNQDG',
+                                ],
+                            }
+                        },
+                        filterconfig[isil],
+                    ]
+                }
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output)

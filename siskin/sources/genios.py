@@ -127,7 +127,25 @@ class GeniosDropbox(GeniosTask):
 
 class GeniosPackageInfo(GeniosTask):
     """
-    Derive package information from a given FTP mirror only.
+    Derive package information (about serials) from a given FTP mirror only.
+
+    Example output:
+
+        {
+          "Recht": [
+            "KUSE"
+          ],
+          "Sozialwissenschaften": [
+            "WAO",
+            "SOFI",
+            "SOLI",
+            "DZI",
+            "BLIS",
+            "IHSL"
+          ],
+          ...
+        }
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -155,29 +173,30 @@ class GeniosPackageInfo(GeniosTask):
             'Recht': glob.glob(os.path.join(directory, 'kons_sachs_recht_*zip')),
         }
 
+        def setify(path, remove_file=True):
+            """ Turn a file into a set, each element being on non-empty line. """
+            dbs = set()
+            with open(output) as handle:
+                for db in map(str.strip, handle):
+                    if db:
+                        dbs.add(db)
+            if remove_file:
+                os.remove(output)
+            return dbs
+
         def metadbs(path):
             """
             Given the path to a meta-package, return a set of database names.
             """
-            output = shellout(r""" unzip -l {input} | grep -Eo "[A-Z]+.zip" | sed -e 's/.zip//g' > {output}""", input=path)
-            dbs = set()
-            with open(output) as handle:
-                for db in map(str.strip, handle):
-                    dbs.add(db)
-            os.remove(output)
-            return dbs
+            output = shellout(r""" unzip -l {input} | grep -Eo "[A-Z]+.zip" | sed -e 's/.zip//g' > {output} """, input=path)
+            return setify(output)
 
         def flatdbs(path):
             """
             Given the path to a flat-package, return a set of database names.
             """
-            output = shellout(r""" unzip -p {input} | grep -Eo 'DB="[A-Z]*"' | sed -e 's/DB=//g' | tr -d '"' > {output}""", input=path)
-            dbs = set()
-            with open(output) as handle:
-                for db in map(str.strip, handle):
-                    dbs.add(db)
-            os.remove(output)
-            return dbs
+            output = shellout(r""" unzip -p {input} | grep -Eo 'DB="[A-Z]*"' | sed -e 's/DB=//g' | tr -d '"' > {output} """, input=path)
+            return setify(output)
 
         pkgmap = collections.defaultdict(set)
 
@@ -188,7 +207,6 @@ class GeniosPackageInfo(GeniosTask):
 
         for package, files in flatpkgs.iteritems():
             for path in files:
-                print(path)
                 for db in flatdbs(path):
                     pkgmap[package].add(db)
 
@@ -206,6 +224,22 @@ class GeniosPackageInfo(GeniosTask):
 class GeniosPackageInfoInverted(GeniosTask):
     """
     Reverse the assignment from pkg name -> db to db -> []packages.
+
+    Example output:
+
+        {
+          "IJAR": [
+            "Fachzeitschriften"
+          ],
+          "ZAAA": [
+            "Fachzeitschriften"
+          ],
+          "POPS": [
+            "Fachzeitschriften"
+          ],
+          ...
+        }
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -230,6 +264,21 @@ class GeniosPackageInfoInverted(GeniosTask):
 class GeniosFZSMap(GeniosTask):
     """
     For the opaque FZS, gather the data from other sources, e.g. Excel files.
+
+    Example output:
+
+        {
+          "IJAR": [
+            "Sozialwissenschaften"
+          ],
+          "ZAAA": [
+            "Wirtschaftswissenschaften",
+            "Psychologie",
+            "Sozialwissenschaften"
+          ],
+          ...
+        }
+
     """
 
     def run(self):
@@ -247,6 +296,28 @@ class GeniosFZSMap(GeniosTask):
 class GeniosMergedMap(GeniosTask):
     """
     Merge the FZS / other inferred mapping and the static FZS mapping into a single file.
+
+    Example output:
+
+        {
+          "IJAR": [
+            "Fachzeitschriften",
+            "Sozialwissenschaften"
+          ],
+          "ZAAA": [
+            "Wirtschaftswissenschaften",
+            "Fachzeitschriften",
+            "Psychologie",
+            "Sozialwissenschaften"
+          ],
+          "POPS": [
+            "Fachzeitschriften",
+            "Psychologie",
+            "Sozialwissenschaften"
+          ],
+          ...
+        }
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -270,6 +341,24 @@ class GeniosMergedMap(GeniosTask):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
 class GeniosMissingPackageNames(GeniosTask):
+    """
+    There are packages, which are only FZS. For these, we currently cannot determine licensing status.
+
+    Example output:
+
+        ABAL
+        ABKL
+        ABMS
+        ABSC
+        AHGA
+        AHOR
+        AMIF
+        ANP
+        AVFB
+        BONL
+        ....
+
+    """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
