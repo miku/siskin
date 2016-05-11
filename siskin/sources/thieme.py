@@ -26,7 +26,7 @@ Config:
 
 [core]
 
-metha_dir = /path/to/dir
+metha-dir = /path/to/dir
 
 [thieme]
 
@@ -63,7 +63,7 @@ class ThiemeCombine(ThiemeTask):
         return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
         luigi.File(output).move(self.output().path)
 
