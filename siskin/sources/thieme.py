@@ -56,7 +56,7 @@ class ThiemeCombine(ThiemeTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default=config.get('thieme', 'oai'), significant=False)
-    prefix = luigi.Parameter(default="tm")
+    prefix = luigi.Parameter(default="nlm")
     collection = luigi.Parameter(default='journalarticles')
 
     def requires(self):
