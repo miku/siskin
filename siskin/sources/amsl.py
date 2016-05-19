@@ -342,7 +342,7 @@ class AMSLFilterConfig(AMSLTask):
                 # special treatment for genios
                 if sid == "48":
                     # first, match packages FZS packages (FZS + X)
-                    fzsterms = [{'sourceID': sid}]
+                    fzsterms = [{'source': [sid]}]
                     for name, c in filters.iteritems():
                         if name == 'collections':
                             if fzstag in c:
@@ -351,7 +351,7 @@ class AMSLFilterConfig(AMSLTask):
                                 fzsterms.append({'package': [fzstag]})
 
                     # then, match non FZS package, but also use holdings information
-                    refterms = [{'sourceID': sid}]
+                    refterms = [{'source': [sid]}]
                     for name, c in filters.iteritems():
                         if name == 'holdings' or name == 'contents':
                             refterms.append({'holdings': {'urls': c}})
@@ -365,7 +365,7 @@ class AMSLFilterConfig(AMSLTask):
 
                 # if we have jstor content files, then do not use collections
                 if sid == "55":
-                    terms = [{'sourceID': sid}]
+                    terms = [{'source': [sid]}]
                     if 'contents' in filters:
                         for name, c in filters.iteritems():
                             if name == 'holdings' or name == 'contents':
@@ -375,18 +375,18 @@ class AMSLFilterConfig(AMSLTask):
                             if name == 'holdings' or name == 'contents':
                                 terms.append({'holdings': {'urls': c}})
                             if name == 'collections':
-                                terms.append({'collections': c})
+                                terms.append({'collection': c})
 
                     konjs[isil].append({'and': terms})
                     continue
 
-                terms = [{'sourceID': sid}]
+                terms = [{'source': [sid]}]
 
                 for name, c in filters.iteritems():
                     if name == 'holdings' or name == 'contents':
                         terms.append({'holdings': {'urls': c}})
                     if name == 'collections':
-                        terms.append({'collections': c})
+                        terms.append({'collection': c})
 
                 konjs[isil].append({'and': terms})
 
