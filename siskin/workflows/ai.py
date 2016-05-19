@@ -182,6 +182,24 @@ class AIIntermediateSchema(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+class AIRedact(AITask):
+    """
+    Redact intermediate schema.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AIIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
+        output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 class AILicensing(AITask):
     """
     Take intermediate schema and a config and attach ISILs accordingly.
