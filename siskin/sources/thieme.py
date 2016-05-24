@@ -69,3 +69,42 @@ class ThiemeCombine(ThiemeTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+
+class ThiemeIntermediateSchema(ThiemeTask):
+    """
+    Conv-oo-do-ert.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    collection = luigi.Parameter(default='journalarticles')
+
+    def requires(self):
+        return ThiemeCombine(date=self.date, prefix='nlm', collection=self.collection)
+
+    def run(self):
+        output = shellout("span-import -i thieme <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
+class ThiemeSolr(ThiemeTask):
+    """
+    Create something solr importable. Attach a single ISIL to all records.
+
+    Ad-hoc task, with all records attached.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    collection = luigi.Parameter(default='journalarticles')
+    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+
+    def requires(self):
+        return ThiemeIntermediateSchema(date=self.date, collection=self.collection)
+
+    def run(self):
+        output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') <(unpigz -c {input}) > {output}""", input=self.input().path)
+        output = shellout("span-export -o {version} {input} | pigz -c > {output}", input=output, version=self.version)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))

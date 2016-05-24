@@ -44,6 +44,7 @@ from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.gbi import GBIISSNList
 from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
+from siskin.sources.thieme import ThiemeIntermediateSchema
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
 import collections
@@ -170,7 +171,8 @@ class AIIntermediateSchema(AITask):
                 CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
-                JstorIntermediateSchema(date=self.date)]
+                JstorIntermediateSchema(date=self.date),
+                ThiemeIntermediateSchema(date=self.date)]
 
     @timed
     def run(self):
