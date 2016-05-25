@@ -56,7 +56,7 @@ class ThiemeCombine(ThiemeTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default=config.get('thieme', 'oai'), significant=False)
-    prefix = luigi.Parameter(default="nlm")
+    prefix = luigi.Parameter(default="tm")
     collection = luigi.Parameter(default='journalarticles')
 
     def requires(self):
@@ -79,10 +79,10 @@ class ThiemeIntermediateSchema(ThiemeTask):
     collection = luigi.Parameter(default='journalarticles')
 
     def requires(self):
-        return ThiemeCombine(date=self.date, prefix='nlm', collection=self.collection)
+        return ThiemeCombine(date=self.date, prefix='tm', collection=self.collection)
 
     def run(self):
-        output = shellout("span-import -i thieme <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout("span-import -i thieme-tm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
