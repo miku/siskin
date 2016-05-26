@@ -64,7 +64,7 @@ class ThiemeCombine(ThiemeTask):
 
     def run(self):
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha_dir'))
+        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
