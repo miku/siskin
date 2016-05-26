@@ -34,7 +34,7 @@ oai = https://example.com/oai/provider
 """
 
 from gluish.common import Executable
-from gluish.intervals import monthly
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config
@@ -49,7 +49,7 @@ class ThiemeTask(DefaultTask):
     TAG = 'thieme'
 
     def closest(self):
-        return monthly(date=self.date)
+        return weekly(date=self.date)
 
 class ThiemeCombine(ThiemeTask):
     """ Combine files."""
