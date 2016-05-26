@@ -57,13 +57,13 @@ class ThiemeCombine(ThiemeTask):
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default=config.get('thieme', 'oai'), significant=False)
     prefix = luigi.Parameter(default="tm")
-    collection = luigi.Parameter(default='journalarticles')
+    set = luigi.Parameter(default='journalarticles')
 
     def requires(self):
         return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
+        shellout("METHA_DIR={dir} metha-sync -set {set} -format {prefix} {url}", set=self.set, prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
         luigi.File(output).move(self.output().path)
 
