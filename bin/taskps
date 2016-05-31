@@ -66,15 +66,20 @@ if __name__ == '__main__':
         print()
 
         for status in ['RUNNING', 'FAILED', 'PENDING', 'DONE', 'DISABLED']:
-            print(status)
-            print('-' * len(status))
-            print()
+
             data = {"status": status, "upstream_status": "", "search":""}
             r = requests.get('http://%s/api/task_list' % addr, params={'data': json.dumps(data)})
             if r.status_code >= 400:
                 raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
             response = json.loads(r.text)
-            for task, props in sorted(response['response'].iteritems()):
+
+            tasks = [task for task, _ in sorted(response['response'].iteritems())]
+
+            head = '%s (%s)' % (status, len(tasks))
+            print(head)
+            print('-' * len(head))
+            print()
+            for task in tasks:
                 print('%s\t* %s' % (status[0].lower(), task))
             print()
     except IOError as err:
