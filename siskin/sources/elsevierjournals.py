@@ -69,14 +69,14 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     Convert backlog to intermediate schema.
     """
     def run(self):
-	directory = config.get('elsevierjournals', 'backlog-dir')
-	_, output = tempfile.mkstemp(prefix='siskin-')
-	for path in iterfiles(directory, fun=lambda p: p.endswith('.tar')):
-	    shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
-	luigi.File(output).move(self.output().path)
+        directory = config.get('elsevierjournals', 'backlog-dir')
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        for path in iterfiles(directory, fun=lambda p: p.endswith('.tar')):
+            shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class ElsevierJournalsPaths(ElsevierJournalsTask):
     """
