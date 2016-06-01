@@ -391,11 +391,7 @@ class AMSLFilterConfig(AMSLTask):
 
                 konjs[isil].append({'and': terms})
 
-            # remove one nesting if possible
-            if len(konjs[isil]) == 1:
-                filterconfig[isil] = konjs[isil][0]
-            else:
-                filterconfig[isil] = {'or': konjs[isil]}
+            filterconfig[isil] = {'or': konjs[isil]}
 
             # exception: FID has a special restriction via file
             if isil == 'DE-15-FID':
