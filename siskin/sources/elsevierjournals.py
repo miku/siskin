@@ -35,11 +35,13 @@ ftp-password = password
 ftp-path = /
 ftp-pattern = *
 
+backlog-dir = /path/to/dir
+
 """
 
 from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.utils import shellout
 from siskin.benchmark import timed
@@ -61,6 +63,20 @@ config = Config.instance()
 class ElsevierJournalsTask(DefaultTask):
     """ Jstor base. """
     TAG = '085'
+
+class ElsevierBacklogIntermediateSchema(ElsevierJournalsTask):
+    """
+    Convert backlog to intermediate schema.
+    """
+    def run(self):
+	directory = config.get('elsevierjournals', 'backlog-dir')
+	_, output = tempfile.mkstemp(prefix='siskin-')
+	for path in iterfiles(directory, fun=lambda p: p.endswith('.tar')):
+	    shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
+	luigi.File(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class ElsevierJournalsPaths(ElsevierJournalsTask):
     """
