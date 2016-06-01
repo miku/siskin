@@ -64,7 +64,7 @@ class ElsevierJournalsTask(DefaultTask):
     """ Elsevier journals base. """
     TAG = '085'
 
-class ElsevierBacklogIntermediateSchema(ElsevierJournalsTask):
+class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     """
     Convert backlog to intermediate schema.
     """
