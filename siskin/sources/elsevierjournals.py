@@ -134,7 +134,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        with target as self.input():
+        for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=output)
         luigi.File(output).move(self.output().path)
 
