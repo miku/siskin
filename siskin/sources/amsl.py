@@ -339,7 +339,7 @@ class AMSLFilterConfig(AMSLTask):
         for isil, blob in items.iteritems():
             for sid, filters in blob.iteritems():
 
-                # special treatment for genios
+                # exception: special treatment for genios
                 if sid == "48":
                     # first, match packages FZS packages (FZS + X)
                     fzsterms = [{'source': [sid]}]
@@ -363,7 +363,7 @@ class AMSLFilterConfig(AMSLTask):
                     konjs[isil].append({'or': [{"and": fzsterms}, {"and": refterms}]})
                     continue
 
-                # if we have jstor content files, then do not use collections
+                # exception: if we have jstor content files, then do not use collections
                 if sid == "55":
                     terms = [{'source': [sid]}]
                     if 'contents' in filters:
@@ -380,22 +380,24 @@ class AMSLFilterConfig(AMSLTask):
                     konjs[isil].append({'and': terms})
                     continue
 
+                # default handling
                 terms = [{'source': [sid]}]
 
                 for name, c in filters.iteritems():
-                    if name == 'holdings' or name == 'contents':
+                    if name in ('holdings', 'contents'):
                         terms.append({'holdings': {'urls': c}})
                     if name == 'collections':
                         terms.append({'collection': c})
 
                 konjs[isil].append({'and': terms})
 
+            # remove one nesting if possible
             if len(konjs[isil]) == 1:
                 filterconfig[isil] = konjs[isil][0]
             else:
                 filterconfig[isil] = {'or': konjs[isil]}
 
-            # FID has a special restriction via file
+            # exception: FID has a special restriction via file
             if isil == 'DE-15-FID':
                 filterconfig[isil] = {
                     'and': [
@@ -407,6 +409,10 @@ class AMSLFilterConfig(AMSLTask):
                         filterconfig[isil],
                     ]
                 }
+
+            # exception: add 85 until AMSL update
+            urls = items['DE-15']['48']['holdings']['urls']
+            filterconfig['DE-15']['or'].append({'and': [{'source:' ['85']}, {'holdings': {'urls': urls}}]})
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output)
