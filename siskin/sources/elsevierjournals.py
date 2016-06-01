@@ -139,7 +139,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class ElsevierJournalsSolr(ElsevierJournalsTask):
     """
