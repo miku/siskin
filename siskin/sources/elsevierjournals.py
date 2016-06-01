@@ -61,7 +61,7 @@ import tempfile
 config = Config.instance()
 
 class ElsevierJournalsTask(DefaultTask):
-    """ Jstor base. """
+    """ Elsevier journals base. """
     TAG = '085'
 
 class ElsevierBacklogIntermediateSchema(ElsevierJournalsTask):
