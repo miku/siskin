@@ -101,213 +101,51 @@ class ElsevierJournalsPaths(ElsevierJournalsTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class ElsevierJournalsExpand(ElsevierJournalsTask):
+class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
     """
-    Expand all tar files.
-    """
-    tag = luigi.Parameter(default='SAXC0000000000002')
-
-    def requires(self):
-        return ElsevierJournalsPaths()
-
-    @timed
-    def run(self):
-        shellout("mkdir -p {dir}", dir=self.taskdir())
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                if not self.tag in row.path:
-                    continue
-                if row.path.endswith('tar'):
-                    shellout("tar -xvf {tarfile} -C {dir}", tarfile=row.path, dir=self.taskdir())
-
-        with self.output().open('w') as output:
-            for dirName, subdirList, fileList in os.walk(self.taskdir()):
-                for fname in fileList:
-                    output.write_tsv(os.path.join(dirName, fname))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
-    """
-    All in one task for now.
-
-    Test indexing:
-
-        $ span-solr $(taskoutput ElsevierJournalsIntermediateSchema) > x.ldj
-        $ solrbulk x.ldj
-
-    """
-    tag = luigi.Parameter(default='SAXC0000000000002')
-
-    def requires(self):
-        return ElsevierJournalsExpand(tag=self.tag)
-
-    @timed
-    def run(self):
-        pattern = re.compile('(?P<base>.*)/(?P<tag>%s)/(?P<issn>.*)/(?P<issue>.*)/(?P<document>.*)/main.xml' % self.tag)
-
-        # doctree groups main files under issue files: {"issue.xml": ["main.xml", "main.xml", ....]}
-        doctree = collections.defaultdict(list)
-
-        # the dataset.xml contains the journal titles
-        datasetpath = os.path.join(os.path.dirname(self.input().path), self.tag, 'dataset.xml')
-        self.logger.info('dataset: %s' % datasetpath)
-
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                if not pattern.match(row.path):
-                    continue
-
-                issuepath = "%s/issue.xml" % '/'.join(row.path.split('/')[:-2])
-                if os.path.exists(issuepath):
-                    doctree[issuepath].append(row.path)
-                else:
-                    self.logger.warning('issue.xml not in expected place for %s' % row.path)
-
-        if not doctree:
-            raise RuntimeError('no documents found')
-
-        with open(datasetpath) as handle:
-            dataset = BeautifulStoneSoup(handle.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
-
-        # map ISSN to journal title
-        titlemap = collections.defaultdict(str)
-        for props in dataset.findAll('journal-issue-properties'):
-            try:
-                titlemap[props.find('issn').text] = props.find('collection-title').text
-            except AttributeError as err:
-                self.logger.warning('cannot find issn or collection title: %s, %s, %s' % (props.find('issn'), props.find('collection-title'), err))
-
-        with self.output().open('w') as output:
-            for issuepath, docs in doctree.iteritems():
-
-                with open(issuepath) as handle:
-                    issue = BeautifulStoneSoup(handle.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
-
-                for docpath in docs:
-                    with open(docpath) as fh:
-                        doc = BeautifulStoneSoup(fh.read(), convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
-
-                    intermediate = {
-                        'finc.format': 'ElectronicArticle',
-                        'finc.mega_collection': 'Elsevier Journals',
-                        'finc.source_id': '85',
-                        'rft.genre': 'article',
-                        'rft.issn': [node.text for node in issue.findAll('ce:issn')],
-                        'doi': doc.find('ce:doi').text,
-                        'url': ['http://dx.doi.org/%s' % doc.find('ce:doi').text],
-                        'languages': ['eng'],
-                        'ris.type': 'EJOUR',
-                        'version': '0.9',
-                    }
-
-                    if doc.find('ce:title'):
-                        intermediate['rft.atitle'] = doc.find('ce:title').text
-
-                    intermediate['rft.jtitle'] = titlemap[intermediate['rft.issn'][0]]
-                    intermediate['finc.record_id'] = base64.b64encode(intermediate['url'][0]).rstrip("=")
-
-                    if doc.find('ce:abstract'):
-                        abstract = doc.find('ce:abstract').getText()
-                        if abstract.startswith('Abstract'):
-                            abstract = abstract.replace('Abstract', '', 1)
-                        if abstract.startswith(u'Highlights•'):
-                            abstract = abstract.replace(u'Highlights•', '', 1)
-                        if abstract.startswith(u'SummaryBackground'):
-                            abstract = abstract.replace(u'SummaryBackground', '', 1)
-                        abstract = abstract.replace(u'•', ' ')
-                        intermediate['abstract'] = abstract
-
-                    authors = []
-                    for author in doc.findAll('ce:author'):
-                        au = {}
-                        given, surname = author.find('ce:given-name'), author.find('ce:surname')
-                        if given:
-                            au.update({'rft.aufirst': given.text})
-                        if surname:
-                            au.update({'rft.aulast': surname.text})
-                        if surname and given:
-                            au.update({'rft.au': surname.text + ", " + given.text})
-                        authors.append(au)
-                    intermediate['authors'] = authors
-
-                    keywords = []
-                    for kw in doc.findAll('ce:keywords'):
-                        keywords.append(kw.find('ce:text').text)
-                    intermediate['x.subjects'] = keywords
-
-                    # page numbers
-                    for item in issue.findAll('ce:include-item'):
-                        doi = item.find('ce:doi').text
-                        if doi == intermediate['doi']:
-                            first, last = item.find('ce:first-page'), item.find('ce:last-page')
-                            if first:
-                                intermediate['rft.spage'] = ''.join(c for c in first.text if c.isdigit())
-                            if last:
-                                intermediate['rft.epage'] = ''.join(c for c in last.text if c.isdigit())
-                            if first and last:
-                                try:
-                                    intermediate['rft.pages'] = str(int(intermediate['rft.epage']) - int(intermediate['rft.spage']))
-                                    intermediate['rft.tpages'] = intermediate['rft.pages']
-                                except ValueError as err:
-                                    self.logger.warning('cannot parse page number %s: %s-%s' % (doi, first.text, last.text))
-
-                    # volume, issue, date
-                    if issue.find('vol-first'):
-                        intermediate['rft.volume'] = issue.find('vol-first').text
-                    if issue.find('iss-first'):
-                        intermediate['rft.issue'] = issue.find('iss-first').text
-                    if issue.find('start-date'):
-                        date = issue.find('start-date').text
-                        if len(date) == 4:
-                            intermediate['rft.date'] = "%s-01-01" % (date)
-                        elif len(date) == 6:
-                            intermediate['rft.date'] = "%s-%s-01" % (date[:4], date[4:6])
-                        elif len(date) == 8:
-                            intermediate['rft.date'] = "%s-%s-%s" % (date[:4], date[4:6], date[6:8])
-                        else:
-                            raise ValueError("unknown date format: %s" % date)
-
-                    output.write(json.dumps(intermediate))
-                    output.write("\n")
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class ElsevierJournalsIntermediateSchemaCombined(ElsevierJournalsTask):
-    """
-    Combine a set of tags into a single file.
+    Intermediate schema from updates.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        tags = [
-            "SAXC0000000000009",
-            "SAXC0000000000010",
-            "SAXC0000000000011",
-            "SAXC0000000000012",
-            "SAXC0000000000013",
-            "SAXC0000000000014",
-            "SAXC0000000000015",
-        ]
-        for tag in tags:
-            yield ElsevierJournalsIntermediateSchema(tag=tag)
+        return ElsevierJournalsPaths(date=self.date)
 
+    @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if not row.path.endswith('.tar'):
+                    continue
+                shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=Gzip)
+
+class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
+    """ Combine backlog and updates. """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [ElsevierJournalsBacklogIntermediateSchema(),
+                ElsevierJournalsUpdatesIntermediateSchema(date=self.date)]
+
+    @timed
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        with target as self.input():
             shellout("cat {input} >> {output}", input=target.path, output=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(), format=Gzip)
 
 class ElsevierJournalsSolr(ElsevierJournalsTask):
     """
     Create something solr importable. Attach a single ISIL to all records.
     """
-    tag = luigi.Parameter(default='SAXC0000000000002')
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return ElsevierJournalsIntermediateSchema(tag=self.tag)
@@ -315,36 +153,7 @@ class ElsevierJournalsSolr(ElsevierJournalsTask):
     @timed
     def run(self):
         output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') {input} > {output}""", input=self.input().path)
-        output = shellout("span-solr {input} > {output}", input=output)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-
-class ElsevierJournalsSolrCombined(ElsevierJournalsTask):
-    """
-    Combine a set of tags into a single file.
-    """
-    date = luigi.DateParameter(default=datetime.date.today())
-
-    def requires(self):
-        tags = [
-            "SAXC0000000000009",
-            "SAXC0000000000010",
-            "SAXC0000000000011",
-            "SAXC0000000000012",
-            "SAXC0000000000013",
-            "SAXC0000000000014",
-            "SAXC0000000000015",
-        ]
-        for tag in tags:
-            yield ElsevierJournalsSolr(tag=tag)
-
-    def run(self):
-        _, output = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=output)
+        output = shellout("span-export {input} > {output}", input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
