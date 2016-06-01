@@ -410,9 +410,9 @@ class AMSLFilterConfig(AMSLTask):
                     ]
                 }
 
-            # exception: add 85 until AMSL update
-            urls = items['DE-15']['48']['holdings']
-            filterconfig['DE-15']['or'].append({'and': [{'source:' ['85']}, {'holdings': {'urls': urls}}]})
+        # exception: add 85 until AMSL update
+        urls = items['DE-15']['48']['holdings']
+        filterconfig['DE-15']['or'].append({'and': [{'source:' ['85']}, {'holdings': {'urls': urls}}]})
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output)
