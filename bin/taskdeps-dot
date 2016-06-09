@@ -36,6 +36,7 @@ from luigi.cmdline_parser import CmdlineParser
 from luigi.parameter import MissingParameterException
 from luigi.task import Register
 from luigi.task_register import TaskClassNotFoundException
+from siskin.utils import random_string
 from siskin.sources import *
 from siskin.workflows import *
 import collections
