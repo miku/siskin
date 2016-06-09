@@ -76,10 +76,10 @@ class ThiemeIntermediateSchema(ThiemeTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    collection = luigi.Parameter(default='journalarticles')
+    set = luigi.Parameter(default='journalarticles')
 
     def requires(self):
-        return ThiemeCombine(date=self.date, prefix='tm', collection=self.collection)
+        return ThiemeCombine(date=self.date, prefix='tm', set=self.set)
 
     def run(self):
         output = shellout("span-import -i thieme-tm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
@@ -95,11 +95,11 @@ class ThiemeSolr(ThiemeTask):
     Ad-hoc task, with all records attached.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    collection = luigi.Parameter(default='journalarticles')
+    set = luigi.Parameter(default='journalarticles')
     version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
-        return ThiemeIntermediateSchema(date=self.date, collection=self.collection)
+        return ThiemeIntermediateSchema(date=self.date, set=self.set)
 
     def run(self):
         output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') <(unpigz -c {input}) > {output}""", input=self.input().path)
