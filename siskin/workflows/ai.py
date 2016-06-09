@@ -40,6 +40,7 @@ from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
+from siskin.sources.elsevierjournals import ElsevierJournalsIntermediateSchema
 from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.gbi import GBIISSNList
 from siskin.sources.holdings import HoldingsFile
@@ -172,7 +173,8 @@ class AIIntermediateSchema(AITask):
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
                 JstorIntermediateSchema(date=self.date),
-                ThiemeIntermediateSchema(date=self.date)]
+                ThiemeIntermediateSchema(date=self.date),
+                ElsevierJournalsIntermediateSchema(date=self.date)]
 
     @timed
     def run(self):
