@@ -264,7 +264,7 @@ class CrossrefDOITable(CrossrefTask):
 
     def run(self):
         output = shellout("""
-            TMPDIR={tmpdir} LC_ALL=C sort -k2,2 -S35% <(TMPDIR={tmpdir} unpigz -c {input}) | tac | TMPDIR={tmpdir} LC_ALL=C sort -S35% -u -k3,3 | pigz -c > {output}""",
+            (set -o pipefail && TMPDIR={tmpdir} LC_ALL=C sort -k2,2 -S25% <(TMPDIR={tmpdir} unpigz -c {input}) | TMPDIR={tmpdir} tac | TMPDIR={tmpdir} LC_ALL=C sort -S25% -u -k3,3 | pigz -c > {output})""",
             tmpdir=config.get('core', 'tempdir'), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
