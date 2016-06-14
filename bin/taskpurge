@@ -42,20 +42,15 @@ import re
 import shutil
 import sys
 
+# WHITELIST contains path segments, which must not be deleted. A simple string
+# comparison is done during purge time. No regexes. No globs.
+# TODO: use globs to include things into whilelist
 WHITELIST = [
-    '/003/NEPCopy',
     '/028/DOAJDump',
     '/048/GBIDropbox',
     '/common/FTPMirror',
     '/crossref/CrossrefHarvestChunk',
     '/dblp/DBLPDownload',
-    '/hackernews/HNCommentsDownload',
-    '/mag/MAGDump',
-    '/mag/MAGFile',
-    '/nl/NLSync',
-    '/wikipedia/WikipediaArticleDump',
-    '/yago/YagoDump',
-    '/zdb/ZDBDump',
 ]
 
 if __name__ == '__main__':
