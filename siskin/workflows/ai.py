@@ -43,7 +43,6 @@ from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.elsevierjournals import ElsevierJournalsIntermediateSchema
 from siskin.sources.gbi import GBIIntermediateSchemaByKind
 from siskin.sources.gbi import GBIISSNList
-from siskin.sources.holdings import HoldingsFile
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.sources.thieme import ThiemeIntermediateSchema
 from siskin.task import DefaultTask

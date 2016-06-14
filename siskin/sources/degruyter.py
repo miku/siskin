@@ -34,15 +34,15 @@ ftp-pattern = some*glob*pattern.zip
 
 """
 
-from siskin.benchmark import timed
-from siskin.common import FTPMirror, Executable
 from gluish.format import TSV
 from gluish.intervals import daily
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.utils import iterfiles
+from siskin.benchmark import timed
+from siskin.common import FTPMirror, Executable
 from siskin.configuration import Config
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 import datetime
 import luigi
 import re
@@ -99,7 +99,8 @@ class DegruyterMembers(DegruyterTask):
 
 class DegruyterXML(DegruyterTask):
     """
-    Extract all XML files from Jstor dump. TODO(miku): Check all subdirs, not just SSH.
+    Extract all XML files from Jstor dump.
+    TODO(miku): Check all subdirs, not just SSH.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     group = luigi.Parameter(default='SSH', description='Nationallizenz_Zeitschriften, Nationallizenz_Jahrbuecher')

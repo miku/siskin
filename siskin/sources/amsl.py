@@ -1,8 +1,8 @@
 # coding: utf-8
 
-#  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
-#                    The Finc Authors, http://finc.info
-#                    Martin Czygan, <martin.czygan@uni-leipzig.de>
+# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -33,74 +33,6 @@ Config:
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 base = https://example.com
 
-----
-
-TODO:
-
-Goal: Assemble complete attachment information (source and collection level,
-holdings, lists and other filters) from AMSL API responses.
-
-E.g. given a collection API response:
-
-Filter relevant ISILs and extract source and collections
-
-```
-{
-    "DE-X": {
-        "and": [
-            {
-                "source": "123"
-            },
-            {
-                "collection": ["...", "...", ...]
-            }
-        ]
-    }
-}
-```
-
-If there is an entry in AMSLHoldings for that ISIL, include holdings file.
-
-```
-{
-    "DE-X": {
-        "and": [
-            {
-                "source": "123"
-            },
-            {
-                "collection": ["...", "...", ...]
-            },
-            {
-                "holdings": {
-                    "file": "..."
-                }
-            }
-        ]
-    }
-}
-```
-
-If there is an entry in content files for a given collection name, use that (and
-ignore / replace collection):
-
-```
-{
-    "DE-D13": {
-        "and": [
-            {
-                "source": "123"
-            },
-            {
-                "holdings": {
-                    "url": "url://to/content-file"
-                }
-            }
-        ]
-    }
-}
-```
-
 """
 
 from gluish.format import TSV
@@ -122,10 +54,13 @@ class AMSLTask(DefaultTask):
 
 class AMSLService(AMSLTask):
     """
-    Retrieve AMSL API response. Outbound: discovery, holdingsfiles, contentfiles, metadata_usage.
+    Retrieve AMSL API response. Outbound:
+    discovery, holdingsfiles, contentfiles,
+    metadata_usage.
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    name = luigi.Parameter(default='outboundservices:discovery')
+    name = luigi.Parameter(default='outboundservices:discovery',
+                           description='discovery, holdingsfiles, contentfiles, metadata_usage')
 
     def run(self):
         parts = self.name.split(':')
@@ -142,7 +77,25 @@ class AMSLService(AMSLTask):
 
 class AMSLCollectionsShardFilter(AMSLTask):
     """
-    A per-shard list of collection entries.
+    A per-shard list of collection entries. One record per line.
+
+        {
+          "evaluateHoldingsFileForLibrary": "no",
+          "holdingsFileLabel": null,
+          "collectionLabel": "DOAJ Directory of Open Access Journals",
+          "shardLabel": "UBL-ai",
+          "contentFileURI": null,
+          "sourceID": "28",
+          "linkToHoldingsFile": null,
+          "holdingsFileURI": null,
+          "productISIL": null,
+          "linkToContentFile": null,
+          "contentFileLabel": null,
+          "externalLinkToContentFile": null,
+          "ISIL": "DE-14"
+        }
+        ....
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
@@ -166,6 +119,15 @@ class AMSLCollectionsShardFilter(AMSLTask):
 class AMSLCollectionsISILList(AMSLTask):
     """
     A per-shard list of ISILs for which we get information from AMSL.
+
+        DE-105
+        DE-14
+        DE-15
+        DE-15-FID
+        DE-1972
+        DE-540
+        ...
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
@@ -197,6 +159,20 @@ class AMSLCollectionsISILList(AMSLTask):
 class AMSLCollectionsISIL(AMSLTask):
     """
     Per ISIL list of collections.
+
+        {
+          "48": [
+            "Genios (Recht)",
+            "Genios (Sozialwissenschaften)",
+            "Genios (Psychologie)",
+            "Genios (Fachzeitschriften)",
+            "Genios (Wirtschaftswissenschaften)"
+          ],
+          "49": [
+            "Helminthological Society (CrossRef)",
+            "International Association of Physical Chemists (IAPC) (CrossRef)",
+            ...
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
     isil = luigi.Parameter(description='ISIL, case sensitive')
@@ -228,11 +204,9 @@ class AMSLHoldingsFile(AMSLTask):
     """
     Access AMSL files/get?setResource= facilities.
 
-    The output is probably zipped.
+    The output is probably zipped (will be decompressed on the fily)
 
     One ISIL can have multiple files.
-
-    If the file is Zipped, it will be decompressed.
     """
     isil = luigi.Parameter(description='ISIL, case sensitive')
     date = luigi.Parameter(default=datetime.date.today())
@@ -276,7 +250,22 @@ class AMSLHoldingsFile(AMSLTask):
 
 class AMSLBuckets(AMSLTask):
     """
-    Assemble attachment configuration from AMSL. WIP.
+    Assemble attachment configuration from AMSL.
+
+        {
+          "DE-L229": {
+            "48": {
+              "holdings": [
+                "https://x.y.z/get?setResource=Dokument/KBART_FREEJOURNALS",
+                "https://x.y.z/get?setResource=Dokument/KBART_DEL229"
+              ],
+              "collections": [
+                "Genios (Wirtschaftswissenschaften)",
+                "Genios (Fachzeitschriften)"
+              ]
+            }
+          },
+          ...
     """
     date = luigi.Parameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai')
@@ -316,7 +305,35 @@ class AMSLBuckets(AMSLTask):
 
 class AMSLFilterConfig(AMSLTask):
     """
-    Convert to filterconfig format. With hard-wired exceptions for various sources.
+    Convert to filterconfig format. With a few
+    hard-wired exceptions for various sources.
+
+        {
+          "DE-L229": {
+            "or": [
+              {
+                "or": [
+                  {
+                    "and": [
+                      {
+                        "source": [
+                          "48"
+                        ]
+                      },
+                      {
+                        "package": [
+                          "Genios (Wirtschaftswissenschaften)"
+                        ]
+                      },
+                      {
+                        "package": [
+                          "Genios (Fachzeitschriften)"
+                        ]
+                      }
+                    ]
+                  },
+        ...
+
     """
     date = luigi.Parameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai')

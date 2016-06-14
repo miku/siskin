@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-#  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
-#                    The Finc Authors, http://finc.info
-#                    Martin Czygan, <martin.czygan@uni-leipzig.de>
+# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -22,12 +22,16 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-CrossRef is an association of scholarly publishers that develops shared
-infrastructure to support more effective scholarly communications.
 
-Our citation-linking network today covers over 68 million journal articles
-and other content items (books chapters, data, theses, technical reports)
-from thousands of scholarly and professional publishers around the globe.
+CrossRef is an association of scholarly publishers
+that develops shared infrastructure to support
+more effective scholarly communications.
+
+Our citation-linking network today covers over 68
+million journal articles and other content items
+(books chapters, data, theses, technical reports)
+from thousands of scholarly and professional
+publishers around the globe.
 
 Configuration
 -------------
@@ -273,7 +277,8 @@ class CrossrefDOITable(CrossrefTask):
 
 class CrossrefDOITableClean(CrossrefTask):
     """
-    Clean the DOI table from DOIs, that are blacklisted (in crossref but leading nowhere).
+    Clean the DOI table from DOIs, that are
+    blacklisted (in crossref but leading nowhere).
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -284,11 +289,13 @@ class CrossrefDOITableClean(CrossrefTask):
     def run(self):
         filepath = config.get('crossref', 'doi-blacklist', 'no-blacklist-available')
 
+        # do not fail, if there is no blacklist configured
         if filepath == 'no-blacklist-available':
             self.logger.warning('no DOI blacklist configured, cf. #5706')
             self.input().copy(self.output().path)
             return
 
+        # do not fail even, if file is configured but missing
         if not os.path.exists(filepath):
             self.logger.warn('crossref DOI blacklist configured, but file is missing: %s' % filepath)
             self.input().copy(self.output().path)
@@ -334,7 +341,8 @@ class CrossrefSortedDOITable(CrossrefTask):
 
 class CrossrefUniqItems(CrossrefTask):
     """
-    What is left to do for calculating a Crossref snapshot: filter out the relevant lines.
+    What is left to do for calculating a Crossref
+    snapshot: filter out the relevant lines.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -344,8 +352,11 @@ class CrossrefUniqItems(CrossrefTask):
 
     def run(self):
         """
-        We write line numbers to a separate file (L). We temporarily extract
-        the chunk file as well (F). Then we can run `filterline L F`.
+        We write line numbers to a separate file
+        (L). We temporarily extract the chunk file
+        as well (F), because pipes seem to fail
+        randomly with many large files. Then we
+        can run `filterline L F`.
         """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
@@ -540,7 +551,8 @@ class CrossrefDOIAndISSNList(CrossrefTask):
 
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """
-    Vanilla records into elasticsearch.
+    Vanilla records into elasticsearch. All or
+    nothing.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -561,9 +573,11 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
                 },
             }
         }
+
         es.indices.create(index=self.index)
-        es.indices.put_mapping(index='bsz', doc_type='default', body=mapping)
+        es.indices.put_mapping(index=self.index, doc_type='default', body=mapping)
         shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().path)
+
         with self.output().open('w'):
             pass
 

@@ -1,8 +1,8 @@
 # coding: utf-8
 
-#  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
-#                    The Finc Authors, http://finc.info
-#                    Martin Czygan, <martin.czygan@uni-leipzig.de>
+# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -28,18 +28,20 @@ http://arxiv.org/help/oa/index
 
 ----
 
+Config:
+
+[core]
+
+metha-dir = /path/to/dir
+
+----
+
 From: https://groups.google.com/forum/#!topic/arxiv-api/aOacIt6KD2E
 
 > the problem is that the API is not the appropriate vehicle to obtain a full
   copy of arXiv metadata. It is intended for interactive queries and search overlays
   and should not be used for full replication. The size of result sets is capped at a large but finite number.
   You should use OAI-PMH instead for your purposes.
-
-Config:
-
-[core]
-
-metha-dir = /path/to/dir
 
 """
 
@@ -55,13 +57,16 @@ import luigi
 config = Config.instance()
 
 class ArxivTask(DefaultTask):
-    """ Base task. """
-
+    """
+    Base task.
+    """
     def closest(self):
         return monthly(date=self.date)
 
 class ArxivCombine(ArxivTask):
-    """ Single file dump. """
+    """
+    Single file dump.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="http://export.arxiv.org/oai2", significant=False)
     prefix = luigi.Parameter(default="oai_dc", significant=False)
