@@ -5,3 +5,7 @@ ELAG 2016
 * http://de.slideshare.net/MartinCzygan/build-your-own-discovery-index-of-scholary-eresources
 * https://finc.info/de/Archive/342
 
+VM
+==
+
+* https://goo.gl/J7hcYC (5+GB)
