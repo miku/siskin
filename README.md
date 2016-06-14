@@ -38,7 +38,7 @@ List tasks:
 
 Run simple task:
 
-    $ taskdo WikipediaTitles --language pcd
+    $ taskdo DOAJDump
 
 Documentation:
 
