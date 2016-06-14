@@ -1,9 +1,9 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301,C0103,W0614,W0401
 
-#  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
-#                    The Finc Authors, http://finc.info
-#                    Martin Czygan, <martin.czygan@uni-leipzig.de>
+# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
