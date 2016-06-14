@@ -22,11 +22,14 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Support for importing all sources at once.
+
+Support for importing all sources at once. See also:
+http://stackoverflow.com/a/1057534/89391
+
 """
 
-import os
 import glob
+import os
 
 modules = glob.glob("%s/*.py" % (os.path.dirname(__file__)))
 __all__ = [os.path.basename(f)[:-3] for f in modules]
