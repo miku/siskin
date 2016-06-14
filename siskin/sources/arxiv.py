@@ -49,12 +49,9 @@ from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
-
-config = Config.instance()
 
 class ArxivTask(DefaultTask):
     """
@@ -75,8 +72,10 @@ class ArxivCombine(ArxivTask):
         return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
+                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
+                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):

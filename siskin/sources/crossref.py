@@ -48,7 +48,6 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
-from siskin.configuration import Config
 from siskin.sources.amsl import AMSLService
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
@@ -63,8 +62,6 @@ import requests
 import siskin
 import tempfile
 import urllib
-
-config = Config.instance()
 
 class CrossrefTask(DefaultTask):
     """
@@ -269,7 +266,7 @@ class CrossrefDOITable(CrossrefTask):
     def run(self):
         output = shellout("""
             (set -o pipefail && TMPDIR={tmpdir} LC_ALL=C sort -k2,2 -S25% <(TMPDIR={tmpdir} unpigz -c {input}) | TMPDIR={tmpdir} tac | TMPDIR={tmpdir} LC_ALL=C sort -S25% -u -k3,3 | pigz -c > {output})""",
-            tmpdir=config.get('core', 'tempdir'), input=self.input().path)
+            tmpdir=self.config.get('core', 'tempdir'), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -287,7 +284,7 @@ class CrossrefDOITableClean(CrossrefTask):
         return CrossrefDOITable(begin=self.begin, date=self.date)
 
     def run(self):
-        filepath = config.get('crossref', 'doi-blacklist', 'no-blacklist-available')
+        filepath = self.config.get('crossref', 'doi-blacklist', 'no-blacklist-available')
 
         # do not fail, if there is no blacklist configured
         if filepath == 'no-blacklist-available':
@@ -333,7 +330,7 @@ class CrossrefSortedDOITable(CrossrefTask):
     def run(self):
         output = shellout("""
             TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -k1,1n <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
-            tmpdir=config.get('core', 'tempdir'), input=self.input().path)
+            tmpdir=self.config.get('core', 'tempdir'), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

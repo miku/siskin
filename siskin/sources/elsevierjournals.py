@@ -46,7 +46,6 @@ from gluish.intervals import weekly
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 import base64
@@ -58,8 +57,6 @@ import os
 import re
 import tempfile
 
-config = Config.instance()
-
 class ElsevierJournalsTask(DefaultTask):
     """ Elsevier journals base. """
     TAG = '085'
@@ -69,7 +66,7 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     Convert backlog to intermediate schema.
     """
     def run(self):
-        directory = config.get('elsevierjournals', 'backlog-dir')
+        directory = self.config.get('elsevierjournals', 'backlog-dir')
         _, output = tempfile.mkstemp(prefix='siskin-')
         for path in iterfiles(directory, fun=lambda p: p.endswith('.tar')):
             shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
@@ -87,10 +84,10 @@ class ElsevierJournalsPaths(ElsevierJournalsTask):
     timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
-        return FTPMirror(host=config.get('elsevierjournals', 'ftp-host'),
-                         username=config.get('elsevierjournals', 'ftp-username'),
-                         password=config.get('elsevierjournals', 'ftp-password'),
-                         pattern=config.get('elsevierjournals', 'ftp-pattern'),
+        return FTPMirror(host=self.config.get('elsevierjournals', 'ftp-host'),
+                         username=self.config.get('elsevierjournals', 'ftp-username'),
+                         password=self.config.get('elsevierjournals', 'ftp-password'),
+                         pattern=self.config.get('elsevierjournals', 'ftp-pattern'),
                          max_retries=self.max_retries,
                          timeout=self.timeout)
 

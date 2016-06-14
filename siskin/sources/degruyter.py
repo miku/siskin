@@ -40,7 +40,6 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror, Executable
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 import datetime
@@ -48,8 +47,6 @@ import luigi
 import re
 import shutil
 import tempfile
-
-config = Config.instance()
 
 class DegruyterTask(DefaultTask):
     TAG = 'degruyter'
@@ -62,12 +59,12 @@ class DegruyterPaths(DegruyterTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        host = config.get('degruyter', 'ftp-host')
-        username = config.get('degruyter', 'ftp-username')
-        password = config.get('degruyter', 'ftp-password')
-        base = config.get('degruyter', 'ftp-path')
-        pattern = config.get('degruyter', 'ftp-pattern')
-        exclude_glob = config.get('degruyter', 'ftp-exclude-glob', '')
+        host = self.config.get('degruyter', 'ftp-host')
+        username = self.config.get('degruyter', 'ftp-username')
+        password = self.config.get('degruyter', 'ftp-password')
+        base = self.config.get('degruyter', 'ftp-path')
+        pattern = self.config.get('degruyter', 'ftp-pattern')
+        exclude_glob = self.config.get('degruyter', 'ftp-exclude-glob', '')
         return FTPMirror(host=host, username=username, password=password,
                          base=base, pattern=pattern, exclude_glob=exclude_glob)
 

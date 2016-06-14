@@ -35,7 +35,6 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
-from siskin.configuration import Config
 from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
 from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
 from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
@@ -57,8 +56,6 @@ import re
 import requests
 import string
 import tempfile
-
-config = Config.instance()
 
 class AITask(DefaultTask):
     TAG = 'ai'
@@ -419,8 +416,8 @@ class AIISSNCoverageSolrMatches(AITask):
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         cache.sess.mount('http://', adapter)
 
-        finc = config.get('ai', 'finc-solr')
-        ai = config.get('ai', 'ai-solr')
+        finc = self.config.get('ai', 'finc-solr')
+        ai = self.config.get('ai', 'ai-solr')
 
         with self.input().open() as handle:
             with self.output().open('w') as output:

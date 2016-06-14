@@ -80,7 +80,6 @@ Other shipments:
 from gluish.format import TSV
 from gluish.utils import shellout
 from siskin.common import Executable
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles, SetEncoder
 import collections
@@ -91,8 +90,6 @@ import luigi
 import os
 import re
 import tempfile
-
-config = Config.instance()
 
 class GeniosTask(DefaultTask):
     """
@@ -112,8 +109,8 @@ class GeniosDropbox(GeniosTask):
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
-                 rsync_options=config.get('gbi', 'rsync-options', '-avzP'),
-                 src=config.get('gbi', 'scp-src'), target=target)
+                 rsync_options=self.config.get('gbi', 'rsync-options', '-avzP'),
+                 src=self.config.get('gbi', 'scp-src'), target=target)
 
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())

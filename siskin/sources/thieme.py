@@ -37,12 +37,9 @@ from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 import datetime
 import luigi
-
-config = Config.instance()
 
 class ThiemeTask(DefaultTask):
     """ Thieme connect. """
@@ -55,7 +52,6 @@ class ThiemeCombine(ThiemeTask):
     """ Combine files."""
 
     date = ClosestDateParameter(default=datetime.date.today())
-    url = luigi.Parameter(default=config.get('thieme', 'oai'), significant=False)
     prefix = luigi.Parameter(default="tm")
     set = luigi.Parameter(default='journalarticles')
 
@@ -63,8 +59,11 @@ class ThiemeCombine(ThiemeTask):
         return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -set {set} -format {prefix} {url}", set=self.set, prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}", prefix=self.prefix, url=self.url, dir=config.get('core', 'metha-dir'))
+        url = self.config.get('thieme', 'oai')
+        shellout("METHA_DIR={dir} metha-sync -set {set} -format {prefix} {url}",
+                 set=self.set, prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
+        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
+                          prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):

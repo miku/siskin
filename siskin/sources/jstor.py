@@ -38,7 +38,6 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror, Executable
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import nwise
 import datetime
@@ -46,8 +45,6 @@ import itertools
 import luigi
 import pipes
 import tempfile
-
-config = Config.instance()
 
 class JstorTask(DefaultTask):
     """ Jstor base. """
@@ -65,10 +62,10 @@ class JstorPaths(JstorTask):
     timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
-        return FTPMirror(host=config.get('jstor', 'ftp-host'),
-                         username=config.get('jstor', 'ftp-username'),
-                         password=config.get('jstor', 'ftp-password'),
-                         pattern=config.get('jstor', 'ftp-pattern'),
+        return FTPMirror(host=self.config.get('jstor', 'ftp-host'),
+                         username=self.config.get('jstor', 'ftp-username'),
+                         password=self.config.get('jstor', 'ftp-password'),
+                         pattern=self.config.get('jstor', 'ftp-pattern'),
                          max_retries=self.max_retries,
                          timeout=self.timeout)
 

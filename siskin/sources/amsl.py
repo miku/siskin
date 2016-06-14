@@ -37,7 +37,6 @@ base = https://example.com
 
 from gluish.format import TSV
 from gluish.utils import shellout
-from siskin.configuration import Config
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder
 import collections
@@ -46,8 +45,6 @@ import json
 import luigi
 import tempfile
 import zipfile
-
-config = Config.instance()
 
 class AMSLTask(DefaultTask):
     TAG = 'amsl'
@@ -68,7 +65,7 @@ class AMSLService(AMSLTask):
             raise RuntimeError('name must be of the form realm:name, e.g. outboundservices:discovery')
         realm, name = parts
 
-        link = '%s/%s/list?do=%s' % (config.get('amsl', 'base').rstrip('/'), realm, name)
+        link = '%s/%s/list?do=%s' % (self.config.get('amsl', 'base').rstrip('/'), realm, name)
         output = shellout("""curl --fail "{link}" > {output} """, link=link)
         luigi.File(output).move(self.output().path)
 
@@ -234,7 +231,7 @@ class AMSLHoldingsFile(AMSLTask):
                     self.logger.debug("skipping non-KBART holding URI: %s" % holding[urikey])
                     continue
 
-                link = "%s%s" % (config.get('amsl', 'uri-download-prefix'), holding[urikey])
+                link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), holding[urikey])
                 downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)

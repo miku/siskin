@@ -46,12 +46,22 @@ class DefaultTask(BaseTask):
         return os.path.join(os.path.dirname(__file__), 'assets', path)
 
     @property
+    def config(self):
+        """
+        Return the config instance.
+        """
+        return config
+
+    @property
     def logger(self):
-        # logging uses singleton internally, so no worries
+        """
+        Return the logger. Module logging uses singleton internally, so no worries.
+        """
         return logging.getLogger('siskin')
 
     @property
     def logfile(self):
-        """ A logfile per task for stderr redirects. """
-        name = self.taskdir().split('/')[-1]
-        return os.path.join(config.get('core', 'logdir', '/var/log/siskin'), '%s.log' % name)
+        """
+        A logfile path per task family (e.g. for stderr redirects).
+        """
+        return os.path.join(config.get('core', 'logdir', '/var/log/siskin'), '%s.log' % self.task_family)
