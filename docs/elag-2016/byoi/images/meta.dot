@@ -1,0 +1,9 @@
+digraph meta {
+	"begin bootcamp" -> "verify installation";
+	"verify installation" -> "import appliance";
+	"import appliance" -> "install virtualbox
+(if you haven't already)";
+	"import appliance" -> "receive USB stick";
+
+	"begin bootcamp" -> "welcome";
+}

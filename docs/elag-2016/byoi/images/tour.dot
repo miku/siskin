@@ -1,0 +1,50 @@
+digraph meta {
+
+	node [fontname=helvetica];
+
+	{
+		node [shape=box style=filled fontname=helvetica];
+
+		"begin bootcamp" -> "verify installation";
+		"verify installation" -> "import appliance";
+		"import appliance" -> "install virtualbox";
+		"import appliance" -> "receive USB stick";
+
+		"begin bootcamp" -> "welcome";
+
+		"part 1" -> "hello.py";
+	}
+
+	{
+		node [shape=oval fontname=helvetica style=""];		
+		"part 1";
+		"part 2";
+		"part 3";
+		"part 4";
+		"part 5";
+		"part 6";
+	}
+
+	"aggreate index" -> "part 6";
+	"part 6" -> "part 5";
+	"part 6" -> "indexing into SOLR
+with solrbulk";
+	
+	"part 5" -> "part 4";
+	"part 5" -> "applying licensing information
+with span-tag";
+	
+	"part 4" -> "part 3";
+	"part 4" -> "combining data sources";
+
+	"part 3" -> "part 2";
+	"part 3" -> "doaj.py";
+
+	"part 2" -> "part 1";
+	"part 2" -> "crossref.py";
+
+	"part 1" -> "begin bootcamp";
+	"part 1" -> "Hello World,
+hello Luigi!"
+
+}
