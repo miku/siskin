@@ -39,7 +39,6 @@ from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 
-FTP_HOME = os.path.join(self.config.get('core', 'home'), 'common/FTPMirror/4661460d9f3094fd94d861d2fca8c9498cdab40c')
 
 class PubmedTask(DefaultTask):
     """ Pubmed base. """
@@ -135,20 +134,6 @@ class PubmedJournalListReduced(PubmedTask):
     def run(self):
         output = shellout(r"""cat {input} | csvcut -c1,3,4,9,10 | tr ',' '\t' > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class PubmedArticleXML(PubmedTask):
-    """
-    Just stream XML.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    base = luigi.Parameter(default=FTP_HOME)
-
-    def run(self):
-        for path in glob.glob(os.path.join(self.base, "articles*")):
-            print(path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
