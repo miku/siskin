@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -22,6 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 import luigi
+
 
 class ILNParameter(luigi.Parameter):
     """

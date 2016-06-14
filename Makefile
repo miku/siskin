@@ -12,6 +12,11 @@ upload:
 	python setup.py sdist
 	twine upload dist/*
 
+imports:
+	isort -rc --atomic .
+
+pylint:
+	pylint siskin
 
 clean:
 	rm -rf siskin.egg-info

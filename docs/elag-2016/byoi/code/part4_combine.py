@@ -18,13 +18,15 @@ To clean:
 
 """
 
+import tempfile
+
+import luigi
 from gluish.task import BaseTask
 from gluish.utils import shellout
-import luigi
-import tempfile
 
 from part2_crossref import CrossrefIntermediateSchema
 from part3_doaj import DOAJIntermediateSchema
+
 
 class Task(BaseTask):
     BASE = 'output'

@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0103
+# pylint: disable=C0103,C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -28,13 +28,14 @@ are there and writeable.
 """
 
 from __future__ import print_function
-from siskin.configuration import Config
+
 import os
 import sys
 import tempfile
-
-# TODO(miku): 2.7 pytz seems to import module argparse twice?
 import warnings
+
+from siskin.configuration import Config
+
 warnings.filterwarnings("ignore")
 
 # https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning

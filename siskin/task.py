@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0103,W0232
+# pylint: disable=C0103,W0232,C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -26,13 +26,12 @@
 Define a siskin wide task with artefacts under core.home directory.
 """
 
+import logging
+import os
+
 from gluish.task import BaseTask
 from gluish.utils import shellout
 from siskin.configuration import Config
-import logging
-import os
-import random
-import siskin
 
 config = Config.instance()
 

@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 # coding: utf-8
+# pylint: disable=C301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -33,10 +33,9 @@ Just logs the output. Could be extended to send this information to some service
 if available.
 """
 
-from timeit import default_timer
 import functools
 import logging
-import os
+from timeit import default_timer
 
 logger = logging.getLogger('gluish')
 

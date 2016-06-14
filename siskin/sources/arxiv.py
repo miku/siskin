@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -45,13 +46,15 @@ From: https://groups.google.com/forum/#!topic/arxiv-api/aOacIt6KD2E
 
 """
 
+import datetime
+
+import luigi
 from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
-import datetime
-import luigi
+
 
 class ArxivTask(DefaultTask):
     """

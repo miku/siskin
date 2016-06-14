@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -25,15 +26,17 @@
 Common tasks.
 """
 
-from gluish.common import Executable
-from gluish.utils import shellout
-from gluish.format import TSV
-from siskin.task import DefaultTask
-from siskin.utils import iterfiles, random_string
 import hashlib
-import luigi
 import os
 import pipes
+
+import luigi
+from gluish.common import Executable
+from gluish.format import TSV
+from gluish.utils import shellout
+from siskin.task import DefaultTask
+from siskin.utils import iterfiles, random_string
+
 
 class CommonTask(DefaultTask):
     """

@@ -27,9 +27,7 @@ Various utilities.
 """
 
 from __future__ import print_function
-from dateutil import relativedelta
-from luigi.task import Register, flatten
-from siskin import __version__
+
 import collections
 import cStringIO as StringIO
 import errno
@@ -37,14 +35,18 @@ import functools
 import hashlib
 import itertools
 import json
-import luigi
 import os
 import pprint
 import random
-import requests
 import string
 import sys
 import tempfile
+
+import luigi
+import requests
+from dateutil import relativedelta
+from siskin import __version__
+
 
 MAN_HEADER = r"""
 
@@ -134,33 +136,6 @@ def iterfiles(directory='.', fun=None):
             if fun(path):
                 yield path
 
-def generate_tasks_manual():
-    """ Return a formatted listing of all tasks with their descriptions. """
-    from siskin.sources import *
-    from siskin.workflows import *
-
-    output = StringIO.StringIO()
-    # task_tuples = sorted(Register.get_reg().iteritems())
-    task_names = Register.task_names()
-    output.write(MAN_HEADER)
-    output.write('  {0} tasks found\n\n'.format(len(task_names)))
-
-    for name in task_names:
-        klass = Register.get_task_cls(name)
-        doc = klass.__doc__ or "@TODO: docs"
-        output.write('{0} {1}\n'.format(name, doc))
-
-        try:
-            deps = flatten(klass().requires())
-        except Exception:
-            # TODO: tasks that have required arguments will fail here
-            formatted = "\tUnavailable since task has required parameters."
-        else:
-            formatted = '\t{0}'.format(pprint.pformat(deps).replace('\n', '\n\t'))
-        output.write('\n\tDependencies ({0}):\n\n{1}\n\n'.format(len(deps), formatted))
-
-    return output.getvalue()
-
 def random_string(length=16):
     """
     Return a random string (upper and lowercase letters) of length `length`,
@@ -193,11 +168,8 @@ def get_task_import_cache():
     task_import_cache = None
     path = os.path.join(tempfile.gettempdir(), 'siskin_task_import_cache_%s' % __version__)
     if not os.path.exists(path):
-        from siskin.sources import *
-        from siskin.workflows import *
-        with open(path, 'w') as output:
-            task_import_cache = dict([(name, Register.get_task_cls(name).__module__) for name in Register.task_names() if name[0].isupper()])
-            json.dump(task_import_cache, output)
+        from cacheutils import _write_task_import_cache
+        _write_task_import_cache(path)
 
     if task_import_cache is None:
         with open(path) as handle:

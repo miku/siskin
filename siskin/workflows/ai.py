@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -28,6 +29,17 @@
 # AMSL (api) + AIIntermediateSchema (sources) = AILicensing (isil) -> AIExport (for solr)
 #
 
+import collections
+import datetime
+import itertools
+import json
+import os
+import re
+import string
+import tempfile
+
+import luigi
+import requests
 from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
@@ -36,26 +48,18 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
-from siskin.sources.crossref import CrossrefIntermediateSchema, CrossrefUniqISSNList
-from siskin.sources.degruyter import DegruyterIntermediateSchema, DegruyterISSNList
+from siskin.sources.crossref import (CrossrefIntermediateSchema,
+                                     CrossrefUniqISSNList)
+from siskin.sources.degruyter import (DegruyterIntermediateSchema,
+                                      DegruyterISSNList)
 from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.elsevierjournals import ElsevierJournalsIntermediateSchema
-from siskin.sources.gbi import GBIIntermediateSchemaByKind
-from siskin.sources.gbi import GBIISSNList
+from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
 from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
 from siskin.sources.thieme import ThiemeIntermediateSchema
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
-import collections
-import datetime
-import itertools
-import json
-import luigi
-import os
-import re
-import requests
-import string
-import tempfile
+
 
 class AITask(DefaultTask):
     TAG = 'ai'

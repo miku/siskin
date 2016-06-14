@@ -31,21 +31,22 @@ open access, peer-reviewed journals.
 http://doaj.org
 """
 
+import datetime
+import json
+import tempfile
+import time
+
+import elasticsearch
+import luigi
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
-from siskin.database import sqlitedb
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin
-import datetime
-import elasticsearch
-import json
-import luigi
-import tempfile
-import time
+
 
 class DOAJTask(DefaultTask):
     """

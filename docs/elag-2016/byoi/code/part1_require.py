@@ -26,8 +26,9 @@ Run with less noise:
 """
 
 import json
-import luigi
 import os
+
+import luigi
 
 
 class SomeInput(luigi.ExternalTask):

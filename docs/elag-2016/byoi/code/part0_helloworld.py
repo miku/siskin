@@ -20,6 +20,7 @@ Run with less noise:
 
 import luigi
 
+
 class HelloWorldTask(luigi.Task):
 
     def run(self):

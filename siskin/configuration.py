@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding: utf-8
 # pylint: disable=C0301,R0904,W0221
 
@@ -28,8 +27,8 @@ Configuration handling, taken from luigi. File format is ini. File location
 at the moment is fixed at /etc/siskin/siskin.ini.
 """
 
-from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 import datetime
+from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
 
 class Config(ConfigParser):

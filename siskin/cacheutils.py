@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301,C0103,W0614,W0401
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -23,11 +23,18 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Support for importing all workflows at once.
+Module exists, so we do not have to do star imports in utils.py.
 """
 
-import os
-import glob
+from luigi.task import Register
+from siskin.sources import *
+from siskin.workflows import *
 
-modules = glob.glob("%s/*.py" % (os.path.dirname(__file__)))
-__all__ = [os.path.basename(f)[:-3] for f in modules]
+
+def _write_task_import_cache(path):
+    """
+    Write dict to path.
+    """
+    with open(path, 'w') as output:
+        task_import_cache = dict([(name, Register.get_task_cls(name).__module__) for name in Register.task_names() if name[0].isupper()])
+        json.dump(task_import_cache, output)

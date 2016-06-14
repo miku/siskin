@@ -19,11 +19,14 @@ To clean:
 """
 
 from __future__ import print_function
-from gluish.task import BaseTask
-from gluish.utils import shellout
-import luigi
+
 import os
 import tempfile
+
+import luigi
+from gluish.task import BaseTask
+from gluish.utils import shellout
+
 
 class Task(BaseTask):
     """

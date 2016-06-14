@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -80,23 +80,22 @@ rsync-options = -e XXX -avzP
 
 """
 
-from gluish.format import TSV, Gzip
+import collections
+import datetime
+import json
+import os
+import re
+import tempfile
+
+import luigi
+from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
-from siskin.common import FTPMirror, Executable
+from siskin.common import Executable
 from siskin.task import DefaultTask
-from siskin.utils import iterfiles, SetEncoder
-import collections
-import datetime
-import json
-import luigi
-import os
-import re
-import shutil
-import tempfile
-import zipfile
+from siskin.utils import SetEncoder, iterfiles
 
 # UPDATE and DUMP are addition configuration that might move into siskin.ini,
 # once it is stable

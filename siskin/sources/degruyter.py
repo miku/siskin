@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -34,19 +35,17 @@ ftp-pattern = some*glob*pattern.zip
 
 """
 
+import datetime
+import tempfile
+
+import luigi
 from gluish.format import TSV
-from gluish.intervals import daily
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
-from siskin.common import FTPMirror, Executable
+from siskin.common import Executable, FTPMirror
 from siskin.task import DefaultTask
-from siskin.utils import iterfiles
-import datetime
-import luigi
-import re
-import shutil
-import tempfile
+
 
 class DegruyterTask(DefaultTask):
     TAG = 'degruyter'

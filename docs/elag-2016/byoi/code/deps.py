@@ -17,6 +17,7 @@ $ python deps.py
 """
 
 import collections
+
 from part6_export import Export
 
 g = collections.defaultdict(set)

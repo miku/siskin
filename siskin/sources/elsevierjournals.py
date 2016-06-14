@@ -39,6 +39,15 @@ backlog-dir = /path/to/dir
 
 """
 
+import base64
+import collections
+import datetime
+import json
+import os
+import re
+import tempfile
+
+import luigi
 from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
@@ -48,14 +57,7 @@ from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
-import base64
-import collections
-import datetime
-import json
-import luigi
-import os
-import re
-import tempfile
+
 
 class ElsevierJournalsTask(DefaultTask):
     """ Elsevier journals base. """

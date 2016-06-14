@@ -17,12 +17,15 @@ To clean:
 """
 
 from __future__ import print_function
-from gluish.task import BaseTask
-from gluish.utils import shellout
-import luigi
+
 import os
 
+import luigi
+from gluish.task import BaseTask
+from gluish.utils import shellout
+
 from part5_licensing import ApplyLicensing
+
 
 class Task(BaseTask):
     BASE = 'output'

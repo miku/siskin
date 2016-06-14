@@ -1,4 +1,5 @@
 # coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -25,11 +26,13 @@
 Helper for databases.
 """
 
-from pymysql.cursors import SSCursor
 import logging
-import pymysql
 import sqlite3
 import urlparse
+
+import pymysql
+from pymysql.cursors import SSCursor
+
 
 class sqlitedb(object):
     """
@@ -92,4 +95,3 @@ class mysqldb(object):
             self.conn.commit()
         self.cursor.close()
         self.conn.close()
-

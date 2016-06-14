@@ -26,6 +26,11 @@
 Pubmed PMC FTP.
 """
 
+import datetime
+import glob
+import os
+
+import luigi
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -33,10 +38,6 @@ from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
-import datetime
-import glob
-import luigi
-import os
 
 FTP_HOME = os.path.join(self.config.get('core', 'home'), 'common/FTPMirror/4661460d9f3094fd94d861d2fca8c9498cdab40c')
 

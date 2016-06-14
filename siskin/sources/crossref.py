@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+# coding: utf-8
+# pylint: disable=C0301
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -42,6 +43,16 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 
 """
 
+import datetime
+import json
+import os
+import tempfile
+import urllib
+
+import elasticsearch
+import luigi
+import requests
+import siskin
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
@@ -51,17 +62,8 @@ from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLService
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
-from siskin.utils import URLCache, ElasticsearchMixin
-import collections
-import datetime
-import elasticsearch
-import json
-import luigi
-import os
-import requests
-import siskin
-import tempfile
-import urllib
+from siskin.utils import ElasticsearchMixin, URLCache
+
 
 class CrossrefTask(DefaultTask):
     """
