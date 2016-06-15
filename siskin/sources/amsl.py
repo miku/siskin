@@ -54,9 +54,8 @@ class AMSLTask(DefaultTask):
 
 class AMSLService(AMSLTask):
     """
-    Retrieve AMSL API response. Outbound:
-    discovery, holdingsfiles, contentfiles,
-    metadata_usage.
+    Retrieve AMSL API response. Outbound: discovery, holdingsfiles,
+    contentfiles, metadata_usage.
     """
     date = luigi.DateParameter(default=datetime.date.today())
     name = luigi.Parameter(default='outboundservices:discovery',
