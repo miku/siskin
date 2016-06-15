@@ -42,6 +42,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
@@ -91,7 +92,7 @@ class ThiemeIntermediateSchema(ThiemeTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
-class ThiemeSolr(ThiemeTask):
+class ThiemeExport(ThiemeTask):
     """
     Create something solr importable. Attach a single ISIL to all records.
 
@@ -102,11 +103,15 @@ class ThiemeSolr(ThiemeTask):
     version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
-        return ThiemeIntermediateSchema(date=self.date, set=self.set)
+        return {
+            'is': ThiemeIntermediateSchema(date=self.date, set=self.set),
+            'config': AMSLFilterConfig(date=self.date),
+        }
 
     def run(self):
-        output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') <(unpigz -c {input}) > {output}""", input=self.input().path)
-        output = shellout("span-export -o {version} {input} | pigz -c > {output}", input=output, version=self.version)
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):

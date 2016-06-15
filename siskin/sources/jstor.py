@@ -45,6 +45,7 @@ from gluish.utils import shellout
 
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 from siskin.utils import nwise
 
@@ -178,18 +179,19 @@ class JstorExport(JstorTask):
     A SOLR-importable version of Jstor.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
-        from siskin.workflows.ai import AIFilterConfig
         return {
-            'file': JstorIntermediateSchema(date=self.date),
-            'config': AIFilterConfig(date=self.date)
+            'is': JstorIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date)
         }
 
     @timed
     def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | span-export | pigz -c > {output}",
-                          input=self.input().get('file').path, config=self.input().get('config').path)
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -226,9 +228,8 @@ class JstorDOIList(JstorTask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v null >> {output} """, input=self.input().path, output=stopover)
-        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v null > {output} """, input=self.input().path)
+        output = shellout("""sort -u {input} > {output} """, input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):

@@ -49,14 +49,18 @@ from gluish.utils import shellout
 from BeautifulSoup import BeautifulSoup
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
-from siskin.sources.crossref import (CrossrefIntermediateSchema,
+from siskin.sources.crossref import (CrossrefDOIList,
+                                     CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)
-from siskin.sources.degruyter import (DegruyterIntermediateSchema,
+from siskin.sources.degruyter import (DegruyterDOIList,
+                                      DegruyterIntermediateSchema,
                                       DegruyterISSNList)
-from siskin.sources.doaj import DOAJIntermediateSchema, DOAJISSNList
+from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
+                                 DOAJISSNList)
 from siskin.sources.elsevierjournals import ElsevierJournalsIntermediateSchema
 from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
-from siskin.sources.jstor import JstorIntermediateSchema, JstorISSNList
+from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
+                                  JstorISSNList)
 from siskin.sources.thieme import ThiemeIntermediateSchema
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
@@ -67,6 +71,38 @@ class AITask(DefaultTask):
 
     def closest(self):
         return weekly(self.date)
+
+class AIDOIStats(AITask):
+    """
+    DOI overlaps.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefDOIList(date=self.date),
+            'degruyter': DegruyterDOIList(date=self.date),
+            'doaj': DOAJDOIList(date=self.date),
+            'jstor': JstorDOIList(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        def loadset(target):
+            s = set()
+            with target.open() as handle:
+                for row in handle.iter_tsv(cols=('doi',)):
+                    s.add(row.issn)
+            return s
+
+        with self.output().open('w') as output:
+            for k1, k2 in itertools.combinations(self.input().keys(), 2):
+                s1 = loadset(self.input().get(k1))
+                s2 = loadset(self.input().get(k2))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class AIISSNStats(AITask):
     """ Match ISSN lists. """
@@ -107,7 +143,6 @@ class AIISSNOverlaps(AITask):
             'crossref': CrossrefUniqISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
-            # 'gbi': GBIISSNList(date=self.date),
             'jstor': JstorISSNList(date=self.date)
         }
 

@@ -56,6 +56,7 @@ from gluish.utils import shellout
 from BeautifulSoup import BeautifulStoneSoup
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 
@@ -141,20 +142,49 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
-class ElsevierJournalsSolr(ElsevierJournalsTask):
+class ElsevierJournalsDOIList(ElsevierJournalsTask):
     """
-    Create something solr importable. Attach a single ISIL to all records.
+    A list of Elsevier journals DOIs.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return ElsevierJournalsIntermediateSchema(tag=self.tag)
+        return {'input': ElsevierJournalsIntermediateSchema(date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):
-        output = shellout("""span-tag -c <(echo '{{"DE-15": {{"any": {{}}}}}}') {input} > {output}""", input=self.input().path)
-        output = shellout("span-export {input} > {output}", input=output)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        # process substitution sometimes results in a broken pipe, so extract beforehand
+        output = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
+        shellout("""jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
+                 input=output, output=stopover, pipefail=True)
+        os.remove(output)
+        output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class ElsevierJournalsExport(ElsevierJournalsTask):
+    """
+    A SOLR-importable version of Jstor.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+
+    def requires(self):
+        return {
+            'is': ElsevierJournalsIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version, pipefail=True)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
