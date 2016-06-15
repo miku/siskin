@@ -203,9 +203,9 @@ class AMSLHoldingsFile(AMSLTask):
     """
     Access AMSL files/get?setResource= facilities.
 
-    The output is probably zipped (will be decompressed on the fily)
+    The output is probably zipped (will be decompressed on the fly).
 
-    One ISIL can have multiple files.
+    One ISIL can have multiple files (they will be combined).
     """
     isil = luigi.Parameter(description='ISIL, case sensitive')
     date = luigi.Parameter(default=datetime.date.today())
