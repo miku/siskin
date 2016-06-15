@@ -91,8 +91,8 @@ class AIDOIStats(AITask):
         def loadset(target):
             s = set()
             with target.open() as handle:
-                for row in handle.iter_tsv(cols=('doi',)):
-                    s.add(row.issn)
+                for line in handle:
+                    s.add(line.strip())
             return s
 
         with self.output().open('w') as output:
