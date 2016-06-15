@@ -67,34 +67,6 @@ class AITask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
-class DownloadFile(AITask):
-    """ Download a file. TODO(miku): move this out here. """
-
-    date = luigi.DateParameter(default=datetime.date.today())
-    url = luigi.Parameter()
-
-    @timed
-    def run(self):
-        output = shellout("""curl -L --fail "{url}" > {output}""", url=self.url)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='file', digest=True))
-
-class DownloadAndUnzipFile(AITask):
-    """ Download a file and unzip it. TODO(miku): move this out here. """
-    date = luigi.DateParameter(default=datetime.date.today())
-    url = luigi.Parameter()
-
-    @timed
-    def run(self):
-        output = shellout("""curl -L --fail "{url}" > {output}""", url=self.url)
-        output = shellout("""unzip -qq -p {input} > {output}""", input=output)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='file', digest=True))
-
 class AIISSNStats(AITask):
     """ Match ISSN lists. """
     date = ClosestDateParameter(default=datetime.date.today())
