@@ -42,6 +42,7 @@ import luigi
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
 from siskin.task import DefaultTask

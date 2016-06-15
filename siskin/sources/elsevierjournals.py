@@ -48,11 +48,12 @@ import re
 import tempfile
 
 import luigi
-from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.utils import shellout
+
+from BeautifulSoup import BeautifulStoneSoup
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
@@ -113,7 +114,7 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
+            for row in sorted(handle.iter_tsv(cols=('path',))):
                 if not row.path.endswith('.tar'):
                     continue
                 shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
