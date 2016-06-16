@@ -45,6 +45,7 @@ from gluish.utils import shellout
 
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
@@ -131,6 +132,29 @@ class DegruyterIntermediateSchema(DegruyterTask):
     @timed
     def run(self):
         output = shellout("span-import -i degruyter {input} | pigz -c > {output}", input=self.input().get('file').path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class DegruyterExport(DegruyterTask):
+    """
+    A SOLR-importable version.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+
+    def requires(self):
+        return {
+            'is': DegruyterIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
