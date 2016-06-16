@@ -1,3 +1,32 @@
+0.1.1 2016-06-16
+----------------
+
+* add DegruyterExport
+* ai: AIDOIStats leads to MemoryError, TODO: use comm
+* add AIDOIStats
+* fix imports with isort
+* crossref: add pipefail to shellout
+* amsl: docs typo
+* amsl: remove hard-wired 85 rules
+* amsl: docs formatting
+* degruyter: extract issns, if they exist
+* ai: remove obsolete tasks
+* taskpurge: cleanup
+* pubmed: remove hard-coded dependence on FTP
+* pylint checks
+* taskps: save space
+* align license headers
+* cleanup docs
+* docs: add link to VM
+* docs: elag bootcamp skeleton
+* docs: remove filterconfig
+* docs: update for elag 2016
+* cleanup example siskin.ini
+* make config a property on the base task
+* sources: docs
+* update license headers
+* update README
+
 0.1.0 2016-06-13
 ----------------
 
