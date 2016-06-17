@@ -33,6 +33,7 @@ BASE.
 """
 
 import datetime
+import tempfile
 
 import luigi
 from gluish.utils import shellout
@@ -76,6 +77,10 @@ class BaseFIDSample(BaseTask):
     prefix = luigi.Parameter(default="oai_dc", significant=False)
 
     def requires(self):
+        """
+        TODO(miku): Is there a way to OR various queries? No example in the
+        documentation (http://oai.base-search.net/index.html#dynamic-sets).
+        """
         return [
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"cinema"'),
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"crisis%20communication"'),
@@ -105,7 +110,7 @@ class BaseFIDSample(BaseTask):
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"intermedial*"'),
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"kommunikationsforschung"'),
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"kommunikationsgeschichte"'),
-            BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"medienpädagogik"'),
+            BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"medienp%E4dagogik"'),
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"literaturverfilmung"'),
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"mass%20communication"'),
             BaseDynamicSet(date=self.date, prefix=self.prefix, set='subject:"massenkommunikation"'),
@@ -149,8 +154,10 @@ class BaseFIDSample(BaseTask):
         """
         TODO(miku): concatenate.
         """
+        _, output = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            print(target)
+            shellout("cat {input} >> {output}", input=target.path, output=output)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz", digest=True))
