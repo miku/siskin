@@ -36,6 +36,8 @@ import datetime
 import tempfile
 
 import luigi
+from gluish.interval import weekly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.common import Executable
@@ -48,9 +50,12 @@ class BaseTask(DefaultTask):
     """
     TAG = 'base'
 
+    def closest(self):
+        return weekly(self.date)
+
 class BaseDynamicSet(BaseTask):
 
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     prefix = luigi.Parameter(default="oai_dc", significant=False)
     set = luigi.Parameter(description='a subject / keyword')
 
@@ -73,7 +78,7 @@ class BaseFIDSample(BaseTask):
 
     http://oai.base-search.net/index.html#overview-of-indexed-fields
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     prefix = luigi.Parameter(default="oai_dc", significant=False)
 
     def requires(self):
