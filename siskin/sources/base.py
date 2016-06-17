@@ -69,7 +69,7 @@ class BaseDynamicSet(BaseTask):
 
 class BaseFIDSample(BaseTask):
     """
-    Base subject filtered.
+    Base subject filtered. Most probably the query results overlap.
 
     http://oai.base-search.net/index.html#overview-of-indexed-fields
     """
@@ -151,9 +151,6 @@ class BaseFIDSample(BaseTask):
         ]
 
     def run(self):
-        """
-        TODO(miku): concatenate.
-        """
         _, output = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=output)
