@@ -40,13 +40,13 @@ import tempfile
 
 import luigi
 import requests
-from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from BeautifulSoup import BeautifulSoup
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
 from siskin.sources.crossref import (CrossrefDOIList,
@@ -57,11 +57,12 @@ from siskin.sources.degruyter import (DegruyterDOIList,
                                       DegruyterISSNList)
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
-from siskin.sources.elsevierjournals import ElsevierJournalsIntermediateSchema
+from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
+                                             ElsevierJournalsISSNList)
 from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
-from siskin.sources.thieme import ThiemeIntermediateSchema
+from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
 
@@ -164,6 +165,34 @@ class AIISSNOverlaps(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIISSNList(AITask):
+    """
+    List of uniq ISSNs in AI.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date),
+            'thieme': ThiemeISSNList(date=self.date),
+            'elsevier': ElsevierJournalsISSNList(date=self.date),
+        }
+
+    @timed
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        for _, target in self.input().items():
+            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
+        output = shellout("sort -u {input} > {output}", input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIIntermediateSchema(AITask):
     """ Create an intermediate schema record from all AI sources. """

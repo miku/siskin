@@ -82,6 +82,7 @@ class JstorPaths(JstorTask):
 class JstorMembers(JstorTask):
     """
     Extract a full list of archive members.
+    TODO: This should only be done once per file.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -96,8 +97,8 @@ class JstorMembers(JstorTask):
                 if not row.path.endswith('.zip'):
                     self.logger.debug('skipping: %s' % row.path)
                     continue
-                shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' | sort >> {output} """,
-                         preserve_whitespace=True, input=row.path, output=stopover)
+                shellout(""" unzip -l {input} | LC_ALL=C grep "xml$" | LC_ALL=C awk '{{print "{input}\t"$4}}' | LC_ALL=C sort >> {output} """,
+                         preserve_whitespace=True, input=row.path, output=stopover, pipefail=True)
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
@@ -122,7 +123,8 @@ class JstorLatestMembers(JstorTask):
         """
         Expect input to be sorted by shipment date, so tac will actually be a perfect rewind.
         """
-        output = shellout("tac {input} | sort -S 50% -u -k2,2 | sort -S 50% -k1,1 > {output}", input=self.input().path)
+        output = shellout("tac {input} | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}",
+                          input=self.input().path, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -131,6 +133,7 @@ class JstorLatestMembers(JstorTask):
 class JstorXML(JstorTask):
     """
     Create a snapshot of the latest data.
+    TODO(miku): maybe shard by journal and reduce update time.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     batch = luigi.IntParameter(default=512, significant=False)
@@ -148,7 +151,7 @@ class JstorXML(JstorTask):
                     margs = " ".join(["'%s'" % item.member.replace('[', r'\[').replace(']', r'\]') for item in chunk])
                     shellout("""unzip -p {archive} {members} |
                                 sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
-                                archive=archive, members=margs, output=stopover)
+                                archive=archive, members=margs, output=stopover, pipefail=True)
 
         luigi.File(stopover).move(self.output().path)
 
@@ -168,7 +171,8 @@ class JstorIntermediateSchema(JstorTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i jstor <(unpigz -c {input}) | pigz -c > {output}", input=self.input().get('file').path)
+        output = shellout("span-import -i jstor <(unpigz -c {input}) | pigz -c > {output}",
+                          input=self.input().get('file').path, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -191,7 +195,8 @@ class JstorExport(JstorTask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
-        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version, pipefail=True)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}",
+                          input=output, version=self.version, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -228,7 +233,8 @@ class JstorDOIList(JstorTask):
 
     @timed
     def run(self):
-        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v null > {output} """, input=self.input().path)
+        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v null > {output} """,
+                          input=self.input().path, pipefail=True)
         output = shellout("""sort -u {input} > {output} """, input=output)
         luigi.File(output).move(self.output().path)
 

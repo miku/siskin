@@ -35,9 +35,11 @@ oai = https://example.com/oai/provider
 """
 
 import datetime
+import tempfile
 
 import luigi
 from gluish.common import Executable
+from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -116,3 +118,23 @@ class ThiemeExport(ThiemeTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class ThiemeISSNList(ThiemeTask):
+    """
+    A list of Elsevier journals DOIs.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'input': ThiemeIntermediateSchema(date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output, pipefail=True)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output, pipefail=True)
+        output = shellout("""sort -u {input} > {output} """, input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
