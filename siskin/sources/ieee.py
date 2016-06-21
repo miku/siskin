@@ -60,4 +60,4 @@ class IEEEIntermediateSchema(IEEETask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True))
+        return luigi.LocalTarget(path=self.path(digest=True, ext='ldj.gz'))
