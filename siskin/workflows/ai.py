@@ -350,6 +350,8 @@ class AICoverageISSN(AITask):
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
             'gbi': GBIISSNList(date=self.date),
+            'elsevierjournals': ElsevierJournalsISSNList(date=self.date),
+            'thieme': ThiemeISSNList(date=self.date),
             'file': AMSLHoldingsFile(isil=self.isil),
         }
 
@@ -368,7 +370,7 @@ class AICoverageISSN(AITask):
                 if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[2]):
                     issns['file'].add(fields[2])
 
-        sources = ['crossref', 'jstor', 'degruyter', 'doaj', 'gbi']
+        sources = ['crossref', 'jstor', 'degruyter', 'doaj', 'gbi', 'elsevierjournals', 'thieme']
 
         for source in sources:
             with self.input().get(source).open() as handle:
