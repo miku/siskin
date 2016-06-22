@@ -72,7 +72,7 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     def run(self):
         directory = self.config.get('elsevierjournals', 'backlog-dir')
         _, output = tempfile.mkstemp(prefix='siskin-')
-        for path in iterfiles(directory, fun=lambda p: p.endswith('.tar')):
+        for path in sorted(iterfiles(directory, fun=lambda p: p.endswith('.tar'))):
             shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
         luigi.File(output).move(self.output().path)
 
