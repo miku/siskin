@@ -89,6 +89,7 @@ class FTPMirror(CommonTask):
         subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(
             host=self.host, username=self.username, base=self.base,
             pattern=self.pattern)).hexdigest()
+
         # target is the root of the mirror
         target = os.path.join(base, subdir)
         if not os.path.exists(target):
@@ -99,8 +100,15 @@ class FTPMirror(CommonTask):
             exclude_glob = "--exclude-glob %s" % self.exclude_glob
 
         command = """lftp -u {username},{password}
-        -e "set sftp:auto-confirm yes; set net:max-retries {max_retries}; set net:timeout {timeout}; set  mirror:parallel-directories 1; mirror --verbose=0
-        --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
+        -e "
+            set sftp:auto-confirm yes;
+            set net:max-retries {max_retries};
+            set net:timeout {timeout};
+            set mirror:parallel-directories 1;
+            set ssl:verify-certificate no;
+            set ftp:ssl-protect-data true;
+
+        mirror --verbose=0 --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
 
         shellout(command, host=self.host, username=pipes.quote(self.username),
                  password=pipes.quote(self.password),

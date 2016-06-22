@@ -24,16 +24,52 @@
 
 """
 IEEE.
+
+Config:
+
+[ieee]
+
+ftp-host = host.name
+ftp-username = username
+ftp-password = password
+ftp-path = /
+ftp-pattern = *
+
 """
 
+import datetime
+
 import luigi
+from gluish.format import TSV
 from gluish.utils import shellout
 
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 
 
 class IEEETask(DefaultTask):
     TAG = 'ieee'
+
+class IEEEPaths(IEEETask):
+    """ A list of IEEE file paths (via FTP). """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        host = self.config.get('ieee', 'ftp-host')
+        username = self.config.get('ieee', 'ftp-username')
+        password = self.config.get('ieee', 'ftp-password')
+        base = self.config.get('ieee', 'ftp-path')
+        pattern = self.config.get('ieee', 'ftp-pattern')
+        return FTPMirror(host=host, username=username, password=password,
+                         base=base, pattern=pattern)
+
+    @timed
+    def run(self):
+        self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
 class IEEEIntermediateSchema(IEEETask):
     """
