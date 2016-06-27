@@ -71,7 +71,7 @@ class IEEEPaths(IEEETask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
-class IEEEIntermediateSchema(IEEETask):
+class IEEEBacklogIntermediateSchema(IEEETask):
     """
     Brute-convert any XML that has an ISSN.
 
