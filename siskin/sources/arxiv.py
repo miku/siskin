@@ -50,7 +50,7 @@ import datetime
 
 import luigi
 from gluish.common import Executable
-from gluish.intervals import monthly
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
@@ -62,7 +62,7 @@ class ArxivTask(DefaultTask):
     Base task.
     """
     def closest(self):
-        return monthly(date=self.date)
+        return weekly(date=self.date)
 
 class ArxivCombine(ArxivTask):
     """
