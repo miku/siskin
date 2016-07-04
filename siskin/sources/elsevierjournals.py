@@ -189,7 +189,7 @@ class ElsevierJournalsISSNList(ElsevierJournalsTask):
 
 class ElsevierJournalsExport(ElsevierJournalsTask):
     """
-    A SOLR-importable version of Jstor.
+    A SOLR-importable version of Elsevier.
     """
     date = luigi.DateParameter(default=datetime.date.today())
     version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
