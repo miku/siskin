@@ -70,7 +70,7 @@ class HighwireCombine(HighwireTask):
         shellout("METHA_DIR={dir} metha-sync -ignore-http-errors -format {prefix} {url}",
                  prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'), pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
