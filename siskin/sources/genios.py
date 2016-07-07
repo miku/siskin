@@ -123,6 +123,23 @@ class GeniosDropbox(GeniosTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+class GeniosReload(GeniosTask):
+    """
+    Find last reload for a given date.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosDropbox(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                print(row.path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
 class GeniosPackageInfo(GeniosTask):
     """
     Derive package information (about serials) from a given FTP mirror only.
