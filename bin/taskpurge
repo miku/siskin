@@ -48,6 +48,8 @@ import sys
 WHITELIST = [
     '/028/DOAJDump',
     '/048/GBIDropbox',
+    '/genios/GeniosDropbox',
+    '/085/ElsevierJournalsBacklogIntermediateSchema',
     '/common/FTPMirror',
     '/crossref/CrossrefHarvestChunk',
     '/dblp/DBLPDownload',
