@@ -186,7 +186,7 @@ class AIISSNList(AITask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for _, target in self.input().items():
-	    shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output, pipefail=True)
+            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output, pipefail=True)
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.File(output).move(self.output().path)
 
@@ -223,6 +223,23 @@ class AIIntermediateSchema(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+class AICheck(AITask):
+    """
+    Run quality check and gather error records.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AIIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 class AIRedact(AITask):
     """
     Redact intermediate schema.
@@ -235,7 +252,7 @@ class AIRedact(AITask):
     @timed
     def run(self):
         """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
-	output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+        output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -255,7 +272,7 @@ class AILicensing(AITask):
 
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-			  config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
+                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -305,8 +322,8 @@ class AIExport(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-	output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}",
-			  input=self.input().path, version=self.version, pipefail=True)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}",
+                          input=self.input().path, version=self.version, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
