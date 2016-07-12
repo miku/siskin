@@ -240,6 +240,23 @@ class AICheck(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+class AICheckStats(AITask):
+    """
+    Error distribution.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AICheck(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path, pipefail=True)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
+
 class AIRedact(AITask):
     """
     Redact intermediate schema.
