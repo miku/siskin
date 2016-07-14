@@ -416,7 +416,7 @@ class AMSLFilterConfig(AMSLTask):
                     'and': [
                         {
                             'issn': {
-                                'url': 'https://goo.gl/azNQDG',
+                                'url': 'https://goo.gl/2W8428',
                             }
                         },
                         filterconfig[isil],
