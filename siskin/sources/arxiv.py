@@ -54,6 +54,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.benchmark import timed
 from siskin.task import DefaultTask
 
 
@@ -80,6 +81,25 @@ class ArxivCombine(ArxivTask):
                  prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
                           prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'), pipefail=True)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+
+class ArxivIntermediateSchema(ArxivTask):
+    """
+    Experimental. Not a valid schema yet.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    url = luigi.Parameter(default="http://export.arxiv.org/oai2", significant=False)
+    prefix = luigi.Parameter(default="oai_dc", significant=False)
+
+    def requires(self):
+        return ArxivCombine(date=self.date, url=self.url)
+
+    @timed
+    def run(self):
+        output = shellout("span-import -i oai <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
         luigi.File(output).move(self.output().path)
 
     def output(self):
