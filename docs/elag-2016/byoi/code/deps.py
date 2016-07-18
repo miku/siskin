@@ -18,16 +18,20 @@ $ python deps.py
 
 import collections
 
+# the top-level task, whose dependency are to be visualized
 from part6_export import Export
 
+# node -> [deps] dictionary
 g = collections.defaultdict(set)
 
 def dump(root=None, indent=0):
+    """ dump to stdout """
     print('%s \_ %s' % ('   ' * indent, root))
     for dep in g[root]:
         dump(root=dep, indent=indent + 1)
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
+    # a basic BFS to populate g
     queue = [Export()]
     while len(queue) > 0:
         task = queue.pop()
@@ -37,6 +41,7 @@ if __name__ == '__main__':
 
     dump(root=Export())
 
+    # # for a visualization with dot/graphviz
     # print('digraph g {')
     # for task, deps in g.iteritems():
     #     for dep in deps:
