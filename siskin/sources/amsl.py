@@ -49,7 +49,6 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder
 
-
 class AMSLTask(DefaultTask):
     TAG = 'amsl'
 
@@ -354,6 +353,17 @@ class AMSLFilterConfig(AMSLTask):
         fzstag = 'Genios (Fachzeitschriften)'
 
         for isil, blob in items.iteritems():
+
+            # DE-15-FID specific: only source ids and ISSN list
+            if isil == 'DE-15-FID':
+                filterconfig[isil] = {
+                    'and': [
+                        {'issn': {'url': 'https://goo.gl/2W8428'}},
+                        {'source': [sid for sid, _ in blob.items()]},
+                    ]
+                }
+                continue
+
             for sid, filters in blob.iteritems():
 
                 # exception: special treatment for genios
@@ -409,19 +419,6 @@ class AMSLFilterConfig(AMSLTask):
                 konjs[isil].append({'and': terms})
 
             filterconfig[isil] = {'or': konjs[isil]}
-
-            # exception: FID has a special restriction via file
-            if isil == 'DE-15-FID':
-                filterconfig[isil] = {
-                    'and': [
-                        {
-                            'issn': {
-                                'url': 'https://goo.gl/2W8428',
-                            }
-                        },
-                        filterconfig[isil],
-                    ]
-                }
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output)
