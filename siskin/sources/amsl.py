@@ -359,7 +359,7 @@ class AMSLFilterConfig(AMSLTask):
             if isil == 'DE-15-FID':
                 filterconfig[isil] = {
                     'and': [
-			{'issn': {'url': self.config.get('amsl', 'fid-issn-list')}},
+                        {'issn': {'url': self.config.get('amsl', 'fid-issn-list')}},
                         {'source': [sid for sid, _ in blob.items()]},
                     ]
                 }
