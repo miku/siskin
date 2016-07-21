@@ -33,6 +33,7 @@ Config:
 
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
 base = https://example.com
+fid-issn-list = https://goo.gl/abcdef
 
 """
 
@@ -358,7 +359,7 @@ class AMSLFilterConfig(AMSLTask):
             if isil == 'DE-15-FID':
                 filterconfig[isil] = {
                     'and': [
-                        {'issn': {'url': 'https://goo.gl/2W8428'}},
+			{'issn': {'url': self.config.get('amsl', 'fid-issn-list')}},
                         {'source': [sid for sid, _ in blob.items()]},
                     ]
                 }
