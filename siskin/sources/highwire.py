@@ -75,3 +75,21 @@ class HighwireCombine(HighwireTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+
+class HighwireIntermediateSchema(HighwireTask):
+    """
+    Experimental OAI -> intermediate schema conversion.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    url = luigi.Parameter(default="open-archive.highwire.org/handler", significant=False)
+    prefix = luigi.Parameter(default="oai_dc", significant=False)
+
+    def requires(self):
+        return HighwireCombine(date=self.date, url=self.url, prefix=self.prefix)
+
+    def run(self):
+        output = shellout("span-import -i oai <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
