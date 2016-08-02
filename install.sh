@@ -175,6 +175,8 @@ fi
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
         apt-get install -y python-pip
+        apt-get install --reinstall python-pkg-resource
+        apt-get install --reinstall python-setuptools
     elif [ -f /etc/redhat-release ]; then
         yum install -y python-pip
     else
@@ -217,3 +219,11 @@ download_file_from_github "/etc/siskin/siskin.ini"
 download_file_from_github "/etc/bash_completion.d/siskin_completion.sh"
 
 chmod +x /etc/bash_completion.d/siskin_completion.sh
+
+echo <<HERE
+
+Please review configuration paths, hosts, ports, credentials, oai-endpoints in:
+
+    /etc/siskin/siskin.ini
+
+HERE
