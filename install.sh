@@ -222,6 +222,9 @@ download_file_from_github "/etc/bash_completion.d/siskin_completion.sh"
 
 chmod +x /etc/bash_completion.d/siskin_completion.sh
 
+mkdir -p /var/log/siskin.log && touch /var/log/siskin.log
+chmod 0777 /var/log/siskin.log
+
 echo <<HERE
 
 Please review configuration paths, hosts, ports, credentials, oai-endpoints in:
