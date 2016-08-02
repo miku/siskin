@@ -177,7 +177,7 @@ fi
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     if [ -f /etc/debian_version ]; then
         apt-get install -y python-pip
-        apt-get install --reinstall python-pkg-resource
+        apt-get install --reinstall python-pkg-resources
         apt-get install --reinstall python-setuptools
     elif [ -f /etc/redhat-release ]; then
         yum install -y python-pip
