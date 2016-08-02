@@ -227,7 +227,7 @@ chmod +x /etc/bash_completion.d/siskin_completion.sh
 mkdir -p /var/log && touch /var/log/siskin.log
 chmod 0777 /var/log/siskin.log
 
-echo <<HERE
+cat <<HERE
 
 Please review configuration paths, hosts, ports, credentials, oai-endpoints in:
 
