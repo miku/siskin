@@ -74,7 +74,7 @@ class IEEEPaths(IEEETask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
-class IEEEBacklogPath(IEEETask):
+class IEEEBacklogPaths(IEEETask):
     """
     List files in the backlog. Just a `tar -tf` of the compressed dump.
     """
