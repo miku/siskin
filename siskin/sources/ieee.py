@@ -23,9 +23,10 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-IEEE.
+IEEE. (http://www.ieee.org/documents/xmldoc_ver5.5.pdf)
 
-Config:
+Config
+------
 
 [ieee]
 
