@@ -35,6 +35,9 @@ ftp-password = password
 ftp-path = /
 ftp-pattern = *
 
+# initial shipment compressed as tar.gz
+backlog-archive = /path/to/ieee.tar.gz
+
 """
 
 import datetime
@@ -67,6 +70,17 @@ class IEEEPaths(IEEETask):
     @timed
     def run(self):
         self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
+
+class IEEEBacklogPath(IEEETask):
+    """
+    List files in the backlog. Just a `tar -tf` of the compressed dump.
+    """
+    def run(self):
+        output = shellout('tar -tf {input} > {output}', input=self.config.get('ieee', 'backlog-archive'))
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
