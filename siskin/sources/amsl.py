@@ -50,6 +50,7 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder
 
+
 class AMSLTask(DefaultTask):
     TAG = 'amsl'
 

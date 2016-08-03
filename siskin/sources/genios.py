@@ -35,17 +35,18 @@ Genios
 """
 
 import datetime
+import operator
 import os
 import re
 
 import luigi
 from gluish.format import TSV
 from gluish.utils import shellout
-import operator
 
 from siskin.common import Executable
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+
 
 class GeniosTask(DefaultTask):
     """
