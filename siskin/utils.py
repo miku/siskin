@@ -49,28 +49,12 @@ from dateutil import relativedelta
 from siskin import __version__
 
 
-MAN_HEADER = r"""
-
-  \V/    \V/    \V/    \V/    \V/    \V/    \V/    \V/    \V/    \V/    \V/
----o------o------o------o------o------o------o------o------o------o------o-----
-
-+ Siskin
-"""
-
 class SetEncoder(json.JSONEncoder):
     """ Helper to encode python sets into JSON lists. """
     def default(self, obj):
         if isinstance(obj, set):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
-
-def wc(path):
-    """
-    Like `wc -l`.
-    """
-    with open(path) as handle:
-        num_lines = sum(1 for line in handle)
-    return num_lines
 
 def date_range(start_date, end_date, increment, period):
     """
@@ -84,45 +68,6 @@ def date_range(start_date, end_date, increment, period):
         result.append(nxt)
         nxt += delta
     return result
-
-def copyregions(src, dst, seekmap):
-    """
-    Copy regions of a source file to a target. The regions are given in the
-    iterable `seekmap`, which must contain (offset, length) tuples.
-
-    `src` (r) and `dst` (w) must be open files handles.
-
-    More: http://stackoverflow.com/q/18551592/89391
-    """
-    for offset, length in sorted(seekmap):
-        src.seek(offset)
-        dst.write(src.read(length))
-
-class memoize(object):
-    '''Decorator. Caches a function's return value each time it is called.
-    If called later with the same arguments, the cached value is returned
-    (not reevaluated).
-    '''
-    def __init__(self, func):
-        self.func = func
-        self.cache = {}
-    def __call__(self, *args):
-        if not isinstance(args, collections.Hashable):
-            # uncacheable. a list, for instance.
-            # better to not cache than blow up.
-            return self.func(*args)
-        if args in self.cache:
-            return self.cache[args]
-        else:
-            value = self.func(*args)
-            self.cache[args] = value
-            return value
-    def __repr__(self):
-        '''Return the function's docstring.'''
-        return self.func.__doc__
-    def __get__(self, obj, objtype):
-        '''Support instance methods.'''
-        return functools.partial(self.__call__, obj)
 
 def iterfiles(directory='.', fun=None):
     """

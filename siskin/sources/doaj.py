@@ -162,57 +162,6 @@ class DOAJFiltered(DOAJDump):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
-class DOAJJson(DOAJTask):
-    """
-    An indexable JSON.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {'input': DOAJFiltered(date=self.date),
-                'jq': Executable(name='jq', message='http://git.io/NYpfTw')}
-
-    @timed
-    def run(self):
-        output = shellout("jq -r -c '._source' {input} > {output}", input=self.input().get('input').path)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class DOAJIndex(DOAJTask, ElasticsearchMixin):
-    """
-    Index into Elasticsearch.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    index = luigi.Parameter(default='doaj')
-
-    def requires(self):
-        return {'input': DOAJJson(date=self.date),
-                'esbulk': Executable(name='esbulk', message='http://git.io/vY5ny'),
-                'curl': Executable(name='curl', message='http://curl.haxx.se/')}
-
-    @timed
-    def run(self):
-        es = elasticsearch.Elasticsearch()
-        shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
-        mapping = {
-            'default': {
-                'date_detection': False,
-                '_id': {
-                    'path': 'URL'
-                },
-            }
-        }
-        es.indices.create(index=self.index)
-        es.indices.put_mapping(index='bsz', doc_type='default', body=mapping)
-        shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().get('input').path)
-        with self.output().open('w'):
-            pass
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
 class DOAJIntermediateSchema(DOAJTask):
     """
     Convert to intermediate schema via span.
