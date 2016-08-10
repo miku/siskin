@@ -41,6 +41,16 @@
 #
 # FAILED
 # ------
+#
+# ----------------
+#
+# CentOS, Python 2.7.9:
+#
+# close failed in file object destructor:
+#                                       sys.excepthook is missing
+#                                                               lost sys.stderr
+#
+# http://bugs.python.org/issue11380
 
 
 from __future__ import print_function
@@ -90,3 +100,14 @@ if __name__ == '__main__':
             pass
         else:
             raise
+
+    # http://stackoverflow.com/a/8690674/89391, http://bugs.python.org/issue11380
+    try:
+        sys.stdout.close()
+    except:
+        pass
+
+    try:
+        sys.stderr.close()
+    except:
+        pass
