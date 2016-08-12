@@ -45,7 +45,6 @@ import tempfile
 import luigi
 import requests
 from dateutil import relativedelta
-
 from siskin import __version__
 
 

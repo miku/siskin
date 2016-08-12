@@ -39,7 +39,6 @@ import luigi
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.common import Executable
 from siskin.task import DefaultTask
 

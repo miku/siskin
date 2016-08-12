@@ -6,7 +6,9 @@ Dummy module for testing out tasks.
 """
 
 import datetime
+
 from siskin.task import DefaultTask
+
 
 class DummyTask(DefaultTask):
     TAG = 'dummy'

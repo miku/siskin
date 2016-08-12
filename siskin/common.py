@@ -34,7 +34,6 @@ import luigi
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.utils import shellout
-
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles, random_string
 
