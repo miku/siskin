@@ -46,7 +46,7 @@ from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
+from luigi.notifications import send_error_email
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
 from siskin.sources.crossref import (CrossrefDOIList,
@@ -345,6 +345,14 @@ class AIExport(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+    def on_success(self):
+        """
+        Piggyback on `send_error_email`, but technically it's just a notification."
+        """
+        message = "A new AI export file has been built, at {path} ({size} bytes)".format(
+            path=self.output().path, size=os.stat(self.output().path).st_size)
+        send_error_email('AI export ready at %s' % self.output().path, message)
 
 class AIUpdate(AITask, luigi.WrapperTask):
     """
