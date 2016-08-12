@@ -361,7 +361,7 @@ class AIUpdate(AITask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [AIExport(date=self.date), AIIntermediateSchema(date=self.date)]
+        return [AIExport(date=self.date), AIRedact(date=self.date)]
 
     def output(self):
         return self.input()
