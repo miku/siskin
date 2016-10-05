@@ -166,7 +166,7 @@ class CrossrefChunkItems(CrossrefTask):
         return CrossrefHarvestChunk(begin=self.begin, end=self.end, filter=self.filter)
 
     def run(self):
-        output = shellout("jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path, pipefail=True)
+        output = shellout("jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -210,7 +210,7 @@ class CrossrefLineDOI(CrossrefTask):
         return CrossrefChunkItems(begin=self.begin, end=self.end, filter=self.filter)
 
     def run(self):
-        output = shellout(r"""jq -r '.DOI?' <(unpigz -c {input}) | awk '{{print NR"\t{input}\t"$0 }}' | pigz -c > {output}""", input=self.input().path, pipefail=True)
+        output = shellout(r"""jq -r '.DOI?' <(unpigz -c {input}) | awk '{{print NR"\t{input}\t"$0 }}' | pigz -c > {output}""", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -271,7 +271,7 @@ class CrossrefDOITable(CrossrefTask):
             TMPDIR={tmpdir} tac |
             TMPDIR={tmpdir} LC_ALL=C sort -S25% -u -k3,3 |
             pigz -c > {output}""", tmpdir=self.config.get('core', 'tempdir'),
-            input=self.input().path, pipefail=True)
+            input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -335,7 +335,7 @@ class CrossrefSortedDOITable(CrossrefTask):
     def run(self):
         output = shellout("""
             TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -k1,1n <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
-            tmpdir=self.config.get('core', 'tempdir'), input=self.input().path, pipefail=True)
+            tmpdir=self.config.get('core', 'tempdir'), input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -378,7 +378,7 @@ class CrossrefUniqItems(CrossrefTask):
 
                     input = shellout("unpigz -c {file} > {output}", file=previous_filename)
                     shellout("filterline {lines} {input} | pigz -c >> {output}",
-                             filterline=self.assets('filterline'), lines=tmp, input=input, output=stopover, pipefail=True)
+                             filterline=self.assets('filterline'), lines=tmp, input=input, output=stopover)
 
                     try:
                         os.remove(tmp)
@@ -410,7 +410,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     @timed
     def run(self):
         output = shellout("span-import -i crossref <(unpigz -c {input}) | pigz -c > {output}",
-                          input=self.input().get('file').path, pipefail=True)
+                          input=self.input().get('file').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -430,7 +430,7 @@ class CrossrefCollections(CrossrefTask):
     @timed
     def run(self):
         output = shellout("""jq -r '.["finc.mega_collection"]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""",
-                          input=self.input().get('input').path, pipefail=True)
+                          input=self.input().get('input').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -486,7 +486,7 @@ class CrossrefDOIList(CrossrefTask):
         # process substitution sometimes results in a broken pipe, so extract beforehand
         output = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
         shellout("""jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
-                 input=output, output=stopover, pipefail=True)
+                 input=output, output=stopover)
         os.remove(output)
         output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
         luigi.File(output).move(self.output().path)
@@ -546,7 +546,7 @@ class CrossrefDOIAndISSNList(CrossrefTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         temp = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
         output = shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
-                          input=temp, output=stopover, pipefail=True)
+                          input=temp, output=stopover)
         os.remove(temp)
         luigi.File(output).move(self.output().path)
 
@@ -691,7 +691,7 @@ class CrossrefDOIHarvest(CrossrefTask):
         }
 
     def run(self):
-        output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path, pipefail=True)
+        output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -716,7 +716,7 @@ class CrossrefDOIBlacklist(CrossrefTask):
              input=self.input().path, output=stopover)
         shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
              input=self.input().path, output=stopover)
-        output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover, pipefail=True)
+        output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
         luigi.File(output).move(self.output().path)
 
     def output(self):

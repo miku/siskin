@@ -152,8 +152,8 @@ class DegruyterExport(DegruyterTask):
     @timed
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
-        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version, pipefail=True)
+                          config=self.input().get('config').path, input=self.input().get('is').path)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version)
         luigi.File(output).move(self.output().path)
 
     def output(self):

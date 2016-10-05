@@ -79,7 +79,7 @@ class ArxivCombine(ArxivTask):
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
                  prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'), pipefail=True)
+                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
@@ -98,7 +98,7 @@ class ArxivIntermediateSchema(ArxivTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i oai <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+        output = shellout("span-import -i oai <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.File(output).move(self.output().path)
 
     def output(self):

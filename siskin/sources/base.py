@@ -65,7 +65,7 @@ class BaseDynamicSet(BaseTask):
         shellout("METHA_DIR={dir} metha-sync -set '{set}' -format {prefix} http://oai.base-search.net/oai",
                  set=self.set, prefix=self.prefix, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -set '{set}' -format {prefix} http://oai.base-search.net/oai | pigz -c > {output}",
-                          set=self.set, prefix=self.prefix, dir=self.config.get('core', 'metha-dir'), pipefail=True)
+                          set=self.set, prefix=self.prefix, dir=self.config.get('core', 'metha-dir'))
         luigi.File(output).move(self.output().path)
 
     def output(self):
