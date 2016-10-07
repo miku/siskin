@@ -36,8 +36,9 @@ import json
 import tempfile
 import time
 
-import elasticsearch
 import luigi
+
+import elasticsearch
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly

@@ -49,9 +49,10 @@ import os
 import tempfile
 import urllib
 
-import elasticsearch
 import luigi
 import requests
+
+import elasticsearch
 import siskin
 from gluish.common import Executable
 from gluish.format import TSV, Gzip

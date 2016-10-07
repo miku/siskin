@@ -88,6 +88,7 @@ import re
 import tempfile
 
 import luigi
+
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

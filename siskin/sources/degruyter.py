@@ -39,6 +39,7 @@ import datetime
 import tempfile
 
 import luigi
+
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

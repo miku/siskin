@@ -40,13 +40,14 @@ import tempfile
 
 import luigi
 import requests
+from luigi.notifications import send_error_email
+
 from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from luigi.notifications import send_error_email
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
 from siskin.sources.crossref import (CrossrefDOIList,

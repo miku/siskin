@@ -21,9 +21,9 @@ To clean:
 import tempfile
 
 import luigi
+
 from gluish.task import BaseTask
 from gluish.utils import shellout
-
 from part2_crossref import CrossrefIntermediateSchema
 from part3_doaj import DOAJIntermediateSchema
 

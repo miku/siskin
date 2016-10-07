@@ -48,6 +48,7 @@ import re
 import tempfile
 
 import luigi
+
 from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip

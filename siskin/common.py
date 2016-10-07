@@ -31,6 +31,7 @@ import os
 import pipes
 
 import luigi
+
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.utils import shellout
