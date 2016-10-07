@@ -29,6 +29,7 @@ at the moment is fixed at /etc/siskin/siskin.ini.
 
 import datetime
 import logging
+import os
 import sys
 from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
@@ -39,7 +40,12 @@ class Config(ConfigParser):
     """
     NO_DEFAULT = None
     _instance = None
-    _config_paths = ['/etc/siskin/siskin.ini']
+
+    # most specific path last
+    _config_paths = [
+        '/etc/siskin/siskin.ini',
+        os.path.join(os.path.expanduser('~'), '.config/siskin/siskin.ini'),
+    ]
 
     @classmethod
     def add_config_path(cls, path):
