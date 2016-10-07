@@ -28,6 +28,7 @@ Define a siskin wide task with artefacts under core.home directory.
 
 import logging
 import os
+import tempfile
 
 from gluish.task import BaseTask
 from gluish.utils import shellout
@@ -37,7 +38,7 @@ config = Config.instance()
 
 class DefaultTask(BaseTask):
     """ A base task that sets its base directory based on config value. """
-    BASE = config.get('core', 'home', Config.NO_DEFAULT)
+    BASE = config.get('core', 'home', os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
     def assets(self, path):
         """ Return the absolute path to the asset. `path` is the relative path
