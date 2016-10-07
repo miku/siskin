@@ -58,10 +58,3 @@ class DefaultTask(BaseTask):
         Return the logger. Module logging uses singleton internally, so no worries.
         """
         return logging.getLogger('siskin')
-
-    @property
-    def logfile(self):
-        """
-        A logfile path per task family (e.g. for stderr redirects).
-        """
-        return os.path.join(config.get('core', 'logdir', '/var/log/siskin'), '%s.log' % self.task_family)

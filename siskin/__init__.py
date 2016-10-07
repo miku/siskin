@@ -49,15 +49,4 @@ except ImportError:
 __version__ = '0.1.7'
 
 config = Config.instance()
-
 tempfile.tempdir = config.get('core', 'tempdir', tempfile.gettempdir())
-logdir = config.get('core', 'logdir', '/var/log/siskin')
-
-for name, directory in (('core.tempdir', tempfile.tempdir), ('core.logdir', logdir)):
-    if not os.path.exists(directory):
-        try:
-            os.makedirs(directory, 1777)
-        except OSError as err:
-            msg = '{0} does not exist and we cannot create it: {1}'.format(name, directory)
-            print(msg, file=sys.stderr)
-            sys.exit(1)
