@@ -64,4 +64,5 @@ if __name__ == '__main__':
 	if len(tags) > 0:
 	    print("OKAI\t%s\t%s" % (issn, "|".join(tags)))
 	else:
-	    print("MISS\tMISS\t%s" % issn)
+	    print("MISS\t%s\tMISS" % issn)
+
