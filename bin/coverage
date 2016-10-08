@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+For each ISSN in KBART, see, if we have an entry in AI.
+
+    $ python coverage.py -f list_of_issns.txt
+"""
+
+from __future__ import print_function
+
+import argparse
+import csv
+import sys
+
+import luigi
+
+from siskin.sources.crossref import CrossrefISSNList
+from siskin.sources.degruyter import DegruyterISSNList
+from siskin.sources.doaj import DOAJISSNList
+from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
+from siskin.sources.gbi import GBIISSNList
+from siskin.sources.jstor import JstorISSNList
+from siskin.sources.thieme import ThiemeISSNList
+
+
+def loadset(filename):
+    """ Load each line of file given by filename into a set. """
+    s = set()
+
+    with open(filename) as handle:
+	for line in handle:
+	    value = line.strip()
+	    if value:
+		s.add(value)
+    return s
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--file', required=True, metavar='LIST OF ISSNS', help='list of ISSNs to check for membership in index')
+
+    args = parser.parse_args()
+
+    given = loadset(args.file)
+    print("%d issns from file" % len(given), file=sys.stderr)
+
+    tasks = [JstorISSNList(), CrossrefISSNList(), ElsevierJournalsISSNList(), DOAJISSNList(), ThiemeISSNList(), DegruyterISSNList(), GBIISSNList()]
+    luigi.build(tasks)
+
+    issns = dict()
+
+    for task in tasks:
+	print("loading from %s" % task.output().path, file=sys.stderr)
+	issns[task.TAG] = loadset(task.output().path)
+
+    print("%d issns in index" % len(issns), file=sys.stderr)
+
+    for issn in given:
+	tags = []
+	for tag, issnset in issns.iteritems():
+	    if issn in issnset:
+		tags.append(tag)
+
+	if len(tags) > 0:
+	    print("OKAI\t%s\t%s" % (issn, "|".join(tags)))
+	else:
+	    print("MISS\tMISS\t%s" % issn)
