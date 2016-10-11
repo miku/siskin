@@ -79,7 +79,7 @@ This VM contains:
 * a VuFind 3 installation -- `/usr/local/vufind`
 * raw metadata (around 3M records) -- `~/Bootcamp/input`
 * scripts and stubs for processing -- `~/Bootcamp/code`
-* these slides -- `~/Bootcamp/slides.pdf`
+* these slides (almost) -- `~/Bootcamp/slides.pdf`
 
 Forwarded ports
 ===============
@@ -554,6 +554,11 @@ Discussion
 * what are your experiences with batch systems?
 * how do you manage large heterogeneous data?
 * what could we add to the pipeline?
+
+More
+====
+
+* one-liner: https://asciinema.org/a/1a13luy7r92v8f1y7crmxw7ui
 
 Q & A
 =====
