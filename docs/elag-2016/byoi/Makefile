@@ -14,3 +14,6 @@ Bootcamp: clean all
 
 more.pdf: more.md
 	pandoc -t beamer -V theme:default -colortheme:default more.md -o more.pdf
+
+slides-vude.pdf: slides-vude.md
+	pandoc -t beamer -V theme:default -colortheme:default slides-vude.md -o slides-vude.pdf

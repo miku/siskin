@@ -1,7 +1,7 @@
 BYOI: Build you own index
 =========================
 
-> Build your own discovery index of scholary e-resources
+> Heute baue ich meinen eigenen Artikelindex – Hands-On Workshop zum leichtgewichtigen Metadatenprozessing.
 
 5th German Vufind Meetup 2016,
 2016--10--11, Freiburg, University Library Freiburg
