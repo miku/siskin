@@ -249,6 +249,13 @@ class AMSLHoldingsFile(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
+class AMSLOpenAccessISSNList(AMSLTask):
+    """
+    Export a list of ISSN, which are considered Open Access. Comes from a fixed (configurable URL),
+    but could come from multiple sources.
+    """
+    pass
+
 class AMSLBuckets(AMSLTask):
     """
     Assemble attachment configuration from AMSL.
