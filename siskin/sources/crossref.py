@@ -60,7 +60,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
-from siskin.sources.amsl import AMSLService
+from siskin.sources.amsl import AMSLService, AMSLFilterConfig
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin, URLCache
@@ -416,6 +416,32 @@ class CrossrefIntermediateSchema(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class CrossrefExport(CrossrefTask):
+    """
+    Tag with ISILs, then export to various formats.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+
+    def requires(self):
+        return {
+            'file': CrossrefIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
+        }
+
+    def run(self):
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        extensions = {
+            'solr5vu3': 'ldj.gz',
+            'formeta': 'form.gz',
+        }
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
 
 class CrossrefCollections(CrossrefTask):
     """
