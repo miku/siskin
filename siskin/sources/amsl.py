@@ -305,6 +305,9 @@ class AMSLBuckets(AMSLTask):
             if item.get('externalLinkToContentFile', False):
                 tree[isil][sid]['contents'].add(item.get('externalLinkToContentFile'))
 
+            if item.get('linkToContentFile', False):
+                tree[isil][sid]['contents'].add(item.get('linkToContentFile'))
+
         with self.output().open('w') as output:
             json.dump(tree, output, cls=SetEncoder)
 
