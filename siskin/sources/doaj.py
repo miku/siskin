@@ -180,6 +180,27 @@ class DOAJIntermediateSchema(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class DOAJExport(DOAJTask):
+    """
+    Export to various formats
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+
+    def requires(self):
+        return DOAJIntermediateSchema(date=self.date)
+
+    def run(self):
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        extensions = {
+            'solr5vu3': 'ldj.gz',
+            'formeta': 'form.gz',
+        }
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+
 class DOAJISSNList(DOAJTask):
     """
     A list of DOAJ ISSNs.

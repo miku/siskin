@@ -180,27 +180,29 @@ class JstorIntermediateSchema(JstorTask):
 
 class JstorExport(JstorTask):
     """
-    A SOLR-importable version of Jstor.
+    Tag with ISILs, then export to various formats.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+    format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
         return {
-            'is': JstorIntermediateSchema(date=self.date),
-            'config': AMSLFilterConfig(date=self.date)
+            'file': JstorIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
         }
 
-    @timed
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('is').path)
-        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}",
-                          input=output, version=self.version)
+                          config=self.input().get('config').path, input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        extensions = {
+            'solr5vu3': 'ldj.gz',
+            'formeta': 'form.gz',
+        }
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
 
 class JstorISSNList(JstorTask):
     """

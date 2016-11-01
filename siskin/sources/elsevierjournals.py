@@ -142,6 +142,32 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+class ElsevierJournalsExport(ElsevierJournalsTask):
+    """
+    Tag with ISILs, then export to various formats.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+
+    def requires(self):
+        return {
+            'file': ElsevierJournalsIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
+        }
+
+    def run(self):
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+        luigi.File(output).move(self.output().path)
+
+    def output(self):
+        extensions = {
+            'solr5vu3': 'ldj.gz',
+            'formeta': 'form.gz',
+        }
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+
 class ElsevierJournalsDOIList(ElsevierJournalsTask):
     """
     A list of Elsevier journals DOIs.
@@ -186,26 +212,3 @@ class ElsevierJournalsISSNList(ElsevierJournalsTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
-class ElsevierJournalsExport(ElsevierJournalsTask):
-    """
-    A SOLR-importable version of Elsevier.
-    """
-    date = luigi.DateParameter(default=datetime.date.today())
-    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
-
-    def requires(self):
-        return {
-            'is': ElsevierJournalsIntermediateSchema(date=self.date),
-            'config': AMSLFilterConfig(date=self.date)
-        }
-
-    @timed
-    def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('is').path)
-        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version)
-        luigi.File(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
