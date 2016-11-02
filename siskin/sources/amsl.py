@@ -251,10 +251,27 @@ class AMSLHoldingsFile(AMSLTask):
 
 class AMSLOpenAccessISSNList(AMSLTask):
     """
-    Export a list of ISSN, which are considered Open Access. Comes from a fixed (configurable URL),
-    but could come from multiple sources.
+    List of ISSN, which are open access.
+
+    For now, extract these ISSN from a special holding file, called
+    KBART_FREEJOURNALS via AMSL.
     """
-    pass
+
+    def run(self):
+        link = "%sDokument/KBART_FREEJOURNALS" % (self.config.get('amsl', 'uri-download-prefix'))
+        downloaded = shellout("curl --fail {link} > {output} ", link=link)
+
+        try:
+            _ = zipfile.ZipFile(downloaded)
+            output = shellout("unzip -p {input} >> {output}", input=downloaded)
+            luigi.File(output).move(self.output().path)
+        except zipfile.BadZipfile:
+            # at least the file is not a zip.
+            output = shellout("cat {input} >> {output}", input=downloaded)
+            luigi.File(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
 
 class AMSLBuckets(AMSLTask):
     """
