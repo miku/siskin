@@ -257,18 +257,29 @@ class AMSLOpenAccessISSNList(AMSLTask):
     KBART_FREEJOURNALS via AMSL.
     """
 
+    date = luigi.Parameter(default=datetime.date.today())
+
     def run(self):
-        link = "%sDokument/KBART_FREEJOURNALS" % (self.config.get('amsl', 'uri-download-prefix'))
+        """
+        Download, maybe unzip, grab column 2 and 3, keep ISSN, sort -u.
+        """
+        key = "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS"
+        link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), key)
+
         downloaded = shellout("curl --fail {link} > {output} ", link=link)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         try:
             _ = zipfile.ZipFile(downloaded)
             output = shellout("unzip -p {input} >> {output}", input=downloaded)
-            luigi.File(output).move(self.output().path)
         except zipfile.BadZipfile:
             # at least the file is not a zip.
             output = shellout("cat {input} >> {output}", input=downloaded)
-            luigi.File(output).move(self.output().path)
+
+        shellout("cut -f 2 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
+        shellout("cut -f 3 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
+        output = shellout("sort -u {input} > {output}", input=stopover)
+        luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
