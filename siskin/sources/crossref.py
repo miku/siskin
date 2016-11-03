@@ -60,7 +60,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
-from siskin.sources.amsl import AMSLService, AMSLFilterConfig
+from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin, URLCache

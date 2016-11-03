@@ -114,4 +114,3 @@ class HighwireExport(HighwireTask):
             'formeta': 'form.gz',
         }
         return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
-
