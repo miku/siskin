@@ -155,6 +155,9 @@ class URLCache(object):
         return os.path.exists(self.get_cache_file(url))
 
     def get(self, url):
+        """
+        TODO: Add retry.
+        """
         if not self.is_cached(url):
             r = self.sess.get(url)
             if r.status_code >= 400:
