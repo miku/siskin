@@ -47,7 +47,7 @@ class MHLibraryHarvest(MHLibraryTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        shellout("metha-sync ")
+        shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
         output = shellout("""metha-cat -root Records "{endpoint}" > {output}""", endpoint=self.endpoint)
         luigi.File(output).move(self.output().path)
 
