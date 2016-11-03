@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph" version="1">
+  <meta>
+</meta>
+  <rules>
+    <data source="metadata.dc.description.value" name="abstract"/>
+    <!-- Abstract -->
+    <entity name="authors[]" flushWith="record">
+      <!-- Author -->
+      <entity name="">
+        <!-- catch the author : in oai:dc there is only dc:creator -->
+        <data source="metadata.dc.creator.value" name="rft.au">
+          <split delimiter=";"/>
+          <trim/>
+        </data>
+      </entity>
+    </entity>
+    <entity name="languages[]" flushWith="record">
+      <!-- Languages -->
+      <!-- try to map language -->
+      <data source="metadata.dc.language.value">
+        <split delimiter=";"/>
+        <trim/>
+        <lookup in="sprachliste"/>
+      </data>
+    </entity>
+    <entity name="url[]" flushWith="record">
+      <!-- URL -->
+      <data source="metadata.dc.identifier.value">
+					</data>
+    </entity>
+    <choose>
+      <data source="metadata.dc.format.value" name="finc.format">
+        <!-- Format -->
+        <lookup in="formatliste"/>
+      </data>
+      <data source="metadata.dc.type.value" name="finc.format">
+        <!-- Default = Format from Source -->
+      </data>
+    </choose>
+    <data name="finc.mega_collection" source="_id">
+      <!-- receive Mega_Collection -->
+      <constant value="$[mega_collection]"/>
+    </data>
+    <combine name="finc.record_id" value="finc-$[sid]-${identifier_key}">
+      <!-- Record-ID  -->
+      <data source="header.identifier.value" name="identifier_key">
+        <regexp match="^(oai:).*\/(\d.*)$" format="${2}"/>
+      </data>
+    </combine>
+    <data source="_id" name="finc.source_id">
+      <!-- receive SID -->
+      <constant value="$[sid]"/>
+    </data>
+    <data source="metadata.dc.title.value" name="rft.btitle">
+      <!-- bTitle -->
+    </data>
+    <data source="metadata.dc.date.value" name="rft.date">
+      <!-- Date -->
+      <compose postfix="-01-01"/>
+    </data>
+    <data source="metadata.dc.date.value" name="x.date">
+      <!-- Date -->
+      <compose postfix="-01-01T00:00:00Z"/>
+    </data>
+    <entity name="rft.pub[]" flushWith="record">
+      <!-- Publisher -->
+      <data source="metadata.dc.publisher.value">
+				</data>
+    </entity>
+    <entity name="x.subjects[]" flushWith="record">
+      <!-- Subjects -->
+      <data source="metadata.dc.subject.value" name="type">
+        <trim/>
+      </data>
+    </entity>
+    <data source="metadata.dc.format.value" name="rft.genre">
+      <!-- Genre -->
+      <lookup in="genre_liste"/>
+    </data>
+  </rules>
+  <maps>
+    <filemap name="formatliste" files="$[MAP_DIR]filemap_fincformat.tsv" separator="\t"/>
+    <filemap name="genre_liste" files="$[MAP_DIR]filemap_rft.genre.tsv" separator="\t"/>
+    <filemap name="sprachliste" files="$[MAP_DIR]sprachliste.tsv" separator="\t"/>
+  </maps>
+</metamorph>
