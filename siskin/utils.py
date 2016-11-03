@@ -157,7 +157,7 @@ class URLCache(object):
 
     def get(self, url):
         """
-        TODO: Add retry.
+        Return URL, either from cache or the web.
         """
 
         @backoff.on_exception(backoff.expo, RuntimeError, max_tries=8)
