@@ -42,6 +42,7 @@ import string
 import sys
 import tempfile
 
+import backoff
 import luigi
 import requests
 
@@ -158,13 +159,18 @@ class URLCache(object):
         """
         TODO: Add retry.
         """
-        if not self.is_cached(url):
+
+        @backoff.on_exception(backoff.expo, RuntimeError, max_tries=8)
+        def fetch(url):
             r = self.sess.get(url)
             if r.status_code >= 400:
                 raise RuntimeError('%s on %s' % (r.status_code, url))
             with tempfile.NamedTemporaryFile(delete=False) as output:
                 output.write(r.text.encode('utf-8'))
             os.rename(output.name, self.get_cache_file(url))
+
+        if not self.is_cached(url):
+            fetch(url)
 
         with open(self.get_cache_file(url)) as handle:
             return handle.read()

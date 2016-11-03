@@ -42,6 +42,7 @@ except:
 
 install_requires = [
     'BeautifulSoup>=3,<4',
+    'backoff>=1.3.1',
     'argparse>=1.2',
     'astroid>=1.1.1',
     'colorama>=0.3.3',
