@@ -195,7 +195,7 @@ class URLCache(object):
             """
             Nested function, so we can configure number of retries.
             """
-            r = self.sess.get(url)
+            r = self.sess.get(url, timeout=600)
             if r.status_code >= 400:
                 raise RuntimeError('%s on %s' % (r.status_code, url))
             with tempfile.NamedTemporaryFile(delete=False) as output:
