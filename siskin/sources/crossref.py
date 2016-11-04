@@ -90,7 +90,7 @@ class CrossrefHarvestChunk(CrossrefTask):
     end = luigi.DateParameter()
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
-    rows = luigi.IntParameter(default=1000, significant=False)
+    rows = luigi.IntParameter(default=200, significant=False)
     max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
     attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
 
