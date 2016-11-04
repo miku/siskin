@@ -44,9 +44,9 @@ backlog-archive = /path/to/ieee.tar.gz
 import datetime
 
 import luigi
-
 from gluish.format import TSV
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask

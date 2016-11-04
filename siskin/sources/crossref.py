@@ -49,16 +49,16 @@ import os
 import tempfile
 import urllib
 
+import elasticsearch
 import luigi
 import requests
-
-import elasticsearch
-import siskin
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+
+import siskin
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.sources.degruyter import DegruyterDOIList

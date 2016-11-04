@@ -21,9 +21,9 @@ from __future__ import print_function
 import os
 
 import luigi
-
 from gluish.task import BaseTask
 from gluish.utils import shellout
+
 from part5_licensing import ApplyLicensing
 
 

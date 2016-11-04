@@ -32,6 +32,7 @@ import tempfile
 
 from gluish.task import BaseTask
 from gluish.utils import shellout
+
 from siskin.configuration import Config
 
 config = Config.instance()

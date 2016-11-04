@@ -36,14 +36,14 @@ import json
 import tempfile
 import time
 
-import luigi
-
 import elasticsearch
+import luigi
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin
