@@ -129,19 +129,49 @@ def get_task_import_cache():
     return task_import_cache, path
 
 class URLCache(object):
-    """ A simple URL *content* cache. Stores everything on the filesystem.
-    Content is first written to a temporary file and then renamed.
-    With concurrent requests for the same URL, the last one wins.
-    Raises exception on any statuscode >= 400. """
+    """
+    A simple URL *content* cache. Stores everything on the filesystem. Content
+    is first written to a temporary file and then renamed. With concurrent
+    requests for the same URL, the last one wins. Raises exception on any HTTP
+    status >= 400. Retries supported.
 
-    def __init__(self, directory=None):
+    >>> cache = URLCache()
+    >>> cache.get_cache_file("https://www.google.com")
+    /tmp/ef/7e/fc/ef7efc9839c3ee036f023e9635bc3b056d6ee2d
+
+    >>> cache.is_cached("https://www.google.com")
+    False
+
+    >>> page = cache.get("https://www.google.com")
+    >>> page[:15]
+    '<!doctype html>'
+
+    >>> cache.is_cached("https://www.google.com")
+    True
+    """
+
+    def __init__(self, directory=None, max_tries=10):
+        """
+        If `directory` is not explictly given, all files will be stored under
+        the temporary directory. Requests can be retried, if they resulted in
+        a non 200 HTTP status code. The server might send a HTTP 500 (Internal
+        Server Error), even if it really is a HTTP 503 (Service Unavailable).
+        We therefore treat HTTP 500 errors as something to retry on,
+        `max_tries` times.
+        """
         self.directory = directory or tempfile.gettempdir()
         self.sess = requests.session()
+        self.max_tries = max_tries
 
     def get_cache_file(self, url):
+        """
+        Return the cache file path for a URL. This will create the parent
+        directories, if necessary.
+        """
         digest = hashlib.sha1(url).hexdigest()
         d0, d1, d2 = digest[:2], digest[2:4], digest[4:6]
         path = os.path.join(self.directory, d0, d1, d2)
+
         if not os.path.exists(path):
             try:
                 os.makedirs(path)
@@ -160,8 +190,11 @@ class URLCache(object):
         Return URL, either from cache or the web.
         """
 
-        @backoff.on_exception(backoff.expo, RuntimeError, max_tries=8)
+        @backoff.on_exception(backoff.expo, RuntimeError, max_tries=self.max_tries)
         def fetch(url):
+            """
+            Nested function, so we can configure number of retries.
+            """
             r = self.sess.get(url)
             if r.status_code >= 400:
                 raise RuntimeError('%s on %s' % (r.status_code, url))
