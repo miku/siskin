@@ -150,7 +150,7 @@ class URLCache(object):
     True
     """
 
-    def __init__(self, directory=None, max_tries=10):
+    def __init__(self, directory=None, max_tries=12):
         """
         If `directory` is not explictly given, all files will be stored under
         the temporary directory. Requests can be retried, if they resulted in
