@@ -1,7 +1,8 @@
 default fileName = in;
 
 fileName|
-open-file|
+open-gzip|
+as-lines|
 decode-formeta|
 morph(FLUX_DIR + "8986.xml", *)|
 encode-json|
