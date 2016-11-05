@@ -47,6 +47,7 @@ import datetime
 import json
 import os
 import tempfile
+import time
 import urllib
 
 import elasticsearch
@@ -93,6 +94,7 @@ class CrossrefHarvestChunk(CrossrefTask):
     rows = luigi.IntParameter(default=200, significant=False)
     max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
     attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
+    sleep = luigi.IntParameter(default=5, significant=False, description='sleep between requests (secs)')
 
     @timed
     def run(self):
@@ -132,6 +134,7 @@ class CrossrefHarvestChunk(CrossrefTask):
                     break
                 output.write(body + "\n")
                 offset += rows
+                time.sleep(self.sleep)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
