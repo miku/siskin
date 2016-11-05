@@ -114,6 +114,8 @@ class CrossrefHarvestChunk(CrossrefTask):
                 params = {"rows": rows, "offset": offset, "filter": filter}
                 url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
                 for attempt in range(1, self.attempts):
+                    if not cache.is_cached(url):
+                        time.sleep(self.sleep)
                     body = cache.get(url)
                     try:
                         content = json.loads(body)
@@ -134,7 +136,6 @@ class CrossrefHarvestChunk(CrossrefTask):
                     break
                 output.write(body + "\n")
                 offset += rows
-                time.sleep(self.sleep)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
