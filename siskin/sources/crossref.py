@@ -219,7 +219,7 @@ class CrossrefLineDOI(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='filelist.gz'))
 
 class CrossrefLineDOIWrapper(CrossrefTask):
     """
@@ -257,7 +257,7 @@ class CrossrefLineDOICombined(CrossrefTask):
         luigi.File(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+        return luigi.LocalTarget(path=self.path(ext='filelist.gz'))
 
 class CrossrefDOITable(CrossrefTask):
     """
@@ -280,7 +280,7 @@ class CrossrefDOITable(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
 
 class CrossrefDOITableClean(CrossrefTask):
     """
@@ -325,7 +325,7 @@ class CrossrefDOITableClean(CrossrefTask):
                     output.write(line + "\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
 
 class CrossrefSortedDOITable(CrossrefTask):
     """
