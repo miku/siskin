@@ -344,7 +344,7 @@ class CrossrefSortedDOITable(CrossrefTask):
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
 
 class CrossrefUniqItems(CrossrefTask):
     """
