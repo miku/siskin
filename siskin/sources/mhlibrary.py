@@ -52,7 +52,7 @@ class MHLibraryHarvest(MHLibraryTask):
     def run(self):
         shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
         output = shellout("""metha-cat -root Records "{endpoint}" > {output}""", endpoint=self.endpoint)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
@@ -70,7 +70,7 @@ class MHLibraryIntermediateSchema(MHLibraryTask):
         mapdir = 'file:///%s' % self.assets("103/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
                           flux=self.assets("103/103.flux"), mapdir=mapdir, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))

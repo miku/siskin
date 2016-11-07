@@ -209,7 +209,7 @@ class GBIDumpDatabaseList(GBITask):
                              grep "zip$" |
                              cut -d '.' -f1 |
                              awk '{{ print "{kind}\t{input}\t"$0 }}' >> {output}""", kind=self.kind, input=row.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -256,7 +256,7 @@ class GBIDumpXML(GBITask):
                              LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-issue>{issue}</x-issue></Document>@' |
                              pigz -c >> {output} """, dbzip=dbzip, origin=archive, issue=self.issue)
 
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
@@ -278,7 +278,7 @@ class GBIDumpIntermediateSchema(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().get('file').path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -334,7 +334,7 @@ class GBIUpdateDatabaseList(GBITask):
                 shellout(""" unzip -p {input} | grep -o 'DB="[^"]*' | sed -e 's/DB="//g' >> {output} """,
                          input=row.path, output=stopover)
         output = shellout("sort -u {input} > {output} && rm {input}", input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -357,7 +357,7 @@ class GBIDatabaseList(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         output = shellout("cat <(cut -f3 {dump}) {update} | sort -u > {output}",
                           dump=self.input().get('dump').path, update=self.input().get('update').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -381,7 +381,7 @@ class GBIDatabaseType(GBITask):
                  input=self.input().get('references').path, output=stopover)
         shellout(r"""cat {input} | awk '{{ print $0"\tfulltext"}}' >> {output}""",
                  input=self.input().get('fulltext').path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -399,7 +399,7 @@ class GBIDatabaseMap(GBITask):
     def run(self):
         dbmap = collections.defaultdict(set)
 
-        with luigi.File(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
+        with luigi.LocalTarget(self.assets('gbi_package_db_map_fulltext.tsv'), format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('package', 'db')):
                 dbmap[row.db].add(row.package)
                 # Full text means Fachzeitschriften (FZS). FZS is a package as
@@ -407,7 +407,7 @@ class GBIDatabaseMap(GBITask):
                 # license agreement.
                 dbmap[row.db].add('Fachzeitschriften')
 
-        with luigi.File(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
+        with luigi.LocalTarget(self.assets('gbi_package_db_map_refs.tsv'), format=TSV).open() as handle:
             for row in handle.iter_tsv(cols=('package', 'db')):
                 # Whereas reference databases are check along with a generic
                 # holding file later.
@@ -444,7 +444,7 @@ class GBIUpdate(GBITask):
                              LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>TBA</x-group><x-issue>{issue}</x-issue></Document>@' >> {output}""",
                              input=row.path, origin=row.path, issue=filedate, output=stopover)
 
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
@@ -464,7 +464,7 @@ class GBIUpdateIntermediateSchema(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("""span-import -i genios {input} | pigz -c >> {output}""", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -483,7 +483,7 @@ class GBIUpdateIntermediateSchemaFiltered(GBITask):
     def run(self):
         output = shellout("""jq -r -c '. | select(.["x.package"] == "{db}")' <(unpigz -c {input}) | pigz -c > {output}""",
                           db=self.db, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -508,7 +508,7 @@ class GBIDatabase(GBITask):
         for source, target in self.input().iteritems():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
 
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -533,7 +533,7 @@ class GBIIntermediateSchemaByKind(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -558,7 +558,7 @@ class GBIExportByKind(GBITask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | span-export | pigz -c > {output}",
                           input=self.input().get('file').path, config=self.input().get('config').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -577,7 +577,7 @@ class GBIDatabaseTable(GBITask):
 
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | tr -d '"' | tr ',' '\t' > {output}""", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -597,7 +597,7 @@ class GBIISSNDatabase(GBITask):
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
                               tr -d '"' | tr ',' '\t' | awk '{{ print "{db}\t"$0 }}'> {output}""", input=self.input().path, db=self.db)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -617,7 +617,7 @@ class GBIPublicationTitleDatabase(GBITask):
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.jtitle"]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
                               tr -d '"' | tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -658,7 +658,7 @@ class GBIPublicationTitleOverview(GBITask):
         for kind, targets in self.input().iteritems():
             for target in targets:
                 shellout(""" cat {input} | awk '{{ print "{kind}\t"$0 }}' >> {output} """, input=target.path, output=stopover, kind=kind)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -678,7 +678,7 @@ class GBITitleDatabase(GBITask):
     def run(self):
         output = shellout(r"""jq -r '[.["finc.record_id"], .["rft.issn"][]? // "NOT_AVAILABLE", .["rft.atitle"]? // "NOT_AVAILABLE"] | @csv' <(unpigz -c {input}) |
                               tr -d '"' | tr ',' '\t' | awk '{{ print "{db}\t"$0 }}' > {output}""", input=self.input().path, db=self.db)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -722,7 +722,7 @@ class GBITitleList(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

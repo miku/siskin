@@ -71,7 +71,7 @@ class ThiemeCombine(ThiemeTask):
                  set=self.set, prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
                           prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
@@ -89,7 +89,7 @@ class ThiemeIntermediateSchema(ThiemeTask):
 
     def run(self):
         output = shellout("span-import -i thieme-tm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
@@ -114,7 +114,7 @@ class ThiemeExport(ThiemeTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('is').path)
         output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -134,7 +134,7 @@ class ThiemeISSNList(ThiemeTask):
         shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         output = shellout("""sort -u {input} > {output} """, input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

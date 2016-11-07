@@ -147,7 +147,7 @@ class FTPFile(CommonTask):
                           username=pipes.quote(self.username),
                           password=pipes.quote(self.password),
                           filepath=pipes.quote(self.filepath))
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext=None))

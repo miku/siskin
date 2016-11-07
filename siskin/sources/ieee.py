@@ -81,7 +81,7 @@ class IEEEBacklogPaths(IEEETask):
     """
     def run(self):
         output = shellout('tar -tf {input} > {output}', input=self.config.get('ieee', 'backlog-archive'))
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
@@ -108,7 +108,7 @@ class IEEEBacklogIntermediateSchema(IEEETask):
 
     def run(self):
         output = shellout("""find {dir} -name "*xml" -type f | xargs -I {{}} span-import -i ieee {{}} | pigz -c >> {output}""", dir=self.dir)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext='ldj.gz'))

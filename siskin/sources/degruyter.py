@@ -90,7 +90,7 @@ class DegruyterMembers(DegruyterTask):
             for row in handle.iter_tsv(cols=('path',)):
                 shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -115,7 +115,7 @@ class DegruyterXML(DegruyterTask):
                     continue
                 shellout("unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path,
                          ignoremap={1: 'OK', 9: 'skip corrupt file'})
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
@@ -132,7 +132,7 @@ class DegruyterIntermediateSchema(DegruyterTask):
     @timed
     def run(self):
         output = shellout("span-import -i degruyter {input} | pigz -c > {output}", input=self.input().get('file').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -155,7 +155,7 @@ class DegruyterExport(DegruyterTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", input=output, format=self.format)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {
@@ -178,7 +178,7 @@ class DegruyterISSNList(DegruyterTask):
         shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -196,7 +196,7 @@ class DegruyterDOIList(DegruyterTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """, input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

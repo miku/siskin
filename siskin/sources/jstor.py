@@ -99,7 +99,7 @@ class JstorMembers(JstorTask):
                     continue
                 shellout(""" unzip -l {input} | LC_ALL=C grep "xml$" | LC_ALL=C awk '{{print "{input}\t"$4}}' | LC_ALL=C sort >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -125,7 +125,7 @@ class JstorLatestMembers(JstorTask):
         """
         output = shellout("tac {input} | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}",
                           input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -153,7 +153,7 @@ class JstorXML(JstorTask):
                                 sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
                                 archive=archive, members=margs, output=stopover)
 
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
@@ -173,7 +173,7 @@ class JstorIntermediateSchema(JstorTask):
     def run(self):
         output = shellout("span-import -i jstor <(unpigz -c {input}) | pigz -c > {output}",
                           input=self.input().get('file').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -195,7 +195,7 @@ class JstorExport(JstorTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {
@@ -219,7 +219,7 @@ class JstorISSNList(JstorTask):
         shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -238,7 +238,7 @@ class JstorDOIList(JstorTask):
         output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v null > {output} """,
                           input=self.input().path)
         output = shellout("""sort -u {input} > {output} """, input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

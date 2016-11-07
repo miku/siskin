@@ -188,7 +188,7 @@ class AIISSNList(AITask):
         for _, target in self.input().items():
             shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output, pipefail=True)
         output = shellout("sort -u {input} > {output}", input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -218,7 +218,7 @@ class AIIntermediateSchema(AITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input()[1:]:
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -235,7 +235,7 @@ class AICheck(AITask):
     @timed
     def run(self):
         output = shellout("span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -252,7 +252,7 @@ class AICheckStats(AITask):
     @timed
     def run(self):
         output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path, pipefail=True)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
@@ -270,7 +270,7 @@ class AIRedact(AITask):
     def run(self):
         """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
         output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -290,7 +290,7 @@ class AILicensing(AITask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -307,7 +307,7 @@ class AIDuplicates(AITask):
     def run(self):
         output = shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """,
                           input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -323,7 +323,7 @@ class AIDuplicatesSortbyDOI(AITask):
 
     def run(self):
         output = shellout("""LC_ALL=C sort -t , -k2,2 -S35% {input} > {output} """, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -340,7 +340,7 @@ class AIExport(AITask):
 
     def run(self):
 	output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
 	extensions = {

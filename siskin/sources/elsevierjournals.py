@@ -74,7 +74,7 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for path in sorted(iterfiles(directory, fun=lambda p: p.endswith('.tar'))):
             shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -119,7 +119,7 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
                 if not row.path.endswith('.tar'):
                     continue
                 shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -137,7 +137,7 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -159,7 +159,7 @@ class ElsevierJournalsExport(ElsevierJournalsTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {
@@ -187,7 +187,7 @@ class ElsevierJournalsDOIList(ElsevierJournalsTask):
                  input=output, output=stopover)
         os.remove(output)
         output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -208,7 +208,7 @@ class ElsevierJournalsISSNList(ElsevierJournalsTask):
         shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         output = shellout("""sort -u {input} > {output} """, input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

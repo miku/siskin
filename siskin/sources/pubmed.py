@@ -118,7 +118,7 @@ class PubmedJournalList(PubmedTask):
 
     def run(self):
         output = shellout("""curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
@@ -134,7 +134,7 @@ class PubmedJournalListReduced(PubmedTask):
 
     def run(self):
         output = shellout(r"""cat {input} | csvcut -c1,3,4,9,10 | tr ',' '\t' > {output}""", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

@@ -71,7 +71,7 @@ class DOAJCSV(DOAJTask):
     @timed
     def run(self):
         output = shellout('wget --retry-connrefused {url} -O {output}', url=self.url)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
@@ -175,7 +175,7 @@ class DOAJIntermediateSchema(DOAJTask):
     @timed
     def run(self):
         output = shellout("span-import -i doaj {input} | pigz -c > {output}", input=self.input().get('input').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -192,7 +192,7 @@ class DOAJExport(DOAJTask):
 
     def run(self):
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {
@@ -217,7 +217,7 @@ class DOAJISSNList(DOAJTask):
         shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
         shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -236,7 +236,7 @@ class DOAJDOIList(DOAJTask):
     def run(self):
         output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
                           input=self.input().get('input').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

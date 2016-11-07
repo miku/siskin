@@ -71,7 +71,7 @@ class HighwireCombine(HighwireTask):
                  prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
                           prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
@@ -89,7 +89,7 @@ class HighwireIntermediateSchema(HighwireTask):
 
     def run(self):
         output = shellout("span-import -i oai <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
@@ -106,7 +106,7 @@ class HighwireExport(HighwireTask):
 
     def run(self):
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {

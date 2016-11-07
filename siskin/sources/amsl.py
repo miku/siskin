@@ -71,7 +71,7 @@ class AMSLService(AMSLTask):
 
         link = '%s/%s/list?do=%s' % (self.config.get('amsl', 'base').rstrip('/'), realm, name)
         output = shellout("""curl --fail "{link}" > {output} """, link=link)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True))
@@ -244,7 +244,7 @@ class AMSLHoldingsFile(AMSLTask):
                     # at least the file is not a zip.
                     output = shellout("cat {input} >> {output}", input=downloaded, output=stopover)
 
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
@@ -279,7 +279,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
         shellout("cut -f 2 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
         shellout("cut -f 3 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
         output = shellout("sort -u {input} > {output}", input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())

@@ -172,7 +172,7 @@ class CrossrefChunkItems(CrossrefTask):
 
     def run(self):
         output = shellout("jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
@@ -216,7 +216,7 @@ class CrossrefLineDOI(CrossrefTask):
 
     def run(self):
         output = shellout(r"""jq -r '.DOI?' <(unpigz -c {input}) | awk '{{print NR"\t{input}\t"$0 }}' | pigz -c > {output}""", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'))
@@ -254,7 +254,7 @@ class CrossrefLineDOICombined(CrossrefTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'))
@@ -277,7 +277,7 @@ class CrossrefDOITable(CrossrefTask):
             TMPDIR={tmpdir} LC_ALL=C sort -S25% -u -k3,3 |
             pigz -c > {output}""", tmpdir=self.config.get('core', 'tempdir'),
             input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
@@ -341,7 +341,7 @@ class CrossrefSortedDOITable(CrossrefTask):
         output = shellout("""
             TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -k1,1n <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
             tmpdir=self.config.get('core', 'tempdir'), input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
@@ -375,7 +375,7 @@ class CrossrefUniqItems(CrossrefTask):
                 lineno, filename = line.strip().split('\t')
                 if previous_filename and previous_filename != filename:
                     _, tmp = tempfile.mkstemp(prefix='siskin-')
-                    with luigi.File(tmp, format=TSV).open('w') as handle:
+                    with luigi.LocalTarget(tmp, format=TSV).open('w') as handle:
                         for ln in linenumbers:
                             handle.write_tsv(ln)
 
@@ -396,7 +396,7 @@ class CrossrefUniqItems(CrossrefTask):
                 linenumbers.append(lineno)
                 previous_filename = filename
 
-        luigi.File(stopover).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -416,7 +416,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     def run(self):
         output = shellout("span-import -i crossref <(unpigz -c {input}) | pigz -c > {output}",
                           input=self.input().get('file').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
@@ -438,7 +438,7 @@ class CrossrefExport(CrossrefTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {
@@ -462,7 +462,7 @@ class CrossrefCollections(CrossrefTask):
     def run(self):
         output = shellout("""jq -r '.["finc.mega_collection"]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""",
                           input=self.input().get('input').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -520,7 +520,7 @@ class CrossrefDOIList(CrossrefTask):
                  input=output, output=stopover)
         os.remove(output)
         output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -539,7 +539,7 @@ class CrossrefISSNList(CrossrefTask):
     @timed
     def run(self):
         output = shellout("jq -r '.ISSN[]?' <(unpigz -c {input}) 2> /dev/null > {output}", input=self.input().get('input').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -557,7 +557,7 @@ class CrossrefUniqISSNList(CrossrefTask):
     @timed
     def run(self):
         output = shellout("sort -u {input} > {output}", input=self.input().path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -579,7 +579,7 @@ class CrossrefDOIAndISSNList(CrossrefTask):
         output = shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
                           input=temp, output=stopover)
         os.remove(temp)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
@@ -723,7 +723,7 @@ class CrossrefDOIHarvest(CrossrefTask):
 
     def run(self):
         output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
@@ -748,7 +748,7 @@ class CrossrefDOIBlacklist(CrossrefTask):
         shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
              input=self.input().path, output=stopover)
         output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
-        luigi.File(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
