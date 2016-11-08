@@ -541,3 +541,42 @@ class AIISSNDetailedCoverageReport(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIApplyOpenAccessFlag(AITask):
+    """
+    Apply OA-Flag. Experimental, refs. #8986.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'issns': AMSLOpenAccessISSNList(date=self.date),
+            'file': AIIntermediateSchema(date=self.date),
+        }
+
+    def run(self):
+        """
+        Toy implementation, make this fast with mf (assets/issue/8986/...).
+        """
+        issns = set()
+
+        with self.input().get('issns').open() as handle:
+            for line in map(string.strip, handle):
+                if not line:
+                    continue
+                issns.add(line)
+
+        with self.output().open('w') as output:
+            with self.input().get('file').open() as handle:
+                for line in handle:
+                    doc = json.loads(line)
+                    doc["x.oa"] = False
+
+                    for issn in doc.get("rft.issn", []):
+                        if issn in issns:
+                            doc["x.oa"] = True
+
+                    output.write(json.dumps(doc))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=Gzip)
