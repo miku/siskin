@@ -48,7 +48,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.benchmark import timed
-from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile
+from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile, AMSLOpenAccessISSNList
 from siskin.sources.crossref import (CrossrefDOIList,
                                      CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)
@@ -557,6 +557,8 @@ class AIApplyOpenAccessFlag(AITask):
     def run(self):
         """
         Toy implementation, make this fast with mf (assets/issue/8986/...).
+
+        Pure python, about 500k records/s.
         """
         issns = set()
 
@@ -576,7 +578,8 @@ class AIApplyOpenAccessFlag(AITask):
                         if issn in issns:
                             doc["x.oa"] = True
 
-                    output.write(json.dumps(doc))
+                    output.write(json.dumps(doc) + "\n")
+
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
