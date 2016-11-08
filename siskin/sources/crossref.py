@@ -739,7 +739,7 @@ class CrossrefDOIBlacklist(CrossrefTask):
     The output of this task should be used as doi-blacklist in config.
     """
     def requires(self):
-        return DOIHarvest(date=self.date)
+        return CrossrefDOIHarvest()
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
