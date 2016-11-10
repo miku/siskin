@@ -283,7 +283,7 @@ class AILicensing(AITask):
 
     def requires(self):
         return {
-            'is': AIIntermediateSchema(date=self.date),
+            'is': AIApplyOpenAccessFlag(date=self.date),
             'config': AMSLFilterConfig(date=self.date),
         }
 
