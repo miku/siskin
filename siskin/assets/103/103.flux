@@ -1,5 +1,4 @@
 // liest XML ein (Trennung der einzelnen Records durch "Record"), uebergibt an morph und speichert in json
-// ein kleiner kommentar
 
 // SID: 103
 
