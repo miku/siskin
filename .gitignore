@@ -54,3 +54,8 @@ tmp/
 
 TODO.md
 byoi.box
+
+/.project
+/.pydevproject
+/.settings
+/src-gen
