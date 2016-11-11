@@ -43,7 +43,7 @@ warnings.filterwarnings("ignore")
 try:
     import urllib3
     urllib3.disable_warnings()
-except AttributeError, ImportError:
+except (AttributeError, ImportError):
     pass
 
 __version__ = '0.1.7'
