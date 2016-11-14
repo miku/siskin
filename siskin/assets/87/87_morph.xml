@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph"
+	version="1">
+
+	<rules>
+			<data source="metadata.dc.description.value" name="abstract"/> <!-- Abstract -->
+
+			<entity name="authors[]" flushWith="record"> <!-- Author -->
+				<entity name="" >
+						<!-- in oai:dc there is only dc:creator -->
+						<data source="metadata.dc.creator.value" name="rft.au"/>
+				</entity>
+			</entity>
+  			  	
+			<entity name="languages[]" flushWith="record"> <!-- Languages -->
+				<choose>
+					<!-- try to map language -->
+					<data source="metadata.dc.language.value" >
+						<lookup in="sprachliste" />
+					</data>
+					<!-- default source value -->
+					<data source="metadata.dc.language.value" >
+					</data>
+				</choose>
+			</entity>
+			
+			<entity name="url[]" flushWith="record"> <!-- URL -->
+					<data source="metadata.dc.identifier.value" >
+					</data>
+			</entity>
+
+			<choose>
+				<data source="metadata.dc.type.value" name="finc.format"> <!-- Format -->
+					<lookup in="formatliste" />
+				</data>
+				<data source="metadata.dc.type.value" name="finc.format"> <!-- Default = Format from Source -->
+				</data>
+			</choose>
+
+			<data name="finc.mega_collection" source="_id"> <!-- receive Mega_Collection -->
+				<constant value="$[mega_collection]"/>
+	      	</data>
+
+			<combine name="finc.record_id" value="finc-$[sid]-${identifier_key}"> <!-- Record-ID  -->
+				<data source="header.identifier.value" name="identifier_key">
+					<regexp match="^(oai:).*\/(\d.*)$" format="${2}"/>
+				</data> 
+			</combine>
+			
+			<data source="_id" name="finc.source_id"> <!-- receive SID -->
+				<constant value="$[sid]"/>
+			</data>
+
+			<data source="metadata.dc.title.value" name="rft.atitle"> <!-- aTitle -->
+			</data>
+
+			<data source="metadata.dc.date.value" name="rft.date"> <!-- Date -->
+			</data>
+			
+			<data source="metadata.dc.date.value" name="x.date"> <!-- x.Date -->
+				<compose postfix="T00:00:00Z"/>
+			</data>
+
+			<entity name="rft.issn[]" flushWith="record"> <!-- ISSN -->
+				<data source="metadata.dc.source.value">
+					<unique/>
+					<regexp match="^[0-9]{4}-[0-9]{3}[0-9X]$"/>
+				</data>
+			</entity>
+			<!--
+			 It´s not clear for what '29' in :'International Journal of Communication; Vol 5 (2011); 29' stands for.
+			 First thought 'Issue', was wrong. Maybe check one day.
+			<data source="metadata.dc.source.value" name="rft.issue">
+				<regexp match="^(.*;\s)(.*);\s(.*)$" format="${3}"/>
+			</data>
+			  -->
+			<combine name="rft.jtitle" value="${jtitle}" reset="true" sameEntity="true"> <!-- Journal Title -->
+				<data source="metadata.dc.source.lang" name="lang">	
+				</data>
+				<data source="metadata.dc.source.value" name="jtitle">
+					<regexp match="^(.*);\s(.*);\s(.*)$" format="${1}"/>
+				</data>
+			</combine>
+			
+			<entity name="rft.pub[]" flushWith="record"> <!-- Publisher -->
+				<data source="metadata.dc.publisher.value">
+				</data>
+			</entity>
+			   
+			<data source="metadata.dc.source.value" name="rft.volume"> <!-- Volume -->
+				<regexp match="^(.*;\s)(.*)\s\(\d\d\d\d\);\s(.*)$" format="${2}"/>
+			</data>
+
+			<entity name="x.subjects[]" flushWith="record"> <!-- Subjects -->
+				<data source="metadata.dc.subject.value" name="type">
+					<split delimiter=","/>
+					<trim/>
+				</data>
+			</entity>
+
+			<data source="metadata.dc.type.value" name="rft.genre"> <!-- Genre -->
+					<lookup in="genre_liste" />
+			</data>
+			
+
+	</rules>
+	<maps>
+		<filemap name="formatliste" files="$[MAP_DIR]filemap_fincformat.tsv" separator="\t" />
+		
+		<filemap name="genre_liste" files="$[MAP_DIR]filemap_rft.genre.tsv" separator="\t" />
+
+		<filemap name="sprachliste" files="$[MAP_DIR]sprachliste.tsv" separator="\t" />
+
+	</maps>
+</metamorph>
