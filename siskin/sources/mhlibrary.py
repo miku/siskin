@@ -67,7 +67,7 @@ class MHLibraryIntermediateSchema(MHLibraryTask):
         return MHLibraryHarvest(date=self.date)
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("103/")
+        mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
                           flux=self.assets("103/103.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
