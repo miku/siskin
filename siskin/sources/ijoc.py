@@ -36,17 +36,17 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class MHLibraryTask(DefaultTask):
-    TAG = '103'
+class IJOCTask(DefaultTask):
+    TAG = '87'
 
     def closest(self):
         return monthly(date=self.date)
 
-class MHLibraryHarvest(MHLibraryTask):
+class IJOCHarvest(IJOCTask):
     """
     Harvest.
     """
-    endpoint = luigi.Parameter(default='http://cdm15759.contentdm.oclc.org/oai/oai.php', significant=False)
+    endpoint = luigi.Parameter(default='http://ijoc.org/index.php/ijoc/oai', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -57,7 +57,7 @@ class MHLibraryHarvest(MHLibraryTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
-class MHLibraryIntermediateSchema(MHLibraryTask):
+class IJOCIntermediateSchema(IJOCTask):
     """
     Convert to intermediate schema via metafacture. Custom morphs and flux are kept in assets/87.
     Maps are kept in assets/maps
@@ -65,12 +65,12 @@ class MHLibraryIntermediateSchema(MHLibraryTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return MHLibraryHarvest(date=self.date)
+        return IJOCHarvest(date=self.date)
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-                          flux=self.assets("103/103.flux"), mapdir=mapdir, input=self.input().path)
+                          flux=self.assets("87/87.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
