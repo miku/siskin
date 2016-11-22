@@ -222,7 +222,7 @@ class GeniosLatest(GeniosTask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for name, path in filemap.iteritems():
-            shellout("unzip -p {input} | pigz -c >> {output}", input=path, output=stopover)
+            shellout("unzip -p {input} | iconv -f iso-8859-1 -t utf-8 | pigz -c >> {output}", input=path, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
