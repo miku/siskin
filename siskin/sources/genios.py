@@ -128,3 +128,36 @@ class GeniosReloadDates(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+class GeniosDatabases(GeniosTask):
+    """
+    Extract a list of database names. Example output:
+
+    AAA
+    AAS
+    AATG
+    ABAU
+    ABES
+    ABIL
+    ...
+    """
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosReloadDates(date=self.date)
+
+    def run(self):
+        dbs = set()
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'db', 'year', 'month', 'path')):
+                if not row.kind.startswith(self.kind):
+                    continue
+                dbs.add(row.db)
+
+        with self.output().open('w') as output:
+            for db in sorted(dbs):
+                output.write_tsv(db)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
