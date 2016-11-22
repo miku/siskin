@@ -26,6 +26,8 @@
 Genios
 ------
 
+This is a reimplementation of Genios tasks.
+
 * References (FZS)
 * Fulltexts (various packages)
 
@@ -56,7 +58,7 @@ class GeniosTask(DefaultTask):
 
 class GeniosDropbox(GeniosTask):
     """
-    Pull down content.
+    Pull down content from FTP.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
