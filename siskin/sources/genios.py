@@ -28,7 +28,7 @@ Genios
 
 This is a reimplementation of Genios tasks.
 
-* References (FZS)
+* References (fachzeitschriften = FZS)
 * Fulltexts (various packages)
 
 * Dump (called reload, monthly)
@@ -189,6 +189,8 @@ class GeniosDatabases(GeniosTask):
 class GeniosLatest(GeniosTask):
     """
     Get the latest version of all files, belonging to some kind, e.g. FZS.
+
+    Latest FZS is about 10G, takes 10min to build.
     """
     kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
     date = luigi.DateParameter(default=datetime.date.today())
@@ -205,6 +207,8 @@ class GeniosLatest(GeniosTask):
 
         This way, different database can have different reload dates, and we
         still can have a *latest* version without explicit dates.
+
+        TODO: inject the kind into the XML.
         """
         filemap = {}
         with self.input().open() as handle:
