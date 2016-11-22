@@ -32,7 +32,19 @@ This is a reimplementation of Genios tasks.
 * Fulltexts (various packages)
 
 * Dump (called reload, monthly)
-* Updates
+
+Examples
+--------
+
+* konsortium_sachsen_fachzeitschriften_STS_reload_201609.zip
+* konsortium_sachsen_fachzeitschriften_update_20160821070003.zip
+
+Ebooks are reloaded monthy:
+
+* konsortium_sachsen_ebooks_GABA_reload_201607.zip
+
+* konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_IFOK_reload_201606.zip
+* konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_update_20161122091046.zip
 
 """
 
@@ -44,6 +56,8 @@ import re
 import luigi
 from gluish.format import TSV
 from gluish.utils import shellout
+from gluish.parameter import ClosestDateParameter
+from gluish.intervals import monthly
 
 from siskin.common import Executable
 from siskin.task import DefaultTask
@@ -81,9 +95,9 @@ class GeniosDropbox(GeniosTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class GeniosLatestReload(GeniosTask):
+class GeniosReloadDates(GeniosTask):
     """
-    The lastest reload files.
+    Extract all reload dates, write them sorted into a file.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -91,48 +105,26 @@ class GeniosLatestReload(GeniosTask):
         return GeniosDropbox(date=self.date)
 
     def run(self):
-        files = []
+        """
+        Reload files are marked with date (years + month).
+        """
+        pattern = re.compile(
+            '.*konsortium_sachsen_('
+            'literaturnachweise_wirtschaftswissenschaften|'
+            'literaturnachweise_recht|'
+            'literaturnachweise_sozialwissenschaften|'
+            'literaturnachweise_psychologie|'
+            'literaturnachweise_technik|'
+            'fachzeitschriften|ebooks)_'
+            '([A-Z]*)_reload_(20[0-9][0-9])([01][0-9]).*')
 
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                match = re.search(r'konsortium_sachsen_([a-z_]*)_([A-Z]{2,4})_reload_(?P<date>[0-9]{6,6}).zip', row.path)
-                if match:
-                    date = match.groupdict().get('date')
-                    files.append((date, row.path))
-
-        latestdate = max(files, key=operator.itemgetter(0))[0]
-        latestfiles = []
-        for date, path in files:
-            if date == latestdate:
-                latestfiles.append(path)
-
-        with self.output().open('w') as output:
-            for path in latestfiles:
-                output.write_tsv(path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
-
-class GeniosReload(GeniosTask):
-    """
-    The lastest reload files.
-    """
-    tag = luigi.Parameter(default='201606', description='date tag given by gbi, e.g. 201606')
-
-    def requires(self):
-        return GeniosDropbox()
-
-    def run(self):
-        files = []
-
-        with self.output().open('w') as output:
-            with self.input().open() as handle:
+            with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('path',)):
-                    match = re.search(r'konsortium_sachsen_([a-z_]*)_([A-Z]{2,4})_reload_(?P<date>[0-9]{6,6}).zip', row.path)
+                    match = pattern.match(row.path)
                     if match:
-                        date = match.groupdict().get('date')
-                        if date == self.tag:
-                            output.write_tsv(row.path)
+                        cols = list(match.groups()) + [row.path]
+                        output.write_tsv(*cols)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
