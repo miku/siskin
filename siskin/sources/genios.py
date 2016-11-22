@@ -98,6 +98,23 @@ class GeniosDropbox(GeniosTask):
 class GeniosReloadDates(GeniosTask):
     """
     Extract all reload dates, write them sorted into a file.
+
+    Example output (first 4 columns):
+
+        ...
+        |  fachzeitschriften                            | ZVS     | 2016    | 10       |
+        |  fachzeitschriften                            | ZWF     | 2016    | 06       |
+        |  fachzeitschriften                            | ZWF     | 2016    | 07       |
+        |  fachzeitschriften                            | ZWF     | 2016    | 08       |
+        |  fachzeitschriften                            | ZWF     | 2016    | 09       |
+        |  fachzeitschriften                            | ZWF     | 2016    | 10       |
+        |  literaturnachweise_psychologie               | PSYT    | 2016    | 06       |
+        |  literaturnachweise_psychologie               | PSYT    | 2016    | 07       |
+        |  literaturnachweise_psychologie               | PSYT    | 2016    | 08       |
+        |  literaturnachweise_psychologie               | PSYT    | 2016    | 09       |
+        |  literaturnachweise_psychologie               | PSYT    | 2016    | 10       |
+        ...
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
