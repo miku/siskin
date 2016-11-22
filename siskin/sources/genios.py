@@ -127,11 +127,11 @@ class GeniosReloadDates(GeniosTask):
         """
         pattern = re.compile(
             '.*konsortium_sachsen_('
-            'literaturnachweise_wirtschaftswissenschaften|'
+            'literaturnachweise_psychologie|'
             'literaturnachweise_recht|'
             'literaturnachweise_sozialwissenschaften|'
-            'literaturnachweise_psychologie|'
             'literaturnachweise_technik|'
+            'literaturnachweise_wirtschaftswissenschaften|'
             'fachzeitschriften|ebooks)_'
             '([A-Z]*)_reload_(20[0-9][0-9])([01][0-9]).*')
 
