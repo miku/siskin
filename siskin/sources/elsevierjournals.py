@@ -48,12 +48,12 @@ import re
 import tempfile
 
 import luigi
+
 from BeautifulSoup import BeautifulStoneSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.utils import shellout
-
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
