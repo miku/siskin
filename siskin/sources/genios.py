@@ -135,13 +135,19 @@ class GeniosReloadDates(GeniosTask):
             'fachzeitschriften|ebooks)_'
             '([A-Z]*)_reload_(20[0-9][0-9])([01][0-9]).*')
 
+        rows = []
+
         with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for row in handle.iter_tsv(cols=('path',)):
-                    match = pattern.match(row.path)
-                    if match:
-                        cols = list(match.groups()) + [row.path]
-                        output.write_tsv(*cols)
+            for row in handle.iter_tsv(cols=('path',)):
+                match = pattern.match(row.path)
+                if not match:
+                    continue
+                cols = list(match.groups()) + [row.path]
+                rows.append(cols)
+
+        with self.output().open('w') as output:
+            for row in sorted(rows):
+                output.write_tsv(*row)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
