@@ -52,13 +52,14 @@ import datetime
 import operator
 import os
 import re
+import tempfile
 
 import luigi
-from gluish.format import TSV
-from gluish.utils import shellout
-from gluish.parameter import ClosestDateParameter
-from gluish.intervals import monthly
 
+from gluish.format import TSV
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.common import Executable
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
@@ -184,3 +185,42 @@ class GeniosDatabases(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class GeniosLatest(GeniosTask):
+    """
+    Get the latest version of all files, belonging to some kind, e.g. FZS.
+    """
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosReloadDates(date=self.date)
+
+    def run(self):
+        """
+        Map each database name to the latest file. Since the required task is
+        sorted, the last entry for a name should be the latest.
+
+        Content of all files is concatenated and gzipped.
+
+        This way, different database can have different reload dates, and we
+        still can have a *latest* version without explicit dates.
+        """
+        filemap = {}
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'db', 'year', 'month', 'path')):
+                if not row.kind.startswith(self.kind):
+                    continue
+                filemap[row.db] = row.path
+
+        if not filemap:
+            raise RuntimeError('could not file a single file for the specified kind: %s' % self.kind)
+
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for name, path in filemap.iteritems():
+            shellout("unzip -p {input} | pigz -c >> {output}", input=path, output=stopover)
+
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
