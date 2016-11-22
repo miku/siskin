@@ -40,15 +40,16 @@ import tempfile
 
 import luigi
 import requests
+
 from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.benchmark import timed
-from siskin.sources.amsl import AMSLFilterConfig, AMSLHoldingsFile, AMSLOpenAccessISSNList
+from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
+                                 AMSLOpenAccessISSNList)
 from siskin.sources.crossref import (CrossrefDOIList,
                                      CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)

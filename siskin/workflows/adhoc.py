@@ -28,8 +28,8 @@
 #
 
 import luigi
-from gluish.format import TSV
 
+from gluish.format import TSV
 from siskin.sources.crossref import CrossrefExport
 from siskin.sources.degruyter import DegruyterExport
 from siskin.sources.doaj import DOAJExport
