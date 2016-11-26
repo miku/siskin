@@ -118,13 +118,12 @@ def get_task_import_cache():
         from cacheutils import _write_task_import_cache
         _write_task_import_cache(path)
 
-    if task_import_cache is None:
-        with open(path) as handle:
-            try:
-                task_import_cache = json.load(handle)
-            except Exception as err:
-                print("failed load task import cache, try removing %s and then try again" % path, file=sys.stderr)
-                sys.exit(1)
+    with open(path) as handle:
+        try:
+            task_import_cache = json.load(handle)
+        except Exception as err:
+            print("failed load task import cache, try removing %s and then try again" % path, file=sys.stderr)
+            sys.exit(1)
 
     return task_import_cache, path
 
