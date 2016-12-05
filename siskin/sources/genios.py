@@ -116,6 +116,17 @@ class GeniosReloadDates(GeniosTask):
         |  literaturnachweise_psychologie               | PSYT    | 2016    | 10       |
         ...
 
+    Group names are hardcoded (regex) in this task. List them with:
+
+        $ taskcat GeniosReloadDates | cut -f1|sort -u
+        ebooks
+        fachzeitschriften
+        literaturnachweise_psychologie
+        literaturnachweise_recht
+        literaturnachweise_sozialwissenschaften
+        literaturnachweise_technik
+        literaturnachweise_wirtschaftswissenschaften
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -155,7 +166,7 @@ class GeniosReloadDates(GeniosTask):
 
 class GeniosDatabases(GeniosTask):
     """
-    Extract a list of database names. Example output:
+    Extract a list of database names by --kind. Example output:
 
     AAA
     AAS
@@ -209,6 +220,8 @@ class GeniosLatest(GeniosTask):
         still can have a *latest* version without explicit dates.
 
         TODO: inject the kind into the XML.
+
+        TODO: What if the latest file is a partial upload?
         """
         filemap = {}
         with self.input().open() as handle:
