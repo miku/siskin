@@ -48,27 +48,6 @@ class PubmedTask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
-class PubmedPaths(PubmedTask):
-    """
-    Sync.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
-
-    def requires(self):
-        return FTPMirror(host='ftp.ncbi.nlm.nih.gov',
-                         base='/pub/pmc/',
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
-
-    @timed
-    def run(self):
-        self.input().move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
 class PubmedMetadataPaths(PubmedTask):
     """
     Sync metadata only (much faster).
