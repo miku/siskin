@@ -223,7 +223,22 @@ class GeniosLatest(GeniosTask):
 
         TODO: What if the latest file is a partial upload?
         """
+
+        allowed_kinds = set([
+            'ebooks',
+            'fachzeitschriften',
+            'literaturnachweise_psychologie',
+            'literaturnachweise_recht',
+            'literaturnachweise_sozialwissenschaften',
+            'literaturnachweise_technik',
+            'literaturnachweise_wirtschaftswissenschaften',
+        ])
+
+        if self.kind not in allowed_kinds:
+            raise RuntimeError('only these --kind parameters are allowed: %s' % ', '.join(allowed_kinds))
+
         filemap = {}
+
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('kind', 'db', 'year', 'month', 'path')):
                 if not row.kind.startswith(self.kind):
