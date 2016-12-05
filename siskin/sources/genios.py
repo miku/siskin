@@ -202,6 +202,15 @@ class GeniosLatest(GeniosTask):
     Get the latest version of all files, belonging to some kind, e.g. FZS.
 
     Latest FZS is about 10G, takes 10min to build.
+
+    The XML contains an additional element, X-Package, containing the kind,
+    e.g. fachzeitschriften, literaturnachweise_technik, ...
+        
+        ...
+        </Copyright>
+        <X-Package>ebooks</X-Package></Document>
+        ...
+
     """
     kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
     date = luigi.DateParameter(default=datetime.date.today())
@@ -218,8 +227,6 @@ class GeniosLatest(GeniosTask):
 
         This way, different database can have different reload dates, and we
         still can have a *latest* version without explicit dates.
-
-        TODO: inject the kind into the XML.
 
         TODO: What if the latest file is a partial upload?
         """
@@ -250,7 +257,10 @@ class GeniosLatest(GeniosTask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for name, path in filemap.iteritems():
-            shellout("unzip -p {input} | iconv -f iso-8859-1 -t utf-8 | pigz -c >> {output}", input=path, output=stopover)
+            shellout("""unzip -p {input} |
+                        iconv -f iso-8859-1 -t utf-8 |
+                        LC_ALL=C sed -e 's@</Document>@<X-Package>{package}</X-Package></Document>@' |
+                        pigz -c >> {output}""", input=path, output=stopover, package=self.kind)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
