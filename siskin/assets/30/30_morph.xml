@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph"
+	version="1">
+
+	<rules>
+			<!-- Format Begin-->
+			<data source="leader" name="@leader7">
+				<substring start="7" end="8" />
+			</data>
+			<data source="leader" name="@leader19">
+				<substring start="19" end="20" />
+			</data>
+			
+			<combine name="@mat" value="eBook">
+				<data source="@leader7">
+					<equals string="m" />
+				</data>
+				<data source="@leader19">
+					<regexp match="[ b]" />
+				</data>
+			</combine>
+			
+			<data name="@mat" source="@leader7">
+				<equals string="a" />
+				<constant value="ElectronicArticle" />
+			</data>
+			
+			<data source="@mat" name="finc.format" />
+			<!-- Format End-->
+			
+			<!-- Author -->
+			<entity name="authors[]" flushWith="record"> 
+				<entity name="" >
+					<data source="1001 .a|7001 .a" name="rft.au">
+					</data>
+				</entity>
+			</entity>
+			
+  			<!-- Languages -->
+			<entity name="languages[]" flushWith="record"> 
+				<choose>
+					<!-- try to map language -->
+					<data source="041  .a" >
+						<lookup in="sprachliste" />
+					</data>
+					<!-- default source value -->
+					<data source="041  .a" >
+					</data>
+				</choose>
+			</entity>
+			
+			<!-- URL -->
+			<entity name="url[]" flushWith="record"> 
+					<data source="85640.u" >
+					</data>
+			</entity>
+			
+			<!-- receive Mega_Collection -->
+			<data name="finc.mega_collection" source="_id"> 
+				<constant value="$[mega_collection]"/>
+	      	</data>
+			
+			<!-- Record-ID  -->
+			<combine name="finc.record_id" value="finc-$[sid]-${identifier_key}"> 
+				<data source="0248 .a" name="identifier_key">
+					<regexp match="^(oai:).*\:document\/(\d.*)$" format="${2}"/>
+				</data> 
+			</combine>
+			
+			<!-- receive SID -->
+			<data source="_id" name="finc.source_id"> 
+				<constant value="$[sid]"/>
+			</data>
+			
+			<!-- Title -->
+			<combine name="rft.atitle" value="${title}${subtitle}">
+				<data source="24500.a" name="title"> <!-- aTitle -->
+				</data>
+				<choose>
+					<data source="24500.b" name="subtitle"> <!-- x.subtitle -->
+						<compose prefix=" : "/>
+					</data>
+					<data source="_id">
+						<constant value="" />
+					</data>
+				</choose>
+			</combine>
+			
+			<!-- Date -->
+			<choose>
+				<data source="260  .c" name="rft.date"> 
+					<regexp match="^\d\d\d\d"/>
+				</data>
+				<data source="_id" name="rft.date"> 
+					<constant value="0000"/>
+				</data>
+			</choose>
+			
+			<!-- x.Date -->
+			<data source="260  .c" name="x.date"> 
+				<regexp match="^\d\d\d\d"/>
+				<compose postfix="-01-01T00:00:00Z"/>
+			</data>
+			
+			<!-- Publisher -->
+			<entity name="rft.pub[]" flushWith="record"> 
+				<data source="260  .b">
+				</data>
+			</entity>
+			
+			<!-- Place -->
+			<entity name="rft.place[]" flushWith="record"> 
+				<data source="260  .a" name="type"> 
+				</data>
+			</entity>	
+			   
+			<!-- Subjects -->
+			<entity name="x.subjects[]" flushWith="record"> 
+				<data source="650??.a" name="type">
+				</data>
+			</entity>
+			
+			<!-- Format -->
+			<data source="metadata.dc.type.value" name="rft.genre"> 
+					<lookup in="genre_liste" />
+			</data>
+			
+			<!-- Abstract -->
+			<data source="520??.a" name="abstract"/> 
+			
+			<!-- Pages -->
+			<choose>
+				<data source="300  .a" name="rft.pages"/> 
+				<data source="773??.g" name="rft.pages"> <!-- Pages in 773-->
+					<regexp match="^(pages:)(.*)$" format="${2}"/>
+				</data>
+				<data source="500  .a" name="rft.pages"> <!-- Journal Pages -->
+					<!-- Match something like: 'In: Zeitschrift für Sozialpsychologie ; 26 (1995) 3 ; 194-220'  -->
+					<regexp match="^In: (.*)( ; )(.*)( ; )(.*)$" format="${5}"/>
+					</data>
+				<data source="500  .a" name="rft.pages"> 
+					<!-- Match something like: 'In: Athenea Digital: Revista de Pensamiento e Investigacion Social (2005) 8 ; 129-144' -->
+					<regexp match="^In: (.*) (\(\d\d\d\d\) \d*)(.*)( ; )(.*)$" format="${5}"/> 
+				</data>
+			</choose>
+			
+			<!-- Series or Journal Title--> 
+			<choose>
+				<data source="4900 .a" name="rft.series"/> <!-- Series --> 
+				<data source="773??.t" name="rft.jtitle" /> <!-- Journal title in 773 -->
+				<data source="500  .a" name="rft.jtitle"> <!-- Journal title in 500 -->
+					<!-- Match something like: 'In: Zeitschrift für Sozialpsychologie ; 26 (1995) 3 ; 194-220'  -->
+					<regexp match="^In: (.*)( ; )(.*)( ; )(.*)$" format="${1}"/>
+				</data>
+				<data source="500  .a" name="rft.jtitle"> 
+					<!-- Match something like: 'In: Athenea Digital: Revista de Pensamiento e Investigacion Social (2005) 8 ; 129-144' -->
+					<regexp match="^In: (.*) (\(\d\d\d\d\) \d*)(.*)( ; )(.*)$" format="${1}"/> 
+				</data>
+			</choose>
+			
+			<!-- Volume -->
+			<choose>
+				<data source="4900 .v" name="rft.volume"/> <!-- Series Volume -->
+				<data source="773??.g" name="rft.volume"> <!-- Volume in 773-->
+					<regexp match="^(volume:)(.*)$" format="${2}"/>
+				</data>
+				<data source="500  .a" name="rft.volume"> <!-- Journal Volume -->
+					<!-- Match something like: 'In: Zeitschrift für Sozialpsychologie ; 26 (1995) 3 ; 194-220'  -->
+					<regexp match="^In: (.*)( ; )(.*)( ; )(.*)$" format="${3}"/> 
+				</data>
+				<data source="500  .a" name="rft.volume"> 
+					<!-- Match something like: 'In: Athenea Digital: Revista de Pensamiento e Investigacion Social (2005) 8 ; 129-144' -->
+					<regexp match="^In: (.*) (\(\d\d\d\d\) \d*)(.*)( ; )(.*)$" format="${2}"/>
+				</data>
+			</choose>
+			
+			<entity name="rft.isbn[]" flushWith="record"> 
+				<data source="020  .9" name="type"/> <!-- ISBN -->
+			</entity>	
+			
+			<!--TO-DO x.oa from  856??.z "Open Access"-->
+
+	</rules>
+	<maps>
+		<filemap name="formatliste" files="$[MAP_DIR]filemap_fincformat.tsv" separator="\t" />
+		
+		<filemap name="genre_liste" files="$[MAP_DIR]filemap_rft.genre.tsv" separator="\t" />
+
+		<filemap name="sprachliste" files="$[MAP_DIR]sprachliste.tsv" separator="\t" />
+
+	</maps>
+</metamorph>
