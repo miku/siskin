@@ -42,11 +42,11 @@ import string
 import sys
 import tempfile
 
-import backoff
 import luigi
 import requests
 from dateutil import relativedelta
 
+import backoff
 from siskin import __version__
 
 
