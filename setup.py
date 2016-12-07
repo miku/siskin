@@ -91,6 +91,7 @@ setup(name='siskin',
       package_data={'siskin': ['assets/*']},
       scripts=[
         'bin/taskcat',
+        'bin/taskconfig',
         'bin/taskdeps-dot',
         'bin/taskdir',
         'bin/taskdo',
