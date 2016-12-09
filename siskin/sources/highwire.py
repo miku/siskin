@@ -52,6 +52,8 @@ class HighwireTask(DefaultTask):
     """
     Base task.
     """
+    TAG = 'highwire'
+
     def closest(self):
         return weekly(date=self.date)
 
