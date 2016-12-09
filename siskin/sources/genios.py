@@ -71,6 +71,16 @@ class GeniosTask(DefaultTask):
     """
     TAG = 'genios'
 
+    allowed_kinds = set([
+        'ebooks',
+        'fachzeitschriften',
+        'literaturnachweise_psychologie',
+        'literaturnachweise_recht',
+        'literaturnachweise_sozialwissenschaften',
+        'literaturnachweise_technik',
+        'literaturnachweise_wirtschaftswissenschaften',
+    ])
+
 class GeniosDropbox(GeniosTask):
     """
     Pull down content from FTP.
@@ -183,6 +193,9 @@ class GeniosDatabases(GeniosTask):
         return GeniosReloadDates(date=self.date)
 
     def run(self):
+        if self.kind not in GeniosTask.allowed_kinds:
+            raise RuntimeError('only these --kind parameters are allowed: %s' % ', '.join(GeniosTask.allowed_kinds))
+
         dbs = set()
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('kind', 'db', 'year', 'month', 'path')):
@@ -231,18 +244,8 @@ class GeniosLatest(GeniosTask):
         TODO: What if the latest file is a partial upload?
         """
 
-        allowed_kinds = set([
-            'ebooks',
-            'fachzeitschriften',
-            'literaturnachweise_psychologie',
-            'literaturnachweise_recht',
-            'literaturnachweise_sozialwissenschaften',
-            'literaturnachweise_technik',
-            'literaturnachweise_wirtschaftswissenschaften',
-        ])
-
-        if self.kind not in allowed_kinds:
-            raise RuntimeError('only these --kind parameters are allowed: %s' % ', '.join(allowed_kinds))
+        if self.kind not in GeniosTask.allowed_kinds:
+            raise RuntimeError('only these --kind parameters are allowed: %s' % ', '.join(GeniosTask.allowed_kinds))
 
         filemap = {}
 
