@@ -79,8 +79,89 @@ class CrossrefTask(DefaultTask):
         """
         return monthly(date=self.date)
 
+class CrossrefHarvestChunkWithCursor(CrossrefTask):
+    """
+    Task should have the same output as `CrossrefHarvestChunk`, but
+    implementation should use cursor (https://git.io/v1K27).
+    """
+    begin = luigi.DateParameter()
+    end = luigi.DateParameter()
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+
+    rows = luigi.IntParameter(default=1000, significant=False)
+    max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
+    attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
+    sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests')
+
+    def run(self):
+        """
+        > Using large offset values can result in extremely long response times. Offsets
+        in the 100,000s and beyond will likely cause a timeout before the API is able
+        to respond. An alternative to paging through very large result sets (like a
+        corpus used for text and data mining) it to use the API's exposure of Solr's
+        deep paging cursors. Any combination of query, filters and facets may be used
+        with deep paging cursors. While rows may be specified along with cursor,
+        offset and sample cannot be used. To use deep paging make a query as normal,
+        but include the cursor parameter with a value of *
+        """
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
+        cache.sess.mount('http://', adapter)
+
+        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(self=self)
+        rows, offset = self.rows, 0
+
+        cursor = '*'
+
+        with self.output().open('w') as output:
+            while True:
+                params = {
+                    'rows': rows,
+                    'filter': filter,
+                    'cursor': cursor
+                }
+
+                url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
+
+                for attempt in range(1, self.attempts):
+                    if not cache.is_cached(url):
+                        time.sleep(self.sleep)
+                    body = cache.get(url)
+                    try:
+                        content = json.loads(body)
+                    except ValueError as err:
+                        if attempt == self.attempts - 1:
+                            self.logger.debug('URL was %s' % url)
+                            self.logger.debug(err)
+                            self.logger.debug(body[:100] + '...')
+                            raise
+
+                        cache_file = cache.get_cache_file(url)
+                        if os.path.exists(cache_file):
+                            self.logger.debug('trying to recover by removing cached entry at %s' % cache_file)
+                            os.remove(cache_file)
+                    else:
+                        break # all fine
+
+                count = len(content['message']['items'])
+                self.logger.debug("%s: %s" % (url, count))
+                if count == 0:
+                    break
+
+                output.write(body + '\n')
+                offset += rows
+
+                if not 'next-cursor' in content['message']:
+                    raise RuntimeError('expected next-cursor in message, but missing')
+                cursor = content['message']['next-cursor']
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 class CrossrefHarvestChunk(CrossrefTask):
     """
+    >>> DEPRECATED, switch to CrossrefHarvestChunkWithCursor soon, (https://git.io/v1K27).
+
     Harvest a slice of Crossref.
 
     API docs can be found under: http://api.crossref.org/
@@ -152,7 +233,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
         if self.update not in ('days', 'weeks', 'months'):
             raise RuntimeError('update can only be: days, weeks or months')
         dates = [dt for dt in date_range(self.begin, self.end, 1, self.update)]
-        tasks = [CrossrefHarvestChunk(begin=dates[i], end=dates[i + 1])
+        tasks = [CrossrefHarvestChunkWithCursor(begin=dates[i], end=dates[i + 1])
                  for i in range(len(dates) - 1)]
         return sorted(tasks)
 
@@ -168,7 +249,7 @@ class CrossrefChunkItems(CrossrefTask):
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     def requires(self):
-        return CrossrefHarvestChunk(begin=self.begin, end=self.end, filter=self.filter)
+        return CrossrefHarvestChunkWithCursor(begin=self.begin, end=self.end, filter=self.filter)
 
     def run(self):
         output = shellout("jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
