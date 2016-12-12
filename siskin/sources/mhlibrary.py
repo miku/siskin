@@ -75,3 +75,26 @@ class MHLibraryIntermediateSchema(MHLibraryTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+    
+class MHLibraryFincSolr(MHLibraryTask):
+    """
+    Export to finc solr schema by using span-export.
+    Tag with ISIL for FID and change record type.
+    """
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+    isil = luigi.Parameter(default='DE-15-FID', description='isil FID')
+    date = ClosestDateParameter(default=datetime.date.today())
+    
+    def requires(self):
+        return {
+            'file': MHLibraryIntermediateSchema(date=self.date)
+        }
+    
+    def run(self):
+        output = shellout("""span-export -o {format} <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
+                 format=self.format, isil=self.isil, input=self.input().get('file').path)
+        output = shellout("""cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+    
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj'))

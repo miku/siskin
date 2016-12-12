@@ -1,5 +1,6 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
+from pip._vendor.distlib.util import ExportEntry
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -75,3 +76,26 @@ class IJOCIntermediateSchema(IJOCTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class IJOCFincSolr(IJOCTask):
+    """
+    Export to finc solr schema by using span-export.
+    Tag with ISIL for FID and change record type.
+    """
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+    isil = luigi.Parameter(default='DE-15-FID', description='isil FID')
+    date = ClosestDateParameter(default=datetime.date.today())
+    
+    def requires(self):
+        return {
+            'file': IJOCIntermediateSchema(date=self.date)
+        }
+    
+    def run(self):
+        output = shellout("""span-export -o {format} <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
+                 format=self.format, isil=self.isil, input=self.input().get('file').path)
+        output = shellout("""cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+    
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj'))
