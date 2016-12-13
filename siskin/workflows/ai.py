@@ -40,13 +40,13 @@ import tempfile
 
 import luigi
 import requests
-
 from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
@@ -61,6 +61,7 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
 from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
+from siskin.sources.ieee import IEEEIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
@@ -212,7 +213,8 @@ class AIIntermediateSchema(AITask):
                 DOAJIntermediateSchema(date=self.date),
                 JstorIntermediateSchema(date=self.date),
                 ThiemeIntermediateSchema(date=self.date),
-                ElsevierJournalsIntermediateSchema(date=self.date)]
+                ElsevierJournalsIntermediateSchema(date=self.date),
+                IEEEIntermediateSchema(date=self.date)]
 
     @timed
     def run(self):
