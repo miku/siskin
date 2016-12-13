@@ -47,6 +47,7 @@ import tempfile
 import luigi
 
 from gluish.format import TSV
+from gluish.intervals import weekly
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
@@ -55,6 +56,9 @@ from siskin.task import DefaultTask
 
 class IEEETask(DefaultTask):
     TAG = 'ieee'
+
+    def closest(self):
+        return weekly(date=self.date)
 
 class IEEEPaths(IEEETask):
     """ A list of IEEE file paths (via FTP). """
