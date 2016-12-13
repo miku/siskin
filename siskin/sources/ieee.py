@@ -42,6 +42,7 @@ backlog-archive = /path/to/ieee.tar.gz
 """
 
 import datetime
+import tempfile
 
 import luigi
 
@@ -70,11 +71,33 @@ class IEEEPaths(IEEETask):
 
     @timed
     def run(self):
-	output = shellout('sort {input} > {output}', input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout('sort {input} > {output}', input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
+
+class IEEEUpdatesIntermediateSchema(IEEETask):
+    """
+    Combined updates, with duplicates.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return IEEEPaths(date=self.date)
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if not 'IEEEUpdates_' in row.path:
+                    continue
+                shellout(r'unzip -p {input} \*.xml | span-import -i ieee | pigz -c >> {output}', input=row.path, output=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
 
 class IEEEBacklogPaths(IEEETask):
     """
@@ -89,27 +112,31 @@ class IEEEBacklogPaths(IEEETask):
 
 class IEEEBacklogIntermediateSchema(IEEETask):
     """
-    Brute-convert any XML that has an ISSN.
-
-    Dump style:
-
-        $ ls -1 /tmp/uol/
-        IEEcnf
-        IEEEcnf
-        IEEEper
-        IEEEstd
-        IEEper
-        $RECYCLE.BIN
-        System Volume Information
-
-    E.g. taskdo IEEEIntermediateSchema --dir /tmp/uol/IEEEstd
-
+    Backlog is a single tar file containing an initial set of records.
     """
-    dir = luigi.Parameter(description='directory to traverse')
 
     def run(self):
-        output = shellout("""find {dir} -name "*xml" -type f | xargs -I {{}} span-import -i ieee {{}} | pigz -c >> {output}""", dir=self.dir)
+        output = shellout("""tar -xOzf {input} | span-import -i ieee | pigz -c >> {output}""",
+                          input=self.config.get('ieee', 'backlog-archive'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext='ldj.gz'))
+
+class IEEEIntermediateSchema(IEEETask):
+    """
+    Combine the backlog and all updates into a single file.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [IEEEBacklogIntermediateSchema(), IEEEUpdatesIntermediateSchema(date=self.date)]
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
