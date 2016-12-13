@@ -70,7 +70,8 @@ class IEEEPaths(IEEETask):
 
     @timed
     def run(self):
-        self.input().move(self.output().path)
+	output = shellout('sort {input} > {output}', input=self.input().path)
+	luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
