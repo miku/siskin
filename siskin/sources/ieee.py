@@ -144,3 +144,22 @@ class IEEEIntermediateSchema(IEEETask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
+class IEEESolrExport(IEEETask):
+    """
+    Export to a SOLR compatible format.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return IEEEIntermediateSchema(date=self.date)
+
+    def run(self):
+        """
+        TODO: get ISIL attachments from AMSL.
+        """
+        output = shellout("""span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(unpigz -c {input}) | span-export | pigz -c > {output}""", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
