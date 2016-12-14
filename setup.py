@@ -96,7 +96,7 @@ setup(name='siskin',
             'assets/87/*',
             'assets/arxiv/*',
             'assets/issue/*',
-            'assets/issue/8986/*'
+            'assets/issue/8986/*',
             'assets/maps/*',
         ]},
       scripts=[
