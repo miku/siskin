@@ -88,7 +88,17 @@ setup(name='siskin',
         'siskin.workflows'
       ],
       package_dir={'siskin': 'siskin'},
-      package_data={'siskin': ['assets/*']},
+      package_data={
+        'siskin': [
+            'assets/*',
+            'assets/103/*',
+            'assets/30/*',
+            'assets/87/*',
+            'assets/arxiv/*',
+            'assets/issue/*',
+            'assets/issue/8986/*'
+            'assets/maps/*',
+        ]},
       scripts=[
         'bin/taskcat',
         'bin/taskconfig',
