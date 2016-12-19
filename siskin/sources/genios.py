@@ -262,6 +262,8 @@ class GeniosLatest(GeniosTask):
         for name, path in filemap.iteritems():
             shellout("""unzip -p {input} |
                         iconv -f iso-8859-1 -t utf-8 |
+                        LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
+                        LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
                         LC_ALL=C sed -e 's@</Document>@<X-Package>{package}</X-Package></Document>@' |
                         pigz -c >> {output}""", input=path, output=stopover, package=self.kind)
 
