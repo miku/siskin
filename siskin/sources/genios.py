@@ -309,7 +309,9 @@ class GeniosIntermediateSchema(GeniosTask):
         return GeniosLatest(kind=self.kind, date=self.date)
 
     def run(self):
-        output = shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().path)
+        logfile = os.path.join("%s.log" % self.output().path)
+        output = shellout("span-import -i -log {logfile} genios <(unpigz -c {input}) | pigz -c >> {output}",
+                          logfile=logfile, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
