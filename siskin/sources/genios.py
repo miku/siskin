@@ -68,6 +68,17 @@ from siskin.utils import iterfiles
 class GeniosTask(DefaultTask):
     """
     Genios task.
+
+    Allowed set names:
+
+    * ebooks
+    * fachzeitschriften
+    * literaturnachweise_psychologie
+    * literaturnachweise_recht
+    * literaturnachweise_sozialwissenschaften
+    * literaturnachweise_technik
+    * literaturnachweise_wirtschaftswissenschaften
+
     """
     TAG = 'genios'
 
