@@ -318,3 +318,53 @@ class GeniosIntermediateSchema(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GeniosCombinedIntermediateSchema(GeniosTask):
+    """
+    Concat all genios files.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        """
+        No ebooks.
+        """
+        return [
+            GeniosIntermediateSchema(date=self.date, kind='fachzeitschriften'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_psychologie'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_recht'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_sozialwissenschaften'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_technik'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_wirtschaftswissenschaften'),
+        ]
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GeniosISSNList(GeniosTask):
+    """
+    A list of Genios ISSNs.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'input': GeniosCombinedIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
+        }
+
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        output = shellout("""sort -u {input} > {output} """, input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
