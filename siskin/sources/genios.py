@@ -309,6 +309,8 @@ class GeniosIntermediateSchema(GeniosTask):
         return GeniosLatest(kind=self.kind, date=self.date)
 
     def run(self):
+        if not os.path.exists(self.taskdir()):
+            os.makedirs(self.taskdir())
         logfile = os.path.join("%s.log" % self.output().path)
         output = shellout("span-import -i -log {logfile} genios <(unpigz -c {input}) | pigz -c >> {output}",
                           logfile=logfile, input=self.input().path)
