@@ -282,3 +282,35 @@ class GeniosLatest(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
+class GeniosIntermediateSchema(GeniosTask):
+    """
+    Intermediate schema by kind.
+
+    Warnings:
+
+    * 2016/12/20 13:57:58 genios: db is not associated with package: ELEO, using generic default
+    * 2016/12/20 13:59:34 genios: db is not associated with package: AKS, using generic default
+    * 2016/12/20 14:04:06 genios: db is not associated with package: KTX, using generic default
+    * 2016/12/20 14:07:01 genios: db is not associated with package: GJHR, using generic default
+    * 2016/12/20 14:08:20 genios: db is not associated with package: MAON, using generic default
+    * 2016/12/20 14:10:00 genios: db is not associated with package: TUD, using generic default
+    * 2016/12/20 14:11:59 genios: db is not associated with package: FOWE, using generic default
+    * 2016/12/20 14:18:52 genios: db is not associated with package: TIAM, using generic default
+    * 2016/12/20 14:37:41 genios: db is not associated with package: HTEC, using generic default
+
+    Related: "Neue Quellen bzw. Austausch", Mon, Dec 5, 2016 at 12:23 PM, ba54ea7d396a41a2a1281f51bba5d33f
+
+    """
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosLatest(kind=self.kind, date=self.date)
+
+    def run(self):
+        output = shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
