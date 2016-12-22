@@ -61,6 +61,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import Executable
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 
@@ -346,6 +347,32 @@ class GeniosCombinedIntermediateSchema(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+class GeniosCombinedExport(GeniosTask):
+    """
+    Tag with ISILs, then export to various formats.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+
+    def requires(self):
+        return {
+            'file': GeniosCombinedIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
+        }
+
+    def run(self):
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+                          config=self.input().get('config').path, input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        extensions = {
+            'solr5vu3': 'ldj.gz',
+            'formeta': 'form.gz',
+        }
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
 
 class GeniosISSNList(GeniosTask):
     """
