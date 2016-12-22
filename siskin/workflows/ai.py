@@ -60,6 +60,7 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
+from siskin.sources.genios import GeniosIntermediateSchema
 from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
 from siskin.sources.ieee import IEEEIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
@@ -206,8 +207,7 @@ class AIIntermediateSchema(AITask):
         TODO(miku): Dynamic dependencies based on holding file.
         """
         return [Executable(name='pigz', message='http://zlib.net/pigz/'),
-                GBIIntermediateSchemaByKind(kind='references', date=self.date),
-                GBIIntermediateSchemaByKind(kind='fulltext', date=self.date),
+                GeniosIntermediateSchema(date=self.date),
                 CrossrefIntermediateSchema(date=self.date),
                 DegruyterIntermediateSchema(date=self.date),
                 DOAJIntermediateSchema(date=self.date),
