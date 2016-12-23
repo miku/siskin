@@ -354,9 +354,12 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
     def run(self):
         """
-        Keep an in-memory list of ids and their new ISILs.
+        Keep a dictionary in memory with ids as keys and a list of ISILs as
+        values.
         """
         updates = {}
+
+        # First column is the ID, 4th to the end are the ISILs.
         output = shellout("cut -d, -f1,4- {changes} > {output}", changes=self.input().get('changes').path)
         with open(output) as handle:
             for line in handle:
@@ -366,31 +369,16 @@ class AIIntermediateSchemaDeduplicated(AITask):
         os.remove(output)
         self.logger.debug('%s changes staged' % len(updates))
 
-        applied = 0
-
         with self.input().get('file').open() as handle:
             with self.output().open('w') as output:
                 for i, line in enumerate(handle):
-                    if i % 1000000 == 0:
-                        self.logger.debug('%s lines processed' % i)
-
                     doc = json.loads(line)
                     identifier = doc["finc.record_id"]
-                    if not identifier in updates:
-                        output.write(json.dumps(doc))
-                        output.write('\n')
-                        continue
 
-                    # ISIL change required
-                    current = doc['x.labels']
-                    updated = updates[identifier]
-
-                    doc['x.labels'] = updated
-                    output.write(json.dumps(doc))
-                    output.write('\n')
-                    applied += 1
-
-        self.logger.debug('%s changes applied' % applied)
+                    if identifier in updates:
+                        doc['x.labels'] = updates[identifier]
+                    
+                    output.write(json.dumps(doc) + '\n')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
