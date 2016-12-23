@@ -384,8 +384,6 @@ class AIIntermediateSchemaDeduplicated(AITask):
                     current = doc['x.labels']
                     updated = updates[identifier]
 
-                    self.logger.debug('%s -> %s for %s' % (current, updated, identifier))
-
                     doc['x.labels'] = updated
                     output.write(json.dumps(doc))
                     output.write('\n')
