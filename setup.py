@@ -72,6 +72,7 @@ install_requires = [
     'six>=1.9.0',
     'snakebite>=2.5.1',
     'sqlitebck>=1.2.1',
+    'ujson>=1.35',
     'urllib3>=1.10',
     'wsgiref>=0.1.2',
 ]
