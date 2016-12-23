@@ -365,6 +365,8 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
         self.logger.debug('%s changes staged' % len(updates))
 
+        applied = 0
+
         with self.input().get('file').open() as handle:
             with self.output().open('w') as output:
                 for i, line in enumerate(handle):
@@ -387,6 +389,9 @@ class AIIntermediateSchemaDeduplicated(AITask):
                     doc['x.labels'] = updated
                     output.write(json.dumps(doc))
                     output.write('\n')
+                    applied += 1
+
+        self.logger.debug('%s changes applied' % applied)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
