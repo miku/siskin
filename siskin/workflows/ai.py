@@ -32,7 +32,6 @@
 import collections
 import datetime
 import itertools
-import json
 import os
 import re
 import string
@@ -40,13 +39,14 @@ import tempfile
 
 import luigi
 import requests
+import ujson as json
+
 from BeautifulSoup import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.benchmark import timed
 from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
@@ -60,8 +60,8 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
-from siskin.sources.genios import GeniosCombinedIntermediateSchema
 from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
+from siskin.sources.genios import GeniosCombinedIntermediateSchema
 from siskin.sources.ieee import IEEEIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
@@ -296,7 +296,7 @@ class AILicensing(AITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class AILocalData(AITask):
     """
@@ -339,6 +339,57 @@ class AIInstitutionChanges(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class AIIntermediateSchemaDeduplicated(AITask):
+    """
+    A DOI deduplicated version of the intermediate schema. Experimental.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'changes': AIInstitutionChanges(date=self.date),
+            'file': AILicensing(date=self.date),
+        }
+
+    def run(self):
+        """
+        Keep an in-memory list of ids and their new ISILs.
+        """
+        updates = {}
+        output = shellout("cut -d, -f1,4- {changes} > {output}", changes=self.input().get('changes').path)
+        with open(output) as handle:
+            for line in handle:
+                fields = [s.strip() for s in line.split(',')]
+                updates[fields[0]] = fields[1:]
+
+        self.logger.debug('%s changes staged' % len(updates))
+
+        with self.input().get('file').open() as handle:
+            with self.output().open('w') as output:
+                for i, line in enumerate(handle):
+                    if i % 1000000 == 0:
+                        self.logger.debug('%s lines processed' % i)
+
+                    doc = json.loads(line)
+                    identifier = doc["finc.record_id"]
+                    if not identifier in updates:
+                        output.write(json.dumps(doc))
+                        output.write('\n')
+                        continue
+
+                    # ISIL change required
+                    current = doc['x.labels']
+                    updated = updates[doc[identifier]]
+
+                    self.logger.debug('%s -> %s for %s' % (current, updated, identifier))
+
+                    doc['x.labels'] = updated
+                    output.write(json.dumps(doc))
+                    output.write('\n')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 class AIDuplicatesSortbyDOI(AITask):
     """
