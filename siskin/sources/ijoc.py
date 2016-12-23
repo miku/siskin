@@ -1,6 +1,15 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
+import datetime
+
+import luigi
 from pip._vendor.distlib.util import ExportEntry
+
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
+from siskin.task import DefaultTask
+
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -27,14 +36,8 @@ from pip._vendor.distlib.util import ExportEntry
 Example workflow with OAI harvest and metafacture.
 """
 
-import datetime
 
-import luigi
 
-from gluish.intervals import monthly
-from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class IJOCTask(DefaultTask):
