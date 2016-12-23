@@ -420,7 +420,7 @@ class AIExport(AITask):
     format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
-        return AILicensing(date=self.date)
+        return AIIntermediateSchemaDeduplicated(date=self.date)
 
     def run(self):
 	output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
