@@ -363,6 +363,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
                 fields = [s.strip() for s in line.split(',')]
                 updates[fields[0]] = fields[1:]
 
+        os.remove(output)
         self.logger.debug('%s changes staged' % len(updates))
 
         applied = 0
