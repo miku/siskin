@@ -371,7 +371,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
         with self.input().get('file').open() as handle:
             with self.output().open('w') as output:
-                for i, line in enumerate(handle):
+                for line in handle:
                     doc = json.loads(line)
                     identifier = doc["finc.record_id"]
 
