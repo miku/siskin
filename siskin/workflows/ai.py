@@ -382,7 +382,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
                     # ISIL change required
                     current = doc['x.labels']
-                    updated = updates[doc[identifier]]
+                    updated = updates[identifier]
 
                     self.logger.debug('%s -> %s for %s' % (current, updated, identifier))
 
