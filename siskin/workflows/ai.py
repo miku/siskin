@@ -298,18 +298,43 @@ class AILicensing(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-class AIDuplicates(AITask):
+class AILocalData(AITask):
     """
-    First attempt at a list of id, DOI, ISIL list for simple duplicate detection.
+    Extract a CSV about source, id, doi and institutions for deduplication.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return AILicensing(date=self.date)
+        return {
+            'is': AILicensing(date=self.date),
+        }
 
     def run(self):
-        output = shellout("""jq -r '[.["finc.record_id"]?, .doi?, .["rft.atitle"]?, .["x.labels"][]?] | @csv' <(unpigz -c {input}) > {output} """,
-                          input=self.input().path)
+        """
+        Unzip on the fly, extract fields as CSV, sort be third column.
+        """
+        output = shellout("""unpigz -c {input} | jq -r '[
+            .["finc.record_id"],
+            .["finc.source_id"],
+            .["doi"],
+            .["x.labels"][]? ] | @csv' | LC_ALL=C sort -S50% -t, -k3 > {output} """, input=self.input().get('is').path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='csv'))
+
+class AIInstitutionChanges(AITask):
+    """
+    Calculate institution changes based on DOI duplicates. Experimental, using
+    https://github.com/miku/groupcover with preferences.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AILocalData(date=self.date)
+
+    def run(self):
+        output = shellout("""groupcover -prefs '85 55 89 60 50 49 28 48' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
