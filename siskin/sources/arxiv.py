@@ -40,9 +40,10 @@ metha-dir = /path/to/dir
 From: https://groups.google.com/forum/#!topic/arxiv-api/aOacIt6KD2E
 
 > the problem is that the API is not the appropriate vehicle to obtain a full
-  copy of arXiv metadata. It is intended for interactive queries and search overlays
-  and should not be used for full replication. The size of result sets is capped at a large but finite number.
-  You should use OAI-PMH instead for your purposes.
+copy of arXiv metadata. It is intended for interactive queries and search
+overlays and should not be used for full replication. The size of result sets
+is capped at a large but finite number. You should use OAI-PMH instead for your
+purposes.
 
 """
 
@@ -143,7 +144,8 @@ class ArxivExport(ArxivTask):
         return ArxivIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
