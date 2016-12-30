@@ -198,6 +198,8 @@ hash pip 2>/dev/null || {
 
 # http://pip-cn.readthedocs.io/en/latest/distribute_setuptools.html
 pip install --upgrade setuptools
+# python-daemon has been problematic in the past.
+pip install --upgrade python-daemon
 pip install --upgrade siskin
 
 # Download file from master branch: https://raw.githubusercontent.com/miku/siskin/master/<PATH>
