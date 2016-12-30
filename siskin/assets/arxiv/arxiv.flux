@@ -16,6 +16,6 @@ fileName|
 open-gzip|
 decode-xml|
 handle-generic-xml("Record")|
-morph(FLUX_DIR + "_morph.xml", *)|
+morph(FLUX_DIR + sid + "_morph.xml", *)|
 encode-json|
 write("stdout");
