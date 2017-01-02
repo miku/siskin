@@ -89,11 +89,11 @@ class SSOARFincSolr(SSOARTask):
     
     def requires(self):
         return {
-            'file': IJOCIntermediateSchema(date=self.date)
+            'file': SSOARIntermediateSchema(date=self.date)
         }
     
     def run(self):
-        output = shellout("""span-export -o {format} > {output}""",
+        output = shellout("""span-export -o {format} {input} > {output}""",
                  format=self.format, input=self.input().get('file').path)
         output = shellout("""cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
