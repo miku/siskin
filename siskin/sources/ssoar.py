@@ -78,3 +78,25 @@ class SSOARIntermediateSchema(SSOARTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+class SSOARFincSolr(SSOARTask):
+    """
+    Export to finc solr schema by using span-export.
+    Change record type.
+    """
+    format = luigi.Parameter(default='solr5vu3', description='export format')
+    date = ClosestDateParameter(default=datetime.date.today())
+    
+    def requires(self):
+        return {
+            'file': IJOCIntermediateSchema(date=self.date)
+        }
+    
+    def run(self):
+        output = shellout("""span-export -o {format} > {output}""",
+                 format=self.format, input=self.input().get('file').path)
+        output = shellout("""cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+    
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj'))
