@@ -61,6 +61,7 @@ class DBLPDownload(DBLPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
+
 class DBLPDOIList(DBLPTask):
     """ QnD doi list. """
 
