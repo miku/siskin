@@ -26,6 +26,8 @@
 siskin is a set of tasks for library metadata management.
 """
 
+from __future__ import print_function
+
 import sys
 
 from siskin import __version__
@@ -36,7 +38,7 @@ if sys.version_info < (2, 7) or sys.version_info.major > 2:
 
 try:
     from setuptools import setup
-except:
+except ImportError:
     from distutils.core import setup
 
 
@@ -80,62 +82,62 @@ install_requires = [
 setup(name='siskin',
       version=__version__,
       description='Various sources and workflows.',
-      url='https://github.com/miku/siskin',
-      author='Martin Czygan',
-      author_email='martin.czygan@uni-leipzig.de',
+      url='https://github.com/ubleipzig/siskin',
+      author='The Finc Authors',
+      author_email='team@finc.info',
       packages=[
-        'siskin',
-        'siskin.sources',
-        'siskin.workflows'
+          'siskin',
+          'siskin.sources',
+          'siskin.workflows'
       ],
       package_dir={'siskin': 'siskin'},
       package_data={
-        'siskin': [
-            'assets/*',
-            'assets/103/*',
-            'assets/30/*',
-            'assets/87/*',
-            'assets/arxiv/*',
-            'assets/issue/*',
-            'assets/issue/8986/*',
-            'assets/maps/*',
-        ]},
+          'siskin': [
+              'assets/*',
+              'assets/103/*',
+              'assets/30/*',
+              'assets/87/*',
+              'assets/arxiv/*',
+              'assets/datacite/*',
+              'assets/js/*',
+              'assets/maps/*',
+              'assets/oai/*',
+          ]},
       scripts=[
-        'bin/taskcat',
-        'bin/taskconfig',
-        'bin/taskdeps-dot',
-        'bin/taskdir',
-        'bin/taskdo',
-        'bin/taskdocs',
-        'bin/taskdu',
-        'bin/taskhash',
-        'bin/taskhead',
-        'bin/taskhelp',
-        'bin/taskhome',
-        'bin/taskinspect',
-        'bin/taskless',
-        'bin/taskls',
-        'bin/tasknames',
-        'bin/taskopen',
-        'bin/taskoutput',
-        'bin/taskps',
-        'bin/taskpurge',
-        'bin/taskredo',
-        'bin/taskrm',
-        'bin/taskstatus',
-        'bin/tasktree',
-        'bin/taskversion',
-        'bin/taskwc',
+          'bin/taskcat',
+          'bin/taskconfig',
+          'bin/taskdeps-dot',
+          'bin/taskdir',
+          'bin/taskdo',
+          'bin/taskdocs',
+          'bin/taskdu',
+          'bin/taskhash',
+          'bin/taskhead',
+          'bin/taskhelp',
+          'bin/taskhome',
+          'bin/taskinspect',
+          'bin/taskless',
+          'bin/taskls',
+          'bin/tasknames',
+          'bin/taskopen',
+          'bin/taskoutput',
+          'bin/taskps',
+          'bin/taskpurge',
+          'bin/taskredo',
+          'bin/taskrm',
+          'bin/taskstatus',
+          'bin/tasktree',
+          'bin/taskversion',
+          'bin/taskwc',
       ],
       install_requires=install_requires,
       zip_safe=False,
       classifier=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Console'
-        'License :: GPLv3',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: POSIX',
-        'Programming Language :: Python',
-        'Topic :: Text Processing',
-      ],
-)
+          'Development Status :: 4 - Beta',
+          'Environment :: Console'
+          'License :: GPLv3',
+          'Operating System :: MacOS :: MacOS X',
+          'Operating System :: POSIX',
+          'Programming Language :: Python',
+          'Topic :: Text Processing',
+      ])
