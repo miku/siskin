@@ -197,8 +197,7 @@ class AIISSNList(AITask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for _, target in self.input().items():
-            shellout("cat {input} | grep -v null >> {output}",
-                     input=target.path, output=output, pipefail=True)
+            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -249,26 +248,25 @@ class AICheck(AITask):
     @timed
     def run(self):
         output = shellout(
-            "span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+            "span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class AICheckStats(AITask):
+class AIErrorDistribution(AITask):
     """
     Error distribution.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return AICheck(date=self.date)
+        return AICheckStats(date=self.date)
 
     @timed
     def run(self):
-        output = shellout(
-            "unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path, pipefail=True)
+        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -288,7 +286,7 @@ class AIRedact(AITask):
     def run(self):
         """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
         output = shellout(
-            "span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+            "span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -309,7 +307,7 @@ class AILicensing(AITask):
 
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('is').path, pipefail=True)
+                          config=self.input().get('config').path, input=self.input().get('is').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
