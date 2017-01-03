@@ -31,14 +31,15 @@ import os
 import tempfile
 
 from gluish.task import BaseTask
-from gluish.utils import shellout
 from siskin.configuration import Config
 
 config = Config.instance()
 
+
 class DefaultTask(BaseTask):
     """ A base task that sets its base directory based on config value. """
-    BASE = config.get('core', 'home', os.path.join(tempfile.gettempdir(), 'siskin-data'))
+    BASE = config.get('core', 'home', os.path.join(
+        tempfile.gettempdir(), 'siskin-data'))
 
     def assets(self, path):
         """ Return the absolute path to the asset. `path` is the relative path
