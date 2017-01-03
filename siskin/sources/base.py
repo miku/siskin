@@ -52,8 +52,17 @@ class BaseTask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
-class BaseDynamicSet(BaseTask):
 
+class BaseDynamicSet(BaseTask):
+    """
+    TODO(miku): Dynamic sets use SOLR queries:
+
+    set=classcode:(002 OR 070 OR 659 OR 791)     => fq on SORL field classcode
+    set=subject:(*journalismus* OR *journalism*) => fq on SOLR field subject
+    set=classcode:(002 OR 070 OR 659 OR 791) subject:(*journalismus* OR *journalism*) => fq on SOLR field classcode and subject
+
+    Long set names currently cause problems with metha-sync.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
     prefix = luigi.Parameter(default="oai_dc", significant=False)
     set = luigi.Parameter(description='a subject / keyword')
