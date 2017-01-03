@@ -173,7 +173,7 @@ class CrossrefHarvestChunk(CrossrefTask):
     rows = luigi.IntParameter(default=200, significant=False)
     max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
     attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
-    sleep = luigi.IntParameter(default=5, significant=False, description='sleep between requests (secs)')
+    sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests (secs)')
 
     @timed
     def run(self):
