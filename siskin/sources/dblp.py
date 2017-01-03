@@ -48,8 +48,9 @@ class DBLPTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+
 class DBLPDownload(DBLPTask):
-    """ Download file and extract. """
+    """ Download file. """
     url = luigi.Parameter(default='http://dblp.uni-trier.de/xml/dblp.xml.gz', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
