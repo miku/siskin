@@ -60,7 +60,6 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
-from siskin.sources.gbi import GBIIntermediateSchemaByKind, GBIISSNList
 from siskin.sources.genios import GeniosCombinedIntermediateSchema
 from siskin.sources.ieee import IEEEIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
