@@ -27,6 +27,12 @@ Electronic Resource Management System Based on Linked Data Technologies.
 
 http://amsl.technology
 
+> Managing electronic resources has become a distinctive and important task for
+libraries in recent years. The diversity of resources, changing licensing
+policies and new business models of the publishers, consortial acquisition and
+modern web scale discovery technologies have turned the market place of
+scientific information into a complex and multidimensional construct.
+
 Config:
 
 [amsl]
@@ -54,10 +60,47 @@ from siskin.utils import SetEncoder
 class AMSLTask(DefaultTask):
     TAG = 'amsl'
 
+
 class AMSLService(AMSLTask):
     """
     Retrieve AMSL API response. Outbound: discovery, holdingsfiles,
     contentfiles, metadata_usage.
+
+    Example output (discovery):
+
+        [
+            {
+                "shardLabel": "SLUB-dbod",
+                "sourceID": "64",
+                "collectionLabel": "Perinorm – Datenbank für Normen und technische Regeln",
+                "productISIL": null,
+                "externalLinkToContentFile": null,
+                "contentFileLabel": null,
+                "contentFileURI": null,
+                "linkToContentFile": null,
+                "ISIL": "DE-105",
+                "evaluateHoldingsFileForLibrary": "no",
+                "holdingsFileLabel": null,
+                "holdingsFileURI": null,
+                "linkToHoldingsFile": null
+            },
+            {
+                "shardLabel": "SLUB-dbod",
+                "sourceID": "64",
+                "collectionLabel": "Perinorm – Datenbank für Normen und technische Regeln",
+                "productISIL": null,
+                "externalLinkToContentFile": null,
+                "contentFileLabel": null,
+                "contentFileURI": null,
+                "linkToContentFile": null,
+                "ISIL": "DE-14",
+                "evaluateHoldingsFileForLibrary": "no",
+                "holdingsFileLabel": null,
+                "holdingsFileURI": null,
+                "linkToHoldingsFile": null
+            },
+        ...
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
     name = luigi.Parameter(default='outboundservices:discovery',
@@ -75,6 +118,7 @@ class AMSLService(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True))
+
 
 class AMSLCollectionsShardFilter(AMSLTask):
     """
@@ -97,9 +141,18 @@ class AMSLCollectionsShardFilter(AMSLTask):
         }
         ....
 
+    Shard distribution as of January 2017:
+
+        $ taskcat AMSLService | jq -rc '.[] | .shardLabel' | sort | uniq -c | sort -nr
+        53493 UBL-ai
+         1121 UBL-main
+          245 SLUB-dswarm
+           19 SLUB-dbod
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
+    shard = luigi.Parameter(
+        default='UBL-ai', description='only collect items for this shard')
 
     def requires(self):
         return AMSLService(date=self.date, name='outboundservices:discovery')
@@ -117,9 +170,10 @@ class AMSLCollectionsShardFilter(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class AMSLCollectionsISILList(AMSLTask):
     """
-    A per-shard list of ISILs for which we get information from AMSL.
+    A per-shard list of ISILs for which AMSL has some information.
 
         DE-105
         DE-14
@@ -128,10 +182,10 @@ class AMSLCollectionsISILList(AMSLTask):
         DE-1972
         DE-540
         ...
-
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
+    shard = luigi.Parameter(
+        default='UBL-ai', description='only collect items for this shard')
 
     def requires(self):
         return AMSLService(date=self.date, name='outboundservices:discovery')
@@ -157,6 +211,7 @@ class AMSLCollectionsISILList(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class AMSLCollectionsISIL(AMSLTask):
     """
     Per ISIL list of collections.
@@ -174,6 +229,63 @@ class AMSLCollectionsISIL(AMSLTask):
             "International Association of Physical Chemists (IAPC) (CrossRef)",
             ...
 
+    Examples (Jan 2017):
+
+        $ taskcat AMSLCollectionsISIL --isil DE-Mit1 --shard SLUB-dbod | jq .
+        {
+            "64": [
+                "Perinorm – Datenbank für Normen und technische Regeln"
+            ]
+        }
+
+        $ taskcat AMSLCollectionsISIL --isil DE-14 --shard SLUB-dswarm | jq .
+        {
+            "83": [
+                "SLUB/Mediathek"
+            ],
+            "69": [
+                "Wiley ebooks"
+            ],
+            "105": [
+                "Springer Journals"
+            ],
+            "94": [
+                "Blackwell Publishing Journal Backfiles 1879-2005",
+                "China Academic Journals (CAJ) Archiv",
+                "Wiley InterScience Backfile Collections 1832-2005",
+                "Torrossa / Periodici",
+                "Cambridge Journals Digital Archive",
+                "Elsevier Journal Backfiles on ScienceDirect",
+                "Periodicals Archive Online",
+                "Emerald Fulltext Archive Database",
+                "Springer Online Journal Archives"
+            ],
+            "67": [
+                "SLUB/Deutsche Fotothek"
+            ]
+        }
+
+        $ taskcat AMSLCollectionsISIL --isil DE-15 --shard SLUB-dswarm | jq .
+        {
+            "68": [
+                "OLC SSG Medien- / Kommunikationswissenschaft",
+                "OLC SSG Film / Theater"
+            ],
+            "94": [
+                "Blackwell Publishing Journal Backfiles 1879-2005",
+                "China Academic Journals (CAJ) Archiv",
+                "Wiley InterScience Backfile Collections 1832-2005",
+                "Torrossa / Periodici",
+                "Cambridge Journals Digital Archive",
+                "Elsevier Journal Backfiles on ScienceDirect",
+                "Periodicals Archive Online",
+                "Emerald Fulltext Archive Database",
+                "Springer Online Journal Archives"
+            ],
+            "105": [
+                "Springer Journals"
+            ]
+        }
     """
     date = luigi.DateParameter(default=datetime.date.today())
     isil = luigi.Parameter(description='ISIL, case sensitive')
@@ -201,6 +313,7 @@ class AMSLCollectionsISIL(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
+
 class AMSLHoldingsFile(AMSLTask):
     """
     Access AMSL files/get?setResource= facilities.
@@ -208,6 +321,8 @@ class AMSLHoldingsFile(AMSLTask):
     The output is probably zipped (will be decompressed on the fly).
 
     One ISIL can have multiple files (they will be combined).
+
+    Output should be in standard KBART format, given the uploaded files in AMSL are KBART.
     """
     isil = luigi.Parameter(description='ISIL, case sensitive')
     date = luigi.Parameter(default=datetime.date.today())
@@ -221,33 +336,41 @@ class AMSLHoldingsFile(AMSLTask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
-        # The property which contains the URI of the holding file. Might change.
+        # The property which contains the URI of the holding file. Might
+        # change.
         urikey = 'DokumentURI'
 
         for holding in holdings:
             if holding["ISIL"] == self.isil:
 
                 if urikey not in holding:
-                    raise RuntimeError('possible AMSL API change, expected: %s, available keys: %s' % (urikey, holding.keys()))
+                    raise RuntimeError('possible AMSL API change, expected: %s, available keys: %s' % (
+                        urikey, holding.keys()))
 
                 # refs. #7142
                 if 'kbart' not in holding[urikey].lower():
-                    self.logger.debug("skipping non-KBART holding URI: %s", holding[urikey])
+                    self.logger.debug(
+                        "skipping non-KBART holding URI: %s", holding[urikey])
                     continue
 
-                link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), holding[urikey])
-                downloaded = shellout("curl --fail {link} > {output} ", link=link)
+                link = "%s%s" % (self.config.get(
+                    'amsl', 'uri-download-prefix'), holding[urikey])
+                downloaded = shellout(
+                    "curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
-                    shellout("unzip -p {input} >> {output}", input=downloaded, output=stopover)
+                    shellout("unzip -p {input} >> {output}",
+                             input=downloaded, output=stopover)
                 except zipfile.BadZipfile:
                     # at least the file is not a zip.
-                    shellout("cat {input} >> {output}", input=downloaded, output=stopover)
+                    shellout("cat {input} >> {output}",
+                             input=downloaded, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
 
 class AMSLOpenAccessISSNList(AMSLTask):
     """
@@ -255,6 +378,20 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
     For now, extract these ISSN from a special holding file, called
     KBART_FREEJOURNALS via AMSL.
+
+    Example (Jan 2017):
+
+        $ taskcat AMSLOpenAccessISSNList | head -10
+        0001-0944
+        0001-1843
+        0001-186X
+        0001-1983
+        0001-2114
+        0001-2211
+        0001-267X
+        0001-3714
+        0001-3757
+        0001-3765
     """
 
     date = luigi.Parameter(default=datetime.date.today())
@@ -284,24 +421,56 @@ class AMSLOpenAccessISSNList(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
+
 class AMSLBuckets(AMSLTask):
     """
     Assemble attachment configuration from AMSL.
 
+    Example (Jan 2017):
+
+        $ taskcat AMSLBuckets --shard UBL-main
         {
-          "DE-L229": {
-            "48": {
-              "holdings": [
-                "https://x.y.z/get?setResource=Dokument/KBART_FREEJOURNALS",
-                "https://x.y.z/get?setResource=Dokument/KBART_DEL229"
-              ],
-              "collections": [
-                "Genios (Wirtschaftswissenschaften)",
-                "Genios (Fachzeitschriften)"
-              ]
-            }
-          },
-          ...
+            "DE-291-114": {
+                "0": {
+                    "collections": [
+                        "Verbunddaten SWB"
+                    ]
+                }
+            },
+            "DE-D174": {
+                "0": {
+                    "collections": [
+                        "Verbunddaten SWB",
+                        "Sächsische Bibliografie"
+                    ]
+                }
+            },
+            "DE-Wim8": {
+                "21": {
+                    "collections": [
+                        "GBV Musikdigitalisate"
+                    ]
+                }
+            },
+            "DE-1989": {
+                "0": {
+                    "collections": [
+                        "SWB SSG UB Heidelberg",
+                        "Fachkatalog Technikgeschichte",
+                        "documenta Archiv Kassel",
+                        "Verbunddaten SWB",
+                        "SWB SSG SLUB Dresden",
+                        "American Space",
+                        "Sächsische Bibliografie"
+                    ]
+                },
+                "22": {
+                    "collections": [
+                        "Qucosa"
+                    ]
+            },
+            ...
+
     """
     date = luigi.Parameter(default=datetime.date.today())
     shard = luigi.Parameter(default='UBL-ai')
@@ -342,35 +511,134 @@ class AMSLBuckets(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
+
 class AMSLFilterConfig(AMSLTask):
     """
     Convert to filterconfig format. With a few
     hard-wired exceptions for various sources.
 
+    Example (Jan 2017):
+
+        $ taskcat AMSLFilterConfig --shard SLUB-dswarm | jq .
         {
-          "DE-L229": {
-            "or": [
-              {
-                "or": [
-                  {
-                    "and": [
-                      {
-                        "source": [
-                          "48"
+            "DE-1989":{
+                "or":[
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "115"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "Bibliographie Drawingbooks",
+                                "Bibliographie Glasmalerei",
+                                "Bibliographie Der Sturm",
+                                "Bibliographie Dürer",
+                                "Bibliographie Cranach",
+                                "Bibliographie Caricature & Comic",
+                                "Bibliographie Hieronymus Bosch",
+                                "Bibliographie FAKE"
+                            ]
+                        }
                         ]
-                      },
-                      {
-                        "package": [
-                          "Genios (Wirtschaftswissenschaften)"
+                    },
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "111"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "Volltexte aus dem Magazin \"Gebrauchsgraphik\"",
+                                "Volltexte aus Illustrierten Magazinen"
+                            ]
+                        }
                         ]
-                      },
-                      {
-                        "package": [
-                          "Genios (Fachzeitschriften)"
+                    },
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "65"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "Hamburger Kunsthalle",
+                                "Kunstbibliothek - Staatliche Museen zu Berlin"
+                            ]
+                        }
                         ]
-                      }
-                    ]
-                  },
+                    },
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "66"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "Heidelberger Bilddatenbank"
+                            ]
+                        }
+                        ]
+                    },
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "67"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "Künstler/Conart",
+                                "SLUB/Deutsche Fotothek"
+                            ]
+                        }
+                        ]
+                    },
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "68"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "OLC SSG Kunst / Kunstwissenschaft",
+                                "OLC SSG Architektur"
+                            ]
+                        }
+                        ]
+                    },
+                    {
+                        "and":[
+                        {
+                            "source":[
+                                "94"
+                            ]
+                        },
+                        {
+                            "collection":[
+                                "Blackwell Publishing Journal Backfiles 1879-2005",
+                                "Cambridge Journals Digital Archive",
+                                "Elsevier Journal Backfiles on ScienceDirect",
+                                "Periodicals Archive Online",
+                                "Torrossa / Periodici"
+                            ]
+                        }
+                        ]
+                    }
+                ]
+            }
+        }
         ...
 
     """
@@ -398,7 +666,8 @@ class AMSLFilterConfig(AMSLTask):
             if isil == 'DE-15-FID':
                 filterconfig[isil] = {
                     'and': [
-                        {'issn': {'url': self.config.get('amsl', 'fid-issn-list')}},
+                        {'issn': {'url': self.config.get(
+                            'amsl', 'fid-issn-list')}},
                         {'source': [sid for sid, _ in blob.items()]},
                     ]
                 }
@@ -427,7 +696,8 @@ class AMSLFilterConfig(AMSLTask):
                                 refterms.append({'not': {'package': [fzstag]}})
                                 refterms.append({'package': c})
 
-                    konjs[isil].append({'or': [{"and": fzsterms}, {"and": refterms}]})
+                    konjs[isil].append(
+                        {'or': [{"and": fzsterms}, {"and": refterms}]})
                     continue
 
                 # exception: if we have jstor content files, then do not use collections
