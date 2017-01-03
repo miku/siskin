@@ -70,6 +70,7 @@ from siskin.utils import URLCache
 
 
 class AITask(DefaultTask):
+    """ AI base task. """
     TAG = 'ai'
 
     def closest(self):
