@@ -27,11 +27,14 @@ PMMP. Poor man's man page.
 """
 
 from __future__ import print_function
+
+import sys
+
 from luigi.task import Register
+
 from siskin.benchmark import green, yellow
 from siskin.sources import *
 from siskin.workflows import *
-import sys
 
 if __name__ == '__main__':
     task_names = Register.task_names()

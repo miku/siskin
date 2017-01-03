@@ -32,15 +32,18 @@ Example outputs images: http://imgur.com/a/12Dag, http://i.imgur.com/8bFvSvN.gif
 """
 
 from __future__ import print_function
+
+import collections
+import sys
+
 from luigi.cmdline_parser import CmdlineParser
 from luigi.parameter import MissingParameterException
 from luigi.task import Register
 from luigi.task_register import TaskClassNotFoundException
-from siskin.utils import random_string
+
 from siskin.sources import *
+from siskin.utils import random_string
 from siskin.workflows import *
-import collections
-import sys
 
 # task -> deps graph
 g = collections.defaultdict(set)

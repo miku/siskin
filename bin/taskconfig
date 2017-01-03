@@ -23,8 +23,10 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 from __future__ import print_function
-from siskin.configuration import Config
+
 import StringIO
+
+from siskin.configuration import Config
 
 if __name__ == '__main__':
     output = StringIO.StringIO()

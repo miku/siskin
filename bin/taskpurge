@@ -35,12 +35,14 @@
 # * run you things as you usually do and expect higher latency during first run
 
 from __future__ import print_function
-from siskin.configuration import Config
+
 import ConfigParser
 import os
 import re
 import shutil
 import sys
+
+from siskin.configuration import Config
 
 # WHITELIST contains path segments, which must not be deleted. A simple string
 # comparison is done during purge time. No regexes. No globs.

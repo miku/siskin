@@ -27,13 +27,16 @@ Show task output, if it has a path.
 """
 
 from __future__ import print_function
-from luigi.cmdline_parser import CmdlineParser
-from luigi.parameter import MissingParameterException
-from luigi.task_register import TaskClassNotFoundException
-from siskin.utils import get_task_import_cache
+
 import importlib
 import os
 import sys
+
+from luigi.cmdline_parser import CmdlineParser
+from luigi.parameter import MissingParameterException
+from luigi.task_register import TaskClassNotFoundException
+
+from siskin.utils import get_task_import_cache
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
