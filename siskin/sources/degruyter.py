@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-DeGruyter task.
+DeGruyter tasks.
 
 [degruyter]
 
@@ -199,7 +199,7 @@ class DegruyterISSNList(DegruyterTask):
 
 
 class DegruyterDOIList(DegruyterTask):
-    """ A list of Degryter DOIs. """
+    """ A list of Degruyter DOIs. """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
