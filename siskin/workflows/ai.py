@@ -236,7 +236,7 @@ class AIIntermediateSchema(AITask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class AICheck(AITask):
+class AICheckStats(AITask):
     """
     Run quality check and gather error records.
     """
