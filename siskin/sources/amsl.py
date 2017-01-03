@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,E1101
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -106,10 +106,10 @@ class AMSLCollectionsShardFilter(AMSLTask):
 
     def run(self):
         with self.input().open() as handle:
-            c = json.load(handle)
+            doc = json.load(handle)
 
         with self.output().open('w') as output:
-            for item in c:
+            for item in doc:
                 if not item['shardLabel'] == self.shard:
                     continue
                 output.write(json.dumps(item) + "\n")
@@ -138,11 +138,11 @@ class AMSLCollectionsISILList(AMSLTask):
 
     def run(self):
         with self.input().open() as handle:
-            c = json.load(handle)
+            doc = json.load(handle)
 
         isils = set()
 
-        for item in c:
+        for item in doc:
             if not item['shardLabel'] == self.shard:
                 continue
             isils.add(item['ISIL'])
@@ -184,9 +184,9 @@ class AMSLCollectionsISIL(AMSLTask):
 
     def run(self):
         with self.input().open() as handle:
-            c = json.load(handle)
+            doc = json.load(handle)
         scmap = collections.defaultdict(set)
-        for item in c:
+        for item in doc:
             if not item['shardLabel'] == self.shard:
                 continue
             if not item['ISIL'] == self.isil:
@@ -232,17 +232,17 @@ class AMSLHoldingsFile(AMSLTask):
 
                 # refs. #7142
                 if 'kbart' not in holding[urikey].lower():
-                    self.logger.debug("skipping non-KBART holding URI: %s" % holding[urikey])
+                    self.logger.debug("skipping non-KBART holding URI: %s", holding[urikey])
                     continue
 
                 link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), holding[urikey])
                 downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
-                    output = shellout("unzip -p {input} >> {output}", input=downloaded, output=stopover)
+                    shellout("unzip -p {input} >> {output}", input=downloaded, output=stopover)
                 except zipfile.BadZipfile:
                     # at least the file is not a zip.
-                    output = shellout("cat {input} >> {output}", input=downloaded, output=stopover)
+                    shellout("cat {input} >> {output}", input=downloaded, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 

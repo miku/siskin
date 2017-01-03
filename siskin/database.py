@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,C0103
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -42,6 +42,7 @@ class sqlitedb(object):
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
+
     def __init__(self, path, timeout=5.0, detect_types=0):
         self.path = path
         self.conn = None
@@ -50,7 +51,8 @@ class sqlitedb(object):
         self.detect_types = detect_types
 
     def __enter__(self):
-        self.conn = sqlite3.connect(self.path, timeout=self.timeout, detect_types=self.detect_types)
+        self.conn = sqlite3.connect(
+            self.path, timeout=self.timeout, detect_types=self.detect_types)
         self.conn.text_factory = str
         self.cursor = self.conn.cursor()
         return self.cursor
@@ -58,6 +60,7 @@ class sqlitedb(object):
     def __exit__(self, exc_class, exc, traceback):
         self.conn.commit()
         self.conn.close()
+
 
 class mysqldb(object):
     """ Context manager for MySQL database access.
@@ -67,6 +70,7 @@ class mysqldb(object):
             result = query.fetchall()
 
     """
+
     def __init__(self, url, stream=False, commit_on_exit=False):
         result = urlparse.urlparse(url, scheme='mysql')
         self.hostname = result.hostname

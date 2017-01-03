@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,E1101
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -55,6 +55,7 @@ class ThiemeTask(DefaultTask):
     def closest(self):
         return weekly(date=self.date)
 
+
 class ThiemeCombine(ThiemeTask):
     """ Combine files."""
 
@@ -76,6 +77,7 @@ class ThiemeCombine(ThiemeTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
 
+
 class ThiemeIntermediateSchema(ThiemeTask):
     """
     Conv-oo-do-ert.
@@ -88,11 +90,13 @@ class ThiemeIntermediateSchema(ThiemeTask):
         return ThiemeCombine(date=self.date, prefix='tm', set=self.set)
 
     def run(self):
-        output = shellout("span-import -i thieme-tm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout(
+            "span-import -i thieme-tm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
 
 class ThiemeExport(ThiemeTask):
     """
@@ -102,7 +106,8 @@ class ThiemeExport(ThiemeTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     set = luigi.Parameter(default='journalarticles')
-    version = luigi.Parameter(default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+    version = luigi.Parameter(
+        default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
         return {
@@ -113,11 +118,13 @@ class ThiemeExport(ThiemeTask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('is').path)
-        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version)
+        output = shellout(
+            "span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 
 class ThiemeISSNList(ThiemeTask):
     """
@@ -131,8 +138,10 @@ class ThiemeISSNList(ThiemeTask):
 
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
-        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input(
+        ).get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input(
+        ).get('input').path, output=output)
         output = shellout("""sort -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 

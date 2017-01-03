@@ -35,6 +35,7 @@ from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
 logger = logging.getLogger('siskin')
 
+
 class Config(ConfigParser):
     """ Wrapper around /etc/siskin/siskin.ini
     """
@@ -49,6 +50,7 @@ class Config(ConfigParser):
 
     @classmethod
     def add_config_path(cls, path):
+        """ Append config path. """
         cls._config_paths.append(path)
         cls._instance.reload()
 
@@ -62,6 +64,7 @@ class Config(ConfigParser):
         return cls._instance
 
     def reload(self):
+        """ Reload configuration. """
         return self._instance.read(self._config_paths)
 
     def _get_with_default(self, method, section, option, default, expected_type=None):
@@ -73,10 +76,10 @@ class Config(ConfigParser):
             return method(self, section, option)
         except (NoOptionError, NoSectionError) as err:
             if default is Config.NO_DEFAULT:
-                logger.error('invalid or missing configuration: %s' % err)
+                logger.error('invalid or missing configuration: %s', err)
                 sys.exit(1)
             if expected_type is not None and default is not None and not isinstance(default, expected_type):
-                logger.error('invalid or missing configuration: %s' % err)
+                logger.error('invalid or missing configuration: %s', err)
                 sys.exit(1)
             return default
 

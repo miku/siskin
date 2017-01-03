@@ -57,13 +57,15 @@ class JstorTask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
+
 class JstorPaths(JstorTask):
     """
     Sync.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('jstor', 'ftp-host'),
@@ -78,6 +80,7 @@ class JstorPaths(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class JstorMembers(JstorTask):
     """
@@ -95,7 +98,7 @@ class JstorMembers(JstorTask):
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 if not row.path.endswith('.zip'):
-                    self.logger.debug('skipping: %s' % row.path)
+                    self.logger.debug('skipping: %s', row.path)
                     continue
                 shellout(""" unzip -l {input} | LC_ALL=C grep "xml$" | LC_ALL=C awk '{{print "{input}\t"$4}}' | LC_ALL=C sort >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
@@ -103,6 +106,7 @@ class JstorMembers(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class JstorLatestMembers(JstorTask):
     """
@@ -130,6 +134,7 @@ class JstorLatestMembers(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class JstorXML(JstorTask):
     """
     Create a snapshot of the latest data.
@@ -145,18 +150,21 @@ class JstorXML(JstorTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
-            groups = itertools.groupby(handle.iter_tsv(cols=('archive', 'member')), lambda row: row.archive)
+            groups = itertools.groupby(handle.iter_tsv(
+                cols=('archive', 'member')), lambda row: row.archive)
             for archive, items in groups:
                 for chunk in nwise(items, n=self.batch):
-                    margs = " ".join(["'%s'" % item.member.replace('[', r'\[').replace(']', r'\]') for item in chunk])
+                    margs = " ".join(["'%s'" % item.member.replace(
+                        '[', r'\[').replace(']', r'\]') for item in chunk])
                     shellout("""unzip -p {archive} {members} |
                                 sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
-                                archive=archive, members=margs, output=stopover)
+                             archive=archive, members=margs, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
+
 
 class JstorIntermediateSchema(JstorTask):
     """
@@ -166,8 +174,10 @@ class JstorIntermediateSchema(JstorTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': JstorXML(date=self.date)}
+        return {
+            'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+            'file': JstorXML(date=self.date)
+        }
 
     @timed
     def run(self):
@@ -177,6 +187,7 @@ class JstorIntermediateSchema(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 
 class JstorExport(JstorTask):
     """
@@ -194,7 +205,8 @@ class JstorExport(JstorTask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+        output = shellout(
+            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -203,6 +215,7 @@ class JstorExport(JstorTask):
             'formeta': 'form.gz',
         }
         return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+
 
 class JstorISSNList(JstorTask):
     """
@@ -216,13 +229,16 @@ class JstorISSNList(JstorTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout(
+            """jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout(
+            """jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class JstorDOIList(JstorTask):
     """

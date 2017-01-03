@@ -42,20 +42,24 @@ class MHLibraryTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+
 class MHLibraryHarvest(MHLibraryTask):
     """
     Harvest.
     """
-    endpoint = luigi.Parameter(default='http://cdm15759.contentdm.oclc.org/oai/oai.php', significant=False)
+    endpoint = luigi.Parameter(
+        default='http://cdm15759.contentdm.oclc.org/oai/oai.php', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
-        output = shellout("""metha-cat -root Records "{endpoint}" > {output}""", endpoint=self.endpoint)
+        output = shellout(
+            """metha-cat -root Records "{endpoint}" > {output}""", endpoint=self.endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
 
 class MHLibraryIntermediateSchema(MHLibraryTask):
     """
@@ -75,7 +79,8 @@ class MHLibraryIntermediateSchema(MHLibraryTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
-    
+
+
 class MHLibraryFincSolr(MHLibraryTask):
     """
     Export to finc solr schema by using span-export.
@@ -84,17 +89,18 @@ class MHLibraryFincSolr(MHLibraryTask):
     format = luigi.Parameter(default='solr5vu3', description='export format')
     isil = luigi.Parameter(default='DE-15-FID', description='isil FID')
     date = ClosestDateParameter(default=datetime.date.today())
-    
+
     def requires(self):
         return {
             'file': MHLibraryIntermediateSchema(date=self.date)
         }
-    
+
     def run(self):
         output = shellout("""span-export -o {format} <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
-                 format=self.format, isil=self.isil, input=self.input().get('file').path)
-        output = shellout("""cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+                          format=self.format, isil=self.isil, input=self.input().get('file').path)
+        output = shellout(
+            """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
-    
+
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj'))

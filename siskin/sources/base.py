@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,E1101
 
 # Copyright 2016 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -33,7 +33,6 @@ BASE.
 """
 
 import datetime
-import tempfile
 
 import luigi
 

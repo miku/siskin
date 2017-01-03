@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,E1101
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -33,6 +33,16 @@ from siskin.task import DefaultTask
 
 
 class DBLPTask(DefaultTask):
+    """
+    DBLP is a computer science bibliography website. Starting in 1993 at the
+    University of Trier, Germany, it grew from a small collection of HTML
+    files[1] and became an organization hosting a database and logic
+    programming bibliography site. DBLP listed more than 3.4 million journal
+    articles, conference papers, and other publications on computer science in
+    July 2016, up from about 14,000 in 1995.[2] All important journals on
+    computer science are tracked. Proceedings papers of many conferences are
+    also tracked. It is mirrored at three sites across the Internet
+    """
     TAG = 'dblp'
 
     def closest(self):

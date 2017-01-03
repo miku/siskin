@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,C0330,W0622,E1101
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -54,7 +54,6 @@ import luigi
 import requests
 
 import elasticsearch
-import siskin
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
@@ -62,7 +61,6 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
-from siskin.sources.degruyter import DegruyterDOIList
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin, URLCache
 
@@ -131,20 +129,20 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                         content = json.loads(body)
                     except ValueError as err:
                         if attempt == self.attempts - 1:
-                            self.logger.debug('URL was %s' % url)
+                            self.logger.debug('URL was %s', url)
                             self.logger.debug(err)
                             self.logger.debug(body[:100] + '...')
                             raise
 
                         cache_file = cache.get_cache_file(url)
                         if os.path.exists(cache_file):
-                            self.logger.debug('trying to recover by removing cached entry at %s' % cache_file)
+                            self.logger.debug('trying to recover by removing cached entry at %s', cache_file)
                             os.remove(cache_file)
                     else:
                         break # all fine
 
                 count = len(content['message']['items'])
-                self.logger.debug("%s: %s" % (url, count))
+                self.logger.debug("%s: %s", url, count)
                 if count == 0:
                     break
 
@@ -202,7 +200,7 @@ class CrossrefHarvestChunk(CrossrefTask):
                         content = json.loads(body)
                     except ValueError as err:
                         if attempt == self.attempts - 1:
-                            self.logger.debug("URL was %s" % url)
+                            self.logger.debug("URL was %s", url)
                             self.logger.debug(err)
                             self.logger.debug(body[:100])
                             raise
@@ -212,7 +210,7 @@ class CrossrefHarvestChunk(CrossrefTask):
                     else:
                         break
                 items = content["message"]["items"]
-                self.logger.debug("%s: %s" % (url, len(items)))
+                self.logger.debug("%s: %s", url, len(items))
                 if len(items) == 0:
                     break
                 output.write(body + "\n")
@@ -356,8 +354,7 @@ class CrossrefDOITable(CrossrefTask):
             TMPDIR={tmpdir} LC_ALL=C sort -k2,2 -S25% <(TMPDIR={tmpdir} unpigz -c {input}) |
             TMPDIR={tmpdir} tac |
             TMPDIR={tmpdir} LC_ALL=C sort -S25% -u -k3,3 |
-            pigz -c > {output}""", tmpdir=self.config.get('core', 'tempdir'),
-            input=self.input().path)
+            pigz -c > {output}""", tmpdir=self.config.get('core', 'tempdir'), input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -385,7 +382,7 @@ class CrossrefDOITableClean(CrossrefTask):
 
         # do not fail even, if file is configured but missing
         if not os.path.exists(filepath):
-            self.logger.warn('crossref DOI blacklist configured, but file is missing: %s' % filepath)
+            self.logger.warn('crossref DOI blacklist configured, but file is missing: %s', filepath)
             self.input().copy(self.output().path)
             return
 
@@ -457,10 +454,10 @@ class CrossrefUniqItems(CrossrefTask):
                 if previous_filename and previous_filename != filename:
                     _, tmp = tempfile.mkstemp(prefix='siskin-')
                     with luigi.LocalTarget(tmp, format=TSV).open('w') as handle:
-                        for ln in linenumbers:
-                            handle.write_tsv(ln)
+                        for lno in linenumbers:
+                            handle.write_tsv(lno)
 
-                    self.logger.info("filtering out %s lines" % len(linenumbers))
+                    self.logger.info("filtering out %s lines", len(linenumbers))
 
                     input = shellout("unpigz -c {file} > {output}", file=previous_filename)
                     shellout("filterline {lines} {input} | pigz -c >> {output}",
@@ -469,7 +466,7 @@ class CrossrefUniqItems(CrossrefTask):
                     try:
                         os.remove(tmp)
                         os.remove(input)
-                    except Exception as err:
+                    except OSError as err:
                         self.logger.warning(err)
 
                     linenumbers = []
@@ -490,8 +487,10 @@ class CrossrefIntermediateSchema(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-       return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-               'file': CrossrefUniqItems(begin=self.begin, date=self.date)}
+        return {
+            'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+            'file': CrossrefUniqItems(begin=self.begin, date=self.date)
+        }
 
     @timed
     def run(self):
@@ -729,7 +728,7 @@ class CrossrefHarvestGeneric(CrossrefTask):
                         content = json.loads(body)
                     except ValueError as err:
                         if attempt == 2:
-                            self.logger.debug("URL was %s" % url)
+                            self.logger.debug("URL was %s", url)
                             self.logger.debug(err)
                             self.logger.debug(body[:100])
                             raise
@@ -739,7 +738,7 @@ class CrossrefHarvestGeneric(CrossrefTask):
                     else:
                         break
                 items = content["message"]["items"]
-                self.logger.debug("%s: %s" % (url, len(items)))
+                self.logger.debug("%s: %s", url, len(items))
                 if len(items) == 0:
                     break
                 output.write(body)
@@ -825,9 +824,9 @@ class CrossrefDOIBlacklist(CrossrefTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("""LC_ALL=C zgrep -E "http(s)?://.*.crossref.org" {input} >> {output}""",
-             input=self.input().path, output=stopover)
+                 input=self.input().path, output=stopover)
         shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
-             input=self.input().path, output=stopover)
+                 input=self.input().path, output=stopover)
         output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 

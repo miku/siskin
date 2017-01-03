@@ -42,23 +42,26 @@ class SSOARTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+
 class SSOARHarvest(SSOARTask):
     """
     Harvest.
     """
     format = luigi.Parameter(default="marcxml", significant=False)
-    endpoint = luigi.Parameter(default='http://www.ssoar.info/OAIHandler/request', significant=False)
+    endpoint = luigi.Parameter(
+        default='http://www.ssoar.info/OAIHandler/request', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint,
-                format=self.format)
+                 format=self.format)
         output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""", endpoint=self.endpoint,
                           format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
 
 class SSOARIntermediateSchema(SSOARTask):
     """
@@ -79,6 +82,7 @@ class SSOARIntermediateSchema(SSOARTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+
 class SSOARFincSolr(SSOARTask):
     """
     Export to finc solr schema by using span-export.
@@ -86,17 +90,18 @@ class SSOARFincSolr(SSOARTask):
     """
     format = luigi.Parameter(default='solr5vu3', description='export format')
     date = ClosestDateParameter(default=datetime.date.today())
-    
+
     def requires(self):
         return {
             'file': SSOARIntermediateSchema(date=self.date)
         }
-    
+
     def run(self):
         output = shellout("""span-export -o {format} {input} > {output}""",
-                 format=self.format, input=self.input().get('file').path)
-        output = shellout("""cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+                          format=self.format, input=self.input().get('file').path)
+        output = shellout(
+            """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
-    
+
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj'))

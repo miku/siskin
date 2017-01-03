@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,E1101,C0103
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -76,6 +76,7 @@ class AITask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
+
 class AIDOIStats(AITask):
     """
     DOI overlaps.
@@ -103,10 +104,12 @@ class AIDOIStats(AITask):
             for k1, k2 in itertools.combinations(self.input().keys(), 2):
                 s1 = loadset(self.input().get(k1))
                 s2 = loadset(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+                output.write_tsv(k1, k2, len(s1), len(s2),
+                                 len(s1.intersection(s2)))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIISSNStats(AITask):
     """ Match ISSN lists. """
@@ -133,10 +136,12 @@ class AIISSNStats(AITask):
             for k1, k2 in itertools.combinations(self.input().keys(), 2):
                 s1 = loadset(self.input().get(k1))
                 s2 = loadset(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+                output.write_tsv(k1, k2, len(s1), len(s2),
+                                 len(s1.intersection(s2)))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIISSNOverlaps(AITask):
     """ Match ISSN lists. """
@@ -153,6 +158,8 @@ class AIISSNOverlaps(AITask):
     @timed
     def run(self):
         def loadset(target):
+            """ Given a luigi.Target, open it, read it, and add each line to a set.
+            """
             s = set()
             with target.open() as handle:
                 for row in handle.iter_tsv(cols=('issn',)):
@@ -168,6 +175,7 @@ class AIISSNOverlaps(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIISSNList(AITask):
     """
@@ -189,7 +197,8 @@ class AIISSNList(AITask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for _, target in self.input().items():
-            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output, pipefail=True)
+            shellout("cat {input} | grep -v null >> {output}",
+                     input=target.path, output=output, pipefail=True)
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -220,11 +229,13 @@ class AIIntermediateSchema(AITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input()[1:]:
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 
 class AICheck(AITask):
     """
@@ -237,11 +248,13 @@ class AICheck(AITask):
 
     @timed
     def run(self):
-        output = shellout("span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+        output = shellout(
+            "span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 
 class AICheckStats(AITask):
     """
@@ -254,11 +267,13 @@ class AICheckStats(AITask):
 
     @timed
     def run(self):
-        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path, pipefail=True)
+        output = shellout(
+            "unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path, pipefail=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='txt'))
+
 
 class AIRedact(AITask):
     """
@@ -272,11 +287,13 @@ class AIRedact(AITask):
     @timed
     def run(self):
         """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
-        output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
+        output = shellout(
+            "span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path, pipefail=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 
 class AILicensing(AITask):
     """
@@ -298,6 +315,7 @@ class AILicensing(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+
 class AILocalData(AITask):
     """
     Extract a CSV about source, id, doi and institutions for deduplication.
@@ -313,7 +331,7 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | jq -r '[
+        output = shellout("""unpigz - c {input} | jq - r '[
             .["finc.record_id"],
             .["finc.source_id"],
             .["doi"],
@@ -322,6 +340,7 @@ class AILocalData(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
+
 
 class AIInstitutionChanges(AITask):
     """
@@ -334,11 +353,13 @@ class AIInstitutionChanges(AITask):
         return AILocalData(date=self.date)
 
     def run(self):
-        output = shellout("""groupcover -prefs '85 55 89 60 50 49 28 48' < {input} > {output}""", input=self.input().path)
+        output = shellout(
+            """groupcover -prefs '85 55 89 60 50 49 28 48' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIIntermediateSchemaDeduplicated(AITask):
     """
@@ -360,14 +381,15 @@ class AIIntermediateSchemaDeduplicated(AITask):
         updates = {}
 
         # First column is the ID, 4th to the end are the ISILs.
-        output = shellout("cut -d, -f1,4- {changes} > {output}", changes=self.input().get('changes').path)
+        output = shellout(
+            "cut -d, -f1,4- {changes} > {output}", changes=self.input().get('changes').path)
         with open(output) as handle:
             for line in handle:
                 fields = [s.strip() for s in line.split(',')]
                 updates[fields[0]] = fields[1:]
 
         os.remove(output)
-        self.logger.debug('%s changes staged' % len(updates))
+        self.logger.debug('%s changes staged', len(updates))
 
         with self.input().get('file').open() as handle:
             with self.output().open('w') as output:
@@ -377,27 +399,12 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
                     if identifier in updates:
                         doc['x.labels'] = updates[identifier]
-                    
+
                     output.write(json.dumps(doc) + '\n')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
-class AIDuplicatesSortbyDOI(AITask):
-    """
-    Sort list by DOI.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return AIDuplicates(date=self.date)
-
-    def run(self):
-        output = shellout("""LC_ALL=C sort -t , -k2,2 -S35% {input} > {output} """, input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class AIExport(AITask):
     """
@@ -410,15 +417,17 @@ class AIExport(AITask):
         return AIIntermediateSchemaDeduplicated(date=self.date)
 
     def run(self):
-	output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout(
+            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	extensions = {
-	    'solr5vu3': 'ldj.gz',
-	    'formeta': 'form.gz',
-	}
-	return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+        extensions = {
+            'solr5vu3': 'ldj.gz',
+            'formeta': 'form.gz',
+        }
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+
 
 class AIUpdate(AITask, luigi.WrapperTask):
     """
@@ -431,6 +440,7 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
     def output(self):
         return self.input()
+
 
 class AICoverageISSN(AITask):
     """
@@ -479,7 +489,8 @@ class AICoverageISSN(AITask):
                 if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[2]):
                     issns['file'].add(fields[2])
 
-        sources = ['crossref', 'jstor', 'degruyter', 'doaj', 'gbi', 'elsevierjournals', 'thieme']
+        sources = ['crossref', 'jstor', 'degruyter',
+                   'doaj', 'gbi', 'elsevierjournals', 'thieme']
 
         for source in sources:
             with self.input().get(source).open() as handle:
@@ -499,6 +510,7 @@ class AICoverageISSN(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIISSNCoverageCatalogMatches(AITask):
     """
@@ -523,7 +535,8 @@ class AIISSNCoverageCatalogMatches(AITask):
         if not self.isil == 'DE-15':
             raise RuntimeError('not implemented except for DE-15')
 
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(
+            tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         cache.sess.mount('http://', adapter)
 
@@ -535,23 +548,28 @@ class AIISSNCoverageCatalogMatches(AITask):
                         self.logger.info('fetch #%05d: %s' % (i, link))
                         body = cache.get(link)
                         if 'Keine Ergebnisse!' in body:
-                            output.write_tsv(row.issn, 'ERR_NOT_IN_CATALOG', link)
+                            output.write_tsv(
+                                row.issn, 'ERR_NOT_IN_CATALOG', link)
                         else:
                             soup = BeautifulSoup(body)
-                            rs = soup.findAll("div", {"class" : "floatleft"})
+                            rs = soup.findAll("div", {"class": "floatleft"})
                             if len(rs) == 0:
                                 output.write_tsv(row.issn, 'ERR_LAYOUT', link)
                                 continue
                             first = rs[0]
-                            match = re.search(r'Treffer([0-9]+)-([0-9]+)von([0-9]+)', first.text)
+                            match = re.search(
+                                r'Treffer([0-9]+)-([0-9]+)von([0-9]+)', first.text)
                             if match:
                                 total = match.group(3)
-                                output.write_tsv(row.issn, 'FOUND_RESULTS_%s' % total, link)
+                                output.write_tsv(
+                                    row.issn, 'FOUND_RESULTS_%s' % total, link)
                             else:
-                                output.write_tsv(row.issn, 'ERR_NO_MATCH', link)
+                                output.write_tsv(
+                                    row.issn, 'ERR_NO_MATCH', link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class AIISSNCoverageSolrMatches(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
@@ -561,57 +579,41 @@ class AIISSNCoverageSolrMatches(AITask):
         return AICoverageISSN(date=self.date, isil=self.isil)
 
     def run(self):
-        if not self.isil == 'DE-15':
+        if self.isil != 'DE-15':
             raise RuntimeError('not implemented except for DE-15')
 
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(
+            tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         cache.sess.mount('http://', adapter)
 
         finc = self.config.get('ai', 'finc-solr')
         ai = self.config.get('ai', 'ai-solr')
 
+        def numFound(link):
+            """ Given a SOLR query URL, return the number of docs found. """
+            body = cache.get(link)
+            content = json.loads(body)
+            return content['response']['numFound']
+
         with self.input().open() as handle:
             with self.output().open('w') as output:
                 for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
                     if row.status == 'NOT_FOUND':
-                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (finc, self.isil, row.issn)
-                        self.logger.info('fetch #%05d: %s' % (i, link))
-                        body = cache.get(link)
-                        content = json.loads(body)
-                        output.write_tsv('finc', row.issn, content['response']['numFound'], link)
+                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (
+                            finc, self.isil, row.issn)
+                        self.logger.info('fetch #%05d: %s', i, link)
+                        output.write_tsv('finc', row.issn,
+                                         numFound(link), link)
                     else:
-                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (ai, self.isil, row.issn)
-                        self.logger.info('fetch #%05d: %s' % (i, link))
-                        body = cache.get(link)
-                        content = json.loads(body)
-                        output.write_tsv('ai', row.issn, content['response']['numFound'], link)
+                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (
+                            ai, self.isil, row.issn)
+                        self.logger.info('fetch #%05d: %s', i, link)
+                        output.write_tsv('ai', row.issn, numFound(link), link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class AIISSNDetailedCoverageReport(AITask):
-    """
-    Detailed coverage report with Pandas (local dependency).
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(default='DE-15')
-
-    def requires(self):
-        return AIISSNCoverageSolrMatches(date=self.date, isil=self.isil)
-
-    def run(self):
-        import pandas as pd
-
-        metrics = collections.defaultdict(dict)
-        df = pd.read_csv(self.input().path, sep='\t', names=['shard', 'issn', 'count'], usecols=[0, 1, 2])
-
-        # number of articles per shard
-        metrics['sum']['finc'] = sum(df[df.shard == 'finc']['count'])
-        metrics['sum']['ai'] = sum(df[df.shard == 'ai']['count'])
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class AIApplyOpenAccessFlag(AITask):
     """
@@ -650,7 +652,6 @@ class AIApplyOpenAccessFlag(AITask):
                             doc["x.oa"] = True
 
                     output.write(json.dumps(doc) + "\n")
-
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)

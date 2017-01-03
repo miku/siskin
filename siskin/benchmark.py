@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C301
+# pylint: disable=C301,C0103,W0201
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -39,6 +39,7 @@ from timeit import default_timer
 
 logger = logging.getLogger('gluish')
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -49,14 +50,21 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def red(s):
+    """ Color string red. """
     return bcolors.FAIL + s + bcolors.ENDC
 
+
 def yellow(s):
+    """ Color string yellow. """
     return bcolors.WARNING + s + bcolors.ENDC
 
+
 def green(s):
+    """ Color string green. """
     return bcolors.OKGREEN + s + bcolors.ENDC
+
 
 class Timer(object):
     """ A timer as a context manager. """
@@ -72,12 +80,12 @@ class Timer(object):
         self.yellow = yellow
 
     def __enter__(self):
-        self.start = self.timer() # measure start time
+        self.start = self.timer()  # measure start time
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        self.end = self.timer() # measure end time
-        self.elapsed_s = self.end - self.start # elapsed time, in seconds
+        self.end = self.timer()  # measure end time
+        self.elapsed_s = self.end - self.start  # elapsed time, in seconds
         self.elapsed_ms = self.elapsed_s * 1000  # elapsed time, in milliseconds
 
 

@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301,C0103,W0614,W0401
+# pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301,C0103,W0614,W0401,E0202
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -52,10 +52,13 @@ from siskin import __version__
 
 class SetEncoder(json.JSONEncoder):
     """ Helper to encode python sets into JSON lists. """
+
     def default(self, obj):
+        """ Decorate call to standard implementation. """
         if isinstance(obj, set):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
+
 
 def date_range(start_date, end_date, increment, period):
     """
@@ -64,11 +67,12 @@ def date_range(start_date, end_date, increment, period):
     """
     result = []
     nxt = start_date
-    delta = relativedelta.relativedelta(**{period:increment})
+    delta = relativedelta.relativedelta(**{period: increment})
     while nxt <= end_date:
         result.append(nxt)
         nxt += delta
     return result
+
 
 def iterfiles(directory='.', fun=None):
     """
@@ -77,18 +81,20 @@ def iterfiles(directory='.', fun=None):
     """
     if fun is None:
         fun = lambda path: True
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
         for f in files:
             path = os.path.join(root, f)
             if fun(path):
                 yield path
 
+
 def random_string(length=16):
     """
-    Return a random string (upper and lowercase letters) of length `length`,
+    Return a random string(upper and lowercase letters) of length `length`,
     defaults to 16.
     """
     return ''.join(random.choice(string.letters) for _ in range(length))
+
 
 def pairwise(obj):
     """ Iterator over a iterable in steps of two. """
@@ -98,7 +104,7 @@ def pairwise(obj):
 
 def nwise(iterable, n=2):
     """
-    Generalized :func:`pairwise`.
+    Generalized: func: `pairwise`.
     Split an iterable after every `n` items.
     """
     i = iter(iterable)
@@ -107,45 +113,49 @@ def nwise(iterable, n=2):
         yield piece
         piece = tuple(itertools.islice(i, n))
 
+
 def get_task_import_cache():
     """
     Load `taskname: modulename` mappings from dictionary. Return a tuple containing
     the dictionary and the path to the cache file.
     """
     task_import_cache = None
-    path = os.path.join(tempfile.gettempdir(), 'siskin_task_import_cache_%s' % __version__)
+    path = os.path.join(tempfile.gettempdir(),
+                        'siskin_task_import_cache_%s' % __version__)
     if not os.path.exists(path):
-        from cacheutils import _write_task_import_cache
+        from siskin.cacheutils import _write_task_import_cache
         _write_task_import_cache(path)
 
     with open(path) as handle:
         try:
             task_import_cache = json.load(handle)
         except Exception as err:
-            print("failed load task import cache, try removing %s and then try again" % path, file=sys.stderr)
+            print("failed load task import cache, try removing %s and then try again" %
+                  path, file=sys.stderr)
             sys.exit(1)
 
     return task_import_cache, path
 
+
 class URLCache(object):
     """
-    A simple URL *content* cache. Stores everything on the filesystem. Content
+    A simple URL * content * cache. Stores everything on the filesystem. Content
     is first written to a temporary file and then renamed. With concurrent
     requests for the same URL, the last one wins. Raises exception on any HTTP
     status >= 400. Retries supported.
 
-    >>> cache = URLCache()
-    >>> cache.get_cache_file("https://www.google.com")
-    /tmp/ef/7e/fc/ef7efc9839c3ee036f023e9635bc3b056d6ee2d
+    >> > cache = URLCache()
+    >> > cache.get_cache_file("https://www.google.com")
+    /tmp / ef / 7e / fc / ef7efc9839c3ee036f023e9635bc3b056d6ee2d
 
-    >>> cache.is_cached("https://www.google.com")
+    >> > cache.is_cached("https://www.google.com")
     False
 
-    >>> page = cache.get("https://www.google.com")
-    >>> page[:15]
+    >> > page = cache.get("https://www.google.com")
+    >> > page[:15]
     '<!doctype html>'
 
-    >>> cache.is_cached("https://www.google.com")
+    >> > cache.is_cached("https://www.google.com")
     True
     """
 
@@ -206,6 +216,7 @@ class URLCache(object):
 
         with open(self.get_cache_file(url)) as handle:
             return handle.read()
+
 
 class ElasticsearchMixin(luigi.Task):
     """ A small mixin for tasks that require an ES connection. """

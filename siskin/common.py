@@ -46,6 +46,7 @@ class CommonTask(DefaultTask):
     """
     TAG = 'common'
 
+
 class Directory(luigi.Task):
     """ Create directory or fail. """
     path = luigi.Parameter(description='directory to create')
@@ -63,6 +64,7 @@ class Directory(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.path)
 
+
 class FTPMirror(CommonTask):
     """
     A generic FTP directory sync. Required lftp (http://lftp.yar.ru/).
@@ -76,8 +78,10 @@ class FTPMirror(CommonTask):
     base = luigi.Parameter(default='.')
     indicator = luigi.Parameter(default=random_string())
     max_retries = luigi.IntParameter(default=5, significant=False)
-    timeout = luigi.IntParameter(default=10, significant=False, description='timeout in seconds')
-    exclude_glob = luigi.Parameter(default="", significant=False, description='globs to exclude')
+    timeout = luigi.IntParameter(
+        default=10, significant=False, description='timeout in seconds')
+    exclude_glob = luigi.Parameter(
+        default="", significant=False, description='globs to exclude')
 
     def requires(self):
         return Executable(name='lftp', message='http://lftp.yar.ru/')
@@ -121,7 +125,7 @@ class FTPMirror(CommonTask):
 
         with self.output().open('w') as output:
             for path in iterfiles(target):
-                self.logger.debug("Mirrored: %s" % path)
+                self.logger.debug("Mirrored: %s", path)
                 output.write_tsv(path)
 
     def output(self):

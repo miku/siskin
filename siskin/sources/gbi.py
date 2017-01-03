@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301
+# pylint: disable=C0301,E1101
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -23,6 +23,11 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
+
+DEPRECATED. Newer, leaner workflow in module gbi.
+
+--------
+
 GBI publisher.
 
 Workflow sketch:
@@ -95,6 +100,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import Executable
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder, iterfiles
 
@@ -127,6 +133,7 @@ DUMP = {
     "date": datetime.date(2015, 11, 1),
 }
 
+
 class GBITask(DefaultTask):
     """
     GBI task.
@@ -140,6 +147,7 @@ class GBITask(DefaultTask):
         """ Update weekly. """
         return weekly(self.date)
 
+
 class GBIDropbox(GBITask):
     """
     Pull down GBI dropbox content.
@@ -152,7 +160,8 @@ class GBIDropbox(GBITask):
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
-                 rsync_options=self.config.get('gbi', 'rsync-options', '-avzP'),
+                 rsync_options=self.config.get(
+                     'gbi', 'rsync-options', '-avzP'),
                  src=self.config.get('gbi', 'scp-src'), target=target)
 
         if not os.path.exists(self.taskdir()):
@@ -165,13 +174,15 @@ class GBIDropbox(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+
 class GBIDump(GBITask):
     """
     List of GBI dump nested zips relative to the GBIDropbox taskdir.
 
     Note: Different for fulltext or references.
     """
-    kind = luigi.Parameter(default='fulltext', description='fulltext or references')
+    kind = luigi.Parameter(
+        default='fulltext', description='fulltext or references')
 
     def requires(self):
         return GBIDropbox()
@@ -180,7 +191,8 @@ class GBIDump(GBITask):
         dropbox = GBIDropbox()
         with self.output().open('w') as output:
             if self.kind not in DUMP.get('files'):
-                raise RuntimeError('no such fileset: %s, available: %s' % (self.kind, DUMP.get('files')))
+                raise RuntimeError('no such fileset: %s, available: %s' % (
+                    self.kind, DUMP.get('files')))
             files = DUMP['files'][self.kind]
             for path in files:
                 abspath = os.path.join(dropbox.taskdir(), path)
@@ -188,6 +200,7 @@ class GBIDump(GBITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
 
 class GBIDumpDatabaseList(GBITask):
     """
@@ -214,13 +227,15 @@ class GBIDumpDatabaseList(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIDumpXML(GBITask):
     """
     Extract a single Database from a dump file.
 
     Note: DB can be fulltext or references.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
@@ -248,7 +263,8 @@ class GBIDumpXML(GBITask):
                 pass
             return
 
-        dbzip = shellout("7z x -so {archive} {db}.zip 2> /dev/null > {output}", archive=archive, db=self.db)
+        dbzip = shellout(
+            "7z x -so {archive} {db}.zip 2> /dev/null > {output}", archive=archive, db=self.db)
         output = shellout("""unzip -p {dbzip} \*.xml 2> /dev/null |
                              iconv -f iso-8859-1 -t utf-8 |
                              LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
@@ -261,11 +277,13 @@ class GBIDumpXML(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
+
 class GBIDumpIntermediateSchema(GBITask):
     """
     Convert dump XML for DB into IS.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
     db = luigi.Parameter(description='name of the database to extract')
 
     def requires(self):
@@ -277,11 +295,13 @@ class GBIDumpIntermediateSchema(GBITask):
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().get('file').path, output=stopover)
+        shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}",
+                 input=self.input().get('file').path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 
 class GBIUpdateList(GBITask):
     """
@@ -289,7 +309,8 @@ class GBIUpdateList(GBITask):
 
     Note: Different for fulltext or references.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -313,6 +334,7 @@ class GBIUpdateList(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
+
 class GBIUpdateDatabaseList(GBITask):
     """
     A list of databases contained in the updates. New databases might be added
@@ -320,7 +342,8 @@ class GBIUpdateDatabaseList(GBITask):
 
     Note: Different for fulltext or references.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -333,11 +356,13 @@ class GBIUpdateDatabaseList(GBITask):
             for row in handle.iter_tsv(cols=('path',)):
                 shellout(""" unzip -p {input} | grep -o 'DB="[^"]*' | sed -e 's/DB="//g' >> {output} """,
                          input=row.path, output=stopover)
-        output = shellout("sort -u {input} > {output} && rm {input}", input=stopover)
+        output = shellout(
+            "sort -u {input} > {output} && rm {input}", input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class GBIDatabaseList(GBITask):
     """
@@ -345,7 +370,8 @@ class GBIDatabaseList(GBITask):
 
     Note: Different for fulltext or references.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -362,13 +388,15 @@ class GBIDatabaseList(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIDatabaseType(GBITask):
     """
     Database-Type mapping generated directly from raw data.
 
     Contains info about all databases, from dumps, updates, references and fulltexts.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -386,11 +414,13 @@ class GBIDatabaseType(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIDatabaseMap(GBITask):
     """
     Create a map to use with span-import (assets/genios/dbmap.json).
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -419,11 +449,13 @@ class GBIDatabaseMap(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIUpdate(GBITask):
     """
     Concatenate updates.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -442,18 +474,20 @@ class GBIUpdate(GBITask):
                              LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                              LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
                              LC_ALL=C sed -e 's@</Document>@<x-origin>{origin}</x-origin><x-group>TBA</x-group><x-issue>{issue}</x-issue></Document>@' >> {output}""",
-                             input=row.path, origin=row.path, issue=filedate, output=stopover)
+                         input=row.path, origin=row.path, issue=filedate, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
+
 class GBIUpdateIntermediateSchema(GBITask):
     """
     Convert the combined updates to ischema.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -463,17 +497,20 @@ class GBIUpdateIntermediateSchema(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("""span-import -i genios {input} | pigz -c >> {output}""", input=target.path, output=stopover)
+            shellout(
+                """span-import -i genios {input} | pigz -c >> {output}""", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+
 class GBIUpdateIntermediateSchemaFiltered(GBITask):
     """
     Filter out items for a given database.
     """
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     db = luigi.Parameter(description='name of the database to extract')
 
@@ -488,12 +525,15 @@ class GBIUpdateIntermediateSchemaFiltered(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+
 class GBIDatabase(GBITask):
     """
     Combine dump and updates for a given database.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     db = luigi.Parameter(description='name of the database to extract')
 
@@ -506,19 +546,23 @@ class GBIDatabase(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for source, target in self.input().iteritems():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+
 class GBIIntermediateSchemaByKind(GBITask):
     """
     Combine all references or fulltext databases into a single intermediate schema document.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -532,26 +576,29 @@ class GBIIntermediateSchemaByKind(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+
 class GBIExportByKind(GBITask):
     """
     A SOLR-importable version of GBI, by kind.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
     def requires(self):
-        from siskin.workflows.ai import AIFilterConfig
         return {
             'file': GBIIntermediateSchemaByKind(issue=self.issue, since=self.since, date=self.date, kind=self.kind),
-            'config': AIFilterConfig(date=self.date)
+            'config': AMSLFilterConfig(date=self.date)
         }
 
     @timed
@@ -563,12 +610,15 @@ class GBIExportByKind(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+
 class GBIDatabaseTable(GBITask):
     """
     For a given database name, extract the ID and date.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     db = luigi.Parameter(description='name of the database to extract')
 
@@ -576,18 +626,22 @@ class GBIDatabaseTable(GBITask):
         return GBIDatabase(issue=self.issue, since=self.since, date=self.date, db=self.db)
 
     def run(self):
-        output = shellout(r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | tr -d '"' | tr ',' '\t' > {output}""", input=self.input().path)
+        output = shellout(
+            r"""jq -r '[.["finc.record_id"], .["x.indicator"]] | @csv' <(unpigz -c {input}) | tr -d '"' | tr ',' '\t' > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIISSNDatabase(GBITask):
     """
     Record ISSN per record per database.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     db = luigi.Parameter(description='name of the database to extract')
 
@@ -602,12 +656,15 @@ class GBIISSNDatabase(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIPublicationTitleDatabase(GBITask):
     """
     Extract publication title per database.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     db = luigi.Parameter(description='name of the database to extract')
 
@@ -622,12 +679,15 @@ class GBIPublicationTitleDatabase(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIPublicationTitleWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare publication title lists.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -641,12 +701,15 @@ class GBIPublicationTitleWrapper(GBITask, luigi.WrapperTask):
     def output(self):
         return self.input()
 
+
 class GBIPublicationTitleOverview(GBITask):
     """
     Just combine all publication titles.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -657,18 +720,22 @@ class GBIPublicationTitleOverview(GBITask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for kind, targets in self.input().iteritems():
             for target in targets:
-                shellout(""" cat {input} | awk '{{ print "{kind}\t"$0 }}' >> {output} """, input=target.path, output=stopover, kind=kind)
+                shellout(""" cat {input} | awk '{{ print "{kind}\t"$0 }}' >> {output} """,
+                         input=target.path, output=stopover, kind=kind)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBITitleDatabase(GBITask):
     """
     Extract title per database, also ISSN.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     db = luigi.Parameter(description='name of the database to extract')
 
@@ -683,14 +750,17 @@ class GBITitleDatabase(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBITitleWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare title lists.
 
     Note: fulltext or reference.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -704,14 +774,17 @@ class GBITitleWrapper(GBITask, luigi.WrapperTask):
     def output(self):
         return self.input()
 
+
 class GBITitleList(GBITask):
     """
     Just a wrapper to prepare title lists.
 
     Note: fulltext or reference.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -721,18 +794,22 @@ class GBITitleList(GBITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare ISSN lists.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -746,12 +823,15 @@ class GBIDatabaseISSNWrapper(GBITask, luigi.WrapperTask):
     def output(self):
         return self.input()
 
+
 class GBIISSNList(GBITask):
     """
     A list of ISSN in GBI. About 400.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -766,7 +846,8 @@ class GBIISSNList(GBITask):
                     parts = line.strip().split('\t')
                     if len(parts) < 3:
                         continue
-                    match = re.search('.*([0-9]{4}-[0-9]{3}[0-9X]).*', parts[2])
+                    match = re.search(
+                        '.*([0-9]{4}-[0-9]{3}[0-9X]).*', parts[2])
                     if match:
                         issns.add(match.group(1))
 
@@ -777,12 +858,15 @@ class GBIISSNList(GBITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class GBIDatabaseWrapper(GBITask, luigi.WrapperTask):
     """
     Just a wrapper to prepare all databases.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -796,12 +880,15 @@ class GBIDatabaseWrapper(GBITask, luigi.WrapperTask):
     def output(self):
         return self.input()
 
+
 class GBIISSNStats(GBITask):
     """
     For each database list the percentage of records that have an ISSN.
     """
-    issue = luigi.Parameter(default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
-    since = luigi.DateParameter(default=DUMP['date'], description='used in filename comparison')
+    issue = luigi.Parameter(
+        default=GBITask.DUMPTAG, description='tag to use as artificial "Dateissue" for dump')
+    since = luigi.DateParameter(
+        default=DUMP['date'], description='used in filename comparison')
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='fulltext')
 
@@ -809,7 +896,8 @@ class GBIISSNStats(GBITask):
         return GBIDatabaseISSNWrapper(issue=self.issue, since=self.since, date=self.date, kind=self.kind)
 
     def run(self):
-        issn_pattern = re.compile(r'[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]')
+        issn_pattern = re.compile(
+            r'[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]')
         with self.output().open('w') as output:
             for target in self.input():
                 stats = collections.defaultdict(int)
@@ -836,13 +924,15 @@ class GBIISSNStats(GBITask):
 
                         stats['issncount'] = len(issns)
                         if stats['total'] > 0:
-                            stats['withissn_percentage'] = '%0.2f' % (100.0 / stats['total'] * stats['issn'])
+                            stats['withissn_percentage'] = '%0.2f' % (
+                                100.0 / stats['total'] * stats['issn'])
                         else:
                             stats['withissn_percentage'] = 0
                         output.write_tsv(stats['db'], 'ok', stats['total'], stats['withissn_percentage'], stats['issncount'],
                                          stats['issn'], stats['noissn'], stats['valid'], stats['invalid'], stats['skipped'])
                     except Exception as err:
-                        output.write_tsv(stats['db'], 'err', 0, 0, 0, 0, 0, 0, 0, 0)
+                        output.write_tsv(
+                            stats['db'], 'err', 0, 0, 0, 0, 0, 0, 0, 0)
                         self.logger.debug(err)
 
     def output(self):

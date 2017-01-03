@@ -26,9 +26,8 @@
 Pubmed PMC FTP.
 """
 
+from __future__ import print_function
 import datetime
-import glob
-import os
 
 import luigi
 
@@ -48,13 +47,15 @@ class PubmedTask(DefaultTask):
     def closest(self):
         return weekly(self.date)
 
+
 class PubmedMetadataPaths(PubmedTask):
     """
     Sync metadata only (much faster).
     """
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host='ftp.ncbi.nlm.nih.gov',
@@ -70,23 +71,6 @@ class PubmedMetadataPaths(PubmedTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class PubmedDOIList(PubmedTask):
-    """
-    Extract rough DOI list from articles*.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return PubmedPaths(date=self.date)
-
-    @timed
-    def run(self):
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                print(row.path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class PubmedJournalList(PubmedTask):
     """
@@ -96,11 +80,13 @@ class PubmedJournalList(PubmedTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
+        output = shellout(
+            """curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
 
 class PubmedJournalListReduced(PubmedTask):
     """
@@ -112,7 +98,8 @@ class PubmedJournalListReduced(PubmedTask):
         return PubmedJournalList(date=self.date)
 
     def run(self):
-        output = shellout(r"""cat {input} | csvcut -c1,3,4,9,10 | tr ',' '\t' > {output}""", input=self.input().path)
+        output = shellout(
+            r"""cat {input} | csvcut -c1,3,4,9,10 | tr ',' '\t' > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
