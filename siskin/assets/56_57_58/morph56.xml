@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph"
+	version="1">
+<meta>
+</meta>
+<macros>
+		<macro name="indi">
+			<!-- build datafields -->
+			<entity name="$[datafield]$[post]" reset="true" flushWith="???$[post]">
+				<data source="$[datafield]$[post].0" name="0" />
+				<data source="$[datafield]$[post].2" name="2" />
+				<data source="$[datafield]$[post].4" name="4" />
+				<data source="$[datafield]$[post].3" name="3" />
+				<data source="$[datafield]$[post].5" name="5" />
+				<data source="$[datafield]$[post].8" name="8" />
+				<data source="$[datafield]$[post].6" name="6" />
+				<data source="$[datafield]$[post].7" name="7" />
+				<data source="$[datafield]$[post].9" name="9" />
+				<!-- remove <<...>> -->
+				<choose flushWith="???$[post]">
+					<data source="$[datafield]$[post].a" name="a">
+						<regexp match="^(&lt;&lt;)(.*)(&gt;&gt;)(\s.*)" format="${2}${4}"/>
+					</data>
+					<data source="$[datafield]$[post].a" name="a"/>
+				</choose>
+				<data source="$[datafield]$[post].b" name="b" />
+				<data source="$[datafield]$[post].c" name="c" />
+				<data source="$[datafield]$[post].d" name="d" />
+				<data source="$[datafield]$[post].e" name="e" />
+				<data source="$[datafield]$[post].f" name="f" />
+				<data source="$[datafield]$[post].g" name="g" />
+				<data source="$[datafield]$[post].h" name="h" />
+				<data source="$[datafield]$[post].i" name="i" />
+				<data source="$[datafield]$[post].j" name="j" />
+				<data source="$[datafield]$[post].k" name="k" />
+				<data source="$[datafield]$[post].l" name="l" />
+				<data source="$[datafield]$[post].m" name="m" />
+				<data source="$[datafield]$[post].n" name="n" />
+				<data source="$[datafield]$[post].o" name="o" />
+				<data source="$[datafield]$[post].p" name="p" />
+				<data source="$[datafield]$[post].q" name="q" />
+				<data source="$[datafield]$[post].r" name="r" />
+				<data source="$[datafield]$[post].s" name="s" />
+				<data source="$[datafield]$[post].t" name="t" />
+				<data source="$[datafield]$[post].u" name="u" />
+				<data source="$[datafield]$[post].w" name="w" />
+				<data source="$[datafield]$[post].v" name="v" />
+				<data source="$[datafield]$[post].x" name="x" />
+				<data source="$[datafield]$[post].y" name="y" />
+				<data source="$[datafield]$[post].z" name="z" />
+				<data source="$[datafield]$[post].D" name="D" />
+				<data source="$[datafield]$[post].A" name="A" />	
+			</entity>
+		</macro>
+	</macros>
+	<rules>
+	<!-- five spaces get lost, we but them back in place -->
+	<data source="leader">
+		<compose prefix="     "/>
+	</data>
+	
+	<!-- ID from 902 to 001, if exists - else 001 with prefix -->
+	<choose>
+		<data source="902  .a" name="001">
+		</data>
+		<data source="001" name="001">
+			<compose prefix="finc-$[sid]-"/>
+		</data>
+	</choose>
+	
+	<!-- some finc-specific fields -->
+	<entity name="980  " flushWith="record">
+			<data source="001" name="a">
+			</data>
+			<data source="001" name="b">
+				<constant value="$[sid]"/>
+			</data>
+	</entity>
+	
+	<!-- pass-trough controlfields-->
+	<data source="008">
+	</data>
+	<data source="007">
+	</data>
+	
+	<!-- build datafields - (no chance to escape each field so far)-->
+	<call-macro name="indi" post="  " datafield="013"/>
+	<call-macro name="indi" post="  " datafield="015"/>
+	<call-macro name="indi" post="  " datafield="016"/>
+  	<call-macro name="indi" post="7 " datafield="016"/>
+  	<call-macro name="indi" post="  " datafield="017"/>
+	<call-macro name="indi" post="  " datafield="020"/>
+	<call-macro name="indi" post="7 " datafield="020"/>
+	<call-macro name="indi" post="  " datafield="022"/>
+	<call-macro name="indi" post="  " datafield="024"/>
+	<call-macro name="indi" post="1 " datafield="024"/>
+	<call-macro name="indi" post="2 " datafield="024"/>
+	<call-macro name="indi" post="3 " datafield="024"/>
+	<call-macro name="indi" post="7 " datafield="024"/>
+	<call-macro name="indi" post="8 " datafield="024"/>
+	<call-macro name="indi" post="08" datafield="024"/>
+	<call-macro name="indi" post="  " datafield="026"/>
+	<call-macro name="indi" post="52" datafield="028"/>
+	<call-macro name="indi" post="00" datafield="028"/>
+	<call-macro name="indi" post="20" datafield="028"/>
+	<call-macro name="indi" post="50" datafield="028"/>
+	<call-macro name="indi" post="  " datafield="028"/>
+	<call-macro name="indi" post="7 " datafield="029"/>
+	<call-macro name="indi" post="  " datafield="032"/>
+	<call-macro name="indi" post="  " datafield="035"/>
+	<call-macro name="indi" post="  " datafield="040"/>
+	<call-macro name="indi" post="  " datafield="041"/> <!--  language = 008[35-37]:041a:041d:130l:730l-->
+	<call-macro name="indi" post="07" datafield="041"/>
+	<call-macro name="indi" post="  " datafield="043"/>
+	<call-macro name="indi" post="  " datafield="044"/>
+	<call-macro name="indi" post="  " datafield="046"/>
+	<call-macro name="indi" post=" 4" datafield="050"/>
+	<call-macro name="indi" post="  " datafield="080"/>
+	<call-macro name="indi" post="74" datafield="082"/>
+	<call-macro name="indi" post="04" datafield="082"/>
+	<call-macro name="indi" post="0 " datafield="082"/>
+	<call-macro name="indi" post="7 " datafield="083"/>
+	<call-macro name="indi" post="  " datafield="084"/>
+	<call-macro name="indi" post="  " datafield="085"/>
+	<call-macro name="indi" post="  " datafield="088"/>
+	<call-macro name="indi" post="  " datafield="090"/>
+	<call-macro name="indi" post="1 " datafield="100"/>
+	<call-macro name="indi" post="  " datafield="100"/> <!-- vf1_author = 100a -->
+	<call-macro name="indi" post="  " datafield="110"/> <!-- vf1_author_corp = 110ab:111ae-->
+	<call-macro name="indi" post="2 " datafield="110"/>
+	<call-macro name="indi" post="  " datafield="111"/>
+	<call-macro name="indi" post="  " datafield="130"/> 
+	<call-macro name="indi" post="0 " datafield="130"/> 
+	<call-macro name="indi" post="  " datafield="111"/>
+	<call-macro name="indi" post="00" datafield="210"/>
+	<call-macro name="indi" post="00" datafield="234"/>
+	<call-macro name="indi" post="  " datafield="240"/>
+	<call-macro name="indi" post="00" datafield="240"/>
+	<call-macro name="indi" post="00" datafield="242"/>
+	<call-macro name="indi" post="00" datafield="245"/> <!-- title = 245ab ; title_part = 245np ; title_sub = 245b ; title_short = 245a ; title_full = 245abdefgknp-->
+	<call-macro name="indi" post="  " datafield="246"/>
+	<call-macro name="indi" post=" 3" datafield="246"/>
+	<call-macro name="indi" post="03" datafield="246"/>
+	<call-macro name="indi" post="21" datafield="246"/>
+	<call-macro name="indi" post="23" datafield="246"/>
+	<call-macro name="indi" post="30" datafield="246"/>
+	<call-macro name="indi" post="31" datafield="246"/>
+	<call-macro name="indi" post="33" datafield="246"/>
+	<call-macro name="indi" post="00" datafield="247"/>
+	<call-macro name="indi" post="  " datafield="249"/>
+	<call-macro name="indi" post="  " datafield="250"/> <!-- edition = 250a -->
+	<call-macro name="indi" post="  " datafield="259"/>
+	<call-macro name="indi" post="  " datafield="260"/> <!-- publisher = custom, getLinkedFieldCombined(260b:264b) -->
+	<call-macro name="indi" post="  " datafield="263"/>
+	<call-macro name="indi" post=" 1" datafield="264"/> <!-- publishDate = custom, removeTrailingPunct(264c:260c) -->
+	<call-macro name="indi" post=" 0" datafield="264"/>
+	<call-macro name="indi" post=" 2" datafield="264"/>
+	<call-macro name="indi" post=" 3" datafield="264"/>
+	<call-macro name="indi" post="31" datafield="264"/>
+	<call-macro name="indi" post="  " datafield="300"/> <!-- physical = custom, getLinkedFieldCombined(300abcefg) -->
+	<call-macro name="indi" post="  " datafield="310"/>
+	<call-macro name="indi" post="  " datafield="337"/>
+	<call-macro name="indi" post="  " datafield="338"/>
+	<call-macro name="indi" post="  " datafield="340"/>
+	<call-macro name="indi" post="  " datafield="344"/>
+	<call-macro name="indi" post="  " datafield="346"/>
+	<call-macro name="indi" post="  " datafield="347"/>
+	<call-macro name="indi" post="  " datafield="362"/> <!--  dateSpan = 362a-->
+	<call-macro name="indi" post="1 " datafield="362"/>
+	<call-macro name="indi" post="  " datafield="366"/>
+	<call-macro name="indi" post="  " datafield="382"/>
+	<call-macro name="indi" post="1 " datafield="490"/> <!-- series2 = 490a -->
+	<call-macro name="indi" post="0 " datafield="490"/>
+	<call-macro name="indi" post="  " datafield="500"/> <!-- footnote = custom, getLinkedFieldCombined(500a) -->
+	<call-macro name="indi" post="  " datafield="501"/>
+	<call-macro name="indi" post="  " datafield="502"/> <!-- dissertation_note = custom, getLinkedFieldCombined(502abcd) -->
+	<call-macro name="indi" post="  " datafield="505"/>
+	<call-macro name="indi" post="0 " datafield="505"/>
+	<call-macro name="indi" post="  " datafield="511"/> <!-- performer_note = 511a -->
+	<call-macro name="indi" post="0 " datafield="511"/>
+	<call-macro name="indi" post="  " datafield="515"/>
+	<call-macro name="indi" post="  " datafield="518"/>
+	<call-macro name="indi" post="  " datafield="520"/>
+	<call-macro name="indi" post="1 " datafield="520"/>
+	<call-macro name="indi" post="3 " datafield="520"/>
+	<call-macro name="indi" post="  " datafield="521"/>
+	<call-macro name="indi" post="  " datafield="525"/>
+	<call-macro name="indi" post="  " datafield="530"/>
+	<call-macro name="indi" post="  " datafield="533"/>
+	<call-macro name="indi" post="  " datafield="538"/>
+	<call-macro name="indi" post="  " datafield="546"/>
+	<call-macro name="indi" post=" 8" datafield="556"/>
+	<call-macro name="indi" post="  " datafield="580"/>
+	<call-macro name="indi" post="1 " datafield="583"/>	
+	<call-macro name="indi" post="14" datafield="600"/>
+	<call-macro name="indi" post=" 7" datafield="600"/>  
+	<call-macro name="indi" post="27" datafield="610"/>
+	<call-macro name="indi" post="14" datafield="610"/>
+	<call-macro name="indi" post=" 7" datafield="611"/>
+	<call-macro name="indi" post="14" datafield="611"/>
+	<call-macro name="indi" post="04" datafield="630"/>
+	<call-macro name="indi" post=" 4" datafield="648"/>
+	<call-macro name="indi" post=" 7" datafield="648"/>
+	<call-macro name="indi" post=" 4" datafield="650"/>
+	<call-macro name="indi" post=" 7" datafield="650"/>
+	<call-macro name="indi" post=" 4" datafield="651"/>
+	<call-macro name="indi" post=" 7" datafield="651"/>
+	<call-macro name="indi" post="  " datafield="653"/>
+	<call-macro name="indi" post=" 4" datafield="655"/>
+	<call-macro name="indi" post=" 7" datafield="655"/>
+	<call-macro name="indi" post="1 " datafield="689"/>
+	<call-macro name="indi" post="00" datafield="689"/>
+	<call-macro name="indi" post="10" datafield="689"/>
+	<call-macro name="indi" post="11" datafield="689"/>
+	<call-macro name="indi" post="12" datafield="689"/>
+	<call-macro name="indi" post="01" datafield="689"/>
+	<call-macro name="indi" post="02" datafield="689"/>
+	<call-macro name="indi" post="03" datafield="689"/>
+	<call-macro name="indi" post="04" datafield="689"/>
+	<call-macro name="indi" post="05" datafield="689"/>
+	<call-macro name="indi" post="06" datafield="689"/>
+	<call-macro name="indi" post="0 " datafield="689"/>
+	<call-macro name="indi" post="  " datafield="700"/> <!-- vf1_author2 = 700a -->
+	<call-macro name="indi" post="12" datafield="700"/> 
+	<call-macro name="indi" post="1 " datafield="700"/> 
+	<call-macro name="indi" post="  " datafield="710"/> <!-- vf1_author_corp2 = 710ab:711ae ; vf1_author2_role = 700e:710e-->
+	<call-macro name="indi" post="1 " datafield="710"/>
+	<call-macro name="indi" post="2 " datafield="710"/>
+	<call-macro name="indi" post="  " datafield="711"/>
+	<call-macro name="indi" post="  " datafield="730"/>
+	<call-macro name="indi" post="0 " datafield="730"/>
+	<call-macro name="indi" post="  " datafield="740"/>
+	<call-macro name="indi" post="0 " datafield="740"/>
+	<call-macro name="indi" post="  " datafield="751"/>
+	<call-macro name="indi" post="  " datafield="753"/>
+	<call-macro name="indi" post="0 " datafield="760"/>
+	<call-macro name="indi" post="08" datafield="765"/>
+	<call-macro name="indi" post="08" datafield="770"/>
+	<call-macro name="indi" post="08" datafield="772"/>
+	<call-macro name="indi" post="0 " datafield="773"/>
+	<call-macro name="indi" post="0 " datafield="776"/>
+	<call-macro name="indi" post="00" datafield="780"/>
+	<call-macro name="indi" post="00" datafield="785"/>
+	<call-macro name="indi" post="08" datafield="787"/>
+	<call-macro name="indi" post="  " datafield="800"/> <!-- series = 800abcdefgmnopqt:810abcdefgmnoprst:811acdegjnpqstuv:830adgmnoprst -->
+	<call-macro name="indi" post="  " datafield="810"/>
+	<call-macro name="indi" post="  " datafield="811"/>
+	<call-macro name="indi" post=" 0" datafield="830"/>
+	<call-macro name="indi" post="  " datafield="830"/>
+	<call-macro name="indi" post="  " datafield="850"/>
+	<call-macro name="indi" post="40" datafield="856"/> <!-- url = 856u -->
+	<call-macro name="indi" post="4 " datafield="856"/>
+	<call-macro name="indi" post="  " datafield="856"/>
+	<call-macro name="indi" post="42" datafield="856"/>
+	<call-macro name="indi" post="  " datafield="831"/>
+	<call-macro name="indi" post="0 " datafield="883"/>
+	<call-macro name="indi" post="  " datafield="900"/>
+	<call-macro name="indi" post="  " datafield="901"/>
+	<call-macro name="indi" post="  " datafield="902"/>
+	<call-macro name="indi" post="  " datafield="920"/>
+	<call-macro name="indi" post="r " datafield="925"/>
+	
+	</rules>
+	<maps>
+
+	</maps>
+
+</metamorph>

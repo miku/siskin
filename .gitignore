@@ -55,6 +55,7 @@ tmp/
 TODO.md
 byoi.box
 
+.vscode/
 /.project
 /.pydevproject
 /.settings
