@@ -58,6 +58,9 @@ from siskin.utils import SetEncoder
 
 
 class AMSLTask(DefaultTask):
+    """
+    Base class for AMSL related tasks.
+    """
     TAG = 'amsl'
 
 
