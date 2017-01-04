@@ -55,9 +55,14 @@ class NRWHarvest(NRWTask):
     Download Dump
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    sid = luigi.Parameter(default='56', description='source id')
     
     def run(self):
-        url = self.config.get('nrw', 'url56')
+        allowed_sids = ('56', '57', '58')
+        if sid not in allowed_sids:
+            raise RuntimeError('allowed source ids: %s' % allowed_sids)
+        
+        url = self.config.get('nrw', 'url%s' % self.sid)
         output = shellout("""wget {url} -O {output} """, url=url)
         luigi.LocalTarget(output).move(self.output().path)
     
