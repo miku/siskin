@@ -50,6 +50,7 @@ from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
+from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
                                      CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)
@@ -214,15 +215,18 @@ class AIIntermediateSchema(AITask):
         """
         TODO(miku): Dynamic dependencies based on holding file.
         """
-        return [Executable(name='pigz', message='http://zlib.net/pigz/'),
-                GeniosCombinedIntermediateSchema(date=self.date),
-                CrossrefIntermediateSchema(date=self.date),
-                DegruyterIntermediateSchema(date=self.date),
-                DOAJIntermediateSchema(date=self.date),
-                JstorIntermediateSchema(date=self.date),
-                ThiemeIntermediateSchema(date=self.date),
-                ElsevierJournalsIntermediateSchema(date=self.date),
-                IEEEIntermediateSchema(date=self.date)]
+        return [
+            Executable(name='pigz', message='http://zlib.net/pigz/'),
+            ArxivIntermediateSchema(date=self.date),
+            CrossrefIntermediateSchema(date=self.date),
+            DegruyterIntermediateSchema(date=self.date),
+            DOAJIntermediateSchema(date=self.date),
+            ElsevierJournalsIntermediateSchema(date=self.date),
+            GeniosCombinedIntermediateSchema(date=self.date),
+            IEEEIntermediateSchema(date=self.date),
+            JstorIntermediateSchema(date=self.date),
+            ThiemeIntermediateSchema(date=self.date),
+        ]
 
     @timed
     def run(self):
@@ -351,8 +355,7 @@ class AIInstitutionChanges(AITask):
         return AILocalData(date=self.date)
 
     def run(self):
-        output = shellout(
-            """groupcover -prefs '85 55 89 60 50 49 28 48' < {input} > {output}""", input=self.input().path)
+        output = shellout("""groupcover -prefs '85 55 89 60 50 49 28 48 121' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
