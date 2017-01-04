@@ -333,7 +333,7 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz - c {input} | jq - r '[
+        output = shellout("""unpigz -c {input} | jq -r '[
             .["finc.record_id"],
             .["finc.source_id"],
             .["doi"],
