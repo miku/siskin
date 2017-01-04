@@ -59,7 +59,7 @@ class NRWHarvest(NRWTask):
     
     def run(self):
         allowed_sids = ('56', '57', '58')
-        if sid not in allowed_sids:
+        if self.sid not in allowed_sids:
             raise RuntimeError('allowed source ids: %s' % allowed_sids)
         
         url = self.config.get('nrw', 'url%s' % self.sid)
