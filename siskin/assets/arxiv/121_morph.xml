@@ -3,7 +3,10 @@
     version="1">
 
     <rules>
-            <data source="metadata.dc.description.value" name="abstract"/> <!-- Abstract -->
+            <!-- Abstract -->
+            <concat name="abstract" delimiter=" " flushWith="record">
+              <data source="metadata.dc.description.value"/>
+            </concat>
 
             <entity name="authors[]" flushWith="record"> <!-- Author -->
                 <entity name="" >
