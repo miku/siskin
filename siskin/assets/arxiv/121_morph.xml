@@ -94,7 +94,8 @@
             </combine>
             
             <entity name="rft.pub[]" flushWith="record"> <!-- Publisher -->
-                <data source="metadata.dc.publisher.value">
+                <data source="_id" name="publisher">
+                    <constant value="Arxiv"/>
                 </data>
             </entity>
                
