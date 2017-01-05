@@ -45,6 +45,7 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 class NRWTask(DefaultTask):
+    """ Base task for NRW music (sid 56,57,58) """
     TAG = 'nrw'
 
     def closest(self):

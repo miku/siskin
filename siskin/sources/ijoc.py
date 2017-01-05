@@ -37,6 +37,7 @@ Example workflow with OAI harvest and metafacture.
 
 
 class IJOCTask(DefaultTask):
+    """ Base task for International Journal of Communication """
     TAG = '87'
 
     def closest(self):
