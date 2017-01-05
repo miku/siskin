@@ -85,13 +85,9 @@
                 <regexp match="^(.*;\s)(.*);\s(.*)$" format="${3}"/>
             </data>
               -->
-            <combine name="rft.jtitle" value="${jtitle}" reset="true" sameEntity="true"> <!-- Journal Title -->
-                <data source="metadata.dc.source.lang" name="lang"> 
-                </data>
-                <data source="metadata.dc.source.value" name="jtitle">
-                    <regexp match="^(.*);\s(.*);\s(.*)$" format="${1}"/>
-                </data>
-            </combine>
+            <data source="_id" name="rft.jtitle">
+                <constant value="Arxiv"/>
+            </data>
             
             <entity name="rft.pub[]" flushWith="record"> <!-- Publisher -->
                 <data source="_id" name="publisher">
