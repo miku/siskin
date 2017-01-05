@@ -48,7 +48,7 @@
                 <constant value="$[mega_collection]"/>
             </data>
 
-            <combine name="finc.record_id" value="finc-$[sid]-${identifier_key}"> <!-- Record-ID  -->
+            <combine name="finc.record_id" value="ai-$[sid]-${identifier_key}"> <!-- Record-ID  -->
                 <data source="header.identifier.value" name="identifier_key">
                     <script file="$[FLUX_DIR]/../js/btoa.js" invoke="b64URLEncode" />
                 </data>
