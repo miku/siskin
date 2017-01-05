@@ -132,5 +132,5 @@ var Base64 = {
 
 // Encode, URL safe, cf. https://play.golang.org/p/KP9nB2FTLo.
 function b64URLEncode(value) {
-  return Base64.encode(value).replace("=", "");
+  return Base64.encode(value).replace(/=/g, "");
 }
