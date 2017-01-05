@@ -48,6 +48,7 @@ import luigi
 
 from gluish.format import TSV
 from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
@@ -59,6 +60,7 @@ class IEEETask(DefaultTask):
 
     def closest(self):
         return weekly(date=self.date)
+
 
 class IEEEPaths(IEEETask):
     """ A list of IEEE file paths (via FTP). """
@@ -81,11 +83,12 @@ class IEEEPaths(IEEETask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
+
 class IEEEUpdatesIntermediateSchema(IEEETask):
     """
     Combined updates, with duplicates.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return IEEEPaths(date=self.date)
@@ -107,12 +110,14 @@ class IEEEBacklogPaths(IEEETask):
     """
     List files in the backlog. Just a `tar -tf` of the compressed dump.
     """
+
     def run(self):
         output = shellout('tar -tf {input} > {output}', input=self.config.get('ieee', 'backlog-archive'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
+
 
 class IEEEBacklogIntermediateSchema(IEEETask):
     """
@@ -127,11 +132,12 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext='ldj.gz'))
 
+
 class IEEEIntermediateSchema(IEEETask):
     """
     Combine the backlog and all updates into a single file.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return [IEEEBacklogIntermediateSchema(), IEEEUpdatesIntermediateSchema(date=self.date)]
@@ -145,11 +151,12 @@ class IEEEIntermediateSchema(IEEETask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
+
 class IEEESolrExport(IEEETask):
     """
     Export to a SOLR compatible format.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return IEEEIntermediateSchema(date=self.date)
