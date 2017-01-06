@@ -45,12 +45,14 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
+
 class NRWTask(DefaultTask):
     """ Base task for NRW music (sid 56,57,58) """
     TAG = 'nrw'
 
     def closest(self):
         return weekly(self.date)
+
 
 class NRWHarvest(NRWTask):
     """
@@ -76,7 +78,7 @@ class NRWTransformation(NRWTask):
     sid = luigi.Parameter(default='56', description='source id')
 
     def requires(self):
-        return NRWHarvest(date=self.date)
+        return NRWHarvest(date=self.date, sid=self.sid)
 
     def run(self):
         output = shellout("""flux.sh {flux} in={input} sid={sid} > {output}""",
