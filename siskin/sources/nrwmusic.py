@@ -63,9 +63,10 @@ class NRWHarvest(NRWTask):
         url = self.config.get('nrw', 'url%s' % self.sid)
         output = shellout("""curl --fail {url} | tar -xOz > {output}""", url=url)
         luigi.LocalTarget(output).move(self.output().path)
-    
+
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
 
 class NRWTransformation(NRWTask):
     """
