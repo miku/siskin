@@ -37,7 +37,7 @@ from siskin.task import DefaultTask
 
 
 class SSOARTask(DefaultTask):
-    """ Basetask for SSOAR """
+    """ Base task for SSOAR """
     TAG = '30'
 
     def closest(self):

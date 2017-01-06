@@ -36,6 +36,7 @@ url58 = url_58
 """
 
 import datetime
+import tempfile
 
 import luigi
 
@@ -53,19 +54,41 @@ class NRWTask(DefaultTask):
 
 class NRWHarvest(NRWTask):
     """
-    Download Dump
+    Download dump and unzip
     """
     date = ClosestDateParameter(default=datetime.date.today())
     sid = luigi.Parameter(default='56', description='source id')
     
-    def run(self):
+    def run(self):     
         allowed_sids = ('56', '57', '58')
         if self.sid not in allowed_sids:
             raise RuntimeError('allowed source ids: %s' % allowed_sids)
         
         url = self.config.get('nrw', 'url%s' % self.sid)
-        output = shellout("""wget {url} -O {output} """, url=url)
+        output = shellout("""curl --fail {url} | tar -xOz > {output}""", url=url)
         luigi.LocalTarget(output).move(self.output().path)
     
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tar.gz'))
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+class NRWTransformation(NRWTask):
+    """
+    Transform data for finc
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    sid = luigi.Parameter(default='56', description='source id')
+
+    def requires(self):
+        return NRWHarvest(date=self.date)
+
+    def run(self):
+        allowed_sids = ('56', '57', '58')
+        if self.sid not in allowed_sids:
+            raise RuntimeError('allowed source ids: %s' % allowed_sids)
+
+        output = shellout("""flux.sh {flux} in={input} sid={sid} > {output}""",
+                          flux=self.assets("56_57_58/nrw_music.flux"), input=self.input().path, sid=self.sid)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
