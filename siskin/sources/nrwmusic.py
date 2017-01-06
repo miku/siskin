@@ -58,12 +58,8 @@ class NRWHarvest(NRWTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     sid = luigi.Parameter(default='56', description='source id')
-    
-    def run(self):     
-        allowed_sids = ('56', '57', '58')
-        if self.sid not in allowed_sids:
-            raise RuntimeError('allowed source ids: %s' % allowed_sids)
-        
+
+    def run(self):
         url = self.config.get('nrw', 'url%s' % self.sid)
         output = shellout("""curl --fail {url} | tar -xOz > {output}""", url=url)
         luigi.LocalTarget(output).move(self.output().path)
@@ -82,10 +78,6 @@ class NRWTransformation(NRWTask):
         return NRWHarvest(date=self.date)
 
     def run(self):
-        allowed_sids = ('56', '57', '58')
-        if self.sid not in allowed_sids:
-            raise RuntimeError('allowed source ids: %s' % allowed_sids)
-
         output = shellout("""flux.sh {flux} in={input} sid={sid} > {output}""",
                           flux=self.assets("56_57_58/nrw_music.flux"), input=self.input().path, sid=self.sid)
         luigi.LocalTarget(output).move(self.output().path)
