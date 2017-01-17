@@ -284,7 +284,7 @@ class AIRedact(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return AIIntermediateSchema(date=self.date)
+        return AIApplyOpenAccessFlag(date=self.date)
 
     @timed
     def run(self):
