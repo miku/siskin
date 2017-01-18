@@ -1,3 +1,8 @@
+0.1.12 2017-01-18
+-----------------
+
+* new tasks, improvements, fixes, across nrw, ai, crossref, arxiv, amsl
+
 0.1.1 2016-06-16
 ----------------
 
