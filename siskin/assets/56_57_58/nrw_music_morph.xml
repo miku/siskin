@@ -60,10 +60,11 @@
 	</data>
 	
 	<!-- ID from 902 to 001, if exists - else 001 with prefix -->
-	<choose>
-		<data source="902  .a" name="001">
+	<choose name="001">
+		<data source="902  .a" >
+			<compose prefix="finc-$[sid]-"/>
 		</data>
-		<data source="001" name="001">
+		<data source="001" >
 			<compose prefix="finc-$[sid]-"/>
 		</data>
 	</choose>
