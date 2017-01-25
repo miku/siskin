@@ -37,7 +37,7 @@ from siskin.task import DefaultTask
 
 
 class MHLibraryTask(DefaultTask):
-    """ Base taske for MH Library """
+    """ Base task for MH Library """
     TAG = '103'
 
     def closest(self):
