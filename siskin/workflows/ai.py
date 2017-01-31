@@ -206,6 +206,36 @@ class AIISSNList(AITask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
+class AIQuality(AITask):
+    """
+    Create short quality report.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [
+            ArxivIntermediateSchema(date=self.date),
+            CrossrefIntermediateSchema(date=self.date),
+            DegruyterIntermediateSchema(date=self.date),
+            DOAJIntermediateSchema(date=self.date),
+            ElsevierJournalsIntermediateSchema(date=self.date),
+            GeniosCombinedIntermediateSchema(date=self.date),
+            IEEEIntermediateSchema(date=self.date),
+            JstorIntermediateSchema(date=self.date),
+            ThiemeIntermediateSchema(date=self.date),
+        ]
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout(""" echo "S:{input}" >> {output} """, input=target.path, output=stopover)
+            shellout("span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}", input=target.path, output=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='txt'))
+
+
 class AIIntermediateSchema(AITask):
     """ Create an intermediate schema record from all AI sources. """
 
