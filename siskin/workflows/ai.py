@@ -62,7 +62,7 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
 from siskin.sources.genios import GeniosCombinedIntermediateSchema
-from siskin.sources.ieee import IEEEIntermediateSchema
+from siskin.sources.ieee import IEEEIntermediateSchema, IEEEDOIList
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
@@ -76,6 +76,53 @@ class AITask(DefaultTask):
 
     def closest(self):
         return weekly(self.date)
+
+
+class AIDOIList(AITask):
+    """
+    List of DOI for ai.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return [
+            CrossrefDOIList(date=self.date),
+            DegruyterDOIList(date=self.date),
+            DOAJDOIList(date=self.date),
+            ElsevierJournalsISSNList(date=self.date),
+            IEEEDOIList(date=self.date),
+            JstorDOIList(date=self.date),
+        ]
+
+    def run(self):
+        """
+        Concatenate files and run sort -u.
+        """
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        output = shellout("LC_ALL=C sort -S35% {input} > {output}", input=stopover)
+        os.remove(stopover)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class AIDOIRedirectTable(AITask):
+    """
+    Generate a redirect table. Takes days. Make sure doi.org is in your hosts file so DNS is not stressed.
+    """
+
+    def requires(self):
+        return AIDOIList()
+
+    def run(self):
+        output = shellout("hurrly -w 64 < {input} > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class AIDOIStats(AITask):
