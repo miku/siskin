@@ -46,6 +46,7 @@ import tempfile
 
 import luigi
 
+from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -170,3 +171,23 @@ class IEEESolrExport(IEEETask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
+
+class IEEEDOIList(IEEETask):
+    """ A list of IEEE DOIs. """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'input': IEEEIntermediateSchema(date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """,
+                 input=self.input().get('input').path, output=stopover)
+        output = shellout("""sort -u {input} > {output} """, input=stopover)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
