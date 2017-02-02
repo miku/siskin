@@ -412,11 +412,9 @@ class GeniosISSNList(GeniosTask):
 
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input(
-        ).get('input').path, output=output)
-        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input(
-        ).get('input').path, output=output)
-        output = shellout("""sort -u {input} > {output} """, input=output)
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        output = shellout("""LC_ALL=C sort -S35% -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
