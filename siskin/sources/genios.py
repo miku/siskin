@@ -49,7 +49,6 @@ Ebooks are reloaded monthy:
 """
 
 import datetime
-import operator
 import os
 import re
 import tempfile
