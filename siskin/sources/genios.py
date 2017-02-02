@@ -93,6 +93,9 @@ class GeniosTask(DefaultTask):
         'literaturnachweise_wirtschaftswissenschaften',
     ])
 
+    def closest(self):
+        return monthly(date=self.date)
+
 
 class GeniosDropbox(GeniosTask):
     """
@@ -204,7 +207,7 @@ class GeniosDatabases(GeniosTask):
     """
     kind = luigi.Parameter(default='fachzeitschriften',
                            description='or: ebooks, literaturnachweise_...')
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return GeniosReloadDates(date=self.date)
@@ -246,7 +249,7 @@ class GeniosLatest(GeniosTask):
     """
     kind = luigi.Parameter(default='fachzeitschriften',
                            description='or: ebooks, literaturnachweise_...')
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return GeniosReloadDates(date=self.date)
@@ -316,7 +319,7 @@ class GeniosIntermediateSchema(GeniosTask):
     """
     kind = luigi.Parameter(default='fachzeitschriften',
                            description='or: ebooks, literaturnachweise_...')
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return GeniosLatest(kind=self.kind, date=self.date)
@@ -337,7 +340,7 @@ class GeniosCombinedIntermediateSchema(GeniosTask):
     """
     Concat all genios files.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         """
@@ -372,7 +375,7 @@ class GeniosCombinedExport(GeniosTask):
     """
     Tag with ISILs, then export to various formats.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
@@ -400,7 +403,7 @@ class GeniosISSNList(GeniosTask):
     """
     A list of Genios ISSNs.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
