@@ -26,11 +26,14 @@
 Common tasks.
 """
 
+import datetime
+import email.utils as eut
 import hashlib
 import os
 import pipes
 
 import luigi
+import requests
 
 from gluish.common import Executable
 from gluish.format import TSV
@@ -155,3 +158,38 @@ class FTPFile(CommonTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext=None))
+
+
+class HTTPDownload(CommonTask):
+    """
+    Download a file via HTTP, read out the HTTP Last-modified header and use it as filename.
+    """
+    url = luigi.Parameter(description='pass this parameter')
+
+    def filename(self):
+        """
+        Returns the name of the output file. This helper relies on network connectivity.
+        """
+        r = requests.head(self.url)
+        if r.status_code != 200:
+            raise RuntimeError('%s on %s' % (r.status_code, self.url))
+        value = r.headers.get('Last-Modified')
+        if value is None:
+            raise RuntimeError('HTTPDownload relies on HTTP Last-Modified header at the moment')
+        parsed_date = eut.parsedate(value)
+        if parsed_date is None:
+            raise RuntimeError('could not parse Last-Modifier header')
+        last_modified_date = datetime.date(*parsed_date[:3])
+        digest = hashlib.sha1(self.url).hexdigest()
+        return '%s-%s.file' % (digest, last_modified_date.isoformat())
+
+    def run(self):
+        """
+        We try just once. TODO(miku): Some retry bracket.
+        Last-Modified date format: Wed, 25 Jan 2017 14:04:59 GMT
+        """
+        output = shellout(""" curl --fail "{url}" > {output} """, input=self.url)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.filename())
