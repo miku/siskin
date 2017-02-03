@@ -48,6 +48,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
+from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
 from siskin.sources.arxiv import ArxivIntermediateSchema
@@ -65,6 +66,7 @@ from siskin.sources.genios import GeniosCombinedIntermediateSchema, GeniosISSNLi
 from siskin.sources.ieee import IEEEIntermediateSchema, IEEEDOIList
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
+from siskin.sources.mag import MAGReferenceDB
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
@@ -312,6 +314,44 @@ class AIIntermediateSchema(AITask):
             shellout("cat {input} >> {output}",
                      input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+
+class AIAddReferences(AITask):
+    """
+    Experimental enrichment with linked documents.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'ai': AIIntermediateSchema(date=self.date),
+            'db': MAGReferenceDB(date=self.date),
+        }
+
+    @timed
+    def run(self):
+        """
+        Run query for DOI for each document and add a new keys if we find referenced DOI.
+        """
+        with sqlitedb(self.input().get('db').path) as cursor:
+            with self.input().get('ai').open() as handle:
+                with self.output().open('w') as output:
+                    for line in handle:
+                        doc = json.loads(line)
+                        doi = doc.get('doi')
+                        if doi is not None:
+                            stmt = """
+                            select doi from lookup where id IN (
+                                select ref from refs where id = (select id from lookup where doi = '%s' ))
+                            """ % doi
+                            cursor.execute(stmt)
+                            rows = cursor.fetchall()
+                            doc["refs"] = [v[0] for v in rows]
+                        output.write(json.dumps(doc))
+                        output.write("\n")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
