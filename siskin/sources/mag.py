@@ -272,10 +272,9 @@ class MAGReferenceDB(MAGTask):
 
     Referenced DOIs in 10.1002/j.2168-9830.2008.tb00991.x:
 
-        $ sqlite3 $(taskoutput MAGReferenceDB) "select doi from lookup where id IN \
-                                                    (select ref from refs where id = (\
-                                                        select id from lookup where doi = \
-                                                            '10.1002/j.2168-9830.2008.tb00991.x'))"
+        $ sqlite3 $(taskoutput MAGReferenceDB) "select doi from lookup where id IN (\
+                                                    select ref from refs where id = (\
+                                                        select id from lookup where doi = '10.1002/j.2168-9830.2008.tb00991.x'))"
         10.1109/FIE.2001.964026
         10.1002/j.2168-9830.1993.tb00065.x
         10.1002/j.2168-9830.2006.tb00883.x
