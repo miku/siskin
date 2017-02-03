@@ -61,7 +61,7 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
-from siskin.sources.genios import GeniosCombinedIntermediateSchema
+from siskin.sources.genios import GeniosCombinedIntermediateSchema, GeniosISSNList
 from siskin.sources.ieee import IEEEIntermediateSchema, IEEEDOIList
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
@@ -546,7 +546,7 @@ class AICoverageISSN(AITask):
             'jstor': JstorISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
-            'gbi': GBIISSNList(date=self.date),
+            'gbi': GeniosISSNList(date=self.date),
             'elsevierjournals': ElsevierJournalsISSNList(date=self.date),
             'thieme': ThiemeISSNList(date=self.date),
             'file': AMSLHoldingsFile(isil=self.isil),
