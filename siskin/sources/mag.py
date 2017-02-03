@@ -1,5 +1,6 @@
 # coding: utf-8
-
+# pylint: disable=C0301,E1101,W0622,C0103
+#
 #  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                    The Finc Authors, http://finc.info
 #                    Martin Czygan, <martin.czygan@uni-leipzig.de>
