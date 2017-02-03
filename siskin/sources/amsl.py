@@ -667,13 +667,26 @@ class AMSLFilterConfig(AMSLTask):
 
             # DE-15-FID specific: only source ids and ISSN list
             if isil == 'DE-15-FID':
-                filterconfig[isil] = {
+                for sid, filters in blob.iteritems():
+                    terms = [{'source': [sid]}]
+                    for name, value in filters.iteritems():
+                        if name == 'collections':
+                            terms.append({'collection': value})
+
+                    konjs[isil].append({'and': terms})
+
+                # Conjoin all previous filters with an ISSN list.
+                filterall = {
                     'and': [
-                        {'issn': {'url': self.config.get(
-                            'amsl', 'fid-issn-list')}},
-                        {'source': [sid for sid, _ in blob.items()]},
-                    ]
-                }
+                        {
+                            'issn': {
+                                'url': self.config.get('amsl', 'fid-issn-list')
+                            }
+                        },
+                        konjs[isil],
+                    ]}
+
+                filterconfig[isil] = filterall
                 continue
 
             for sid, filters in blob.iteritems():
