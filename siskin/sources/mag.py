@@ -116,11 +116,15 @@
 #     URL
 
 import datetime
+import tempfile
 
 import luigi
+
+from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.configuration import Config
+from siskin.database import sqlitedb
 from siskin.task import DefaultTask
 
 config = Config.instance()
@@ -202,7 +206,7 @@ class MAGFile(MAGTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="txt.gz"))
+        return luigi.LocalTarget(path=self.path(ext="txt.gz"), format=Gzip)
 
 
 class MAGPaperDomains(MAGTask):
@@ -260,3 +264,75 @@ class MAGKeywordDistribution(MAGTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="txt.gz"))
+
+
+class MAGReferenceDB(MAGTask):
+    """
+    Create a sqlite3 version of references. Takes about 45min, database is about 26GB.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'papers': MAGFile(name='Papers'),
+            'refs': MAGFile(name='PaperReferences'),
+        }
+
+    def run(self):
+        _, dbpath = tempfile.mkstemp(prefix='siskin-')
+
+        # Create the lookup table from doi to internal id.
+        with sqlitedb(dbpath) as cursor:
+            query = cursor.execute("""CREATE TABLE IF NOT EXISTS lookup (doi text, id text)""")
+
+        batch, size = [], 1000000
+        with self.input().get('papers').open() as handle:
+            for i, row in enumerate(handle):
+                if i % size == 0:
+                    self.logger.debug("[%d] adding batch (%d) ...", i, len(batch))
+                    with sqlitedb(dbpath) as cursor:
+                        query = cursor.executemany("""INSERT INTO lookup VALUES (?, ?)""", batch)
+                    batch = []
+
+                fields = row.strip().split('\t')
+                id, doi = fields[0].strip(), fields[5].strip()
+                if id == "" or doi == "":
+                    continue
+
+                batch.append((doi, id))
+
+        self.logger.debug("creating index...")
+
+        with sqlitedb(dbpath) as cursor:
+            query = cursor.execute("""CREATE INDEX IF NOT EXISTS idx_lookup_doi ON lookup (doi)""")
+            query = cursor.execute("""CREATE INDEX IF NOT EXISTS idx_lookup_id ON lookup (id)""")
+
+        # Create the references table from internal id to internal id.
+        with sqlitedb(dbpath) as cursor:
+            query = cursor.execute("""CREATE TABLE IF NOT EXISTS refs (id text, ref text)""")
+
+        batch, size = [], 1000000
+        with self.input().get('refs').open() as handle:
+            for i, row in enumerate(handle):
+                if i % size == 0:
+                    self.logger.debug("[%d] adding batch (%d) ...", i, len(batch))
+                    with sqlitedb(dbpath) as cursor:
+                        query = cursor.executemany("""INSERT INTO refs VALUES (?, ?)""", batch)
+                    batch = []
+
+                fields = row.strip().split('\t')
+                id, ref = fields[0].strip(), fields[1].strip()
+                if id == "" or ref == "":
+                    continue
+
+                batch.append((id, ref))
+
+        self.logger.debug("creating index...")
+
+        with sqlitedb(dbpath) as cursor:
+            query = cursor.execute("""CREATE INDEX IF NOT EXISTS idx_refs_id ON refs (id)""")
+
+        luigi.LocalTarget(dbpath).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="db"))
