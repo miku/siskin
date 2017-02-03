@@ -269,6 +269,22 @@ class MAGKeywordDistribution(MAGTask):
 class MAGReferenceDB(MAGTask):
     """
     Create a sqlite3 version of references. Takes about 45min, database is about 26GB.
+
+    Referenced DOIs in 10.1002/j.2168-9830.2008.tb00991.x:
+
+        $ sqlite3 $(taskoutput MAGReferenceDB) "select doi from lookup where id IN \
+                                                    (select ref from refs where id = (\
+                                                        select id from lookup where doi = \
+                                                            '10.1002/j.2168-9830.2008.tb00991.x'))"
+        10.1109/FIE.2001.964026
+        10.1002/j.2168-9830.1993.tb00065.x
+        10.1002/j.2168-9830.2006.tb00883.x
+        10.1002/j.2168-9830.1999.tb00449.x
+        10.1007/s11948-007-9040-7
+        10.1002/j.2168-9830.2005.tb00823.x
+        10.1002/j.2168-9830.2005.tb00836.x
+        10.1177/1466138104045659
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
