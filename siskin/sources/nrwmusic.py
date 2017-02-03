@@ -38,7 +38,6 @@ url58 = url_58
 import datetime
 import email.utils as eut
 
-
 import luigi
 import requests
 
