@@ -75,7 +75,7 @@ class AITask(DefaultTask):
     TAG = 'ai'
 
     def closest(self):
-        return weekly(self.date)
+        return self.date
 
 
 class AIDOIList(AITask):
