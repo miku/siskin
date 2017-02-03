@@ -39,6 +39,7 @@ import datetime
 import tempfile
 
 import luigi
+import requests
 
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -51,7 +52,27 @@ class NRWTask(DefaultTask):
     TAG = 'nrw'
 
     def closest(self):
-        return weekly(self.date)
+        """
+        Use the HTTP Last-Modified header to determine the most recent date.
+
+        If we cannot determine the date, we fail (maybe fallback to some weekly value instead).
+        """
+        if not hasattr(self, 'sid'):
+            raise AttributeError('assumed task has a parameter sid, but it does not')
+        url = self.config.get('nrw', 'url%s' % self.sid)
+
+        r = requests.head(url)
+        if r.status_code != 200:
+            raise RuntimeError('%s on %s' % (r.status_code, self.url))
+        value = r.headers.get('Last-Modified')
+        if value is None:
+            raise RuntimeError('HTTP Last-Modified header not found')
+        parsed_date = eut.parsedate(value)
+        if parsed_date is None:
+            raise RuntimeError('could not parse Last-Modifier header')
+        last_modified_date = datetime.date(*parsed_date[:3])
+
+        return last_modified_date
 
 
 class NRWHarvest(NRWTask):
