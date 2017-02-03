@@ -339,15 +339,15 @@ class AIAddReferences(AITask):
         with sqlitedb(self.input().get('db').path) as cursor:
             with self.input().get('ai').open() as handle:
                 with self.output().open('w') as output:
+                    stmt = """
+                    select doi from lookup where id IN (
+                        select ref from refs where id = (select id from lookup where doi = ? ))
+                    """
                     for line in handle:
                         doc = json.loads(line)
                         doi = doc.get('doi')
                         if doi is not None:
-                            stmt = """
-                            select doi from lookup where id IN (
-                                select ref from refs where id = (select id from lookup where doi = '%s' ))
-                            """ % doi
-                            cursor.execute(stmt)
+                            cursor.execute(stmt, (doi,))
                             rows = cursor.fetchall()
                             doc["refs"] = [v[0] for v in rows]
                         output.write(json.dumps(doc))
