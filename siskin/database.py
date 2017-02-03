@@ -38,7 +38,7 @@ class sqlitedb(object):
     """
     Simple context manager for sqlite3 databases. Commits everything at exit.
 
-        with sqlite3db('/tmp/test.db') as cursor:
+        with sqlitedb('/tmp/test.db') as cursor:
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
