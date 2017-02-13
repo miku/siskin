@@ -683,7 +683,9 @@ class AMSLFilterConfig(AMSLTask):
                                 'url': self.config.get('amsl', 'fid-issn-list')
                             }
                         },
-                        konjs[isil],
+                        {
+                            'or': konjs[isil],
+                        }
                     ]}
 
                 filterconfig[isil] = filterall
