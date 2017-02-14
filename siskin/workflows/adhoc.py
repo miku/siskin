@@ -69,19 +69,3 @@ class AdhocFormetaSamples(AdhocTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class PDA82(AdhocTask):
-    """
-    Adhoc task for #9773. WIP.
-
-    TODO: Add namespace, use mf.
-    """
-
-    def run(self):
-	output = shellout("curl --fail -sL https://is.gd/M5DcEW > {output}")
-	output = shellout("""unzip -p {input} | xmlcutty -path /collection/record > {output} """, input=output)
-	luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'))
