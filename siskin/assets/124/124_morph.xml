@@ -60,12 +60,10 @@
 				<constant value="$[mega_collection]"/>
 		</data>
 
-			<!-- Record-ID  -->
-			<combine name="finc.record_id" value="finc-$[sid]-${identifier_key}">
-				<data source="0248 .a" name="identifier_key">
-					<regexp match="^(oai:).*\:document\/(\d.*)$" format="${2}"/>
-				</data>
-			</combine>
+		<!-- Record-ID, TODO: maybe b64 encode the key -->
+		<combine name="finc.record_id" value="ai-124-${key}">
+			<data source="001" name="key"></data>
+		</combine>
 
 			<!-- receive SID -->
 			<data source="_id" name="finc.source_id">
