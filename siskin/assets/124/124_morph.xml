@@ -37,7 +37,7 @@
 			</entity>
 
 			<!-- Languages -->
-			<entity name="languages[]" flushWith="mx:record">
+			<entity name="languages[]" flushWith="record">
 				<choose>
 					<!-- try to map language -->
 					<data source="041  .a" >
