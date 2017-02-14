@@ -25,7 +25,7 @@
 """
 DawsonEra, #9773, SID124.
 
-Experimental: zip, marcxml, missing ns, 0x01, illegal characters.
+Experimental: zip, marcxml, missing ns, illegal characters.
 
 Configuration
 -------------
@@ -61,3 +61,77 @@ class DawsonDownload(DawsonTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='zip'))
+
+
+class DawsonFixAndCombine(DawsonTask):
+    """
+    Fix missing namespace, combine all files into a single file.
+
+    > Exception in thread "main" org.culturegraph.mf.exceptions.MetafactureException:
+    org.xml.sax.SAXParseException; lineNumber: 540690; columnNumber: 68; An invalid
+    XML character (Unicode: 0x1a) was found in the element content of the document.
+    """
+
+    def requires(self):
+	return DawsonDownload()
+
+    def run(self):
+	output = shellout(r"""
+	    echo '<?xml version="1.0" encoding="UTF-8"?>
+	    <collection xmlns="http://www.loc.gov/MARC21/slim">
+	    ' >> {output} &&
+
+	    unzip -p {input} |
+	    sed -e 's@<mx:collection xmlns="http://www.loc.gov/MARC21/slim">@@' |
+	    sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@' |
+	    sed -e 's@</mx:collection>@@' |
+	    sed -e 's@<mx:@<@g;s@</mx:@</@g' |
+	    tr -d '\032\033' >> {output} &&
+
+	    echo '</collection>' >> {output}""",
+			  input=self.input().path, preserve_whitespace=True)
+	luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
+class DawsonIntermediateSchema(DawsonTask):
+    """
+    Convert to intermediate schema via metafacture. Custom morphs and flux are
+    kept in assets/124. Maps are kept in assets/maps.
+    """
+
+    def requires(self):
+	return DawsonFixAndCombine()
+
+    def run(self):
+	mapdir = 'file:///%s' % self.assets("maps/")
+	output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
+			  flux=self.assets("124/124.flux"), mapdir=mapdir, input=self.input().path)
+	luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+
+class DawsonExport(DawsonTask):
+    """
+    Export via span-export. Hard-wired tag: DE-82.
+    """
+    format = luigi.Parameter(default='solr5vu3', description='export format, see span-export -list')
+
+    def requires(self):
+	return DawsonIntermediateSchema()
+
+    def run(self):
+
+	output = shellout("""
+	    cat {input} |
+	    span-tag -c '{{"DE-82": {{"any": {{}}}}}}' |
+	    span-export -o {format} > {output}""",
+			  format=self.format, input=self.input().path)
+	luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj'))
