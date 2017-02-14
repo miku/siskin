@@ -65,7 +65,7 @@ class DawsonDownload(DawsonTask):
 
 class DawsonFixAndCombine(DawsonTask):
     """
-    Fix missing namespace, combine all files into a single file.
+    Remove namespace, combine all files into a single file.
 
     > Exception in thread "main" org.culturegraph.mf.exceptions.MetafactureException:
     org.xml.sax.SAXParseException; lineNumber: 540690; columnNumber: 68; An invalid
