@@ -105,4 +105,4 @@ class SSOARFincSolr(SSOARTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj'))
+        return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj'))
