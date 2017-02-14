@@ -54,10 +54,8 @@
 		</macro>
 	</macros>
 	<rules>
-	<!-- five spaces get lost, we but them back in place -->
-	<data source="leader">
-		<compose prefix="     "/>
-	</data>
+	<!-- get leader -->
+	<data source="leader" />
 	
 	<!-- ID from 902 to 001, if exists - else 001 with prefix -->
 	<choose name="001">
@@ -79,10 +77,7 @@
 	</entity>
 	
 	<!-- pass-trough controlfields-->
-	<data source="008">
-	</data>
-	<data source="007">
-	</data>
+	<data source="008|007" />
 	
 	<!-- build datafields - (no chance to escape each field so far)-->
 	<call-macro name="indi" post="  " datafield="013"/>
