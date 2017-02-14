@@ -73,27 +73,27 @@ class DawsonFixAndCombine(DawsonTask):
     """
 
     def requires(self):
-	return DawsonDownload()
+        return DawsonDownload()
 
     def run(self):
-	output = shellout(r"""
-	    echo '<?xml version="1.0" encoding="UTF-8"?>
-	    <collection xmlns="http://www.loc.gov/MARC21/slim">
-	    ' >> {output} &&
+        output = shellout(r"""
+            echo '<?xml version="1.0" encoding="UTF-8"?>
+            <collection xmlns="http://www.loc.gov/MARC21/slim">
+            ' >> {output} &&
 
-	    unzip -p {input} |
-	    sed -e 's@<mx:collection xmlns="http://www.loc.gov/MARC21/slim">@@' |
-	    sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@' |
-	    sed -e 's@</mx:collection>@@' |
-	    sed -e 's@<mx:@<@g;s@</mx:@</@g' |
-	    tr -d '\032\033' >> {output} &&
+            unzip -p {input} |
+            sed -e 's@<mx:collection xmlns="http://www.loc.gov/MARC21/slim">@@' |
+            sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@' |
+            sed -e 's@</mx:collection>@@' |
+            sed -e 's@<mx:@<@g;s@</mx:@</@g' |
+            tr -d '\032\033' >> {output} &&
 
-	    echo '</collection>' >> {output}""",
-			  input=self.input().path, preserve_whitespace=True)
-	luigi.LocalTarget(output).move(self.output().path)
+            echo '</collection>' >> {output}""",
+                          input=self.input().path, preserve_whitespace=True)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class DawsonIntermediateSchema(DawsonTask):
@@ -103,16 +103,16 @@ class DawsonIntermediateSchema(DawsonTask):
     """
 
     def requires(self):
-	return DawsonFixAndCombine()
+        return DawsonFixAndCombine()
 
     def run(self):
-	mapdir = 'file:///%s' % self.assets("maps/")
-	output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-			  flux=self.assets("124/124.flux"), mapdir=mapdir, input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        mapdir = 'file:///%s' % self.assets("maps/")
+        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
+                          flux=self.assets("124/124.flux"), mapdir=mapdir, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
 class DawsonExport(DawsonTask):
@@ -122,16 +122,16 @@ class DawsonExport(DawsonTask):
     format = luigi.Parameter(default='solr5vu3', description='export format, see span-export -list')
 
     def requires(self):
-	return DawsonIntermediateSchema()
+        return DawsonIntermediateSchema()
 
     def run(self):
 
-	output = shellout("""
-	    cat {input} |
-	    span-tag -c '{{"DE-82": {{"any": {{}}}}}}' |
-	    span-export -o {format} > {output}""",
-			  format=self.format, input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("""
+            cat {input} |
+            span-tag -c '{{"DE-82": {{"any": {{}}}}}}' |
+            span-export -o {format} > {output}""",
+                          format=self.format, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj'))
+        return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj'))
