@@ -79,6 +79,8 @@ class GeniosTask(DefaultTask):
     * literaturnachweise_technik
     * literaturnachweise_wirtschaftswissenschaften
 
+    The database_blacklist lists database names, that should excluded from processing, #9534.
+
     """
     TAG = 'genios'
 
@@ -91,6 +93,33 @@ class GeniosTask(DefaultTask):
         'literaturnachweise_technik',
         'literaturnachweise_wirtschaftswissenschaften',
     ])
+
+    database_blacklist = (
+        'AE',
+        'ANP',
+        'AUTO',
+        'AUW',
+        'BSTZ',
+        'EMAR',
+        'FERT',
+        'FLUI',
+        'FP',
+        'FW',
+        'HOLZ',
+        'INST',
+        'KE',
+        'KONT',
+        'LEDI',
+        'MEIN',
+        'MF',
+        'MUM',
+        'NPC',
+        'PROD',
+        'STHZ',
+        'STIF',
+        'WEFO',
+        'WUV',
+    )
 
     def closest(self):
         return monthly(date=self.date)
@@ -181,7 +210,15 @@ class GeniosReloadDates(GeniosTask):
                 match = pattern.match(row.path)
                 if not match:
                     continue
+
                 cols = list(match.groups()) + [row.path]
+                # cols contains the [kind, database name, year, month, filename]
+                # ['ebooks', 'DFVE', '2016', '09', '.../siskin-data/genios/...reload_201609.zip']
+
+                if cols[1] in self.database_blacklist:
+                    self.logger.debug("excluding blacklisted %s from further processing", cols[1])
+                    continue
+
                 rows.append(cols)
 
         with self.output().open('w') as output:
