@@ -338,7 +338,7 @@ class GeniosIntermediateSchema(GeniosTask):
     """
     Intermediate schema by kind.
 
-    Warnings:
+    Warnings (incomplete):
 
     * 2016/12/20 13:57:58 genios: db is not associated with package: ELEO, using generic default
     * 2016/12/20 13:59:34 genios: db is not associated with package: AKS, using generic default
@@ -349,8 +349,96 @@ class GeniosIntermediateSchema(GeniosTask):
     * 2016/12/20 14:11:59 genios: db is not associated with package: FOWE, using generic default
     * 2016/12/20 14:18:52 genios: db is not associated with package: TIAM, using generic default
     * 2016/12/20 14:37:41 genios: db is not associated with package: HTEC, using generic default
+    * 2017/02/27 11:49:52 genios: db is not associated with package: TWNE, using generic default
+    * 2017/02/27 11:50:01 genios: db is not associated with package: SPI, using generic default
+    * 2017/02/27 11:50:16 genios: db is not associated with package: EAWO, using generic default
+    * 2017/02/27 11:50:48 genios: db is not associated with package: BRSC, using generic default
+    * 2017/02/27 11:50:48 genios: db is not associated with package: SBP, using generic default
+    * 2017/02/27 11:50:58 genios: db is not associated with package: AUKO, using generic default
+    * 2017/02/27 11:51:00 genios: db is not associated with package: HILA, using generic default
+    * 2017/02/27 11:51:01 genios: db is not associated with package: FIME, using generic default
+    * 2017/02/27 11:51:01 genios: db is not associated with package: PJCP, using generic default
+    * 2017/02/27 11:52:27 genios: db is not associated with package: JNC, using generic default
+    * 2017/02/27 11:52:27 genios: db is not associated with package: REMW, using generic default
+    * 2017/02/27 11:53:14 genios: db is not associated with package: LAW, using generic default
+    * 2017/02/27 11:53:26 genios: db is not associated with package: CME, using generic default
+    * 2017/02/27 11:53:26 genios: db is not associated with package: GUG, using generic default
+    * 2017/02/27 11:54:47 genios: db is not associated with package: ELEO, using generic default
+    * 2017/02/27 11:55:30 genios: db is not associated with package: EIRB, using generic default
+    * 2017/02/27 11:56:50 genios: db is not associated with package: PJP, using generic default
+    * 2017/02/27 11:57:18 genios: db is not associated with package: AKS, using generic default
+    * 2017/02/27 11:57:18 genios: db is not associated with package: IFAM, using generic default
+    * 2017/02/27 11:57:27 genios: db is not associated with package: AKA, using generic default
+    * 2017/02/27 11:57:27 genios: db is not associated with package: FK, using generic default
+    * 2017/02/27 11:57:30 genios: db is not associated with package: ASPA, using generic default
+    * 2017/02/27 11:57:31 genios: db is not associated with package: PHAP, using generic default
+    * 2017/02/27 12:01:11 genios: db is not associated with package: JER, using generic default
+    * 2017/02/27 12:02:30 genios: db is not associated with package: BGWP, using generic default
+    * 2017/02/27 12:03:08 genios: db is not associated with package: PGE, using generic default
+    * 2017/02/27 12:03:11 genios: db is not associated with package: LB, using generic default
+    * 2017/02/27 12:06:31 genios: db is not associated with package: INJO, using generic default
+    * 2017/02/27 12:06:35 genios: db is not associated with package: MBP, using generic default
+    * 2017/02/27 12:06:50 genios: db is not associated with package: PAPE, using generic default
+    * 2017/02/27 12:06:58 genios: db is not associated with package: IGMW, using generic default
+    * 2017/02/27 12:07:08 genios: db is not associated with package: BME, using generic default
+    * 2017/02/27 12:07:15 genios: db is not associated with package: BUBH, using generic default
+    * 2017/02/27 12:07:45 genios: db is not associated with package: FINE, using generic default
+    * 2017/02/27 12:08:21 genios: db is not associated with package: SCMW, using generic default
+    * 2017/02/27 12:08:11 genios: db is not associated with package: EU, using generic default
+    * 2017/02/27 12:08:27 genios: db is not associated with package: EMRE, using generic default
+    * 2017/02/27 12:08:41 genios: db is not associated with package: JBS, using generic default
+    * 2017/02/27 12:08:48 genios: db is not associated with package: UTIL, using generic default
+    * 2017/02/27 12:09:06 genios: db is not associated with package: MUB, using generic default
+    * 2017/02/27 12:09:31 genios: db is not associated with package: PVD, using generic default
+    * 2017/02/27 12:09:50 genios: db is not associated with package: FMAI, using generic default
+    * 2017/02/27 12:10:19 genios: db is not associated with package: TUD, using generic default
+    * 2017/02/27 12:10:38 genios: db is not associated with package: DI, using generic default
+    * 2017/02/27 12:10:55 genios: db is not associated with package: ISBF, using generic default
+    * 2017/02/27 12:11:07 genios: db is not associated with package: AGRI, using generic default
+    * 2017/02/27 12:11:07 genios: db is not associated with package: OGR, using generic default
+    * 2017/02/27 12:11:09 genios: db is not associated with package: DQ, using generic default
+    * 2017/02/27 12:11:46 genios: db is not associated with package: SLO, using generic default
+    * 2017/02/27 12:12:12 genios: db is not associated with package: KUCH, using generic default
+    * 2017/02/27 12:12:20 genios: db is not associated with package: JPV, using generic default
+    * 2017/02/27 12:12:20 genios: db is not associated with package: FOWE, using generic default
+    * 2017/02/27 12:13:27 genios: db is not associated with package: AUPR, using generic default
+    * 2017/02/27 12:13:39 genios: db is not associated with package: DQW, using generic default
+    * 2017/02/27 12:13:43 genios: db is not associated with package: DEBA, using generic default
+    * 2017/02/27 12:14:04 genios: db is not associated with package: PHM, using generic default
+    * 2017/02/27 12:14:04 genios: db is not associated with package: CAVE, using generic default
+    * 2017/02/27 12:14:17 genios: db is not associated with package: EMW, using generic default
+    * 2017/02/27 12:14:17 genios: db is not associated with package: DMS, using generic default
+    * 2017/02/27 12:14:35 genios: db is not associated with package: PC, using generic default
+    * 2017/02/27 12:14:41 genios: db is not associated with package: JGSI, using generic default
+    * 2017/02/27 12:15:08 genios: db is not associated with package: FSM, using generic default
+    * 2017/02/27 12:15:48 genios: db is not associated with package: MABL, using generic default
+    * 2017/02/27 12:17:11 genios: db is not associated with package: LHMW, using generic default
+    * 2017/02/27 12:18:40 genios: db is not associated with package: ENER, using generic default
+    * 2017/02/27 12:18:48 genios: db is not associated with package: TIAM, using generic default
+    * 2017/02/27 12:18:53 genios: db is not associated with package: SOA, using generic default
+    * 2017/02/27 12:19:04 genios: db is not associated with package: MBW, using generic default
+    * 2017/02/27 12:19:12 genios: db is not associated with package: VD, using generic default
+    * 2017/02/27 12:19:14 genios: db is not associated with package: MUTE, using generic default
+    * 2017/02/27 12:19:26 genios: db is not associated with package: KONZ, using generic default
+    * 2017/02/27 12:20:00 genios: db is not associated with package: BIWI, using generic default
+    * 2017/02/27 12:20:00 genios: db is not associated with package: AUMO, using generic default
+    * 2017/02/27 12:20:00 genios: db is not associated with package: BTME, using generic default
+    * 2017/02/27 12:21:18 genios: db is not associated with package: SAFR, using generic default
+    * 2017/02/27 12:21:41 genios: db is not associated with package: BURE, using generic default
+    * 2017/02/27 12:22:26 genios: db is not associated with package: KUSO, using generic default
+    * 2017/02/27 12:22:41 genios: db is not associated with package: AMW, using generic default
+    * 2017/02/27 12:24:20 genios: db is not associated with package: WWON, using generic default
+    * 2017/02/27 12:25:05 genios: db is not associated with package: JRW, using generic default
+    * 2017/02/27 12:25:05 genios: db is not associated with package: PJLS, using generic default
+    * 2017/02/27 12:25:26 genios: db is not associated with package: HPRW, using generic default
+    * 2017/02/27 12:25:26 genios: db is not associated with package: REGI, using generic default
+    * 2017/02/27 12:25:28 genios: db is not associated with package: DISK, using generic default
+    * 2017/02/27 12:25:28 genios: db is not associated with package: KSM, using generic default
+    * 2017/02/27 12:26:55 genios: db is not associated with package: OER, using generic default
+    * 2017/02/27 12:26:54 genios: db is not associated with package: EAW, using generic default
 
     Related: "Neue Quellen bzw. Austausch", Mon, Dec 5, 2016 at 12:23 PM, ba54ea7d396a41a2a1281f51bba5d33f
+    See also: #9534.
 
     """
     kind = luigi.Parameter(default='fachzeitschriften',
