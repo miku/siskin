@@ -62,6 +62,8 @@ class ArxivTask(DefaultTask):
     """
     Base task.
     """
+    TAG = '121'
+
     def closest(self):
         return weekly(date=self.date)
 
