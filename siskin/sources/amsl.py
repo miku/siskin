@@ -75,7 +75,7 @@ class AMSLService(AMSLTask):
             {
                 "shardLabel": "SLUB-dbod",
                 "sourceID": "64",
-                "collectionLabel": "Perinorm – Datenbank für Normen und technische Regeln",
+		"megaCollection": "Perinorm – Datenbank für Normen und technische Regeln",
                 "productISIL": null,
                 "externalLinkToContentFile": null,
                 "contentFileLabel": null,
@@ -90,7 +90,7 @@ class AMSLService(AMSLTask):
             {
                 "shardLabel": "SLUB-dbod",
                 "sourceID": "64",
-                "collectionLabel": "Perinorm – Datenbank für Normen und technische Regeln",
+		"megaCollection": "Perinorm – Datenbank für Normen und technische Regeln",
                 "productISIL": null,
                 "externalLinkToContentFile": null,
                 "contentFileLabel": null,
@@ -130,7 +130,7 @@ class AMSLCollectionsShardFilter(AMSLTask):
         {
           "evaluateHoldingsFileForLibrary": "no",
           "holdingsFileLabel": null,
-          "collectionLabel": "DOAJ Directory of Open Access Journals",
+	  "megaCollection": "DOAJ Directory of Open Access Journals",
           "shardLabel": "UBL-ai",
           "contentFileURI": null,
           "sourceID": "28",
@@ -306,7 +306,7 @@ class AMSLCollectionsISIL(AMSLTask):
                 continue
             if not item['ISIL'] == self.isil:
                 continue
-            scmap[item['sourceID']].add(item['collectionLabel'].strip())
+	    scmap[item['sourceID']].add(item['megaCollection'].strip())
         if not scmap:
             raise RuntimeError('no collections found for ISIL: %s' % self.isil)
 
@@ -491,7 +491,7 @@ class AMSLBuckets(AMSLTask):
             if not item.get('shardLabel') == self.shard:
                 continue
 
-            isil, sid, cid = item.get('ISIL'), item.get('sourceID'), item.get('collectionLabel')
+	    isil, sid, cid = item.get('ISIL'), item.get('sourceID'), item.get('megaCollection')
 
             if not sid in tree[isil]:
                 tree[isil][sid] = collections.defaultdict(set)
