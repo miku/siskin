@@ -120,4 +120,4 @@ class DefaultTask(BaseTask):
             self.logger.warn(err)
             return
         else:
-            self.logger.debug("Successfully stamped: %s", self.TAG)
+            self.logger.debug("Successfully stamped: %s", sid)
