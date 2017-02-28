@@ -24,13 +24,23 @@
 
 """
 Define a siskin wide task with artefacts under core.home directory.
+
+[amsl]
+
+write-url = https://live.abc.xyz/w/i/write
+
 """
 
 import logging
+
 import os
+import re
 import tempfile
 
+import luigi
+
 from gluish.task import BaseTask
+from gluish.utils import shellout
 from siskin.configuration import Config
 
 config = Config.instance()
@@ -38,8 +48,9 @@ config = Config.instance()
 
 class DefaultTask(BaseTask):
     """ A base task that sets its base directory based on config value. """
-    BASE = config.get('core', 'home', os.path.join(
-        tempfile.gettempdir(), 'siskin-data'))
+    BASE = config.get('core', 'home', os.path.join(tempfile.gettempdir(), 'siskin-data'))
+
+    stamp = luigi.BooleanParameter(default=False, description="send an updated stamp to AMSL", significant=False)
 
     def assets(self, path):
         """ Return the absolute path to the asset. `path` is the relative path
@@ -59,3 +70,54 @@ class DefaultTask(BaseTask):
         Return the logger. Module logging uses singleton internally, so no worries.
         """
         return logging.getLogger('siskin')
+
+    def on_success(self):
+        """
+        Try to send a datestamp to AMSL, but only if a couple of prerequisites are met:
+
+        All subclasses inherit a --stamp boolean flag, which must be set. If
+        the TAG of the source is not numeric, we won't do anything. If
+        "amsl.write-url" configuration is not set, we will log the error, but
+        do not stop processing. Finally, even if the HTTP request fails, it
+        won't be fatal.
+
+        On success, the API returns:
+
+            < HTTP/1.1 200 OK
+            < Content-Type: text/html; charset=UTF-8
+            < Content-Length: 2
+            ...
+
+            OK
+        """
+
+        if not self.stamp:
+            return
+
+        if not hasattr(self, 'TAG'):
+            self.logger.warn("No tag defined, skip stamping.")
+            return
+
+        if not re.match(r"^[\d]+$", self.TAG):
+            self.logger.warn("Non-integer source id: %s, skip stamping.", self.TAG)
+            return
+
+        # Otherwise: Parameter 'sid' ... not a positive integer.
+        sid = self.TAG.lstrip("0")
+
+        try:
+            write_url = config.get("amsl", "write-url", None)
+            if write_url is None:
+                self.logger.warn("Missing amsl.write-url configuration, skip stamping.")
+                return
+        except Exception as err:
+            self.logger.warn("Could not stamp: %s", err)
+            return
+
+        try:
+            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" """, write_url=write_url, sid=sid)
+        except RuntimeError as err:
+            self.logger.warn(err)
+            return
+        else:
+            self.logger.debug("Successfully stamped: %s", self.TAG)

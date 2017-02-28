@@ -67,6 +67,7 @@ class ArxivTask(DefaultTask):
     def closest(self):
         return weekly(date=self.date)
 
+
 class ArxivCombine(ArxivTask):
     """
     Single file dump.
@@ -87,6 +88,7 @@ class ArxivCombine(ArxivTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+
 
 class ArxivIntermediateSchema(ArxivTask):
     """
@@ -133,6 +135,7 @@ class ArxivIntermediateSchema(ArxivTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 
 class ArxivExport(ArxivTask):
     """
