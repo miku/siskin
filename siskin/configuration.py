@@ -77,10 +77,10 @@ class Config(ConfigParser):
         except (NoOptionError, NoSectionError) as err:
             if default is Config.NO_DEFAULT:
                 logger.error('invalid or missing configuration: %s', err)
-                sys.exit(1)
+                raise
             if expected_type is not None and default is not None and not isinstance(default, expected_type):
                 logger.error('invalid or missing configuration: %s', err)
-                sys.exit(1)
+                raise
             return default
 
     def get(self, section, option, default=NO_DEFAULT):
