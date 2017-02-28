@@ -115,7 +115,7 @@ class DefaultTask(BaseTask):
             return
 
         try:
-            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" """, write_url=write_url, sid=sid)
+            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """, write_url=write_url, sid=sid)
         except RuntimeError as err:
             self.logger.warn(err)
             return
