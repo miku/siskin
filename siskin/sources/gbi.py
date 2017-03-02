@@ -138,7 +138,7 @@ class GBITask(DefaultTask):
     """
     GBI task.
     """
-    TAG = '048'
+    TAG = 'gbi-deprecated'
 
     # DUMPTAG: the most recent update date as string.
     DUMPTAG = DUMP['date'].strftime("%Y%m%d%H%M%S")
