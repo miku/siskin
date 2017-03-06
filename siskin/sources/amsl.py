@@ -661,16 +661,36 @@ class AMSLFilterConfig(AMSLTask):
         # Disjunction (or-terms) per ISIL. List of alternatives.
         disj = collections.defaultdict(list)
 
-        # the presence of this tag marks FZS / fulltext
+        # The presence of this tag marks FZS / fulltext.
         fzstag = 'Genios (Fachzeitschriften)'
+
+        # The blob is a dictionary, where keys are sids and the values are again dicts.
+        #
+        #   "DE-Pl11": {
+        #     "48": {
+        #       "holdings": [
+        #         "https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEPl11",
+        #         "https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS"
+        #       ],
+        #       "collections": [
+        #         "Genios (Wirtschaftswissenschaften)",
+        #         "Genios (Technik)",
+        #         "Genios (Fachzeitschriften)"
+        #       ]
+        #     }
+        #   },
+        # ...
 
         for isil, blob in items.iteritems():
 
             # DE-15-FID specific: only source ids and ISSN list
             if isil == 'DE-15-FID':
                 for sid, filters in blob.iteritems():
+                    # Add source id constraint.
                     terms = [{'source': [sid]}]
+
                     for name, value in filters.iteritems():
+                        # Add optional collection name and holding or content file constraints.
                         if name == 'collections':
                             terms.append({'collection': value})
                         if name in ('contents', 'holdings'):
@@ -679,7 +699,7 @@ class AMSLFilterConfig(AMSLTask):
                     # Add this source and its constraints to the list of alternatives for this ISIL.
                     disj[isil].append({'and': terms})
 
-                # Conjoin all previous filters with an ISSN list.
+                # Conjoin all filters so far with an ISSN list.
                 filterall = {
                     'and': [
                         {
