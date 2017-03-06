@@ -658,8 +658,8 @@ class AMSLFilterConfig(AMSLTask):
 
         filterconfig = collections.defaultdict(dict)
 
-        # konjuctions (or-terms) per ISIL
-        konjs = collections.defaultdict(list)
+        # Disjunction (or-terms) per ISIL. List of alternatives.
+        disj = collections.defaultdict(list)
 
         # the presence of this tag marks FZS / fulltext
         fzstag = 'Genios (Fachzeitschriften)'
@@ -676,7 +676,8 @@ class AMSLFilterConfig(AMSLTask):
                         if name in ('contents', 'holdings'):
                             terms.append({'holdings': {'urls': value}})
 
-                    konjs[isil].append({'and': terms})
+                    # Add this source and its constraints to the list of alternatives for this ISIL.
+                    disj[isil].append({'and': terms})
 
                 # Conjoin all previous filters with an ISSN list.
                 filterall = {
@@ -687,7 +688,7 @@ class AMSLFilterConfig(AMSLTask):
                             }
                         },
                         {
-                            'or': konjs[isil],
+                            'or': disj[isil],
                         }
                     ]}
 
@@ -717,7 +718,7 @@ class AMSLFilterConfig(AMSLTask):
                                 refterms.append({'not': {'package': [fzstag]}})
                                 refterms.append({'package': c})
 
-                    konjs[isil].append(
+                    disj[isil].append(
                         {'or': [{"and": fzsterms}, {"and": refterms}]})
                     continue
 
@@ -735,7 +736,7 @@ class AMSLFilterConfig(AMSLTask):
                             if name == 'collections':
                                 terms.append({'collection': c})
 
-                    konjs[isil].append({'and': terms})
+                    disj[isil].append({'and': terms})
                     continue
 
                 # default handling
@@ -747,9 +748,9 @@ class AMSLFilterConfig(AMSLTask):
                     if name == 'collections':
                         terms.append({'collection': c})
 
-                konjs[isil].append({'and': terms})
+                disj[isil].append({'and': terms})
 
-            filterconfig[isil] = {'or': konjs[isil]}
+            filterconfig[isil] = {'or': disj[isil]}
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output)
