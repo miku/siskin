@@ -673,6 +673,8 @@ class AMSLFilterConfig(AMSLTask):
                     for name, value in filters.iteritems():
                         if name == 'collections':
                             terms.append({'collection': value})
+                        if name in ('contents', 'holdings'):
+                            terms.append({'holdings': {'urls': value}})
 
                     konjs[isil].append({'and': terms})
 
