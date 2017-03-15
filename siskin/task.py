@@ -50,7 +50,7 @@ class DefaultTask(BaseTask):
     """ A base task that sets its base directory based on config value. """
     BASE = config.get('core', 'home', os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
-    stamp = luigi.BooleanParameter(default=False, description="send an updated stamp to AMSL", significant=False)
+    stamp = luigi.BoolParameter(default=False, description="send an updated stamp to AMSL", significant=False)
 
     def assets(self, path):
         """ Return the absolute path to the asset. `path` is the relative path
