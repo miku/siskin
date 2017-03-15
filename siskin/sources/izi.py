@@ -40,7 +40,7 @@ class IZITask(DefaultTask):
 class IZIIntermediateSchema(IZITask):
     """ Convert XML to intermediate schema via metafacture """
     date = ClosestDateParameter(default=datetime.date.today())
-    iziFile = luigi.Parameter(default='/tmp/IZI_XML.xml', description='path izi datadump')
+    iziFile = luigi.Parameter(default='/tmp/IZI_XML.xml', description='path izi datadump', significant=False)
 
     def run(self):
         output = shellout("""flux.sh {flux} in={iziFile} > {output}""",
@@ -58,7 +58,7 @@ class IZIFincSolr(IZITask):
     format = luigi.Parameter(default='solr5vu3', description='export format')
     isil = luigi.Parameter(default='DE-15-FID', description='isil FID')
     date = ClosestDateParameter(default=datetime.date.today())
-    iziFile = luigi.Parameter(default='/tmp/IZI_XML.xml', description='path izi datadump')
+    iziFile = luigi.Parameter(default='/tmp/IZI_XML.xml', description='path izi datadump', significant=False)
 
     def requires(self):
         return {
