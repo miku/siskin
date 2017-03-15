@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
+	<rules>
+		
+		<combine name="finc.record_id" value="finc-$[sid]-${identifier_key}">
+			<data source="NUMMER.value" name="identifier_key" />
+		</combine>
+
+		<combine name="finc.mega_collection" value="IZI-Datenbank">
+			<data source="_id" />
+		</combine>
+
+		<combine name="finc.source_id" value="78">
+			<data source="_id" />
+		</combine>
+
+		<entity name="authors[]" flushWith="record">
+			<entity name="" sameEntity="true" reset="true">
+				<data source="AUTOR.value" name="rft.au">
+					<split delimiter=";" />
+					<trim />
+				</data>
+				<!--<data source="KORP_URHEBER.value" name="rft.aucorp" /> verursacht Probleme beim Intermediate Schema-->
+			</entity>			
+		</entity>	
+				
+		<data source="TITEL.value" name="rft.btitle" />
+		<data source="ZEITSCHRIFT.value" name="rft.jtitle">
+			<regexp match="^(.*\S)\s(\S.*)(\/\d\d\d\d)(\/.*\d,)\s(S\..*\.)$" format="${1}" />
+			<replace pattern="," with="" />
+		</data>
+		
+		<data source="ZEITSCHRIFT.value" name="rft.issue">
+			<regexp match="^(.*,)\s(.*\d)(\/\d\d\d\d)(\/.*\d,)\s(S\..*\.)$" format="${2}" />
+			<replace pattern="," with="" />
+		</data>
+		
+		<data source="ZEITSCHRIFT.value" name="rft.volume">
+			<regexp match="^(.*,)\s(.*\d)(\/\d\d\d\d)(\/.*\d,)\s(S\..*\.)$" format="${4}" />
+			<replace pattern="/" with="" />
+			<replace pattern="," with="" />
+		</data>
+		
+		<data source="ZEITSCHRIFT.value" name="rft.pages">
+			<regexp match="^(.*,)\s(.*\d)(\/\d\d\d\d)(\/.*\d,)\s(S\..*\.)$" format="${5}" />
+			<replace pattern="," with="" />
+			<replace pattern="S\.\s" with="" />
+			<replace pattern="S\." with="" />
+			<replace pattern="\." with="" />
+		</data>
+		
+		<entity name="rft.place[]" flushWith="record">
+			<choose>
+				<data source="QUELLE.value">
+					<regexp match="^(.*:)\s(.*)\s.*" format="${1}" />
+					<replace pattern=":" with="" />
+					<replace pattern="O\.O\." with="[S.l.]" />
+				</data>				
+				<combine name="rft.place" value="[S.l.]">
+					<choose>	
+						<data source="URL.value">
+							<constant value="FOUND" />
+						</data>
+						<data source="_id">
+							<constant value="NOTFOUND" />
+						</data>
+						<postprocess>
+							<equals string="NOTFOUND" />
+						</postprocess>
+					</choose>
+				</combine>			
+			</choose>
+		</entity>
+		
+		<entity name="rft.pub[]" flushWith="record">		
+			<data source="QUELLE.value">
+				<regexp match="^(.*:)\s(.*)\s(\d\d\d\d)\.\s(.*\d\sS\.)$" format="${2}" />
+				<trim />
+			</data>									
+		</entity>
+		
+		<data source="QUELLE.value" name="rft.tpages">
+			<regexp match=".*\s(.*\d\sS\.).*" format="${1}" />
+		</data>
+		
+		<choose name="rft.series">
+			<data source="SAMMELWERK.value" name="collection" />
+			<data source="REIHENTITEL.value" name="rft.series" />
+		</choose>	
+		
+		<data source="BAND.value" name="rft.volume" />
+		
+		<entity name="rft.isbn[]" flushWith="record">
+			<data source="ISBN.value" />
+		</entity>	
+		
+		<entity name="languages[]" flushWith="record">
+			<data source="SPRACHE.value" />
+		</entity>	
+
+		<choose name="x.date">
+            <combine name="x.date" value="${jahr}-01-01T00:00:00Z">
+				<data source="JAHR.value" name="jahr">
+					<regexp match=".*(\d\d\d\d).*" format="${1}" />
+				</data>
+			</combine>
+            <data source="QUELLE.value">
+				<regexp match=".*(\d\d\d\d).*" format="${1}-01-01T00:00:00Z" />
+            </data>
+		</choose>	
+		
+		<entity name="url[]" flushWith="record">
+			<combine name="finc.record_id" value="http://www.izi-datenbank.de/details/${identifier_key}">			
+                <data source="NUMMER.value" name="identifier_key" />
+			</combine>
+			<data source="URL.value" />
+		</entity>
+
+		<data source="PUBLIKATIONSTYP.value" name="@publikationstyp">
+			<split delimiter="; " />
+			<trim />
+		</data>
+	
+		<choose name="finc.format">
+			<combine name="finc.format" value="ElectronicArticle">
+				<data source="URL.value" />						
+				<data source="ZEITSCHRIFT.value" />																			
+			</combine>
+			
+			<combine name="finc.format" value="Article">
+				<data source="ZEITSCHRIFT.value" />
+				<choose>
+					<data source="URL.value">
+						<constant value="FOND" />
+					</data>
+					<data source="_id">
+						<constant value="NOTFOUND" />
+					</data>
+					<postprocess>
+						<equals string="NOTFOUND" />
+					</postprocess>
+				</choose>																
+			</combine>
+			
+			<combine name="finc.format" value="ElectronicThesis">
+				<data source="URL.value" />				
+				<data source="@publikationstyp">
+					<whitelist>
+						<entry name="Bachelorarbeit" />
+						<entry name="Masterarbeit" />
+						<entry name="Diplomarbeitarbeit" />
+						<entry name="Magisterarbeitarbeit" />
+						<entry name="Dissertation" />
+					</whitelist>
+				</data>
+			</combine>	
+			
+			<combine name="finc.format" value="Thesis">
+				<choose>
+					<data source="URL.value">
+						<constant value="FOND" />
+					</data>
+					<data source="_id">
+						<constant value="NOTFOUND" />
+					</data>
+					<postprocess>
+						<equals string="NOTFOUND" />
+					</postprocess>
+				</choose>
+				<data source="@publikationstyp">
+					<whitelist>
+						<entry name="Bachelorarbeit" />
+						<entry name="Masterarbeit" />
+						<entry name="Diplomarbeitarbeit" />
+						<entry name="Magisterarbeitarbeit" />
+						<entry name="Dissertation" />
+					</whitelist>
+				</data>
+			</combine>
+			
+			<combine name="finc.format" value="Book">
+				<choose>
+					<data source="URL.value">
+						<constant value="FOND" />
+					</data>
+					<data source="_id">
+						<constant value="NOTFOUND" />
+					</data>
+					<postprocess>
+						<equals string="NOTFOUND" />
+					</postprocess>
+				</choose>				
+			</combine>	
+			
+			<combine name="finc.format" value="ElectronicBook">
+				<data source="URL.value" />
+			</combine>							
+		</choose>
+		
+		<entity name="x.subjects[]" flushWith="record">
+			<data source="SCHLAGWORT.value">
+				<split delimiter=";" />
+				<trim />
+			</data>
+			<!--<data source="SCHLAGWORT_Eng.value">
+				<split delimiter=";" />
+				<trim />
+			</data>
+			<data source="FREIE.value" >
+				<split delimiter=";" />
+				<trim />
+			</data>-->
+		</entity>			
+	
+	</rules>
+</metamorph>
