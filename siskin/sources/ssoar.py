@@ -98,7 +98,7 @@ class SSOARFincSolr(SSOARTask):
         }
 
     def run(self):
-        output = shellout("""span-export -o {format} {input} > {output}""",
+        output = shellout("""span-export -with-fullrecord -o {format} {input} > {output}""",
                           format=self.format, input=self.input().get('file').path)
         output = shellout(
             """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
