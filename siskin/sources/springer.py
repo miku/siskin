@@ -23,5 +23,11 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Pubmed PMC FTP.
+Springer.
 """
+
+from siskin.task import DefaultTask
+
+
+class SpringerTask(DefaultTask):
+    TAG = 'springer'
