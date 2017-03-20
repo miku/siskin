@@ -800,20 +800,23 @@ class AMSLFilterConfigNext(AMSLTask):
         for item in doc:
             if not item['shardLabel'] == self.shard:
                 continue
-            ff = [
-                {
-                    'collection': [item['megaCollection']],
-                },
-                {
-                    'source': [item['sourceID']],
-                },
-            ]
-            if item.get('evaluateHoldingsFileForLibrary') == 'yes':
-                ff.append({'holdings': {'urls': [item['linkToHoldingsFile']]}})
+
+            # Source is always ok to use.
+            ff = [{'source': [item['sourceID']]}]
+
+            # (External) content file overrules both megacollection (which might
+            # not be defined, e.g. jstor) and holdings file.
+            if not item.get('externalLinkToContentFile') and not item.get('linkToContentFile'):
+                ff.append({'collection': [item['megaCollection']]})
+                if item.get('evaluateHoldingsFileForLibrary') == 'yes':
+                    ff.append({'holdings': {'urls': [item['linkToHoldingsFile']]}})
+
+            # Choose either linkToContentFile (rare) or externalLinkToContentFile.
             if item.get('linkToContentFile') is not None:
                 ff.append({'holdings': {'urls': [item['linkToContentFile']]}})
-            if item.get('externalLinkToContentFile') is not None:
-                ff.append({'holdings': {'urls': [item['externalLinkToContentFile']]}})
+            else:
+                if item.get('externalLinkToContentFile') is not None:
+                    ff.append({'holdings': {'urls': [item['externalLinkToContentFile']]}})
 
             if 'or' not in filters[item['ISIL']]:
                 filters[item['ISIL']]['or'] = []
