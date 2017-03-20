@@ -777,3 +777,49 @@ class AMSLFilterConfig(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
+
+
+class AMSLFilterConfigNext(AMSLTask):
+    """
+    Next version filter config.
+    """
+
+    date = luigi.Parameter(default=datetime.date.today())
+    shard = luigi.Parameter(default='UBL-ai')
+
+    def requires(self):
+        return AMSLService(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.loads(handle.read())
+
+        # collect filters per ISIL
+        filters = collections.defaultdict(dict)
+
+        for item in doc:
+            if not item['shardLabel'] == self.shard:
+                continue
+            ff = [
+                {
+                    'collection': [item['megaCollection']],
+                },
+                {
+                    'source': [item['sourceID']],
+                },
+            ]
+            if item.get('evaluateHoldingsFileForLibrary') == 'yes':
+                ff.append({'holdings': {'urls': [item['linkToHoldingsFile']]}})
+            if item.get('linkToContentFile') is not None:
+                ff.append({'holdings': {'urls': [item['linkToContentFile']]}})
+
+            if 'or' not in filters[item['ISIL']]:
+                filters[item['ISIL']]['or'] = []
+
+            filters[item['ISIL']]['or'].append({'and': ff})
+
+        with self.output().open('w') as output:
+            json.dump(filters, output)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
