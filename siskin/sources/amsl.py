@@ -812,6 +812,8 @@ class AMSLFilterConfigNext(AMSLTask):
                 ff.append({'holdings': {'urls': [item['linkToHoldingsFile']]}})
             if item.get('linkToContentFile') is not None:
                 ff.append({'holdings': {'urls': [item['linkToContentFile']]}})
+            if item.get('externalLinkToContentFile') is not None:
+                ff.append({'holdings': {'urls': [item['externalLinkToContentFile']]}})
 
             if 'or' not in filters[item['ISIL']]:
                 filters[item['ISIL']]['or'] = []
