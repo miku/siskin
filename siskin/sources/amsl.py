@@ -781,7 +781,43 @@ class AMSLFilterConfig(AMSLTask):
 
 class AMSLFilterConfigNext(AMSLTask):
     """
-    Next version filter config.
+    This task turns an AMSL API response into a filterconfig, which span-tag
+    can understand.
+
+    AMSL API might not specify everything we need to know, so this is the
+    *only* place, where additional information can be added.
+
+    Also, span-tag is fast, but not that fast, that we can iterate over a
+    disjuction of 60000 items fast enough, which, if we could, would simplify
+    the implementation of this task.
+
+    The main speed improvement comes from using lists of collection names
+    instead of having each collection processed separately - which is how it
+    works conceptually: Each collection could use a separate KBART file (or use
+    none at all).
+
+    We group all collections by (isil, source id, url) first, so we can use lists of collections,
+    even if a single source uses different KBART files for different collections.
+
+    Further, we ignore collection names, if (external) content files are used.
+    These content files are usually there, because the data source contains
+    collections, which cannot be determined by the datum itself.
+
+    Performance data point: 22 ISIL each with between 1 and 26 alternatives for
+    attachment, each alternative consisting of around three filters. Around 30
+    holding or content files each with between 10 and 50000 entries referenced 220
+    times in total: around 20k records/s.
+
+                AMSL Discovery API
+                        +
+                        |
+                        v
+                AMSLFilterConfig
+                        +
+                        |
+                        v
+        span-tag -c config.json < input.is > output.is
+
     """
 
     date = luigi.Parameter(default=datetime.date.today())
@@ -803,10 +839,10 @@ class AMSLFilterConfigNext(AMSLTask):
 
             # We only care, if there actually is a link, refs. #10088.
             if item.get('externalLinkToContentFile') is not None:
-                grouped[item['ISIL']][item['sourceID']][item['externalLinkToContentFile']]
+                grouped[item['ISIL']][item['sourceID']][item['externalLinkToContentFile']] = []
                 continue
             if item.get('linkToContentFile') is not None:
-                grouped[item['ISIL']][item['sourceID']][item['linkToContentFile']]
+                grouped[item['ISIL']][item['sourceID']][item['linkToContentFile']] = []
                 continue
             if item.get('linkToHoldingsFile') is not None:
                 grouped[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].append(item['megaCollection'])
@@ -815,22 +851,24 @@ class AMSLFilterConfigNext(AMSLTask):
             # Anything that does not have a link, we stash under _collections.
             grouped[item['ISIL']][item['sourceID']]['_collections'].append(item['megaCollection'])
 
-        # collect filters per ISIL
+        # Collect filters per ISIL.
         filters = collections.defaultdict(dict)
 
         for isil, sids in grouped.items():
+            # Collection alternative ways an ISIL might be attached to a record.
             alternatives = []
+
             for sid, docs in sids.items():
-                for key, cs in docs.items():
+                for key, colls in docs.items():
                     # These are items, that are only restricted by SID + collection.
                     if key == '_collections':
-                        f = {'and': [{'source': [sid]}, {'collection': cs}]}
-                        alternatives.append(f)
+                        flr = {'and': [{'source': [sid]}, {'collection': colls}]}
+                        alternatives.append(flr)
                         continue
 
                     # These items have some KBART file restriction (holding,
                     # content, externalContent), given via URL.
-                    f = {
+                    flr = {
                         'and': [
                             {
                                 'source': [sid],
@@ -842,10 +880,15 @@ class AMSLFilterConfigNext(AMSLTask):
                             }
                         ]
                     }
-                    if len(cs) > 0:
-                        f['and'].append({'collection': cs})
 
-                    alternatives.append(f)
+                    # In case of holding files, we use the collection names as
+                    # well. For (external) content files we do not use
+                    # collections, since collection names are often not defined
+                    # by these sources in the first place.
+                    if len(colls) > 0:
+                        flr['and'].append({'collection': colls})
+
+                    alternatives.append(flr)
 
             # DE-15-FID has an overall ISSN constraint.
             if isil == 'DE-15-FID':
