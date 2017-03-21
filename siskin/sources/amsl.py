@@ -794,34 +794,77 @@ class AMSLFilterConfigNext(AMSLTask):
         with self.input().open() as handle:
             doc = json.loads(handle.read())
 
-        # collect filters per ISIL
-        filters = collections.defaultdict(dict)
+        # Group collections by ISIL, source ID and link.
+        grouped = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(list)))
 
         for item in doc:
             if not item['shardLabel'] == self.shard:
                 continue
 
-            # Source is always ok to use.
-            ff = [{'source': [item['sourceID']]}]
-
-            # (External) content file overrules both megacollection (which might
-            # not be defined, e.g. jstor) and holdings file.
-            if not item.get('externalLinkToContentFile') and not item.get('linkToContentFile'):
-                ff.append({'collection': [item['megaCollection']]})
-                if item.get('evaluateHoldingsFileForLibrary') == 'yes' and item.get('linkToHoldingsFile') is not None:
-                    ff.append({'holdings': {'urls': [item['linkToHoldingsFile']]}})
-
-            # Choose either linkToContentFile (rare) or externalLinkToContentFile.
+            # We only care, if there actually is a link, refs. #10088.
+            if item.get('externalLinkToContentFile') is not None:
+                grouped[item['ISIL']][item['sourceID']][item['externalLinkToContentFile']]
+                continue
             if item.get('linkToContentFile') is not None:
-                ff.append({'holdings': {'urls': [item['linkToContentFile']]}})
-            else:
-                if item.get('externalLinkToContentFile') is not None:
-                    ff.append({'holdings': {'urls': [item['externalLinkToContentFile']]}})
+                grouped[item['ISIL']][item['sourceID']][item['linkToContentFile']]
+                continue
+            if item.get('linkToHoldingsFile') is not None:
+                grouped[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].append(item['megaCollection'])
+                continue
 
-            if 'or' not in filters[item['ISIL']]:
-                filters[item['ISIL']]['or'] = []
+            # Anything that does not have a link, we stash under _collections.
+            grouped[item['ISIL']][item['sourceID']]['_collections'].append(item['megaCollection'])
 
-            filters[item['ISIL']]['or'].append({'and': ff})
+        # collect filters per ISIL
+        filters = collections.defaultdict(dict)
+
+        for isil, sids in grouped.items():
+            alternatives = []
+            for sid, docs in sids.items():
+                for key, cs in docs.items():
+                    # These are items, that are only restricted by SID + collection.
+                    if key == '_collections':
+                        f = {'and': {'source': [sid], 'collection': cs}}
+                        alternatives.append(f)
+                        continue
+
+                    # These items have some KBART file restriction (holding,
+                    # content, externalContent), given via URL.
+                    f = {
+                        'and': [
+                            {
+                                'source': [sid],
+                            },
+                            {
+                                'holdings': {
+                                    'urls': [key],
+                                }
+                            }
+                        ]
+                    }
+                    if len(cs) > 0:
+                        f['and'].append({'collection': cs})
+
+                    alternatives.append(f)
+
+            # DE-15-FID has an overall ISSN constraint.
+            if isil == 'DE-15-FID':
+                filters[isil] = {
+                    'and': [
+                        {
+                            'issn': {
+                                'url': self.config.get('amsl', 'fid-issn-list'),
+                            }
+                        },
+                        {
+                            'or': alternatives,
+                        },
+                    ]
+                }
+                continue
+
+            # Default alternatives.
+            filters[isil] = {'or': alternatives}
 
         with self.output().open('w') as output:
             json.dump(filters, output)
