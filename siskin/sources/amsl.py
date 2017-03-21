@@ -824,7 +824,7 @@ class AMSLFilterConfigNext(AMSLTask):
                 for key, cs in docs.items():
                     # These are items, that are only restricted by SID + collection.
                     if key == '_collections':
-                        f = {'and': {'source': [sid], 'collection': cs}}
+                        f = {'and': [{'source': [sid], 'collection': cs}]}
                         alternatives.append(f)
                         continue
 
