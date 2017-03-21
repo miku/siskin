@@ -808,7 +808,7 @@ class AMSLFilterConfigNext(AMSLTask):
             # not be defined, e.g. jstor) and holdings file.
             if not item.get('externalLinkToContentFile') and not item.get('linkToContentFile'):
                 ff.append({'collection': [item['megaCollection']]})
-                if item.get('evaluateHoldingsFileForLibrary') == 'yes':
+                if item.get('evaluateHoldingsFileForLibrary') == 'yes' and item.get('linkToHoldingsFile') is not None:
                     ff.append({'holdings': {'urls': [item['linkToHoldingsFile']]}})
 
             # Choose either linkToContentFile (rare) or externalLinkToContentFile.
