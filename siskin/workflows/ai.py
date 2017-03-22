@@ -62,11 +62,13 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
-from siskin.sources.genios import GeniosCombinedIntermediateSchema, GeniosISSNList
-from siskin.sources.ieee import IEEEIntermediateSchema, IEEEDOIList
+from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
+                                   GeniosISSNList)
+from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.mag import MAGReferenceDB
+from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
@@ -305,6 +307,7 @@ class AIIntermediateSchema(AITask):
             IEEEIntermediateSchema(date=self.date),
             JstorIntermediateSchema(date=self.date),
             ThiemeIntermediateSchema(date=self.date),
+            SpringerIntermediateSchema(),
         ]
 
     @timed
