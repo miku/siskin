@@ -23,11 +23,71 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Springer.
+Springer (testing).
+
+Config
+------
+
+[springer]
+
+intermediate-schema-file = /path/to/file
 """
 
+import luigi
+
+from gluish.format import Gzip
+from gluish.utils import shellout
+from siskin.sources.amsl import AMSLFilterConfigNext
 from siskin.task import DefaultTask
 
 
 class SpringerTask(DefaultTask):
     TAG = 'springer'
+
+
+class SpringerIntermediateSchema(SpringerTask, luigi.ExternalTask):
+    """
+    Provided.
+    """
+
+    def output(self):
+	return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'))
+
+
+class SpringerTagged(SpringerTask):
+    """
+    Tag records with ISIL.
+    """
+
+    def requires(self):
+	return {
+	    'file': SpringerIntermediateSchema(),
+	    'config': AMSLFilterConfigNext(),
+	}
+
+    def run(self):
+	output = shellout("span-tag -c {config} {input} | pigz -c > {output}",
+			  config=self.input().get('config').path,
+			  input=self.input().get('file').path)
+
+	luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+
+class SpringerSolr(SpringerTask):
+    """
+    Solr importable.
+    """
+    format = luigi.Parameter(default='solr5vu3', description="solr5vu3, formeta")
+
+    def requires(self):
+	return SpringerTagged()
+
+    def run(self):
+	output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+	luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
