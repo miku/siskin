@@ -51,7 +51,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.ExternalTask):
     """
 
     def output(self):
-	return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'))
+        return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'))
 
 
 class SpringerTagged(SpringerTask):
@@ -60,34 +60,34 @@ class SpringerTagged(SpringerTask):
     """
 
     def requires(self):
-	return {
-	    'file': SpringerIntermediateSchema(),
-	    'config': AMSLFilterConfigNext(),
-	}
+        return {
+            'file': SpringerIntermediateSchema(),
+            'config': AMSLFilterConfigNext(),
+        }
 
     def run(self):
-	output = shellout("span-tag -c {config} {input} | pigz -c > {output}",
-			  config=self.input().get('config').path,
-			  input=self.input().get('file').path)
+        output = shellout("span-tag -c {config} {input} | pigz -c > {output}",
+                          config=self.input().get('config').path,
+                          input=self.input().get('file').path)
 
-	luigi.LocalTarget(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class SpringerSolr(SpringerTask):
+class SpringerExport(SpringerTask):
     """
     Solr importable.
     """
     format = luigi.Parameter(default='solr5vu3', description="solr5vu3, formeta")
 
     def requires(self):
-	return SpringerTagged()
+        return SpringerTagged()
 
     def run(self):
-	output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
