@@ -821,7 +821,6 @@ class AMSLFilterConfigNext(AMSLTask):
     """
 
     date = luigi.Parameter(default=datetime.date.today())
-    shard = luigi.Parameter(default='UBL-ai')
 
     def requires(self):
         return AMSLService(date=self.date)
@@ -834,8 +833,6 @@ class AMSLFilterConfigNext(AMSLTask):
         grouped = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(list)))
 
         for item in doc:
-            if not item['shardLabel'] == self.shard:
-                continue
 
             # We only care, if there actually is a link, refs. #10088.
             if item.get('externalLinkToContentFile') is not None:
