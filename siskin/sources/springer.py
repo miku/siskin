@@ -30,7 +30,7 @@ Config
 
 [springer]
 
-intermediate-schema-file = /path/to/file
+intermediate-schema-file = /path/to/file # must be gzip compressed
 """
 
 import luigi
@@ -66,7 +66,7 @@ class SpringerTagged(SpringerTask):
         }
 
     def run(self):
-        output = shellout("span-tag -c {config} {input} | pigz -c > {output}",
+        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path,
                           input=self.input().get('file').path)
 
