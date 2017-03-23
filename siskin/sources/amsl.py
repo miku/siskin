@@ -830,23 +830,27 @@ class AMSLFilterConfigNext(AMSLTask):
             doc = json.loads(handle.read())
 
         # Group collections by ISIL, source ID and link.
-        grouped = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(list)))
+        grouped = collections.defaultdict(
+            lambda: collections.defaultdict(
+                lambda: collections.defaultdict(list)))
 
         for item in doc:
 
+            isil, sid = item['ISIL'], item['sourceID']
+
             # We only care, if there actually is a link, refs. #10088.
             if item.get('externalLinkToContentFile') is not None:
-                grouped[item['ISIL']][item['sourceID']][item['externalLinkToContentFile']] = []
+                grouped[isil][sid][item['externalLinkToContentFile']] = []
                 continue
             if item.get('linkToContentFile') is not None:
-                grouped[item['ISIL']][item['sourceID']][item['linkToContentFile']] = []
+                grouped[isil][sid][item['linkToContentFile']] = []
                 continue
             if item.get('linkToHoldingsFile') is not None:
-                grouped[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].append(item['megaCollection'])
+                grouped[isil][sid][item['linkToHoldingsFile']].append(item['megaCollection'])
                 continue
 
             # Anything that does not have a link, we stash under _collections.
-            grouped[item['ISIL']][item['sourceID']]['_collections'].append(item['megaCollection'])
+            grouped[isil][sid]['_collections'].append(item['megaCollection'])
 
         # Collect filters per ISIL.
         filters = collections.defaultdict(dict)
@@ -879,15 +883,15 @@ class AMSLFilterConfigNext(AMSLTask):
                     }
 
                     # In case of holding files, we use the collection names as
-                    # well. For (external) content files we do not use
-                    # collections, since collection names are often not defined
-                    # by these sources in the first place.
+                    # well. In contrast, for (external) content files we do not
+                    # use collection names, since they are often not defined by
+                    # these sources in the first place.
                     if len(colls) > 0:
                         flr['and'].append({'collection': colls})
 
                     alternatives.append(flr)
 
-            # DE-15-FID has an overall ISSN constraint.
+            # DE-15-FID has an overall ISSN constraint, will could be slashed by #10088.
             if isil == 'DE-15-FID':
                 filters[isil] = {
                     'and': [
