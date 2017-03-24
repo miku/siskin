@@ -427,6 +427,8 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
 class AMSLBuckets(AMSLTask):
     """
+    Deprecated: Will be replaced by AMSLFilterConfigNext.
+
     Assemble attachment configuration from AMSL.
 
     Example (Jan 2017):
@@ -518,6 +520,8 @@ class AMSLBuckets(AMSLTask):
 
 class AMSLFilterConfig(AMSLTask):
     """
+    Deprecated: Will be replaced by AMSLFilterConfigNext.
+
     Convert to filterconfig format. With a few
     hard-wired exceptions for various sources.
 
