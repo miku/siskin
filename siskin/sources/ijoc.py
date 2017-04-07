@@ -97,7 +97,7 @@ class IJOCFincSolr(IJOCTask):
         }
 
     def run(self):
-        output = shellout("""span-export -o {format} <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
+        output = shellout("""span-export -o {format} -with-fullrecord <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
                           format=self.format, isil=self.isil, input=self.input().get('file').path)
         output = shellout(
             """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
