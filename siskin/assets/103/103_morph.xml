@@ -55,14 +55,23 @@
     <data source="metadata.dc.title.value" name="rft.btitle">
       <!-- bTitle -->
     </data>
-    <data source="metadata.dc.date.value" name="rft.date">
-      <!-- Date -->
-      <compose postfix="-01-01"/>
+    <data source="metadata.dc.date.value" name="@date">
+      <!-- preprocess Date -->
+      <split delimiter=";"/>
+      <trim/>
     </data>
-    <data source="metadata.dc.date.value" name="x.date">
-      <!-- Date -->
-      <compose postfix="-01-01T00:00:00Z"/>
-    </data>
+    <combine name="rft.date" value="${rftdate}" flushWith="metadata.dc.date.value">
+      <data source="@date" name="rftdate">
+        <!-- Date -->
+        <compose postfix="-01-01"/>
+      </data>
+    </combine>
+    <combine name="x.date" value="${xdate}" flushWith="metadata.dc.date.value">
+      <data source="@date" name="xdate">
+        <!-- Date -->
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+    </combine>
     <entity name="rft.pub[]" flushWith="record">
       <!-- Publisher -->
       <data source="metadata.dc.publisher.value">
