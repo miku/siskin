@@ -895,22 +895,6 @@ class AMSLFilterConfigNext(AMSLTask):
 
                     alternatives.append(flr)
 
-            # DE-15-FID has an overall ISSN constraint, will could be slashed by #10088.
-            if isil == 'DE-15-FID':
-                filters[isil] = {
-                    'and': [
-                        {
-                            'issn': {
-                                'url': self.config.get('amsl', 'fid-issn-list'),
-                            }
-                        },
-                        {
-                            'or': alternatives,
-                        },
-                    ]
-                }
-                continue
-
             # Default alternatives.
             filters[isil] = {'or': alternatives}
 
