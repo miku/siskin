@@ -800,8 +800,9 @@ class AMSLFilterConfigNext(AMSLTask):
     works conceptually: Each collection could use a separate KBART file (or use
     none at all).
 
-    We group all collections by (isil, source id, url) first, so we can use lists of collections,
-    even if a single source uses different KBART files for different collections.
+    We group all collections by (isil, source id, url) first, so we can use
+    lists of collections, even if a single source uses different KBART files
+    for different collections.
 
     Further, we ignore collection names, if (external) content files are used.
     These content files are usually there, because the data source contains
@@ -813,14 +814,12 @@ class AMSLFilterConfigNext(AMSLTask):
     times in total: around 20k records/s.
 
                 AMSL Discovery API
-                        +
                         |
                         v
-                AMSLFilterConfig
-                        +
+                AMSLFilterConfigNext
                         |
                         v
-        span-tag -c config.json < input.is > output.is
+        $ span-tag -c config.json < input.is > output.is
 
     """
 
@@ -834,6 +833,19 @@ class AMSLFilterConfigNext(AMSLTask):
             doc = json.loads(handle.read())
 
         # Group collections by ISIL, source ID and link.
+        #
+        # {
+        #     'DE-291-114': {
+        #         '0': {
+        #             '_collections': ['Verbunddaten SWB']
+        #         },
+        #         '49': {
+        #             'https://x.com/KBART_DEJ59': ['21st Century COE Program (CrossRef)', ...]
+        #         },
+        #         ...
+        #     },
+        #     ...
+        # }
         grouped = collections.defaultdict(
             lambda: collections.defaultdict(
                 lambda: collections.defaultdict(list)))
@@ -860,8 +872,7 @@ class AMSLFilterConfigNext(AMSLTask):
         filters = collections.defaultdict(dict)
 
         for isil, sids in grouped.items():
-            # Collection alternative ways an ISIL might be attached to a record.
-            alternatives = []
+            alternatives = []  # ways an ISIL might be attached to a record
 
             for sid, docs in sids.items():
                 for key, colls in docs.items():
