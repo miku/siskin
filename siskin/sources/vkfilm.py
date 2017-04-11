@@ -47,7 +47,7 @@ class VKFilmTask(DefaultTask):
 
 class VKFilmFile(VKFilmTask, luigi.ExternalTask):
     """
-    Manually downloaded dump, #8575#note-7.
+    Manually downloaded MAB dump, #8575#note-7.
     """
 
     def output(self):
