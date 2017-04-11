@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
+	
+    <rules>
+
+        <combine name="Leader" value="     nam  2200000 u 4500">
+            <data source="_id" />           
+        </combine>
+
+        <combine name="001" value="finc-$[sid]-${id}">
+            <data source="001" name="id" />
+        </combine>
+
+        <combine name="005" value="${jahr}000000.0">
+            <data source="003" name="jahr" />
+        </combine>
+
+        <combine name="007" value="tu">
+            <data source="_id" />
+        </combine>
+
+        <combine name="008" value="                                   ${sprache}   ">
+           <!-- eng -->
+           <data source="037b" name="sprache" />
+        </combine>
+
+        <entity name="016  " flushWith="record">
+            <data source="025z" name="a">
+                <regexp match="TRM=(.*)" format="${1}" />
+            </data>
+            <data source="025z" name="2">
+                <regexp match="(TRM)" />    <!-- Bedingung, damit Feld 2 nur erscheint, wenn Feld a belegt ist -->
+                <constant value="DE-600" />                
+            </data>         
+        </entity>
+
+        <entity name="020  " flushWith="record">
+            <!-- 3-499-55465-8 -->
+            <data source="540" name="a">
+                <replace pattern="-" with="" />
+            </data>
+            <data source="540" name="9" />
+        </entity>
+
+        <entity name="022" flushWith="record">
+            <choose>
+                <data source="542" name="a" />
+                <data source="542a" name="a" />
+            </choose>
+        </entity>
+
+        <!-- Inhalt "eng" stimmt nicht mit Konkordanztabelle überein
+        <entity name="040" flushWith="record">
+            <choose>
+                <data source="070" name="a" />
+                <data source="070a" name="c" />
+                <data source="070b" name="d" />
+            </choose>
+        </entity>-->
+
+        <entity name="100  " flushWith="record">
+            <!-- Brauneck, Manfred$$9HF0000002$$b[Hrsg.] -->
+            <data source="100" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="240" flushWith="record">
+            <!-- My Beautiful Laundrette <engl. / UT: engl. für Hörgesch> -->
+            <data source="304" name="a">
+                <regexp match="(.*)\s\W\w" format="${1}" /> <!-- Sprachkürzel nach RDA nicht mehr angegeben --> 
+            </data>             
+        </entity>      
+
+        <entity name="245  " flushWith="record">
+            <data source="331" name="a" />
+            <data source="335" name="b" />
+        </entity>
+        
+         <!-- Paralleltitel -->
+        <entity name="246" flushWith="record">
+            <!-- Action Mutante -->
+            <data source="340" name="a" />
+        </entity>
+
+        <entity name="249  " flushWith="record">
+            <data source="361" name="a" />
+        </entity>
+
+        <entity name="250  " flushWith="record">
+            <data source="403" name="a" />
+        </entity>
+
+        <entity name="260  " flushWith="record">
+            <data source="410" name="a" />
+            <data source="412" name="b" />
+            <data source="425" name="c" />
+        </entity> 
+
+        <entity name="264  " flushWith="record">
+            <!-- Troy$$bAnchor Bay$$c[1999] -->         
+            <data source="419" name="c">
+                <regexp match="(\[\d\d\d\d\])" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="300  " flushWith="record">
+            <data source="433" name="a" />
+            <choose>
+                <data source="434" name="b" />
+                <data source="440" name="b" /> <!-- Audioformat??? -->
+            </choose>
+            <data source="435" name="c" />
+            <data source="437" name="e" />
+        </entity>
+
+        <entity name="336  " flushWith="record">
+            <data source="060" name="a" />
+        </entity>
+		
+		<entity name="337  " flushWith="record">			
+			<data source="061" name="a" />
+        </entity>
+		
+		<entity name="338  " flushWith="record">			
+			<data source="062" name="a" />
+        </entity>
+
+        <entity name="490  " flushWith="record">				
+		    <data source="454" name="a" />
+            <data source="451" name="v">
+                <regexp match=".*\s;\s(.*)" format="${1}" />
+            </data>
+        </entity>
+
+        <!-- teilweise interne Vermerke: Nr. 18. - S. 40-41. - Sign.: ZA 108 -->
+        <entity name="500  " flushWith="record">			
+			<data source="501" name="a">
+                <!-- Die Altersfreigabe kommt in die 521 -->
+                <not-equals string="FSK-0" />
+                <not-equals string="FSK-6" />
+                <not-equals string="FSK-12" />
+                <not-equals string="FSK-16" />
+                <not-equals string="FSK-18" />
+            </data>
+        </entity>
+
+         <entity name="502  " flushWith="record">			
+            <!-- Dissertation$$cUniversität Klagenfurt, Fakultät für Kulturwissenschaften$$d2002 -->
+			<data source="520" name="a">
+                  <replace pattern="\$\$c" with=", " />
+                  <replace pattern="\$\$d" with=", " />
+            </data>              
+        </entity>
+
+        <entity name="521  " flushWith="record">			
+			<data source="501" name="a">
+                <regexp match="(.*FSK.*)" />
+            </data>
+        </entity>
+
+        <entity name="538  " flushWith="record">			
+			<choose>
+                <!-- Systemvoraussetzungen:$$bPentium 4 ab 2,6 GHz oder G4 ab 1 GHz; 512 MB RAM; DVD-Laufwerk -->
+                <data source="651" name="a">
+                    <replace pattern="\$\$b" with=" " />
+                </data>              
+                <data source="651a" name="a">
+                    <replace pattern="\$\$b" with=" " />
+                </data>              
+                <data source="651b" name="a">
+                    <replace pattern="\$\$b" with=" " />
+                </data>              
+            </choose>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <choose>
+                <!-- Brauneck, Manfred$$9HF0000002$$b[Hrsg.] -->
+                <data source="100b" name="a">
+                    <regexp match="(.*)\$\$\d" format="${1}" />
+                </data>
+                <data source="100c" name="a">
+                    <regexp match="(.*)\$\$\d" format="${1}" />
+                </data>
+                <data source="100f" name="a">
+                    <regexp match="(.*)\$\$\d" format="${1}" />
+                </data>
+                <data source="100e" name="a">
+                    <regexp match="(.*)\$\$\d" format="${1}" />
+                </data>
+            </choose>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="104" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="108" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="112" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="116" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="120" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="124" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="128" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="132" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="136" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="140" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="144" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="148" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+       <entity name="700  " flushWith="record">
+            <data source="152" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="156" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="160" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="164" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="168" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="172" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="176" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="180" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="184" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="188" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="192" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="record">
+            <data source="196" name="a">
+                <regexp match="(.*)\$\$\d" format="${1}" />
+            </data>
+        </entity>
+
+         <entity name="980  " flushWith="record">
+            <data source="001" name="a" />
+            <data source="_id" name="b">
+                <constant value="$[sid]" />
+            </data>
+         </entity>
+
+    </rules>
+
+</metamorph>
