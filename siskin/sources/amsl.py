@@ -809,7 +809,7 @@ class AMSLFilterConfigNext(AMSLTask):
     collections, which cannot be determined by the datum itself.
 
     For SID 48 we test simple attachments via DB names parsed from KBART (span
-    0.1.144 or later).
+    0.1.144 or later), refs. #10266.
 
     Performance data point: 22 ISIL each with between 1 and 26 alternatives for
     attachment, each alternative consisting of around three filters. Around 30
@@ -881,7 +881,7 @@ class AMSLFilterConfigNext(AMSLTask):
                 for key, colls in docs.items():
                     # These are items, that are only restricted by SID + collection.
                     if key == '_collections':
-                        # Testing: 48 (WISO) special case.
+                        # Testing: 48 (WISO) special case, refs. #10266.
                         if sid == "48":
                             continue
                         flr = {'and': [{'source': [sid]}, {'collection': colls}]}
@@ -907,7 +907,7 @@ class AMSLFilterConfigNext(AMSLTask):
                     # well. In contrast, for (external) content files we do not
                     # use collection names, since they are often not defined by
                     # these sources in the first place.
-                    # Extra: Testing: 48 (WISO) special case.
+                    # Extra: # Testing: 48 (WISO) special case, refs. #10266.
                     if len(colls) > 0 and sid != "48":
                         flr['and'].append({'collection': colls})
 
