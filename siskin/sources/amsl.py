@@ -808,6 +808,9 @@ class AMSLFilterConfigNext(AMSLTask):
     These content files are usually there, because the data source contains
     collections, which cannot be determined by the datum itself.
 
+    For SID 48 we test simple attachments via DB names parsed from KBART (span
+    0.1.144 or later).
+
     Performance data point: 22 ISIL each with between 1 and 26 alternatives for
     attachment, each alternative consisting of around three filters. Around 30
     holding or content files each with between 10 and 50000 entries referenced 220
