@@ -878,6 +878,9 @@ class AMSLFilterConfigNext(AMSLTask):
                 for key, colls in docs.items():
                     # These are items, that are only restricted by SID + collection.
                     if key == '_collections':
+                        # Testing: 48 (WISO) special case.
+                        if sid == "48":
+                            continue
                         flr = {'and': [{'source': [sid]}, {'collection': colls}]}
                         alternatives.append(flr)
                         continue
@@ -901,7 +904,8 @@ class AMSLFilterConfigNext(AMSLTask):
                     # well. In contrast, for (external) content files we do not
                     # use collection names, since they are often not defined by
                     # these sources in the first place.
-                    if len(colls) > 0:
+                    # Extra: Testing: 48 (WISO) special case.
+                    if len(colls) > 0 and sid != "48":
                         flr['and'].append({'collection': colls})
 
                     alternatives.append(flr)
