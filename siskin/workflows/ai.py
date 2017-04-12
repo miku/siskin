@@ -417,6 +417,29 @@ class AIRedact(AITask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
+class AIBlobDB(AITask):
+    """
+    Create data.db file for microblob, then:
+
+    $ microblob -db $(taskoutput AIBlobDB) -file $(taskoutput AIRedact) -serve
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AIRedact(date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""
+            microblob -db {output} -file <(unpigz -c "{input}") -key "finc.record_id"
+        """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldb'))
+
+
 class AILicensing(AITask):
     """
     Take intermediate schema and a config and attach ISILs accordingly.
