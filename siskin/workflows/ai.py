@@ -431,9 +431,15 @@ class AIBlobDB(AITask):
 
     @timed
     def run(self):
+        """
+        Extract intermediate schema file temporarily.
+        """
         tempdir = tempfile.mkdtemp(prefix="siskin-")
-        output = shellout("""microblob -db {tempdir} -file <(unpigz -c {input}) -key finc.record_id""",
-                          tempdir=tempdir, input=self.input().path)
+        extracted = shellout("unpigz -c {input} > {output}", input=self.input().path)
+
+        output = shellout("microblob -db {tempdir} -file {input} -key finc.record_id",
+                          tempdir=tempdir, input=extracted)
+        os.remove(extraced)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
