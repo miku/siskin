@@ -64,7 +64,6 @@ class VKFilmMarc(VKFilmTask):
         return VKFilmFile()
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} > {output}""",
                           flux=self.assets("127/127.flux"), input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
