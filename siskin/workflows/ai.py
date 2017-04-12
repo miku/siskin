@@ -431,9 +431,9 @@ class AIBlobDB(AITask):
 
     @timed
     def run(self):
-        output = shellout("""
-            microblob -db {output} -file <(unpigz -c "{input}") -key "finc.record_id"
-        """, input=self.input().path)
+        tempdir = tempfile.mkdtemp(prefix="siskin-")
+        output = shellout("""microblob -db {tempdir} -file <(unpigz -c {input}) -key finc.record_id""",
+                          tempdir=tempdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
