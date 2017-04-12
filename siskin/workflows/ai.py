@@ -437,10 +437,9 @@ class AIBlobDB(AITask):
         tempdir = tempfile.mkdtemp(prefix="siskin-")
         extracted = shellout("unpigz -c {input} > {output}", input=self.input().path)
 
-        output = shellout("microblob -db {tempdir} -file {input} -key finc.record_id",
-                          tempdir=tempdir, input=extracted)
+        shellout("microblob -db {tempdir} -file {input} -key finc.record_id", tempdir=tempdir, input=extracted)
         os.remove(extraced)
-        luigi.LocalTarget(output).move(self.output().path)
+        luigi.LocalTarget(tempdir).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldb'))
