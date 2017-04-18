@@ -489,6 +489,29 @@ class AILicensingNext(AITask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
+class AICompareLicensing(AITask):
+    """
+    Ad-hoc task to compare result of various licensing modes.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'current': AILicensing(date=self.date),
+            'next': AILicensingNext(date=self.date),
+        }
+
+    def run(self):
+        """
+        TODO: Extract two TSV files, sorted by ID. Then, in a uniq(1) style, compare
+        the values in the other colums and emit diffs.
+        """
+        pass
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+
 class AILocalData(AITask):
     """
     Extract a CSV about source, id, doi and institutions for deduplication.
