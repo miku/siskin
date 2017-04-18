@@ -506,7 +506,16 @@ class AICompareLicensing(AITask):
         TODO: Extract two TSV files, sorted by ID. Then, in a uniq(1) style, compare
         the values in the other colums and emit diffs.
         """
-        pass
+        current = shellout("""unpigz -c {input} |
+                              jq -cr '[.["finc.record_id"], .["x.labels"]] | @csv' |
+                              LC_ALL=C sort -S35% > {output} """,
+                           input=self.input().get('current').path)
+        next = shellout("""unpigz -c {input} |
+                           jq -cr '[.["finc.record_id"], .["x.labels"]] | @csv' |
+                           LC_ALL=C sort -S35% > {output} """,
+                        input=self.input().get('next').path)
+        output = shellout("diff {current} {next} > {output}", current=current, next=next)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
