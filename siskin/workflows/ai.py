@@ -34,6 +34,7 @@ import datetime
 import itertools
 import os
 import re
+import shutil
 import string
 import tempfile
 
@@ -439,7 +440,8 @@ class AIBlobDB(AITask):
 
         shellout("microblob -db {tempdir} -file {input} -key finc.record_id", tempdir=tempdir, input=extracted)
         os.remove(extracted)
-        luigi.LocalTarget(tempdir).move(self.output().path)
+        os.makedirs(os.path.dirname(self.output().path))
+        shutil.move(tempdir, self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldb'))
