@@ -26,7 +26,7 @@ class CrossrefSnippet(luigi.ExternalTask, CrossrefTask):
     """ Some batch API excerpt. """
 
     def output(self):
-	return luigi.LocalTarget(path=self.assets('crossref.json.gz'))
+        return luigi.LocalTarget(path=self.assets('crossref.json.gz'))
 
 
 class CrossrefItems(CrossrefTask):
@@ -35,14 +35,14 @@ class CrossrefItems(CrossrefTask):
     """
 
     def requires(self):
-	return CrossrefSnippet()
+        return CrossrefSnippet()
 
     def run(self):
-	output = shellout("gunzip -c {input} | jq -cr '.message.items[]?' > {output}", input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("gunzip -c {input} | jq -cr '.message.items[]?' > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
 class CrossrefIntermediateSchema(CrossrefTask):
@@ -54,14 +54,14 @@ class CrossrefIntermediateSchema(CrossrefTask):
     """
 
     def requires(self):
-	return CrossrefItems()
+        return CrossrefItems()
 
     def run(self):
-	output = shellout("span-import -i crossref {input} > {output}", input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("span-import -i crossref {input} > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 if __name__ == '__main__':
     luigi.run(['CrossrefIntermediateSchema', '--workers', '1', '--local-scheduler'])

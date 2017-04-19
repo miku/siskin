@@ -27,20 +27,20 @@ class MergedSources(MergedTask):
     """ Merge various intermediate format files. """
 
     def requires(self):
-	return [
-	    CrossrefIntermediateSchema(),
-	    DOAJIntermediateSchema(),
-	    HarvestIntermediateSchema(),
-	]
+        return [
+            CrossrefIntermediateSchema(),
+            DOAJIntermediateSchema(),
+            HarvestIntermediateSchema(),
+        ]
 
     def run(self):
-	_, temp = tempfile.mkstemp(prefix='btag-')
-	for target in self.input():
-	    shellout("cat {input} >> {output}", input=target.path, output=temp)
-	luigi.LocalTarget(temp).move(self.output().path)
+        _, temp = tempfile.mkstemp(prefix='btag-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=temp)
+        luigi.LocalTarget(temp).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 if __name__ == '__main__':
     luigi.run(['MergedSources', '--workers', '4', '--local-scheduler'])
