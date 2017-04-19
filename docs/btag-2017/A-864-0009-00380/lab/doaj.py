@@ -7,8 +7,6 @@ Convert DOAJ JSON to intermediate format.
 
 from __future__ import print_function
 
-import os
-
 import luigi
 
 from common import DefaultTask
@@ -16,6 +14,7 @@ from gluish.utils import shellout
 
 
 class DOAJTask(DefaultTask):
+    """ DOAJ related tasks. """
     TAG = 'doaj'
 
 
@@ -25,7 +24,7 @@ class DOAJInput(luigi.ExternalTask, DOAJTask):
     """
 
     def output(self):
-	return luigi.LocalTarget(path=self.assets('doaj.ldj'))
+        return luigi.LocalTarget(path=self.assets('doaj.ldj'))
 
 
 class DOAJIntermediateSchema(DOAJTask):
@@ -34,14 +33,14 @@ class DOAJIntermediateSchema(DOAJTask):
     """
 
     def requires(self):
-	return DOAJInput()
+        return DOAJInput()
 
     def run(self):
-	output = shellout("span-import -i doaj {input} > {output}", input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("span-import -i doaj {input} > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 if __name__ == '__main__':
     luigi.run(['DOAJIntermediateSchema', '--workers', '1', '--local-scheduler'])

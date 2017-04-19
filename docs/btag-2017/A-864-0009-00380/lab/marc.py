@@ -16,6 +16,7 @@ from gluish.utils import shellout
 
 
 class MarcTask(DefaultTask):
+    """ Base tasks for marc files. """
     TAG = 'marc'
 
 
@@ -25,12 +26,12 @@ class MarcDownload(MarcTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-	output = shellout("""wget -O {output} https://ebooks.adelaide.edu.au/meta/pg/marc.zip""")
-	output = shellout("""unzip -p {input} > {output}""", input=output)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("""wget -O {output} https://ebooks.adelaide.edu.au/meta/pg/marc.zip""")
+        output = shellout("""unzip -p {input} > {output}""", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 
 class MarcIntermediateSchema(MarcTask):

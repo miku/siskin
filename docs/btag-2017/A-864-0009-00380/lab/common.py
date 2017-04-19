@@ -1,10 +1,13 @@
+#!/usr/bin/env python
 # coding: utf-8
+
+"""
+Common code.
+"""
 
 from __future__ import print_function
 
 import os
-
-import luigi
 
 from gluish.task import BaseTask
 
@@ -18,5 +21,5 @@ class DefaultTask(BaseTask):
     BASE = os.path.join(__dir__, '../outputs')
 
     def assets(self, path):
-	""" Return the absolute path for an asset. """
-	return os.path.join(__dir__, '../assets', path)
+        """ Return the absolute path for an asset. """
+        return os.path.join(__dir__, '../assets', path)

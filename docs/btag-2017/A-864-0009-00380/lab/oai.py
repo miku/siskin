@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+# pylint: disable=C0301
 
 """
 Harvest some OAI, live and keep a set around, if the net is down.
@@ -8,7 +9,6 @@ Harvest some OAI, live and keep a set around, if the net is down.
 from __future__ import print_function
 
 import datetime
-import os
 
 import luigi
 
@@ -17,6 +17,7 @@ from gluish.utils import shellout
 
 
 class HarvestTask(DefaultTask):
+    """ Harvesting base class. """
     TAG = 'harvest'
 
 
@@ -26,7 +27,7 @@ class HarvestInput(luigi.ExternalTask, HarvestTask):
     """
 
     def output(self):
-	return luigi.LocalTarget(path=self.assets('doaj.ldj'))
+        return luigi.LocalTarget(path=self.assets('doaj.ldj'))
 
 
 class HarvestLive(HarvestTask):
@@ -38,13 +39,13 @@ class HarvestLive(HarvestTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-	shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
-	output = shellout("""metha-cat -root Records "{endpoint}" > {output}""",
-			  endpoint=self.endpoint)
-	luigi.LocalTarget(output).move(self.output().path)
+        shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
+        output = shellout("""metha-cat -root Records "{endpoint}" > {output}""",
+                          endpoint=self.endpoint)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class HarvestIntermediateSchema(HarvestTask):
@@ -55,16 +56,16 @@ class HarvestIntermediateSchema(HarvestTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-	return HarvestLive(endpoint=self.endpoint, date=self.date)
+        return HarvestLive(endpoint=self.endpoint, date=self.date)
 
     def run(self):
-	mapdir = 'file:///%s' % self.assets("maps/")
-	output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-			  flux=self.assets("harvest/flux.flux"), mapdir=mapdir, input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        mapdir = 'file:///%s' % self.assets("maps/")
+        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
+                          flux=self.assets("harvest/flux.flux"), mapdir=mapdir, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
 if __name__ == '__main__':
