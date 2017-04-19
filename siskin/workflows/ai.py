@@ -32,6 +32,7 @@
 import collections
 import datetime
 import itertools
+import multiprocessing
 import os
 import re
 import shutil
@@ -506,15 +507,31 @@ class AICompareLicensing(AITask):
         TODO: Extract two TSV files, sorted by ID. Then, in a uniq(1) style, compare
         the values in the other colums and emit diffs.
         """
-        current = shellout("""unpigz -c {input} |
-                              jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv' |
-                              LC_ALL=C sort -S35% > {output} """,
-                           input=self.input().get('current').path)
-        next = shellout("""unpigz -c {input} |
-                           jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv' |
-                           LC_ALL=C sort -S35% > {output} """,
-                        input=self.input().get('next').path)
-        output = shellout("diff {current} {next} > {output}", current=current, next=next)
+        queue = multiprocessing.Queue()
+
+        def fun(path, name, queue):
+            """ Inner function, so we can parallelize. """
+            output = shellout("""unpigz -c {input} |
+                        jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv' |
+                        LC_ALL=C sort -S35% > {output} """,
+                              input=path)
+            queue.put((name, output))
+
+        processes = [
+            multiprocessing.Process(target=fun, args=(self.input().get('current').path, 'current', queue)),
+            multiprocessing.Process(target=fun, args=(self.input().get('next').path, 'next', queue)),
+        ]
+
+        for p in processes:
+            p.start()
+
+        for p in processes:
+            p.join()
+
+        filemap = dict([queue.get() for _ in processes])
+
+        output = shellout("diff {current} {next} > {output}",
+                          current=filemap.get('current'), next=filemap.get('next'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
