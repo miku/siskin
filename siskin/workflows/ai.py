@@ -51,7 +51,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfig, AMSLFilterConfigNext, AMSLHoldingsFile,
+from siskin.sources.amsl import (AMSLFilterConfigDeprecated, AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
@@ -469,7 +469,7 @@ class AILicensing(AITask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class AILicensingNext(AITask):
+class AILicensing(AITask):
     """
     Temporary task to compare ISIL attachments side by side.
     """
@@ -478,7 +478,7 @@ class AILicensingNext(AITask):
     def requires(self):
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfigNext(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
         }
 
     def run(self):
@@ -498,8 +498,8 @@ class AICompareLicensing(AITask):
 
     def requires(self):
         return {
+            'deprecated': AILicensingDeprecated(date=self.date),
             'current': AILicensing(date=self.date),
-            'next': AILicensingNext(date=self.date),
         }
 
     def run(self):
@@ -517,8 +517,8 @@ class AICompareLicensing(AITask):
             queue.put((name, output))
 
         processes = [
+            multiprocessing.Process(target=fun, args=(self.input().get('deprecated').path, 'deprecated', queue)),
             multiprocessing.Process(target=fun, args=(self.input().get('current').path, 'current', queue)),
-            multiprocessing.Process(target=fun, args=(self.input().get('next').path, 'next', queue)),
         ]
 
         for p in processes:
@@ -529,8 +529,8 @@ class AICompareLicensing(AITask):
 
         filemap = dict([queue.get() for _ in processes])
 
-        output = shellout("LC_ALL=C comm -3 {current} {next} > {output}",
-                          current=filemap.get('current'), next=filemap.get('next'))
+        output = shellout("LC_ALL=C comm -3 {deprecated} {current} > {output}",
+                          deprecated=filemap.get('deprecated'), current=filemap.get('current'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

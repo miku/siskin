@@ -427,7 +427,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
 class AMSLBuckets(AMSLTask):
     """
-    Deprecated: Will be replaced by AMSLFilterConfigNext.
+    Deprecated: Will be replaced by AMSLFilterConfig.
 
     Assemble attachment configuration from AMSL.
 
@@ -518,9 +518,9 @@ class AMSLBuckets(AMSLTask):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
 
-class AMSLFilterConfig(AMSLTask):
+class AMSLFilterConfigDeprecated(AMSLTask):
     """
-    Deprecated: Will be replaced by AMSLFilterConfigNext.
+    Deprecated: Will be replaced by AMSLFilterConfigDeprecated.
 
     Convert to filterconfig format. With a few
     hard-wired exceptions for various sources.
@@ -783,7 +783,7 @@ class AMSLFilterConfig(AMSLTask):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
 
-class AMSLFilterConfigNext(AMSLTask):
+class AMSLFilterConfig(AMSLTask):
     """
     This task turns an AMSL API response into a filterconfig, which span-tag
     can understand.
@@ -819,7 +819,7 @@ class AMSLFilterConfigNext(AMSLTask):
                 AMSL Discovery API
                         |
                         v
-                AMSLFilterConfigNext
+                AMSLFilterConfig
                         |
                         v
         $ span-tag -c config.json < input.is > output.is
