@@ -512,9 +512,8 @@ class AICompareLicensing(AITask):
         def fun(path, name, queue):
             """ Inner function, so we can parallelize. """
             output = shellout("""unpigz -c {input} |
-                        jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv' |
-                        LC_ALL=C sort -S35% > {output} """,
-                              input=path)
+                                 jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv |
+                                 LC_ALL=C sort -S35% > {output} """, input=path)
             queue.put((name, output))
 
         processes = [
@@ -530,7 +529,7 @@ class AICompareLicensing(AITask):
 
         filemap = dict([queue.get() for _ in processes])
 
-        output = shellout("comm -3 {current} {next} > {output}",
+        output = shellout("LC_ALL=C comm -3 {current} {next} > {output}",
                           current=filemap.get('current'), next=filemap.get('next'))
         luigi.LocalTarget(output).move(self.output().path)
 
