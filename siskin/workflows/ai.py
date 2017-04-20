@@ -530,7 +530,7 @@ class AICompareLicensing(AITask):
 
         filemap = dict([queue.get() for _ in processes])
 
-        output = shellout("diff {current} {next} > {output}",
+        output = shellout("diff -q -H {current} {next} > {output}",
                           current=filemap.get('current'), next=filemap.get('next'))
         luigi.LocalTarget(output).move(self.output().path)
 
