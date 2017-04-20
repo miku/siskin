@@ -512,7 +512,7 @@ class AICompareLicensing(AITask):
         def fun(path, name, queue):
             """ Inner function, so we can parallelize. """
             output = shellout("""unpigz -c {input} |
-                                 jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv |
+                                 jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv' |
                                  LC_ALL=C sort -S35% > {output} """, input=path)
             queue.put((name, output))
 
