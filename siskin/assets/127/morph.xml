@@ -19,7 +19,7 @@
                     <regexp match="^(m).*" /> <!-- falls Monografie -->
                     <constant value="m" />
                 </data>
-                <data source="052" name="pos7"> <!-- falls Zeitschrift (Feld muss lediglich besetzt sein) -->
+                <data source="052" name="pos7"> <!-- falls Zeitschrift oder Reihe (Feld muss lediglich besetzt sein) -->
                     <constant value="s" />
                 </data>
                 <data source="051" name="pos7">
@@ -45,6 +45,11 @@
         <!-- wird benötigt, um zwischen elektronischen und physischen Ressourcen zu unterscheiden -->
         <combine name="007" value="${pos1-2}">
             <choose>
+                <data source="655" name="pos1-2">
+                    <substring start="0" end="15" />
+                    <not-equals string="http://d-nb.info" /> <!-- eine elektronische Ressource, aber nicht nur Inhaltsverzeichnis -->
+                    <constant value="cr" />
+                </data>
                 <data source="050" name="pos1-2">
                     <regexp match="(.....ca)" />
                     <constant value="vf" /> <!-- Videobandkassette -->
@@ -83,11 +88,13 @@
                 </data>
                 <data source="050" name="pos1-2">
                 <regexp match="(.....ba)" />
-                    <constant value="mr" /> <!-- Filmspule -->
+                    <!--<constant value="mr" /> <! Filmspule -->
+                    <constant value="vf" /> <!-- Videokassette -->
                 </data>
                 <data source="050" name="pos1-2">
                 <regexp match="(.....ac)" />
-                    <constant value="st" /> <!-- Tonband -->
+                    <!-- <constant value="st" /> < Tonband -->
+                    <constant value="vf" /> <!-- Videokassette -->
                 </data>
                 <data source="050" name="pos1-2">
                 <regexp match="(.....dc)" />
@@ -132,7 +139,17 @@
                     <substring start="0" end="1" />
                     <equals string="p" />
                 </data>
-                <data source="052">
+                <combine name="" value="{journal}">
+                    <data source="052" name="journal">
+                        <substring start="0" end="1" />
+                        <equals string="r" />
+                        <constant value="p" />
+                    </data>
+                    <data source="331">
+                        <regexp match="Zeitschrift" />
+                    </data>
+                </combine>
+                <data source="052" name="journal">
                     <substring start="0" end="1" />
                     <equals string="r" />
                     <constant value="m" />
@@ -307,7 +324,12 @@
         </entity>
 
         <entity name="490  " flushWith="record">
-		    <data source="454c" name="a" />
+		    <choose name="a">
+                <data source="454c" />
+                <!-- Film und Fernsehen ; 21/22 -->
+                <data source="597" />
+                <data source="590" />
+            </choose>
             <data source="455" name="v" />
         </entity>
 
@@ -446,30 +468,36 @@
             </combine>
         </entity>
 
-        <entity name="856  " flushWith="655" reset="true">
+        <entity name="856  " flushWith="record">
             <!-- URL zur elektronischen Ressource -->
             <!-- beginnt teilweise mit htm$$u und endet teilweise mit $$ -->
             <!-- http://www.shortfilm.ch -->
             <!-- http://www.ses.fi$$9htm -->
             <!-- htm$$uhttp://www.freidok.uni-freiburg.de/volltexte/127/$$ -->
             <choose name="u">
-                <data source="655">
+                <data source="655" name="u">
                     <regexp match="^(http.*)\$\$9" format="${1}" />
                 </data>
-                <data source="655">
+                <data source="655" name="u">
                     <regexp match="\$\$u(http.*)\$\$" format="${1}" />
                 </data>
-                <data source="655">
+                <data source="655" name="u">
                     <regexp match="\$\$u(http.*)" format="${1}" />
                 </data>
-                <data source="655">
+                <data source="655" name="u">
                     <regexp match="http.*" />
                 </data>
             </choose>
+            <choose>
+            <data source="655" name="3">
+                <regexp match="http://d-nb.info" /> <!-- Bedingung, damit Feld nur erscheint, wenn Feld u belegt ist -->
+                <constant value="Link zum Inhaltsverzeichnis" />
+            </data>
             <data source="655" name="3">
                 <regexp match="^\S" /> <!-- Bedingung, damit Feld nur erscheint, wenn Feld u belegt ist -->
                 <constant value="Link zur Ressource" />
             </data>
+            </choose>
         </entity>
 
         <entity name="856  " flushWith="record">
@@ -485,6 +513,10 @@
             </data>
         </entity>
 
+        <data source="655" name="@url">
+            <regexp match=".*(d-nb).*" format="{1}" />
+        </data>
+
         <entity name="935  " flushWith="record">
             <choose name="b">
                 <data source="335|433c|501|750c|720|433|437">
@@ -496,6 +528,10 @@
                     <equals string="|||||aa|||||||" />
                     <constant value="cdda" />
                     <occurrence only="1" />
+                </data>
+                <data source="@url">
+                    <not-equals string="d-nb" /> <!-- URL soll nicht nur auf Inhaltsverzeichnis verweisen -->
+                    <constant value="cofz" />
                 </data>
             </choose>
             <choose name="c">
