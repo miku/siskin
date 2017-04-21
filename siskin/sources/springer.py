@@ -37,7 +37,7 @@ import luigi
 
 from gluish.format import Gzip
 from gluish.utils import shellout
-from siskin.sources.amsl import AMSLFilterConfigNext
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
@@ -62,7 +62,7 @@ class SpringerTagged(SpringerTask):
     def requires(self):
         return {
             'file': SpringerIntermediateSchema(),
-            'config': AMSLFilterConfigNext(),
+            'config': AMSLFilterConfig(),
         }
 
     def run(self):
