@@ -51,7 +51,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigDeprecated, AMSLFilterConfig, AMSLHoldingsFile,
+from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
@@ -467,53 +467,6 @@ class AILicensing(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
-class AICompareLicensing(AITask):
-    """
-    Ad-hoc task to compare result of various licensing modes.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'deprecated': AILicensingDeprecated(date=self.date),
-            'current': AILicensing(date=self.date),
-        }
-
-    def run(self):
-        """
-        TODO: Extract two TSV files, sorted by ID. Then, in a uniq(1) style, compare
-        the values in the other colums and emit diffs.
-        """
-        queue = multiprocessing.Queue()
-
-        def fun(path, name, queue):
-            """ Inner function, so we can parallelize. """
-            output = shellout("""unpigz -c {input} |
-                                 jq -cr '[.["finc.record_id"], ([.["x.labels"][]?]|sort|.[])? ] | @csv' |
-                                 LC_ALL=C sort -S35% > {output} """, input=path)
-            queue.put((name, output))
-
-        processes = [
-            multiprocessing.Process(target=fun, args=(self.input().get('deprecated').path, 'deprecated', queue)),
-            multiprocessing.Process(target=fun, args=(self.input().get('current').path, 'current', queue)),
-        ]
-
-        for p in processes:
-            p.start()
-
-        for p in processes:
-            p.join()
-
-        filemap = dict([queue.get() for _ in processes])
-
-        output = shellout("LC_ALL=C comm -3 {deprecated} {current} > {output}",
-                          deprecated=filemap.get('deprecated'), current=filemap.get('current'))
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
 
 
 class AILocalData(AITask):
