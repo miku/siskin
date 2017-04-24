@@ -461,8 +461,8 @@ class AMSLFilterConfig(AMSLTask):
     *only* place, where additional information can be added.
 
     Also, span-tag is fast, but not that fast, that we can iterate over a
-    disjuction of 60000 items fast enough, which, if we could, would simplify
-    the implementation of this task.
+    disjuction of 60K items for each of the 100M documents fast enough,
+    which, if we could, would simplify the implementation of this task.
 
     The main speed improvement comes from using lists of collection names
     instead of having each collection processed separately - which is how it
