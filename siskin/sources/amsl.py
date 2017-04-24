@@ -531,11 +531,11 @@ class AMSLFilterConfig(AMSLTask):
                 missing = []
 
             for key in contains:
-                if bool(operator.itemgetter(key)(item)) is False:
+                if not bool(operator.itemgetter(key)(item)):
                     return False
 
             for key in missing:
-                if bool(operator.itemgetter(key)(item)) is True:
+                if bool(operator.itemgetter(key)(item)):
                     return False
 
             return True
