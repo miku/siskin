@@ -309,9 +309,9 @@ class AMSLCollectionsISIL(AMSLTask):
                 continue
             if not item['ISIL'] == self.isil:
                 continue
-        scmap[item['sourceID']].add(item['megaCollection'].strip())
-        if not scmap:
-            raise RuntimeError('no collections found for ISIL: %s' % self.isil)
+            scmap[item['sourceID']].add(item['megaCollection'].strip())
+            if not scmap:
+                raise RuntimeError('no collections found for ISIL: %s' % self.isil)
 
         with self.output().open('w') as output:
             output.write(json.dumps(scmap, cls=SetEncoder) + "\n")
@@ -355,22 +355,17 @@ class AMSLHoldingsFile(AMSLTask):
 
                 # refs. #7142
                 if 'kbart' not in holding[urikey].lower():
-                    self.logger.debug(
-                        "skipping non-KBART holding URI: %s", holding[urikey])
+                    self.logger.debug("skipping non-KBART holding URI: %s", holding[urikey])
                     continue
 
-                link = "%s%s" % (self.config.get(
-                    'amsl', 'uri-download-prefix'), holding[urikey])
-                downloaded = shellout(
-                    "curl --fail {link} > {output} ", link=link)
+                link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), holding[urikey])
+                downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
-                    shellout("unzip -p {input} >> {output}",
-                             input=downloaded, output=stopover)
+                    shellout("unzip -p {input} >> {output}", input=downloaded, output=stopover)
                 except zipfile.BadZipfile:
                     # at least the file is not a zip.
-                    shellout("cat {input} >> {output}",
-                             input=downloaded, output=stopover)
+                    shellout("cat {input} >> {output}", input=downloaded, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
