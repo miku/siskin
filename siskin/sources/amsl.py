@@ -534,7 +534,8 @@ class AMSLFilterConfig(AMSLTask):
                 # --------------------------------
                 # X   X    X    -    -    -     X
 
-                self.logger.debug("ignoring case with product isil for AI %s, %s, %s", item['ISIL'], item['sourceID'], item['productISIL'])
+                self.logger.debug("ignoring case with product isil for AI %s, %s, %s",
+                                  item['ISIL'], item['sourceID'], item['productISIL'])
 
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
