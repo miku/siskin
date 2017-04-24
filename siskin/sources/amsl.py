@@ -856,52 +856,98 @@ class AMSLFilterConfigX(AMSLTask):
             doc = json.loads(handle.read())
 
         for item in doc:
-            # SID, Collection, ISIL
             if (all(operator.itemgetter('sourceID',
                                         'megaCollection',
                                         'ISIL')(item)) and
                     not any(operator.itemgetter('linkToHoldingsFile',
                                                 'linkToContentFile',
-                                                'externalLinkToContentFile')(item))):
+                                                'externalLinkToContentFile',
+                                                'productISIL')(item))):
                 print("Case 1 (ISIL, SID, Collection)")
-            # SID, Collection, ISIL, HoldingFile
+                # Group collections by ISIL and SID, combine into:
+                # {"and": [{"source": [SID]}, {"collection": [...]}]}
+
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'productISIL')(item)) and
+                    not any(operator.itemgetter('linkToContentFile',
+                                                'externalLinkToContentFile')(item))):
+                print("Case 2 (ISIL, SID, Collection, Product ISIL)")
+                # ProductISIL can be ignored for AI for the moment.
+
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
                                           'ISIL',
                                           'linkToHoldingsFile')(item)) and
                     not any(operator.itemgetter('linkToContentFile',
-                                                'externalLinkToContentFile')(item))):
-                print("Case 2 (ISIL, SID, Collection, Holding File)")
-            # SID, Collection, ISIL, External Content
+                                                'externalLinkToContentFile',
+                                                'productISIL')(item))):
+                print("Case 3 (ISIL, SID, Collection, Holding File)")
+                # Group collections by ISIL, SID and holding file, combine into:
+                # {"and": [{"source": [SID]}, {"collection": [...]}, {"holdings": {"urls": [...]}}]}
+
+                # Exception: SID 48 should not use collection name, combine into:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
+
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
                                           'ISIL',
                                           'externalLinkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile', 'linkToContentFile')(item))):
-                print("Case 3 (ISIL, SID, Collection, External Content File)")
-            # SID, Collection, ISIL, Internal Content
+                    not any(operator.itemgetter('linkToHoldingsFile',
+                                                'linkToContentFile',
+                                                'productISIL')(item))):
+                print("Case 4 (ISIL, SID, Collection, External Content File)")
+                # Create a single item: ISIL, SID, content file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
+                #
+                # Content files are used, when the raw data does not carry its collection.
+
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
                                           'ISIL',
                                           'linkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile', 'externalLinkToContentFile')(item))):
-                print("Case 4 (ISIL, SID, Collection, Internal Content File)")
-            # SID, Collection, ISIL, HoldingsFile, External Content
+                    not any(operator.itemgetter('linkToHoldingsFile',
+                                                'externalLinkToContentFile',
+                                                'productISIL')(item))):
+                print("Case 5 (ISIL, SID, Collection, Internal Content File)")
+                # Create a single item: ISIL, SID, content file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
+                #
+                # Content files are used, when the raw data does not carry its collection.
+
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
                                           'ISIL',
                                           'linkToHoldingsFile',
                                           'externalLinkToContentFile')(item)) and
-                    not operator.itemgetter('linkToContentFile')(item)):
-                print("Case 5 (ISIL, SID, Collection, External Content File, Holding File)")
-            # SID, Collection, ISIL, HoldingsFile, Internal Content
+                    not any(operator.itemgetter('linkToContentFile',
+                                                'productISIL')(item))):
+                print("Case 6 (ISIL, SID, Collection, External Content File, Holding File)")
+                # Create a single item: ISIL, SID, content file, holding file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
+                #
+
+                # First, the content file restricts the set of records, then
+                # another holding file can restrict the attachments, e.g. list of
+                # ISSN or other.
+
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
                                           'ISIL',
                                           'linkToHoldingsFile',
                                           'linkToContentFile')(item)) and
-                    not operator.itemgetter('externalLinkToContentFile')(item)):
-                print("Case 6 (ISIL, SID, Collection, Internal Content File, Holding File)")
+                    not any(operator.itemgetter('externalLinkToContentFile',
+                                                'productISIL')(item))):
+                print("Case 7 (ISIL, SID, Collection, Internal Content File, Holding File)")
+                # Create a single item: ISIL, SID, content file, holding file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
+                #
+
+                # First, the content file restricts the set of records, then
+                # another holding file can restrict the attachments, e.g. list of
+                # ISSN or other.
+
             else:
                 self.logger.debug(item)
                 raise RuntimeError("unhandled combination of sid, collection and other parameters")
