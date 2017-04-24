@@ -480,6 +480,20 @@ class AMSLFilterConfig(AMSLTask):
     attachment, each alternative consisting of around three filters. Around 30
     holding or content files each with between 10 and 50000 entries referenced
     220 times in total: around 20k records/s.
+
+    Case table:
+
+    SID COLL ISIL LTHF LTCF ELTCF PI
+    --------------------------------
+    X   X    X    -    -    -     -
+    X   X    X    X    -    -     -
+    X   X    X    X    X    -     -
+    X   X    X    X    -    X     -
+    X   X    X    X    -    -     X
+    X   X    X    -    X    -     -
+    X   X    X    -    -    X     -
+    X   X    X    -    -    -     X
+
     """
 
     date = luigi.Parameter(default=datetime.date.today())
