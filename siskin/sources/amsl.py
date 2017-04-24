@@ -556,7 +556,10 @@ class AMSLFilterConfig(AMSLTask):
                 # Exception: SID 48 should not use collection name, combine into:
                 # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
 
-                isilsidfilecollections[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].add(item['megaCollection'])
+                if item.get('evaluateHoldingsFileForLibrary') == "yes":
+                    isilsidfilecollections[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].add(item['megaCollection'])
+                else:
+                    self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
 
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
@@ -626,12 +629,15 @@ class AMSLFilterConfig(AMSLTask):
                 # another holding file can restrict the attachments, e.g. list of
                 # ISSN or other.
 
-                isilfilters[item["ISIL"]].append({
-                    "and": [
-                        {"source": [item["sourceID"]]},
-                        {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
-                        {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
-                    ]})
+                if item.get('evaluateHoldingsFileForLibrary') == "yes":
+                    isilfilters[item["ISIL"]].append({
+                        "and": [
+                            {"source": [item["sourceID"]]},
+                            {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
+                            {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
+                        ]})
+                else:
+                    self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
 
             elif (all(operator.itemgetter('sourceID',
                                           'megaCollection',
@@ -653,12 +659,15 @@ class AMSLFilterConfig(AMSLTask):
                 # another holding file can restrict the attachments, e.g. list of
                 # ISSN or other.
 
-                isilfilters[item["ISIL"]].append({
-                    "and": [
-                        {"source": [item["sourceID"]]},
-                        {"holdings": {"urls": [item["linkToContentFile"]]}},
-                        {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
-                    ]})
+                if item.get('evaluateHoldingsFileForLibrary') == "yes":
+                    isilfilters[item["ISIL"]].append({
+                        "and": [
+                            {"source": [item["sourceID"]]},
+                            {"holdings": {"urls": [item["linkToContentFile"]]}},
+                            {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
+                        ]})
+                else:
+                    self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
             else:
                 # Bail out, if none of the above cases holds.
                 self.logger.debug(item)
