@@ -46,6 +46,7 @@ fid-issn-list = https://goo.gl/abcdef
 import collections
 import datetime
 import json
+import operator
 import tempfile
 import zipfile
 
@@ -778,6 +779,132 @@ class AMSLFilterConfigDeprecated(AMSLTask):
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+
+class AMSLFilterConfigX(AMSLTask):
+    """
+    Next version of AMSL filter config.
+
+    Cases:
+
+    (1) Source and collection:
+
+        {
+            "sourceID": "64",
+            "megaCollection": "Perinorm – Datenbank für Normen und technische Regeln",
+            "ISIL": "DE-105",
+        },
+
+    (2) Source, collection and holding file
+
+        {
+            "sourceID": "94",
+            "megaCollection": "Blackwell Publishing Journal Backfiles 1879-2005",
+            "ISIL": "DE-105",
+            "linkToHoldingsFile": "https://example.com/O/f/g?s=x"
+        },
+
+    (3) Source, collection and holding file, but collection name is not in metadata:
+
+        {
+            "sourceID": "48",
+            "megaCollection": "Genios (Fachzeitschriften)", // <- this is not in raw data
+            "ISIL": "DE-105",
+            "linkToHoldingsFile": "https://example.com/O/f/g?s=x"
+        },
+
+    (4) Source, collection and content file, but collection must be ignored:
+
+        {
+            "sourceID": "55",
+            "megaCollection": "JSTOR Arts & Sciences I Archive", // <- this is not in raw data
+            "externalLinkToContentFile": "http://www.jstor.org/kbart/collections/as",
+            "ISIL": "DE-15",
+        },
+
+    (5) Source, collection, (external) content and holding file. Collection name must be ignored.
+
+        {
+            "sourceID": "55",
+            "megaCollection": "JSTOR Arts & Sciences I Archive", // <- this is not in raw data
+            "externalLinkToContentFile": "http://www.jstor.org/kbart/collections/as",
+            "ISIL": "DE-15-FID",
+            "linkToHoldingsFile": "https://example.com/O/f/g?s=x"
+        },
+
+    (6) Source, collection, (internal) content file. Collection name must be ignored.
+
+        {
+            "sourceID": "55",
+            "megaCollection": "JSTOR Film and Performing Arts",
+            "linkToContentFile": "https://example.com/O/f/g?s=x",
+            "ISIL": "DE-L242",
+        },
+
+    """
+
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def requires(self):
+        return AMSLService(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.loads(handle.read())
+
+        for item in doc:
+            # SID, Collection, ISIL
+            if (all(operator.itemgetter('sourceID',
+                                        'megaCollection',
+                                        'ISIL')(item)) and
+                    not any(operator.itemgetter('linkToHoldingsFile',
+                                                'linkToContentFile',
+                                                'externalLinkToContentFile')(item))):
+                print("Case 1 (ISIL, SID, Collection)")
+            # SID, Collection, ISIL, HoldingFile
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToHoldingsFile')(item)) and
+                    not any(operator.itemgetter('linkToContentFile',
+                                                'externalLinkToContentFile')(item))):
+                print("Case 2 (ISIL, SID, Collection, Holding File)")
+            # SID, Collection, ISIL, External Content
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'externalLinkToContentFile')(item)) and
+                    not any(operator.itemgetter('linkToHoldingsFile', 'linkToContentFile')(item))):
+                print("Case 3 (ISIL, SID, Collection, External Content File)")
+            # SID, Collection, ISIL, Internal Content
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToContentFile')(item)) and
+                    not any(operator.itemgetter('linkToHoldingsFile', 'externalLinkToContentFile')(item))):
+                print("Case 4 (ISIL, SID, Collection, Internal Content File)")
+            # SID, Collection, ISIL, HoldingsFile, External Content
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToHoldingsFile',
+                                          'externalLinkToContentFile')(item)) and
+                    not operator.itemgetter('linkToContentFile')(item)):
+                print("Case 5 (ISIL, SID, Collection, External Content File, Holding File)")
+            # SID, Collection, ISIL, HoldingsFile, Internal Content
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToHoldingsFile',
+                                          'linkToContentFile')(item)) and
+                    not operator.itemgetter('externalLinkToContentFile')(item)):
+                print("Case 6 (ISIL, SID, Collection, Internal Content File, Holding File)")
+            else:
+                self.logger.debug(item)
+                raise RuntimeError("unhandled combination of sid, collection and other parameters")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
