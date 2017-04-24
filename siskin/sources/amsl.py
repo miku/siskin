@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301,E1101
+# pylint: disable=C0301,E1101,C0330
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -42,6 +42,8 @@ base = https://example.com
 fid-issn-list = https://goo.gl/abcdef
 
 """
+
+from __future__ import print_function
 
 import collections
 import datetime
