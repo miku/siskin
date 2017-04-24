@@ -786,180 +786,32 @@ class AMSLFilterConfigDeprecated(AMSLTask):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
 
-class AMSLFilterConfigX(AMSLTask):
+class AMSLFilterConfig(AMSLTask):
     """
     Next version of AMSL filter config.
 
     Cases:
 
-    (1) Source and collection:
+    61084 Case 3 (ISIL, SID, Collection, Holding File)
+      805 Case 2 (ISIL, SID, Collection, Product ISIL)
+      380 Case 1 (ISIL, SID, Collection)
+       38 Case 4 (ISIL, SID, Collection, External Content File)
+       31 Case 6 (ISIL, SID, Collection, External Content File, Holding File)
+        1 Case 7 (ISIL, SID, Collection, Internal Content File, Holding File)
+        1 Case 5 (ISIL, SID, Collection, Internal Content File)
 
-        {
-            "sourceID": "64",
-            "megaCollection": "Perinorm – Datenbank für Normen und technische Regeln",
-            "ISIL": "DE-105",
-        },
+    Process:
 
-    (2) Source, collection and holding file
+                AMSL Discovery API
+                      |
+                      v
+                AMSLFilterConfig
+                      |
+                      v
+        $ span-tag -c config.json < input.is > output.is
 
-        {
-            "sourceID": "94",
-            "megaCollection": "Blackwell Publishing Journal Backfiles 1879-2005",
-            "ISIL": "DE-105",
-            "linkToHoldingsFile": "https://example.com/O/f/g?s=x"
-        },
+    Notes:
 
-    (3) Source, collection and holding file, but collection name is not in metadata:
-
-        {
-            "sourceID": "48",
-            "megaCollection": "Genios (Fachzeitschriften)", // <- this is not in raw data
-            "ISIL": "DE-105",
-            "linkToHoldingsFile": "https://example.com/O/f/g?s=x"
-        },
-
-    (4) Source, collection and content file, but collection must be ignored:
-
-        {
-            "sourceID": "55",
-            "megaCollection": "JSTOR Arts & Sciences I Archive", // <- this is not in raw data
-            "externalLinkToContentFile": "http://www.jstor.org/kbart/collections/as",
-            "ISIL": "DE-15",
-        },
-
-    (5) Source, collection, (external) content and holding file. Collection name must be ignored.
-
-        {
-            "sourceID": "55",
-            "megaCollection": "JSTOR Arts & Sciences I Archive", // <- this is not in raw data
-            "externalLinkToContentFile": "http://www.jstor.org/kbart/collections/as",
-            "ISIL": "DE-15-FID",
-            "linkToHoldingsFile": "https://example.com/O/f/g?s=x"
-        },
-
-    (6) Source, collection, (internal) content file. Collection name must be ignored.
-
-        {
-            "sourceID": "55",
-            "megaCollection": "JSTOR Film and Performing Arts",
-            "linkToContentFile": "https://example.com/O/f/g?s=x",
-            "ISIL": "DE-L242",
-        },
-
-    """
-
-    date = luigi.Parameter(default=datetime.date.today())
-
-    def requires(self):
-        return AMSLService(date=self.date)
-
-    def run(self):
-        with self.input().open() as handle:
-            doc = json.loads(handle.read())
-
-        for item in doc:
-            if (all(operator.itemgetter('sourceID',
-                                        'megaCollection',
-                                        'ISIL')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile',
-                                                'linkToContentFile',
-                                                'externalLinkToContentFile',
-                                                'productISIL')(item))):
-                print("Case 1 (ISIL, SID, Collection)")
-                # Group collections by ISIL and SID, combine into:
-                # {"and": [{"source": [SID]}, {"collection": [...]}]}
-
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'productISIL')(item)) and
-                    not any(operator.itemgetter('linkToContentFile',
-                                                'externalLinkToContentFile')(item))):
-                print("Case 2 (ISIL, SID, Collection, Product ISIL)")
-                # ProductISIL can be ignored for AI for the moment.
-
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToHoldingsFile')(item)) and
-                    not any(operator.itemgetter('linkToContentFile',
-                                                'externalLinkToContentFile',
-                                                'productISIL')(item))):
-                print("Case 3 (ISIL, SID, Collection, Holding File)")
-                # Group collections by ISIL, SID and holding file, combine into:
-                # {"and": [{"source": [SID]}, {"collection": [...]}, {"holdings": {"urls": [...]}}]}
-
-                # Exception: SID 48 should not use collection name, combine into:
-                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
-
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'externalLinkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile',
-                                                'linkToContentFile',
-                                                'productISIL')(item))):
-                print("Case 4 (ISIL, SID, Collection, External Content File)")
-                # Create a single item: ISIL, SID, content file:
-                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
-                #
-                # Content files are used, when the raw data does not carry its collection.
-
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile',
-                                                'externalLinkToContentFile',
-                                                'productISIL')(item))):
-                print("Case 5 (ISIL, SID, Collection, Internal Content File)")
-                # Create a single item: ISIL, SID, content file:
-                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
-                #
-                # Content files are used, when the raw data does not carry its collection.
-
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToHoldingsFile',
-                                          'externalLinkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToContentFile',
-                                                'productISIL')(item))):
-                print("Case 6 (ISIL, SID, Collection, External Content File, Holding File)")
-                # Create a single item: ISIL, SID, content file, holding file:
-                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
-                #
-
-                # First, the content file restricts the set of records, then
-                # another holding file can restrict the attachments, e.g. list of
-                # ISSN or other.
-
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToHoldingsFile',
-                                          'linkToContentFile')(item)) and
-                    not any(operator.itemgetter('externalLinkToContentFile',
-                                                'productISIL')(item))):
-                print("Case 7 (ISIL, SID, Collection, Internal Content File, Holding File)")
-                # Create a single item: ISIL, SID, content file, holding file:
-                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
-                #
-
-                # First, the content file restricts the set of records, then
-                # another holding file can restrict the attachments, e.g. list of
-                # ISSN or other.
-
-            else:
-                self.logger.debug(item)
-                raise RuntimeError("unhandled combination of sid, collection and other parameters")
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
-
-
-class AMSLFilterConfig(AMSLTask):
-    """
     This task turns an AMSL API response into a filterconfig, which span-tag
     can understand.
 
@@ -975,12 +827,8 @@ class AMSLFilterConfig(AMSLTask):
     works conceptually: Each collection could use a separate KBART file (or use
     none at all).
 
-    We group all collections by (isil, source id, url) first, so we can use
-    lists of collections, even if a single source uses different KBART files
-    for different collections.
-
-    Further, we ignore collection names, if (external) content files are used.
-    These content files are usually there, because the data source contains
+    We ignore collection names, if (external) content files are used. These
+    content files are usually there, because the data source contains
     collections, which cannot be determined by the datum itself.
 
     For SID 48 we test simple attachments via DB names parsed from KBART (span
@@ -988,17 +836,8 @@ class AMSLFilterConfig(AMSLTask):
 
     Performance data point: 22 ISIL each with between 1 and 26 alternatives for
     attachment, each alternative consisting of around three filters. Around 30
-    holding or content files each with between 10 and 50000 entries referenced 220
-    times in total: around 20k records/s.
-
-                AMSL Discovery API
-                        |
-                        v
-                AMSLFilterConfig
-                        |
-                        v
-        $ span-tag -c config.json < input.is > output.is
-
+    holding or content files each with between 10 and 50000 entries referenced
+    220 times in total: around 20k records/s.
     """
 
     date = luigi.Parameter(default=datetime.date.today())
@@ -1010,107 +849,178 @@ class AMSLFilterConfig(AMSLTask):
         with self.input().open() as handle:
             doc = json.loads(handle.read())
 
-        # Group collections by ISIL, source ID and link.
-        #
-        # {
-        #     'DE-291-114': {
-        #         '0': {
-        #             '_collections': ['Verbunddaten SWB']
-        #         },
-        #         '49': {
-        #             'https://x.com/KBART_DEJ59': ['21st Century COE Program (CrossRef)', ...]
-        #         },
-        #         ...
-        #     },
-        #     ...
-        # }
-        grouped = collections.defaultdict(
+        # Case: sid and collection.
+        isilsidcollections = collections.defaultdict(
+            lambda: collections.defaultdict(set))
+
+        # Case: sid, collection, holding file.
+        isilsidfilecollections = collections.defaultdict(
             lambda: collections.defaultdict(
-                lambda: collections.defaultdict(list)))
+                lambda: collections.defaultdict(set)))
+
+        # Ready-made filters per ISIL:
+        isilfilters = collections.defaultdict(list)
 
         for item in doc:
+            if (all(operator.itemgetter('sourceID',
+                                        'megaCollection',
+                                        'ISIL')(item)) and
+                    not any(operator.itemgetter('linkToHoldingsFile',
+                                                'linkToContentFile',
+                                                'externalLinkToContentFile',
+                                                'productISIL')(item))):
+                # Case 1 (ISIL, SID, Collection)
+                #
+                # Group collections by ISIL and SID, combine into:
+                # {"and": [{"source": [SID]}, {"collection": [...]}]}
 
-            isil, sid = item['ISIL'], item['sourceID']
+                isilsidcollections[item['ISIL']][item['sourceID']].add(item['megaCollection'])
 
-            # Possible case (content + holding file):
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'productISIL')(item)) and
+                    not any(operator.itemgetter('linkToContentFile',
+                                                'externalLinkToContentFile')(item))):
+                pass  # print("Case 2 (ISIL, SID, Collection, Product ISIL)")
+                self.logger.debug("ignoring case with product isil for AI %s, %s, %s", item['ISIL'], item['sourceID'], item['productISIL'])
 
-            #   {
-            #     "shardLabel": "UBL-ai",
-            #     "sourceID": "55",
-            #     "megaCollection": "JSTOR Arts & Sciences VII Archive",
-            #     "productISIL": null,
-            #     "externalLinkToContentFile": "http://www.jstor.org/kbart/collections/asvii",
-            #     "contentFileLabel": null,
-            #     "contentFileURI": null,
-            #     "linkToContentFile": null,
-            #     "ISIL": "DE-15-FID",
-            #     "evaluateHoldingsFileForLibrary": "yes",
-            #     "holdingsFileLabel": "FID_ISSN_Filter",
-            #     "holdingsFileURI": "http://example.com/metadata-usage/Dokument/FID_ISSN_Filter",
-            #     "linkToHoldingsFile": "https://example.com/metadata-usage/Dokument/FID_ISSN_Filter"
-            #   },
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToHoldingsFile')(item)) and
+                    not any(operator.itemgetter('linkToContentFile',
+                                                'externalLinkToContentFile',
+                                                'productISIL')(item))):
+                # Case 3 (ISIL, SID, Collection, Holding File)
+                #
+                # Group collections by ISIL, SID and holding file, combine into:
+                # {"and": [{"source": [SID]}, {"collection": [...]}, {"holdings": {"urls": [...]}}]}
 
-            # We only care, if there actually is a link, refs. #10088.
-            if item.get('externalLinkToContentFile') is not None:
-                grouped[isil][sid][item['externalLinkToContentFile']] = []
-                continue
-            if item.get('linkToContentFile') is not None:
-                grouped[isil][sid][item['linkToContentFile']] = []
-                continue
-            if item.get('linkToHoldingsFile') is not None:
-                grouped[isil][sid][item['linkToHoldingsFile']].append(item['megaCollection'])
-                continue
+                # Exception: SID 48 should not use collection name, combine into:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
 
-            # Anything that does not have a link, we stash under _collections.
-            grouped[isil][sid]['_collections'].append(item['megaCollection'])
+                isilsidfilecollections[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].add(item['megaCollection'])
 
-        # Collect filters per ISIL.
-        filters = collections.defaultdict(dict)
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'externalLinkToContentFile')(item)) and
+                    not any(operator.itemgetter('linkToHoldingsFile',
+                                                'linkToContentFile',
+                                                'productISIL')(item))):
+                # Case 4 (ISIL, SID, Collection, External Content File)
+                #
+                # Create a single item: ISIL, SID, content file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
+                #
+                # Content files are used, when the raw data does not carry its collection.
 
-        for isil, sids in grouped.items():
-            alternatives = []  # ways an ISIL might be attached to a record
+                isilfilters[item["ISIL"]].append({
+                    "and": [
+                        {"source": [item["sourceID"]]},
+                        {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
+                    ]})
 
-            for sid, docs in sids.items():
-                for key, colls in docs.items():
-                    # These are items, that are only restricted by SID + collection.
-                    if key == '_collections':
-                        # Testing: 48 (WISO) special case, refs. #10266.
-                        if sid == "48":
-                            continue
-                        flr = {'and': [{'source': [sid]}, {'collection': colls}]}
-                        alternatives.append(flr)
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToContentFile')(item)) and
+                    not any(operator.itemgetter('linkToHoldingsFile',
+                                                'externalLinkToContentFile',
+                                                'productISIL')(item))):
+                # Case 5 (ISIL, SID, Collection, Internal Content File)
+                #
+                # Create a single item: ISIL, SID, content file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
+                #
+                # Content files are used, when the raw data does not carry its collection.
+
+                isilfilters[item["ISIL"]].append({
+                    "and": [
+                        {"source": [item["sourceID"]]},
+                        {"holdings": {"urls": [item["linkToContentFile"]]}},
+                    ]})
+
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToHoldingsFile',
+                                          'externalLinkToContentFile')(item)) and
+                    not any(operator.itemgetter('linkToContentFile',
+                                                'productISIL')(item))):
+                # Case 6 (ISIL, SID, Collection, External Content File, Holding File)
+                #
+                # Create a single item: ISIL, SID, content file, holding file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
+                #
+                #
+                # First, the content file restricts the set of records, then
+                # another holding file can restrict the attachments, e.g. list of
+                # ISSN or other.
+
+                isilfilters[item["ISIL"]].append({
+                    "and": [
+                        {"source": [item["sourceID"]]},
+                        {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
+                        {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
+                    ]})
+
+            elif (all(operator.itemgetter('sourceID',
+                                          'megaCollection',
+                                          'ISIL',
+                                          'linkToHoldingsFile',
+                                          'linkToContentFile')(item)) and
+                    not any(operator.itemgetter('externalLinkToContentFile',
+                                                'productISIL')(item))):
+                # Case 7 (ISIL, SID, Collection, Internal Content File, Holding File)
+                #
+                # Create a single item: ISIL, SID, content file, holding file:
+                # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
+                #
+                #
+                # First, the content file restricts the set of records, then
+                # another holding file can restrict the attachments, e.g. list of
+                # ISSN or other.
+
+                isilfilters[item["ISIL"]].append({
+                    "and": [
+                        {"source": [item["sourceID"]]},
+                        {"holdings": {"urls": [item["linkToContentFile"]]}},
+                        {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
+                    ]})
+            else:
+                # Bail out, if none of the above cases holds.
+                self.logger.debug(item)
+                raise RuntimeError("unhandled combination of sid, collection and other parameters")
+
+        # Second pass for some cases.
+        for isil, blob in isilsidcollections.items():
+            for sid, colls in blob.items():
+                if sid == "48":
+                    # isilfilters[isil].append({"source": [sid]})
+                    self.logger.debug("""suppress single {"source": [48]} filter for %s""", isil)
+                    continue
+                isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": colls}]})
+
+        for isil, blob in isilsidfilecollections.items():
+            for sid, spec in blob.items():
+                for link, colls in spec.items():
+                    if sid == "48":
+                        isilfilters[isil].append({"and": [{"source": [sid]}, {"holdings": {"urls": [link]}}]})
                         continue
+                    isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": colls}, {"holdings": {"urls": [link]}}]})
 
-                    # These items have some KBART file restriction (holding,
-                    # content, externalContent), given via URL.
-                    flr = {
-                        'and': [
-                            {
-                                'source': [sid],
-                            },
-                            {
-                                'holdings': {
-                                    'urls': [key],
-                                }
-                            }
-                        ]
-                    }
-
-                    # In case of holding files, we use the collection names as
-                    # well. In contrast, for (external) content files we do not
-                    # use collection names, since they are often not defined by
-                    # these sources in the first place.
-                    # Extra: # Testing: 48 (WISO) special case, refs. #10266.
-                    if len(colls) > 0 and sid != "48":
-                        flr['and'].append({'collection': colls})
-
-                    alternatives.append(flr)
-
-            # Default alternatives.
-            filters[isil] = {'or': alternatives}
+        # Final assembly.
+        filterconfig = collections.defaultdict(dict)
+        for isil, filters in isilfilters.items():
+            if len(filters) == 1:
+                filterconfig[isil] = filters[0]
+            else:
+                filterconfig[isil] = {"or": filters}
 
         with self.output().open('w') as output:
-            json.dump(filters, output)
+            json.dump(filterconfig, output, cls=SetEncoder)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
