@@ -857,6 +857,24 @@ class AMSLFilterConfig(AMSLTask):
 
             isil, sid = item['ISIL'], item['sourceID']
 
+            # Possible case (content + holding file):
+
+            #   {
+            #     "shardLabel": "UBL-ai",
+            #     "sourceID": "55",
+            #     "megaCollection": "JSTOR Arts & Sciences VII Archive",
+            #     "productISIL": null,
+            #     "externalLinkToContentFile": "http://www.jstor.org/kbart/collections/asvii",
+            #     "contentFileLabel": null,
+            #     "contentFileURI": null,
+            #     "linkToContentFile": null,
+            #     "ISIL": "DE-15-FID",
+            #     "evaluateHoldingsFileForLibrary": "yes",
+            #     "holdingsFileLabel": "FID_ISSN_Filter",
+            #     "holdingsFileURI": "http://example.com/metadata-usage/Dokument/FID_ISSN_Filter",
+            #     "linkToHoldingsFile": "https://example.com/metadata-usage/Dokument/FID_ISSN_Filter"
+            #   },
+
             # We only care, if there actually is a link, refs. #10088.
             if item.get('externalLinkToContentFile') is not None:
                 grouped[isil][sid][item['externalLinkToContentFile']] = []
