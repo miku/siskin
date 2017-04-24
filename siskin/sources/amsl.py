@@ -454,15 +454,15 @@ class AMSLFilterConfig(AMSLTask):
 
     Notes:
 
-    This task turns an AMSL API response into a filterconfig, which span-tag
-    can understand.
+    This task turns an AMSL discovery API response into a filterconfig, which
+    span(1) can understand.
 
-    AMSL API might not specify everything we need to know, so this is the
-    *only* place, where additional information can be added.
+    AMSL API might not specify everything we need to know, so this is the only
+    place, where workarounds should happen.
 
     Also, span-tag is fast, but not that fast, that we can iterate over a
-    disjuction of 60K items for each of the 100M documents fast enough,
-    which, if we could, would simplify the implementation of this task.
+    disjuction of 60K items for each of the 100M documents fast enough, which,
+    if we could, would simplify the implementation of this task.
 
     The main speed improvement comes from using lists of collection names
     instead of having each collection processed separately - which is how it
@@ -470,11 +470,11 @@ class AMSLFilterConfig(AMSLTask):
     none at all).
 
     We ignore collection names, if (external) content files are used. These
-    content files are usually there, because the data source contains
-    collections, which cannot be determined by the datum itself.
+    content files are usually there, because we cannot infer the collection
+    name from the data alone.
 
-    For SID 48 we test simple attachments via DB names parsed from KBART (span
-    0.1.144 or later), refs. #10266.
+    Notable exception: For SID 48 we test simple attachments via WISO database
+    names parsed from KBART (span 0.1.144 or later), refs. #10266.
 
     Performance data point: 22 ISIL each with between 1 and 26 alternatives for
     attachment, each alternative consisting of around three filters. Around 30
@@ -527,6 +527,8 @@ class AMSLFilterConfig(AMSLTask):
             return True
 
         for item in doc:
+            isil, sid, megaCollection = operator.itemgetter('ISIL', 'sourceID', 'megaCollection')(item)
+
             if checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL'],
                            missing=['linkToHoldingsFile', 'linkToContentFile', 'externalLinkToContentFile', 'productISIL']):
                 # Case 1 (ISIL, SID, Collection)
@@ -538,7 +540,7 @@ class AMSLFilterConfig(AMSLTask):
                 # Group collections by ISIL and SID, combine into:
                 # {"and": [{"source": [SID]}, {"collection": [...]}]}
 
-                isilsidcollections[item['ISIL']][item['sourceID']].add(item['megaCollection'])
+                isilsidcollections[isil][sid].add(megaCollection)
 
             elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'productISIL'],
                              missing=['linkToHoldingsFile', 'linkToContentFile', 'externalLinkToContentFile']):
@@ -549,7 +551,7 @@ class AMSLFilterConfig(AMSLTask):
                 # X   X    X    -    -    -     X
 
                 self.logger.debug("ignoring case with product isil for AI %s, %s, %s",
-                                  item['ISIL'], item['sourceID'], item['productISIL'])
+                                  isil, sid, item['productISIL'])
 
             elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile', 'productISIL'],
                              missing=['linkToContentFile', 'externalLinkToContentFile']):
@@ -560,10 +562,10 @@ class AMSLFilterConfig(AMSLTask):
                 # X   X    X    X    -    -     X
 
                 self.logger.debug("productISIL is set, but we do not have a filter for it yet: %s, %s, %s",
-                                  item['ISIL'], item['sourceID'], item['megaCollection'])
+                                  isil, sid, megaCollection)
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidfilecollections[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].add(item['megaCollection'])
+                    isilsidfilecollections[isil][sid][item['linkToHoldingsFile']].add(megaCollection)
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
 
@@ -582,7 +584,7 @@ class AMSLFilterConfig(AMSLTask):
                 # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidfilecollections[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].add(item['megaCollection'])
+                    isilsidfilecollections[isil][sid][item['linkToHoldingsFile']].add(megaCollection)
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
 
@@ -599,9 +601,9 @@ class AMSLFilterConfig(AMSLTask):
                 #
                 # Content files are used, when the raw data does not carry its collection.
 
-                isilfilters[item["ISIL"]].append({
+                isilfilters[isil].append({
                     "and": [
-                        {"source": [item["sourceID"]]},
+                        {"source": [sid]},
                         {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
                     ]})
 
@@ -618,9 +620,9 @@ class AMSLFilterConfig(AMSLTask):
                 #
                 # Content files are used, when the raw data does not carry its collection.
 
-                isilfilters[item["ISIL"]].append({
+                isilfilters[isil].append({
                     "and": [
-                        {"source": [item["sourceID"]]},
+                        {"source": [sid]},
                         {"holdings": {"urls": [item["linkToContentFile"]]}},
                     ]})
 
@@ -640,9 +642,9 @@ class AMSLFilterConfig(AMSLTask):
                 # ISSN or other.
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilfilters[item["ISIL"]].append({
+                    isilfilters[isil].append({
                         "and": [
-                            {"source": [item["sourceID"]]},
+                            {"source": [sid]},
                             {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
                             {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
                         ]})
@@ -665,34 +667,49 @@ class AMSLFilterConfig(AMSLTask):
                 # ISSN or other.
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilfilters[item["ISIL"]].append({
+                    isilfilters[isil].append({
                         "and": [
-                            {"source": [item["sourceID"]]},
+                            {"source": [sid]},
                             {"holdings": {"urls": [item["linkToContentFile"]]}},
                             {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
                         ]})
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
             else:
-                # Bail out, if none of the above cases holds.
+                # Case 9 (none of the above): Halt processing.
                 raise RuntimeError("unhandled combination of sid, collection and other parameters: %s", item)
 
         # Second pass for some cases.
         for isil, blob in isilsidcollections.items():
             for sid, colls in blob.items():
                 if sid == "48":
-                    # isilfilters[isil].append({"source": [sid]})
                     self.logger.debug("""suppress single {"source": [48]} filter for %s""", isil)
                     continue
-                isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": sorted(colls)}]})
+                isilfilters[isil].append({
+                    "and": [
+                        {"source": [sid]},
+                        {"collection": sorted(colls)},
+                    ]
+                })
 
         for isil, blob in isilsidfilecollections.items():
             for sid, spec in blob.items():
                 for link, colls in spec.items():
                     if sid == "48":
-                        isilfilters[isil].append({"and": [{"source": [sid]}, {"holdings": {"urls": [link]}}]})
+                        isilfilters[isil].append({
+                            "and": [
+                                {"source": [sid]},
+                                {"holdings": {"urls": [link]}},
+                            ]
+                        })
                         continue
-                    isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": sorted(colls)}, {"holdings": {"urls": [link]}}]})
+                    isilfilters[isil].append({
+                        "and": [
+                            {"source": [sid]},
+                            {"collection": sorted(colls)},
+                            {"holdings": {"urls": [link]}},
+                        ]
+                    })
 
         # Final assembly.
         filterconfig = collections.defaultdict(dict)
