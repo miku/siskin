@@ -503,14 +503,32 @@ class AMSLFilterConfig(AMSLTask):
         # Ready-made filters per ISIL:
         isilfilters = collections.defaultdict(list)
 
+        # helper function:
+        def checkvalues(item, contains=None, missing=None):
+            """
+            For a dictionary, check if it contains values for the keys given in
+            contains and at the same time it does not have values for keys, which are given in missing.
+            """
+            if not isinstance(item, dict):
+                raise ValueError('dictionary only')
+            if contains is None:
+                contains = []
+            if missing is None:
+                missing = []
+
+            for key in contains:
+                if bool(operator.itemgetter(key)(item)) is False:
+                    return False
+
+            for key in missing:
+                if bool(operator.itemgetter(key)(item)) is True:
+                    return False
+
+            return True
+
         for item in doc:
-            if (all(operator.itemgetter('sourceID',
-                                        'megaCollection',
-                                        'ISIL')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile',
-                                                'linkToContentFile',
-                                                'externalLinkToContentFile',
-                                                'productISIL')(item))):
+            if checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL'],
+                           missing=['linkToHoldingsFile', 'linkToContentFile', 'externalLinkToContentFile', 'productISIL']):
                 # Case 1 (ISIL, SID, Collection)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
@@ -522,12 +540,8 @@ class AMSLFilterConfig(AMSLTask):
 
                 isilsidcollections[item['ISIL']][item['sourceID']].add(item['megaCollection'])
 
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'productISIL')(item)) and
-                    not any(operator.itemgetter('linkToContentFile',
-                                                'externalLinkToContentFile')(item))):
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'productISIL'],
+                             missing=['linkToHoldingsFile', 'linkToContentFile', 'externalLinkToContentFile']):
                 # Case 2 (ISIL, SID, Collection, Product ISIL)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
@@ -537,14 +551,25 @@ class AMSLFilterConfig(AMSLTask):
                 self.logger.debug("ignoring case with product isil for AI %s, %s, %s",
                                   item['ISIL'], item['sourceID'], item['productISIL'])
 
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToHoldingsFile')(item)) and
-                    not any(operator.itemgetter('linkToContentFile',
-                                                'externalLinkToContentFile',
-                                                'productISIL')(item))):
-                # Case 3 (ISIL, SID, Collection, Holding File)
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile', 'productISIL'],
+                             missing=['linkToContentFile', 'externalLinkToContentFile']):
+                # Case 3 (ISIL, SID, Collection, Product ISIL)
+                #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    X    -    -     X
+
+                self.logger.debug("productISIL is set, but we do not have a filter for it yet: %s, %s, %s",
+                                  item['ISIL'], item['sourceID'], item['megaCollection'])
+
+                if item.get('evaluateHoldingsFileForLibrary') == "yes":
+                    isilsidfilecollections[item['ISIL']][item['sourceID']][item['linkToHoldingsFile']].add(item['megaCollection'])
+                else:
+                    self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
+
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile'],
+                             missing=['linkToContentFile', 'externalLinkToContentFile', 'productISIL']):
+                # Case 4 (ISIL, SID, Collection, Holding File)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
                 # --------------------------------
@@ -561,14 +586,9 @@ class AMSLFilterConfig(AMSLTask):
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
 
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'externalLinkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile',
-                                                'linkToContentFile',
-                                                'productISIL')(item))):
-                # Case 4 (ISIL, SID, Collection, External Content File)
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'externalLinkToContentFile'],
+                             missing=['linkToHoldingsFile', 'linkToContentFile', 'productISIL']):
+                # Case 5 (ISIL, SID, Collection, External Content File)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
                 # --------------------------------
@@ -585,14 +605,9 @@ class AMSLFilterConfig(AMSLTask):
                         {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
                     ]})
 
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToHoldingsFile',
-                                                'externalLinkToContentFile',
-                                                'productISIL')(item))):
-                # Case 5 (ISIL, SID, Collection, Internal Content File)
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToContentFile'],
+                             missing=['linkToHoldingsFile', 'externalLinkToContentFile', 'productISIL']):
+                # Case 6 (ISIL, SID, Collection, Internal Content File)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
                 # --------------------------------
@@ -609,14 +624,9 @@ class AMSLFilterConfig(AMSLTask):
                         {"holdings": {"urls": [item["linkToContentFile"]]}},
                     ]})
 
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToHoldingsFile',
-                                          'externalLinkToContentFile')(item)) and
-                    not any(operator.itemgetter('linkToContentFile',
-                                                'productISIL')(item))):
-                # Case 6 (ISIL, SID, Collection, External Content File, Holding File)
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile', 'externalLinkToContentFile'],
+                             missing=['linkToContentFile', 'productISIL']):
+                # Case 7 (ISIL, SID, Collection, External Content File, Holding File)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
                 # --------------------------------
@@ -639,14 +649,9 @@ class AMSLFilterConfig(AMSLTask):
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
 
-            elif (all(operator.itemgetter('sourceID',
-                                          'megaCollection',
-                                          'ISIL',
-                                          'linkToHoldingsFile',
-                                          'linkToContentFile')(item)) and
-                    not any(operator.itemgetter('externalLinkToContentFile',
-                                                'productISIL')(item))):
-                # Case 7 (ISIL, SID, Collection, Internal Content File, Holding File)
+            elif checkvalues(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile', 'linkToContentFile'],
+                             missing=['externalLinkToContentFile', 'productISIL']):
+                # Case 8 (ISIL, SID, Collection, Internal Content File, Holding File)
                 #
                 # SID COLL ISIL LTHF LTCF ELTCF PI
                 # --------------------------------
@@ -679,7 +684,7 @@ class AMSLFilterConfig(AMSLTask):
                     # isilfilters[isil].append({"source": [sid]})
                     self.logger.debug("""suppress single {"source": [48]} filter for %s""", isil)
                     continue
-                isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": colls}]})
+                isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": sorted(colls)}]})
 
         for isil, blob in isilsidfilecollections.items():
             for sid, spec in blob.items():
@@ -687,7 +692,7 @@ class AMSLFilterConfig(AMSLTask):
                     if sid == "48":
                         isilfilters[isil].append({"and": [{"source": [sid]}, {"holdings": {"urls": [link]}}]})
                         continue
-                    isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": colls}, {"holdings": {"urls": [link]}}]})
+                    isilfilters[isil].append({"and": [{"source": [sid]}, {"collection": sorted(colls)}, {"holdings": {"urls": [link]}}]})
 
         # Final assembly.
         filterconfig = collections.defaultdict(dict)
