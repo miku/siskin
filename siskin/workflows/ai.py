@@ -469,27 +469,6 @@ class AILicensing(AITask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class AILicensing(AITask):
-    """
-    Temporary task to compare ISIL attachments side by side.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfig(date=self.date),
-        }
-
-    def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('is').path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
 class AICompareLicensing(AITask):
     """
     Ad-hoc task to compare result of various licensing modes.
