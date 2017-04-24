@@ -670,8 +670,7 @@ class AMSLFilterConfig(AMSLTask):
                     self.logger.warning("evaluateHoldingsFileForLibrary is not yes and still there is a link: skipping %s", item)
             else:
                 # Bail out, if none of the above cases holds.
-                self.logger.debug(item)
-                raise RuntimeError("unhandled combination of sid, collection and other parameters")
+                raise RuntimeError("unhandled combination of sid, collection and other parameters: %s", item)
 
         # Second pass for some cases.
         for isil, blob in isilsidcollections.items():
