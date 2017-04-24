@@ -513,6 +513,10 @@ class AMSLFilterConfig(AMSLTask):
                                                 'productISIL')(item))):
                 # Case 1 (ISIL, SID, Collection)
                 #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    -    -    -     -
+                #
                 # Group collections by ISIL and SID, combine into:
                 # {"and": [{"source": [SID]}, {"collection": [...]}]}
 
@@ -524,7 +528,12 @@ class AMSLFilterConfig(AMSLTask):
                                           'productISIL')(item)) and
                     not any(operator.itemgetter('linkToContentFile',
                                                 'externalLinkToContentFile')(item))):
-                pass  # print("Case 2 (ISIL, SID, Collection, Product ISIL)")
+                # Case 2 (ISIL, SID, Collection, Product ISIL)
+                #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    -    -    -     X
+
                 self.logger.debug("ignoring case with product isil for AI %s, %s, %s", item['ISIL'], item['sourceID'], item['productISIL'])
 
             elif (all(operator.itemgetter('sourceID',
@@ -535,6 +544,10 @@ class AMSLFilterConfig(AMSLTask):
                                                 'externalLinkToContentFile',
                                                 'productISIL')(item))):
                 # Case 3 (ISIL, SID, Collection, Holding File)
+                #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    X    -    -     -
                 #
                 # Group collections by ISIL, SID and holding file, combine into:
                 # {"and": [{"source": [SID]}, {"collection": [...]}, {"holdings": {"urls": [...]}}]}
@@ -552,6 +565,10 @@ class AMSLFilterConfig(AMSLTask):
                                                 'linkToContentFile',
                                                 'productISIL')(item))):
                 # Case 4 (ISIL, SID, Collection, External Content File)
+                #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    -    -    X     -
                 #
                 # Create a single item: ISIL, SID, content file:
                 # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
@@ -573,6 +590,10 @@ class AMSLFilterConfig(AMSLTask):
                                                 'productISIL')(item))):
                 # Case 5 (ISIL, SID, Collection, Internal Content File)
                 #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    -    X    -     -
+                #
                 # Create a single item: ISIL, SID, content file:
                 # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}]}
                 #
@@ -593,9 +614,12 @@ class AMSLFilterConfig(AMSLTask):
                                                 'productISIL')(item))):
                 # Case 6 (ISIL, SID, Collection, External Content File, Holding File)
                 #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    X    -    X     -
+                #
                 # Create a single item: ISIL, SID, content file, holding file:
                 # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
-                #
                 #
                 # First, the content file restricts the set of records, then
                 # another holding file can restrict the attachments, e.g. list of
@@ -617,9 +641,12 @@ class AMSLFilterConfig(AMSLTask):
                                                 'productISIL')(item))):
                 # Case 7 (ISIL, SID, Collection, Internal Content File, Holding File)
                 #
+                # SID COLL ISIL LTHF LTCF ELTCF PI
+                # --------------------------------
+                # X   X    X    X    X    -     -
+                #
                 # Create a single item: ISIL, SID, content file, holding file:
                 # {"and": [{"source": [SID]}, {"holdings": {"urls": [...]}}, {"holdings": {"urls": [...]}}]}
-                #
                 #
                 # First, the content file restricts the set of records, then
                 # another holding file can restrict the attachments, e.g. list of
