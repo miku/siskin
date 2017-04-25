@@ -509,7 +509,9 @@ class AMSLFilterConfig(AMSLTask):
             lambda: collections.defaultdict(
                 lambda: collections.defaultdict(set)))
 
-        isilfilters = collections.defaultdict(list)  # Ready-made filters per ISIL.
+        # Ready-made filters per ISIL. Some filters can be added on-the-fly
+        # because there aren't many occurences.
+        isilfilters = collections.defaultdict(list)
 
         def checkvalues(obj, contains=None, missing=None):
             """
