@@ -107,7 +107,7 @@ class ThiemeExport(ThiemeTask):
     date = ClosestDateParameter(default=datetime.date.today())
     set = luigi.Parameter(default='journalarticles')
     version = luigi.Parameter(
-        default='solr5vu3v11', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+        default='solr5vu3', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
         return {
