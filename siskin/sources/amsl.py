@@ -593,7 +593,7 @@ class AMSLFilterConfig(AMSLTask):
                                       'productISIL']):
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidfilecollections[isil][sid][item['linkToHoldingsFile']].add(megaCollection)
+                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(megaCollection)
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
