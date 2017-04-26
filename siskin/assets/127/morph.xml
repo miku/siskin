@@ -4,7 +4,7 @@
 
     <rules>
 
-       <combine name="leader" value="     c${pos6}${pos7}  2200000 u 4500">
+       <combine name="leader" value="00000c${pos6}${pos7}0000000000000000">
             <choose>
                 <data source="050" name="pos6">
                     <regexp match="(.....ce..)" />
@@ -46,7 +46,7 @@
         <combine name="007" value="${pos1-2}">
             <choose>
                 <data source="655" name="pos1-2">
-                    <substring start="0" end="15" />
+                    <substring start="0" end="16" />
                     <not-equals string="http://d-nb.info" /> <!-- eine elektronische Ressource, aber nicht nur Inhaltsverzeichnis -->
                     <constant value="cr" />
                 </data>
@@ -61,6 +61,10 @@
                 <data source="050" name="pos1-2">
                 <regexp match="(\W.......g)" />
                     <constant value="cr" /> <!-- Datei im Internet -->
+                </data>
+                <data source="050" name="pos1-2">
+                    <equals string="|||||aa|||||||" />
+                    <constant value="sd" /> <!-- Audio-CD -->
                 </data>
                 <data source="050" name="pos1-2">
                     <regexp match="(.....ce.\W)" />
@@ -323,6 +327,11 @@
 			<data source="062" name="b" />
         </entity>
 
+        <!-- Erscheinungsverlauf -->
+        <entity name="362  " flushWith="record">
+            <data source="405" name="a" />
+        </entity>
+
         <entity name="490  " flushWith="record">
 		    <choose name="a">
                 <data source="454c" />
@@ -451,11 +460,15 @@
 
         <entity name="773  " flushWith="record">
             <!-- Film und Fernsehen -->
-            <data source="594" name="d" />
-            <choose>
+            <data source="594" />
+            <choose name="g">
                 <!-- Nr. 10/1939 S. 200-203 -->
-                <data source="596" name="g" />
-                <data source="596b" name="g" />
+                <data source="596" />
+                <data source="596b" />
+                <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
+                <data source="501">
+                    <regexp match="(.*)\. - Sign" format="${1}" />
+                </data>
              </choose>
             <!-- Film und Fernsehen ; 21/22 -->
             <data source="597" name="k" />
@@ -475,16 +488,16 @@
             <!-- http://www.ses.fi$$9htm -->
             <!-- htm$$uhttp://www.freidok.uni-freiburg.de/volltexte/127/$$ -->
             <choose name="u">
-                <data source="655" name="u">
+                <data source="655">
                     <regexp match="^(http.*)\$\$9" format="${1}" />
                 </data>
-                <data source="655" name="u">
+                <data source="655">
                     <regexp match="\$\$u(http.*)\$\$" format="${1}" />
                 </data>
-                <data source="655" name="u">
+                <data source="655">
                     <regexp match="\$\$u(http.*)" format="${1}" />
                 </data>
-                <data source="655" name="u">
+                <data source="655">
                     <regexp match="http.*" />
                 </data>
             </choose>
@@ -514,7 +527,9 @@
         </entity>
 
         <data source="655" name="@url">
-            <regexp match=".*(d-nb).*" format="{1}" />
+            <!-- http://d-nb.info/1022036432/04 -->
+            <!--<regexp match=".*(d-nb).*" format="{1}" />-->
+            <substring start="7" end="11" />
         </data>
 
         <entity name="935  " flushWith="record">
@@ -530,7 +545,7 @@
                     <occurrence only="1" />
                 </data>
                 <data source="@url">
-                    <not-equals string="d-nb" /> <!-- URL soll nicht nur auf Inhaltsverzeichnis verweisen -->
+                    <not-equals string="d-nb" /> <!-- wenn URL nur auf Inhaltsverzeichnis verweist, kein E-Book -->
                     <constant value="cofz" />
                 </data>
             </choose>
