@@ -460,15 +460,18 @@
 
         <entity name="773  " flushWith="record">
             <!-- Film und Fernsehen -->
-            <data source="594" />
+            <data source="594" name="d"/>
             <choose name="g">
                 <!-- Nr. 10/1939 S. 200-203 -->
                 <data source="596" />
                 <data source="596b" />
                 <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
-                <data source="501">
-                    <regexp match="(.*)\. - Sign" format="${1}" />
-                </data>
+                <combine name="" value="${reference}">
+                    <data source="501" name="reference">
+                        <regexp match="(.*)\. - Sign" format="${1}" />
+                    </data>
+                    <data source="590" />
+                </combine>
              </choose>
             <!-- Film und Fernsehen ; 21/22 -->
             <data source="597" name="k" />
