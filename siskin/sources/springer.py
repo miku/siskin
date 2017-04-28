@@ -33,6 +33,11 @@ Config
 intermediate-schema-file = /path/to/file # must be gzip compressed
 """
 
+from __future__ import print_function
+
+import json
+import re
+
 import luigi
 
 from gluish.format import Gzip
@@ -45,13 +50,49 @@ class SpringerTask(DefaultTask):
     TAG = 'springer'
 
 
-class SpringerIntermediateSchema(SpringerTask, luigi.ExternalTask):
+class SpringerProvided(SpringerTask, luigi.ExternalTask):
     """
     Provided.
     """
 
     def output(self):
-        return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'))
+        return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'), format=Gzip)
+
+
+class SpringerCleanFields(SpringerTask):
+    """
+    Clean abstracts, refs #...
+    """
+
+    def requires(self):
+        return SpringerProvided()
+
+    def run(self):
+        striptags = lambda s: re.sub(r'\$\$[^\$]*\$\$', '', re.sub(r'<[^>]*>', '', s))
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    doc = json.loads(line)
+                    doc['abstract'] = striptags(doc.get('abstract', '').encode('utf-8'))
+                    doc['rft.atitle'] = striptags(doc.get('rft.atitle', '').encode('utf-8'))
+                    doc['x.subjects'] = [striptags(subj.encode('utf-8')) for subj in doc.get('x.subjects', [])]
+                    output.write(json.dumps(doc))
+                    output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+
+class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
+    """
+    Just the cleaned version.
+    """
+
+    def requires(self):
+        return SpringerCleanFields()
+
+    def output(self):
+        return self.input()
 
 
 class SpringerTagged(SpringerTask):
@@ -61,7 +102,7 @@ class SpringerTagged(SpringerTask):
 
     def requires(self):
         return {
-            'file': SpringerIntermediateSchema(),
+            'file': SpringerCleanFields(),
             'config': AMSLFilterConfig(),
         }
 
