@@ -336,37 +336,11 @@ class GeniosLatest(GeniosTask):
 
 class GeniosIntermediateSchema(GeniosTask):
     """
-    Intermediate schema by kind.
-
-    Warnings (incomplete):
-
-    * 2016/12/20 14:04:06 genios: db is not associated with package: KTX, using generic default
-    * 2016/12/20 14:08:20 genios: db is not associated with package: MAON, using generic default
-    * 2016/12/20 14:37:41 genios: db is not associated with package: HTEC, using generic default
-    * 2017/02/27 11:49:52 genios: db is not associated with package: TWNE, using generic default
-    * 2017/02/27 11:53:26 genios: db is not associated with package: GUG, using generic default
-    * 2017/02/27 11:54:47 genios: db is not associated with package: ELEO, using generic default
-    * 2017/02/27 11:57:18 genios: db is not associated with package: AKS, using generic default
-    * 2017/02/27 11:57:30 genios: db is not associated with package: ASPA, using generic defat
-    * 2017/02/27 12:01:11 genios: db is not associated with package: JER, using generic default
-    * 2017/02/27 12:03:08 genios: db is not associated with package: PGE, using generic default
-    * 2017/02/27 12:07:45 genios: db is not associated with package: FINE, using generic default
-    * 2017/02/27 12:09:06 genios: db is not associated with package: MUB, using generic default
-    * 2017/02/27 12:09:50 genios: db is not associated with package: FMAI, using generic default
-    * 2017/02/27 12:10:19 genios: db is not associated with package: TUD, using generic default
-    * 2017/02/27 12:12:12 genios: db is not associated with package: KUCH, using generic default
-    * 2017/02/27 12:12:20 genios: db is not associated with package: FOWE, using generic default
-    * 2017/02/27 12:18:40 genios: db is not associated with package: ENER, using generic default
-    * 2017/02/27 12:18:48 genios: db is not associated with package: TIAM, using generic default
-    * 2017/02/27 12:18:53 genios: db is not associated with package: SOA, using generic default
-    * 2017/02/27 12:19:26 genios: db is not associated with package: KONZ, using generic default
-    * 2017/02/27 12:20:00 genios: db is not associated with package: AUMO, using generic default
-    * 2017/02/27 12:22:26 genios: db is not associated with package: KUSO, using generic default
-    * 2017/02/27 12:25:26 genios: db is not associated with package: HPRW, using generic default
+    Intermediate schema by kind. May be incomplete, since the database mapping
+    is derived from dozens of XLS sheets and manual guesses.
 
     Related: "Neue Quellen bzw. Austausch", Mon, Dec 5, 2016 at 12:23 PM, ba54ea7d396a41a2a1281f51bba5d33f
     See also: #9534.
-
     """
     kind = luigi.Parameter(default='fachzeitschriften',
                            description='or: ebooks, literaturnachweise_...')
