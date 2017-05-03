@@ -300,16 +300,16 @@ class AIIntermediateSchema(AITask):
         """
         return [
             Executable(name='pigz', message='http://zlib.net/pigz/'),
-            ArxivIntermediateSchema(date=self.date),
-            CrossrefIntermediateSchema(date=self.date),
-            DegruyterIntermediateSchema(date=self.date),
-            DOAJIntermediateSchema(date=self.date),
-            ElsevierJournalsIntermediateSchema(date=self.date),
-            GeniosCombinedIntermediateSchema(date=self.date),
-            IEEEIntermediateSchema(date=self.date),
-            JstorIntermediateSchema(date=self.date),
-            ThiemeIntermediateSchema(date=self.date),
-            SpringerIntermediateSchema(),
+            ArxivIntermediateSchema(date=self.date, stamp=True),
+            CrossrefIntermediateSchema(date=self.date, stamp=True),
+            DegruyterIntermediateSchema(date=self.date, stamp=True),
+            DOAJIntermediateSchema(date=self.date, stamp=True),
+            ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
+            GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
+            IEEEIntermediateSchema(date=self.date, stamp=True),
+            JstorIntermediateSchema(date=self.date, stamp=True),
+            ThiemeIntermediateSchema(date=self.date, stamp=True),
+            SpringerIntermediateSchema(stamp=True),
         ]
 
     @timed
