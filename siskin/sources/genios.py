@@ -313,6 +313,8 @@ class GeniosLatest(GeniosTask):
             for row in handle.iter_tsv(cols=('kind', 'db', 'year', 'month', 'path')):
                 if not row.kind.startswith(self.kind):
                     continue
+                if int(row.year) < self.date.year or int(row.month) < self.date.month:
+                    self.logger.debug("maybe ignoreable, but not ignored for now (#9534): %s", row.path)
                 filemap[row.db] = row.path
 
         if not filemap:
