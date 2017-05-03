@@ -47,6 +47,7 @@ from __future__ import print_function
 
 import collections
 import datetime
+import itertools
 import json
 import operator
 import tempfile
@@ -423,6 +424,80 @@ class AMSLOpenAccessISSNList(AMSLTask):
         return luigi.LocalTarget(path=self.path())
 
 
+class AMSLWisoPackages(AMSLTask):
+    """
+    Collect WISO packages.
+    """
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def requires(self):
+        return AMSLService(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.loads(handle.read())
+
+        isilpkg = collections.defaultdict(lambda: collections.defaultdict(set))
+
+        for item in doc:
+            isil, sid = item.get('ISIL'), item.get('sourceID')
+            mega_collection = item.get('mega_collection')
+            lthf = item.get('linkToHoldingsFile')
+            if sid != "48":
+                continue
+            isilpkg[isil][lthf].add(mega_collection)
+
+        filterconfig = collections.defaultdict(dict)
+        fzs_package_name = 'Genios (Fachzeitschriften)'
+
+        for isil, blob in isilpkg.items():
+            include_fzs = False
+            for _, colls in blob.items():
+                if fzs_package_name in colls:
+                    include_fzs = True
+
+            filters = []
+
+            if include_fzs and isil != 'DE-15-FID':
+                packages = set(itertools.chain(*[c for _, c in blob.items()]))
+                filters.append({
+                    'and': [
+                        {'source': ['48']},
+                        {'package': [fzs_package_name]},
+                        {'package': [name for name in packages if name != fzs_package_name]}
+                    ]
+                })
+
+            for lthf, colls in blob.items():
+                if lthf is None or lthf == 'null':
+                    continue
+                if isil == 'DE-15-FID':
+                    filter = {
+                        'and': [
+                            {'source': ['48']},
+                            {'holdings': {'urls': [lthf]}},
+                            {'package': [c for c in colls if c != fzs_package_name]},
+                        ]
+                    }
+                else:
+                    filter = {
+                        'and': [
+                            {'source': ['48']},
+                            {'holdings': {'urls': [lthf]}},
+                            {'package': [c for c in colls if c != fzs_package_name]},
+                            {'not': {'package': [fzs_package_name]}}
+                        ]
+                    }
+                filters.append(filter)
+            filterconfig[isil] = {'or': filters}
+
+        with self.output().open('w') as output:
+            json.dump(filterconfig, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+
 class AMSLFilterConfig(AMSLTask):
     """
     Next version of AMSL filter config.
@@ -494,10 +569,13 @@ class AMSLFilterConfig(AMSLTask):
     date = luigi.Parameter(default=datetime.date.today())
 
     def requires(self):
-        return AMSLService(date=self.date)
+        return {
+            'amsl': AMSLService(date=self.date),
+            'wiso': AMSLWisoPackages(date=self.date),
+        }
 
     def run(self):
-        with self.input().open() as handle:
+        with self.input().get('amsl').open() as handle:
             doc = json.loads(handle.read())
 
         # Case: ISIL, SID, collection.
@@ -536,7 +614,10 @@ class AMSLFilterConfig(AMSLTask):
             return True
 
         for item in doc:
-            isil, sid, megaCollection = operator.itemgetter('ISIL', 'sourceID', 'megaCollection')(item)
+            isil, sid, mega_collection = operator.itemgetter('ISIL', 'sourceID', 'megaCollection')(item)
+
+            if sid == '48':  # Handled elsewhere.
+                continue
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
@@ -549,7 +630,7 @@ class AMSLFilterConfig(AMSLTask):
                                     'externalLinkToContentFile',
                                     'productISIL']):
 
-                isilsidcollections[isil][sid].add(megaCollection)
+                isilsidcollections[isil][sid].add(mega_collection)
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
@@ -576,10 +657,10 @@ class AMSLFilterConfig(AMSLTask):
                              missing=['linkToContentFile', 'externalLinkToContentFile']):
 
                 self.logger.debug("productISIL is set, but we do not have a filter for it yet: %s, %s, %s",
-                                  isil, sid, megaCollection)
+                                  isil, sid, mega_collection)
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(megaCollection)
+                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(mega_collection)
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
@@ -595,7 +676,7 @@ class AMSLFilterConfig(AMSLTask):
                                       'productISIL']):
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(megaCollection)
+                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(mega_collection)
                 else:
                     self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
@@ -682,9 +763,6 @@ class AMSLFilterConfig(AMSLTask):
         # A second pass.
         for isil, blob in isilsidcollections.items():
             for sid, colls in blob.items():
-                if sid == "48":
-                    self.logger.debug("""suppress single {"source": [48]} filter for %s""", isil)
-                    continue
                 isilfilters[isil].append({
                     "and": [
                         {"source": [sid]},
@@ -696,14 +774,6 @@ class AMSLFilterConfig(AMSLTask):
         for isil, blob in isilsidlinkcollections.items():
             for sid, spec in blob.items():
                 for link, colls in spec.items():
-                    if sid == "48":
-                        isilfilters[isil].append({
-                            "and": [
-                                {"source": [sid]},
-                                {"holdings": {"urls": [link]}},
-                            ]
-                        })
-                        continue
                     isilfilters[isil].append({
                         "and": [
                             {"source": [sid]},
@@ -721,6 +791,13 @@ class AMSLFilterConfig(AMSLTask):
                 filterconfig[isil] = filters[0]
                 continue
             filterconfig[isil] = {"or": filters}
+
+        # Include WISO.
+        with self.input().get('wiso').open() as handle:
+            wisoconf = json.load(handle)
+            for isil, tree in wisoconf.items():
+                for filter in tree.get('or', []):
+                    filterconfig[isil]['or'].append(filter)
 
         with self.output().open('w') as output:
             json.dump(filterconfig, output, cls=SetEncoder)
