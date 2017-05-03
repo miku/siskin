@@ -183,7 +183,7 @@
         </entity>
 
         <entity name="022  " flushWith="542|542a" reset="true">
-            <data source="542|542a" name="a" />
+                <data source="542|542a" name="a" />
         </entity>
 
         <entity name="024  " flushWith="541" reset="true">
@@ -333,12 +333,7 @@
         </entity>
 
         <entity name="490  " flushWith="record">
-		    <choose name="a">
-                <data source="454c" />
-                <!-- Film und Fernsehen ; 21/22 -->
-                <data source="597" />
-                <data source="590" />
-            </choose>
+            <data source="454c" name="a" />
             <data source="455" name="v" />
         </entity>
 
@@ -458,30 +453,120 @@
             </data>
         </entity>
 
+        <choose name="@volume">
+            <!-- Film und Fernsehen ; 21/22 -->
+            <data source="597">
+                <regexp match="(.*) ; (.*)" format="${2}" />
+            </data>
+            <!-- Film und Fernsehen ; 21/22 -->
+            <data source="590">
+                <regexp match="(.*) ; (.*)" format="${2}" />
+            </data>
+        </choose>
+
+        <data source="425|425a" name="@year">
+            <regexp match="(\d\d\d\d)" format="${1}" />
+        </data>
+
+        <choose name="@issue">
+            <!-- Nr. 10/1939 S. 200-203 -->
+            <data source="596">
+                <regexp match="(.*) S\. \d.*" format="${1}" />
+                <replace pattern="\. - " with="" />
+            </data>
+            <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
+            <data source="596a">
+                <regexp match="(.*)\. - Sign" format="${1}" />
+            </data>
+            <data source="596b">
+                <regexp match="(.*) S\. \d.*" format="${1}" />
+                <replace pattern="\. - " with="" />
+            </data>
+            <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
+            <combine name="" value="${issue}">
+                <data source="501" name="issue">
+                    <regexp match="(.*)\. - S\." format="${1}" />
+                    <replace pattern="\. - " with="" />
+                </data>
+                <data source="590" /> <!-- damit Fußnote in 501 nur berücksichtigt wird, wenn Artikel vorliegt -->
+            </combine>
+        </choose>
+
+        <choose name="@pages">
+            <!-- Nr. 10/1939 S. 200-203 -->
+            <data source="596">
+                <regexp match=".* (S\. .*)" format="${1}" />
+            </data>
+            <data source="596b">
+                <regexp match=".* (S\. .*)" format="${1}" />
+            </data>
+            <combine name="" value="${pages}">
+                <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
+                <data source="501" name="pages">
+                    <regexp match=".* (S\. .*\d)\. -" format="${1}" />
+                </data>
+                <data source="590" /> <!-- damit Fußnote in 501 nur berücksichtigt wird, wenn Artikel vorliegt -->
+            </combine>
+        </choose>
+
         <entity name="773  " flushWith="record">
-            <!-- Film und Fernsehen -->
             <data source="594" name="d"/>
             <choose name="g">
-                <!-- Nr. 10/1939 S. 200-203 -->
-                <data source="596" />
-                <data source="596b" />
-                <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
-                <combine name="" value="${reference}">
-                    <data source="501" name="reference">
+                <combine name="g" value="${volume}(${year}), ${issue}, ${pages}">
+                    <data source="@volume" name="volume" />
+                    <data source="@year" name="year" />
+                    <data source="@issue" name="issue" />
+                    <data source="@pages" name="pages" />
+                </combine>
+                <choose> <!-- falls obige Variante nicht geht -->
+                    <!-- Nr. 10/1939 S. 200-203 -->
+                    <data source="596" />
+                    <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
+                    <data source="596a">
                         <regexp match="(.*)\. - Sign" format="${1}" />
                     </data>
-                    <data source="590" />
-                </combine>
-             </choose>
+                    <data source="596b" />
+                    <!-- Heft 1. - S. 12-17. - Sign.: ZB 175 -->
+                    <combine name="" value="${reference}">
+                        <data source="501" name="reference">
+                            <regexp match="(.*)\. - Sign" format="${1}" />
+                        </data>
+                        <data source="590" /> <!-- damit Fußnote in 501 nur berücksichtigt wird, wenn Artikel vorliegt -->
+                    </combine>
+                </choose>
+            </choose>
             <!-- Film und Fernsehen ; 21/22 -->
             <data source="597" name="k" />
             <!-- Nr. 10/1939 S. 200-203 -->
             <data source="598" name="n" />
-            <!-- Film und Fernsehen -->
-            <data source="590" name="t" />
+            <choose name="t">
+                <!-- Film und Fernsehen ; 21/22 -->
+                <data source="590">
+                   <regexp match="(.*) ; " format="${1}" />
+                </data>
+                <!-- Film und Fernsehen -->
+                <data source="590" />
+            </choose>
             <combine name="w" value="finc-127-${id}">
-                <data source="010" name="id" />
+                <choose name="id">
+                    <data source="590">
+                        <regexp match="(.*) ; " format="${1}" />
+                        <lookup in="id" />
+                    </data>
+                    <data source="590" name="id">
+                        <lookup in="id" />
+                    </data>
+                </choose>
             </combine>
+            <choose name="x">
+                <data source="590">
+                    <regexp match="(.*) ; " format="${1}" />
+                    <lookup in="issn" />
+                </data>
+                <data source="590">
+                    <lookup in="issn" />
+                </data>
+            </choose>
         </entity>
 
         <entity name="856  " flushWith="record">
@@ -576,7 +661,9 @@
 
     <maps>
 
-        <filemap name="gesamttitel" files="$[FLUX_DIR]output_ht.csv" separator="\t" />
+        <filemap name="gesamttitel" files="$[FLUX_DIR]gesamttitel.csv" separator="\t" />
+        <filemap name="issn" files="$[FLUX_DIR]issn.csv" separator="\t" />
+        <filemap name="id" files="$[FLUX_DIR]id.csv" separator="\t" />
 
     </maps>
 
