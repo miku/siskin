@@ -21,7 +21,7 @@ For siskin updates a
 $ pip install -U siskin
 ```
 
-suffices. For a full update, run
+should suffices. For a full update, run
 
 ```
 $ curl -sL https://git.io/vg2iq | sudo -i bash
