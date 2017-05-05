@@ -5,7 +5,7 @@ in
 | open-file
 | as-records
 | decode-mab
-| morph(FLUX_DIR + "filter.xml", *)
+| filter(FLUX_DIR + "filter.xml")
 | morph(FLUX_DIR + "morph.xml", *)
 | stream-to-marc21xml
 | write("stdout");
