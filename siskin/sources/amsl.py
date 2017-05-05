@@ -441,7 +441,7 @@ class AMSLWisoPackages(AMSLTask):
 
         for item in doc:
             isil, sid = item.get('ISIL'), item.get('sourceID')
-            mega_collection = item.get('mega_collection')
+            mega_collection = item.get('megaCollection')
             lthf = item.get('linkToHoldingsFile')
             if sid != "48":
                 continue
