@@ -44,12 +44,14 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
+
 class PQDTTask(DefaultTask):
     """ Thieme connect. """
     TAG = '34'
 
     def closest(self):
         return weekly(date=self.date)
+
 
 class PQDTCombine(PQDTTask):
     """ Combine files."""
@@ -71,6 +73,7 @@ class PQDTCombine(PQDTTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
 
+
 class PQDTIntermediateSchema(PQDTTask):
     """
     OAI to intermediate schema.
@@ -83,7 +86,25 @@ class PQDTIntermediateSchema(PQDTTask):
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} mega_collection=PQDT sid=34 in={input} MAP_DIR={mapdir} > {output}""",
-                          flux=self.assets("oai/flux.flux"), mapdir=mapdir, input=self.input().path)
+                          flux=self.assets("34/flux.flux"), mapdir=mapdir, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+
+class PQDTExport(PQDTTask):
+    """
+    OAI to SOLR schema.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='solr5vu3')
+
+    def requires(self):
+        return PQDTIntermediateSchema(date=self.date)
+
+    def run(self):
+        output = shellout(""" span-export -o {format} {input} > {output} """, input=self.input().path, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
