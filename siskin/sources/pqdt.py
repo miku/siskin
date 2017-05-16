@@ -39,7 +39,7 @@ import datetime
 import luigi
 
 from gluish.common import Executable
-from gluish.intervals import weekly
+from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
@@ -50,7 +50,7 @@ class PQDTTask(DefaultTask):
     TAG = '34'
 
     def closest(self):
-        return weekly(date=self.date)
+        return monthly(date=self.date)
 
 
 class PQDTCombine(PQDTTask):
