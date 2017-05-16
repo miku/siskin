@@ -42,6 +42,7 @@ from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
@@ -101,10 +102,15 @@ class PQDTExport(PQDTTask):
     format = luigi.Parameter(default='solr5vu3')
 
     def requires(self):
-        return PQDTIntermediateSchema(date=self.date)
+        return {
+            'file': PQDTIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
+        }
 
     def run(self):
-        output = shellout(""" span-export -o {format} {input} > {output} """, input=self.input().path, format=self.format)
+        output = shellout(""" span-tag -c {config} {input} > {output} """,
+                          config=self.input().get('config').path, input=self.input().get('file').path)
+        output = shellout(""" span-export -o {format} {input} > {output} """, input=output, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
