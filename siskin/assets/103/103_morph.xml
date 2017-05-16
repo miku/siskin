@@ -27,7 +27,8 @@
     <entity name="url[]" flushWith="record">
       <!-- URL -->
       <data source="metadata.dc.identifier.value">
-					</data>
+        <regexp match="^http.*" />
+      </data>
     </entity>
     <choose>
       <data source="metadata.dc.format.value" name="finc.format">
