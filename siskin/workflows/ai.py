@@ -70,6 +70,7 @@ from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.mag import MAGReferenceDB
+from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
@@ -310,6 +311,7 @@ class AIIntermediateSchema(AITask):
             JstorIntermediateSchema(date=self.date, stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
             SpringerIntermediateSchema(stamp=True),
+            PQDTIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed
