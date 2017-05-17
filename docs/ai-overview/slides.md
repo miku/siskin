@@ -456,7 +456,9 @@ Uses a dependency graph (DAG).
 Orchestration
 =============
 
-Dependencies (analogy): [Pizza](https://is.gd/HjYlCA).
+Dependencies (analogy):
+
+* [Pizza](https://is.gd/uKe3k3)
 
 ----
 
