@@ -9,7 +9,7 @@ Building Metadata Indices
 Overview
 ========
 
-![Overview](Sources.png)
+![Overview](images/DataSources.png)
 
 ----
 
@@ -358,7 +358,7 @@ Licensing
 
 A complex piece.
 
-![](Licensing.png)
+![](images/Licensing.png)
 
 ----
 
@@ -413,7 +413,7 @@ $ solrbulk -server localhost:8983/solr/biblio file.ldj
 ...
 ```
 
-![](solrbulk.png)
+![](images/solrbulk.png)
 
 ----
 
