@@ -1,7 +1,7 @@
 Building Metadata Indices
 =========================
 
-2017-05-17, 12:00-16:00
+2017-05-17, 12:30-15:00, Leipzig University Library
 [Martin Czygan](martin.czygan@uni-leipzig.de), [Tracy Hoffmann](tracy.hoffmann@uni-leipzig.de), [Robert Schenk](robert.schenk@uni-leipzig.de), et al.
 
 ----
@@ -517,6 +517,16 @@ Development
 * no central database
 * strive for reproducability
 * run on various OS (different Linux distributions, Mac OS X)
+
+----
+
+Development
+===========
+
+* Why [Python](https://www.python.org/)? It's [popular](https://www.tiobe.com/tiobe-index/) and has wide range of application in the scientific domain.
+* Why [Metafacture](https://github.com/culturegraph/metafacture-core/wiki)? A comprehensive and declarative tool. 
+* Why UNIX? 40 plus years of [text processing](http://www.oreilly.com/openbook/utp/UnixTextProcessing.pdf).
+* Why [Go](http://golang.org/)? It's fast and easy to deploy.
 
 ----
 
