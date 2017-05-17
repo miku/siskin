@@ -22,6 +22,13 @@ Around 118,221,121 articles in total. Only parts visible to libraries.
 
 ----
 
+Collection distribution
+=======================
+
+![](scripts/facets.png)
+
+----
+
 Diversity
 =========
 
