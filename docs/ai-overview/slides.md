@@ -448,3 +448,90 @@ We use a dedicated orchestration framework written in Python. It documents the w
 * https://github.com/spotify/luigi
 
 > Luigi is a Python module that helps you build complex pipelines of batch jobs. It handles dependency resolution, workflow management, visualization etc. It also comes with Hadoop support built in. 
+
+Uses a dependency graph (DAG).
+
+----
+
+Orchestration
+=============
+
+Dependencies (analogy): [Pizza](https://is.gd/HjYlCA).
+
+----
+
+Orchestration
+=============
+
+![](images/luigi_svg.png)
+
+----
+
+Orchestration
+=============
+
+![](images/luigi_d3.png)
+
+----
+
+Orchestration
+=============
+
+![](images/luigi_d3_2.png)
+
+----
+
+Orchestration
+=============
+
+![](images/taskps.png)
+
+----
+
+Orchestration
+=============
+
+* workflows are [extensible](https://raw.githubusercontent.com/miku/siskin/master/docs/catalog/AIExport.gif)
+* all tasks executable via command line
+* distributed as a normal [python package](https://pypi.python.org/pypi/siskin)
+
+----
+
+Development
+===========
+
+* open source
+* with git (and github)
+* each data source has a file containing *recipes*
+
+----
+
+![](images/sources.png)
+
+----
+
+Development
+===========
+
+* can create or modify new sources independent of existing workflows
+* no central database
+* strive for reproducability
+* run on various OS (different Linux distributions, Mac OS X)
+
+----
+
+Outlook
+=======
+
+* more (new) sources
+* migrating existing data sources into the DAG
+* automated quality checks
+* add more external information (e.g. citation graph) to the metadata
+
+----
+
+More
+====
+
+* https://github.com/ubleipzig
+* https://github.com/finc
