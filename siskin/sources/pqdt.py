@@ -39,6 +39,7 @@ import datetime
 import luigi
 
 from gluish.common import Executable
+from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -86,12 +87,12 @@ class PQDTIntermediateSchema(PQDTTask):
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} mega_collection="PQDT Open" sid=34 in={input} MAP_DIR={mapdir} > {output}""",
+        output = shellout("""flux.sh {flux} mega_collection="PQDT Open" sid=34 in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
                           flux=self.assets("34/flux.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class PQDTExport(PQDTTask):
