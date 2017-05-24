@@ -26,6 +26,14 @@
 Genios
 ------
 
+Configuration:
+
+[genios]
+
+scp-src = user@ftp.example.com:/home/gbi
+
+----
+
 This is a reimplementation of Genios tasks.
 
 * References (fachzeitschriften = FZS)
