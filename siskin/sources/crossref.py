@@ -585,7 +585,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         for item in items:
             if item['sourceID'] == '49':
-                amsl.add(item['collectionLabel'].strip())
+                amsl.add(item['megaCollection'].strip())
 
         with self.input().get('crossref').open() as handle:
             with self.output().open('w') as output:
