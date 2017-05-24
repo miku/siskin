@@ -587,6 +587,8 @@ class CrossrefCollectionsDifference(CrossrefTask):
             if item['sourceID'] == '49':
                 amsl.add(item['megaCollection'].strip())
 
+        self.logger.debug("found %s crossref collections in AMSL" % len(amsl))
+
         with self.input().get('crossref').open() as handle:
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('name',)):
