@@ -53,7 +53,7 @@ from siskin.utils import iterfiles
 
 class KHMTask(DefaultTask):
     """ Base task for KHM Koeln (sid 109) """
-    TAG = 'khm'
+    TAG = '109'
     FILEPATTERN = r'.*aleph.ALL_RECS.(?P<date>[12][0-9]{3,3}[01][0-9][0123][0-9]).*(?P<no>[0-9]{1,}).tar.gz'
 
     def closest(self):
