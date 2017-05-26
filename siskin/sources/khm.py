@@ -33,7 +33,10 @@ scp-src = user@ftp.example.com:/home/gbi
 """
 
 import datetime
+import itertools
 import os
+import re
+import tempfile
 
 import luigi
 
@@ -51,6 +54,7 @@ from siskin.utils import iterfiles
 class KHMTask(DefaultTask):
     """ Base task for KHM Koeln (sid 109) """
     TAG = 'khm'
+    FILEPATTERN = r'.*aleph.ALL_RECS.(?P<date>[12][0-9]{3,3}[01][0-9][0123][0-9]).*(?P<no>[0-9]{1,}).tar.gz'
 
     def closest(self):
         return monthly(date=self.date)
@@ -75,11 +79,76 @@ class KHMDropbox(KHMTask):
             os.makedirs(self.taskdir())
 
         with self.output().open('w') as output:
-            for path in iterfiles(target):
+            for path in sorted(iterfiles(target)):
                 output.write_tsv(path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+
+class KHMLatestDate(KHMTask):
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return KHMDropbox(date=self.date)
+
+    def run(self):
+        """
+        Naming schema: aleph.ALL_RECS.20170316.123655.2.tar.gz. aleph.ALL_RECS.YYYYMMDD.HHMMSS.NO.tar.gz
+        """
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                records = sorted(handle.iter_tsv(cols=('path',)), reverse=True)
+                if len(records) == 0:
+                    raise RuntimeError('no files found, cannot determine latest date')
+                groups = re.search(self.FILEPATTERN, records[0].path).groupdict()
+                output.write_tsv(groups["date"])
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class KHMLatest(KHMTask):
+    """
+    Decompress and join files from the (presumably) lastest version.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'dropbox': KHMDropbox(date=self.date),
+            'date': KHMLatestDate(date=self.date),
+        }
+
+    def run(self):
+        """
+        Naming schema: aleph.ALL_RECS.20170316.123655.2.tar.gz. aleph.ALL_RECS.YYYYMMDD.HHMMSS.NO.tar.gz
+
+        Ugly XML merge.
+        """
+        with self.input().get('date').open() as handle:
+            latest_date = handle.read().strip()
+
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+
+        shellout(""" echo '<?xml version = "1.0" encoding = "UTF-8"?>
+            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+            ' >> {stopover} """, stopover=stopover, preserve_whitespace=True)
+
+        with self.input().get('dropbox').open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                groups = re.search(self.FILEPATTERN, row.path).groupdict()
+                if groups["date"] != latest_date:
+                    continue
+                shellout("tar xOf {input} | xmlcutty -path /OAI-PMH/ListRecords/record >> {stopover}", input=row.path, stopover=stopover)
+
+        shellout(""" echo '</OAI-PMH>' >> {stopover} """, stopover=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='marcxml'))
 
 
 class KHMTransformation(KHMTask):
