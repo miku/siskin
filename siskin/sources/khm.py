@@ -33,9 +33,9 @@ scp-src = user@ftp.example.com:/home/gbi
 """
 
 import datetime
+import os
 
 import luigi
-import os
 
 from gluish.common import Executable
 from gluish.format import TSV
@@ -45,6 +45,7 @@ from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 
 
 class KHMTask(DefaultTask):
