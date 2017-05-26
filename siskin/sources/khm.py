@@ -22,7 +22,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-KHM Koeln
+KHM Koeln (#9269).
 
 Configuration keys:
 
