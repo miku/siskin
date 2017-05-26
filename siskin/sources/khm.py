@@ -87,7 +87,7 @@ class KHMDropbox(KHMTask):
 
 
 class KHMLatestDate(KHMTask):
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return KHMDropbox(date=self.date)
@@ -112,7 +112,7 @@ class KHMLatest(KHMTask):
     """
     Decompress and join files from the (presumably) lastest version.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
