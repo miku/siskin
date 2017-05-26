@@ -145,7 +145,8 @@ class KHMLatest(KHMTask):
                 shellout("tar xOf {input} | xmlcutty -path /OAI-PMH/ListRecords/record >> {stopover}", input=row.path, stopover=stopover)
 
         shellout(""" echo '</OAI-PMH>' >> {stopover} """, stopover=stopover)
-        luigi.LocalTarget(stopover).move(self.output().path)
+        output = shellout(""" xmllint --format {input} > {output} """, input=stopover)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='marcxml'))
