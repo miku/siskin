@@ -198,7 +198,8 @@ class CrossrefChunkItems(CrossrefTask):
 
 class CrossrefLineDOI(CrossrefTask):
     """
-    Extract the line number and DOI for a given chunk. Works per chunk, so updates can be more incremental.
+    Extract the line number and DOI for a given chunk. Works per chunk, so
+    updates can be more incremental.
 
     TODO: Sort by filename seems correct for now, even in some edge cases, like
     DOI 10.1177/0959353515613812:
@@ -206,25 +207,25 @@ class CrossrefLineDOI(CrossrefTask):
     13046   ... CrossrefChunkItems/begin-2016-01-01-end-2016-02-01-filter-deposit.ldj.gz 10.1177/0959353515613812
     3548977 ... CrossrefChunkItems/begin-2016-01-01-end-2016-02-01-filter-deposit.ldj.gz 10.1177/0959353515613812
 
-    Both docs come in a single API harvest slice, but they differ slightly:
+    Both docs come in a single (monthly) API harvest slice, but they differ slightly:
     https://gist.github.com/miku/c9e892343d8b0acb49cf
 
     Document in line #3548977 would be the most recent and the current
-    implementation find it:
+    implementation would find it:
 
         $ taskcat CrossrefDOITable | LC_ALL=C grep -F "10.1177/0959353515613812"
         3548977 ... CrossrefChunkItems/begin-2016-01-01-end-2016-02-01-filter-deposit.ldj.gz 10.1177/0959353515613812
 
-    So by using tac we should get the correct answer here, but it might probably
-    be more robust, to use `timestamp` or some inherent attribute of the record
-    for ordering.
+    So by using tac we should get the correct answer here, but it might be more
+    robust, to use `timestamp` or some attribute of the record for sorting.
 
     Q: DOI "10.1016/j.visres.2013.12.006" is in CrossrefChunkItems, but does not
     get extracted here. Why?
 
     A: 10.1016/j.visres.2013.12.006 is only an associated DOI, here a
     "Corrigendum to" the original article, which has been published in a
-    subsequent volume. """
+    subsequent volume.
+    """
 
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
