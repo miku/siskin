@@ -80,8 +80,7 @@ class CrossrefTask(DefaultTask):
 
 class CrossrefHarvestChunkWithCursor(CrossrefTask):
     """
-    Task should have the same output as `CrossrefHarvestChunk`, but
-    implementation should use cursor (https://git.io/v1K27).
+    Harvest window with cursors (https://git.io/v1K27).
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
@@ -153,70 +152,6 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 if not 'next-cursor' in content['message']:
                     raise RuntimeError('expected next-cursor in message, but missing')
                 cursor = content['message']['next-cursor']
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-
-class CrossrefHarvestChunk(CrossrefTask):
-    """
-    >>> DEPRECATED, switch to CrossrefHarvestChunkWithCursor soon, (https://git.io/v1K27).
-
-    Harvest a slice of Crossref.
-
-    API docs can be found under: http://api.crossref.org/
-
-    The output file is line delimited JSON, just the concatenated responses.
-    """
-    begin = luigi.DateParameter()
-    end = luigi.DateParameter()
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
-
-    rows = luigi.IntParameter(default=200, significant=False)
-    max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
-    attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
-    sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests (secs)')
-
-    @timed
-    def run(self):
-        """
-        The API sometimes returns a 504 or other error. We therefore cache all HTTP requests
-        locally with a simple URLCache and re-attempt a URL a couple of times.
-        """
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
-        adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
-        cache.sess.mount('http://', adapter)
-
-        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(self=self)
-        rows, offset = self.rows, 0
-
-        with self.output().open('w') as output:
-            while True:
-                params = {"rows": rows, "offset": offset, "filter": filter}
-                url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
-                for attempt in range(1, self.attempts):
-                    if not cache.is_cached(url):
-                        time.sleep(self.sleep)
-                    body = cache.get(url)
-                    try:
-                        content = json.loads(body)
-                    except ValueError as err:
-                        if attempt == self.attempts - 1:
-                            self.logger.debug("URL was %s", url)
-                            self.logger.debug(err)
-                            self.logger.debug(body[:100])
-                            raise
-                        if os.path.exists(cache.get_cache_file(url)):
-                            self.logger.debug("trying to recover by removing cached entry")
-                            os.remove(cache.get_cache_file(url))
-                    else:
-                        break
-                items = content["message"]["items"]
-                self.logger.debug("%s: %s", url, len(items))
-                if len(items) == 0:
-                    break
-                output.write(body + "\n")
-                offset += rows
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
