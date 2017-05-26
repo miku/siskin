@@ -82,8 +82,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     """
     Harvest window with cursors (https://git.io/v1K27).
     """
-    begin = luigi.DateParameter()
-    end = luigi.DateParameter()
+    begin = luigi.DateParameter(description='start of harvesting window')
+    end = luigi.DateParameter(description='end of harvesting window, inclusive')
     filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     rows = luigi.IntParameter(default=1000, significant=False)
