@@ -152,10 +152,20 @@ class KHMLatest(KHMTask):
         return luigi.LocalTarget(path=self.path(ext='marcxml'))
 
 
-class KHMTransformation(KHMTask):
+class KHMIntermediateSchema(KHMTask):
     """
-    Transform. Get dump from "Datenklappe" and transform via metafacture.
+    Convert to intermediate schema via metafacture.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return KHMLatest(date=self.date)
 
     def run(self):
-        raise RuntimeError("TODO")
+        mapdir = 'file:///%s' % self.assets("maps/")
+        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
+                          flux=self.assets("109/109.flux"), mapdir=mapdir, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
