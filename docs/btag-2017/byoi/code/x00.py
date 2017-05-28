@@ -91,4 +91,4 @@ class MyTask(luigi.Task):
         return luigi.LocalTarget(path='x00.output.txt')
 
 if __name__ == '__main__':
-    luigi.run()
+    luigi.run(local_scheduler=True)

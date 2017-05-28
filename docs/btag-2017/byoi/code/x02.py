@@ -27,6 +27,7 @@ from __future__ import print_function
 import luigi
 import os
 
+
 class FreeSpace(luigi.Task):
     """
     A custom completion criteria. Here, we want to ensure, that there is
@@ -46,4 +47,4 @@ class FreeSpace(luigi.Task):
         return free > required
 
 if __name__ == '__main__':
-    luigi.run()
+    luigi.run(local_scheduler=True)
