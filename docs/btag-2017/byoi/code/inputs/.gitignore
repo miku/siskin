@@ -1,2 +1,4 @@
+*.ldj
+*.xml
 *ldj.gz
 *xml.gz
