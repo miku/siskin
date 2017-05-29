@@ -1,0 +1,16 @@
+sheet music	unknown
+Monograph	Book
+Volume	Issue
+Periodical Periodical
+info:eu-repo/semantics/article	article
+
+#"article",
+#"book",
+#"bookitem",
+#"conference",
+#"document",
+#"issue",
+#"preprint",
+#"proceeding",
+#"report",
+#"unknown"
