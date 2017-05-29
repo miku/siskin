@@ -26,7 +26,9 @@
 # BTAG preparation
 # ================
 
+import collections
 import json
+import random
 
 import luigi
 
@@ -41,6 +43,7 @@ from siskin.task import DefaultTask
 class BTAGTask(DefaultTask):
     """ Base task for BTAG. """
     TAG = 'btag'
+
 
 class BTAGCrossrefSet(BTAGTask):
     """
@@ -88,3 +91,35 @@ class BTAGCrossrefSet(BTAGTask):
 
     def output(self):
 	return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class BTAGCrossref(BTAGTask):
+    """
+    Create a crossref subset, that contains items, that have references in MAG and dups in DOAJ.
+    """
+
+    def requires(self):
+	return {
+	    'crossref': CrossrefUniqItems(),
+	    'set': BTAGCrossrefSet(max=5000000),
+	}
+
+    def run(self):
+	entries = {}
+	with self.input().get('set').open() as handle:
+	    for row in handle.iter_tsv(cols=('doi', 'refcount', 'indoaj')):
+		entries[row.doi] = row
+
+	with self.input().get('crossref').open() as handle:
+	    with self.output().open('w') as output:
+		for line in handle:
+		    doc = json.loads(line)
+		    if doc.get("DOI") in entries:
+			output.write(json.dumps(doc) + "\n")
+		    else:
+			if random.random() < 0.0001:
+			    self.logger.debug("inlude random record")
+			    output.write(json.dumps(doc) + "\n")
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj'))
