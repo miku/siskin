@@ -125,7 +125,7 @@ class BTAGCrossref(BTAGTask):
 	return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
-class DOAJSubset(BTAGTask):
+class BTAGDOAJSubset(BTAGTask):
     """
     A smaller subset of DOAJ.
     """
