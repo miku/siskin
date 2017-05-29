@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-PQDT.
+PQDT, http://pqdtopen.proquest.com.
 
 Config
 ------
@@ -48,7 +48,7 @@ from siskin.task import DefaultTask
 
 
 class PQDTTask(DefaultTask):
-    """ Thieme connect. """
+    """ PQDT open. """
     TAG = '34'
 
     def closest(self):
