@@ -35,7 +35,7 @@ import luigi
 from gluish.format import TSV
 from siskin.database import sqlitedb
 from siskin.sources.crossref import CrossrefUniqItems
-from siskin.sources.doaj import DOAJDOIList
+from siskin.sources.doaj import DOAJDOIList, DOAJDump
 from siskin.sources.mag import MAGReferenceDB
 from siskin.task import DefaultTask
 
@@ -120,6 +120,42 @@ class BTAGCrossref(BTAGTask):
 			if random.random() < 0.0001:
 			    self.logger.debug("inlude random record")
 			    output.write(json.dumps(doc) + "\n")
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+
+class DOAJSubset(BTAGTask):
+    """
+    A smaller subset of DOAJ.
+    """
+
+    def requires(self):
+	return {
+	    'doaj': DOAJDump(),
+	    'set': BTAGCrossrefSet(max=5000000),
+	}
+
+    def run(self):
+	entries = {}
+	with self.input().get('set').open() as handle:
+	    for row in handle.iter_tsv(cols=('doi', 'refcount', 'indoaj')):
+		entries[row.doi] = row
+
+	with self.input().get('doaj').open() as handle:
+	    with self.output().open('w') as output:
+		for line in handle:
+		    doc = json.loads(line)
+		    for iddoc in doc['_source']['bibjson']['identifier']:
+			if iddoc["type"] != "doi":
+			    continue
+			doi = iddoc["id"]
+			if doi in entries:
+			    output.write(json.dumps(doc) + "\n")
+			else:
+			    if random.random() < 0.0001:
+				self.logger.debug("inlude random record")
+				output.write(json.dumps(doc) + "\n")
 
     def output(self):
 	return luigi.LocalTarget(path=self.path(ext='ldj'))
