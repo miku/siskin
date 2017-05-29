@@ -159,3 +159,36 @@ class BTAGDOAJSubset(BTAGTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
+
+class BTAGMAGSubset(BTAGTask):
+    """ A small subset of MAG. """
+
+    def requires(self):
+        return {
+            'db': MAGReferenceDB(),
+            'crossref': BTAGCrossref(),
+        }
+
+    def run(self):
+        doiset = set()
+        with self.input().get('crossref').open() as handle:
+            for line in handle:
+                doc = json.loads(line)
+                doiset.add(doc['DOI'])
+
+        with sqlitedb(self.input().get('db').path) as cursor:
+            with self.output().open('w') as output:
+                stmt = """
+                    select doi from lookup where id IN (
+                        select ref from refs where id = (
+                            select id from lookup where doi = ?))
+                """
+                for doi in doiset:
+                    cursor.execute(stmt, (doi,))
+                    rows = cursor.fetchall()
+                    refs = [v[0] for v in rows]
+                    output.write_tsv(doi, *refs)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'), format=TSV)
