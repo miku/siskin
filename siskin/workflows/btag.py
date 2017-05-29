@@ -153,7 +153,7 @@ class BTAGDOAJSubset(BTAGTask):
                         if doi in entries:
                             output.write(json.dumps(doc) + "\n")
                         else:
-                            if random.random() < 0.0001:
+                            if random.random() < 0.001:
                                 self.logger.debug("inlude random record")
                                 output.write(json.dumps(doc) + "\n")
 
