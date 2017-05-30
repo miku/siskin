@@ -2,5 +2,5 @@
 # coding: utf-8
 
 """
-TODO: Merging and deduplication.
+TODO: Merging and deduplication (groupcover).
 """
