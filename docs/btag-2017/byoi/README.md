@@ -1,6 +1,8 @@
 README
 ======
 
+TODO: VM, install: VuFind, solrbulk, span.
+
 This directory contains material for
 
 > Heute baue ich meinen eigenen Artikelindex: Leichtgewichtige Metadatenverarbeitung
