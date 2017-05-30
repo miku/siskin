@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-TODO: Licensing (KBART).
+TODO: Licensing (KBART) + deduplication with groupcover.
 """
 
 import json
@@ -53,6 +53,7 @@ class TaggedIntermediateSchema(luigi.Task):
 
     def output(self):
 	return luigi.LocalTarget(path='outputs/tagged.is.ldj')
+
 
 if __name__ == '__main__':
     luigi.run(local_scheduler=True)
