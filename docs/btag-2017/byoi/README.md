@@ -29,3 +29,19 @@ $ tree -sh .
 2 directories, 10 files
 
 ```
+
+Task tree
+---------
+
+```
+ \_ Export(format=solr5vu3)
+    \_ TaggedIntermediateSchema()
+       \_ IntermediateSchema()
+          \_ DOAJIntermediateSchema()
+             \_ DOAJInput()
+          \_ ArxivIntermediateSchema()
+             \_ ArxivInput()
+          \_ CrossrefIntermediateSchema()
+             \_ CrossrefInput()
+       \_ CreateConfig()
+```
