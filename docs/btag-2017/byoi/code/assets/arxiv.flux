@@ -9,8 +9,8 @@ default sid = "121";
 default mega_collection = "Arxiv";
 default format = "ElectronicArticle";
 default fileName = in;
-//default fileName = FLUX_DIR + sid + "records.xml";
-//default out = FLUX_DIR + sid + ".json";
+// default fileName = FLUX_DIR + sid + "records.xml";
+// default out = FLUX_DIR + sid + ".json";
 
 fileName|
 open-file|

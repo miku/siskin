@@ -2,5 +2,5 @@
 # coding: utf-8
 
 """
-TODO: MAG graph.
+TODO: MAG graph (crossref event data).
 """

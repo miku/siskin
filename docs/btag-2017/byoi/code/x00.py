@@ -80,9 +80,6 @@ class MyTask(luigi.Task):
     and some result.
     """
 
-    def requires(self):
-        pass
-
     def run(self):
         with self.output().open('w') as output:
             output.write('Some bytes written to a file.\n')
