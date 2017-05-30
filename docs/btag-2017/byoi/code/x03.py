@@ -18,7 +18,7 @@ class IPlannerResponse(luigi.ExternalTask):
 	return luigi.LocalTarget(path='inputs/iplanner.json')
 
 
-class Welcome(luigi.Task):
+class MyTask(luigi.Task):
     """
     A welcome message written to a file.
     """
@@ -34,7 +34,7 @@ class Welcome(luigi.Task):
 	    output.write("Willkommen zum Hands-On Lab '%s' am DBT!\n" % doc['sessions']['1']['title'])
 
     def output(self):
-	return luigi.LocalTarget(path='x03.output.txt')
+	return luigi.LocalTarget(path='outputs/x03.txt')
 
 if __name__ == '__main__':
     luigi.run(local_scheduler=True)

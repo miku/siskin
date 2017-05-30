@@ -1,4 +1,6 @@
 *.ldj
 *.xml
+*.tsv
 *ldj.gz
 *xml.gz
+*tsv.gz

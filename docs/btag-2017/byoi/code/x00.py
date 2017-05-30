@@ -85,7 +85,7 @@ class MyTask(luigi.Task):
             output.write('Some bytes written to a file.\n')
 
     def output(self):
-        return luigi.LocalTarget(path='x00.output.txt')
+	return luigi.LocalTarget(path='outputs/x00.txt')
 
 if __name__ == '__main__':
     luigi.run(local_scheduler=True)

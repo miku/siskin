@@ -1,34 +1,42 @@
 #!/usr/bin/env python
 # coding: utf-8
-# pylint: disable=C0111,C0301
 
 """
-TODO: OAI/Arxiv example.
+TODO: Merging and deduplication (groupcover).
 """
+
+import tempfile
 
 import luigi
+
 from gluish.utils import shellout
+from x04 import CrossrefIntermediateSchema, DOAJIntermediateSchema
+from x05 import ArxivIntermediateSchema
 
 
-class ArxivInput(luigi.ExternalTask):
+def merge(targets):
+    """ Given a number of targets, concatenate them into a temporary file. """
+    _, tmpf = tempfile.mkstemp(prefix='lab-')
+    for target in targets:
+	shellout("""cat {input} >> {output}""", input=target.path, output=tmpf)
+    return tmpf
 
-    def output(self):
-	return luigi.LocalTarget(path='inputs/arxiv.xml')
 
-
-class ArxivIntermediateSchema(luigi.Task):
+class IntermediateSchema(luigi.Task):
 
     def requires(self):
-	return ArxivInput()
+	return [
+	    CrossrefIntermediateSchema(),
+	    DOAJIntermediateSchema(),
+	    ArxivIntermediateSchema(),
+	]
 
     def run(self):
-	output = shellout("""flux.sh assets/arxiv.flux in={input} MAP_DIR=assets/maps/ > {output}""",
-			  input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+	merged = merge(self.input())
+	luigi.LocalTarget(merged).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path='output/x06.ldj')
-
+	return luigi.LocalTarget(path='outputs/combined.is.ldj')
 
 if __name__ == '__main__':
     luigi.run(local_scheduler=True)
