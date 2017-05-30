@@ -22,8 +22,9 @@ Screenies:
 
 """
 
-import luigi
 import time
+
+import luigi
 
 
 class MyTask(luigi.Task):
@@ -40,7 +41,7 @@ class MyTask(luigi.Task):
             output.write('Some bytes written to a file.\n')
 
     def output(self):
-        return luigi.LocalTarget(path='x01.output.txt')
+        return luigi.LocalTarget(path='outputs/x01.txt')
 
 if __name__ == '__main__':
     luigi.run()
