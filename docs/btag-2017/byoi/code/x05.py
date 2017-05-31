@@ -7,27 +7,28 @@ TODO: OAI/Arxiv example.
 """
 
 import luigi
+from luigi.format import Gzip
 from gluish.utils import shellout
 
 
 class ArxivInput(luigi.ExternalTask):
 
     def output(self):
-	return luigi.LocalTarget(path='inputs/arxiv.xml')
+        return luigi.LocalTarget(path='inputs/arxiv.xml')
 
 
 class ArxivIntermediateSchema(luigi.Task):
 
     def requires(self):
-	return ArxivInput()
+        return ArxivInput()
 
     def run(self):
-	output = shellout("""flux.sh assets/arxiv.flux in={input} MAP_DIR=assets/maps/ > {output}""",
-			  input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("""flux.sh assets/arxiv.flux in={input} MAP_DIR=assets/maps/ | gzip -c > {output}""",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path='outputs/arxiv.is.ldj')
+        return luigi.LocalTarget(path='outputs/arxiv.is.ldj.gz', format=Gzip)
 
 
 if __name__ == '__main__':

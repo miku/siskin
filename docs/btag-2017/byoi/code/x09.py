@@ -19,7 +19,7 @@ class Export(luigi.Task):
         return TaggedIntermediateSchema()
 
     def run(self):
-        output = shellout(""" span-export -o {format} {input} | gzip -c > {output} """,
+        output = shellout(""" gunzip -c {input} | span-export -o {format} | gzip -c > {output} """,
                           format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
