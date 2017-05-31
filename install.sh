@@ -34,12 +34,18 @@
 
 set -o pipefail
 
+# Binary packages are 64-bit only at the moment.
+MACHINE_TYPE=`uname -m`
+if [ ${MACHINE_TYPE} != 'x86_64' ]; then
+	echo "err: 64-bit only" && exit 1
+fi
+
 if [ "$EUID" -ne 0 ]; then
-	echo "superuser only" && exit 1
+	echo "err: superuser only" && exit 1
 fi
 
 if [[ "$OSTYPE" != "linux-gnu" ]]; then
-	echo "not supported: $OSTYPE" && exit 1
+	echo "err: not supported: $OSTYPE" && exit 1
 fi
 
 # Install curl and wget first.
