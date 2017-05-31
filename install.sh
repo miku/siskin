@@ -147,6 +147,7 @@ if [ -f /etc/debian_version ]; then
 	install_latest_deb "miku/metha"
 	install_latest_deb "miku/solrbulk"
 	install_latest_deb "miku/span"
+	install_latest_deb "miku/microblob"
 fi
 
 # Centos.
@@ -185,6 +186,7 @@ if [ -f /etc/redhat-release ]; then
 	install_latest_rpm "miku/metha"
 	install_latest_rpm "miku/solrbulk"
 	install_latest_rpm "miku/span"
+	install_latest_rpm "miku/microblob"
 fi
 
 # Install pip (debian).
