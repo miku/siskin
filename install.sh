@@ -80,7 +80,7 @@ install_latest_deb() {
 	# dpkg cannot handle urls?
 	tempdir=$(mktemp -d)
 	cd "$tempdir" && wget -O transit.deb "$URL" && dpkg -i transit.deb && rm -f transit.deb && cd -
-	rm -f "$tempdir"
+	rm -rf "$tempdir"
 }
 
 # install_latest_rpm installs latest rpm release, given a username/repository from github.com.
