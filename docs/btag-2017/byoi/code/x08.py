@@ -53,7 +53,7 @@ class TaggedIntermediateSchema(luigi.Task):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/tagged.is.ldj.gz', format=Gip)
+        return luigi.LocalTarget(path='outputs/tagged.is.ldj.gz', format=Gzip)
 
 
 if __name__ == '__main__':
