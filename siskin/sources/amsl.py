@@ -619,6 +619,24 @@ class AMSLFilterConfig(AMSLTask):
             if sid == '48':  # Handled elsewhere.
                 continue
 
+	    # 10495, maybe use a TSV with custom column name to use a subject list?
+	    if isil == 'DE-15-FID' and sid == '34':
+		isilfilters[isil].append({
+		    "and": [
+			{
+			    "source": ["34"],
+			},
+			{
+			    "subject": [
+				"Film studies",
+				"Information science",
+				"Mass communication",
+			    ]
+			},
+		    ]
+		})
+		continue
+
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
             # X   X    X    -    -    -     -
