@@ -35,6 +35,7 @@ import functools
 import hashlib
 import itertools
 import json
+import operator
 import os
 import pprint
 import random
@@ -112,6 +113,50 @@ def nwise(iterable, n=2):
     while piece:
         yield piece
         piece = tuple(itertools.islice(i, n))
+
+
+def dictcheck(obj, contains=None, missing=None):
+    """
+    For a dictionary, check if it contains *values* for the keys given in
+    contains and at the same time it does not have values for keys, which are
+    given in missing.
+
+    >>> dictcheck({"name": "x"}, contains=["name"])
+    True
+
+    >>> dictcheck({"name": "x"}, contains=["name"], missing=["key"])
+    True
+
+    >>> dictcheck({"name": "x", "key": "1234"}, contains=["name"], missing=["key"])
+    False
+
+    >>> dictcheck({"key": None}, missing=["key"])
+    True
+
+    >>> dictcheck({}, missing=["key"])
+    True
+
+    """
+    if not isinstance(obj, dict):
+	raise ValueError('dictionary only')
+    if contains is None:
+	contains = []
+    if missing is None:
+	missing = []
+
+    for key in contains:
+	if key not in obj:
+	    return False
+	if not bool(operator.itemgetter(key)(obj)):
+	    return False
+
+    for key in missing:
+	if key not in obj:
+	    continue
+	if bool(operator.itemgetter(key)(obj)):
+	    return False
+
+    return True
 
 
 def get_task_import_cache():
