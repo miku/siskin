@@ -125,7 +125,7 @@ class AIDOIRedirectTable(AITask):
         return AIDOIList()
 
     def run(self):
-        output = shellout("hurrly -w 64 < {input} > {output}", input=self.input().path)
+        output = shellout("hurrly -w 16 < {input} > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
