@@ -1,15 +1,11 @@
 README
 ======
 
-TODO: VM, install: VuFind, solrbulk, span.
-
 This directory contains material for
 
 > Heute baue ich meinen eigenen Artikelindex: Leichtgewichtige Metadatenverarbeitung
 
 * http://www.professionalabstracts.com/api/iplanner/?conf=dbt2017&model=sessions&method=get&params[sids]=132&params[pids]=282&params[format]=pdf
-
-Build an aggregated index including licensing and cross references with 225 lines of code.
 
 Content
 -------
@@ -46,20 +42,4 @@ Content
 └── [ 698]  x09.py
 
 3 directories, 25 files
-```
-
-Task tree
----------
-
-```
- \_ Export(format=solr5vu3)
-    \_ TaggedIntermediateSchema()
-       \_ IntermediateSchema()
-	  \_ DOAJIntermediateSchema()
-	     \_ DOAJInput()
-	  \_ ArxivIntermediateSchema()
-	     \_ ArxivInput()
-	  \_ CrossrefIntermediateSchema()
-	     \_ CrossrefInput()
-       \_ CreateConfig()
 ```
