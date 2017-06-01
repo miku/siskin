@@ -2,7 +2,15 @@
 # coding: utf-8
 
 """
-A first dependency.
+A first dependency
+==================
+
+Goals:
+
+* show luigi.ExternalTask for things, that are provided
+* require a single other task
+* show how to access inputs with self.input ...
+
 """
 
 import json
@@ -15,7 +23,7 @@ class IPlannerResponse(luigi.ExternalTask):
     """
 
     def output(self):
-	return luigi.LocalTarget(path='inputs/iplanner.json')
+        return luigi.LocalTarget(path='inputs/iplanner.json')
 
 
 class MyTask(luigi.Task):
@@ -24,17 +32,20 @@ class MyTask(luigi.Task):
     """
 
     def requires(self):
-	return IPlannerResponse()
+        return IPlannerResponse()
 
     def run(self):
-	with self.input().open() as file:
-	    doc = json.load(file)
+        """
+        Access output of required task with self.input() ...
+        """
+        with self.input().open() as file:
+            doc = json.load(file)
 
-	with self.output().open('w') as output:
-	    output.write("Willkommen zum Hands-On Lab '%s' am DBT!\n" % doc['sessions']['1']['title'])
+        with self.output().open('w') as output:
+            output.write("Willkommen zum Lab '%s' am DBT 2017!\n" % doc['sessions']['1']['title'])
 
     def output(self):
-	return luigi.LocalTarget(path='outputs/x03.txt')
+        return luigi.LocalTarget(path='outputs/x03.txt')
 
 if __name__ == '__main__':
     luigi.run(local_scheduler=True)

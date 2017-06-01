@@ -3,7 +3,12 @@
 # pylint: disable=C0111,C0301
 
 """
-TODO: OAI/Arxiv example.
+Reuse established frameworks
+============================
+
+* possible integration with existing metadata frameworks
+* external command plus assets, which can be shipped together
+
 """
 
 import luigi
@@ -23,6 +28,10 @@ class ArxivIntermediateSchema(luigi.Task):
         return ArxivInput()
 
     def run(self):
+        """
+        Use metafacture runner to normalize harvested data. Assets can live
+        side by side with code.
+        """
         output = shellout("""flux.sh assets/arxiv.flux in={input} MAP_DIR=assets/maps/ | gzip -c > {output}""",
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)

@@ -2,7 +2,15 @@
 # coding: utf-8
 
 """
-TODO: Crossref, DOAJ example.
+Library metadata
+================
+
+Goals:
+
+* use bibliographic data
+* run data normalization
+* show reuse of external programs via shellout (templates)
+
 """
 
 import luigi
@@ -11,12 +19,18 @@ from gluish.utils import shellout
 
 
 class CrossrefInput(luigi.Task):
+    """
+    Harvested from Crossref, http://api.crossref.org/
+    """
 
     def output(self):
         return luigi.LocalTarget('inputs/crossref.ldj')
 
 
 class CrossrefIntermediateSchema(luigi.Task):
+    """
+    Format normalization, using an in-house tool.
+    """
 
     def requires(self):
         return CrossrefInput()

@@ -2,15 +2,17 @@
 # coding: utf-8
 
 """
-An example task.
+Web Interface
+=============
+
+Goals:
+
+* show web interface
+
 
 First, start scheduler in the background.
 
     $ luigid --background
-
-Goal:
-
-* Show web interface.
 
 Simple command line integration.
 
@@ -30,18 +32,15 @@ import luigi
 class MyTask(luigi.Task):
     """ Simulate work, so we can inspect the web interface. """
 
-    def requires(self):
-        pass
-
     def run(self):
         """ TODO: Adjust HTTP URL. """
-        print('running task (may want to visit http://127.0.0.1:8082)')
-        time.sleep(30)
+        print('running task - visit http://127.0.0.1:8082')
+        time.sleep(60)
         with self.output().open('w') as output:
             output.write('Some bytes written to a file.\n')
 
     def output(self):
-	return luigi.LocalTarget(path='outputs/x01.txt')
+        return luigi.LocalTarget(path='outputs/x01.txt')
 
 if __name__ == '__main__':
     luigi.run()

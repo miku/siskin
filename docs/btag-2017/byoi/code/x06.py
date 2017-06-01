@@ -2,7 +2,13 @@
 # coding: utf-8
 
 """
-TODO: Merging and deduplication (groupcover).
+Merging outputs
+===============
+
+Goals:
+
+* show that tasks can require multiple things
+
 """
 
 import tempfile
@@ -16,11 +22,13 @@ from x05 import ArxivIntermediateSchema
 
 
 def merge(targets):
-    """ Given a number of targets, concatenate them into a temporary file. """
-    _, tmpf = tempfile.mkstemp(prefix='lab-')
+    """
+    Helper function to concatenate the outputs for a number of targets.
+    """
+    _, tf = tempfile.mkstemp(prefix='lab-')
     for target in targets:
-        shellout("""cat {input} >> {output}""", input=target.path, output=tmpf)
-    return tmpf
+        shellout("cat {input} >> {output}", input=target.path, output=tf)
+    return tf
 
 
 class IntermediateSchema(luigi.Task):
