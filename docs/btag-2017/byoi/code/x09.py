@@ -15,7 +15,7 @@ Goals:
 import luigi
 
 from gluish.utils import shellout
-from x08 import TaggedIntermediateSchema
+from x08 import TaggedIntermediateSchema  # TaggedAndDeduplicatedIntermediateSchema
 
 
 class Export(luigi.Task):
@@ -26,6 +26,10 @@ class Export(luigi.Task):
     format = luigi.Parameter(default='solr5vu3', description='solr5vu3 or formeta')
 
     def requires(self):
+        """
+        Once we have a better workflow in place, we can replace the inputs,
+        e.g. with a deduplicated version (TaggedAndDeduplicatedIntermediateSchema).
+        """
         return TaggedIntermediateSchema()
 
     def run(self):
