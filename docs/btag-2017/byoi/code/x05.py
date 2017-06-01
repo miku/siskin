@@ -6,8 +6,10 @@
 Reuse established frameworks
 ============================
 
-* possible integration with existing metadata frameworks
-* external command plus assets, which can be shipped together
+Goals:
+
+* show integration with existing metadata frameworks
+* show external command plus required assets (which can be shipped together)
 
 """
 

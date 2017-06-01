@@ -9,6 +9,8 @@ Goals:
 
 * show flexibility with respect to completion criteria
 
+----
+
 Run:
 
     $ python x02.py MyTask

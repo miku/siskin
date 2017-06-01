@@ -12,6 +12,8 @@ Goals:
 * command line integration
 * client-server model
 
+----
+
 Simple command line integration
 -------------------------------
 
