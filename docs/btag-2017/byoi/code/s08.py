@@ -21,7 +21,7 @@ import luigi
 
 from luigi.format import Gzip
 from gluish.utils import shellout
-from x06 import IntermediateSchema
+from s06 import IntermediateSchema
 
 
 class CreateConfig(luigi.Task):
@@ -92,11 +92,7 @@ class TaggedIntermediateSchema(luigi.Task):
 #
 # Below we show an example of deduplication via DOI.
 #
-# Deduplication has many facets, groupcover is a simplistic tool that works with
-# a certain CSV format.
-#
-#
-# Here, we have a three-step process:
+# This is a three-step process:
 #
 # 1. Extract a list of relevant information. A list of faster to process.
 # 2. Use a tool (groupcover), that works on the extracted data and returns the changes to be made.
@@ -109,7 +105,7 @@ class ListifyRecords(luigi.Task):
     """
 
     def requires(self):
-        # TODO: Use intermediate schema file, that contains the licensing information.
+        return TaggedIntermediateSchema()
 
     def run(self):
         output = shellout("""gunzip -c {input} | jq -r '[
@@ -171,7 +167,6 @@ class TaggedAndDeduplicatedIntermediateSchema(luigi.Task):
         os.remove(output)
         logging.debug('%s changes staged', len(updates))
 
-        # Weave in the changes.
         with self.input().get('file').open() as handle:
             with self.output().open('w') as output:
                 for line in handle:

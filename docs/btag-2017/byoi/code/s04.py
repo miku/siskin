@@ -33,7 +33,7 @@ class CrossrefIntermediateSchema(luigi.Task):
     """
 
     def requires(self):
-        """ TODO: Let CrossrefIntermediateSchema depend on CrossrefInput. """
+        return CrossrefInput()
 
     def run(self):
         output = shellout("span-import -i crossref {input} | gzip -c > {output}", input=self.input().path)
@@ -56,7 +56,7 @@ class DOAJIntermediateSchema(luigi.Task):
 
     def run(self):
         output = shellout("span-import -i doaj {input} | gzip -c > {output}", input=self.input().path)
-        # TODO: Move the 'output' of the above command into place.
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget('outputs/doaj.is.ldj.gz', format=Gzip)

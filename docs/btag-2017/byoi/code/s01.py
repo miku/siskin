@@ -37,7 +37,8 @@ class MyTask(luigi.Task):
         """ TODO: Adjust HTTP URL. """
         print('running task - visit http://127.0.0.1:8082')
         time.sleep(60)
-        # TODO: Write a string of your choice to the output file of this task.
+        with self.output().open('w') as output:
+            output.write('Some bytes written to a file.\n')
 
     def output(self):
         return luigi.LocalTarget(path='outputs/x01.txt')
