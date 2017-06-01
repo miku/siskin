@@ -100,19 +100,14 @@
 	    </data>
 
 	    <entity name="x.subjects[]" flushWith="record"> <!-- Subjects -->
-		<data source="metadata.dc.subject.value" name="type">
-		    <split delimiter=","/>
-		    <trim/>
-		</data>
+		<data source="metadata.dc.subject.value" name="type"/>
 	    </entity>
 
 	    <data source="metadata.dc.type.value" name="rft.genre"> <!-- Genre -->
 		    <lookup in="genre_liste" />
 	    </data>
 
-	    <data source="metadata.dc.identifier.value" name="doi">
-		<regexp match="^doi:(.*)" format="${1}"/>
-	    </data>
+	    <data source="metadata.dc.identifier.value" name="doi"/>
 
     </rules>
     <maps>
