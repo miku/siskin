@@ -10,6 +10,12 @@ Goals:
 * a task parameter
 * parameterize output filename to reflect task parameters (see also: https://git.io/vH0sO)
 
+Last step:
+
+Index with solrbulk:
+
+    $ solrbulk -server http://localhost:8080/solr/biblio -verbose -z path/to/file.ldj.gz
+
 """
 
 import luigi
