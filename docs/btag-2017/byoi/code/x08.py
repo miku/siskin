@@ -13,6 +13,8 @@ Goals:
 """
 
 import json
+import logging
+import os
 import tempfile
 
 import luigi
@@ -34,14 +36,28 @@ class CreateConfig(luigi.Task):
         with self.output().open('w') as output:
             config = {
                 'DE-15': {
-                    'holdings': {
-                        'file': 'inputs/de-15.tsv'
-                    }
+                    'or': [
+                        {
+                            'holdings': {
+                                'file': 'inputs/de-15.tsv'
+                            }
+                        },
+                        {
+                            'collection': ["Arxiv"],
+                        },
+                    ]
                 },
                 'DE-14': {
-                    'holdings': {
-                        'file': 'inputs/de-14.tsv'
-                    }
+                    'or': [
+                        {
+                            'holdings': {
+                                'file': 'inputs/de-14.tsv'
+                            }
+                        },
+                        {
+                            'collection': ["Arxiv"],
+                        },
+                    ]
                 }
             }
             output.write(json.dumps(config))
@@ -71,6 +87,99 @@ class TaggedIntermediateSchema(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(path='outputs/tagged.is.ldj.gz', format=Gzip)
+
+# Optional.
+#
+# Below we show an example of deduplication via DOI.
+#
+# This is a three-step process:
+#
+# 1. Extract a list of relevant information. A list of faster to process.
+# 2. Use a tool (groupcover), that works on the extracted data and returns the changes to be made.
+# 3. Apply these changed to the original data.
+
+
+class ListifyRecords(luigi.Task):
+    """
+    Turn records in a list, which groupcover can understand.
+    """
+
+    def requires(self):
+        return TaggedIntermediateSchema()
+
+    def run(self):
+        output = shellout("""gunzip -c {input} | jq -r '[
+            .["finc.record_id"],
+            .["finc.source_id"],
+            .["doi"],
+            .["x.labels"][]? ] | @csv' | sort -t, -k3 > {output}
+        """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path='outputs/listified.csv')
+
+
+class CalculateInstitutionChanges(luigi.Task):
+    """
+    Calculate institution changes based on DOI duplicates. Experimental, using
+    https://github.com/miku/groupcover with preferences.
+    """
+
+    def requires(self):
+        return ListifyRecords()
+
+    def run(self):
+        output = shellout("""groupcover -prefs '121 49 28' < {input} > {output}""",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path='outputs/institution-changes.tsv')
+
+
+class TaggedAndDeduplicatedIntermediateSchema(luigi.Task):
+    """
+    A DOI deduplicated version of the intermediate schema. Experimental.
+    """
+
+    def requires(self):
+        return {
+            'changes': CalculateInstitutionChanges(),
+            'file': TaggedIntermediateSchema(),
+        }
+
+    def run(self):
+        """
+        Keep a dictionary in memory with ids as keys and a list of ISILs as
+        values.
+        """
+        updates = {}
+
+        # First column is the ID, 4th to the end are the ISILs.
+        output = shellout("cut -d, -f1,4- {changes} > {output}",
+                          changes=self.input().get('changes').path)
+        with open(output) as handle:
+            for line in handle:
+                fields = [s.strip() for s in line.split(',')]
+                updates[fields[0]] = fields[1:]
+
+        os.remove(output)
+        logging.debug('%s changes staged', len(updates))
+
+        with self.input().get('file').open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    doc = json.loads(line)
+                    identifier = doc["finc.record_id"]
+
+                    if identifier in updates:
+                        doc['x.labels'] = updates[identifier]
+
+                    output.write(json.dumps(doc) + '\n')
+
+    def output(self):
+        return luigi.LocalTarget(path='outputs/tagged-deduplicated.is.ldj.gz', format=Gzip)
 
 
 if __name__ == '__main__':
