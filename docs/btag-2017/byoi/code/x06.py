@@ -34,11 +34,10 @@ def merge(targets):
 class IntermediateSchema(luigi.Task):
 
     def requires(self):
-        return [
-            CrossrefIntermediateSchema(),
-            DOAJIntermediateSchema(),
-            ArxivIntermediateSchema(),
-        ]
+        """
+        TODO: This tasks depends on three other tasks: the intermediate schemas
+        of Crossref, DOAJ, Arxiv.
+        """
 
     def run(self):
         merged = merge(self.input())

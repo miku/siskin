@@ -7,7 +7,7 @@ Licensing terms
 
 Goals:
 
-* a show detour to the (complex) world of licensing
+* detour to the (complex) world of licensing
 * example for managing licensing information and it's integration in the process
 
 """
@@ -74,10 +74,10 @@ class TaggedIntermediateSchema(luigi.Task):
     """
 
     def requires(self):
-        return {
-            'config': CreateConfig(),
-            'records': IntermediateSchema(),
-        }
+        """
+        TODO: This task requires: CreateConfig, IntermediateSchema. We want to
+        refer to these outputs by name, e.g. 'config' and 'records'.
+        """
 
     def run(self):
         output = shellout(""" gunzip -c {input} | span-tag -c {config} | gzip -c > {output} """,
@@ -109,7 +109,7 @@ class ListifyRecords(luigi.Task):
     """
 
     def requires(self):
-        # TODO: Use intermediate schema file, that contains the licensing information.
+        """ TODO: Use intermediate schema file, that contains the licensing information. """
 
     def run(self):
         output = shellout("""gunzip -c {input} | jq -r '[

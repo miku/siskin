@@ -7,7 +7,7 @@ Licensing terms
 
 Goals:
 
-* a show detour to the (complex) world of licensing
+* detour to the (complex) world of licensing
 * example for managing licensing information and it's integration in the process
 
 """
