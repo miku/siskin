@@ -5,11 +5,10 @@
 """
 Note: This is WIP. Currently Python 2 only.
 
-Input file is an OAI DC XML.
+Input file is an OAI DC XML, processing currently tailored for SID 103.
 
     $ python 103.py INFILE OUTFILE
 
-MARCXML is written to stdout.
 """
 
 import os
