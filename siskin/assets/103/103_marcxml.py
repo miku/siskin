@@ -1,0 +1,644 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+import os
+import re
+import sys
+import cgi
+import base64
+import sqlite3
+import xmltodict
+
+sqlitecon = sqlite3.connect("101.db")
+sqlite = sqlitecon.cursor()
+sqlite.execute ("DROP TABLE IF EXISTS record")
+
+query = """
+    CREATE TABLE
+       'record' ('id' INTEGER PRIMARY KEY AUTOINCREMENT,
+                 'identifier' TEXT,
+                 'title' TEXT,
+                 'description' TEXT,
+                 'subject' TEXT,
+                 'type' TEXT,
+                 'format' TEXT,
+                 'relation' TEXT,
+                 'publisher' TEXT,
+                 'date' TEXT,
+                 'source' TEXT,
+                 'language' TEXT,
+                 'rights' TEXT,
+                 'url' TEXT,
+                 'creator' TEXT,
+                 'coverage' TEXT)
+"""
+
+sqlite.execute(query)
+
+try:
+    inputfile = open("103_input.xml", "r", encoding="utf-8")
+except:
+    print("Could not read file!")
+    sys.exit(0)
+
+try:
+    outputfile = open("103_output.xml", "w", encoding="utf-8")
+except:
+    print("Could not create file!")
+    sys.exit(0)
+
+xml = xmltodict.parse(inputfile.read())
+
+identifier = ""
+title = ""
+description = ""
+subject = ""
+type = ""
+format = ""
+relation = ""
+publisher = ""
+date = ""
+source = ""
+language = ""
+rights = ""
+url = ""
+creator = ""
+coverage = ""
+
+inserts = 0
+updates = 0
+
+for i, record in enumerate(xml["collection"]["Record"]):
+
+    if record["header"]["@status"] != "deleted":
+
+        identifier = record["header"]["identifier"]
+
+        try:
+            title = record["metadata"]["oai_dc:dc"]["dc:title"]
+            if isinstance(title, list):
+                title = '||'.join(record["metadata"]["oai_dc:dc"]["dc:title"])
+        except (TypeError, KeyError):
+            title = ''
+
+        try:
+            description = record["metadata"]["oai_dc:dc"]["dc:description"]
+            if isinstance(description, list):
+                description = '||'.join(record["metadata"]["oai_dc:dc"]["dc:description"])
+        except (TypeError, KeyError):
+            description = ''
+
+        try:
+            subject = record["metadata"]["oai_dc:dc"]["dc:subject"]
+            if isinstance(subject, list):
+                subject = '; '.join(record["metadata"]["oai_dc:dc"]["dc:subject"])
+        except (TypeError, KeyError):
+            subject = ''
+
+        try:
+            type = record["metadata"]["oai_dc:dc"]["dc:type"]
+            if isinstance(type, list):
+                type = '||'.join(record["metadata"]["oai_dc:dc"]["dc:type"])
+        except (TypeError, KeyError):
+            type = ''
+
+        try:
+            format = record["metadata"]["oai_dc:dc"]["dc:format"]
+            if isinstance(format, list):
+                format = '||'.join(record["metadata"]["oai_dc:dc"]["dc:format"])
+        except (TypeError, KeyError):
+            format = ''
+
+        try:
+            relation = record["metadata"]["oai_dc:dc"]["dc:relation"]
+            if isinstance(relation, list):
+                relation = '||'.join(record["metadata"]["oai_dc:dc"]["dc:relation"])
+        except (TypeError, KeyError):
+            relation = ''
+
+        try:
+            publisher = record["metadata"]["oai_dc:dc"]["dc:publisher"]
+            if isinstance(publisher, list):
+                publisher = '||'.join(record["metadata"]["oai_dc:dc"]["dc:publisher"])
+        except (TypeError, KeyError):
+            publisher = ''
+
+        try:
+            date = record["metadata"]["oai_dc:dc"]["dc:date"]
+            if isinstance(date, list):
+                date = '||'.join(record["metadata"]["oai_dc:dc"]["dc:date"])
+        except (TypeError, KeyError):
+            date = ''
+
+        try:
+            source = record["metadata"]["oai_dc:dc"]["dc:source"]
+            if isinstance(source, list):
+                source = record["metadata"]["oai_dc:dc"]["dc:source"][0]
+        except (TypeError, KeyError):
+            source = ''
+
+        try:
+            language = record["metadata"]["oai_dc:dc"]["dc:language"]
+            if isinstance(language, list):
+                language = '||'.join(record["metadata"]["oai_dc:dc"]["dc:language"])
+        except (TypeError, KeyError):
+            language = ''
+
+        try:
+            rights = record["metadata"]["oai_dc:dc"]["dc:rights"]
+            if isinstance(rights, list):
+                rights = '||'.join(record["metadata"]["oai_dc:dc"]["dc:rights"])
+        except (TypeError, KeyError):
+            rights = ''
+
+        try:
+            url = record["metadata"]["oai_dc:dc"]["dc:identifier"]
+            if isinstance(url , list):
+                url = record["metadata"]["oai_dc:dc"]["dc:identifier"][1]
+        except (TypeError, KeyError):
+            url = ''
+
+        try:
+            creator = record["metadata"]["oai_dc:dc"]["dc:creator"]
+            if isinstance(creator, list):
+                creator = '||'.join(record["metadata"]["oai_dc:dc"]["dc:creator"])
+        except (TypeError, KeyError):
+            creator = ''
+
+        try:
+            coverage = record["metadata"]["oai_dc:dc"]["dc:coverage"]
+            if isinstance(coverage , list):
+                coverage = '||'.join(record["metadata"]["oai_dc:dc"]["dc:coverage"])
+        except (TypeError, KeyError):
+            coverage = ''
+
+
+        values = (title, format, type)
+
+        query = """
+            SELECT
+                id,
+                url,
+                COUNT(id) AS matches
+            FROM
+                record
+            WHERE
+                title = ? AND
+                format = ? AND
+                type = ?
+        """
+
+        sqlite.execute(query, values)
+        row = sqlite.fetchone()
+
+        id = row[0]
+        url_old = row[1]
+        matches = row[2]
+
+        if matches == 0:
+
+            values = (identifier, title, description, subject, type, format, relation, publisher, date, source, language, rights, url, creator, coverage)
+
+            query = """
+                INSERT INTO
+                    record (identifier,
+                            title,
+                            description,
+                            subject,
+                            type,
+                            format,
+                            relation,
+                            publisher,
+                            date,
+                            source,
+                            language,
+                            rights,
+                            url,
+                            creator,
+                            coverage)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+
+            inserts = inserts + 1
+
+        else:
+
+            url = url_old + "||" + url
+            values = (url, id)
+
+            query = """
+                UPDATE
+                    record
+                SET
+                    url = ?
+                WHERE
+                    id = ?
+            """
+
+            updates = updates + 1
+
+        sqlite.execute(query, values)
+
+        identifier = ""
+        title = ""
+        description = ""
+        subject = ""
+        type = ""
+        format = ""
+        relation = ""
+        publisher = ""
+        date = ""
+        source = ""
+        language = ""
+        rights = ""
+        url = ""
+        creator = ""
+        coverage = ""
+
+        #print("Inserts:", inserts, "Updates", updates)
+
+query = "SELECT * FROM record"
+sqlite.execute(query)
+rows = sqlite.fetchall()
+
+outputfile.write("<collection>")
+outputfile.write("\n")
+
+for  row in rows:
+    identifier = row[1]
+    identifier = base64.b64encode(identifier.encode()).decode().rstrip("=")
+    title = row[2]
+    title = cgi.escape(title)
+    description = row[3]
+    description = cgi.escape(description)
+    subject = row[4]
+    subject = cgi.escape(subject)
+    type = row[5]
+    format = row[6]
+    relation = row[7]
+    publisher = row[8]
+    publisher = cgi.escape(publisher)
+    date = row[9]
+    source = row[10]
+    source = cgi.escape(source)
+    language = row[11]
+    rights = row[12]
+    rights = cgi.escape(rights)
+    url = row[13]
+    creator = row[14]
+    creator = cgi.escape(creator)
+    coverage = row[15]
+    coverage = cgi.escape(coverage)
+
+    if identifier == "":
+        continue
+
+    # Zur Gewährleistung der korrekten Reihenfolge der Tags werden zunächst alle Variablen deklariert und erst dann die Datei geschrieben
+
+    f001 = "\t\t<controlfield tag=\"001\">finc-103-%s</controlfield>\n" % identifier
+
+    # ElectronicJournal
+    if format == "periodical":
+        leader = "\t\t<leader>00000nas0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">tu</controlfield>\n"
+        f008 = "\t\t<controlfield tag=\"008\">130227n20uuuuuuxx uuupger c</controlfield>\n"
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">cofz</subfield>\n\t\t</datafield>\n"
+
+    # Photo (Image gibt es nicht)
+    elif format == "ephemera":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # Photo
+    elif format == "magazine cover":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # Photo
+    elif format == "photograph":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # Photo (Image gibt es nicht)
+    elif format == "postcard":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # Photo
+    elif format == "clipping":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # Print
+    elif format == "flier (printed matter)":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kf</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Print
+    elif format == "storyboard":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kf</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # MusicalScore (ElectronicMusicalScore gibt es nicht)
+    elif format == "sheet music":
+        leader = "\t\t<leader>00000ncs0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">qu</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Print
+    elif format == "correspondence":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kf</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Print
+    elif format == "pamphlet":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kf</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Print
+    elif format == "correspondence document":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kf</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Photo
+    elif format == "lobby card":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # Print
+    elif format == "photomechanical print":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kf</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Drawing
+    elif format == "cigarette cards":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kd</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Photo
+    elif format == "souvenir handkerchief box":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # ElectronicBook
+    elif format == "scrapbook":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">cr</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">cofz</subfield>\n\t\t</datafield>\n"
+
+    # Photo
+    elif format == "slides (photographs)":
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+    # ElectronicBook
+    elif format == "program (document)":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">cr</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">cofz</subfield>\n\t\t</datafield>\n"
+
+    # ElectronicBook
+    elif format == "pressbook":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">cr</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">cofz</subfield>\n\t\t</datafield>\n"
+
+    # ElectronicManuscript
+    elif format == "autograph album":
+        leader = "\t\t<leader>00000ntm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">tu</controlfield>\n"
+        f008 = "\t\t<controlfield tag=\"008\">130227n20uuuuuuxx uuumger c</controlfield>\n"
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">handschr</subfield>\n\t\t</datafield>\n"
+
+    # ElectronicBook
+    elif format == "monograph":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">cr</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">cofz</subfield>\n\t\t</datafield>\n"
+
+    # Drawing
+    elif format == "drawing":
+        leader = "\t\t<leader>00000nam0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">kd</controlfield>\n"
+        f008 = ""
+        f935b = ""
+
+    # Photo
+    else:
+        leader = "\t\t<leader>00000ckm0000000000000000</leader>\n"
+        f007 = "\t\t<controlfield tag=\"007\">ta</controlfield>\n"
+        f008 = ""
+        f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
+
+
+    if language != "":
+        f041 = language.replace("English", "eng")
+        f041 = "\t\t<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(f041) + "</subfield>\n\t\t</datafield>\n"
+    else:
+        f041 = ""
+
+
+    if creator != "":
+        creator = creator.split(" ; ")
+        f100 = creator[0]
+        f100 = "\t\t<datafield tag=\"100\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(f100) + "</subfield>\n\t\t</datafield>\n"
+        if len(creator) > 1:
+            f700 = []
+            for creator_part in creator[1:]:
+                creator_part =  "\t\t<datafield tag=\"700\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(creator_part) + "</subfield>\n\t\t</datafield>\n"
+                f700.append(creator_part)
+            f700 = "".join(f700)
+        else:
+            f700 = ""
+    else:
+        f100 = ""
+        f700 = ""
+
+
+    if title != "":
+        f245 = "\t\t<datafield tag=\"245\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(title) + "</subfield>\n\t\t</datafield>\n"
+    else:
+        f245 = ""
+
+
+    #Chicago : Selig Polyscope Co.
+    #Shurey's Publications
+    if publisher != "":
+        match = re.search("(.*)\s:\s(.*)", publisher)
+        if match:
+            place = match.group(1)
+            place = "\n\t\t\t<subfield code=\"a\">" + str(place) + "</subfield>"
+            publisher = match.group(2)
+            publisher = "\n\t\t\t<subfield code=\"b\"> : " + str(publisher) + "</subfield>"
+        else:
+            place = ""
+            publisher = "\n\t\t\t<subfield code=\"b\">" + str(publisher) + "</subfield>"
+    else:
+        publisher = ""
+        place = ""
+
+
+    #1932-04-01
+    #1930; 1931
+    #1922
+    if date != "":
+        match = re.search("(^\d\d\d\d)", date)
+        if match:
+            date = match.group(1)
+            if publisher != "":
+                date = "\n\t\t\t<subfield code=\"c\">, " + str(date) + "</subfield>"
+            else:
+                date = "\n\t\t\t<subfield code=\"c\">" + str(date) + "</subfield>"
+        else:
+            date = ""
+    else:
+        date = ""
+
+    if place != "" or publisher != "" or date != "":
+        f260 = "\t\t<datafield tag=\"260\" ind1=\" \" ind2=\" \">" + str(place) + str(publisher) + str(date) + "\n\t\t</datafield>\n"
+    else:
+        f260 = ""
+
+
+    if source != "":
+        f490 = "\t\t<datafield tag=\"490\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(source) + "</subfield>\n\t\t</datafield>\n"
+    else:
+        f490 = ""
+
+
+    if rights != "" and coverage != "":
+        f500 = []
+        f500.append("\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(rights) + "</subfield>\n\t\t</datafield>\n")
+        f500.append("\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(coverage) + "</subfield>\n\t\t</datafield>\n")
+        f500 = "".join(f500)
+    elif rights != "":
+        f500 = "\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(rights) + "</subfield>\n\t\t</datafield>\n"
+    elif coverage != "":
+        f500 = "\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(coverage) + "</subfield>\n\t\t</datafield>\n"
+    else:
+        f500 = ""
+
+
+    if description != "":
+        description = description.split("||")
+        f520 = []
+        for description_part in description:
+            f520.append("\t\t<datafield tag=\"520\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(description_part) + "</subfield>\n\t\t</datafield>\n")
+        f520 = "".join(f520)
+    else:
+        f520 = ""
+
+
+    if subject != "" or format != "":
+        # manchmal ended die Schlagwortfolgfe auf ;
+        subject = subject.rstrip(";")
+        # die Trennzeichen sind in der Quelle uneinheitlich: mal " ; " mal "; "
+        # Problem: Semikolon ist Trennzeichen zwischen Schlagwörtern, kommt aber auch als Funktionszeichen in HTML-Entitities (&amp;) vor
+        match = re.search("&\w\w\w?\w?;", subject)
+
+        # wenn keine HTMl-Entities vorkommen, werden die Trennzeichen vereinheitlicht
+        if not match:
+            subject = subject.replace(" ; ", ";")
+            subject = subject.replace(" ;", ";")
+            subject = subject.replace("; ", ";")
+            subject = subject.split(";")
+        # wenn HTMl-Entities vorkommen, wird nur das reguläre Trennzeichen verwendet und abweichende Fälle bleiben unberücksichtigt
+        else:
+            subject = subject.split(" ; ")
+
+        f689 = []
+        for subject_part in subject:
+            f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(subject_part) + "</subfield>\n\t\t</datafield>\n")
+
+        format = format.title()
+        f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(format) + "</subfield>\n\t\t</datafield>\n")
+        f689 = "".join(f689)
+
+    else:
+        f689 = ""
+
+    #if relation != "":
+     #   outputfile.write("\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Reihe</subfield>\n\t\t\t<subfield code=\"u\">" + str(relation) + "</subfield>\n\t\t</datafield>\n")
+
+
+    if url != "":
+        url = url.split("||")
+        if len(url) == 1:
+            url = url[0]
+            f856 = "\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Ressource</subfield>\n\t\t\t<subfield code=\"u\">" + str(url) + "</subfield>\n\t\t</datafield>\n"
+        else:
+            items = len(url)
+            f520 = "\t\t<datafield tag=\"520\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">Contains a collection of " + str(items) + " Pictures.</subfield>\n\t\t</datafield>\n"
+            f856 = []
+            i = 1
+            for url_part in url:
+                f856.append("\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Picture " + str(i) + "</subfield>\n\t\t\t<subfield code=\"u\">" + str(url_part) + "</subfield>\n\t\t</datafield>\n")
+                i = i + 1
+            f856 = "".join(f856)
+    else:
+        f856 = ""
+
+
+    f980 = "\t\t<datafield tag=\"980\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">%s</subfield>\n\t\t\t<subfield code=\"b\">103</subfield>\n\t\t</datafield>\n" % identifier
+
+
+    outputfile.write("\t<record>\n")
+    outputfile.write(leader)
+    outputfile.write(f001)
+    outputfile.write(f007)
+    outputfile.write(f008)
+    outputfile.write(f041)
+    outputfile.write(f100)
+    outputfile.write(f245)
+    outputfile.write(f260)
+    outputfile.write(f490)
+    outputfile.write(f500)
+    outputfile.write(f520)
+    outputfile.write(f689)
+    outputfile.write(f700)
+    outputfile.write(f856)
+    outputfile.write(f935b)
+    outputfile.write(f980)
+    outputfile.write("\t</record>\n")
+
+outputfile.write("</collection>")
+
+sqlitecon.commit()
+sqlitecon.close()
+inputfile.close()
+outputfile.close()
