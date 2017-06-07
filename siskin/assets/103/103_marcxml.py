@@ -475,6 +475,9 @@ for row in rows:
 
     if language != "":
         f041 = language.replace("English", "eng")
+        f041 = language.replace("German", "ger")
+        f041 = language.replace("French", "fre")
+        f041 = language.replace("Italian", "ita")
         f041 = "\t\t<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(f041) + "</subfield>\n\t\t</datafield>\n"
     else:
         f041 = ""
