@@ -43,10 +43,10 @@ except ImportError:
 
 
 install_requires = [
-    'BeautifulSoup>=3,<4',
-    'backoff>=1.3.1',
     'argparse>=1.2',
     'astroid>=1.1.1',
+    'backoff>=1.3.1',
+    'BeautifulSoup>=3,<4',
     'colorama>=0.3.3',
     'decorator>=3.4.0',
     'elasticsearch>=2',
@@ -65,8 +65,8 @@ install_requires = [
     'pyisbn>=1.0.0',
     'pylint>=1.2.1',
     'pymarc>=3.0.1',
-    'pyparsing>=2.0.3',
     'pymysql>=0.7',
+    'pyparsing>=2.0.3',
     'python-dateutil>=2.2',
     'pytz>=2014.4',
     'requests>=2.5.1',
@@ -77,6 +77,7 @@ install_requires = [
     'ujson>=1.35',
     'urllib3>=1.10',
     'wsgiref>=0.1.2',
+    'xmltodict==0.11.0',
 ]
 
 setup(name='siskin',
