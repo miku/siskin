@@ -55,7 +55,26 @@ class MHLibraryHarvest(MHLibraryTask):
     def run(self):
         shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
         output = shellout(
-            """metha-cat -root Records "{endpoint}" > {output}""", endpoint=self.endpoint)
+            """metha-cat -root collection "{endpoint}" > {output}""", endpoint=self.endpoint)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
+class MHLibraryMARC(MHLibraryTask):
+    """
+    Convert OAI DC to MARCXML via custom Python script (TBR).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return MHLibraryHarvest(date=self.date)
+
+    def run(self):
+        output = shellout("python {script} {input} {output}",
+                          script=self.assets('103/103_marcxml.py'),
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

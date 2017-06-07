@@ -1,17 +1,35 @@
 #!/usr/bin/env python
 # coding: utf-8
+# pylint: disable=C0103
+
+"""
+Note: This is WIP. Currently Python 2 only.
+
+Input file is an OAI DC XML.
+
+    $ python 103.py INFILE OUTFILE
+
+MARCXML is written to stdout.
+"""
 
 import os
+import io
 import re
 import sys
 import cgi
 import base64
 import sqlite3
+import tempfile
 import xmltodict
 
-sqlitecon = sqlite3.connect("101.db")
+if len(sys.argv) < 3:
+    raise ValueError('usage: %s INFILE OUTFILE' % sys.argv[0])
+
+_, dbfile = tempfile.mkstemp(prefix='103-')
+
+sqlitecon = sqlite3.connect(dbfile)
 sqlite = sqlitecon.cursor()
-sqlite.execute ("DROP TABLE IF EXISTS record")
+sqlite.execute("DROP TABLE IF EXISTS record")
 
 query = """
     CREATE TABLE
@@ -35,17 +53,8 @@ query = """
 
 sqlite.execute(query)
 
-try:
-    inputfile = open("103_input.xml", "r", encoding="utf-8")
-except:
-    print("Could not read file!")
-    sys.exit(0)
-
-try:
-    outputfile = open("103_output.xml", "w", encoding="utf-8")
-except:
-    print("Could not create file!")
-    sys.exit(0)
+inputfile = io.open(sys.argv[1], "r", encoding='utf-8')
+outputfile = io.open(sys.argv[2], "w", encoding='utf-8')
 
 xml = xmltodict.parse(inputfile.read())
 
@@ -153,7 +162,7 @@ for i, record in enumerate(xml["collection"]["Record"]):
 
         try:
             url = record["metadata"]["oai_dc:dc"]["dc:identifier"]
-            if isinstance(url , list):
+            if isinstance(url, list):
                 url = record["metadata"]["oai_dc:dc"]["dc:identifier"][1]
         except (TypeError, KeyError):
             url = ''
@@ -167,11 +176,10 @@ for i, record in enumerate(xml["collection"]["Record"]):
 
         try:
             coverage = record["metadata"]["oai_dc:dc"]["dc:coverage"]
-            if isinstance(coverage , list):
+            if isinstance(coverage, list):
                 coverage = '||'.join(record["metadata"]["oai_dc:dc"]["dc:coverage"])
         except (TypeError, KeyError):
             coverage = ''
-
 
         values = (title, format, type)
 
@@ -261,10 +269,10 @@ query = "SELECT * FROM record"
 sqlite.execute(query)
 rows = sqlite.fetchall()
 
-outputfile.write("<collection>")
-outputfile.write("\n")
+outputfile.write(u"<collection>")
+outputfile.write(u"\n")
 
-for  row in rows:
+for row in rows:
     identifier = row[1]
     identifier = base64.b64encode(identifier.encode()).decode().rstrip("=")
     title = row[2]
@@ -465,13 +473,11 @@ for  row in rows:
         f008 = ""
         f935b = "\t\t<datafield tag=\"935\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"b\">foto</subfield>\n\t\t</datafield>\n"
 
-
     if language != "":
         f041 = language.replace("English", "eng")
         f041 = "\t\t<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(f041) + "</subfield>\n\t\t</datafield>\n"
     else:
         f041 = ""
-
 
     if creator != "":
         creator = creator.split(" ; ")
@@ -480,7 +486,8 @@ for  row in rows:
         if len(creator) > 1:
             f700 = []
             for creator_part in creator[1:]:
-                creator_part =  "\t\t<datafield tag=\"700\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(creator_part) + "</subfield>\n\t\t</datafield>\n"
+                creator_part = "\t\t<datafield tag=\"700\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + \
+                    str(creator_part) + "</subfield>\n\t\t</datafield>\n"
                 f700.append(creator_part)
             f700 = "".join(f700)
         else:
@@ -489,33 +496,30 @@ for  row in rows:
         f100 = ""
         f700 = ""
 
-
     if title != "":
-        f245 = "\t\t<datafield tag=\"245\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(title) + "</subfield>\n\t\t</datafield>\n"
+        f245 = "\t\t<datafield tag=\"245\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + unicode(title) + "</subfield>\n\t\t</datafield>\n"
     else:
         f245 = ""
 
-
-    #Chicago : Selig Polyscope Co.
-    #Shurey's Publications
+    # Chicago : Selig Polyscope Co.
+    # Shurey's Publications
     if publisher != "":
         match = re.search("(.*)\s:\s(.*)", publisher)
         if match:
             place = match.group(1)
             place = "\n\t\t\t<subfield code=\"a\">" + str(place) + "</subfield>"
             publisher = match.group(2)
-            publisher = "\n\t\t\t<subfield code=\"b\"> : " + str(publisher) + "</subfield>"
+            publisher = "\n\t\t\t<subfield code=\"b\"> : " + unicode(publisher) + "</subfield>"
         else:
             place = ""
-            publisher = "\n\t\t\t<subfield code=\"b\">" + str(publisher) + "</subfield>"
+            publisher = "\n\t\t\t<subfield code=\"b\">" + unicode(publisher) + "</subfield>"
     else:
         publisher = ""
         place = ""
 
-
-    #1932-04-01
+    # 1932-04-01
     #1930; 1931
-    #1922
+    # 1922
     if date != "":
         match = re.search("(^\d\d\d\d)", date)
         if match:
@@ -530,16 +534,14 @@ for  row in rows:
         date = ""
 
     if place != "" or publisher != "" or date != "":
-        f260 = "\t\t<datafield tag=\"260\" ind1=\" \" ind2=\" \">" + str(place) + str(publisher) + str(date) + "\n\t\t</datafield>\n"
+        f260 = "\t\t<datafield tag=\"260\" ind1=\" \" ind2=\" \">" + unicode(place) + unicode(publisher) + unicode(date) + "\n\t\t</datafield>\n"
     else:
         f260 = ""
-
 
     if source != "":
         f490 = "\t\t<datafield tag=\"490\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(source) + "</subfield>\n\t\t</datafield>\n"
     else:
         f490 = ""
-
 
     if rights != "" and coverage != "":
         f500 = []
@@ -553,16 +555,15 @@ for  row in rows:
     else:
         f500 = ""
 
-
     if description != "":
         description = description.split("||")
         f520 = []
         for description_part in description:
-            f520.append("\t\t<datafield tag=\"520\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(description_part) + "</subfield>\n\t\t</datafield>\n")
+            f520.append("\t\t<datafield tag=\"520\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" +
+                        unicode(description_part) + "</subfield>\n\t\t</datafield>\n")
         f520 = "".join(f520)
     else:
         f520 = ""
-
 
     if subject != "" or format != "":
         # manchmal ended die Schlagwortfolgfe auf ;
@@ -583,7 +584,8 @@ for  row in rows:
 
         f689 = []
         for subject_part in subject:
-            f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(subject_part) + "</subfield>\n\t\t</datafield>\n")
+            f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" +
+                        unicode(subject_part) + "</subfield>\n\t\t</datafield>\n")
 
         format = format.title()
         f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(format) + "</subfield>\n\t\t</datafield>\n")
@@ -592,53 +594,54 @@ for  row in rows:
     else:
         f689 = ""
 
-    #if relation != "":
-     #   outputfile.write("\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Reihe</subfield>\n\t\t\t<subfield code=\"u\">" + str(relation) + "</subfield>\n\t\t</datafield>\n")
-
+    # if relation != "":
+     #   outputfile.write(u"\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Reihe</subfield>\n\t\t\t<subfield code=\"u\">" + str(relation) + "</subfield>\n\t\t</datafield>\n")
 
     if url != "":
         url = url.split("||")
         if len(url) == 1:
             url = url[0]
-            f856 = "\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Ressource</subfield>\n\t\t\t<subfield code=\"u\">" + str(url) + "</subfield>\n\t\t</datafield>\n"
+            f856 = "\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Ressource</subfield>\n\t\t\t<subfield code=\"u\">" + \
+                str(url) + "</subfield>\n\t\t</datafield>\n"
         else:
             items = len(url)
-            f520 = "\t\t<datafield tag=\"520\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">Contains a collection of " + str(items) + " Pictures.</subfield>\n\t\t</datafield>\n"
+            f520 = "\t\t<datafield tag=\"520\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">Contains a collection of " + \
+                str(items) + " Pictures.</subfield>\n\t\t</datafield>\n"
             f856 = []
             i = 1
             for url_part in url:
-                f856.append("\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Picture " + str(i) + "</subfield>\n\t\t\t<subfield code=\"u\">" + str(url_part) + "</subfield>\n\t\t</datafield>\n")
+                f856.append("\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Picture " +
+                            str(i) + "</subfield>\n\t\t\t<subfield code=\"u\">" + str(url_part) + "</subfield>\n\t\t</datafield>\n")
                 i = i + 1
             f856 = "".join(f856)
     else:
         f856 = ""
 
-
     f980 = "\t\t<datafield tag=\"980\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">%s</subfield>\n\t\t\t<subfield code=\"b\">103</subfield>\n\t\t</datafield>\n" % identifier
 
+    outputfile.write(u"\t<record>\n")
+    outputfile.write(unicode(leader))
+    outputfile.write(unicode(f001))
+    outputfile.write(unicode(f007))
+    outputfile.write(unicode(f008))
+    outputfile.write(unicode(f041))
+    outputfile.write(unicode(f100))
+    outputfile.write(unicode(f245))
+    outputfile.write(unicode(f260))
+    outputfile.write(unicode(f490))
+    outputfile.write(unicode(f500))
+    outputfile.write(unicode(f520))
+    outputfile.write(unicode(f689))
+    outputfile.write(unicode(f700))
+    outputfile.write(unicode(f856))
+    outputfile.write(unicode(f935b))
+    outputfile.write(unicode(f980))
+    outputfile.write(u"\t</record>\n")
 
-    outputfile.write("\t<record>\n")
-    outputfile.write(leader)
-    outputfile.write(f001)
-    outputfile.write(f007)
-    outputfile.write(f008)
-    outputfile.write(f041)
-    outputfile.write(f100)
-    outputfile.write(f245)
-    outputfile.write(f260)
-    outputfile.write(f490)
-    outputfile.write(f500)
-    outputfile.write(f520)
-    outputfile.write(f689)
-    outputfile.write(f700)
-    outputfile.write(f856)
-    outputfile.write(f935b)
-    outputfile.write(f980)
-    outputfile.write("\t</record>\n")
-
-outputfile.write("</collection>")
+outputfile.write(u"</collection>")
 
 sqlitecon.commit()
 sqlitecon.close()
 inputfile.close()
 outputfile.close()
+os.remove(dbfile)
