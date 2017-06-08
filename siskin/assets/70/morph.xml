@@ -41,8 +41,9 @@
         </entity>
 
         <entity name="100  " flushWith="record">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="1" />
             </data>
         </entity>
@@ -57,65 +58,74 @@
             <data source="Year.value" name="c" />
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="2" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="3" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="4" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="5" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="6" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="7" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="8" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="9" />
             </data>
         </entity>
 
-        <entity name="700  " flushWith="Person.value" reset="true">
-            <data source="Person.value" name="a">
-                <split delimiter=";" />
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
                 <occurrence only="10" />
             </data>
         </entity>
