@@ -50,7 +50,7 @@ from siskin.task import DefaultTask
 
 class ThiemeTask(DefaultTask):
     """ Thieme connect. """
-    TAG = 'thieme'
+    TAG = '60'
 
     def closest(self):
         return weekly(date=self.date)
