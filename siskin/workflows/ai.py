@@ -783,29 +783,12 @@ class AIApplyOpenAccessFlag(AITask):
 
     def run(self):
         """
-        Toy implementation, make this fast with mf (assets/issue/8986/...).
-
-        Pure python, about 500k records/s.
+        Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min.
         """
-        issns = set()
-
-        with self.input().get('issns').open() as handle:
-            for line in map(string.strip, handle):
-                if not line:
-                    continue
-                issns.add(line)
-
-        with self.output().open('w') as output:
-            with self.input().get('file').open() as handle:
-                for line in handle:
-                    doc = json.loads(line)
-                    doc["x.oa"] = False
-
-                    for issn in doc.get("rft.issn", []):
-                        if issn in issns:
-                            doc["x.oa"] = True
-
-                    output.write(json.dumps(doc) + "\n")
+        output = shellout("unpigz -c {input} | span-oa-filter -f {file} | pigz -c > {output}",
+                          input=self.input().get('file').path,
+                          file=self.input().get('issns').path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
