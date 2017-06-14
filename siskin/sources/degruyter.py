@@ -56,7 +56,7 @@ class DegruyterTask(DefaultTask):
     TAG = 'degruyter'
 
     def closest(self):
-        return datetime.date(2015, 4, 1)
+        return datetime.date(2017, 6, 1)
 
 
 class DegruyterPaths(DegruyterTask):
