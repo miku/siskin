@@ -22,6 +22,9 @@
 			<data source="_id" >
 				<constant value="DE-15-FID" />
 			</data>
+			<data source="_id" >
+				<constant value="DE-L152" />
+			</data>
 		</entity>
 
 		<entity name="authors[]" flushWith="record">
