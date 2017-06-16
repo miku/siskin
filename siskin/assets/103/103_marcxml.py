@@ -380,7 +380,7 @@ for row in rows:
 
     # leader = get_leader(format=format)
     # f007 = get_field_007(format=format)
-    # f008 = get_field_007(format=format)
+    # f008 = get_field_008(format=format)
     # f935b = get_field_935b(format=format)
 
     # ElectronicJournal
