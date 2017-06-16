@@ -307,6 +307,82 @@ for row in rows:
 
     f001 = "\t\t<controlfield tag=\"001\">finc-103-%s</controlfield>\n" % identifier
 
+    # 2017-06-16: Example rewrite of some XML:
+    #
+    # formatmaps = {
+    #     'periodical': {
+    #         '007': 'tu',
+    #         '008': '130227n20uuuuuuxx uuupger c',
+    #         'leader': 'nas',
+    #         '935b' : 'cofz',
+    #     },
+    #     'ephemera': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'magazine cover': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'photograph': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'postcard': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'clipping': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'flier (printed matter)': {'007': 'kf', 'leader': 'nam'},
+    #     'storyboard': {'007': 'kf', 'leader': 'nam'},
+    #     'sheet music': {'007': 'qu', 'leader': 'ncs'},
+    #     'correspondence': {'007': 'kf', 'leader': 'nam'},
+    #     'pamphlet': {'007': 'kf', 'leader': 'nam'},
+    #     'correspondence document': {'007': 'kf', 'leader': 'nam'},
+    #     'lobby card': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'photomechanical print': {'007': 'kf', 'leader': 'nam'},
+    #     'cigarette cards': {'007': 'kd', 'leader': 'nam'},
+    #     'souvenir handkerchief box': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'scrapbook': {'007': 'cr', 'leader': 'nam', '935b' : 'cofz'},
+    #     'slides (photographs)': {'007': 'ta', 'leader': 'ckm', '935b' : 'foto'},
+    #     'program (document)': {'007': 'cr', 'leader': 'nam', '935b' : 'cofz'},
+    #     'pressbook': {'007': 'cr', 'leader': 'nam', '935b' : 'cofz'},
+    #     'autograph album': {'007': 'tu', 'leader': 'ntm', '935b' : 'handschr'},
+    #     'monograph': {'007': 'cr', 'leader': 'nam', '935b' : 'cofz'},
+    #     'drawing': {'007': 'kd', 'leader': 'nam'},
+    # }
+
+    # TODO:
+    # format not found: pamphlet;
+    # format not found: correspondence; document
+    # format not found: flier (printed matter);
+    # format not found: Monograph
+    # format not found: ephemera;
+    # format not found: Periodical
+    # format not found:
+    # format not found: document
+    # if format not in formatmaps:
+    #     print("format not found: %s" % format, file=sys.stderr)
+    #     continue
+
+    # def get_field_007(format='photograph'):
+    #     """ Return XML for field 007 given a format. """
+    #     return """<controlfield tag="007">%s</controlfield>""" % formatmaps[format]["007"]
+
+    # def get_field_008(format='photograph'):
+    #     if "008" not in formatmaps[format]:
+    #         return ""
+    #     return """
+    #         <controlfield tag="008">%s</controlfield>
+    #     """ % formatmaps[format]["008"]
+
+    # def get_leader(format='photograph'):
+    #     """ Return XML for leader given a format. """
+    #     return "<leader>00000%s0000000000000000</leader>" % formatmaps[format]["leader"]
+
+    # def get_field_935b(format='photograph'):
+    #     """ Return XML for 935.b given a format. """
+    #     if "935b" not in formatmaps[format]:
+    #         return ""
+    #     return """
+    #         <datafield tag="935" ind1=" " ind2=" ">
+    #             <subfield code="b">%s</subfield>
+    #         </datafield>
+    #     """ % formatmaps[format]["935b"]
+
+    # leader = get_leader(format=format)
+    # f007 = get_field_007(format=format)
+    # f008 = get_field_007(format=format)
+    # f935b = get_field_935b(format=format)
+
     # ElectronicJournal
     if format == "periodical":
         leader = "\t\t<leader>00000nas0000000000000000</leader>\n"
