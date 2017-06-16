@@ -11,6 +11,8 @@ Input file is an OAI DC XML, processing currently tailored for SID 103.
 
 """
 
+from __future__ import print_function
+
 import os
 import io
 import re
@@ -22,7 +24,8 @@ import tempfile
 import xmltodict
 
 if len(sys.argv) < 3:
-    raise ValueError('usage: %s INFILE OUTFILE' % sys.argv[0])
+    print('usage: %s INFILE OUTFILE' % sys.argv[0], file=sys.stderr)
+    sys.exit(1)
 
 _, dbfile = tempfile.mkstemp(prefix='103-')
 
