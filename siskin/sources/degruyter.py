@@ -113,7 +113,7 @@ class DegruyterMembers(DegruyterTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                if '-%s.zip' % ts not in row.path:
+                if '-%s.zip' % self.ts not in row.path:
                     continue
                 shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
