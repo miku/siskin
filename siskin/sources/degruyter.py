@@ -102,8 +102,7 @@ class DegruyterPaths(DegruyterTask):
 
 class DegruyterXML(DegruyterTask):
     """
-    Extract all XML files from Jstor dump.
-    TODO(miku): Check all subdirs, not just SSH.
+    Single file version.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     group = luigi.Parameter(
