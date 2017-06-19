@@ -105,8 +105,8 @@ class DegruyterXML(DegruyterTask):
     Single file version.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(
-        default='SSH', description='Nationallizenz_Zeitschriften, Nationallizenz_Jahrbuecher')
+    group = luigi.Parameter(default='SSH', description='main subdirectory')
+    ts = luigi.Parameter(default=DegruyterTask.TIMESTAMP)
 
     def requires(self):
         return DegruyterPaths(date=self.date)
@@ -117,6 +117,8 @@ class DegruyterXML(DegruyterTask):
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
                 if not '/%s/' % self.group in row.path:
+                    continue
+                if '-%s.zip' % self.ts not in row.path:
                     continue
                 shellout(r"unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path,
                          ignoremap={1: 'OK', 9: 'skip corrupt file'})
