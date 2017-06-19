@@ -52,8 +52,27 @@ from siskin.task import DefaultTask
 class DegruyterTask(DefaultTask):
     """
     De Gruyter is a scholarly publishing house specializing in academic literature.
+
+    Each file on the FTP server comes with an epoch timestamp, which seems to be the
+    same for a single shipment:
+
+        ...
+        zrgra.2010.127.issue-1-1496849175274.zip
+        zrs.2012.4.issue-1-1496849175274.zip
+        ...
+
+    The fileset we use is based on this timestamp and can be set with TIMESTAMP.
+
+        $ ...80420a2/SSH $ ls -1 | egrep -o '1[0-9]{4,}' | sort | uniq -c | sort -nr
+        8878 1497254827738
+        8878 1496849175274
+        8023 1423571177743
+        1041 1424176025682
+           2 1478602063508
+
     """
     TAG = 'degruyter'
+    TIMESTAMP = '1497254827738'
 
     def closest(self):
         return datetime.date(2017, 6, 1)
@@ -82,8 +101,9 @@ class DegruyterPaths(DegruyterTask):
 
 
 class DegruyterMembers(DegruyterTask):
-    """ Extract a full list of archive members. """
+    """ Extract a full list of archive members for a given timestamp. """
     date = ClosestDateParameter(default=datetime.date.today())
+    ts = luigi.Parameter(default=DegruyterTask.TIMESTAMP)
 
     def requires(self):
         return DegruyterPaths(date=self.date)
@@ -93,6 +113,8 @@ class DegruyterMembers(DegruyterTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
+                if '-%s.zip' % ts not in row.path:
+                    continue
                 shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' >> {output} """,
                          preserve_whitespace=True, input=row.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
