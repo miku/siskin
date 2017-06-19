@@ -100,29 +100,6 @@ class DegruyterPaths(DegruyterTask):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
 
-class DegruyterMembers(DegruyterTask):
-    """ Extract a full list of archive members for a given timestamp. """
-    date = ClosestDateParameter(default=datetime.date.today())
-    ts = luigi.Parameter(default=DegruyterTask.TIMESTAMP)
-
-    def requires(self):
-        return DegruyterPaths(date=self.date)
-
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                if '-%s.zip' % self.ts not in row.path:
-                    continue
-                shellout(""" unzip -l {input} | grep "xml$" | awk '{{print "{input}\t"$4}}' >> {output} """,
-                         preserve_whitespace=True, input=row.path, output=stopover)
-        luigi.LocalTarget(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
 class DegruyterXML(DegruyterTask):
     """
     Extract all XML files from Jstor dump.
