@@ -77,6 +77,7 @@ class CrossrefTask(DefaultTask):
         """
         return monthly(date=self.date)
 
+
 class CrossrefHarvestChunkWithCursor(CrossrefTask):
     """
     Harvest window with cursors (https://git.io/v1K27).
@@ -155,6 +156,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     Harvest everything in incremental steps. Yield the targets sorted by date (ascending).
@@ -174,6 +176,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     def output(self):
         return self.input()
 
+
 class CrossrefChunkItems(CrossrefTask):
     """
     Extract the message items, per chunk.
@@ -191,6 +194,7 @@ class CrossrefChunkItems(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
 
 class CrossrefLineDOI(CrossrefTask):
     """
@@ -237,6 +241,7 @@ class CrossrefLineDOI(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'))
 
+
 class CrossrefLineDOIWrapper(CrossrefTask):
     """
     Run DOI and line extraction for each chunk.
@@ -254,6 +259,7 @@ class CrossrefLineDOIWrapper(CrossrefTask):
 
     def output(self):
         return self.input()
+
 
 class CrossrefLineDOICombined(CrossrefTask):
     """
@@ -274,6 +280,7 @@ class CrossrefLineDOICombined(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'))
+
 
 class CrossrefDOITable(CrossrefTask):
     """
@@ -296,6 +303,7 @@ class CrossrefDOITable(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
+
 
 class CrossrefDOITableClean(CrossrefTask):
     """
@@ -342,6 +350,7 @@ class CrossrefDOITableClean(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
 
+
 class CrossrefSortedDOITable(CrossrefTask):
     """
     Sort the CrossrefDOITable by filename and line number.
@@ -360,6 +369,7 @@ class CrossrefSortedDOITable(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist.gz'), format=Gzip)
+
 
 class CrossrefUniqItems(CrossrefTask):
     """
@@ -416,6 +426,7 @@ class CrossrefUniqItems(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+
 class CrossrefIntermediateSchema(CrossrefTask):
     """
     Convert to intermediate format via span.
@@ -438,6 +449,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+
 class CrossrefCollectionStats(CrossrefTask):
     """
     Export a list of collection name and a few fields.
@@ -452,12 +464,13 @@ class CrossrefCollectionStats(CrossrefTask):
     def run(self):
         output = shellout("""
             unpigz -c {input} |
-            jq -rc '[.["finc.record_id"], .["finc.source_id"], .["finc.mega_collection"], .["doi"]] | @csv ' > {output}
-        """, input=self.input().path)
+            jq -rc '[.["finc.record_id"], .["finc.source_id"], .["finc.mega_collection"], .["doi"]] | @csv' | sed -e 's@","@\t@g' | tr -d '"' > {output}
+        """, input=self.input().path, preserve_whitespace=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
 
 class CrossrefExport(CrossrefTask):
     """
@@ -485,6 +498,7 @@ class CrossrefExport(CrossrefTask):
         }
         return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
 
+
 class CrossrefCollections(CrossrefTask):
     """
     A collection of crossref collections, refs. #6985.
@@ -504,6 +518,7 @@ class CrossrefCollections(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class CrossrefCollectionsDifference(CrossrefTask):
     """
@@ -541,6 +556,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class CrossrefDOIList(CrossrefTask):
     """
     A list of Crossref DOIs.
@@ -565,6 +581,7 @@ class CrossrefDOIList(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class CrossrefISSNList(CrossrefTask):
     """
     Just dump a list of all ISSN values. With dups and all.
@@ -584,6 +601,7 @@ class CrossrefISSNList(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class CrossrefUniqISSNList(CrossrefTask):
     """
     Just dump a list of all ISSN values. Sorted and uniq.
@@ -601,6 +619,7 @@ class CrossrefUniqISSNList(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class CrossrefDOIAndISSNList(CrossrefTask):
     """
@@ -623,6 +642,7 @@ class CrossrefDOIAndISSNList(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
+
 
 class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
     """
@@ -658,6 +678,7 @@ class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
 
 class CrossrefHarvestGeneric(CrossrefTask):
     """
@@ -708,6 +729,7 @@ class CrossrefHarvestGeneric(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+
 class CrossrefGenericItems(CrossrefTask):
     """
     Flatten and deduplicate. Stub.
@@ -734,6 +756,7 @@ class CrossrefGenericItems(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 
 class CrossrefDOIHarvest(CrossrefTask):
     """
@@ -768,6 +791,7 @@ class CrossrefDOIHarvest(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv.gz'))
+
 
 class CrossrefDOIBlacklist(CrossrefTask):
     """
