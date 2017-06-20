@@ -438,6 +438,26 @@ class CrossrefIntermediateSchema(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
+class CrossrefCollectionStats(CrossrefTask):
+    """
+    Export a list of collection name and a few fields.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefIntermediateSchema(begin=self.begin, date=self.date)
+
+    @timed
+    def run(self):
+        output = shellout("""
+            unpigz -c {input} |
+            jq -rc '[.["finc.record_id"], .["finc.source_id"], .["finc.mega_collection"], .["doi"]] | @csv ' > {output}
+        """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
 
 class CrossrefExport(CrossrefTask):
     """
