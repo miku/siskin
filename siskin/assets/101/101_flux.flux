@@ -11,4 +11,5 @@ inputfile
 //| filter(filterfile)
 | morph(morphfile, *)
 | encode-json(prettyprinting="false")
-| write(outputfile);
+| write("stdout");
+// | write(outputfile);

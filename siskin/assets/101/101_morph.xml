@@ -6,7 +6,8 @@
 		<!-- Record-ID  -->
         <combine name="finc.record_id" value="finc-$[sid]-${identifier_key}">
             <data source="url.value" name="identifier_key">
-                <script file="$[FLUX_DIR]btoa.js" invoke="b64URLEncode"/>
+                <!-- <script file="$[FLUX_DIR]btoa.js" invoke="b64URLEncode"/> -->
+                <script file="$[FLUX_DIR]/../js/btoa.js" invoke="b64URLEncode"/>
             </data>
         </combine>
 
