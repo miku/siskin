@@ -73,6 +73,7 @@ from siskin.sources.mag import MAGReferenceDB
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
+from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
 
@@ -312,6 +313,7 @@ class AIIntermediateSchema(AITask):
             ThiemeIntermediateSchema(date=self.date, stamp=True),
             SpringerIntermediateSchema(stamp=True),
             PQDTIntermediateSchema(date=self.date, stamp=True),
+            KielFMFIntermediateSchema(stamp=True),
         ]
 
     @timed
