@@ -58,7 +58,7 @@ class HHBDCombine(HHBDTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class HHBDIntermediateSchema(HHBDTask):
