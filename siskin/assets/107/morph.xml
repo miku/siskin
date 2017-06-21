@@ -17,8 +17,11 @@
         <data source="metadata.dc.language.value">
           <lookup in="sprachliste"/>
         </data>
-        <!-- default source value -->
-        <data source="metadata.dc.language.value"/>
+        <!-- default source value: ger -->
+        <data source="metadata.dc.language.value">
+          <constant value="ger"/>
+        </data>
+        <!-- <data source="metadata.dc.language.value"/> -->
       </choose>
     </entity>
     <entity name="url[]" flushWith="record">
@@ -54,6 +57,7 @@
     <data source="metadata.dc.date.value" name="rft.date">
       <!-- Date -->
       <regexp match="^\d\d\d\d"/>
+      <compose postfix="-01-01"/>
     </data>
     <data source="metadata.dc.date.value" name="x.date">
       <!-- x.Date -->
