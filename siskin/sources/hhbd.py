@@ -37,7 +37,7 @@ from siskin.task import DefaultTask
 
 
 class HHBDTask(DefaultTask):
-    """ Bsae task for source. """
+    """ Base task for source. """
     TAG = '107'
 
     def closest(self):
