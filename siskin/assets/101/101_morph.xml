@@ -19,6 +19,8 @@
 			<data source="_id" />
 		</combine>
 
+		<!-- This can be done via span-tag. -->
+		<!--
 		<entity name="x.labels[]" flushWith="record">
 			<data source="_id" >
 				<constant value="DE-15-FID" />
@@ -27,6 +29,7 @@
 				<constant value="DE-L152" />
 			</data>
 		</entity>
+		-->
 
 		<entity name="authors[]" flushWith="record">
 			<entity name="" sameEntity="true" reset="true">
