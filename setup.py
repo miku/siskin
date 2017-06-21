@@ -95,6 +95,7 @@ setup(name='siskin',
       package_data={
           'siskin': [
               'assets/*',
+              'assets/101/*',
               'assets/103/*',
               'assets/107/*',
               'assets/30/*',
