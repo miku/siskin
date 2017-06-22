@@ -615,7 +615,7 @@ class AMSLFilterConfig(AMSLTask):
                 continue
 
             # refs #10495, maybe use a TSV with custom column name to use a subject list?
-            if isil == 'DE-15-FID' and sid == '34':
+            if sid == '34' and isil == 'DE-15-FID':
                 isilfilters[isil].append({
                     "and": [
                         {
