@@ -29,6 +29,10 @@
       <data source="metadata.dc.identifier.value">
         <regexp match="^http.*" />
       </data>
+      <data source="metadata.dc.identifier.value">
+        <regexp match="^urn:nbn.*" />
+        <compose prefix="https://nbn-resolving.org/"/>
+      </data>
     </entity>
     <choose>
       <data source="metadata.dc.type.value" name="finc.format">
