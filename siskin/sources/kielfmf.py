@@ -36,8 +36,9 @@ input = /path/to/xml (ask RS)
 """
 
 import luigi
-from gluish.utils import shellout
+from luigi.format import Gzip
 
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
@@ -62,7 +63,7 @@ class KielFMFIntermediateSchema(KielFMFTask):
         # point to a temporary file. The return value of shellout is the value of
         # output.
         output = shellout("""
-            flux.sh {flux} inputfile={input} > {output}
+            flux.sh {flux} inputfile={input} | pigz -c > {output}
         """, flux=self.assets('101/101_flux.flux'), input=input)
 
         # This moves the output of the above shell command into the desired task
@@ -70,4 +71,4 @@ class KielFMFIntermediateSchema(KielFMFTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
