@@ -531,32 +531,13 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
     def run(self):
         """
-        Keep a dictionary in memory with ids as keys and a list of ISILs as
-        values.
+        Update intermediate schema labels from file. We cut out the ID and the
+        ISIL list from the changes.
         """
-        updates = {}
-
-        # First column is the ID, 4th to the end are the ISILs.
-        output = shellout(
-            "cut -d, -f1,4- {changes} > {output}", changes=self.input().get('changes').path)
-        with open(output) as handle:
-            for line in handle:
-                fields = [s.strip() for s in line.split(',')]
-                updates[fields[0]] = fields[1:]
-
-        os.remove(output)
-        self.logger.debug('%s changes staged', len(updates))
-
-        with self.input().get('file').open() as handle:
-            with self.output().open('w') as output:
-                for line in handle:
-                    doc = json.loads(line)
-                    identifier = doc["finc.record_id"]
-
-                    if identifier in updates:
-                        doc['x.labels'] = updates[identifier]
-
-                    output.write(json.dumps(doc) + '\n')
+        output = shellout("unpigz -c {input} | span-update-labels -f <(cut -f1,4- {file}) | pigz -c > {output}",
+                          input=self.input().get('file').path,
+                          file=self.input().get('changes').path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
