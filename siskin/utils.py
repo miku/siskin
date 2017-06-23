@@ -138,23 +138,23 @@ def dictcheck(obj, contains=None, missing=None):
 
     """
     if not isinstance(obj, dict):
-	raise ValueError('dictionary only')
+        raise ValueError('dictionary only')
     if contains is None:
-	contains = []
+        contains = []
     if missing is None:
-	missing = []
+        missing = []
 
     for key in contains:
-	if key not in obj:
-	    return False
-	if not bool(operator.itemgetter(key)(obj)):
-	    return False
+        if key not in obj:
+            return False
+        if not bool(operator.itemgetter(key)(obj)):
+            return False
 
     for key in missing:
-	if key not in obj:
-	    continue
-	if bool(operator.itemgetter(key)(obj)):
-	    return False
+        if key not in obj:
+            continue
+        if bool(operator.itemgetter(key)(obj)):
+            return False
 
     return True
 
