@@ -297,9 +297,6 @@ class AIIntermediateSchema(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        """
-        TODO(miku): Dynamic dependencies based on holding file.
-        """
         return [
             Executable(name='pigz', message='http://zlib.net/pigz/'),
             ArxivIntermediateSchema(date=self.date, stamp=True),
