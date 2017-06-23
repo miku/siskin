@@ -507,7 +507,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
         Update intermediate schema labels from file. We cut out the ID and the
         ISIL list from the changes.
         """
-        output = shellout("unpigz -c {input} | span-update-labels -f <(cut -f1,4- {file}) | pigz -c > {output}",
+        output = shellout("unpigz -c {input} | span-update-labels -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
                           input=self.input().get('file').path,
                           file=self.input().get('changes').path)
         luigi.LocalTarget(output).move(self.output().path)
