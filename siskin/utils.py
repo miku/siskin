@@ -182,6 +182,17 @@ def get_task_import_cache():
     return task_import_cache, path
 
 
+def load_set_from_target(target):
+    """
+    Given a luigi.LocalTarget, load each line of the file into a set.
+    """
+    s = set()
+    with target.open() as handle:
+        for line in handle:
+            s.add(line.strip())
+    return s
+
+
 class URLCache(object):
     """
     A simple URL * content * cache. Stores everything on the filesystem. Content

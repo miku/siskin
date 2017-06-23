@@ -75,7 +75,7 @@ from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.task import DefaultTask
-from siskin.utils import URLCache
+from siskin.utils import URLCache, load_set_from_target
 
 
 class AITask(DefaultTask):
@@ -149,17 +149,10 @@ class AIDOIStats(AITask):
 
     @timed
     def run(self):
-        def loadset(target):
-            s = set()
-            with target.open() as handle:
-                for line in handle:
-                    s.add(line.strip())
-            return s
-
         with self.output().open('w') as output:
             for k1, k2 in itertools.combinations(self.input().keys(), 2):
-                s1 = loadset(self.input().get(k1))
-                s2 = loadset(self.input().get(k2))
+                s1 = load_set_from_target(self.input().get(k1))
+                s2 = load_set_from_target(self.input().get(k2))
                 output.write_tsv(k1, k2, len(s1), len(s2),
                                  len(s1.intersection(s2)))
 
@@ -181,19 +174,11 @@ class AIISSNStats(AITask):
 
     @timed
     def run(self):
-        def loadset(target):
-            s = set()
-            with target.open() as handle:
-                for row in handle.iter_tsv(cols=('issn',)):
-                    s.add(row.issn)
-            return s
-
         with self.output().open('w') as output:
             for k1, k2 in itertools.combinations(self.input().keys(), 2):
-                s1 = loadset(self.input().get(k1))
-                s2 = loadset(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2),
-                                 len(s1.intersection(s2)))
+                s1 = load_set_from_target(self.input().get(k1))
+                s2 = load_set_from_target(self.input().get(k2))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -213,19 +198,10 @@ class AIISSNOverlaps(AITask):
 
     @timed
     def run(self):
-        def loadset(target):
-            """ Given a luigi.Target, open it, read it, and add each line to a set.
-            """
-            s = set()
-            with target.open() as handle:
-                for row in handle.iter_tsv(cols=('issn',)):
-                    s.add(row.issn)
-            return s
-
         with self.output().open('w') as output:
             for k1, k2 in itertools.combinations(self.input().keys(), 2):
-                s1 = loadset(self.input().get(k1))
-                s2 = loadset(self.input().get(k2))
+                s1 = load_set_from_target(self.input().get(k1))
+                s2 = load_set_from_target(self.input().get(k2))
                 for issn in sorted(s1.intersection(s2)):
                     output.write_tsv(k1, k2, issn)
 
