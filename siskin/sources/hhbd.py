@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Heidelberger historische Bestände digital.
+Heidelberger historische Bestände digital, #5964.
 """
 
 import datetime
