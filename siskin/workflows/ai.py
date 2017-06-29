@@ -121,13 +121,13 @@ class AIDOIRedirectTable(AITask):
     """
     Generate a redirect table. Takes days. Make sure doi.org is in your hosts file so DNS is not stressed.
     """
-    w = luigi.IntParameter(default=4, description='number of workers for hurrly')
+    hurrly_workers = luigi.IntParameter(default=4, description='number of workers for hurrly')
 
     def requires(self):
         return AIDOIList()
 
     def run(self):
-        output = shellout("hurrly -w {w} < {input} > {output}", w=self.w, input=self.input().path)
+        output = shellout("hurrly -w {w} < {input} > {output}", w=self.hurrly_workers, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
