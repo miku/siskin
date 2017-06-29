@@ -6,7 +6,7 @@
 default MAP_DIR ="/assets/maps/";
 default sid = "34";
 default mega_collection = "PQDT Open";
-default format = "ElectronicArticle";
+default format = "ElectronicThesis";
 default fileName = in;
 
 fileName|
