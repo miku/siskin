@@ -48,7 +48,7 @@
 				<data source="$[datafield]$[post].y" name="y" />
 				<data source="$[datafield]$[post].z" name="z" />
 				<data source="$[datafield]$[post].D" name="D" />
-				<data source="$[datafield]$[post].A" name="A" />	
+				<data source="$[datafield]$[post].A" name="A" />
 			</entity>
 		</macro>
 		<macro name="title">
@@ -63,7 +63,7 @@
 					<data source="$[htitle]" name="a" />
 					<data source="$[htitle]" name="b" />
 				</choose>
-				<data source="$[datafield]$[post].b" name="b" />		
+				<data source="$[datafield]$[post].b" name="b" />
 				<data source="$[datafield]$[post].c" name="c" />
 				<data source="$[datafield]$[post].f" name="f" />
 				<data source="$[datafield]$[post].g" name="g" />
@@ -77,7 +77,7 @@
 	</macros>
 	<rules>
 	<!-- 901  .b = Aussage ueber Materialart -->
-	
+
 	<choose flushWith="leader">
 		<choose>
 			<if>
@@ -91,63 +91,64 @@
 				<compose prefix="     "/>
 			</data>
 	</choose>
-	
+
 	<!-- ID zwischenspeichern für übergeordnetes Werk -->
 	<data source="7600 .o" name="@hierarchy_tit">
 		<lookup in="hierarchy_title"></lookup>
 	</data>
-	
+
 	<entity name="4901 ">
 		<data source="@hierarchy_tit" name="a">
 		</data>
 	</entity>
-	
+
 	<!-- ID in finc-ID umwandeln -->
 
 		<data source="001" name="001">
 			<compose prefix="finc-109-"/>
 		</data>
 
-	
+
 	<data source="901  .b" name="@mat">
 		<substring start="0" end="3"/>
 	</data>
-	
+
 	<data name="@format" source="@mat">
 			<equals string="VID" /> <!-- Videokassette -->
 			<constant value="vf" />
 	</data>
-	
+
 	<data name="@format" source="@mat">
 			<regexp match="DVD|BLU"/><!-- DVD-Video oder BluRay -->
 			<constant value="vd" />
 	</data>
-	
+
 	<data name="@format" source="@mat"> <!-- Book (maybe most of it) -->
 			<equals string="FIL" />
 			<constant value="tu" />
 	</data>
-	
+
 	<data name="@bray" source="@mat">
 			<equals string="BLU" /> <!-- Blu-Ray -> 935b:bray -->
 			<constant value="bray" />
 	</data>
-	
+
 	<data name="@m" source="@mat">
 			<equals string="BLU" /> <!-- Blu-Ray -> Leaderbit7 -> M  -->
 			<constant value="m" />
 	</data>
-	
+
 	<data source="@format" name="007">
 	</data>
-	
+
 	<!-- If Bluray, bulid 935  .b -->
 	<entity name="935  ">
-		<choose>
-			<data source="@bray" name="b"></data>
-		</choose>
+		<data source="_id" name="a">
+			<constant value="vkfilm" />
+		</data>
+		<data source="@bray" name="b" />
 	</entity>
-	
+
 	<entity name="980  " flushWith="record">
 			<data source="001" name="a">
 			</data>
@@ -155,7 +156,7 @@
 				<constant value="109"/>
 			</data>
 	</entity>
-	
+
 	<!-- 008 als controlfield weiterreichen-->
 	<choose>
 		<data source="008">
@@ -164,7 +165,7 @@
 		<data source="008">
 		</data>
 	</choose>
-	
+
 	<!-- datafields zusammenbauen -->
 	<call-macro name="indi" post="  " datafield="016"/>
   	<call-macro name="indi" post="7 " datafield="016"/>
@@ -194,7 +195,7 @@
 	<call-macro name="indi" post="  " datafield="100"/> <!-- vf1_author = 100a -->
 	<call-macro name="indi" post="  " datafield="110"/> <!-- vf1_author_corp = 110ab:111ae-->
 	<call-macro name="indi" post="  " datafield="111"/>
-	<call-macro name="indi" post="  " datafield="130"/> 
+	<call-macro name="indi" post="  " datafield="130"/>
 	<call-macro name="indi" post="  " datafield="111"/>
 	<call-macro name="indi" post="  " datafield="240"/>
 	<call-macro name="title" post="00" datafield="245" htitle="@hierarchy_tit"/> <!-- title = 245ab ; title_part = 245np ; title_sub = 245b ; title_short = 245a ; title_full = 245abdefgknp-->
@@ -219,8 +220,8 @@
 	<call-macro name="indi" post="  " datafield="533"/>
 	<call-macro name="indi" post="1 " datafield="583"/>
 	<call-macro name="indi" post="  " datafield="700"/> <!-- vf1_author2 = 700a -->
-	<call-macro name="indi" post="12" datafield="700"/> 
-	<call-macro name="indi" post="1 " datafield="700"/> 
+	<call-macro name="indi" post="12" datafield="700"/>
+	<call-macro name="indi" post="1 " datafield="700"/>
 	<call-macro name="indi" post="  " datafield="710"/> <!-- vf1_author_corp2 = 710ab:711ae ; vf1_author2_role = 700e:710e-->
 	<call-macro name="indi" post="  " datafield="711"/>
 	<call-macro name="indi" post="  " datafield="730"/>
@@ -244,7 +245,7 @@
 	<call-macro name="indi" post="0 " datafield="883"/>
 	<call-macro name="indi" post="  " datafield="920"/>
 	<call-macro name="indi" post="r " datafield="925"/>
-	<call-macro name="indi" post=" 7" datafield="600"/>  
+	<call-macro name="indi" post=" 7" datafield="600"/>
 	<call-macro name="indi" post="27" datafield="610"/>
 	<call-macro name="indi" post=" 7" datafield="611"/>
 	<call-macro name="indi" post=" 7" datafield="648"/>
@@ -264,7 +265,7 @@
 	<call-macro name="indi" post="05" datafield="689"/>
 	<call-macro name="indi" post="06" datafield="689"/>
 	<call-macro name="indi" post="0 " datafield="689"/>
-	
+
 	<call-macro name="indi" post="  " datafield="901"/>
 
 	</rules>
