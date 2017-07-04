@@ -152,15 +152,17 @@ class DOAJIdentifierBlacklist(DOAJTask):
                                 .["_source"]["last_updated"],
                                 .["_source"]["id"]
                             ]' {input} | sort -S35% > {output}""", input=self.input().path)
+
         with open(output) as handle:
-            with self.output().open('w') as output:
-                docs = (json.loads(s) for s in handle)
-                for title, grouper in itertools.groupby(docs, key=operator.itemgetter(0)):
-                    group = list(grouper)
-                    if not title or len(title) < self.min_title_length or len(group) < 2:
-                        continue
-                    for dropable in map(operator.itemgetter(2), group[0:len(group) - 1]):
-                        output.write_tsv(dropable)
+            docs = (json.loads(s) for s in handle)
+
+        with self.output().open('w') as output:
+            for title, grouper in itertools.groupby(docs, key=operator.itemgetter(0)):
+                group = list(grouper)
+                if not title or len(title) < self.min_title_length or len(group) < 2:
+                    continue
+                for dropable in map(operator.itemgetter(2), group[0:len(group) - 1]):
+                    output.write_tsv(dropable)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
