@@ -198,8 +198,8 @@ def load_set_from_file(filename, func=lambda v: v):
     Given a filename, load each non-empty line into a set.
     """
     s = set()
-    with open(self.assets(filename)) as handle:
-        for line in map(str.split, handle):
+    with open(filename) as handle:
+        for line in map(str.strip, handle):
             if not line:
                 continue
             s.add(func(line))

@@ -32,7 +32,9 @@ http://doaj.org
 """
 
 import datetime
+import itertools
 import json
+import operator
 import tempfile
 import time
 
@@ -46,7 +48,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.task import DefaultTask
-from siskin.utils import load_set_from_file
+from siskin.utils import load_set_from_file, load_set_from_target
 
 
 class DOAJTask(DefaultTask):
@@ -130,6 +132,40 @@ class DOAJDump(DOAJTask):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
+class DOAJIdentifierBlacklist(DOAJTask):
+    """
+    Create a blacklist of identifiers.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    min_title_length = luigi.IntParameter(default=30,
+                                          description='Only consider titles with at least this length.')
+
+    def requires(self):
+        return DOAJDump(date=self.date)
+
+    def run(self):
+        """
+        Output a list of identifiers of documents, which have the same title. Use the newest.
+        """
+        output = shellout("""jq -rc '[
+                                .["_source"]["bibjson"]["title"],
+                                .["_source"]["last_updated"],
+                                .["_source"]["id"]
+                            ]' {input} | sort -S35% > {output}""", input=self.input().path)
+        with open(output) as handle:
+            with self.output().open('w') as output:
+                docs = (json.loads(s) for s in handle)
+                for title, grouper in itertools.groupby(docs, key=operator.itemgetter(0)):
+                    group = list(grouper)
+                    if not title or len(title) < self.min_title_length or len(group) < 2:
+                        continue
+                    for dropable in map(operator.itemgetter(2), group[0:len(group) - 1]):
+                        output.write_tsv(dropable)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
 class DOAJFiltered(DOAJTask):
     """
     Filter DOAJ by ISSN in assets. Slow.
@@ -137,16 +173,23 @@ class DOAJFiltered(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return DOAJDump(date=self.date)
+        return {
+            'dump': DOAJDump(date=self.date),
+            'blacklist': DOAJIdentifierBlacklist(date=self.date),
+        }
 
     @timed
     def run(self):
-        excludes = load_set_from_file('028_doaj_filter.tsv', func=lambda line: line.replace("-", ""))
+        identifier_blacklist = load_set_from_target(self.input().get('blacklist'))
+        excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
+                                      func=lambda line: line.replace("-", ""))
 
         with self.output().open('w') as output:
-            with self.input().open() as handle:
+            with self.input().get('dump').open() as handle:
                 for line in handle:
                     record, skip = json.loads(line), False
+                    if record['_source']['id'] in identifier_blacklist:
+                        continue
                     for issn in record["_source"]["index"]["issn"]:
                         issn = issn.replace("-", "").strip()
                         if issn in excludes:
