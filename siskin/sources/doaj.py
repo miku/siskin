@@ -46,7 +46,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.task import DefaultTask
-from siskin.utils import ElasticsearchMixin
+from siskin.utils import load_set_from_file
 
 
 class DOAJTask(DefaultTask):
