@@ -127,7 +127,8 @@ class DOAJDump(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
-class DOAJFiltered(DOAJDump):
+
+class DOAJFiltered(DOAJTask):
     """
     Filter DOAJ by ISSN in assets. Slow.
     """
