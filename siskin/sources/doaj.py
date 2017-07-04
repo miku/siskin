@@ -139,13 +139,7 @@ class DOAJFiltered(DOAJTask):
 
     @timed
     def run(self):
-        excludes = set()
-        with open(self.assets('028_doaj_filter.tsv')) as handle:
-            for line in handle:
-                line = line.strip()
-                if not line:
-                    continue
-                excludes.add(line.replace("-", ""))
+        excludes = load_set_from_file('028_doaj_filter.tsv', func=lambda line: line.replace("-", ""))
 
         with self.output().open('w') as output:
             with self.input().open() as handle:

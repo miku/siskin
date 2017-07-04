@@ -193,6 +193,19 @@ def load_set_from_target(target):
     return s
 
 
+def load_set_from_file(filename, func=lambda v: v):
+    """
+    Given a filename, load each non-empty line into a set.
+    """
+    s = set()
+    with open(self.assets(filename)) as handle:
+        for line in map(str.split, handle):
+            if not line:
+                continue
+            s.add(func(line))
+    return s
+
+
 class URLCache(object):
     """
     A simple URL * content * cache. Stores everything on the filesystem. Content
