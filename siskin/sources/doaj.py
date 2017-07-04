@@ -58,6 +58,7 @@ class DOAJTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+
 class DOAJCSV(DOAJTask):
     """
     CSV dump, updated every 30 minutes. Not sure what's in there.
@@ -75,6 +76,7 @@ class DOAJCSV(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
+
 
 class DOAJDump(DOAJTask):
     """
@@ -157,6 +159,7 @@ class DOAJFiltered(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+
 class DOAJIntermediateSchema(DOAJTask):
     """
     Convert to intermediate schema via span.
@@ -174,6 +177,7 @@ class DOAJIntermediateSchema(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 
 class DOAJExport(DOAJTask):
     """
@@ -196,6 +200,7 @@ class DOAJExport(DOAJTask):
         }
         return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
 
+
 class DOAJISSNList(DOAJTask):
     """
     A list of DOAJ ISSNs.
@@ -216,6 +221,7 @@ class DOAJISSNList(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class DOAJDOIList(DOAJTask):
     """
