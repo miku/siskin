@@ -126,7 +126,47 @@
             <data source="Author.value|Editor.value" name="a">
                 <split delimiter=" ; " />
                 <replace pattern=",$" with="" />
-                <occurrence only="10" />
+                <occurrence only="11" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
+                <occurrence only="12" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
+                <occurrence only="13" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
+                <occurrence only="14" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
+                <occurrence only="15" />
+            </data>
+        </entity>
+
+        <entity name="700  " flushWith="Author.value|Editor.value" reset="true">
+            <data source="Author.value|Editor.value" name="a">
+                <split delimiter=" ; " />
+                <replace pattern=",$" with="" />
+                <occurrence only="16" />
             </data>
         </entity>
 
