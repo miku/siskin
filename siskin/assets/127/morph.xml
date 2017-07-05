@@ -621,6 +621,9 @@
         </data>
 
         <entity name="935  " flushWith="record">
+            <data source="_id" name="a">
+		    	<constant value="vkfilm" />
+	    	</data>
             <choose name="b">
                 <data source="335|433c|501|750c|720|433|437">
                     <regexp match="Blu-ray" />
