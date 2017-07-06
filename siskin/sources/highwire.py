@@ -57,6 +57,7 @@ class HighwireTask(DefaultTask):
     def closest(self):
         return weekly(date=self.date)
 
+
 class HighwireCombine(HighwireTask):
     """
     Single file dump.
@@ -78,6 +79,7 @@ class HighwireCombine(HighwireTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
 
+
 class HighwireIntermediateSchema(HighwireTask):
     """
     Experimental OAI -> intermediate schema conversion.
@@ -90,11 +92,13 @@ class HighwireIntermediateSchema(HighwireTask):
         return HighwireCombine(date=self.date, url=self.url, prefix=self.prefix)
 
     def run(self):
-        output = shellout("span-import -i oai <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout("unpigz -c {input} | span-reshape -z -i highwire | pigz -c > {output}",
+                          input=self.input().path, pipefail=False)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
 
 class HighwireExport(HighwireTask):
     """
