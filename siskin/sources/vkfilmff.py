@@ -82,9 +82,9 @@ class VKFilmFFPaths(VKFilmFFTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
-class VKFilmFFCleanedMARC(VKFilmFFTask):
+class VKFilmFFCleanedXML(VKFilmFFTask):
     """
-    Uncompress and clean MARC file.
+    Uncompress and clean MARC XML, remove "Nichtsortierzeichen" on the fly, refs #8571.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -98,7 +98,7 @@ class VKFilmFFCleanedMARC(VKFilmFFTask):
 
                 if not row.path.endswith(filename):
                     continue
-                output = shellout("unpigz -c {file} > {output}", file=row.path)
+                output = shellout("unpigz -c {file} | sed $'s/\u0098//g;s/\u009C//g' > {output}", file=row.path)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:
