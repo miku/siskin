@@ -500,9 +500,9 @@ class AMSLWisoPackages(AMSLTask):
 
 class AMSLFilterConfig(AMSLTask):
     """
-    Next version of AMSL filter config.
+    Turn AMSL API to a span(1) filter configuration.
 
-    Cases:
+    Cases (Spring 2017):
 
     61084 Case 3 (ISIL, SID, Collection, Holding File)
       805 Case 2 (ISIL, SID, Collection, Product ISIL)
@@ -524,15 +524,15 @@ class AMSLFilterConfig(AMSLTask):
 
     Notes:
 
-    This task turns an AMSL discovery API response into a filterconfig, which
+    This task turns an AMSL discovery API response into a filterconfig[1], which
     span(1) can understand.
 
-    AMSL API might not specify everything we need to know, so this is the only
-    place, where workarounds should happen.
+    AMSL API might not specify everything we need to know, so this task shall
+    be the only place, where workarounds happen.
 
-    Also, span-tag is fast, but not that fast, that we can iterate over a
-    disjuction of 60K items for each of the 100M documents fast enough, which,
-    if we could, would simplify the implementation of this task.
+    Whil span-tag is fast, it is not fast enough to iterate over a disjuction
+    of 60K items for each of the 100M documents fast enough, which - if we
+    could - would simplify the implementation of this task.
 
     The main speed improvement comes from using lists of collection names
     instead of having each collection processed separately - which is how it
@@ -543,15 +543,12 @@ class AMSLFilterConfig(AMSLTask):
     content files are usually there, because we cannot infer the collection
     name from the data alone.
 
-    Notable exception: For SID 48 we test simple attachments via WISO database
-    names parsed from KBART (span 0.1.144 or later), refs. #10266.
-
     Performance data point: 22 ISIL each with between 1 and 26 alternatives for
     attachment, each alternative consisting of around three filters. Around 30
     holding or content files each with between 10 and 50000 entries referenced
-    220 times in total: around 20k records/s.
+    about 200 times in total: around 20k records/s.
 
-    Case table:
+    Case table (Spring 2017):
 
     SID COLL ISIL LTHF LTCF ELTCF PI
     --------------------------------
@@ -564,6 +561,9 @@ class AMSLFilterConfig(AMSLTask):
     X   X    X    -    -    X     -
     X   X    X    -    -    -     X
 
+    ----
+
+    [1] https://git.io/vQohE
     """
 
     date = luigi.Parameter(default=datetime.date.today())
