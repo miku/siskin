@@ -37,9 +37,9 @@ Config:
 
 [amsl]
 
+base = https://x.y.z
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
-base = https://example.com
-fid-issn-list = https://goo.gl/abcdef
+write-url = https://x.y.z/OntoWiki/x/y # stamping
 
 """
 
