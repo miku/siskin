@@ -67,6 +67,12 @@
 		<compose prefix="finc-117-"/>
 	</data>
 
+	<entity name="935  " flushWith="record">
+		<data source="_id" name="a">
+			<constant value="vkfilm" />
+		</data>
+	</entity>
+
 	<entity name="980  " flushWith="record">
 			<data source="001" name="a">
 			</data>
