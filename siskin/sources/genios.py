@@ -219,6 +219,11 @@ class GeniosReloadDates(GeniosTask):
                 if not match:
                     continue
 
+                stinfo = os.stat(row.path)
+                if stinfo.st_size < 22:
+                    self.logger.warning("skipping file, too small (%s): %s", stinfo.st_size, row.path)
+                    continue
+
                 cols = list(match.groups()) + [row.path]
                 # cols contains the [kind, database name, year, month, filename]
                 # ['ebooks', 'DFVE', '2016', '09', '.../siskin-data/genios/...reload_201609.zip']
