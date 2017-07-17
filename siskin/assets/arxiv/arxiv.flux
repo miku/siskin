@@ -13,7 +13,7 @@ default fileName = in;
 //default out = FLUX_DIR + sid + ".json";
 
 fileName|
-open-gzip|
+open-file(compression="GZIP")|
 decode-xml|
 handle-generic-xml("Record")|
 morph(FLUX_DIR + sid + "_morph.xml", *)|
