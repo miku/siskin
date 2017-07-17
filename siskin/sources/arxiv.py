@@ -128,8 +128,11 @@ class ArxivIntermediateSchema(ArxivTask):
         return ArxivCombine(date=self.date)
 
     def run(self):
+        """
+        With 3.1.1 -Xmx512m seemed to be enough. Also: java -Xmx1G -XX:+PrintFlagsFinal -Xmx2G 2>/dev/null | grep MaxHeapSize.
+        """
         mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
+        output = shellout("""FLUX_JAVA_OPTIONS="-Xmx2048m" flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
                           flux=self.assets("arxiv/arxiv.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
