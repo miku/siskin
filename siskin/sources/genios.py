@@ -60,6 +60,7 @@ import datetime
 import os
 import re
 import tempfile
+import zipfile
 
 import luigi
 
@@ -193,6 +194,7 @@ class GeniosReloadDates(GeniosTask):
 
     """
     date = luigi.DateParameter(default=datetime.date.today())
+    strict = luigi.BooleanParameter(default=False, description='fail, if we spot bad files')
 
     def requires(self):
         return GeniosDropbox(date=self.date)
@@ -222,6 +224,17 @@ class GeniosReloadDates(GeniosTask):
                 stinfo = os.stat(row.path)
                 if stinfo.st_size < 22:
                     self.logger.warning("skipping file, too small (%s): %s", stinfo.st_size, row.path)
+                    if self.strict:
+                        raise RuntimeError('too small: %s' % row.path)
+                    continue
+
+                # Do a quick readability check.
+                try:
+                    zipfile.ZipFile(row.path)
+                except zipfile.BadZipfile as err:
+                    self.logger.debug("%s: %s", err, row.path)
+                    if self.strict:
+                        raise err
                     continue
 
                 cols = list(match.groups()) + [row.path]
