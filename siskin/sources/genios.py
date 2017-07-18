@@ -217,10 +217,7 @@ class GeniosReloadDates(GeniosTask):
 
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path',)):
-                match = pattern.match(row.path)
-                if not match:
-                    continue
-
+                # If the file is too small to be zipfile, skip.
                 stinfo = os.stat(row.path)
                 if stinfo.st_size < 22:
                     self.logger.warning("skipping file, too small (%s): %s", stinfo.st_size, row.path)
@@ -228,13 +225,17 @@ class GeniosReloadDates(GeniosTask):
                         raise RuntimeError('too small: %s' % row.path)
                     continue
 
-                # Do a quick readability check.
+                # Partial Zip? Skip.
                 try:
                     zipfile.ZipFile(row.path)
                 except zipfile.BadZipfile as err:
                     self.logger.debug("%s: %s", err, row.path)
                     if self.strict:
                         raise err
+                    continue
+
+                match = pattern.match(row.path)
+                if not match:
                     continue
 
                 cols = list(match.groups()) + [row.path]
