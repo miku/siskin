@@ -75,7 +75,8 @@ Source complexity
 -----------------
 
 ```shell
-$ for f in $(find siskin/sources/ -name "*py"); do printf "$(git rev-list HEAD --count -- $f)       $f\n"; done | sort -nr
+$ for f in $(find siskin/sources/ -name "*py"); do
+    printf "$(git rev-list HEAD --count -- $f)       $f\n"; done | sort -nr
 171	siskin/sources/crossref.py
 134	siskin/sources/gbi.py
 125	siskin/sources/amsl.py
