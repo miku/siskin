@@ -51,4 +51,4 @@ class EgyptologyFincMARC(EgyptologyTask, luigi.ExternalTask):
     """
 
     def output(self):
-	return luigi.LocalTarget(path=self.config.get('egyptology', 'file'))
+        return luigi.LocalTarget(path=self.config.get('egyptology', 'file'))
