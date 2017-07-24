@@ -196,6 +196,31 @@ class CrossrefChunkItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
+class CrossrefRawItems(CrossrefTask):
+    """
+    Concatenate all harvested items.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+    update = luigi.Parameter(default='months', description='days, weeks or months')
+
+    def requires(self):
+        if self.update not in ('days', 'weeks', 'months'):
+            raise RuntimeError('update can only be: days, weeks or months')
+        dates = [dt for dt in date_range(self.begin, self.date, 1, self.update)]
+        tasks = [CrossrefChunkItems(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
+        return tasks
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+
 class CrossrefLineDOI(CrossrefTask):
     """
     Extract the line number and DOI for a given chunk. Works per chunk, so
