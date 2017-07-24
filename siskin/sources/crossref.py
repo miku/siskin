@@ -387,14 +387,14 @@ class CrossrefSortedDOITable(CrossrefTask):
         return CrossrefDOITableClean(begin=self.begin, date=self.closest())
 
     def run(self):
-	"""
-	TODO(miku): fix #10909.
+        """
+        TODO(miku): fix #10909.
 
-	$ unpigz -c begin-2006-01-01-date-2017-06-01.filelist.gz |grep -F "10.1055/s-0036-1577880"
-	986730 begin-2017-05-01-end-2017-06-01-filter-deposit.ldj.gz 10.1055/s-0036-1577880
+        $ unpigz -c begin-2006-01-01-date-2017-06-01.filelist.gz |grep -F "10.1055/s-0036-1577880"
+        986730 begin-2017-05-01-end-2017-06-01-filter-deposit.ldj.gz 10.1055/s-0036-1577880
 
-	$ unpigz -c begin-2006-01-01-date-2017-06-01.filelist.gz |grep -F "10.1055/s-0036-1577880"
-	"""
+        $ unpigz -c begin-2006-01-01-date-2017-06-01.filelist.gz |grep -F "10.1055/s-0036-1577880"
+        """
         output = shellout("""
             TMPDIR={tmpdir} LC_ALL=C sort -S50% -k2,2 -k1,1n <(TMPDIR={tmpdir} unpigz -c {input}) | cut -f 1-2 | pigz -c > {output}""",
                           tmpdir=self.config.get('core', 'tempdir'), input=self.input().path)
