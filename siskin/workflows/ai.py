@@ -454,19 +454,14 @@ class AILocalData(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'is': AILicensing(date=self.date),
-        }
+        return AILicensing(date=self.date)
 
     def run(self):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | jq -r '[
-            .["finc.record_id"],
-            .["finc.source_id"],
-            .["doi"],
-            .["x.labels"][]? ] | @csv' | LC_ALL=C sort -S50% -t, -k3 > {output} """, input=self.input().get('is').path)
+        output = shellout("""unpigz -c {input} | span-local-data | LC_ALL=C sort -S50% -t, -k3 > {output} """,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
