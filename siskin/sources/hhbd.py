@@ -91,10 +91,10 @@ class HHBDExport(HHBDTask):
         return HHBDIntermediateSchema(date=self.date)
 
     def run(self):
+        """ Tag by hand since not yet in AMSL. """
         output = shellout("""
             cat {input} | span-tag -c '{{"DE-540": {{"any": {{}}}}}}' |
-            span-export -with-fullrecord -o {format} |
-            sed -e 's@"recordtype":"ai"@"recordtype":"is"@' > {output}
+            span-export -with-fullrecord -o {format} > {output}
         """, format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
