@@ -174,20 +174,25 @@
             <choose name="startpage">
                 <!-- 169 -->
                 <!-- 169-183, 7 Pl. -->
+                <!-- 4-6, 4 Abb. -->
                 <data source="StartPage.value">
-                    <regexp match="(.*)-\d" format="{1}" />
+                    <regexp match="(\d+)-(\d+)" format="${1}" />
                 </data>
                 <data source="StartPage.value" />
+                <data source="_id">
+                    <constant value="?" />
+                </data>
             </choose>
             <choose name="endpage">
                 <!-- 169 -->
                 <!-- 169-183, 7 Pl. -->
-                <data source="EndPage.value">
-                    <regexp match="(\d)-(.*)" format="{2}" />
+                <!-- 4-6, 4 Abb. -->
+                <data source="StartPage.value">
+                    <regexp match="(\d+)-(\d+)" format="${2}" />
                 </data>
                 <data source="EndPage.value" />
                 <data source="_id">
-                    <constant value="x" />
+                    <constant value="?" />
                 </data>
             </choose>
         </combine>
