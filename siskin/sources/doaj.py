@@ -156,13 +156,13 @@ class DOAJIdentifierBlacklist(DOAJTask):
         with open(output) as handle:
             docs = (json.loads(s) for s in handle)
 
-        with self.output().open('w') as output:
-            for title, grouper in itertools.groupby(docs, key=operator.itemgetter(0)):
-                group = list(grouper)
-                if not title or len(title) < self.min_title_length or len(group) < 2:
-                    continue
-                for dropable in map(operator.itemgetter(2), group[0:len(group) - 1]):
-                    output.write_tsv(dropable)
+            with self.output().open('w') as output:
+                for title, grouper in itertools.groupby(docs, key=operator.itemgetter(0)):
+                    group = list(grouper)
+                    if not title or len(title) < self.min_title_length or len(group) < 2:
+                        continue
+                    for dropable in map(operator.itemgetter(2), group[0:len(group) - 1]):
+                        output.write_tsv(dropable)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
