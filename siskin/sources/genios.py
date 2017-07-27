@@ -194,7 +194,7 @@ class GeniosReloadDates(GeniosTask):
 
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    strict = luigi.BooleanParameter(default=False, description='fail, if we spot bad files')
+    strict = luigi.BoolParameter(default=False, description='fail, if we spot bad files')
 
     def requires(self):
         return GeniosDropbox(date=self.date)
