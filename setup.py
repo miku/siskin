@@ -50,6 +50,7 @@ install_requires = [
     'colorama>=0.3.3',
     'decorator>=3.4.0',
     'elasticsearch>=2',
+    'future>=0.16',
     'gluish>=0.2.7',
     'gspread>=0.2.2',
     'jsonpath-rw>=1.3.0',
