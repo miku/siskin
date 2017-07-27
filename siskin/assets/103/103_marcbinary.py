@@ -40,6 +40,15 @@ def get_field_935b(format='photograph'):
         return ""
     return formatmaps[format]["935b"]
 
+langmap = {
+    "English": "eng",
+    "German": "ger",
+    "French": "fre",
+    "Italian": "ita",
+    "Russian": "rus",
+    "Spanish": "spa"
+    }
+
 formatmaps = {
     'periodical':
     {
@@ -172,18 +181,6 @@ formatmaps = {
         'leader': 'nam'
     },
 }
-
-"""
-    TODO:
-    format not found: pamphlet;
-    format not found: correspondence; document
-    format not found: flier (printed matter);
-    format not found: Monograph
-    format not found: ephemera;
-    format not found: Periodical
-    format not found:
-    format not found: document
-"""
 
 if len(sys.argv) < 3:
     print('usage: %s INFILE OUTFILE' % sys.argv[0], file=sys.stderr)
@@ -462,7 +459,6 @@ for row in rows:
         if isinstance(language, list):
             language = language[0] # nur die zuerst angegebene Sprache wird berücksichtig
 
-        langmap = {"English": "eng", "German": "ger", "French": "fre", "Italian": "ita", "Russian": "rus", "Spanish": "spa"}
         f041_a = langmap.get(language, "")
 
         if f041_a == "":
