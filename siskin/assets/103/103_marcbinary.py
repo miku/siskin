@@ -3,6 +3,8 @@
 # pylint: disable=C0103
 
 import os
+from __future__ import print_function
+
 import io
 import re
 import sys
@@ -10,6 +12,8 @@ import marcx
 import base64
 import sqlite3
 import tempfile
+from builtins import bytes
+
 import xmltodict
 
 def clear_format(format):
@@ -214,8 +218,8 @@ query = """
 
 sqlite.execute(query)
 
-inputfile = open(sys.argv[1], "r", encoding="utf-8")
-outputfile = open(sys.argv[2], "wb")
+inputfile = io.open(sys.argv[1], "r", encoding="utf-8")
+outputfile = io.open(sys.argv[2], "wb")
 
 xml = xmltodict.parse(inputfile.read())
 
