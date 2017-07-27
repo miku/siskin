@@ -24,21 +24,25 @@ def clear_format(format):
     format = format.rstrip()
     format = format.rstrip(";")
     format = format.lower()
-    format = format.split("; ") # manchmal sind mehrere Formate angegeben
+    format = format.split("; ")  # manchmal sind mehrere Formate angegeben
     if isinstance(format, list):
-        format = format[0] # nur das zuerst angegebe Format wird genommen
+        format = format[0]  # nur das zuerst angegebe Format wird genommen
     return format
+
 
 def get_leader(format='photograph'):
     return "     %s  22        450 " % formatmaps[format]["leader"]
 
+
 def get_field_007(format='photograph'):
     return formatmaps[format]["007"]
+
 
 def get_field_008(format='photograph', f041_a="   "):
     if "008" not in formatmaps[format]:
         return "130227uu20uuuuuuxx uuup%s  c" % f041_a
     return "130227%s20uuuuuuxx uuup%s  c" % (formatmaps[format]["008"], f041_a)
+
 
 def get_field_935b(format='photograph'):
     if "935b" not in formatmaps[format]:
@@ -52,7 +56,7 @@ langmap = {
     "Italian": "ita",
     "Russian": "rus",
     "Spanish": "spa"
-    }
+}
 
 formatmaps = {
     'periodical':
@@ -60,37 +64,37 @@ formatmaps = {
         '007': 'tu',
         '008': 'n',
         'leader': 'nas',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
     'ephemera':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'magazine cover':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'photograph':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'postcard':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'clipping':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'flier (printed matter)':
     {
@@ -126,7 +130,7 @@ formatmaps = {
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'photomechanical print':
     {
@@ -142,43 +146,43 @@ formatmaps = {
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'scrapbook':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
     'slides (photographs)':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
     'program (document)':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
     'pressbook':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
     'autograph album':
     {
         '007': 'tu',
         'leader': 'ntm',
-        '935b' : 'handschr'
+        '935b': 'handschr'
     },
     'monograph':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
     'drawing':
     {
@@ -458,11 +462,11 @@ for row in rows:
     f007 = get_field_007(format=format)
 
     if language != "":
-        language = language.rstrip(";") # manchmal endet die Sprache auf ";"
-        language = language.replace(" ", "") # manchmal gibt es Leerzeichen mittendrin oder am Ende
-        language = language.split(";") # manchmal sind mehrere Sprache angegeben
+        language = language.rstrip(";")  # manchmal endet die Sprache auf ";"
+        language = language.replace(" ", "")  # manchmal gibt es Leerzeichen mittendrin oder am Ende
+        language = language.split(";")  # manchmal sind mehrere Sprache angegeben
         if isinstance(language, list):
-            language = language[0] # nur die zuerst angegebene Sprache wird berücksichtig
+            language = language[0]  # nur die zuerst angegebene Sprache wird berücksichtig
 
         f041_a = langmap.get(language, "")
 
@@ -592,7 +596,7 @@ for row in rows:
     for value in f500_a:
         marcrecord.add("500", a=value)
 
-    if isinstance (f520_a, list):
+    if isinstance(f520_a, list):
         for value in f520_a:
             marcrecord.add("520", a=value)
     else:
