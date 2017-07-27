@@ -73,16 +73,16 @@ class MHLibraryMARC(MHLibraryTask):
 
     def run(self):
         output = shellout("python {script} {input} {output}",
-                          script=self.assets('103/103_marcxml.py'),
+                          script=self.assets('103/103_marcbinary.py'),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincmarc.xml'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
 
     def on_success(self):
         """
         Signal for manual update. This is decoupled from the task output,
         because it might be deleted, when imported.
         """
-        self.output().copy(self.path(ext='fincmarc.xml.import'))
+        self.output().copy(self.path(ext='fincmarc.mrc.import'))
