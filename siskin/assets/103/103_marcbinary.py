@@ -2,19 +2,20 @@
 # coding: utf-8
 # pylint: disable=C0103
 
-import os
 from __future__ import print_function
 
-import io
-import re
-import sys
-import marcx
 import base64
+import io
+import os
+import re
 import sqlite3
+import sys
 import tempfile
 from builtins import bytes
 
+import marcx
 import xmltodict
+
 
 def clear_format(format):
     if isinstance(format, list):
