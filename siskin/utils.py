@@ -28,8 +28,14 @@ Various utilities.
 
 from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import map
+from builtins import range
+from builtins import object
 import collections
-import cStringIO as StringIO
+import io as StringIO
 import errno
 import functools
 import hashlib
@@ -100,7 +106,7 @@ def random_string(length=16):
 def pairwise(obj):
     """ Iterator over a iterable in steps of two. """
     iterable = iter(obj)
-    return itertools.izip(iterable, iterable)
+    return zip(iterable, iterable)
 
 
 def nwise(iterable, n=2):

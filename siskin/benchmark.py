@@ -33,6 +33,7 @@ Just logs the output. Could be extended to send this information to some service
 if available.
 """
 
+from builtins import object
 import functools
 import logging
 from timeit import default_timer
@@ -40,7 +41,7 @@ from timeit import default_timer
 logger = logging.getLogger('gluish')
 
 
-class bcolors:
+class bcolors(object):
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'

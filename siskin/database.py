@@ -26,9 +26,12 @@
 Helper for databases.
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import logging
 import sqlite3
-import urlparse
+import urllib.parse
 
 import pymysql
 from pymysql.cursors import SSCursor
@@ -72,7 +75,7 @@ class mysqldb(object):
     """
 
     def __init__(self, url, stream=False, commit_on_exit=False):
-        result = urlparse.urlparse(url, scheme='mysql')
+        result = urllib.parse.urlparse(url, scheme='mysql')
         self.hostname = result.hostname
         self.username = result.username
         self.password = result.password
