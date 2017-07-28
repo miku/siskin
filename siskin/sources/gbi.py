@@ -545,7 +545,7 @@ class GBIDatabase(GBITask):
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for source, target in self.input().iteritems():
+        for source, target in self.input().items():
             shellout("cat {input} >> {output}",
                      input=target.path, output=stopover)
 
@@ -718,7 +718,7 @@ class GBIPublicationTitleOverview(GBITask):
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for kind, targets in self.input().iteritems():
+        for kind, targets in self.input().items():
             for target in targets:
                 shellout(""" cat {input} | awk '{{ print "{kind}\t"$0 }}' >> {output} """,
                          input=target.path, output=stopover, kind=kind)

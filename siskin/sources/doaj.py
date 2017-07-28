@@ -31,6 +31,8 @@ open access, peer-reviewed journals.
 http://doaj.org
 """
 
+from builtins import map
+from builtins import range
 import datetime
 import itertools
 import json

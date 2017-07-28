@@ -349,7 +349,7 @@ class GeniosLatest(GeniosTask):
                 'could not file a single file for the specified kind: %s' % self.kind)
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for _, path in filemap.iteritems():
+        for _, path in filemap.items():
             shellout(r"""unzip -p {input} |
                         iconv -f iso-8859-1 -t utf-8 |
                         LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |

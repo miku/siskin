@@ -43,12 +43,15 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 import datetime
 import json
 import os
 import tempfile
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import luigi
 import requests
@@ -119,7 +122,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                     'cursor': cursor
                 }
 
-                url = 'http://api.crossref.org/works?%s' % (urllib.urlencode(params))
+                url = 'http://api.crossref.org/works?%s' % (urllib.parse.urlencode(params))
 
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
@@ -514,7 +517,7 @@ class CrossrefHarvestGeneric(CrossrefTask):
         with self.output().open('w') as output:
             while True:
                 params = {"rows": rows, "offset": offset}
-                url = 'http://api.crossref.org/%s?%s' % (self.kind, urllib.urlencode(params))
+                url = 'http://api.crossref.org/%s?%s' % (self.kind, urllib.parse.urlencode(params))
                 for attempt in range(1, 3):
                     body = cache.get(url)
                     try:

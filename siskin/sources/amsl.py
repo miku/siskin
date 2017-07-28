@@ -352,7 +352,7 @@ class AMSLHoldingsFile(AMSLTask):
 
                 if urikey not in holding:
                     raise RuntimeError('possible AMSL API change, expected: %s, available keys: %s' % (
-                        urikey, holding.keys()))
+                        urikey, list(holding.keys())))
 
                 # refs. #7142
                 if 'kbart' not in holding[urikey].lower():
@@ -450,16 +450,16 @@ class AMSLWisoPackages(AMSLTask):
         filterconfig = collections.defaultdict(dict)
         fzs_package_name = 'Genios (Fachzeitschriften)'
 
-        for isil, blob in isilpkg.items():
+        for isil, blob in list(isilpkg.items()):
             include_fzs = False
-            for _, colls in blob.items():
+            for _, colls in list(blob.items()):
                 if fzs_package_name in colls:
                     include_fzs = True
 
             filters = []
 
             if include_fzs and isil != 'DE-15-FID':
-                packages = set(itertools.chain(*[c for _, c in blob.items()]))
+                packages = set(itertools.chain(*[c for _, c in list(blob.items())]))
                 filters.append({
                     'and': [
                         {'source': ['48']},
@@ -468,7 +468,7 @@ class AMSLWisoPackages(AMSLTask):
                     ]
                 })
 
-            for lthf, colls in blob.items():
+            for lthf, colls in list(blob.items()):
                 if lthf is None or lthf == 'null':
                     continue
                 if isil == 'DE-15-FID':
@@ -763,8 +763,8 @@ class AMSLFilterConfig(AMSLTask):
                 raise RuntimeError("unhandled combination of sid, collection and other parameters: %s", item)
 
         # A second pass.
-        for isil, blob in isilsidcollections.items():
-            for sid, colls in blob.items():
+        for isil, blob in list(isilsidcollections.items()):
+            for sid, colls in list(blob.items()):
                 isilfilters[isil].append({
                     "and": [
                         {"source": [sid]},
@@ -773,9 +773,9 @@ class AMSLFilterConfig(AMSLTask):
                 })
 
         # A second pass.
-        for isil, blob in isilsidlinkcollections.items():
-            for sid, spec in blob.items():
-                for link, colls in spec.items():
+        for isil, blob in list(isilsidlinkcollections.items()):
+            for sid, spec in list(blob.items()):
+                for link, colls in list(spec.items()):
                     isilfilters[isil].append({
                         "and": [
                             {"source": [sid]},
@@ -786,7 +786,7 @@ class AMSLFilterConfig(AMSLTask):
 
         # Final assembly.
         filterconfig = collections.defaultdict(dict)
-        for isil, filters in isilfilters.items():
+        for isil, filters in list(isilfilters.items()):
             if len(filters) == 0:
                 continue
             if len(filters) == 1:
@@ -797,7 +797,7 @@ class AMSLFilterConfig(AMSLTask):
         # Include WISO.
         with self.input().get('wiso').open() as handle:
             wisoconf = json.load(handle)
-            for isil, tree in wisoconf.items():
+            for isil, tree in list(wisoconf.items()):
                 for filter in tree.get('or', []):
                     filterconfig[isil]['or'].append(filter)
 
