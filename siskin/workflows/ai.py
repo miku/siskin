@@ -151,7 +151,7 @@ class AIDOIStats(AITask):
     @timed
     def run(self):
         with self.output().open('w') as output:
-            for k1, k2 in itertools.combinations(self.input().keys(), 2):
+            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
                 output.write_tsv(k1, k2, len(s1), len(s2),
@@ -176,7 +176,7 @@ class AIISSNStats(AITask):
     @timed
     def run(self):
         with self.output().open('w') as output:
-            for k1, k2 in itertools.combinations(self.input().keys(), 2):
+            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
                 output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
@@ -200,7 +200,7 @@ class AIISSNOverlaps(AITask):
     @timed
     def run(self):
         with self.output().open('w') as output:
-            for k1, k2 in itertools.combinations(self.input().keys(), 2):
+            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
                 for issn in sorted(s1.intersection(s2)):
@@ -229,7 +229,7 @@ class AIISSNList(AITask):
     @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        for _, target in self.input().items():
+        for _, target in list(self.input().items()):
             shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
