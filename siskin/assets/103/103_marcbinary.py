@@ -2,20 +2,15 @@
 # coding: utf-8
 # pylint: disable=C0103
 
-from __future__ import print_function
-
-import base64
-import io
 import os
+import io
 import re
-import sqlite3
 import sys
-import tempfile
-from builtins import bytes
-
 import marcx
+import base64
+import sqlite3
+import tempfile
 import xmltodict
-
 
 def clear_format(format):
     if isinstance(format, list):
@@ -24,25 +19,21 @@ def clear_format(format):
     format = format.rstrip()
     format = format.rstrip(";")
     format = format.lower()
-    format = format.split("; ")  # manchmal sind mehrere Formate angegeben
+    format = format.split("; ") # manchmal sind mehrere Formate angegeben
     if isinstance(format, list):
-        format = format[0]  # nur das zuerst angegebe Format wird genommen
+        format = format[0] # nur das zuerst angegebene Format wird genommen
     return format
-
 
 def get_leader(format='photograph'):
     return "     %s  22        450 " % formatmaps[format]["leader"]
 
-
 def get_field_007(format='photograph'):
     return formatmaps[format]["007"]
-
 
 def get_field_008(format='photograph', f041_a="   "):
     if "008" not in formatmaps[format]:
         return "130227uu20uuuuuuxx uuup%s  c" % f041_a
     return "130227%s20uuuuuuxx uuup%s  c" % (formatmaps[format]["008"], f041_a)
-
 
 def get_field_935b(format='photograph'):
     if "935b" not in formatmaps[format]:
@@ -56,7 +47,7 @@ langmap = {
     "Italian": "ita",
     "Russian": "rus",
     "Spanish": "spa"
-}
+    }
 
 formatmaps = {
     'periodical':
@@ -64,37 +55,37 @@ formatmaps = {
         '007': 'tu',
         '008': 'n',
         'leader': 'nas',
-        '935b': 'cofz'
+        '935b' : 'cofz'
     },
     'ephemera':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'magazine cover':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'photograph':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'postcard':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'clipping':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'flier (printed matter)':
     {
@@ -130,7 +121,7 @@ formatmaps = {
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'photomechanical print':
     {
@@ -146,43 +137,43 @@ formatmaps = {
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'scrapbook':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b': 'cofz'
+        '935b' : 'cofz'
     },
     'slides (photographs)':
     {
         '007': 'ta',
         'leader': 'ckm',
-        '935b': 'foto'
+        '935b' : 'foto'
     },
     'program (document)':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b': 'cofz'
+        '935b' : 'cofz'
     },
     'pressbook':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b': 'cofz'
+        '935b' : 'cofz'
     },
     'autograph album':
     {
         '007': 'tu',
         'leader': 'ntm',
-        '935b': 'handschr'
+        '935b' : 'handschr'
     },
     'monograph':
     {
         '007': 'cr',
         'leader': 'nam',
-        '935b': 'cofz'
+        '935b' : 'cofz'
     },
     'drawing':
     {
@@ -223,8 +214,8 @@ query = """
 
 sqlite.execute(query)
 
-inputfile = io.open(sys.argv[1], "r", encoding="utf-8")
-outputfile = io.open(sys.argv[2], "wb")
+inputfile = open(sys.argv[1], "r", encoding="utf-8")
+outputfile = open(sys.argv[2], "wb")
 
 xml = xmltodict.parse(inputfile.read())
 
@@ -250,103 +241,61 @@ for record in xml["collection"]["Record"]:
 
         identifier = record["header"]["identifier"]
 
-        try:
-            title = record["metadata"]["oai_dc:dc"]["dc:title"]
-            if isinstance(title, list):
-                title = "||".join(record["metadata"]["oai_dc:dc"]["dc:title"])
-        except (TypeError, KeyError):
-            title = ""
+        title = record.get("metadata").get("oai_dc:dc").get("dc:title", "")
+        if isinstance(title, list):
+            title = "||".join(title)
 
-        try:
-            description = record["metadata"]["oai_dc:dc"]["dc:description"]
-            if isinstance(description, list):
-                description = "||".join(record["metadata"]["oai_dc:dc"]["dc:description"])
-        except (TypeError, KeyError):
-            description = ""
+        description = record.get("metadata").get("oai_dc:dc").get("dc:description", "")
+        if isinstance(description, list):
+            description = "||".join(description)
 
-        try:
-            subject = record["metadata"]["oai_dc:dc"]["dc:subject"]
-            if isinstance(subject, list):
-                subject = "; ".join(record["metadata"]["oai_dc:dc"]["dc:subject"])
-        except (TypeError, KeyError):
-            subject = ""
+        subject = record.get("metadata").get("oai_dc:dc").get("dc:subject", "")
+        if isinstance(subject, list):
+            subject = "; ".join(subject)
 
-        try:
-            type = record["metadata"]["oai_dc:dc"]["dc:type"]
-            if isinstance(type, list):
-                type = "||".join(record["metadata"]["oai_dc:dc"]["dc:type"])
-        except (TypeError, KeyError):
-            type = ""
+        type = record.get("metadata").get("oai_dc:dc").get("dc:type", "")
+        if isinstance(type, list):
+            type = "||".join(type)
 
-        try:
-            format = record["metadata"]["oai_dc:dc"]["dc:format"]
-            if isinstance(format, list):
-                format = "||".join(record["metadata"]["oai_dc:dc"]["dc:format"])
-        except (TypeError, KeyError):
-            format = ""
+        format = record.get("metadata").get("oai_dc:dc").get("dc:format", "")
+        if isinstance(format, list):
+            format = "||".join(format)
 
-        try:
-            relation = record["metadata"]["oai_dc:dc"]["dc:relation"]
-            if isinstance(relation, list):
-                relation = "||".join(record["metadata"]["oai_dc:dc"]["dc:relation"])
-        except (TypeError, KeyError):
-            relation = ""
+        relation = record.get("metadata").get("oai_dc:dc").get("dc:relation", "")
+        if isinstance(relation, list):
+            relation = "||".join(relation)
 
-        try:
-            publisher = record["metadata"]["oai_dc:dc"]["dc:publisher"]
-            if isinstance(publisher, list):
-                publisher = "||".join(record["metadata"]["oai_dc:dc"]["dc:publisher"])
-        except (TypeError, KeyError):
-            publisher = ""
+        publisher = record.get("metadata").get("oai_dc:dc").get("dc:publisher", "")
+        if isinstance(publisher, list):
+            publisher = "||".join(publisher)
 
-        try:
-            date = record["metadata"]["oai_dc:dc"]["dc:date"]
-            if isinstance(date, list):
-                date = "||".join(record["metadata"]["oai_dc:dc"]["dc:date"])
-        except (TypeError, KeyError):
-            date = ""
+        date = record.get("metadata").get("oai_dc:dc").get("dc:date", "")
+        if isinstance(date, list):
+            date = "||".join(date)
 
-        try:
-            source = record["metadata"]["oai_dc:dc"]["dc:source"]
-            if isinstance(source, list):
-                source = record["metadata"]["oai_dc:dc"]["dc:source"][0]
-        except (TypeError, KeyError):
-            source = ""
+        source = record.get("metadata").get("oai_dc:dc").get("dc:source", "")
+        if isinstance(source, list):
+            source = source[0]
 
-        try:
-            language = record["metadata"]["oai_dc:dc"]["dc:language"]
-            if isinstance(language, list):
-                language = "||".join(record["metadata"]["oai_dc:dc"]["dc:language"])
-        except (TypeError, KeyError):
-            language = ""
+        language = record.get("metadata").get("oai_dc:dc").get("dc:language", "")
+        if isinstance(language, list):
+            language = "||".join(language)
 
-        try:
-            rights = record["metadata"]["oai_dc:dc"]["dc:rights"]
-            if isinstance(rights, list):
-                rights = "||".join(record["metadata"]["oai_dc:dc"]["dc:rights"])
-        except (TypeError, KeyError):
-            rights = ""
+        rights = record.get("metadata").get("oai_dc:dc").get("dc:rights", "")
+        if isinstance(rights, list):
+            rights = "||".join(rights)
 
-        try:
-            url = record["metadata"]["oai_dc:dc"]["dc:identifier"]
-            if isinstance(url, list):
-                url = record["metadata"]["oai_dc:dc"]["dc:identifier"][1]
-        except (TypeError, KeyError):
-            url = ""
+        url = record.get("metadata").get("oai_dc:dc").get("dc:identifier", "")
+        if isinstance(url, list):
+            url = url[1]
 
-        try:
-            creator = record["metadata"]["oai_dc:dc"]["dc:creator"]
-            if isinstance(creator, list):
-                creator = "||".join(record["metadata"]["oai_dc:dc"]["dc:creator"])
-        except (TypeError, KeyError):
-            creator = ""
+        creator = record.get("metadata").get("oai_dc:dc").get("dc:creator", "")
+        if isinstance(creator, list):
+            creator = "||".join(creator)
 
-        try:
-            coverage = record["metadata"]["oai_dc:dc"]["dc:coverage"]
-            if isinstance(coverage, list):
-                coverage = "||".join(record["metadata"]["oai_dc:dc"]["dc:coverage"])
-        except (TypeError, KeyError):
-            coverage = ""
+        coverage = record.get("metadata").get("oai_dc:dc").get("dc:coverage", "")
+        if isinstance(coverage, list):
+            coverage = "||".join(coverage)
 
         values = (title, format, type)
 
@@ -462,11 +411,11 @@ for row in rows:
     f007 = get_field_007(format=format)
 
     if language != "":
-        language = language.rstrip(";")  # manchmal endet die Sprache auf ";"
-        language = language.replace(" ", "")  # manchmal gibt es Leerzeichen mittendrin oder am Ende
-        language = language.split(";")  # manchmal sind mehrere Sprache angegeben
+        language = language.rstrip(";") # manchmal endet die Sprache auf ";"
+        language = language.replace(" ", "") # manchmal gibt es Leerzeichen mittendrin oder am Ende
+        language = language.split(";") # manchmal sind mehrere Sprache angegeben
         if isinstance(language, list):
-            language = language[0]  # nur die zuerst angegebene Sprache wird berücksichtig
+            language = language[0] # nur die zuerst angegebene Sprache wird berücksichtig
 
         f041_a = langmap.get(language, "")
 
@@ -596,7 +545,7 @@ for row in rows:
     for value in f500_a:
         marcrecord.add("500", a=value)
 
-    if isinstance(f520_a, list):
+    if isinstance (f520_a, list):
         for value in f520_a:
             marcrecord.add("520", a=value)
     else:
@@ -615,7 +564,7 @@ for row in rows:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856_u)
 
     marcrecord.add("935", b=f935_b)
-    marcrecord.add("980", a=f980_a, b=f980_b, c="Margaret Herrick Library")
+    marcrecord.add("980", a=f980_a, b=f980_b)
     outputfile.write(marcrecord.as_marc())
 
 sqlitecon.commit()
