@@ -452,6 +452,7 @@ class AILocalData(AITask):
     Extract a CSV about source, id, doi and institutions for deduplication.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    batchsize = luigi.IntParameter(default=25000, significant=False)
 
     def requires(self):
         return AILicensing(date=self.date)
@@ -460,8 +461,8 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | span-local-data | LC_ALL=C sort -S50% -t, -k3 > {output} """,
-                          input=self.input().path)
+        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort -S50% -t, -k3 > {output} """,
+                          size=self.batchsize, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
