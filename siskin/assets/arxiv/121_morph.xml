@@ -112,6 +112,7 @@
 
             <data source="metadata.dc.identifier.value" name="doi">
                 <regexp match="^doi:(.*)" format="${1}"/>
+                <replace pattern="\"" with="" />
             </data>
 
     </rules>
