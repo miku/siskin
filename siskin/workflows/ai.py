@@ -480,7 +480,7 @@ class AIInstitutionChanges(AITask):
         return AILocalData(date=self.date)
 
     def run(self):
-        output = shellout("""groupcover -prefs '85 55 89 60 50 105 49 28 48 121' < {input} > {output}""", input=self.input().path)
+        output = shellout("""groupcover -prefs '85 55 89 60 50 105 34 101 49 28 48 121' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
