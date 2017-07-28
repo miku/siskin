@@ -2,6 +2,9 @@
 # coding: utf-8
 # pylint: disable=C0103
 
+from __future__ import print_function
+from builtins import bytes
+
 import os
 import io
 import re
@@ -214,8 +217,8 @@ query = """
 
 sqlite.execute(query)
 
-inputfile = open(sys.argv[1], "r", encoding="utf-8")
-outputfile = open(sys.argv[2], "wb")
+inputfile = io.open(sys.argv[1], "r", encoding="utf-8")
+outputfile = io.open(sys.argv[2], "wb")
 
 xml = xmltodict.parse(inputfile.read())
 
@@ -545,7 +548,7 @@ for row in rows:
     for value in f500_a:
         marcrecord.add("500", a=value)
 
-    if isinstance (f520_a, list):
+    if isinstance(f520_a, list):
         for value in f520_a:
             marcrecord.add("520", a=value)
     else:
@@ -565,6 +568,7 @@ for row in rows:
 
     marcrecord.add("935", b=f935_b)
     marcrecord.add("980", a=f980_a, b=f980_b)
+    marcrecord.add("980", a=f980_a, b=f980_b, c="Margaret Herrick Library")
     outputfile.write(marcrecord.as_marc())
 
 sqlitecon.commit()
