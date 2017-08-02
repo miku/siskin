@@ -44,6 +44,7 @@ for i, line in enumerate(inputfile, start=1):
 
     line = line.replace("\n", "")
 
+    # Identfier
     f001 = get_field("identifier")
     if f001 == "":
         continue
@@ -53,26 +54,31 @@ for i, line in enumerate(inputfile, start=1):
     f001 = f001.decode("ascii")
     f001 = f001.rstrip("=")
 
+    # ISSN
     f022a = get_field("<dc:identifier scheme=\"ISSN\">issn:(.*)</dc:identifier>")
 
+    # Sprache
     f041a = get_field("<dc:language>(.*)</dc:language>")
 
+    # Person
     f100a =  get_repeatable_field("dc:creator")
 
+    # Titel
     f245a = get_field("dc:title")
     try:
         f245a, f245b = f245a.split(" : ")
     except:
         f245b = ""
 
+    # Erscheinungsvermerk
     f260b = get_field("dc:publisher")
     try:
         f260a, f260b = f260b.split(" : ")
     except:
         f260a = ""
-
     f260c = get_field("dc:date")
 
+    # Umfang
     f300a = get_field("dcterms:extent")
     f300a = f300a
     if f300a != "":
@@ -82,10 +88,13 @@ for i, line in enumerate(inputfile, start=1):
     else:
         f300a = ""
 
+    # ausführliche Quellenangabe
     f500a = get_field("dcterms:bibliographicCitation")
 
+    # beschreibender Text
     f520a = get_field("<dc:description xml:lang=\"\w\w\w\">(.*?)</dc:description>")
 
+    # Quelle
     f773a = get_field("dcterms:bibliographicCitation.jtitle")
     volume = get_field("dcterms:bibliographicCitation.volume")
     issue = get_field("dcterms:bibliographicCitation.issue")
@@ -94,10 +103,13 @@ for i, line in enumerate(inputfile, start=1):
     f773g = "%s(%s)%s, S. %s-%s" % (volume, f260c, issue, spage, epage)
     f773x = get_field("<dc:identifier scheme=\"ISSN\">issn:(.*)</dc:identifier>")
 
+    # URL und DOI
     f856u = get_field("dc:identifier")
     doi = get_field("<dc:identifier scheme=\"DOI\">(.*?)</dc:identifier>")
 
+    # Schlagwörter
     f950a = get_field("<dc:subject xml:lang=\"\w\w\w\">(.*?)</dc:subject>")
+    f950a = f950a.split(" ; ")
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
@@ -119,7 +131,10 @@ for i, line in enumerate(inputfile, start=1):
 
     marcrecord.add("773", a=f773a, g=f773g, x=f773x)
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=[f856u, doi])
-    marcrecord.add("950", a=f950a)
+
+    for subject in f950a:
+        marcrecord.add("950", a=subject)
+
     marcrecord.add("980", a=f001, b="39")
 
     outputfile.write(marcrecord.as_marc())
