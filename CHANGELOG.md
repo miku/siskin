@@ -1,3 +1,11 @@
+0.1.37 2017-08-03
+-----------------
+
+* new tasks, improvements and fixes
+* metafacture / assets
+* towards Python 2/3
+* btag and documentation updates
+
 0.1.12 2017-01-18
 -----------------
 
