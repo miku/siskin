@@ -39,12 +39,15 @@ url = http://export.com/intermediate.file.gz
 
 from __future__ import print_function
 
+import datetime
 import json
 import re
 
 import luigi
 
 from gluish.format import Gzip
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
@@ -52,6 +55,9 @@ from siskin.task import DefaultTask
 
 class SpringerTask(DefaultTask):
     TAG = 'springer'
+
+    def closest(self):
+        return monthly(date=self.date)
 
 
 class SpringerProvided(SpringerTask, luigi.ExternalTask):
@@ -67,6 +73,7 @@ class SpringerDownload(SpringerTask):
     """
     Attempt to download file from a configured URL.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
@@ -107,48 +114,10 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     """
     Just the cleaned version.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return SpringerDownload()
 
     def output(self):
         return self.input()
-
-
-class SpringerTagged(SpringerTask):
-    """
-    Tag records with ISIL.
-    """
-
-    def requires(self):
-        return {
-            'file': SpringerCleanFields(),
-            'config': AMSLFilterConfig(),
-        }
-
-    def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path,
-                          input=self.input().get('file').path)
-
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
-class SpringerExport(SpringerTask):
-    """
-    Solr importable.
-    """
-    format = luigi.Parameter(default='solr5vu3', description="solr5vu3, formeta")
-
-    def requires(self):
-        return SpringerTagged()
-
-    def run(self):
-        output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
