@@ -69,14 +69,14 @@ class SpringerDownload(SpringerTask):
     """
 
     def run(self):
-	output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
-			  username=self.config.get('springer', 'username'),
-			  password=self.config.get('springer', 'password'),
-			  url=self.config.get('springer', 'url'))
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
+                          username=self.config.get('springer', 'username'),
+                          password=self.config.get('springer', 'password'),
+                          url=self.config.get('springer', 'url'))
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class SpringerCleanFields(SpringerTask):
