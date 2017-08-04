@@ -109,7 +109,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     """
 
     def requires(self):
-        return SpringerCleanFields()
+        return SpringerDownload()
 
     def output(self):
         return self.input()
