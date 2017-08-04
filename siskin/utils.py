@@ -177,7 +177,7 @@ def get_task_import_cache():
     path = os.path.join(tempfile.gettempdir(),
                         'siskin_task_import_cache_%s' % __version__)
     if not os.path.exists(path):
-	logger.debug("creating task import cache at %s", path)
+        logger.debug("creating task import cache at %s", path)
         from siskin.cacheutils import _write_task_import_cache
         _write_task_import_cache(path)
 
