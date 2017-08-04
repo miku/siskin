@@ -31,6 +31,10 @@ Config
 [springer]
 
 intermediate-schema-file = /path/to/file # must be gzip compressed
+
+username = nana
+password = s3cret
+url = http://export.com/intermediate.file.gz
 """
 
 from __future__ import print_function
@@ -57,6 +61,22 @@ class SpringerProvided(SpringerTask, luigi.ExternalTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'), format=Gzip)
+
+
+class SpringerDownload(SpringerTask):
+    """
+    Attempt to download file from a configured URL.
+    """
+
+    def run(self):
+	output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
+			  username=self.config.get('springer', 'username'),
+			  password=self.config.get('springer', 'password'),
+			  url=self.config.get('springer', 'url'))
+	luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class SpringerCleanFields(SpringerTask):
