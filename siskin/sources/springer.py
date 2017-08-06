@@ -90,9 +90,10 @@ class SpringerCleanFields(SpringerTask):
     """
     Clean abstracts, refs #...
     """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SpringerDownload()
+        return SpringerDownload(date=self.date)
 
     def run(self):
         striptags = lambda s: re.sub(r'\$\$[^\$]*\$\$', '', re.sub(r'<[^>]*>', '', s))
@@ -117,7 +118,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SpringerCleanFields()
+        return SpringerCleanFields(date=self.date)
 
     def output(self):
         return self.input()
