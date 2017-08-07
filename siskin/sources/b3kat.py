@@ -28,10 +28,12 @@
 B3Kat, #8697.
 """
 
-import tempfile
 import datetime
+import tempfile
+
 import luigi
 from gluish.format import Gzip
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.task import DefaultTask
@@ -49,7 +51,8 @@ class B3KatDownload(B3KatTask):
     Download snapshot. Adjust the number of files with parameter 'last', which
     holds the id of the last part.
     """
-    last = luigi.IntParameter(default=30, description='number of parts')
+    date = ClosestDateParameter(default=datetime.date.today())
+    last = luigi.IntParameter(default=30, description='number of parts', significant=False)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
