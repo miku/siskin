@@ -32,6 +32,7 @@ import sys
 
 import luigi
 import xmltodict
+from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -93,9 +94,9 @@ class MarburgIntermediateSchema(MarburgTask):
     def run(self):
         output = shellout(""" cat {input} | \
                               jq '.Records.Record[]|.metadata.article' | \
-                              jq -f {filter} -cr > {output}""",
+                              jq -f {filter} -cr | gzip -c > {output}""",
                           input=self.input().path, filter=self.assets('73/filter.jq'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path(ext='ldj'))
+        return luigi.LocalTarget(self.path(ext='ldj.gz'), format=Gzip)
