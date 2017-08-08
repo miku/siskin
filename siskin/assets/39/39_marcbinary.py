@@ -33,9 +33,9 @@ def get_repeatable_field(field):
        value = regexp.group(1)
        value = value.replace("<%s>" % field, "")
        value = value.split("</%s>" %field)
-       return value
     else:
-       return ""
+        value = []
+    return value
 
 inputfile = open("39_input.xml", "r", encoding="utf-8")
 outputfile = open("39_output.mrc", "wb")
@@ -61,7 +61,7 @@ for i, line in enumerate(inputfile, start=1):
     f041a = get_field("<dc:language>(.*)</dc:language>")
 
     # Person
-    f100a =  get_repeatable_field("dc:creator")
+    persons =  get_repeatable_field("dc:creator")
 
     # Titel
     f245a = get_field("dc:title")
@@ -95,11 +95,11 @@ for i, line in enumerate(inputfile, start=1):
     f520a = get_field("<dc:description xml:lang=\"\w\w\w\">(.*?)</dc:description>")
 
     # Quelle
-    f773a = get_field("dcterms:bibliographicCitation.jtitle")
-    volume = get_field("dcterms:bibliographicCitation.volume")
-    issue = get_field("dcterms:bibliographicCitation.issue")
-    spage = get_field("dcterms:bibliographicCitation.spage")
-    epage = get_field("dcterms:bibliographicCitation.epage")
+    f773a = get_field("dcterms:bibliographicCitation\.jtitle")
+    volume = get_field("dcterms:bibliographicCitation\.volume")
+    issue = get_field("dcterms:bibliographicCitation\.issue")
+    spage = get_field("dcterms:bibliographicCitation\.spage")
+    epage = get_field("dcterms:bibliographicCitation\.epage")
     f773g = "%s(%s)%s, S. %s-%s" % (volume, f260c, issue, spage, epage)
     f773x = get_field("<dc:identifier scheme=\"ISSN\">issn:(.*)</dc:identifier>")
 
@@ -119,18 +119,28 @@ for i, line in enumerate(inputfile, start=1):
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
     marcrecord.add("022", a=f022a)
     marcrecord.add("041", a=f041a)
+
+    if len(persons) > 0:
+        f100a = persons[0]
+    else:
+        f100a = ""
+
     marcrecord.add("100", a=f100a)
-    marcrecord.add("245", a=f245a, b=f245b)
+    marcrecord.add("245", subfields=["a", f245a, "b", f245b])
     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
     marcrecord.add("300", a=f300a)
     marcrecord.add("500", a=f500a)
     marcrecord.add("520", a=f520a)
 
-    for author in f100a[1:]:
-        marcrecord.add("700", a=author)
+    if len(persons) > 1:
+        for f700a in persons[1:]:
+            marcrecord.add("700", a=f700a)
 
     marcrecord.add("773", a=f773a, g=f773g, x=f773x)
-    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=[f856u, doi])
+    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
+    if doi != "":
+        marcrecord.add("856", q="text/html", _3="DOI", u=doi)
 
     for subject in f950a:
         marcrecord.add("950", a=subject)
@@ -139,8 +149,8 @@ for i, line in enumerate(inputfile, start=1):
 
     outputfile.write(marcrecord.as_marc())
 
-    if i > 20000:
-        break
+    #if i > 40000:
+    #    break
 
 inputfile.close()
 outputfile.close()
