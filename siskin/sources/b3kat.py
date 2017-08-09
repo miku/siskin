@@ -44,7 +44,7 @@ class B3KatTask(DefaultTask):
     TAG = 'b3kat'
 
     def closest(self):
-        """ Adjust data creation date here. """
+        """ Find date on this site: https://www.bib-bvb.de/web/b3kat/open-data """
         return datetime.date(2017, 5, 1)
 
 
