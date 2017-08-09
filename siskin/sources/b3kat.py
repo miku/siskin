@@ -29,13 +29,14 @@ B3Kat, #8697.
 """
 
 import datetime
+import os
 import tempfile
 
 import luigi
+
 from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.task import DefaultTask
 
 
@@ -43,24 +44,34 @@ class B3KatTask(DefaultTask):
     TAG = 'b3kat'
 
     def closest(self):
+        """ Adjust data creation date here. """
         return datetime.date(2017, 5, 1)
 
 
 class B3KatDownload(B3KatTask):
     """
     Download snapshot. Adjust the number of files with parameter 'last', which
-    holds the id of the last part.
+    holds the id of the last part. Output is a single (large) MARC file.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    last = luigi.IntParameter(default=30, description='number of parts', significant=False)
+    last = luigi.IntParameter(default=30, description='number of parts (starts with 1)', significant=False)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for i in range(1, self.last + 1):
             link = 'https://www.bib-bvb.de/OpenData/b3kat_export_{year:04d}_{month:02d}_teil{part:02d}.xml.gz'.format(
                 year=self.closest().year, month=self.closest().month, part=i)
-            shellout("""curl -sL --fail "{link}" >> {stopover} """, link=link, stopover=stopover)
+            downloaded = shellout("""curl -sL --fail "{link}" > {output} """, link=link)
+            output = shellout("""yaz-marcdump -i marcxml -o marc <(unpigz -c "{input}") > {output}""", input=downloaded)
+            shellout("cat {input} >> {stopover}", input=output, stopover=stopover)
+
+            try:
+                os.remove(downloaded)
+                os.remove(output)
+            except OSError as err:
+                self.logger.error(err)
+
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
