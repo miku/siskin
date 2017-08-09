@@ -51,7 +51,9 @@ import json
 import os
 import tempfile
 import time
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 
 import luigi
 import requests
@@ -601,7 +603,7 @@ class CrossrefDOIHarvest(CrossrefTask):
         }
 
     def run(self):
-        output = shellout("hurrly -w 64 < {input} | pigz > {output}", input=self.input().get('input').path)
+        output = shellout("hurrly -w 4 < {input} | pigz > {output}", input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
