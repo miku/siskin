@@ -30,18 +30,38 @@ VKFilmBerlin, UdK Berlin, #8697.
 
 import datetime
 
+import luigi
+
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
+from siskin.sources.b3kat import B3KatDownload
 from siskin.task import DefaultTask
 
 
 class VKFilmBerlinTask(DefaultTask):
     TAG = '117'
 
+    def closest(self):
+        return monthly(date=self.date)
 
-class VKFilmBerlinDummy(VKFilmBerlinTask):
+
+class VKFilmBerlinMARC(VKFilmBerlinTask):
     """
-    B3Kat and things.
-
-    Via: https://www.bib-bvb.de/web/b3kat/open-data, around 8G zipped.
-
-    Updates via OAI, maybe. Filter, Flux.
+    Apply filters and transformations.
     """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return B3KatDownload(date=self.date)
+
+    def run(self):
+        output = shellout("flux.sh {flux} in={input} > {output}",
+                          flux=self.assets("117/flux_b3kat_filter.flux"), input=self.input().path)
+        output = shellout("flux.sh {flux} in={input} > {output}",
+                          flux=self.assets("117/117.flux"), input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))

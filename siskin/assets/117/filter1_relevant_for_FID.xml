@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metamorph xmlns="http://www.culturegraph.org/metamorph" version="1">
+  <rules>
+    <combine name="match" value="record" sameEntity="true">
+      <choose>
+        <data name="rvkentry" source="084  .a">
+          <whitelist>
+            <entry name="AN 1780"/>
+            <entry name="AN 3900"/>
+            <entry name="AN 3920"/>
+            <entry name="AN 4030"/>
+            <entry name="CV 3500"/>
+            <entry name="DW 4000"/>
+            <entry name="DW 4200"/>
+            <entry name="MF 1000"/>
+            <entry name="MF 1500"/>
+            <entry name="NQ 2270"/>
+          </whitelist>
+        </data>
+        <data name="rvkentry" source="084  .a">
+          <regexp match="^MS.7[89][56789].*$"/>
+        </data>
+        <data name="rvkentry" source="084  .a">
+          <regexp match="^AP.*$"/>
+          <blacklist>
+            <entry name="AP 6000"/>
+            <entry name="AP 6300"/>
+            <entry name="AP 6400"/>
+            <entry name="AP 6500"/>
+            <entry name="AP 6582"/>
+            <entry name="AP 6583"/>
+            <entry name="AP 6586"/>
+            <entry name="AP 6600"/>
+            <entry name="AP 6630"/>
+            <entry name="AP 6800"/>
+            <entry name="AP 6930"/>
+            <entry name="AP 7200"/>
+            <entry name="AP 7250"/>
+            <entry name="AP 7320"/>
+            <entry name="AP 7337"/>
+            <entry name="AP 7900"/>
+            <entry name="AP 8300"/>
+            <entry name="AP 8735"/>
+            <entry name="AP 8786"/>
+            <entry name="AP 9950"/>
+            <entry name="AP 9954"/>
+          </blacklist>
+        </data>
+      </choose>
+      <data name="rvk" source="084  .2">
+        <equals string="rvk"/>
+      </data>
+    </combine>
+  </rules>
+</metamorph>

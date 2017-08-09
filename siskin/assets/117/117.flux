@@ -1,13 +1,11 @@
-default inputfile = FLUX_DIR + "DE-B170.mrc";
-default outputfile = FLUX_DIR + "117_output.xml";
-default morphfile = FLUX_DIR + 117_morph.xml;
+default out = "stdout";
 
-dump|
+in|
 open-file|
 decode-xml|
 handle-marcxml|
 filter(FLUX_DIR + "filter1_relevant_for_FID.xml")|
 filter(FLUX_DIR + "filter2_relevant_for_FID.xml")|
-morph(morphfile)|
+morph(FLUX_DIR + "117_morph.xml")|
 stream-to-marc21xml|
 write(out);
