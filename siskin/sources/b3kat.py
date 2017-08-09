@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
+# pylint: disable=W0232,E1101,R0904,E1103,C0301
 
 # Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -34,13 +34,13 @@ import tempfile
 
 import luigi
 
-from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
 class B3KatTask(DefaultTask):
+    """ Base task for B3Kat. """
     TAG = 'b3kat'
 
     def closest(self):
