@@ -44,18 +44,23 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         ptitle = False
         year = False
         language = False
-        subject = False # Piece Style ; Instrumentation ; timeperiod
-        person = False
+        subject1 = False # Piece Style
+        subject2 = False # Instrumentation
+        subject3 = False # timeperiod
+        composer = False
+        librettist = False
         url = False
 
         f001 = ""
         f041a = ""
+        f100a = ""
         f245a = ""
         f245b = ""
         f260c = ""
         f590a = ""
         f590b = ""
         f689a = ""
+        f700a = ""
         f856u = ""
         f950a = []
 
@@ -91,17 +96,17 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             ##############################################
 
-            if person == True:
+            if composer == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     f100a = regexp.group(1)
 
             regexp = re.search("name=\"composer\"", line)
             if regexp:
-                person = True
+                composer = True
                 continue
             else:
-                person = False
+                composer = False
 
             ##############################################
 
@@ -111,7 +116,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
                     f245a = regexp.group(1)
                     f245a = html.unescape(f245a)
 
-            regexp = re.search("name=\"Work Title\"", line)
+            regexp = re.search("name=\"worktitle\"", line)
             if regexp:
                 title = True
                 continue
@@ -151,7 +156,21 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             ##############################################
 
-            if subject == True:
+            if librettist == True:
+                regexp = re.search("<string>\[\[:Category:(.*?)\|.*<\/string>", line)
+                if regexp:
+                    f700a = regexp.group(1)
+
+            regexp = re.search("name=\"Librettist\"", line)
+            if regexp:
+                librettist = True
+                continue
+            else:
+                librettist = False
+
+            ##############################################
+
+            if subject1 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     s = regexp.group(1)
@@ -161,14 +180,14 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             regexp = re.search("name=\"Piece Style\"", line)
             if regexp:
-                subject = True
+                subject1 = True
                 continue
             else:
-                subject = False
+                subject1 = False
 
             ##############################################
 
-            if subject == True:
+            if subject2 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     s = regexp.group(1)
@@ -178,24 +197,24 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             regexp = re.search("name=\"Instrumentation\"", line)
             if regexp:
-                subject = True
+                subject2 = True
                 continue
             else:
-                subject = False
+                subject2 = False
 
             ##############################################
 
-            if subject == True:
+            if subject3 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     f950a.append(regexp.group(1))
 
             regexp = re.search("name=\"timeperiod\"", line)
             if regexp:
-                subject = True
+                subject3 = True
                 continue
             else:
-                subject = False
+                subject3 = False
 
             ##############################################
 
@@ -219,11 +238,18 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
         marcrecord.add("041", a=f041a)
         marcrecord.add("100", a=f100a)
-        f245 = ["a", f245a, "b", f245b]
-        marcrecord.add("245", subfields=f245)
+        marcrecord.add("245", subfields=["a", f245a, "b", f245b])
         marcrecord.add("260", b=f260c)
-        marcrecord.add("590", a=f590a, b=f590b)
-        marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+        marcrecord.add("590", subfields=["a", f590a, "b", f590b])
+        marcrecord.add("700", a=f700a)
+
+        subtest = []
+        for subject in f950a:
+            if subject not in subtest:
+               subtest.append(subject)
+               marcrecord.add("689", a=subject)
+
+        marcrecord.add("856", q="text/html", _3="Petrucci-Musikbibliothek", u=f856u)
 
         #subtest = []
         #for subject in f950a:
@@ -231,20 +257,17 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         #        subtest.append(subject)
         #        marcrecord.add("950", a=subject)
 
-        subtest = []
-        for subject in f950a:
-            if subject not in subtest:
-                subtest.append(subject)
-                marcrecord.add("689", a=subject)
+        marcrecord.add("950", y=f260c)
 
-        marcrecord.add("980", a=f001, b="15", c="Petrucci Musikbibliothek")
+        marcrecord.add("970", c="PN")
+
+        marcrecord.add("980", a=f001, b="15", c="Petrucci-Musikbibliothek")
 
         outputfile.write(marcrecord.as_marc())
 
-
         inputfile.close()
 
-    print(i)
+    #print(i)
     #if i == 10000:
     #    break
 
