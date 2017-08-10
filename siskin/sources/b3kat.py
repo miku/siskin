@@ -34,9 +34,10 @@ import tempfile
 
 import luigi
 
+from gluish.format import TSV
+from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from gluish.intervals import semiyearly
 from siskin.task import DefaultTask
 
 
@@ -63,7 +64,7 @@ class B3KatLinks(B3KatTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class B3KatDownload(B3KatTask):
@@ -72,22 +73,23 @@ class B3KatDownload(B3KatTask):
     holds the id of the last part. Output is a single (large) MARC file.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    last = luigi.IntParameter(default=30, description='number of parts (starts with 1)', significant=False)
+
+    def requires(self):
+        return B3KatLinks(date=self.date)
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for i in range(1, self.last + 1):
-            link = 'https://www.bib-bvb.de/OpenData/b3kat_export_{year:04d}_{month:02d}_teil{part:02d}.xml.gz'.format(
-                year=self.closest().year, month=self.closest().month, part=i)
-            downloaded = shellout("""curl -sL --fail "{link}" > {output} """, link=link)
-            output = shellout("""yaz-marcdump -i marcxml -o marc <(unpigz -c "{input}") > {output}""", input=downloaded)
-            shellout("cat {input} >> {stopover}", input=output, stopover=stopover)
+        with self.input().open() as handle:
+            for i, row in enumerate(handle.iter_tsv(cols=('url',)), start=1):
+                downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
+                output = shellout("""yaz-marcdump -i marcxml -o marc <(unpigz -c "{input}") > {output}""", input=downloaded)
+                shellout("cat {input} >> {stopover}", input=output, stopover=stopover)
 
-            try:
-                os.remove(downloaded)
-                os.remove(output)
-            except OSError as err:
-                self.logger.error(err)
+                try:
+                    os.remove(downloaded)
+                    os.remove(output)
+                except OSError as err:
+                    self.logger.error(err)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
