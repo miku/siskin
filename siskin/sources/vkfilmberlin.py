@@ -59,10 +59,10 @@ class VKFilmBerlinFiltered(VKFilmBerlinTask):
     def run(self):
         output = shellout("flux.sh {flux} in={input} > {output}",
                           flux=self.assets("117/flux_b3kat_filter.flux"), input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class VKFilmBerlinMARC(VKFilmBerlinTask):
@@ -73,11 +73,11 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	return VKFilmBerlinFiltered(date=self.date)
+        return VKFilmBerlinFiltered(date=self.date)
 
     def run(self):
         output = shellout("flux.sh {flux} in={input} > {output}",
-                          flux=self.assets("117/117.flux"), input=output)
+                          flux=self.assets("117/117.flux"), input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
