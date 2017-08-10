@@ -77,7 +77,7 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
 
     def run(self):
         """ https://stackoverflow.com/a/7774512 """
-        output = shellout("""
+        output = shellout(r"""
             perl -CSDA -pe's/[^\x9\xA\xD\x20-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+//g;' {input} > {output}
         """, input=self.input().path)
         output = shellout("flux.sh {flux} in={input} > {output}",
