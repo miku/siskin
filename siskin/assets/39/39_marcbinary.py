@@ -44,6 +44,10 @@ for i, line in enumerate(inputfile, start=1):
 
     line = line.replace("\n", "")
 
+    # Zugangsrechte
+    if "<dcterms:accessRights>restricted</dcterms:accessRights>" in line:
+        continue
+
     # Identfier
     f001 = get_field("identifier")
     if f001 == "":
