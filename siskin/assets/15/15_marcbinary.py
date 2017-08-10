@@ -47,6 +47,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         subject1 = False # Piece Style
         subject2 = False # Instrumentation
         subject3 = False # timeperiod
+        footnote = False
         composer = False
         librettist = False
         url = False
@@ -55,14 +56,15 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         f041a = ""
         f100a = ""
         f245a = ""
-        f245b = ""
+        f246a = ""
         f260c = ""
+        f500a = ""
         f590a = ""
         f590b = ""
+        f650a = []
         f689a = ""
         f700a = ""
         f856u = ""
-        f950a = []
 
         for line in inputfile:
 
@@ -128,8 +130,8 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             if ptitle == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
-                    f245b = regexp.group(1)
-                    f245b = html.unescape(f245b)
+                    f246a = regexp.group(1)
+                    f246a = html.unescape(f246a)
 
             regexp = re.search("name=\"Alternative Title\"", line)
             if regexp:
@@ -170,12 +172,32 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             ##############################################
 
+            if footnote == True:
+
+                regexp = re.search("<string>\[\[:Category:.*?\|(.*?)\]\]\sand\s\[\[:Category:.*?\|(.*?)\]\]<\/string>", line)
+                if regexp:
+                    person1, person2 = regexp.groups()
+                    f500a = person1 + " and " + person2
+                else:
+                    regexp = re.search("<string>\[\[:Category:.*?\|(.*?)\]\]<\/string>", line)
+                    if regexp:
+                        f500a = regexp.group(1)
+
+            regexp = re.search("name=\"Dedication\"", line)
+            if regexp:
+                footnote = True
+                continue
+            else:
+                footnote = False
+
+            ##############################################
+
             if subject1 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     s = regexp.group(1)
                     s = s.title()
-                    f950a.append(s)
+                    f650a.append(s)
                     f590a = s
 
             regexp = re.search("name=\"Piece Style\"", line)
@@ -192,7 +214,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
                 if regexp:
                     s = regexp.group(1)
                     s = s.title()
-                    f950a.append(s)
+                    f650a.append(s)
                     f590b = s
 
             regexp = re.search("name=\"Instrumentation\"", line)
@@ -207,7 +229,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             if subject3 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
-                    f950a.append(regexp.group(1))
+                    f650a.append(regexp.group(1))
 
             regexp = re.search("name=\"timeperiod\"", line)
             if regexp:
@@ -238,26 +260,21 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
         marcrecord.add("041", a=f041a)
         marcrecord.add("100", a=f100a)
-        marcrecord.add("245", subfields=["a", f245a, "b", f245b])
-        marcrecord.add("260", b=f260c)
+        marcrecord.add("245", a=f245a)
+        marcrecord.add("246", a=f246a)
+        marcrecord.add("260", c=f260c)
+        marcrecord.add("500", a=f500a)
         marcrecord.add("590", subfields=["a", f590a, "b", f590b])
+        marcrecord.add("650", y=f260c)
         marcrecord.add("700", a=f700a)
 
         subtest = []
-        for subject in f950a:
+        for subject in f650a:
             if subject not in subtest:
                subtest.append(subject)
                marcrecord.add("689", a=subject)
 
         marcrecord.add("856", q="text/html", _3="Petrucci-Musikbibliothek", u=f856u)
-
-        #subtest = []
-        #for subject in f950a:
-        #    if subject not in subtest:
-        #        subtest.append(subject)
-        #        marcrecord.add("950", a=subject)
-
-        marcrecord.add("950", y=f260c)
 
         marcrecord.add("970", c="PN")
 
