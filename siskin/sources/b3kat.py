@@ -36,6 +36,7 @@ import luigi
 
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from gluish.intervals import semiyearly
 from siskin.task import DefaultTask
 
 
@@ -45,7 +46,24 @@ class B3KatTask(DefaultTask):
 
     def closest(self):
         """ Find date on this site: https://www.bib-bvb.de/web/b3kat/open-data """
-        return datetime.date(2017, 5, 1)
+        return semiyearly(date=self.date)
+
+
+class B3KatLinks(B3KatTask):
+    """
+    A list of latest links. Currently grepped from https://www.bib-bvb.de/web/b3kat/open-data.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""
+            curl -s "https://www.bib-bvb.de/web/b3kat/open-data" |
+            grep -Eo "/OpenData/b3kat_export_[0-9]{{4,4}}_[0-9]{{1,2}}_teil[0-9]{{1,2}}.xml.gz" |
+            awk '{{print "https://www.bib-bvb.de"$0 }}' > {output} """)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
 
 
 class B3KatDownload(B3KatTask):
