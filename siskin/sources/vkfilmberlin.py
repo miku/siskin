@@ -76,8 +76,12 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
         return VKFilmBerlinFiltered(date=self.date)
 
     def run(self):
+        """ https://stackoverflow.com/a/7774512 """
+        output = shellout("""
+            perl -CSDA -pe's/[^\x9\xA\xD\x20-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+//g;' {input} > {output}
+        """, input=self.input().path)
         output = shellout("flux.sh {flux} in={input} > {output}",
-                          flux=self.assets("117/117.flux"), input=self.input().path)
+                          flux=self.assets("117/117.flux"), input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
