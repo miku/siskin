@@ -84,8 +84,8 @@ class VKFilmFFPaths(VKFilmFFTask):
 
 class VKFilmFFFincMarc(VKFilmFFTask):
     """
-    Uncompress, clean MARC XML, remove "Nichtsortierzeichen" on the fly, refs
-    #8571. Convert via Flux.
+    Find MARC XML, uncompress, clean, remove "Nichtsortierzeichen" on the fly,
+    convert via flux (refs #8571).
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
