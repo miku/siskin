@@ -100,6 +100,7 @@ class VKFilmFFFincMarc(VKFilmFFTask):
                 if not row.path.endswith(filename):
                     continue
                 output = shellout("unpigz -c {file} | sed $'s/\u0098//g;s/\u009C//g' > {output}", file=row.path)
+                output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
                 output = shellout("flux.sh {flux} inputfile={input} outputfile=stdout > {output}",
                                   flux=self.assets("119/119.flux"), input=output)
                 luigi.LocalTarget(output).move(self.output().path)
