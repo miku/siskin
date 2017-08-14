@@ -22,7 +22,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-nrw music tasks
+NRW music tasks. Deprecated, refs #9014.
 
 Config
 ------
