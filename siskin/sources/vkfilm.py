@@ -25,7 +25,7 @@
 #
 
 """
-VKFilm, #8575, about 120000 records.
+VKFilm (Postdam), #8575, about 120000 records.
 
 Config
 ------
