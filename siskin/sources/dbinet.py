@@ -48,9 +48,11 @@ from gluish.format import TSV
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
+
 class DBInetTask(DefaultTask):
     """ Base task. """
     TAG = "80"
+
 
 class DBInetFiles(DBInetTask):
     """
@@ -65,6 +67,7 @@ class DBInetFiles(DBInetTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
 
 class DBInetJSON(DBInetTask):
     """
@@ -87,6 +90,7 @@ class DBInetJSON(DBInetTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 
 class DBInetIntermediateSchema(DBInetTask):
     """ Convert via jq. Filter out dead links (takes a while). """
@@ -116,7 +120,7 @@ class DBInetIntermediateSchema(DBInetTask):
                                 self.logger.debug("[%s] %s", resp.status_code, url)
                                 continue
                             okurls.append(url)
-                        except requests.exceptions.ConnectionError as err:
+                        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
                             self.logger.debug(err)
                             continue
                         else:
