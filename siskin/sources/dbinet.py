@@ -120,7 +120,9 @@ class DBInetIntermediateSchema(DBInetTask):
                                 self.logger.debug("[%s] %s", resp.status_code, url)
                                 continue
                             okurls.append(url)
-                        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
+                        except (requests.exceptions.ConnectionError,
+                                requests.exceptions.ReadTimeout,
+                                requests.exceptions.TooManyRedirects) as err:
                             self.logger.debug(err)
                             continue
                         else:
