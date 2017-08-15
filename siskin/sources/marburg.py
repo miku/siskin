@@ -32,11 +32,12 @@ import sys
 
 import luigi
 import xmltodict
+
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
+from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
@@ -100,3 +101,26 @@ class MarburgIntermediateSchema(MarburgTask):
 
     def output(self):
         return luigi.LocalTarget(self.path(ext='ldj.gz'), format=Gzip)
+
+
+class MarburgExport(MarburgTask):
+    """
+    Attach and export.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='solr5vu3')
+
+    def requires(self):
+        return {
+            'data': MarburgIntermediateSchema(date=self.date),
+            'config': AMSLFilterConfig(date=self.date),
+        }
+
+    def run(self):
+        output = shellout("span-tag -c {config} <(gunzip -c {input}) | span-export -o {format} > {output}",
+                          config=self.input().get("config").path, input=self.input().get("data").path,
+                          format=self.format)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(self.path(ext='ldj'))
