@@ -101,6 +101,7 @@ class DBInetIntermediateSchema(DBInetTask):
         return DBInetJSON()
 
     def run(self):
+        """ When URLs are checked, only write records with at least one reachable URL. """
         output = shellout("jq -rc -f {filter} {input} > {output}",
                           filter=self.assets('80/filter.jq'), input=self.input().path)
 
@@ -116,8 +117,8 @@ class DBInetIntermediateSchema(DBInetTask):
                     for url in doc.get("url"):
                         try:
                             resp = requests.get(url, timeout=20)
+                            self.logger.debug("[%s] %s", resp.status_code, url)
                             if resp.status_code >= 400:
-                                self.logger.debug("[%s] %s", resp.status_code, url)
                                 continue
                             okurls.append(url)
                         except (requests.exceptions.ConnectionError,
@@ -125,8 +126,10 @@ class DBInetIntermediateSchema(DBInetTask):
                                 requests.exceptions.TooManyRedirects) as err:
                             self.logger.debug(err)
                             continue
-                        else:
-                            self.logger.debug("[%s] %s", resp.status_code, url)
+
+                    if len(okurls) == 0:
+                        continue
+
                     doc["urls"] = okurls
                     output.write(json.dumps(doc))
                     output.write("\n")
