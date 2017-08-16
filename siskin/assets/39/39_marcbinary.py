@@ -144,17 +144,17 @@ for i, line in enumerate(inputfile, start=1):
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
     if doi != "":
-        marcrecord.add("856", q="text/html", _3="DOI", u=doi)
+        marcrecord.add("856", q="text/html", _3="DOI", u="http://doi.org/" + doi)
 
     for subject in f950a:
         marcrecord.add("950", a=subject)
 
-    marcrecord.add("980", a=f001, b="39")
+    marcrecord.add("980", a=f001, b="39", c="Persee.fr")
 
     outputfile.write(marcrecord.as_marc())
 
-    #if i > 40000:
-    #    break
+    if i > 40000:
+        break
 
 inputfile.close()
 outputfile.close()
