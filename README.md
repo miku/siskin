@@ -5,6 +5,8 @@ Various tasks for heterogeneous metadata handling.
 
 [![pypi version](http://img.shields.io/pypi/v/siskin.svg?style=flat)](https://pypi.python.org/pypi/siskin)
 
+* Overview in a [few markdown slides](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
+
 Install
 -------
 
