@@ -117,28 +117,19 @@ parser.add_argument("--tag",
                     metavar="name")
 
 args = parser.parse_args()
+parser = xml.sax.make_parser()
 
 if args.task == "list_fields":
-
-    parser = xml.sax.make_parser()
     handler = FieldExampleHandler()
     parser.setContentHandler(handler)
-    parser.parse(open(args.inputfile, "r"))
-
     for key, value in handler.examples.items():
         print(key + " = " + value)
 
 elif args.task == "print_json":
-
-    parser = xml.sax.make_parser()
     handler = StreamingJsonHandler()
     parser.setContentHandler(handler)
-    parser.parse(open(args.inputfile, "r"))
 
 elif args.task == "count_records":
-
-    parser = xml.sax.make_parser()
     handler = CountingHandler(tag=args.tag)
     parser.setContentHandler(handler)
-    parser.parse(open(args.inputfile, "r"))
     print(handler.count)
