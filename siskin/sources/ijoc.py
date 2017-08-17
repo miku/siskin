@@ -30,9 +30,10 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.sources.amsl import AMSLFilterConfig
 
 """
-Example workflow with OAI harvest and metafacture.
+IJOC, refs #7138.
 """
 
 
@@ -93,14 +94,14 @@ class IJOCFincSolr(IJOCTask):
 
     def requires(self):
         return {
+            'config': AMSLFilterConfig(date=self.date),
             'file': IJOCIntermediateSchema(date=self.date)
         }
 
     def run(self):
-        output = shellout("""span-export -o {format} -with-fullrecord <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
-                          format=self.format, isil=self.isil, input=self.input().get('file').path)
-        output = shellout(
-            """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+        output = shellout("""span-tag -c {config} {input} | span-export -o {format} -with-fullrecord > {output}""",
+                          config=self.input().get('config').path, input=self.input().get('file').path,
+                          format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
