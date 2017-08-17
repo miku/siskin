@@ -45,8 +45,8 @@ input, output = "39_input.xml", "39_output.mrc"
 if len(sys.argv) == 3:
     input, output = sys.argv[1], sys.argv[2]
 
-inputfile = open(input, "r", encoding="utf-8")
-outputfile = open(output, "wb")
+inputfile = io.open(input, "r", encoding="utf-8")
+outputfile = io.open(output, "wb")
 
 for i, line in enumerate(inputfile, start=1):
 
