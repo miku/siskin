@@ -54,9 +54,9 @@ class PerseeCombined(PerseeTask):
     def run(self):
         output = shellout("""
             metha-sync http://oai.persee.fr/c/ext/prescript/oai &&
-            metha-cat http://oai.persee.fr/c/ext/prescript/oai > {output}
+            metha-cat http://oai.persee.fr/c/ext/prescript/oai | pigz -c > {output}
         """)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
