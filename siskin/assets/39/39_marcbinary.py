@@ -40,8 +40,13 @@ def get_repeatable_field(field):
         value = []
     return value
 
-inputfile = open("39_input.xml", "r", encoding="utf-8")
-outputfile = open("39_output.mrc", "wb")
+input, output = "39_input.xml", "39_output.mrc"
+
+if len(sys.argv) == 3:
+    input, output = sys.argv[1], sys.argv[2]
+
+inputfile = open(input, "r", encoding="utf-8")
+outputfile = open(output, "wb")
 
 for i, line in enumerate(inputfile, start=1):
 
