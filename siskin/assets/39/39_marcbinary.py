@@ -1,11 +1,13 @@
 #!/usr/bin/dev python3
 # coding: utf-8
 
+import base64
 import io
 import re
 import sys
+
 import marcx
-import base64
+
 
 def get_field(field):
 
@@ -16,10 +18,11 @@ def get_field(field):
 
     regexp = re.search(pattern, line)
     if regexp:
-       value = regexp.group(1)
-       return value
+        value = regexp.group(1)
+        return value
     else:
-       return ""
+        return ""
+
 
 def get_repeatable_field(field):
 
@@ -30,9 +33,9 @@ def get_repeatable_field(field):
 
     regexp = re.search(pattern, line)
     if regexp:
-       value = regexp.group(1)
-       value = value.replace("<%s>" % field, "")
-       value = value.split("</%s>" %field)
+        value = regexp.group(1)
+        value = value.replace("<%s>" % field, "")
+        value = value.split("</%s>" % field)
     else:
         value = []
     return value
@@ -65,7 +68,7 @@ for i, line in enumerate(inputfile, start=1):
     f041a = get_field("<dc:language>(.*)</dc:language>")
 
     # Person
-    persons =  get_repeatable_field("dc:creator")
+    persons = get_repeatable_field("dc:creator")
 
     # Titel
     f245a = get_field("dc:title")
@@ -117,7 +120,7 @@ for i, line in enumerate(inputfile, start=1):
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
-    marcrecord.leader =  "       b  22        450 "
+    marcrecord.leader = "       b  22        450 "
     marcrecord.add("001", data="finc-39-%s" % f001)
     marcrecord.add("007", data="tu")
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
@@ -153,7 +156,7 @@ for i, line in enumerate(inputfile, start=1):
 
     outputfile.write(marcrecord.as_marc())
 
-    #if i > 30000:
+    # if i > 40000:
     #    break
 
 inputfile.close()
