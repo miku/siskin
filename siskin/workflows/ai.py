@@ -288,6 +288,7 @@ class AIIntermediateSchema(AITask):
             PQDTIntermediateSchema(date=self.date, stamp=True),
             KielFMFIntermediateSchema(stamp=True),
             IJOCIntermediateSchema(stamp=True),
+            CeeolJournalsDumpIntermediateSchema(stamp=True),
         ]
 
     @timed
