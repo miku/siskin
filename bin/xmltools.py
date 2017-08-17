@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
+# pylint: disable=C0103
 
 # Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -26,8 +27,8 @@
 
 
 # Contains a collection of utilities for parsing and analysing xml files
-# Current functions: list_fields
-# To do: sort tags, count_records, count_doublet, print_json
+# Current functions: list_fields, count_records
+# To do: sort tags, count_doublet, print_json
 
 
 import collections
