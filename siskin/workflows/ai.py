@@ -288,6 +288,7 @@ class AIIntermediateSchema(AITask):
             SpringerIntermediateSchema(stamp=True),
             PQDTIntermediateSchema(date=self.date, stamp=True),
             KielFMFIntermediateSchema(stamp=True),
+            IJOCIntermediateSchema(stamp=True),
         ]
 
     @timed
