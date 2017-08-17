@@ -60,3 +60,22 @@ class PerseeCombined(PerseeTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
+
+class PerseeMARC(PerseeTask):
+    """
+    Custom convert to MARC.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return PerseeCombined(date=self.date)
+
+    def run(self):
+        output = shellout("""python {script} <(unpigz -c {input}) {output}""",
+                          script=self.assets('39/39_marcbinary.py'),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
