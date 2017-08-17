@@ -25,7 +25,6 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 
-
 # Contains a collection of utilities for parsing and analysing xml files
 # Current functions: fieldlist, print as json, validate xml
 # To do: sort tags, count records, count doublet
@@ -111,8 +110,8 @@ elif args.task == "print_json":
 elif args.task == "count_records":
 
     file = open(args.inputfile, "r", encoding="utf-8")
-    for i, line in enumerate(file, start = 0):
-        if i == 5: # diverse Kopfzeilen und Dokumententypdefinitionen werden übersprungen
+    for i, line in enumerate(file, start=0):
+        if i == 5:  # diverse Kopfzeilen und Dokumententypdefinitionen werden übersprungen
             regexp = re.match("<(.*?)>.*</(.*)>", line)
             if regexp:
                 starttag, endtag = regexp.groups()
@@ -120,20 +119,7 @@ elif args.task == "count_records":
                     command = 'grep -c "</%s>" %s' % (endtag, args.inputfile)
                     os.system(command)
             else:
-                forelast = ""
-                last = ""
-                for i, line in enumerate(file, start = 0):
-                    if last != line:
-                        last = line
-                    else:
-                        forelast = line
-
-                endtag =
-                command = 'grep -c "</%s>" %s' % (endtag, args.inputfile)
-                os.system(command)
+                pass
 
 elif args.task == "validate_xml":
     os.system("xmllint --format %s" % args.inputfile)
-
-
-
