@@ -122,14 +122,20 @@ parser = xml.sax.make_parser()
 if args.task == "list_fields":
     handler = FieldExampleHandler()
     parser.setContentHandler(handler)
+    with open(args.inputfile, "r") as handle:
+        parser.parse(handle)
     for key, value in handler.examples.items():
         print(key + " = " + value)
 
 elif args.task == "print_json":
     handler = StreamingJsonHandler()
     parser.setContentHandler(handler)
+    with open(args.inputfile, "r") as handle:
+        parser.parse(handle)
 
 elif args.task == "count_records":
     handler = CountingHandler(tag=args.tag)
     parser.setContentHandler(handler)
+    with open(args.inputfile, "r") as handle:
+        parser.parse(handle)
     print(handler.count)
