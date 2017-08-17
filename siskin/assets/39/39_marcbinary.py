@@ -123,7 +123,7 @@ for i, line in enumerate(inputfile, start=1):
     f950a = get_field("<dc:subject xml:lang=\"\w\w\w\">(.*?)</dc:subject>")
     f950a = f950a.split(" ; ")
 
-    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord = marcx.Record(force_utf8=True, to_unicode=True)
     marcrecord.strict = False
     marcrecord.leader = "       b  22        450 "
     marcrecord.add("001", data="finc-39-%s" % f001)
