@@ -75,12 +75,12 @@ class IJOCIntermediateSchema(IJOCTask):
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
+        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
                           flux=self.assets("87/87.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 
 class IJOCFincSolr(IJOCTask):
@@ -99,7 +99,7 @@ class IJOCFincSolr(IJOCTask):
         }
 
     def run(self):
-        output = shellout("""span-tag -c {config} {input} | span-export -o {format} -with-fullrecord > {output}""",
+        output = shellout("""span-tag -c {config} <(unpigz -c {input}) | span-export -o {format} -with-fullrecord > {output}""",
                           config=self.input().get('config').path, input=self.input().get('file').path,
                           format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
