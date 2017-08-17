@@ -42,7 +42,7 @@ class PerseeTask(DefaultTask):
     TAG = '39'
 
     def closest(self):
-	return monthly(self.date)
+        return monthly(self.date)
 
 
 class PerseeCombined(PerseeTask):
@@ -52,11 +52,11 @@ class PerseeCombined(PerseeTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-	output = shellout("""
-	    metha-sync http://oai.persee.fr/c/ext/prescript/oai &&
-	    metha-cat http://oai.persee.fr/c/ext/prescript/oai > {output}
-	""")
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout("""
+            metha-sync http://oai.persee.fr/c/ext/prescript/oai &&
+            metha-cat http://oai.persee.fr/c/ext/prescript/oai > {output}
+        """)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path())
+        return luigi.LocalTarget(path=self.path())
