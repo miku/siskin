@@ -275,7 +275,6 @@ class AIIntermediateSchema(AITask):
 
     def requires(self):
         return [
-            Executable(name='pigz', message='http://zlib.net/pigz/'),
             ArxivIntermediateSchema(date=self.date, stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
@@ -294,9 +293,8 @@ class AIIntermediateSchema(AITask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input()[1:]:
-            shellout("cat {input} >> {output}",
-                     input=target.path, output=stopover)
+        for target in self.input():
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
