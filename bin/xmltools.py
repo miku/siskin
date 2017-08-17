@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# pylint: disable=C0103
 
 # Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -25,9 +24,10 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 
+
 # Contains a collection of utilities for parsing and analysing xml files
-# Current functions: fieldlist, print as json, validate xml
-# To do: sort tags, count records, count doublet
+# Current functions: list_fields
+# To do: sort tags, count_records, count_doublet, print_json
 
 
 import collections
@@ -50,7 +50,7 @@ parser.add_argument("-f",
                     metavar="filename")
 parser.add_argument("-t",
                     dest="task",
-                    help="task to do (list_fields, count_records)",
+                    help="task to do (list_fields, count_records, print_json)",
                     metavar="task")
 args = parser.parse_args()
 
@@ -110,16 +110,16 @@ elif args.task == "print_json":
 elif args.task == "count_records":
 
     file = open(args.inputfile, "r", encoding="utf-8")
-    for i, line in enumerate(file, start=0):
-        if i == 5:  # diverse Kopfzeilen und Dokumententypdefinitionen werden übersprungen
-            regexp = re.match("<(.*?)>.*</(.*)>", line)
-            if regexp:
-                starttag, endtag = regexp.groups()
-                if starttag == endtag:
-                    command = 'grep -c "</%s>" %s' % (endtag, args.inputfile)
-                    os.system(command)
-            else:
-                pass
+    last_line = ""
+    for line in file:
+        forelast_line = last_line
+        last_line = line
 
-elif args.task == "validate_xml":
-    os.system("xmllint --format %s" % args.inputfile)
+    regexp = re.match(".*</(.*)>", forelast_line)
+    if regexp:
+        forelast_tag = regexp.group(1)
+    else:
+        forelast_tag = forelast_line
+
+    command = 'grep -c "</%s>" %s' % (forelast_tag, args.inputfile)
+    os.system(command)
