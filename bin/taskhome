@@ -24,7 +24,7 @@
 
 from __future__ import print_function
 
-import ConfigParser
+import configparser
 import sys
 
 from siskin.configuration import Config
@@ -33,6 +33,6 @@ if __name__ == '__main__':
     try:
         config = Config.instance()
         print(config.get('core', 'home'))
-    except ConfigParser.Error as err:
+    except configparser.Error as err:
         print('invalid configuration @%s: %s' % (config._config_paths, err), file=sys.stderr)
         sys.exit(1)

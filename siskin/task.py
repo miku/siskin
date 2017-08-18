@@ -48,7 +48,7 @@ config = Config.instance()
 
 class DefaultTask(BaseTask):
     """ A base task that sets its base directory based on config value. """
-    BASE = config.get('core', 'home', os.path.join(tempfile.gettempdir(), 'siskin-data'))
+    BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
     stamp = luigi.BoolParameter(default=False, description="send an updated stamp to AMSL", significant=False)
 

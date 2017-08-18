@@ -88,7 +88,7 @@ class DegruyterPaths(DegruyterTask):
         password = self.config.get('degruyter', 'ftp-password')
         base = self.config.get('degruyter', 'ftp-path')
         pattern = self.config.get('degruyter', 'ftp-pattern')
-        exclude_glob = self.config.get('degruyter', 'ftp-exclude-glob', '')
+        exclude_glob = self.config.get('degruyter', 'ftp-exclude-glob', fallback='')
         return FTPMirror(host=host, username=username, password=password,
                          base=base, pattern=pattern, exclude_glob=exclude_glob)
 

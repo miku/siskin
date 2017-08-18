@@ -31,7 +31,7 @@ import datetime
 import logging
 import os
 import sys
-from ConfigParser import ConfigParser, NoOptionError, NoSectionError
+from configparser import ConfigParser, NoOptionError, NoSectionError
 
 logger = logging.getLogger('siskin')
 
@@ -66,36 +66,3 @@ class Config(ConfigParser):
     def reload(self):
         """ Reload configuration. """
         return self._instance.read(self._config_paths)
-
-    def _get_with_default(self, method, section, option, default, expected_type=None):
-        """ Gets the value of the section/option using method. Returns default if value
-        is not found. Raises an exception if the default value is not None and doesn't match
-        the expected_type.
-        """
-        try:
-            return method(self, section, option)
-        except (NoOptionError, NoSectionError) as err:
-            if default is Config.NO_DEFAULT:
-                logger.error('invalid or missing configuration: %s', err)
-                raise
-            if expected_type is not None and default is not None and not isinstance(default, expected_type):
-                logger.error('invalid or missing configuration: %s', err)
-                raise
-            return default
-
-    def get(self, section, option, default=NO_DEFAULT):
-        return self._get_with_default(ConfigParser.get, section, option, default)
-
-    def getboolean(self, section, option, default=NO_DEFAULT):
-        return self._get_with_default(ConfigParser.getboolean, section, option, default, bool)
-
-    def getint(self, section, option, default=NO_DEFAULT):
-        return self._get_with_default(ConfigParser.getint, section, option, default, int)
-
-    def getfloat(self, section, option, default=NO_DEFAULT):
-        return self._get_with_default(ConfigParser.getfloat, section, option, default, float)
-
-    def getdate(self, section, option, default=NO_DEFAULT):
-        """ Dates must be formatted ISO8601 style: %Y-%m-%d """
-        value = self.get(section, option, default=default)
-        return datetime.date(*map(int, value.split('-')))
