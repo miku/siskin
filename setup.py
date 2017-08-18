@@ -27,6 +27,7 @@ siskin is a set of tasks for library metadata management.
 """
 
 from __future__ import print_function
+import sys
 
 from siskin import __version__
 
@@ -72,9 +73,11 @@ install_requires = [
     'sqlitebck>=1.2.1',
     'ujson>=1.35',
     'urllib3>=1.10',
-    'wsgiref>=0.1.2',
     'xmltodict==0.11.0',
 ]
+
+if sys.version_info.major < 3:
+    install_requires.append('wsgiref>=0.1.2')
 
 setup(name='siskin',
       version=__version__,
