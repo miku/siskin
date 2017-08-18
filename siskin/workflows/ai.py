@@ -43,7 +43,7 @@ import luigi
 import requests
 import ujson as json
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
