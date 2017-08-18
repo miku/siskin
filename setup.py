@@ -28,13 +28,7 @@ siskin is a set of tasks for library metadata management.
 
 from __future__ import print_function
 
-import sys
-
 from siskin import __version__
-
-if sys.version_info < (2, 7) or sys.version_info.major > 2:
-    print("siskin runs with Python 2.7 or higher, but not with Python 3 yet")
-    sys.exit(1)
 
 try:
     from setuptools import setup
