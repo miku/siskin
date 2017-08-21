@@ -54,6 +54,7 @@ from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
                                  AMSLOpenAccessISSNList)
 from siskin.sources.arxiv import ArxivIntermediateSchema
+from siskin.sources.ceeol import CeeolJournalsDumpIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
                                      CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)
@@ -67,13 +68,14 @@ from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
 from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
                                    GeniosISSNList)
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
+from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
+from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.sources.mag import MAGReferenceDB
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
-from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
 
