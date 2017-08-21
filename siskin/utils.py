@@ -28,17 +28,11 @@ Various utilities.
 
 from __future__ import print_function
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import zip
-from builtins import map
-from builtins import range
-from builtins import object
 import collections
-import io as StringIO
 import errno
 import functools
 import hashlib
+import io as StringIO
 import itertools
 import json
 import logging
@@ -49,13 +43,19 @@ import random
 import string
 import sys
 import tempfile
+from builtins import map, object, range, zip
 
 import luigi
 import requests
-from dateutil import relativedelta
+from future import standard_library
 
 import backoff
+from dateutil import relativedelta
 from siskin import __version__
+
+standard_library.install_aliases()
+
+
 
 logger = logging.getLogger('siskin')
 
@@ -103,7 +103,7 @@ def random_string(length=16):
     Return a random string(upper and lowercase letters) of length `length`,
     defaults to 16.
     """
-    return ''.join(random.choice(string.letters) for _ in range(length))
+    return ''.join(random.choice(string.ascii_letters) for _ in range(length))
 
 
 def pairwise(obj):
