@@ -54,43 +54,43 @@ class BTAGCrossrefSet(BTAGTask):
     minrefs = luigi.IntParameter(default=2)
 
     def requires(self):
-	return {
-	    'crossref': CrossrefUniqItems(),
-	    'doaj': DOAJDOIList(),
-	    'magdb': MAGReferenceDB()
-	}
+        return {
+            'crossref': CrossrefUniqItems(),
+            'doaj': DOAJDOIList(),
+            'magdb': MAGReferenceDB()
+        }
 
     def run(self):
-	"""
-	Write out the doi, the number of refs found in MAG and whether the doi is in DOAJ as well.
-	"""
-	doaj = set()
-	with self.input().get('doaj').open() as handle:
-	    for line in handle:
-		doaj.add(line.strip())
+        """
+        Write out the doi, the number of refs found in MAG and whether the doi is in DOAJ as well.
+        """
+        doaj = set()
+        with self.input().get('doaj').open() as handle:
+            for line in handle:
+                doaj.add(line.strip())
 
-	with sqlitedb(self.input().get('magdb').path) as cursor:
-	    with self.input().get('crossref').open() as handle:
-		with self.output().open('w') as output:
-		    stmt = """
-			select doi from lookup where id IN (
-			    select ref from refs where id = (
-				select id from lookup where doi = ?))
-		    """
-		    for i, line in enumerate(handle):
-			if i > self.max:
-			    break
-			doc = json.loads(line)
-			doi = doc.get('DOI')
-			if doi is not None:
-			    cursor.execute(stmt, (doi,))
-			    rows = cursor.fetchall()
-			    refs = [v[0] for v in rows]
-			    if len(refs) >= self.minrefs:
-				output.write_tsv(doi, len(refs), doi in doaj)
+        with sqlitedb(self.input().get('magdb').path) as cursor:
+            with self.input().get('crossref').open() as handle:
+                with self.output().open('w') as output:
+                    stmt = """
+                    select doi from lookup where id IN (
+                        select ref from refs where id = (
+                        select id from lookup where doi = ?))
+                    """
+                    for i, line in enumerate(handle):
+                        if i > self.max:
+                            break
+                        doc = json.loads(line)
+                        doi = doc.get('DOI')
+                        if doi is not None:
+                            cursor.execute(stmt, (doi,))
+                            rows = cursor.fetchall()
+                            refs = [v[0] for v in rows]
+                            if len(refs) >= self.minrefs:
+                                output.write_tsv(doi, len(refs), doi in doaj)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class BTAGCrossref(BTAGTask):
@@ -99,30 +99,30 @@ class BTAGCrossref(BTAGTask):
     """
 
     def requires(self):
-	return {
-	    'crossref': CrossrefUniqItems(),
-	    'set': BTAGCrossrefSet(max=5000000),
-	}
+        return {
+            'crossref': CrossrefUniqItems(),
+            'set': BTAGCrossrefSet(max=5000000),
+        }
 
     def run(self):
-	entries = {}
-	with self.input().get('set').open() as handle:
-	    for row in handle.iter_tsv(cols=('doi', 'refcount', 'indoaj')):
-		entries[row.doi] = row
+        entries = {}
+        with self.input().get('set').open() as handle:
+            for row in handle.iter_tsv(cols=('doi', 'refcount', 'indoaj')):
+                entries[row.doi] = row
 
-	with self.input().get('crossref').open() as handle:
-	    with self.output().open('w') as output:
-		for line in handle:
-		    doc = json.loads(line)
-		    if doc.get("DOI") in entries:
-			output.write(json.dumps(doc) + "\n")
-		    else:
-			if random.random() < 0.0001:
-			    self.logger.debug("inlude random record")
-			    output.write(json.dumps(doc) + "\n")
+        with self.input().get('crossref').open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    doc = json.loads(line)
+                    if doc.get("DOI") in entries:
+                        output.write(json.dumps(doc) + "\n")
+                    else:
+                        if random.random() < 0.0001:
+                            self.logger.debug("inlude random record")
+                            output.write(json.dumps(doc) + "\n")
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
 class BTAGDOAJSubset(BTAGTask):
@@ -131,64 +131,64 @@ class BTAGDOAJSubset(BTAGTask):
     """
 
     def requires(self):
-	return {
-	    'doaj': DOAJDump(),
-	    'set': BTAGCrossrefSet(max=5000000),
-	}
+        return {
+            'doaj': DOAJDump(),
+            'set': BTAGCrossrefSet(max=5000000),
+        }
 
     def run(self):
-	entries = {}
-	with self.input().get('set').open() as handle:
-	    for row in handle.iter_tsv(cols=('doi', 'refcount', 'indoaj')):
-		entries[row.doi] = row
+        entries = {}
+        with self.input().get('set').open() as handle:
+            for row in handle.iter_tsv(cols=('doi', 'refcount', 'indoaj')):
+                entries[row.doi] = row
 
-	with self.input().get('doaj').open() as handle:
-	    with self.output().open('w') as output:
-		for line in handle:
-		    doc = json.loads(line)
-		    for iddoc in doc['_source']['bibjson']['identifier']:
-			if iddoc["type"] != "doi":
-			    continue
-			doi = iddoc["id"]
-			if doi in entries:
-			    output.write(json.dumps(doc) + "\n")
-			else:
-			    if random.random() < 0.001:
-				self.logger.debug("inlude random record")
-				output.write(json.dumps(doc) + "\n")
+        with self.input().get('doaj').open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    doc = json.loads(line)
+                    for iddoc in doc['_source']['bibjson']['identifier']:
+                        if iddoc["type"] != "doi":
+                            continue
+                        doi = iddoc["id"]
+                        if doi in entries:
+                            output.write(json.dumps(doc) + "\n")
+                        else:
+                            if random.random() < 0.001:
+                                self.logger.debug("inlude random record")
+                                output.write(json.dumps(doc) + "\n")
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 
 class BTAGMAGSubset(BTAGTask):
     """ A small subset of MAG. """
 
     def requires(self):
-	return {
-	    'db': MAGReferenceDB(),
-	    'crossref': BTAGCrossref(),
-	}
+        return {
+            'db': MAGReferenceDB(),
+            'crossref': BTAGCrossref(),
+        }
 
     def run(self):
-	doiset = set()
-	with self.input().get('crossref').open() as handle:
-	    for line in handle:
-		doc = json.loads(line)
-		doiset.add(doc['DOI'])
+        doiset = set()
+        with self.input().get('crossref').open() as handle:
+            for line in handle:
+                doc = json.loads(line)
+                doiset.add(doc['DOI'])
 
-	with sqlitedb(self.input().get('db').path) as cursor:
-	    with self.output().open('w') as output:
-		stmt = """
-		    select doi from lookup where id IN (
-			select ref from refs where id = (
-			    select id from lookup where doi = ?))
-		"""
-		for doi in doiset:
-		    cursor.execute(stmt, (doi,))
-		    rows = cursor.fetchall()
-		    refs = [v[0] for v in rows]
-		    output.write_tsv(doi, *refs)
+        with sqlitedb(self.input().get('db').path) as cursor:
+            with self.output().open('w') as output:
+                stmt = """
+                    select doi from lookup where id IN (
+                    select ref from refs where id = (
+                        select id from lookup where doi = ?))
+                """
+                for doi in doiset:
+                    cursor.execute(stmt, (doi,))
+                    rows = cursor.fetchall()
+                    refs = [v[0] for v in rows]
+                    output.write_tsv(doi, *refs)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='ldj'), format=TSV)
