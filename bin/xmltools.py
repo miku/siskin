@@ -26,8 +26,8 @@
 
 
 # Contains a collection of utilities for parsing and analysing xml files
-# Current functions: list_fields, count_records
-# To do: sort tags, count_doublet, print_json
+# Current functions: list_fields, count_records, print_json
+# To do: sort tags, count_doublet
 
 from __future__ import print_function
 
@@ -108,7 +108,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-v",
                     action="version",
                     help="show version",
-                    version="0.1.1")
+                    version="0.1.2")
 parser.add_argument("-f",
                     dest="inputfile",
                     help="file to parse",
