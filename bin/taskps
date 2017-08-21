@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
             response = json.loads(r.text)
 
-            tasks = [task for task, _ in sorted(response['response'].iteritems())]
+            tasks = [task for task, _ in sorted(response['response'].items())]
 
             if len(tasks) == 0:
                 continue
