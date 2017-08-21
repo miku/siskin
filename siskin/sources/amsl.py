@@ -111,7 +111,7 @@ class AMSLService(AMSLTask):
     """
     date = luigi.DateParameter(default=datetime.date.today())
     name = luigi.Parameter(default='outboundservices:discovery',
-                           description='discovery, holdingsfiles, contentfiles, metadata_usage')
+                           description='discovery, holdingsfiles, contentfiles, metadata_usage, freeContent')
 
     def run(self):
         parts = self.name.split(':')
