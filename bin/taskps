@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
         for status in ['RUNNING', 'FAILED', 'PENDING', 'DONE', 'DISABLED']:
 
-            data = {"status": status, "upstream_status": "", "search":""}
+            data = {"status": status, "upstream_status": "", "search": ""}
             r = requests.get('http://%s/api/task_list' % addr, params={'data': json.dumps(data)})
             if r.status_code >= 400:
                 raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
