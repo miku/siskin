@@ -95,7 +95,7 @@ class CountingHandler(xml.sax.ContentHandler):
         self.start_element_counter = 0
 
     def startElement(self, name, attr):
-            if self.tag == "":
+            if not self.tag:
                 self.start_element_counter += 1
                 if self.start_element_counter == 2:
                     self.tag = name
@@ -125,11 +125,6 @@ parser.add_argument("-tag",
 args = parser.parse_args()
 parser = xml.sax.make_parser()
 
-if args.tag == None:
-    tag = ""
-else:
-    tag = args.tag
-
 if args.task == "list_fields":
     handler = FieldExampleHandler()
     parser.setContentHandler(handler)
@@ -145,7 +140,7 @@ elif args.task == "print_json":
         parser.parse(handle)
 
 elif args.task == "count_records":
-    handler = CountingHandler(tag)
+    handler = CountingHandler(args.tag)
     parser.setContentHandler(handler)
     with open(args.inputfile, "r") as handle:
         parser.parse(handle)
