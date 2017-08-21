@@ -124,7 +124,7 @@ class AMSLService(AMSLTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True))
+        return luigi.LocalTarget(path=self.path(digest=True, ext='json'))
 
 
 class AMSLCollectionsShardFilter(AMSLTask):
