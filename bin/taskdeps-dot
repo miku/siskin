@@ -52,6 +52,7 @@ seen = set()
 # These tasks are rendered with all parameters.
 INCLUDE_FULLY = set(['Executable', 'FTPMirror'])
 
+
 def iterdeps(task):
     """
     Collect dependencies recursively and store them in the global graph `g`.
@@ -73,10 +74,11 @@ def iterdeps(task):
             seen.add(dependency)
             iterdeps(dependency)
 
+
 def simpleformat(graph):
     """ Format graph as dot. Omit parameters - makes some graphs much smaller. Example: http://imgur.com/a/hxJqv """
     s = 'digraph %s {' % random_string()
-    for task, deps in g.iteritems():
+    for task, deps in g.items():
         for dep in deps:
             s = s + """\t"%s" [fontname="Helvetica"]; """ % task[0]
             s = s + """\t"%s" [fontname="Helvetica"]; """ % dep[0]

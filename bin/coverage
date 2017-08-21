@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
     for issn in given:
         tags = []
-        for tag, issnset in issns.iteritems():
+        for tag, issnset in issns.items():
             if issn in issnset:
                 tags.append(tag)
 

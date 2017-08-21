@@ -57,7 +57,7 @@ def calculate_task_hashes():
     """
     hashes = []
     task_import_cache, _ = get_task_import_cache()
-    for klassname, modulename in sorted(task_import_cache.iteritems()):
+    for klassname, modulename in sorted(task_import_cache.items()):
         module = importlib.import_module(modulename)
         klass = getattr(module, klassname)
         sha1 = hashlib.sha1()
@@ -65,12 +65,14 @@ def calculate_task_hashes():
         hashes.append((sha1.hexdigest(), "%s.%s" % (modulename, klassname)))
     return hashes
 
+
 def dump_hashes():
     """
     Dumps hash and full task name to stdout.
     """
     for hash, name in calculate_task_hashes():
         print("%s\t%s" % (hash, name))
+
 
 def compare(filename):
     """

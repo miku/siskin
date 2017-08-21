@@ -24,6 +24,7 @@ from part6_export import Export
 # node -> [deps] dictionary
 g = collections.defaultdict(set)
 
+
 def dump(root=None, indent=0):
     """ dump to stdout """
     print('%s \_ %s' % ('   ' * indent, root))
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 
     # # for a visualization with dot/graphviz
     # print('digraph g {')
-    # for task, deps in g.iteritems():
+    # for task, deps in g.items():
     #     for dep in deps:
     #         print(' "%s" -> "%s";' % (task, dep))
     # print('}')
