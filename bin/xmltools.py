@@ -89,9 +89,16 @@ class CountingHandler(xml.sax.ContentHandler):
     This handler counts the number of records (by tag name).
     """
 
-    def __init__(self, tag='Record'):
+    def __init__(self, tag):
         self.count = 0
         self.tag = tag
+        self.start_element_counter = 0
+
+    def startElement(self, name, attr):
+            if self.tag == "":
+                self.start_element_counter += 1
+                if self.start_element_counter == 2:
+                    self.tag = name
 
     def endElement(self, name):
         if name == self.tag:
@@ -101,7 +108,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-v",
                     action="version",
                     help="show version",
-                    version="0.0.1")
+                    version="0.1.1")
 parser.add_argument("-f",
                     dest="inputfile",
                     help="file to parse",
@@ -110,14 +117,18 @@ parser.add_argument("-t",
                     dest="task",
                     help="task to do (list_fields, count_records, print_json)",
                     metavar="task")
-parser.add_argument("--tag",
+parser.add_argument("-tag",
                     dest="tag",
-                    default="Record",
                     help="record tag name used for counting",
-                    metavar="name")
+                    metavar="tag")
 
 args = parser.parse_args()
 parser = xml.sax.make_parser()
+
+if args.tag == None:
+    tag = ""
+else:
+    tag = args.tag
 
 if args.task == "list_fields":
     handler = FieldExampleHandler()
@@ -134,7 +145,7 @@ elif args.task == "print_json":
         parser.parse(handle)
 
 elif args.task == "count_records":
-    handler = CountingHandler(tag=args.tag)
+    handler = CountingHandler(tag)
     parser.setContentHandler(handler)
     with open(args.inputfile, "r") as handle:
         parser.parse(handle)
