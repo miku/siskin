@@ -79,3 +79,10 @@ class PerseeMARC(PerseeTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+    def on_success(self):
+	"""
+	Signal for manual update. This is decoupled from the task output,
+	because it might be deleted, when imported.
+	"""
+	self.output().copy(self.path(ext='fincmarc.mrc.import'))
