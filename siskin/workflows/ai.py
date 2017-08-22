@@ -523,16 +523,11 @@ class AIExport(AITask):
     format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
-        return {
-            'free': AMSLService(name="inhouseservices:freeContent", date=self.date),
-            'file': AIIntermediateSchemaDeduplicated(date=self.date),
-        }
+        return AIIntermediateSchemaDeduplicated(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} -free-content {free} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
-                          free=self.input().get('free').path,
-                          input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
