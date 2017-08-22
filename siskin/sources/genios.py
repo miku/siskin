@@ -146,8 +146,7 @@ class GeniosDropbox(GeniosTask):
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
-                 rsync_options=self.config.get(
-                     'gbi', 'rsync-options', '-avzP'),
+                 rsync_options=self.config.get('gbi', 'rsync-options', fallback='-avzP'),
                  src=self.config.get('gbi', 'scp-src'), target=target)
 
         if not os.path.exists(self.taskdir()):
