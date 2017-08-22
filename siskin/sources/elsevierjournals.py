@@ -42,6 +42,7 @@ backlog-dir = /path/to/dir
 import datetime
 import os
 import tempfile
+from builtins import str
 
 import luigi
 
@@ -119,7 +120,7 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
         _, output = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for row in sorted(handle.iter_tsv(cols=('path',))):
-                if not row.path.endswith('.tar'):
+                if not str(row.path).endswith('.tar'):
                     continue
                 shellout(
                     "span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
