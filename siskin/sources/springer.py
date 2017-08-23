@@ -30,8 +30,6 @@ Config
 
 [springer]
 
-intermediate-schema-file = /path/to/file # must be gzip compressed
-
 username = nana
 password = s3cret
 url = http://export.com/intermediate.file.gz
