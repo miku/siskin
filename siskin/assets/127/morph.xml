@@ -658,6 +658,9 @@
             <data source="_id" name="b">
                 <constant value="$[sid]" />
             </data>
+            <data source="_id" name="c">
+		<constant value="Filmuniversität Konrad Wolf Potsdam (VK Film)" />
+            </data>
          </entity>
 
     </rules>
