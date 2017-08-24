@@ -32,10 +32,7 @@ import logging
 import os
 import sys
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 logger = logging.getLogger('siskin')
 
