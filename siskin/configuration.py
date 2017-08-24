@@ -34,8 +34,8 @@ import sys
 
 try:
     import configparser
-except:
-    from six.moves import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 logger = logging.getLogger('siskin')
 
