@@ -31,12 +31,16 @@ import datetime
 import logging
 import os
 import sys
-from configparser import ConfigParser, NoOptionError, NoSectionError
+
+try:
+    import configparser
+except:
+    from six.moves import configparser
 
 logger = logging.getLogger('siskin')
 
 
-class Config(ConfigParser):
+class Config(configparser.ConfigParser):
     """ Wrapper around /etc/siskin/siskin.ini
     """
     NO_DEFAULT = None
