@@ -27,7 +27,7 @@
 
 # Contains a collection of utilities for parsing and analysing xml files
 # Current functions: list_fields, count_records, print_json
-# To do: sort tags, count_doublet
+# To do: sort tags, count_doublet, list all possible values of a given field
 
 from __future__ import print_function
 
