@@ -42,7 +42,8 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         id = False
         title = False
         ptitle = False
-        year = False
+        pub_year = False
+        comp_year = False
         language = False
         subject1 = False # Piece Style
         subject2 = False # Instrumentation
@@ -55,6 +56,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         f001 = ""
         f041a = ""
         f100a = ""
+        f1000 = ""
         f245a = ""
         f246a = ""
         f260c = ""
@@ -73,7 +75,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
                 f001 = regexp.group(1)
                 continue
 
-            ##############################################
+            # Sprache
 
             if language == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -96,7 +98,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 language = False
 
-            ##############################################
+            # Komponist
 
             if composer == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -110,7 +112,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 composer = False
 
-            ##############################################
+            # Sachtitel
 
             if title == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -125,7 +127,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 title = False
 
-            ##############################################
+            # Alternativtitel
 
             if ptitle == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -140,9 +142,9 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 ptitle = False
 
-            ##############################################
+            # Erscheinungsjahr
 
-            if year == True:
+            if pub_year == True:
                 regexp = re.search("<string>(\d\d\d\d)<\/string>", line)
                 if regexp:
                     f260c = regexp.group(1)
@@ -151,12 +153,28 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             regexp = re.search("name=\"Year of First Publication\"", line)
             if regexp:
-                year = True
+                pub_year = True
                 continue
             else:
-                year = False
+                pub_year = False
 
-            ##############################################
+            # Kompositionsjahr
+
+            if comp_year == True:
+                regexp = re.search("<string>(\d\d\d\d)<\/string>", line)
+                if regexp:
+                    f650y = regexp.group(1)
+                else:
+                    f650y = ""
+
+            regexp = re.search("name=\"Year/Date of Composition\"", line)
+            if regexp:
+                comp_year = True
+                continue
+            else:
+                comp_year = False
+
+            # Librettist
 
             if librettist == True:
                 regexp = re.search("<string>\[\[:Category:(.*?)\|.*<\/string>", line)
@@ -170,7 +188,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 librettist = False
 
-            ##############################################
+            # Fußnote
 
             if footnote == True:
 
@@ -190,7 +208,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 footnote = False
 
-            ##############################################
+            # Stil (Piece Style)
 
             if subject1 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -207,7 +225,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 subject1 = False
 
-            ##############################################
+            # Besetzung (Instrumentation)
 
             if subject2 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -224,7 +242,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 subject2 = False
 
-            ##############################################
+            # zeitliche Einordnung (Timeperiod)
 
             if subject3 == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -238,7 +256,7 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 subject3 = False
 
-            ##############################################
+            # URL
 
             if url == True:
                 regexp = re.search("<string>(.*)<\/string>", line)
@@ -252,20 +270,28 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
             else:
                 url = False
 
+            # VIAF
+
+            regexp = re.search("<viafId>(\d+)</viafId>", line) # Feld manchmal vorhanden, aber leer
+            if regexp:
+                f1000 = regexp.group(1)
+                f1000 = "(VIAF)" + f1000
+
+
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
         marcrecord.leader = "     ncs  22        450 "
-        marcrecord.add("001", data="finc-15-%s" % f001) # f001 ergänzen!
+        marcrecord.add("001", data="finc-15-%s" % f001)
         marcrecord.add("007", data="qu")
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
         marcrecord.add("041", a=f041a)
-        marcrecord.add("100", a=f100a)
+        marcrecord.add("100", a=f100a, _0=f1000)
         marcrecord.add("245", a=f245a)
         marcrecord.add("246", a=f246a)
         marcrecord.add("260", c=f260c)
         marcrecord.add("500", a=f500a)
         marcrecord.add("590", subfields=["a", f590a, "b", f590b])
-        marcrecord.add("650", y=f260c)
+        marcrecord.add("650", y=f650y)
         marcrecord.add("700", a=f700a)
 
         subtest = []
