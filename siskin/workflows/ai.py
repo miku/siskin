@@ -38,8 +38,10 @@ import re
 import shutil
 import string
 import tempfile
+import urllib
 
 import luigi
+import rdflib
 import requests
 import ujson as json
 
@@ -549,6 +551,49 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
     def output(self):
         return self.input()
+
+
+class AICollectionsAndSerialNumbers(AITask):
+    """
+    Turtlized <Collection> amsl:coveredMediumID <ISSN>, <ISSN>, ..., refs #5156.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AIIntermediateSchema(date=self.date)
+
+    def run(self):
+        g = rdflib.Graph()
+        ns = {
+            "amsl": rdflib.Namespace('http://amsl.technology/'),
+            "disco": rdflib.Namespace('http://amsl.technology/discovery/Metadatenkollektion/'),
+        }
+
+        p = ns["amsl"].coveredMediumID
+        disco = ns["disco"]
+
+        with self.input().open() as handle:
+            for i, line in enumerate(handle):
+                if i % 100000 == 0:
+                    self.logger.debug("%s %s", i, len(g))
+                doc = json.loads(line)
+                issns = doc.get('rft.issn', []) + doc.get('rft.eissn', [])
+                if len(issns) == 0:
+                    continue
+                colls = doc.get('finc.mega_collection', [])
+                if not colls:
+                    continue
+                for issn in issns:
+                    for c in colls:
+                        s = disco[urllib.quote(c)]
+                        o = rdflib.URIRef('urn:ISSN:%s' % issn)
+                        g.add((s, p, o))
+
+        with self.output().open('w') as output:
+            output.write(g.serialize(format='turtle'))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ttl'))
 
 
 class AICoverageISSN(AITask):
