@@ -63,6 +63,19 @@ The installation script adds basic config files. Edit them.
 #       └── siskin.ini
 ```
 
+Schema changes
+--------------
+
+To remove all files of a certain format (due to schema changes or such) it helps, if naming is uniform:
+
+```shell
+$ tasknames | grep IntermediateSchema | xargs -I {} taskrm {}
+...
+```
+
+Apart from that, all upstream tasks need to be removed manually (consult the
+[map](https://git.io/v5sdS)) as this is not automatic yet.
+
 Evolving workflows
 ------------------
 
