@@ -41,10 +41,11 @@
         <!-- Default = Format from Source -->
       </data>
     </choose>
-    <data name="finc.mega_collection" source="_id">
-      <!-- receive Mega_Collection -->
-      <constant value="$[mega_collection]"/>
-    </data>
+    <entity name="finc.mega_collection[]" flushWith="record">
+      <data source="_id">
+        <constant value="$[mega_collection]"/>
+      </data>
+    </entity>
     <combine name="finc.record_id" value="ai-$[sid]-${identifier_key}">
       <!-- Record-ID  -->
       <data source="header.identifier.value" name="identifier_key">

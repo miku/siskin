@@ -2,7 +2,7 @@
 {
     "finc.format":          "ElectronicArticle",
 #   "finc.mega_collection": "FID #5374",
-    "finc.mega_collection": "Datenbank Internetquellen",
+    "finc.mega_collection": ["Datenbank Internetquellen"],
     "finc.record_id":       ["finc-80-",.id]|add,
     "finc.source_id":       "80",
 #   "authors":              [{"rft.au":.creator?}],

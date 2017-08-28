@@ -51,34 +51,27 @@
       </entity>
     </macro>
   </macros>
-
   <rules>
-
-    <data source="leader" />
-
-    <data source="003|005|007|008" />
-
+    <data source="leader"/>
+    <data source="003|005|007|008"/>
     <!-- ID in finc-ID umwandeln -->
     <data source="001" name="001">
-      <compose prefix="finc-117-" />
+      <compose prefix="finc-117-"/>
     </data>
-
     <entity name="935  " flushWith="record">
       <data source="_id" name="a">
-        <constant value="vkfilm" />
+        <constant value="vkfilm"/>
       </data>
     </entity>
-
     <entity name="980  " flushWith="record">
-      <data source="001" name="a" />
+      <data source="001" name="a"/>
       <data source="_id" name="b">
-        <constant value="117" />
+        <constant value="117"/>
       </data>
       <data source="_id" name="c">
-        <constant value="Universität der Künste Berlin (VK Film)" />
+        <constant value="Universität der Künste Berlin (VK Film)"/>
       </data>
     </entity>
-
     <!-- datafields zusammenbauen -->
     <call-macro name="indi" post="  " datafield="016"/>
     <call-macro name="indi" post="7 " datafield="016"/>
@@ -203,7 +196,6 @@
     <call-macro name="indi" post="06" datafield="689"/>
     <call-macro name="indi" post="0 " datafield="689"/>
     <call-macro name="indi" post="  " datafield="901"/>
-
   </rules>
   <maps>
 	</maps>

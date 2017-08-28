@@ -27,10 +27,10 @@
     <entity name="url[]" flushWith="record">
       <!-- URL -->
       <data source="metadata.dc.identifier.value">
-        <regexp match="^http.*" />
+        <regexp match="^http.*"/>
       </data>
       <data source="metadata.dc.identifier.value">
-        <regexp match="^urn:nbn.*" />
+        <regexp match="^urn:nbn.*"/>
         <compose prefix="https://nbn-resolving.org/"/>
       </data>
     </entity>
@@ -65,13 +65,13 @@
     </data>
     <data source="metadata.dc.date.value" name="rft.date">
       <!-- Date -->
-      <regexp match=".*?(\d\d\d\d).*" format="${1}" />
+      <regexp match=".*?(\d\d\d\d).*" format="${1}"/>
       <script file="$[FLUX_DIR]/cleandate.js" invoke="cleanDate"/>
       <compose postfix="-01-01"/>
     </data>
     <data source="metadata.dc.date.value" name="x.date">
       <!-- x.Date -->
-      <regexp match=".*?(\d\d\d\d).*" format="${1}" />
+      <regexp match=".*?(\d\d\d\d).*" format="${1}"/>
       <script file="$[FLUX_DIR]/cleandate.js" invoke="cleanDate"/>
       <compose postfix="-01-01T00:00:00Z"/>
     </data>

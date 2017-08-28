@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<metamorph 
-  xmlns="http://www.culturegraph.org/metamorph" version="1">
+<metamorph xmlns="http://www.culturegraph.org/metamorph" version="1">
   <rules>
     <data source="metadata.dc.description.value" name="abstract"/>
     <!-- Abstract -->
@@ -20,7 +19,7 @@
           <lookup in="sprachliste"/>
         </data>
         <!-- default source value -->
-        <data source="metadata.dc.language.value"></data>
+        <data source="metadata.dc.language.value"/>
       </choose>
     </entity>
     <entity name="url[]" flushWith="record">
@@ -42,10 +41,11 @@
         <!-- Default = Format from Source -->
       </data>
     </choose>
-    <data name="finc.mega_collection" source="_id">
-      <!-- receive Mega_Collection -->
-      <constant value="$[mega_collection]"/>
-    </data>
+    <entity name="finc.mega_collection[]" flushWith="record">
+      <data source="_id">
+        <constant value="$[mega_collection]"/>
+      </data>
+    </entity>
     <combine name="finc.record_id" value="ai-$[sid]-${identifier_key}">
       <!-- Record-ID  -->
       <data source="header.identifier.value" name="identifier_key">
@@ -80,14 +80,14 @@
     </entity>
     <combine name="rft.jtitle" value="${jtitle}" reset="true" sameEntity="true">
       <!-- Journal Title -->
-      <data source="metadata.dc.source.lang" name="lang"></data>
+      <data source="metadata.dc.source.lang" name="lang"/>
       <data source="metadata.dc.source.value" name="jtitle">
         <regexp match="^(.*);\s(.*);\s(.*)$" format="${1}"/>
       </data>
     </combine>
     <entity name="rft.pub[]" flushWith="record">
       <!-- Publisher -->
-      <data source="metadata.dc.publisher.value"></data>
+      <data source="metadata.dc.publisher.value"/>
     </entity>
     <data source="metadata.dc.source.value" name="rft.volume">
       <!-- Volume -->
