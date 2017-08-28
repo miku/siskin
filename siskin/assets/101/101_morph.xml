@@ -11,9 +11,11 @@
             </data>
         </combine>
 
-		<combine name="finc.mega_collection" value="Kieler Beiträge zur Filmmusikforschung">
-			<data source="_id" />
-		</combine>
+		<entity name="finc.mega_collection[]" flushWith="record">
+			<data source="_id" >
+				<constant value="Kieler Beiträge zur Filmmusikforschung" />
+			</data>
+		</entity>
 
 		<combine name="finc.source_id" value="101">
 			<data source="_id" />
