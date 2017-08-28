@@ -25,11 +25,40 @@
 
 """
 IMSLP, refs #1240.
+
+Config
+------
+
+[imslp]
+
+url = http://example.com/imslpOut_2016-12-25.tar.gz
 """
 
+import datetime
+
+import luigi
+
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
 class IMSLPTask(DefaultTask):
     """ Base task for IMSLP. """
     TAG = "15"
+
+    def closest(self):
+        return datetime.date(2017, 12, 25)
+
+
+class IMSLPDownload(IMSLPTask):
+    """ Download raw data. Should be a single URL pointing to a tar.gz. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""wget -O {output} {url}""", url=self.config.get('imslp', 'url'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tar.gz'))
