@@ -62,3 +62,15 @@ class IMSLPDownload(IMSLPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tar.gz'))
+
+
+class IMSLPConvert(IMSLPTask):
+    """ Extract and transform. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        print(self.taskdir())
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.xml'))
