@@ -585,7 +585,7 @@ class AICollectionsAndSerialNumbers(AITask):
                     continue
                 for issn in issns:
                     for c in colls:
-                        s = disco[urllib.quote(c)]
+                        s = disco[urllib.quote(c.encode('utf-8'))]
                         o = rdflib.URIRef('urn:ISSN:%s' % issn)
                         g.add((s, p, o))
 
