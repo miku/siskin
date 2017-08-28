@@ -35,6 +35,8 @@ url = http://example.com/imslpOut_2016-12-25.tar.gz
 """
 
 import datetime
+import shutil
+import tempfile
 
 import luigi
 
@@ -69,8 +71,16 @@ class IMSLPConvert(IMSLPTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
 
+    def requires(self):
+        return IMSLPDownload(date=self.date)
+
     def run(self):
-        print(self.taskdir())
+        tempdir = tempfile.mkdtemp(prefix='siskin-')
+        shellout("tar -xvzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
+        output = shellout("python {script} {tempdir} {output}",
+                          script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
+        shutil.rmtree(tempdir)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincmarc.xml'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
