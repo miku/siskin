@@ -24,10 +24,27 @@
 
 """
 Studienkreis Rundfunk und Geschichte, refs #5517, #11005.
+
+Config
+------
+
+[rug]
+
+input = /path/to/excel.file.xls
 """
 
+import luigi
+
 from siskin.task import DefaultTask
+
 
 class RUGTask(DefaultTask):
     """ Base task for RUG. """
     TAG = "88"
+
+
+class RUGSpreadsheet(RUGTask, luigi.ExternalTask):
+    """ It starts with Excel. """
+
+    def output(self):
+        return luigi.LocalTarget(self.config.get('rug', 'input'))
