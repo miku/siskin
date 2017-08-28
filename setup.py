@@ -65,6 +65,7 @@ install_requires = [
     'pyparsing>=2.0.3',
     'python-dateutil>=2.2',
     'pytz>=2014.4',
+    'rdflib>=4',
     'requests>=2.5.1',
     'simplejson>=3.6.0',
     'six>=1.9.0',
