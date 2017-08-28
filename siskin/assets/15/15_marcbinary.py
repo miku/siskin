@@ -43,13 +43,21 @@ langmap = {
     "Hebrew": "heb"
 }
 
-outputfile = io.open("15_output.mrc", "wb")
+input_directory = "IMSLP"
+output_filename = "15_output.mrc"
 
-for i, filename in enumerate(os.listdir("IMSLP"), start=1):
+if len(sys.argv) > 1:
+    input_directory = sys.argv[1]
+if len(sys.argv) > 2:
+    output_filename = sys.argv[2]
+
+outputfile = io.open(output_filename, "wb")
+
+for i, filename in enumerate(os.listdir(input_directory), start=1):
 
     if filename.endswith(".xml"):
 
-        inputfile = io.open("IMSLP/" + filename, "r", encoding="utf-8")
+        inputfile = io.open(input_directory + "/" + filename, "r", encoding="utf-8")
 
         id = False
         title = False
