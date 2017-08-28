@@ -29,7 +29,7 @@ langmap = {
     "Czech": "cze",
     "Portuguese": "por",
     "Hebrew": "heb"
-    }
+}
 
 outputfile = io.open("15_output.mrc", "wb")
 
@@ -45,9 +45,9 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         pub_year = False
         comp_year = False
         language = False
-        subject1 = False # Piece Style
-        subject2 = False # Instrumentation
-        subject3 = False # timeperiod
+        subject1 = False  # Piece Style
+        subject2 = False  # Instrumentation
+        subject3 = False  # timeperiod
         footnote = False
         composer = False
         librettist = False
@@ -272,11 +272,10 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
             # VIAF
 
-            regexp = re.search("<viafId>(\d+)</viafId>", line) # Feld manchmal vorhanden, aber leer
+            regexp = re.search("<viafId>(\d+)</viafId>", line)  # Feld manchmal vorhanden, aber leer
             if regexp:
                 f1000 = regexp.group(1)
                 f1000 = "(VIAF)" + f1000
-
 
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
@@ -297,8 +296,8 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
         subtest = []
         for subject in f650a:
             if subject not in subtest:
-               subtest.append(subject)
-               marcrecord.add("689", a=subject)
+                subtest.append(subject)
+                marcrecord.add("689", a=subject)
 
         marcrecord.add("856", q="text/html", _3="Petrucci-Musikbibliothek", u=f856u)
 
@@ -310,12 +309,9 @@ for i, filename in enumerate(os.listdir("IMSLP"), start=1):
 
         inputfile.close()
 
-    #print(i)
-    #if i == 10000:
+    # print(i)
+    # if i == 10000:
     #    break
 
 
 outputfile.close()
-
-
-
