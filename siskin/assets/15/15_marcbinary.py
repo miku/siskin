@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+"""
+Custom conversion for IMSLP XML. Usually a set of files within a given
+directory, refs #1240.
+
+Usage:
+
+    $ python 15_marcbinary.py [INPUT-DIRECTORY [, OUTPUT-FILE]]
+
+"""
+
 import os
 import io
 import re
