@@ -76,7 +76,7 @@ class IMSLPConvert(IMSLPTask):
 
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
-        shellout("tar -xvzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
+        shellout("tar -xzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
         output = shellout("python {script} {tempdir} {output}",
                           script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
         shutil.rmtree(tempdir)
