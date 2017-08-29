@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
+# pylint: disable=C0103
 
 """
 Custom conversion for IMSLP XML. Usually a set of files within a given
