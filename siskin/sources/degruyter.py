@@ -72,7 +72,7 @@ class DegruyterTask(DefaultTask):
 
     """
     TAG = 'degruyter'
-    TIMESTAMP = '1497254827738'
+    TIMESTAMP = '1499552812781'
 
     def closest(self):
         return datetime.date(2017, 8, 1)
