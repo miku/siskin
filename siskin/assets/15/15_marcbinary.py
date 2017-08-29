@@ -160,11 +160,7 @@ for root, dirs, files in os.walk(input_directory):
                         f041 = "eng"
 
             regexp = re.search("name=\"Language\"", line)
-            if regexp:
-                language = True
-                continue
-            else:
-                language = False
+            language = True if regexp else False
 
             # Komponist
 
@@ -174,11 +170,7 @@ for root, dirs, files in os.walk(input_directory):
                     f100a = regexp.group(1)
 
             regexp = re.search(r"name=\"composer\"", line)
-            if regexp:
-                composer = True
-                continue
-            else:
-                composer = False
+            composer = True if regexp else False
 
             # Sachtitel
 
@@ -189,11 +181,7 @@ for root, dirs, files in os.walk(input_directory):
                     f245a = html_unescape(f245a)
 
             regexp = re.search(r"name=\"worktitle\"", line)
-            if regexp:
-                title = True
-                continue
-            else:
-                title = False
+            title = True if regexp else False
 
             # Alternativtitel
 
@@ -204,11 +192,7 @@ for root, dirs, files in os.walk(input_directory):
                     f246a = html_unescape(f246a)
 
             regexp = re.search(r"name=\"Alternative Title\"", line)
-            if regexp:
-                ptitle = True
-                continue
-            else:
-                ptitle = False
+            ptitle = True if regexp else False
 
             # Erscheinungsjahr
 
@@ -220,11 +204,7 @@ for root, dirs, files in os.walk(input_directory):
                     f260c = ""
 
             regexp = re.search(r"name=\"Year of First Publication\"", line)
-            if regexp:
-                pub_year = True
-                continue
-            else:
-                pub_year = False
+            pub_year = True if regexp else False
 
             # Kompositionsjahr
 
@@ -236,11 +216,7 @@ for root, dirs, files in os.walk(input_directory):
                     f650y = ""
 
             regexp = re.search(r"name=\"Year/Date of Composition\"", line)
-            if regexp:
-                comp_year = True
-                continue
-            else:
-                comp_year = False
+            comp_year = True if regexp else False
 
             # Librettist
 
@@ -250,11 +226,7 @@ for root, dirs, files in os.walk(input_directory):
                     f700a = regexp.group(1)
 
             regexp = re.search(r"name=\"Librettist\"", line)
-            if regexp:
-                librettist = True
-                continue
-            else:
-                librettist = False
+            librettist = True if regexp else False
 
             # Fußnote
 
@@ -270,11 +242,7 @@ for root, dirs, files in os.walk(input_directory):
                         f500a = regexp.group(1)
 
             regexp = re.search(r"name=\"Dedication\"", line)
-            if regexp:
-                footnote = True
-                continue
-            else:
-                footnote = False
+            footnote = True if regexp else False
 
             # Stil (Piece Style)
 
@@ -287,11 +255,7 @@ for root, dirs, files in os.walk(input_directory):
                     f590a = s
 
             regexp = re.search(r"name=\"Piece Style\"", line)
-            if regexp:
-                subject1 = True
-                continue
-            else:
-                subject1 = False
+            subject1 = True if regexp else False
 
             # Besetzung (Instrumentation)
 
@@ -304,11 +268,7 @@ for root, dirs, files in os.walk(input_directory):
                     f590b = s
 
             regexp = re.search(r"name=\"Instrumentation\"", line)
-            if regexp:
-                subject2 = True
-                continue
-            else:
-                subject2 = False
+            subject2 = True if regexp else False
 
             # zeitliche Einordnung (Timeperiod)
 
@@ -318,11 +278,7 @@ for root, dirs, files in os.walk(input_directory):
                     f650a.append(regexp.group(1))
 
             regexp = re.search(r"name=\"timeperiod\"", line)
-            if regexp:
-                subject3 = True
-                continue
-            else:
-                subject3 = False
+            subject2 = True if regexp else False
 
             # URL
 
@@ -332,11 +288,7 @@ for root, dirs, files in os.walk(input_directory):
                     f856u = regexp.group(1)
 
             regexp = re.search(r"name=\"permlink\"", line)
-            if regexp:
-                url = True
-                continue
-            else:
-                url = False
+            url = True if regexp else False
 
             # VIAF
 
