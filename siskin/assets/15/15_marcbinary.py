@@ -100,7 +100,7 @@ if len(sys.argv) > 2:
 outputfile = io.open(output_filename, "wb")
 
 
-for root, dirs, files in os.walk(input_directory):
+for root, _, files in os.walk(input_directory):
     for filename in files:
         if not filename.endswith(".xml"):
             continue
