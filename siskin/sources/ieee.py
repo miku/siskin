@@ -123,6 +123,9 @@ class IEEEBacklogPaths(IEEETask):
 class IEEEBacklogIntermediateSchema(IEEETask):
     """
     Backlog is a single tar file containing an initial set of records.
+
+    <strike>Strangely,</strike> this yields an occasional tar "Cannot write: Broken pipe".
+    // XML syntax error on line 402780414: invalid character entity &10 (no semicolon)
     """
 
     def run(self):
