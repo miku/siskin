@@ -60,7 +60,7 @@ class SpringerTask(DefaultTask):
 
 class SpringerProvided(SpringerTask, luigi.ExternalTask):
     """
-    Provided.
+    Provided. This is deprecated via #6647. Data access via download, see: SpringerDownload.
     """
 
     def output(self):
