@@ -351,9 +351,5 @@ for root, dirs, files in os.walk(input_directory):
 
         inputfile.close()
 
-    # print(i)
-    # if i == 10000:
-    #    break
-
 
 outputfile.close()
