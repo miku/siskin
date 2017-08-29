@@ -73,11 +73,13 @@ if len(sys.argv) > 2:
 
 outputfile = io.open(output_filename, "wb")
 
-for i, filename in enumerate(os.listdir(input_directory), start=1):
 
-    if filename.endswith(".xml"):
-
-        inputfile = io.open(input_directory + "/" + filename, "r", encoding="utf-8")
+for root, dirs, files in os.walk(input_directory):
+    for filename in files:
+        if not filename.endswith(".xml"):
+            continue
+        filepath = os.path.join(root, filename)
+        inputfile = io.open(filepath, "r", encoding="utf-8")
 
         id = False
         title = False
