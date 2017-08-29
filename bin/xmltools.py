@@ -26,8 +26,8 @@
 
 
 # Contains a collection of utilities for parsing and analysing xml files
-# Current functions: list_fields, count_records, print_json
-# To do: sort tags, count_doublet, list all possible values of a given field
+# Current functions: list_fields, count_records, print_json, list_all_values, list_unique_values
+# To do: sort tags, count_doublet
 
 from __future__ import print_function
 
@@ -104,18 +104,61 @@ class CountingHandler(xml.sax.ContentHandler):
         if name == self.tag:
             self.count += 1
 
+
+class ListAllValuesHandler(xml.sax.ContentHandler):
+    """
+    This handler list all values of a given field.
+    """
+
+    def __init__(self, tag):
+        self.tag = tag
+        self.current = None
+
+    def startElement(self, name, attr):
+        self.current = name
+
+    def characters(self, value):
+        name = self.current
+        if name == self.tag:
+            value = value.strip()
+            if value:
+                print(value)
+
+
+class ListUniqueValuesHandler(xml.sax.ContentHandler):
+    """
+    This handler list all unique values of a given field.
+    """
+
+    def __init__(self, tag):
+        self.tag = tag
+        self.current = None
+        self.values = []
+
+    def startElement(self, name, attr):
+        self.current = name
+
+    def characters(self, value):
+        name = self.current
+        if name == self.tag:
+            value = value.strip()
+            if value and value not in self.values:
+                self.values.append(value)
+                print(value)
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-v",
                     action="version",
                     help="show version",
-                    version="0.1.2")
+                    version="0.2.2")
 parser.add_argument("-f",
                     dest="inputfile",
                     help="file to parse",
                     metavar="filename")
 parser.add_argument("-t",
                     dest="task",
-                    help="task to do (list_fields, count_records, print_json)",
+                    help="task to do (list_fields, count_records, print_json, list_all_values, list_unique_values)",
                     metavar="task")
 parser.add_argument("-tag",
                     dest="tag",
@@ -145,3 +188,16 @@ elif args.task == "count_records":
     with open(args.inputfile, "r") as handle:
         parser.parse(handle)
     print(handler.count)
+
+elif args.task == "list_all_values":
+    handler = ListAllValuesHandler(args.tag)
+    parser.setContentHandler(handler)
+    with open(args.inputfile, "r") as handle:
+        parser.parse(handle)
+
+elif args.task == "list_unique_values":
+    handler = ListUniqueValuesHandler(args.tag)
+    parser.setContentHandler(handler)
+    with open(args.inputfile, "r") as handle:
+        parser.parse(handle)
+    print("???")
