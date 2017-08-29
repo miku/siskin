@@ -72,7 +72,7 @@ class DegruyterTask(DefaultTask):
 
     """
     TAG = 'degruyter'
-    TIMESTAMP = '1499552812781'
+    TIMESTAMP = '1497254827738'  # TODO(miku): partial updates are possible and missed by this.
 
     def closest(self):
         return datetime.date(2017, 8, 1)
