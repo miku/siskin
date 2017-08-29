@@ -18,9 +18,26 @@ import io
 import os
 import re
 import sys
+from xml.sax.saxutils import escape, unescape
 
-import html
 import marcx
+
+# escape() and unescape() takes care of &, < and >.
+html_escape_table = {
+    '"': "&quot;",
+    "'": "&apos;"
+}
+html_unescape_table = {v: k for k, v in html_escape_table.items()}
+
+
+def html_escape(text):
+    """ Escape HTML, see also: https://wiki.python.org/moin/EscapingHtml"""
+    return escape(text, html_escape_table)
+
+
+def html_unescape(text):
+    """ Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml"""
+    return unescape(text, html_unescape_table)
 
 langmap = {
     "English": "eng",
@@ -141,7 +158,7 @@ for i, filename in enumerate(os.listdir(input_directory), start=1):
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     f245a = regexp.group(1)
-                    f245a = html.unescape(f245a)
+                    f245a = html_unescape(f245a)
 
             regexp = re.search("name=\"worktitle\"", line)
             if regexp:
@@ -156,7 +173,7 @@ for i, filename in enumerate(os.listdir(input_directory), start=1):
                 regexp = re.search("<string>(.*)<\/string>", line)
                 if regexp:
                     f246a = regexp.group(1)
-                    f246a = html.unescape(f246a)
+                    f246a = html_unescape(f246a)
 
             regexp = re.search("name=\"Alternative Title\"", line)
             if regexp:
