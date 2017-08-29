@@ -42,11 +42,12 @@ import json
 import re
 
 import luigi
-
+import six
 from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
@@ -102,6 +103,13 @@ class SpringerCleanFields(SpringerTask):
                     doc['abstract'] = striptags(doc.get('abstract', '').encode('utf-8'))
                     doc['rft.atitle'] = striptags(doc.get('rft.atitle', '').encode('utf-8'))
                     doc['x.subjects'] = [striptags(subj.encode('utf-8')) for subj in doc.get('x.subjects', [])]
+
+                    # #5994, #note-37 / https://git.io/v5ZNu requests
+                    # multi-valued mega_collection, rev: https://git.io/v5ZNl.
+                    # Turn value into list, if it is not already.
+                    if isinstance(doc['finc.mega_collection'], six.string_types):
+                        doc['finc.mega_collection'] = [doc['finc.mega_collection']]
+
                     output.write(json.dumps(doc))
                     output.write("\n")
 
