@@ -75,7 +75,7 @@ class DegruyterTask(DefaultTask):
     TIMESTAMP = '1497254827738'
 
     def closest(self):
-        return datetime.date(2017, 6, 1)
+        return datetime.date(2017, 8, 1)
 
 
 class DegruyterPaths(DegruyterTask):
