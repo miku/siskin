@@ -112,25 +112,25 @@ for root, dirs, files in os.walk(input_directory):
 
         for line in inputfile:
 
-            regexp = re.search("<recordId>(.*)<\/recordId>", line)
+            regexp = re.search(r"<recordId>(.*)<\/recordId>", line)
             if regexp:
                 f001 = regexp.group(1)
                 continue
 
             # Sprache
 
-            if language == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if language:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     language = regexp.group(1)
-                    regexp = re.search("^(.*?)\W.*", language)
+                    regexp = re.search(r"^(.*?)\W.*", language)
                     if regexp:
                         f041a = regexp.group(1)
                     else:
                         f041a = language
                     f041a = langmap.get(f041a, "")
                     if f041a == "":
-                        print("Die Sprache %s fehlt in der Map!" % language)
+                        print(r"Die Sprache %s fehlt in der Map!" % language)
                         f041 = "eng"
 
             regexp = re.search("name=\"Language\"", line)
@@ -142,12 +142,12 @@ for root, dirs, files in os.walk(input_directory):
 
             # Komponist
 
-            if composer == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if composer:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     f100a = regexp.group(1)
 
-            regexp = re.search("name=\"composer\"", line)
+            regexp = re.search(r"name=\"composer\"", line)
             if regexp:
                 composer = True
                 continue
@@ -156,13 +156,13 @@ for root, dirs, files in os.walk(input_directory):
 
             # Sachtitel
 
-            if title == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if title:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     f245a = regexp.group(1)
                     f245a = html_unescape(f245a)
 
-            regexp = re.search("name=\"worktitle\"", line)
+            regexp = re.search(r"name=\"worktitle\"", line)
             if regexp:
                 title = True
                 continue
@@ -171,13 +171,13 @@ for root, dirs, files in os.walk(input_directory):
 
             # Alternativtitel
 
-            if ptitle == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if ptitle:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     f246a = regexp.group(1)
                     f246a = html_unescape(f246a)
 
-            regexp = re.search("name=\"Alternative Title\"", line)
+            regexp = re.search(r"name=\"Alternative Title\"", line)
             if regexp:
                 ptitle = True
                 continue
@@ -186,14 +186,14 @@ for root, dirs, files in os.walk(input_directory):
 
             # Erscheinungsjahr
 
-            if pub_year == True:
-                regexp = re.search("<string>(\d\d\d\d)<\/string>", line)
+            if pub_year:
+                regexp = re.search(r"<string>(\d\d\d\d)<\/string>", line)
                 if regexp:
                     f260c = regexp.group(1)
                 else:
                     f260c = ""
 
-            regexp = re.search("name=\"Year of First Publication\"", line)
+            regexp = re.search(r"name=\"Year of First Publication\"", line)
             if regexp:
                 pub_year = True
                 continue
@@ -202,14 +202,14 @@ for root, dirs, files in os.walk(input_directory):
 
             # Kompositionsjahr
 
-            if comp_year == True:
-                regexp = re.search("<string>(\d\d\d\d)<\/string>", line)
+            if comp_year:
+                regexp = re.search(r"<string>(\d\d\d\d)<\/string>", line)
                 if regexp:
                     f650y = regexp.group(1)
                 else:
                     f650y = ""
 
-            regexp = re.search("name=\"Year/Date of Composition\"", line)
+            regexp = re.search(r"name=\"Year/Date of Composition\"", line)
             if regexp:
                 comp_year = True
                 continue
@@ -218,12 +218,12 @@ for root, dirs, files in os.walk(input_directory):
 
             # Librettist
 
-            if librettist == True:
-                regexp = re.search("<string>\[\[:Category:(.*?)\|.*<\/string>", line)
+            if librettist:
+                regexp = re.search(r"<string>\[\[:Category:(.*?)\|.*<\/string>", line)
                 if regexp:
                     f700a = regexp.group(1)
 
-            regexp = re.search("name=\"Librettist\"", line)
+            regexp = re.search(r"name=\"Librettist\"", line)
             if regexp:
                 librettist = True
                 continue
@@ -232,18 +232,18 @@ for root, dirs, files in os.walk(input_directory):
 
             # Fußnote
 
-            if footnote == True:
+            if footnote:
 
-                regexp = re.search("<string>\[\[:Category:.*?\|(.*?)\]\]\sand\s\[\[:Category:.*?\|(.*?)\]\]<\/string>", line)
+                regexp = re.search(r"<string>\[\[:Category:.*?\|(.*?)\]\]\sand\s\[\[:Category:.*?\|(.*?)\]\]<\/string>", line)
                 if regexp:
                     person1, person2 = regexp.groups()
                     f500a = person1 + " and " + person2
                 else:
-                    regexp = re.search("<string>\[\[:Category:.*?\|(.*?)\]\]<\/string>", line)
+                    regexp = re.search(r"<string>\[\[:Category:.*?\|(.*?)\]\]<\/string>", line)
                     if regexp:
                         f500a = regexp.group(1)
 
-            regexp = re.search("name=\"Dedication\"", line)
+            regexp = re.search(r"name=\"Dedication\"", line)
             if regexp:
                 footnote = True
                 continue
@@ -252,15 +252,15 @@ for root, dirs, files in os.walk(input_directory):
 
             # Stil (Piece Style)
 
-            if subject1 == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if subject1:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     s = regexp.group(1)
                     s = s.title()
                     f650a.append(s)
                     f590a = s
 
-            regexp = re.search("name=\"Piece Style\"", line)
+            regexp = re.search(r"name=\"Piece Style\"", line)
             if regexp:
                 subject1 = True
                 continue
@@ -269,15 +269,15 @@ for root, dirs, files in os.walk(input_directory):
 
             # Besetzung (Instrumentation)
 
-            if subject2 == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if subject2:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     s = regexp.group(1)
                     s = s.title()
                     f650a.append(s)
                     f590b = s
 
-            regexp = re.search("name=\"Instrumentation\"", line)
+            regexp = re.search(r"name=\"Instrumentation\"", line)
             if regexp:
                 subject2 = True
                 continue
@@ -286,12 +286,12 @@ for root, dirs, files in os.walk(input_directory):
 
             # zeitliche Einordnung (Timeperiod)
 
-            if subject3 == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if subject3:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     f650a.append(regexp.group(1))
 
-            regexp = re.search("name=\"timeperiod\"", line)
+            regexp = re.search(r"name=\"timeperiod\"", line)
             if regexp:
                 subject3 = True
                 continue
@@ -300,12 +300,12 @@ for root, dirs, files in os.walk(input_directory):
 
             # URL
 
-            if url == True:
-                regexp = re.search("<string>(.*)<\/string>", line)
+            if url:
+                regexp = re.search(r"<string>(.*)<\/string>", line)
                 if regexp:
                     f856u = regexp.group(1)
 
-            regexp = re.search("name=\"permlink\"", line)
+            regexp = re.search(r"name=\"permlink\"", line)
             if regexp:
                 url = True
                 continue
@@ -314,7 +314,7 @@ for root, dirs, files in os.walk(input_directory):
 
             # VIAF
 
-            regexp = re.search("<viafId>(\d+)</viafId>", line)  # Feld manchmal vorhanden, aber leer
+            regexp = re.search(r"<viafId>(\d+)</viafId>", line)  # Feld manchmal vorhanden, aber leer
             if regexp:
                 f1000 = regexp.group(1)
                 f1000 = "(VIAF)" + f1000
