@@ -13,6 +13,65 @@ import fileinput
 inputfile = fileinput.input()
 outputfile = open("1_output.mrc", "wb")
 
+langmap = {
+    "da": "dan",
+    "de": "ger",
+    "el": "ell",
+    "en": "eng",
+    "eo": "epo",
+    "es": "spa",
+    "fi": "fin",
+    "fr": "fre",
+    "it": "ita",
+    "la": "lat",
+    "nl": "nld",
+    "no": "nor",
+    "pt": "por",
+    "ro": "rom",
+    "ru": "rus",
+    "sv": "swe",
+    "ja": "jpn",
+    "he": "heb",
+    "hu": "hun",
+    "pl": "pol",
+    "cy": "cym",
+    "cs": "ces",
+    "yi": "yid",
+    "bg": "bul",
+    "is": "isl",
+    "ga": "gle",
+    "sr": "srp",
+    "af": "afr",
+    "iu": "iku",
+    "fy": "fry",
+    "br": "bre",
+    "arp": "arp",
+    "lt": "lit",
+    "tl": "tgl",
+    "ca": "cat",
+    "myn": "myn",
+    "fur": "fur",
+    "enm": "enm",
+    "oc": "oci",
+    "gla": "gla",
+    "rmr": "rmr",
+    "mi": "mri",
+    "ilo": "ilo",
+    "ia": "ina",
+    "nap": "nap",
+    "ceb": "ceb",
+    "gl": "glg",
+    "nah": "nah",
+    "sl": "slv",
+    "te": "tel",
+    "oji": "oji",
+    "ar": "ara",
+    "et": "est",
+    "fa": "fas",
+    "sa": "san",
+    "zh": "zho"
+    }
+
 record = []
 in_record = False
 counter = 0
@@ -27,7 +86,9 @@ for line in inputfile:
     f100a = ""
     f245a = ""
     f250a = ""
-    f260a = ""
+    f260b = ""
+    f260c = ""
+    f300 = ""
     f300a = ""
     f300b = ""
     f300c = ""
@@ -56,11 +117,11 @@ for line in inputfile:
         for file in files:
             if file.endswith('.txt'):
                 f856u = file
-                f001 = file
-                f001 = f001.encode("utf-8")
-                f001 = base64.b64encode(f001)
-                f001 = f001.decode("ascii")
-                f001 = f001.rstrip("=")
+
+        try:
+            f001 = record["rdf:RDF"]["pgterms:ebook"]["@rdf:about"]
+        except (TypeError, KeyError):
+            pass
 
         try:
             f010a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc010"]["#text"]
@@ -73,7 +134,7 @@ for line in inputfile:
             pass
 
         try:
-            f041a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:language"]["#text"]
+            f041a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:language"]["rdf:Description"]["rdf:value"]["#text"]
         except (TypeError, KeyError):
            pass
 
@@ -95,17 +156,17 @@ for line in inputfile:
             pass
 
         try:
-            f260a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:publisher"]
+            f260b = record["rdf:RDF"]["pgterms:ebook"]["dcterms:publisher"]
         except (TypeError, KeyError):
             pass
 
         try:
-            value = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc300"]
-            regexp = re.search("^\$a(.*?)\$b(.*?)\$c(.*?)$", value) #$a11 v. :$bill. ;$c24 cm
-            if regexp:
-                f300a, f300b, f300c = regexp.groups()
-            else:
-                f300a = value
+            f260c = record["rdf:RDF"]["pgterms:ebook"]["dcterms:issued"]["#text"]
+        except (TypeError, KeyError):
+            pass
+
+        try:
+            f300 = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc300"]
         except (TypeError, KeyError):
             pass
 
@@ -139,27 +200,89 @@ for line in inputfile:
 
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
-        marcrecord.leader = "     ncs  22        450 "
+
+       # Leader
+        marcrecord.leader = "     nam  22        4500"
+
+        # 001
+        regexp = re.search("ebooks\/(\d+)", f001)
+        if regexp:
+            f001 = regexp.group(1)
+        else:
+            print("ID fehlt!")
         marcrecord.add("001", data="finc-1-%s" % f001)
+
+        # 007
         marcrecord.add("007", data="cr")
+
+        # Sprache für 008
+        language = f041a
+        f041a = langmap.get(f041a, "")
+        if f041a == "":
+            print("Die Sprache %s fehlt in der Lookup-Tabelle!" % language)
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
+
+        # Übergeordnetes Werk ???
         marcrecord.add("010", a=f010a)
+
+        # ISBN
         marcrecord.add("020", a=f020a)
+
+        # Sprache für 041a
         marcrecord.add("041", a=f041a)
+
+        # 1. Urheber
         marcrecord.add("100", a=f100a)
+
+        # Titel
         marcrecord.add("245", a=f245a)
+
+        # Ausgabevermerk ???
         marcrecord.add("250", a=f250a)
-        marcrecord.add("260", a=f260a)
+
+        # Erscheinungsjahr (bei Project Gutenberg)
+        regexp = re.search("^(\d\d\d\d)", f260c)
+        if regexp:
+            f260c = regexp.group(1)
+        else:
+            f260c = ""
+
+        # Erscheinungsvermerk
+        marcrecord.add("260", b=f260b, c=f260c)
+
+        # Kollationsangaben
+        regexp = re.search("^\$a(.*?)\$b(.*?)\$c(.*?)$", f300) #$a11 v. :$bill. ;$c24 cm
+        if regexp:
+            f300a, f300b, f300c = regexp.groups()
+        else:
+            f300a = f300
         marcrecord.add("300", a=f300a, b=f300b, c=f300c)
+
+        # 440 ??? so in den Rohdaten
         marcrecord.add("440", a=f440a)
+
+        # Fußnote (allgemein)
         marcrecord.add("500", a=f500a)
+
+        # Fußnote (Credits)
         marcrecord.add("508", a=f508a)
+
+        # Zusammenfassung
         marcrecord.add("520", a=f520a)
         marcrecord.add("546", a=f546a)
+
+        # Schlagwörter
         for subject in subjects:
             marcrecord.add("689", a=subject)
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
+        # Medienform
+        marcrecord.add("935", b="cofz")
+
+        # Ansigelung
         marcrecord.add("980", a=f001, b="1", c="Project Gutenberg")
+
+
         outputfile.write(marcrecord.as_marc())
 
         record = []
