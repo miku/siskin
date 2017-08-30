@@ -75,7 +75,7 @@ langmap = {
     "fa": "fas",
     "sa": "san",
     "zh": "zho"
-    }
+}
 
 record = []
 in_record = False
@@ -141,7 +141,7 @@ for line in inputfile:
         try:
             f041a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:language"]["rdf:Description"]["rdf:value"]["#text"]
         except (TypeError, KeyError):
-           pass
+            pass
 
         try:
             f100a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:creator"]["pgterms:agent"]["pgterms:name"]
@@ -256,7 +256,7 @@ for line in inputfile:
         marcrecord.add("260", b=f260b, c=f260c)
 
         # Kollationsangaben
-        regexp = re.search("^\$a(.*?)\$b(.*?)\$c(.*?)$", f300) #$a11 v. :$bill. ;$c24 cm
+        regexp = re.search("^\$a(.*?)\$b(.*?)\$c(.*?)$", f300)  # $a11 v. :$bill. ;$c24 cm
         if regexp:
             f300a, f300b, f300c = regexp.groups()
         else:
@@ -287,7 +287,6 @@ for line in inputfile:
         # Ansigelung
         marcrecord.add("980", a=f001, b="1", c="Project Gutenberg")
 
-
         outputfile.write(marcrecord.as_marc())
 
         record = []
@@ -295,7 +294,7 @@ for line in inputfile:
 
     counter += 1
 
-    #if counter == 500000:
+    # if counter == 500000:
     #    break
 
 inputfile.close()
