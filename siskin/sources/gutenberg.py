@@ -31,8 +31,12 @@ https://www.gutenberg.org/, refs #10875, #5520.
 
 """
 
+import datetime
+
 import luigi
 
+from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -43,11 +47,15 @@ class GutenbergTask(DefaultTask):
     """
     TAG = '1'
 
+    def closest(self):
+        return weekly(date=self.date)
+
 
 class GutenbergDownload(GutenbergTask):
     """
     Download RDF dump.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         output = shellout("wget -O {output} http://www.gutenberg.org/cache/epub/feeds/rdf-files.tar.zip")
@@ -58,10 +66,13 @@ class GutenbergDownload(GutenbergTask):
 
 
 class GutenbergMARC(GutenbergTask):
-    """ Extract and convert. """
+    """
+    Extract and convert.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GutenbergDownload()
+        return GutenbergDownload(date=self.date)
 
     def run(self):
         output = shellout("unzip -p {input} | tar -xO | python {script} > {output}",
