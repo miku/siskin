@@ -13,6 +13,11 @@ import fileinput
 inputfile = fileinput.input()
 outputfile = open("1_output.mrc", "wb")
 
+# Workaround, so we can stream to stdout as well.
+
+if "-" in sys.argv[1:]:
+    outputfile = sys.stdout
+
 langmap = {
     "da": "dan",
     "de": "ger",
@@ -294,4 +299,8 @@ for line in inputfile:
     #    break
 
 inputfile.close()
-outputfile.close()
+
+if outputfile == sys.stdout:
+    outputfile.flush()
+else:
+    outputfile.close()
