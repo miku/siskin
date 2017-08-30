@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+Custom conversion for Gutenberg RDF, refs. #10875.
+
+Usage:
+
+    $ wget http://www.gutenberg.org/cache/epub/feeds/rdf-files.tar.zip
+    $ unzip -p rdf-files.tar.zip | tar -xO | python 1_marcbinary.py -
+
+"""
 import io
 import re
 import sys
