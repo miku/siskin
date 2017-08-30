@@ -57,7 +57,7 @@ class RISMArchives(RISMTask):
 
     Example pattern: rismExportBvb_YYYY-MM-DD.tar.gz
     """
-    date = ClosestDateParameter(default=datetime.date.today)
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         output = shellout("""
@@ -76,7 +76,7 @@ class RISMCombineBinaryMARC(RISMTask):
     """
     Combine and convert to binary MARC.
     """
-    date = ClosestDateParameter(default=datetime.date.today)
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return RISMArchives()
