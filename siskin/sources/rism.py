@@ -63,7 +63,7 @@ class RISMArchives(RISMTask):
     def run(self):
         output = shellout("""
             curl --fail -sL "{url}" |
-            grep -Eo "rismExportBv.*?tar.gz" |
+            grep -Eo "rismExportBvbOut_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].tar.gz" |
             sort | uniq |
             awk '{{ print "{url}/"$1 }}' > {output}
         """, url=self.config.get('rism', 'base-url'))
