@@ -129,7 +129,7 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     """
 
     def run(self):
-        output = shellout("""tar xOzf {input} | span-import -i ieee | pigz -c > {output}""",
+        output = shellout("""tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",
                           input=self.config.get('ieee', 'backlog-archive'),
                           ignoremap={2: 'FIXME later'})
         luigi.LocalTarget(output).move(self.output().path)
