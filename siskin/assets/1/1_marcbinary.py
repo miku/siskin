@@ -10,14 +10,16 @@ Usage:
     $ unzip -p rdf-files.tar.zip | tar -xO | python 1_marcbinary.py -
 
 """
+
+import base64
+import fileinput
 import io
+import json
 import re
 import sys
-import json
+
 import marcx
-import base64
 import xmltodict
-import fileinput
 
 inputfile = fileinput.input()
 outputfile = open("1_output.mrc", "wb")
