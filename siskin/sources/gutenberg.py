@@ -75,7 +75,7 @@ class GutenbergMARC(GutenbergTask):
         return GutenbergDownload(date=self.date)
 
     def run(self):
-        output = shellout("unzip -p {input} | tar -xO | python {script} > {output}",
+        output = shellout("unzip -p {input} | tar -xO | python {script} - > {output}",
                           input=self.input().path, script=self.assets('1/1_marcbinary.py'))
         luigi.LocalTarget(output).move(self.output().path)
 
