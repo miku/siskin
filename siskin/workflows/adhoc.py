@@ -29,7 +29,7 @@
 
 import luigi
 
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.sources.crossref import CrossrefExport
 from siskin.sources.degruyter import DegruyterExport
@@ -69,3 +69,22 @@ class AdhocFormetaSamples(AdhocTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class OADOIDatasetStatusByDOI(AdhocTask):
+    """
+    Download oadoi.org dataset.
+    See release notes at: https://docs.google.com/document/d/1Whfe26oyjTedeW1GGWkq3NADgDbL2R2eXqrJCWS8vcc/edit#
+
+    > These datasets are for non-commercial use. For commercial use, ask us
+      about our Support Level Agreement (team@impactstory.org). For more
+      information about oaDOI, see http://oadoi.org.
+    """
+
+    def run(self):
+        url = "https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz"
+        output = shellout("""wget -O "{output}" "{url}" """, url=url)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="csv.gz"), format=Gzip)
