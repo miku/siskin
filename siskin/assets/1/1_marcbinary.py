@@ -108,7 +108,7 @@ for line in inputfile:
     f300a = ""
     f300b = ""
     f300c = ""
-    f440a = ""
+    f490a = ""
     f500a = ""
     f508a = ""
     f520a = ""
@@ -117,6 +117,7 @@ for line in inputfile:
     f856u = ""
     files = []
     subjects = []
+    mediatype = ""
 
     if line.startswith("<rdf:RDF"):
         in_record = True
@@ -131,8 +132,22 @@ for line in inputfile:
             files.append(file.get("pgterms:file", {}).get("@rdf:about", ""))
 
         for file in files:
-            if file.endswith('.txt'):
-                f856u = file
+
+            regexp = re.search("(http:\/\/www\.gutenberg\.org\/ebooks\/\d+)", file)
+            if regexp:
+                f856u = regexp.group(1)
+                mediatype = "ebook"
+                break
+        else:
+
+            for file in files:
+                if file.endswith('.mp3'):
+                    regexp = re.search("(http:\/\/www\.gutenberg\.org\/files\/\d+)", file)
+                    if regexp:
+                        f856u = regexp.group(1)
+                        mediatype = "audio"
+                        print("audio")
+                        break
 
         try:
             f001 = record["rdf:RDF"]["pgterms:ebook"]["@rdf:about"]
@@ -140,12 +155,12 @@ for line in inputfile:
             pass
 
         try:
-            f010a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc010"]["#text"]
+            f010a = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc010"]
         except (TypeError, KeyError):
             pass
 
         try:
-            f020a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc020"]["#text"]
+            f020a = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc020"]
         except (TypeError, KeyError):
             pass
 
@@ -182,12 +197,12 @@ for line in inputfile:
             pass
 
         try:
-            f300 = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc300"]
+            f300 = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc300"]
         except (TypeError, KeyError):
             pass
 
         try:
-            f440a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc440"]
+            f490a = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc440"]
         except (TypeError, KeyError):
             pass
 
@@ -197,17 +212,17 @@ for line in inputfile:
             pass
 
         try:
-            f508a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc508"]
+            f508a = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc508"]
         except (TypeError, KeyError):
             pass
 
         try:
-            f520a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc520"]
+            f520a = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc520"]
         except (TypeError, KeyError):
             pass
 
         try:
-            f546a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:marc546"]
+            f546a = record["rdf:RDF"]["pgterms:ebook"]["pgterms:marc546"]
         except (TypeError, KeyError):
             pass
 
@@ -217,25 +232,38 @@ for line in inputfile:
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
 
-       # Leader
-        marcrecord.leader = "     nam  22        4500"
+        # Leader
+        if mediatype == "ebook":
+            marcrecord.leader = "     nam  22        4500"
+        elif mediatype == "audio":
+            marcrecord.leader = "     cam  22        4500"
+        else:
+            print("Keine Formatzuweisung möglich: " + f001 + " " + f245a) # Problem: manche haben in den Rohdaten URL, die aber nicht gefunden wird
+            record = []
+            in_record = False
+            continue
 
         # 001
         regexp = re.search("ebooks\/(\d+)", f001)
         if regexp:
             f001 = regexp.group(1)
         else:
-            print("ID fehlt!")
+            pass
+            #print("ID fehlt!")
         marcrecord.add("001", data="finc-1-%s" % f001)
 
         # 007
-        marcrecord.add("007", data="cr")
+        if mediatype == "ebook":
+             marcrecord.add("007", data="cr")
+        elif mediatype == "audio":
+             marcrecord.add("007", data="q")
 
         # Sprache für 008
         language = f041a
         f041a = langmap.get(f041a, "")
         if f041a == "":
-            print("Die Sprache %s fehlt in der Lookup-Tabelle!" % language)
+            pass
+            #print("Die Sprache %s fehlt in der Lookup-Tabelle!" % language)
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
 
         # Übergeordnetes Werk ???
@@ -275,7 +303,7 @@ for line in inputfile:
         marcrecord.add("300", a=f300a, b=f300b, c=f300c)
 
         # 440 ??? so in den Rohdaten
-        marcrecord.add("440", a=f440a)
+        marcrecord.add("490", a=f490a)
 
         # Fußnote (allgemein)
         marcrecord.add("500", a=f500a)
@@ -290,6 +318,8 @@ for line in inputfile:
         # Schlagwörter
         for subject in subjects:
             marcrecord.add("689", a=subject)
+
+        # URL
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
         # Medienform
