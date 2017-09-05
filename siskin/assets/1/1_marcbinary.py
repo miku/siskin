@@ -96,6 +96,7 @@ for line in inputfile:
     line = line.strip()
 
     f001 = ""
+    f007 = "cr"
     f010a = ""
     f020a = ""
     f041a = ""
@@ -117,7 +118,7 @@ for line in inputfile:
     f856u = ""
     files = []
     subjects = []
-    mediatype = ""
+    leader_6_8 = "nam"
 
     if line.startswith("<rdf:RDF"):
         in_record = True
@@ -133,21 +134,14 @@ for line in inputfile:
 
         for file in files:
 
+            if file.endswith(".mp3") or file.endswith(".ogg"):
+                leader_6_8 = "cim"
+                f007 = "su"
+
             regexp = re.search("(http:\/\/www\.gutenberg\.org\/ebooks\/\d+)", file)
             if regexp:
                 f856u = regexp.group(1)
-                mediatype = "ebook"
                 break
-        else:
-
-            for file in files:
-                if file.endswith('.mp3'):
-                    regexp = re.search("(http:\/\/www\.gutenberg\.org\/files\/\d+)", file)
-                    if regexp:
-                        f856u = regexp.group(1)
-                        mediatype = "audio"
-                        print("audio")
-                        break
 
         try:
             f001 = record["rdf:RDF"]["pgterms:ebook"]["@rdf:about"]
@@ -233,15 +227,7 @@ for line in inputfile:
         marcrecord.strict = False
 
         # Leader
-        if mediatype == "ebook":
-            marcrecord.leader = "     nam  22        4500"
-        elif mediatype == "audio":
-            marcrecord.leader = "     cam  22        4500"
-        else:
-            print("Keine Formatzuweisung möglich: " + f001 + " " + f245a) # Problem: manche haben in den Rohdaten URL, die aber nicht gefunden wird
-            record = []
-            in_record = False
-            continue
+        marcrecord.leader = "     %s  22        4500" % leader_6_8
 
         # 001
         regexp = re.search("ebooks\/(\d+)", f001)
@@ -253,10 +239,7 @@ for line in inputfile:
         marcrecord.add("001", data="finc-1-%s" % f001)
 
         # 007
-        if mediatype == "ebook":
-             marcrecord.add("007", data="cr")
-        elif mediatype == "audio":
-             marcrecord.add("007", data="q")
+        marcrecord.add("007", data=f007)
 
         # Sprache für 008
         language = f041a
