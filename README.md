@@ -69,13 +69,13 @@ Software versioning
 Since siskin works mostly *on data*, software versioning is a bit less strict,
 but we try to adhere to the following rules:
 
-* *major* changes: You need to recreate all your data from scratch.
-* *minor* changes: We added, renamed or removed at least one *task*. You will
+* *major* changes: *You need to recreate all your data from scratch*.
+* *minor* changes: We added, renamed or removed *at least one task*. You will
   have to recreate a subset of the tasks to see the changes. You might need to change
-  pipelines depending on those tasks, because the might not exist any more or have been renamed.
-* *revision* changes: A modification within existing tasks (e.g.
-  bugfixes). You will have to recreate a subset of the tasks to see this changes,
-  but no new task is introduced. No pipeline is broken, that wasn't already.
+  pipelines depending on those tasks, because they might not exist any more or have been renamed.
+* *revision* changes: A modification within existing tasks (e.g. bugfixes).
+  You will have to recreate a subset of the tasks to see this changes, but no new
+  task is introduced. *No pipeline is broken, that wasn't already*.
 
 These rules apply for version 0.2.0 and later.
 
