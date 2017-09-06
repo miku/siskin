@@ -46,7 +46,7 @@ try:
 except (AttributeError, ImportError):
     pass
 
-__version__ = '0.1.53'
+__version__ = '0.2.0'
 
 config = Config.instance()
 tempfile.tempdir = config.get('core', 'tempdir', fallback=tempfile.gettempdir())
