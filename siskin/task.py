@@ -106,7 +106,7 @@ class DefaultTask(BaseTask):
         sid = self.TAG.lstrip("0")
 
         try:
-            write_url = config.get("amsl", "write-url", None)
+            write_url = config.get("amsl", "write-url")
             if write_url is None:
                 self.logger.warn("Missing amsl.write-url configuration, skip stamping.")
                 return
