@@ -1,7 +1,8 @@
 siskin
 ======
 
-Various tasks for heterogeneous metadata handling.
+Various tasks for heterogeneous metadata handling. Based on
+[luigi](https://github.com/spotify/luigi) from Spotify.
 
 [![pypi version](http://img.shields.io/pypi/v/siskin.svg?style=flat)](https://pypi.python.org/pypi/siskin)
 
@@ -10,7 +11,7 @@ Various tasks for heterogeneous metadata handling.
 Install
 -------
 
-Tested on vanilla CentOS 6.7, 7.1, 7.2 and Precise 64 boxes:
+Tested on vanilla CentOS 7.1, 7.2 and Precise 64 boxes:
 
     $ curl -sL https://git.io/vg2iq | sudo -i bash
 
