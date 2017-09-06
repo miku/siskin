@@ -118,6 +118,7 @@ for line in inputfile:
     f856u = ""
     files = []
     subjects = []
+    authors = []
     leader_6_8 = "nam"
 
     if line.startswith("<rdf:RDF"):
@@ -165,8 +166,9 @@ for line in inputfile:
 
         try:
             f100a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:creator"]["pgterms:agent"]["pgterms:name"]
-            if f100a == "Various":
-                f100a = ""
+            if author == "Various":
+                author = ""
+            authors.append(author)
         except (TypeError, KeyError):
             pass
 
@@ -259,7 +261,12 @@ for line in inputfile:
         marcrecord.add("041", a=f041a)
 
         # 1. Urheber
-        marcrecord.add("100", a=f100a)
+        if len(authors) > 0:
+                f100a = authors[0]
+                marcrecord.add("100", a=f100a)
+                if len(authors) > 1:
+                    for f700a in authors[1:]:
+                        marcrecord.add("700", a=f700a)
 
         # Titel
         marcrecord.add("245", a=f245a)
