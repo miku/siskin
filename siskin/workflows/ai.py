@@ -465,7 +465,7 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort -S50% -t, -k3 > {output} """,
+        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort -S20% -t, -k3 > {output} """,
                           size=self.batchsize, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
