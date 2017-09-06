@@ -49,13 +49,7 @@ For siskin updates a
 $ pip install -U siskin
 ```
 
-should suffices. For a full update, run
-
-```
-$ curl -sL https://git.io/vg2iq | sudo -i bash
-```
-
-again.
+should suffices.
 
 Run
 ---
