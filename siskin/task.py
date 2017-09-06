@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0103,W0232,C0301
+# pylint: disable=C0103,W0232,C0301,W0703
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
