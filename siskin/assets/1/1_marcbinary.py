@@ -22,12 +22,13 @@ import marcx
 import xmltodict
 
 inputfile = fileinput.input()
-outputfile = open("1_output.mrc", "wb")
 
 # Workaround, so we can stream to stdout as well.
+outputfile = sys.stdout
 
-if "-" in sys.argv[1:]:
-    outputfile = sys.stdout
+if "-" not in sys.argv[1:]:
+    outputfile = open("1_output.mrc", "wb")
+
 
 langmap = {
     "da": "dan",
