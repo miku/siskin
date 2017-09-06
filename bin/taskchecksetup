@@ -58,6 +58,6 @@ if __name__ == '__main__':
 
     for program, msg in sorted(deps):
         if which(program) is None:
-            print('%sxx\t%s%s\t%s' % (bcolors.WARNING, bcolors.ENDC, program, msg))
+            print('%sxx\t%s%s\t%s' % (bcolors.FAIL, bcolors.ENDC, program, msg))
         else:
             print('%sok\t%s%s' % (bcolors.OKGREEN, bcolors.ENDC, program))
