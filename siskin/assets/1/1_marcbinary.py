@@ -115,6 +115,7 @@ for line in inputfile:
     f520a = ""
     f546a = ""
     f689a = ""
+    f700a = ""
     f856u = ""
     files = []
     subjects = []
@@ -128,7 +129,7 @@ for line in inputfile:
         record.append(line)
 
     if line.startswith("</rdf:RDF>"):
-        record = xmltodict.parse('\n'.join(record), force_list=("dcterms:hasFormat", "dcterms:subject"))
+        record = xmltodict.parse('\n'.join(record), force_list=("dcterms:hasFormat", "dcterms:subject", "dcterms:creator"))
 
         for file in record["rdf:RDF"]["pgterms:ebook"].get("dcterms:hasFormat", []):
             files.append(file.get("pgterms:file", {}).get("@rdf:about", ""))
@@ -165,10 +166,11 @@ for line in inputfile:
             pass
 
         try:
-            author = record["rdf:RDF"]["pgterms:ebook"]["dcterms:creator"]["pgterms:agent"]["pgterms:name"]
-            if author == "Various":
-                author = ""
-            authors.append(author)
+            for creator in record["rdf:RDF"]["pgterms:ebook"]["dcterms:creator"]:
+                author = creator["pgterms:agent"]["pgterms:name"]
+                if author == "Various":
+                    author = ""
+                authors.append(author)
         except (TypeError, KeyError):
             pass
 
@@ -262,11 +264,8 @@ for line in inputfile:
 
         # 1. Urheber
         if len(authors) > 0:
-                f100a = authors[0]
-                marcrecord.add("100", a=f100a)
-                if len(authors) > 1:
-                    for f700a in authors[1:]:
-                        marcrecord.add("700", a=f700a)
+            f100a = authors[0]
+            marcrecord.add("100", a=f100a)
 
         # Titel
         marcrecord.add("245", a=f245a)
@@ -308,6 +307,11 @@ for line in inputfile:
         # Schlagwörter
         for subject in subjects:
             marcrecord.add("689", a=subject)
+
+        # 2. und mehr Urheber
+        if len(authors) > 1:
+            for f700a in authors[1:]:
+                marcrecord.add("700", a=f700a)
 
         # URL
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
