@@ -118,6 +118,7 @@ setup(name='siskin',
           ]},
       scripts=[
           'bin/taskcat',
+          'bin/taskchecksetup',
           'bin/taskconfig',
           'bin/taskdeps-dot',
           'bin/taskdir',

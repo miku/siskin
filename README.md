@@ -11,9 +11,34 @@ Various tasks for heterogeneous metadata handling. Based on
 Install
 -------
 
-Tested on vanilla CentOS 7.1, 7.2 and Precise 64 boxes:
+```
+$ pip install -U siskin
+```
 
-    $ curl -sL https://git.io/vg2iq | sudo -i bash
+Currently, Python 2 and 3 support is on the way and the installation might be a
+bit flaky.
+
+Run taskchecksetup to see, what needs to be installed.
+
+```shell
+$ taskchecksetup
+ok     7z
+ok     curl
+ok     filterline
+ok     flux.sh
+ok     groupcover
+ok     hurrly
+ok     jq
+ok     metha-sync
+ok     microblob
+ok     pigz
+ok     solrbulk
+ok     span-import
+ok     unzip
+ok     wget
+ok     xmllint
+ok     yaz-marcdump
+```
 
 Update
 ------

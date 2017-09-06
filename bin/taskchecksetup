@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Check external tools dependencies.
+"""
+import os
+
+
+def which(program):
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+if __name__ == '__main__':
+    deps = [
+        ('7z', 'http://www.7-zip.org/7z.html'),
+        ('curl', 'https://curl.haxx.se/'),
+        ('filterline', 'http://github.com/miku/filterline/releases'),
+        ('flux.sh', 'https://github.com/culturegraph/metafacture-core/wiki'),
+        ('groupcover', 'http://github.com/miku/groupcover/releases'),
+        ('hurrly', 'http://github.com/miku/hurrly/releases'),
+        ('jq', 'https://stedolan.github.io/jq/'),
+        ('metha-sync', 'http://github.com/miku/metha/releases'),
+        ('microblob', 'http://github.com/miku/microblob/releases'),
+        ('pigz', 'https://zlib.net/pigz/'),
+        ('solrbulk', 'http://github.com/miku/solrbulk/releases'),
+        ('span-import', 'http://github.com/miku/span/releases'),
+        ('unzip', 'http://www.info-zip.org/pub/infozip/'),
+        ('wget', 'https://www.gnu.org/software/wget/'),
+        ('xmllint', 'http://xmlsoft.org/xmllint.html'),
+        ('yaz-marcdump', 'http://www.indexdata.com/yaz'),
+    ]
+
+    for program, msg in sorted(deps):
+        if which(program) is None:
+            print('%sxx\t%s%s\t%s' % (bcolors.WARNING, bcolors.ENDC, program, msg))
+        else:
+            print('%sok\t%s%s' % (bcolors.OKGREEN, bcolors.ENDC, program))
