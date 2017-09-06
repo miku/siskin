@@ -165,7 +165,7 @@ for line in inputfile:
             pass
 
         try:
-            f100a = record["rdf:RDF"]["pgterms:ebook"]["dcterms:creator"]["pgterms:agent"]["pgterms:name"]
+            author = record["rdf:RDF"]["pgterms:ebook"]["dcterms:creator"]["pgterms:agent"]["pgterms:name"]
             if author == "Various":
                 author = ""
             authors.append(author)
