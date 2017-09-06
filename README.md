@@ -66,8 +66,8 @@ The installation script adds basic config files. Edit them.
 Software versioning
 -------------------
 
-Since siskin works mostly *on data*, software versioning is a bit less strict,
-but we try to adhere to the following rules:
+Since siskin works mostly *on data*, software versioning differs a bit, but we
+try to adhere to the following rules:
 
 * *major* changes: *You need to recreate all your data from scratch*.
 * *minor* changes: We added, renamed or removed *at least one task*. You will
