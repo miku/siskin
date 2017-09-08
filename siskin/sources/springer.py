@@ -65,6 +65,7 @@ class SpringerProvided(SpringerTask, luigi.ExternalTask):
     Provided. This is deprecated via #6647. Data access via download, see: SpringerDownload.
     """
 
+    @deprecated
     def output(self):
         return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'), format=Gzip)
 
