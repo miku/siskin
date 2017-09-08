@@ -30,6 +30,8 @@ def deprecated(func):
     """
     Mark functions as deprecated. It will result in a warning being emmitted
     when the function is used.
+
+    TODO: emit a bit more useful text.
     """
 
     @functools.wraps(func)

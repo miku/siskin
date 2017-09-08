@@ -43,11 +43,12 @@ import re
 
 import luigi
 import six
+
 from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
+from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
@@ -87,13 +88,16 @@ class SpringerDownload(SpringerTask):
 
 class SpringerCleanFields(SpringerTask):
     """
-    Clean abstracts, refs #...
+    As per Google Hangout 2017-09-08 we define "exchange-ready" as
+    "no-post-processing-required". Hence this task marked deprecated, use
+    SpringerDownload task instead.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return SpringerDownload(date=self.date)
 
+    @deprecated
     def run(self):
         striptags = lambda s: re.sub(r'\$\$[^\$]*\$\$', '', re.sub(r'<[^>]*>', '', s))
         with self.input().open() as handle:
@@ -124,7 +128,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SpringerCleanFields(date=self.date)
+	return SpringerDownload(date=self.date)
 
     def output(self):
         return self.input()
