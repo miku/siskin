@@ -128,7 +128,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-	return SpringerDownload(date=self.date)
+        return SpringerDownload(date=self.date)
 
     def output(self):
         return self.input()
