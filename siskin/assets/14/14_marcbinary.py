@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+# coding: utf-8
+
+import io
+import os
+import re
+import sys
+
+import pymarc
+import marcx
+
+copytags = ("003", "004", "005", "006", "007", "008", "009", "010", "011", "012",
+            "013", "014", "015", "016", "017", "018", "019", "020", "021", "022", "023",
+            "024", "025", "026", "027", "028", "029", "030", "031", "032", "033", "034",
+            "035", "036", "037", "038", "039", "040", "041", "042", "043", "044", "045",
+            "046", "047", "048", "049", "050", "051", "052", "053", "054", "055", "056",
+            "057", "058", "059", "060", "061", "062", "063", "064", "065", "066", "067",
+            "068", "069", "070", "071", "072", "073", "074", "075", "076", "077", "078",
+            "079", "080", "081", "082", "083", "085", "086", "087", "088", "089", "090",
+            "091", "092", "093", "094", "095", "096", "097", "098", "099", "100", "101",
+            "102", "103", "104", "105", "106", "107", "108", "110", "111", "112", "113",
+            "114", "115", "116", "117", "118", "120", "121", "124", "125", "126", "129",
+            "130", "131", "134", "135", "138", "142", "145", "148", "149", "151", "155",
+            "156", "157", "160", "162", "163", "164", "165", "166", "167", "173", "174",
+            "175", "176", "178", "183", "184", "187", "192", "200", "204", "210", "212",
+            "234", "240", "243", "245", "246", "254", "256", "260", "300", "340", "383",
+            "386", "387", "447", "448", "456", "490", "500", "504", "510", "518", "520",
+            "541", "561", "563", "590", "591", "592", "593", "594", "595", "596", "597",
+            "650", "657", "700", "710", "730", "762", "772", "773", "775", "787", "852")
+
+inputfile = open("14_input.mrc", "rb")
+outputfile = open("14_output.mrc", "wb")
+
+reader = pymarc.MARCReader(inputfile)
+
+def get_links(record):
+    """
+    Given a marc record, just return all links (from 856.u).
+
+    Same as:
+
+        >>> record = marcx.Record()
+        >>> record.add('856', u='http://google.com')
+        >>> list(record.itervalues('856.u'))
+        ['http://google.com']
+
+    """
+    for field in record.get_fields('856'):
+        for url in field.get_subfields('u'):
+             yield url
+
+for i, oldrecord in enumerate(reader, start=1):
+
+    newrecord = marcx.Record()
+
+    # prüfen, ob es sich um Digitalisat handelt
+    f856 = oldrecord["856"]
+    if f856:
+        for field in oldrecord.get_fields("856"):
+            if "http" in field:
+                f856 = field
+            else:
+                f856 = ""
+    else:
+        continue
+
+    # leader
+    leader = "     " + oldrecord.leader[5:]
+    newrecord.leader = leader
+
+    # 001
+    f001 = oldrecord["001"].data
+    newrecord.add("001", data="finc-14-%s" % f001)
+
+    # Originalfelder, die ohne Änderung übernommen werden
+    for tag in copytags:
+        for field in oldrecord.get_fields(tag):
+            newrecord.add_field(field)
+
+    # 856 (Digitalisat)
+    links = list(get_links(oldrecord))
+    if len(links) > 0:
+        newrecord.add("856", q="text/html", _3="Link zum Digitalisat", u=links[0])
+
+    # 856 (Datensatz)
+    newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://opac.rism.info/search?id=" + f001)
+
+    # 970
+    newrecord.add("970", c="PN")
+
+    # 980
+    newrecord.add("980", a=f001, b="14", c="RISM")
+
+    outputfile.write(newrecord.as_marc())
+
+    if i == 500:
+        break
+
+inputfile.close()
+outputfile.close()
