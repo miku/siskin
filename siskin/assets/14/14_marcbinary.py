@@ -28,10 +28,6 @@ copytags = ("003", "004", "005", "006", "007", "008", "009", "010", "011", "012"
             "541", "561", "563", "590", "591", "592", "593", "594", "595", "596", "597",
             "650", "657", "700", "710", "730", "762", "772", "773", "775", "787", "852")
 
-inputfile = open("14_input.mrc", "rb")
-outputfile = open("14_output.mrc", "wb")
-
-reader = pymarc.MARCReader(inputfile)
 
 def get_links(record):
     """
@@ -49,9 +45,20 @@ def get_links(record):
         for url in field.get_subfields('u'):
              yield url
 
+
+inputfile = open("14_input.mrc", "rb")
+outputfile = open("14_output.mrc", "wb")
+
+reader = pymarc.MARCReader(inputfile)
+
 for i, oldrecord in enumerate(reader, start=1):
 
     newrecord = marcx.Record()
+
+    # prüfen, ob Titel vorhanden ist
+    f245 = oldrecord["245"]
+    if not f245:
+        continue
 
     # prüfen, ob es sich um Digitalisat handelt
     f856 = oldrecord["856"]
@@ -93,8 +100,8 @@ for i, oldrecord in enumerate(reader, start=1):
 
     outputfile.write(newrecord.as_marc())
 
-    if i == 500:
-        break
+    #if i == 500:
+    #    break
 
 inputfile.close()
 outputfile.close()
