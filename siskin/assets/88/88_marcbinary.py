@@ -22,6 +22,9 @@ for row in range(sheet.nrows):
 	csv_record = sheet.row_values(row)
 	marc_record = marcx.Record(force_utf8=True)
 
+	if csv_record[0] == "rft.jtitle":
+		continue
+
 	# Leader
 	marc_record.leader = "     nca  22        450 "
 
@@ -50,7 +53,6 @@ for row in range(sheet.nrows):
 	f260b = str(f260b)
 	f260c = csv_record[9]
 	f260c = str(f260c).rstrip(".0")
-	print(f260c)
 	marc_record.add("260", b=f260b, c=f260c)
 	
 	# Seitenzahl
