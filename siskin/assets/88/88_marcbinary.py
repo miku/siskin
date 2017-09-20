@@ -26,7 +26,7 @@ for row in range(sheet.nrows):
 		continue
 
 	# Leader
-	marc_record.leader = "     nca  22        450 "
+	marc_record.leader = "     naa  22        450 "
 
 	# ID
 	f001 = csv_record[13]
@@ -34,6 +34,9 @@ for row in range(sheet.nrows):
 	f001 = base64.b64encode(f001)
 	f001 = f001.decode("ascii")
 	marc_record.add("001", data="finc-88-%s" % f001)
+
+	# 007
+	marc_record.add("007", data="cr")
 
 	# 1. Schöpfer
 	f100a = csv_record[1]
