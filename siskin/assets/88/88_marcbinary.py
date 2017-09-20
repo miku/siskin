@@ -10,7 +10,7 @@ outputfile = open("88_output.mrc", "wb")
 workbook = xlrd.open_workbook("88 RuG Aug 2017.xlsx")
 sheet = workbook.sheet_by_name("Tabelle2")
 
-for row in range(sheet.nrows):
+for i, row in enumerate(range(sheet.nrows), start=0):
 	
 	csv_record = sheet.row_values(row)
 	marc_record = marcx.Record(force_utf8=True)
@@ -19,17 +19,11 @@ for row in range(sheet.nrows):
 		continue
 
 	# Leader
-	marc_record.leader = "     naa  22        450 "
+	marc_record.leader = "     naa  22        4500"
 
 	# ID
-	f001 = csv_record[13]
-	f001 = f001.encode("utf-8")
-	f001 = base64.b64encode(f001)
-	f001 = f001.decode("ascii")
-	f001 = f001.rstrip("==")
-	pages = csv_record[12]
-	pages = str(pages).rstrip(".0")
-	marc_record.add("001", data="finc-88-%s-%s" % (f001, pages))
+	f001 = str(i)
+	marc_record.add("001", data="finc-88-" + f001)
 
 	# 007
 	marc_record.add("007", data="cr")
