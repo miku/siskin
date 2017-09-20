@@ -26,7 +26,10 @@ for row in range(sheet.nrows):
 	f001 = f001.encode("utf-8")
 	f001 = base64.b64encode(f001)
 	f001 = f001.decode("ascii")
-	marc_record.add("001", data="finc-88-%s" % f001)
+	f001 = f001.rstrip("==")
+	pages = csv_record[12]
+	pages = str(pages).rstrip(".0")
+	marc_record.add("001", data="finc-88-%s-%s" % (f001, pages))
 
 	# 007
 	marc_record.add("007", data="cr")
@@ -89,7 +92,7 @@ for row in range(sheet.nrows):
 	marc_record.add("935", b="cofz")
 
 	# Kollektion
-	marc_record.add("980", a=f001, b="88", c="Rundfunk und Geschichte")
+	marc_record.add("980", a=f001, b="88", c='Zeitschrift "Rundfunk und Geschichte"')
 
 
 	outputfile.write(marc_record.as_marc())
