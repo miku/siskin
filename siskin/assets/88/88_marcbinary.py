@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import io
-import re
-import os
-import sys
 import base64
-import tempfile
-
 import xlrd
-import csv
 import marcx
 
 outputfile = open("88_output.mrc", "wb")
@@ -38,6 +31,10 @@ for row in range(sheet.nrows):
 	# 007
 	marc_record.add("007", data="cr")
 
+	# ISSN
+	f022a = csv_record[4]
+	marc_record.add("022", a=f022a)
+
 	# 1. Schöpfer
 	f100a = csv_record[1]
 	f100a = f100a.split("; ")
@@ -63,7 +60,7 @@ for row in range(sheet.nrows):
 	f300a = str(f300a).rstrip(".0")
 	marc_record.add("300", a=f300a)
 
-	# weite Schöpfer
+	# weitere Schöpfer
 	f700a = csv_record[1]
 	f700a = f700a.split("; ")
 	if len(f700a) > 1:
