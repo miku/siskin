@@ -29,7 +29,12 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	marc_record.add("007", data="cr")
 
 	#008
-	marc_record.add("008", data="130227uu20uuuuuuxx uuup     c")
+	f260c = csv_record[9]
+	f260c = str(f260c).rstrip(".0")
+	if len(f260c) == 4:
+		marc_record.add("008", data="130227u%suuuuuxx uuup     c" % f260c)
+	else:
+		marc_record.add("008", data="130227uu20uuuuuuxx uuup     c")
 
 	# ISSN
 	f022a = csv_record[4]
