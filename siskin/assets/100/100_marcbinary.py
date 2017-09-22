@@ -28,6 +28,9 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	# 007
 	marc_record.add("007", data="cr")
 
+	#008
+	marc_record.add("008", data="130227uu20uuuuuuxx uuup     c")
+
 	# ISSN
 	f022a = csv_record[5]
 	marc_record.add("022", a=f022a)
@@ -51,7 +54,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	f260b = f260b.lstrip("Hamburg: ")
 	f260c = csv_record[8]
 	f260c = str(f260c).rstrip(".0")
-	publisher = ["a", "Hamburg", "b", f260b, "c", f260c]
+	publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
 	marc_record.add("260", subfields=publisher)
 	
 	# Seitenzahl
