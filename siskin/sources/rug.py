@@ -4,6 +4,7 @@
 # Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -23,7 +24,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Studienkreis Rundfunk und Geschichte, refs #5517, #11005.
+Studienkreis Rundfunk und Geschichte, refs #5517, #11005, #11424.
 
 Config
 ------
@@ -34,6 +35,7 @@ input = /path/to/excel.file.xls
 """
 
 import luigi
+from gluish.utils import shellout
 
 from siskin.task import DefaultTask
 
@@ -47,4 +49,20 @@ class RUGSpreadsheet(RUGTask, luigi.ExternalTask):
     """ It starts with Excel. """
 
     def output(self):
-        return luigi.LocalTarget(self.config.get('rug', 'input'))
+        return luigi.LocalTarget(path=self.config.get('rug', 'input'))
+
+
+class RUGMARC(RUGTask):
+    """ Convert Excel to BinaryMarc """
+
+    def requires(self):
+        return RUGSpreadsheet()
+
+    def run(self):
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets("88/88_marcbinary.py"),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))

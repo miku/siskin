@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import base64
+"""
+Usage example:
+
+    $ 88_marcbinary.py [INPUT] [OUTPUT]
+"""
+
+from builtins import *
 import xlrd
 import marcx
+import sys
+import io
 
-outputfile = open("88_output.mrc", "wb")
+# Default input and output.
+inputfilename, outputfilename = "88 RuG Aug 2017.xlsx", "88_output.mrc"
 
-workbook = xlrd.open_workbook("88 RuG Aug 2017.xlsx")
+if len(sys.argv) == 3:
+	inputfilename, outputfilename = sys.argv[1:]
+
+outputfile = io.open(outputfilename, "wb")
+
+workbook = xlrd.open_workbook(inputfilename)
 sheet = workbook.sheet_by_name("Tabelle2")
 
 for i, row in enumerate(range(sheet.nrows), start=0):
