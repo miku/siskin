@@ -33,7 +33,7 @@ from siskin.task import DefaultTask
 from siskin.sources.amsl import AMSLFilterConfig
 
 """
-IJOC, refs #7138.
+IJOC, refs #7138, #11005.
 """
 
 
