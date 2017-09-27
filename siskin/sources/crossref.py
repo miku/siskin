@@ -66,11 +66,9 @@ from gluish.utils import date_range, shellout
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
-from siskin.utils import ElasticsearchMixin, URLCache
+from siskin.utils import URLCache
 
 standard_library.install_aliases()
-
-
 
 
 class CrossrefTask(DefaultTask):
