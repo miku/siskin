@@ -98,7 +98,7 @@ class SpringerIssue11557(SpringerTask):
 
     def run(self):
         output = shellout("""
-            jq 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"]) | .["finc.mega_collection"] = [.["finc.mega_collection"]]' < <(unpigz -c {input}) | pigz -c > {output}
+            jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"]) | .["finc.mega_collection"] = [.["finc.mega_collection"]]' < <(unpigz -c {input}) | pigz -c > {output}
         """, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
