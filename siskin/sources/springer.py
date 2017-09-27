@@ -45,7 +45,7 @@ import luigi
 import six
 
 from gluish.format import Gzip
-from gluish.intervals import monthly
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.decorator import deprecated
@@ -57,7 +57,7 @@ class SpringerTask(DefaultTask):
     TAG = 'springer'
 
     def closest(self):
-        return monthly(date=self.date)
+        return weekly(date=self.date)
 
 
 class SpringerProvided(SpringerTask, luigi.ExternalTask):
