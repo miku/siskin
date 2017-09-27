@@ -1,13 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding: utf-8
 
-import base64
+from builtins import *
 import xlrd
 import marcx
 
-outputfile = open("100_output.mrc", "wb")
+# Default input and output.
+inputfilename = "100_Medienwissenschaft_Berichte_Papiere.xlsx"
+outputfilename = "100_output.mrc"
 
-workbook = xlrd.open_workbook("100 Medienwissenschaft Berichte Papiere 001_173 Aug 2017.xlsx")
+if len(sys.argv) == 3:
+	inputfilename, outputfilename = sys.argv[1:]
+
+outputfile = open(outputfilename, "wb")
+
+workbook = xlrd.open_workbook(inputfilename)
 sheet = workbook.sheet_by_name("Tabelle1")
 
 for i, row in enumerate(range(sheet.nrows), start=0):
