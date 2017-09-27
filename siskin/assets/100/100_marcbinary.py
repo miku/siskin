@@ -2,8 +2,9 @@
 # coding: utf-8
 
 from builtins import *
-import xlrd
+
 import marcx
+import xlrd
 
 # Default input and output.
 inputfilename = "100_Medienwissenschaft_Berichte_Papiere.xlsx"

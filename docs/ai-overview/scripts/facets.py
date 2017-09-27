@@ -1,8 +1,9 @@
 # coding: utf-8
 
-import json
-import matplotlib.pyplot as plt
 import itertools
+import json
+
+import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
 

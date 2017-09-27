@@ -33,7 +33,6 @@ import luigi
 from gluish.format import Gzip
 from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter
-from siskin.oai import OAIIntermediateSchema
 from siskin.task import DefaultTask
 
 

@@ -31,14 +31,13 @@ open access, peer-reviewed journals.
 http://doaj.org
 """
 
-from builtins import map
-from builtins import range
 import datetime
 import itertools
 import json
 import operator
 import tempfile
 import time
+from builtins import map, range
 
 import luigi
 

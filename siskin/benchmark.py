@@ -33,9 +33,9 @@ Just logs the output. Could be extended to send this information to some service
 if available.
 """
 
-from builtins import object
 import functools
 import logging
+from builtins import object
 from timeit import default_timer
 
 logger = logging.getLogger('gluish')

@@ -3,17 +3,19 @@
 # pylint: disable=C0103
 
 from __future__ import print_function
+
+import base64
+import io
+import os
+import re
+import sqlite3
+import sys
+import tempfile
 from builtins import bytes
 
-import os
-import io
-import re
-import sys
 import marcx
-import base64
-import sqlite3
-import tempfile
 import xmltodict
+
 
 def clear_format(format):
     if isinstance(format, list):

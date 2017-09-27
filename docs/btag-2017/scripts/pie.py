@@ -3,12 +3,14 @@
 """
 Sources and sizes.
 """
-import json
-import requests
-import matplotlib.pyplot as plt
-from matplotlib import cm
-import numpy as np
 import base64
+import json
+
+import requests
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import cm
 
 addr = base64.b64decode("""aHR0cDovLzE3Mi4xOC4xMTMuNzo4MDg1L3NvbHIvYmlibGlv""")
 

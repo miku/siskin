@@ -15,6 +15,7 @@ Goals:
 
 import luigi
 from luigi.format import Gzip
+
 from gluish.utils import shellout
 
 

@@ -43,20 +43,19 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 
 """
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import range
 import datetime
 import json
 import os
 import tempfile
 import time
-import urllib.request
-import urllib.parse
 import urllib.error
+import urllib.parse
+import urllib.request
+from builtins import range
 
 import luigi
 import requests
+from future import standard_library
 
 import elasticsearch
 from gluish.common import Executable
@@ -68,6 +67,10 @@ from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import ElasticsearchMixin, URLCache
+
+standard_library.install_aliases()
+
+
 
 
 class CrossrefTask(DefaultTask):
@@ -459,42 +462,6 @@ class CrossrefDOIAndISSNList(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
-
-
-class CrossrefIndex(CrossrefTask, ElasticsearchMixin):
-    """
-    Vanilla records into elasticsearch. All or
-    nothing.
-    """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
-    date = ClosestDateParameter(default=datetime.date.today())
-    index = luigi.Parameter(default='crossref')
-
-    def requires(self):
-        return CrossrefUniqItems(begin=self.begin, date=self.date)
-
-    @timed
-    def run(self):
-        es = elasticsearch.Elasticsearch()
-        shellout("curl -XDELETE {host}:{port}/{index}", host=self.es_host, port=self.es_port, index=self.index)
-        mapping = {
-            'default': {
-                'date_detection': False,
-                '_id': {
-                    'path': 'URL'
-                },
-            }
-        }
-
-        es.indices.create(index=self.index)
-        es.indices.put_mapping(index=self.index, doc_type='default', body=mapping)
-        shellout("esbulk -verbose -index {index} {input}", index=self.index, input=self.input().path)
-
-        with self.output().open('w'):
-            pass
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
 
 
 class CrossrefHarvestGeneric(CrossrefTask):

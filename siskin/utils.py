@@ -56,12 +56,13 @@ from siskin import __version__
 standard_library.install_aliases()
 
 
-
 logger = logging.getLogger('siskin')
 
 
 class SetEncoder(json.JSONEncoder):
-    """ Helper to encode python sets into JSON lists. """
+    """
+    Helper to encode python sets into JSON lists.
+    """
 
     def default(self, obj):
         """ Decorate call to standard implementation. """
@@ -86,8 +87,8 @@ def date_range(start_date, end_date, increment, period):
 
 def iterfiles(directory='.', fun=None):
     """
-    Yield paths below a directory, optionally filter the path through a function
-    given in `fun`.
+    Shortcut for os.walk, yield paths below a directory, optionally filter the
+    paths by function given in `fun`.
     """
     if fun is None:
         fun = lambda path: True
@@ -107,15 +108,16 @@ def random_string(length=16):
 
 
 def pairwise(obj):
-    """ Iterator over a iterable in steps of two. """
+    """
+    Iterator over a iterable in steps of two.
+    """
     iterable = iter(obj)
     return zip(iterable, iterable)
 
 
 def nwise(iterable, n=2):
     """
-    Generalized: func: `pairwise`.
-    Split an iterable after every `n` items.
+    Generalized: func: `pairwise`. Split an iterable after every `n` items.
     """
     i = iter(iterable)
     piece = tuple(itertools.islice(i, n))
@@ -126,9 +128,10 @@ def nwise(iterable, n=2):
 
 def dictcheck(obj, contains=None, missing=None):
     """
-    For a dictionary, check if it contains *values* for the keys given in
-    contains and at the same time it does not have values for keys, which are
-    given in missing.
+
+    Check if a dictionary contains values for the keys given in contains and at
+    the same time it does not contain values for keys, which are given in
+    missing.
 
     >>> dictcheck({"name": "x"}, contains=["name"])
     True
@@ -218,23 +221,23 @@ def load_set_from_file(filename, func=lambda v: v):
 
 class URLCache(object):
     """
-    A simple URL * content * cache. Stores everything on the filesystem. Content
+    A simple URL content cache. Stores everything on the filesystem. Content
     is first written to a temporary file and then renamed. With concurrent
     requests for the same URL, the last one wins. Raises exception on any HTTP
     status >= 400. Retries supported.
 
-    >> > cache = URLCache()
-    >> > cache.get_cache_file("https://www.google.com")
-    /tmp / ef / 7e / fc / ef7efc9839c3ee036f023e9635bc3b056d6ee2d
+    >>> cache = URLCache()
+    >>> cache.get_cache_file("https://www.google.com")
+    /tmp/ef/7e/fc/ef7efc9839c3ee036f023e9635bc3b056d6ee2d
 
-    >> > cache.is_cached("https://www.google.com")
+    >>> cache.is_cached("https://www.google.com")
     False
 
-    >> > page = cache.get("https://www.google.com")
-    >> > page[:15]
+    >>> page = cache.get("https://www.google.com")
+    >>> page[:15]
     '<!doctype html>'
 
-    >> > cache.is_cached("https://www.google.com")
+    >>> cache.is_cached("https://www.google.com")
     True
     """
 
@@ -245,7 +248,7 @@ class URLCache(object):
         a non 200 HTTP status code. The server might send a HTTP 500 (Internal
         Server Error), even if it really is a HTTP 503 (Service Unavailable).
         We therefore treat HTTP 500 errors as something to retry on,
-        `max_tries` times.
+        at most `max_tries` times.
         """
         self.directory = directory or tempfile.gettempdir()
         self.sess = requests.session()
@@ -253,8 +256,8 @@ class URLCache(object):
 
     def get_cache_file(self, url):
         """
-        Return the cache file path for a URL. This will create the parent
-        directories, if necessary.
+        Return the cache file path for a URL. This will - as a side effect -
+        create the parent directories, if necessary.
         """
         digest = hashlib.sha1(url).hexdigest()
         d0, d1, d2 = digest[:2], digest[2:4], digest[4:6]
@@ -295,11 +298,3 @@ class URLCache(object):
 
         with open(self.get_cache_file(url)) as handle:
             return handle.read()
-
-
-class ElasticsearchMixin(luigi.Task):
-    """ A small mixin for tasks that require an ES connection. """
-    es_host = luigi.Parameter(default='localhost', significant=False,
-                              description='elasticsearch host')
-    es_port = luigi.IntParameter(default=9200, significant=False,
-                                 description='elasticsearch port')

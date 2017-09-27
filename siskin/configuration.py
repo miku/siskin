@@ -23,22 +23,21 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Configuration handling, taken from luigi. File format is ini. File location
-at the moment is fixed at /etc/siskin/siskin.ini.
+Configuration handling, taken from luigi - ini format.
 """
 
+import configparser
 import datetime
 import logging
 import os
 import sys
 
-import configparser
-
 logger = logging.getLogger('siskin')
 
 
 class Config(configparser.ConfigParser):
-    """ Wrapper around /etc/siskin/siskin.ini
+    """
+    Access to ini file.
     """
     NO_DEFAULT = None
     _instance = None

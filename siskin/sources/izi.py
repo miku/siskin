@@ -33,6 +33,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
+
 class IZITask(DefaultTask):
     """ Base task for IZI """
     TAG = '78'

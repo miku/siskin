@@ -31,8 +31,8 @@ import json
 import sys
 
 import luigi
-import xmltodict
 
+import xmltodict
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

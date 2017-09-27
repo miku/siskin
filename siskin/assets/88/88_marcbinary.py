@@ -7,11 +7,12 @@ Usage example:
     $ 88_marcbinary.py [INPUT] [OUTPUT]
 """
 
-from builtins import *
-import xlrd
-import marcx
-import sys
 import io
+import sys
+from builtins import *
+
+import marcx
+import xlrd
 
 # Default input and output.
 inputfilename, outputfilename = "88 RuG Aug 2017.xlsx", "88_output.mrc"

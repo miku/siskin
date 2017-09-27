@@ -25,7 +25,6 @@ import luigi
 from gluish.task import BaseTask
 from gluish.utils import shellout
 
-
 # TODO: add imports
 
 class Task(BaseTask):

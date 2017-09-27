@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Define a siskin wide task with artefacts under core.home directory.
+Define a siskin wide task with artifacts under core.home directory.
 
 [amsl]
 
@@ -32,7 +32,6 @@ write-url = https://live.abc.xyz/w/i/write
 """
 
 import logging
-
 import os
 import re
 import tempfile
@@ -47,14 +46,25 @@ config = Config.instance()
 
 
 class DefaultTask(BaseTask):
-    """ A base task that sets its base directory based on config value. """
+    """
+    Base task for all siskin tasks.
+
+    It sets the base directory, where all task artifacts will be stored. It
+    also provides shortcuts to config, assets and logging objects. A command
+    line parameter named stamp is used to update timestamps in AMSL electronic
+    resource management system.
+    """
     BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
-    stamp = luigi.BoolParameter(default=False, description="send an updated stamp to AMSL", significant=False)
+    stamp = luigi.BoolParameter(default=False,
+                                description="send an updated stamp to AMSL",
+                                significant=False)
 
     def assets(self, path):
-        """ Return the absolute path to the asset. `path` is the relative path
-        below the assets root dir. """
+        """
+        Return the absolute path to the asset. `path` is the relative path
+        below the assets root dir.
+        """
         return os.path.join(os.path.dirname(__file__), 'assets', path)
 
     @property
@@ -115,7 +125,8 @@ class DefaultTask(BaseTask):
             return
 
         try:
-            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """, write_url=write_url, sid=sid)
+            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """,
+                     write_url=write_url, sid=sid)
         except RuntimeError as err:
             self.logger.warn(err)
             return

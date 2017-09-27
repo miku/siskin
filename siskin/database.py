@@ -26,15 +26,17 @@
 Helper for databases.
 """
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import object
 import logging
 import sqlite3
 import urllib.parse
+from builtins import object
 
 import pymysql
+from future import standard_library
 from pymysql.cursors import SSCursor
+
+standard_library.install_aliases()
+
 
 
 class sqlitedb(object):

@@ -43,8 +43,8 @@ import urllib
 import luigi
 import rdflib
 import requests
-import ujson as json
 
+import ujson as json
 from bs4 import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip

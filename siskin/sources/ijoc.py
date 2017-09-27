@@ -29,8 +29,9 @@ import luigi
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 from siskin.sources.amsl import AMSLFilterConfig
+from siskin.task import DefaultTask
+
 
 """
 IJOC, refs #7138, #11005.
