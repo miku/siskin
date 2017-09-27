@@ -87,6 +87,25 @@ class SpringerDownload(SpringerTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
+class SpringerIssue11557(SpringerTask):
+    """
+    Via 5994#note-37, finc.mega_collection is now multi-valued, refs #11557.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SpringerDownload(date=self.date)
+
+    def run(self):
+        output = shellout("""
+            jq 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"]) | .["finc.mega_collection"] = [.["finc.mega_collection"]]' < <(unpigz -c {input}) | pigz -c > {output}
+        """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+
 class SpringerCleanFields(SpringerTask):
     """
     As per Google Hangout 2017-09-08 we define "exchange-ready" as
@@ -129,7 +148,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SpringerDownload(date=self.date)
+        return SpringerIssue11557(date=self.date)
 
     def output(self):
         return self.input()
