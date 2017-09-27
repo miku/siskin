@@ -73,6 +73,7 @@ install_requires = [
     'sqlitebck>=1.2.1',
     'ujson>=1.35',
     'urllib3>=1.10',
+    'xlrd==1.0.0',
     'xmltodict==0.11.0',
 ]
 
