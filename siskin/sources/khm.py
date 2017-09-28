@@ -22,7 +22,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-KHM Koeln (#9269).
+KHM Koeln, refs #9269, #8391.
 
 Configuration keys:
 
@@ -132,9 +132,9 @@ class KHMLatest(KHMTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
         shellout(""" echo '<?xml version = "1.0" encoding = "UTF-8"?>
-            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                     xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+                           <collection xmlns="http://www.loc.gov/MARC21/slim"
+                                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                       xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
             ' >> {stopover} """, stopover=stopover, preserve_whitespace=True)
 
         with self.input().get('dropbox').open() as handle:
@@ -142,14 +142,14 @@ class KHMLatest(KHMTask):
                 groups = re.search(self.FILEPATTERN, row.path).groupdict()
                 if groups["date"] != latest_date:
                     continue
-                shellout("tar xOf {input} | xmlcutty -path /OAI-PMH/ListRecords/record >> {stopover}", input=row.path, stopover=stopover)
+                shellout("tar xOf {input} | xmlcutty -path /OAI-PMH/ListRecords/record/metadata/record >> {stopover}", input=row.path, stopover=stopover)
 
-        shellout(""" echo '</OAI-PMH>' >> {stopover} """, stopover=stopover)
+        shellout(""" echo '</collection>' >> {stopover} """, stopover=stopover)
         output = shellout(""" xmllint --format {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='marcxml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class KHMIntermediateSchema(KHMTask):
