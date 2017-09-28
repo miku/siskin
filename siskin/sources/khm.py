@@ -113,6 +113,7 @@ class KHMLatest(KHMTask):
     Decompress and join files from the (presumably) lastest version.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    ext = luigi.Parameter(default="xml", description="mrc, xml", significant=False)
 
     def requires(self):
         return {
@@ -145,11 +146,16 @@ class KHMLatest(KHMTask):
                 shellout("tar xOf {input} | xmlcutty -path /OAI-PMH/ListRecords/record/metadata/record >> {stopover}", input=row.path, stopover=stopover)
 
         shellout(""" echo '</collection>' >> {stopover} """, stopover=stopover)
-        output = shellout(""" xmllint --format {input} > {output} """, input=stopover)
+        output = shellout(""" xmllint --format {input} |
+                              grep -v '<controlfield tag="LDR">' |
+                              grep -v '<controlfield tag="FMT">' > {output} """, input=stopover)
+        if self.ext == "mrc":
+            output = shellout(""" yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output)
+
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext=self.ext))
 
 
 class KHMIntermediateSchema(KHMTask):
