@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding: utf-8
 
+from builtins import *
 import io
-import os
-import re
 import sys
 
-import marcx
 import pymarc
+import marcx
 
 copytags = ("003", "004", "005", "006", "007", "008", "009", "010", "011", "012",
             "013", "014", "015", "016", "017", "018", "019", "020", "021", "022", "023",
@@ -45,13 +44,18 @@ def get_links(record):
         for url in field.get_subfields('u'):
              yield url
 
+# Default input and output.
+inputfilename, outputfilename = "14_input.mrc", "14_output.mrc"
 
-inputfile = open("14_input.mrc", "rb")
-outputfile = open("14_output.mrc", "wb")
+if len(sys.argv) == 3:
+    inputfilename, outputfilename = sys.argv[1:]
+
+inputfile = io.open(inputfilename, "rb")
+outputfile = io.open(outputfilename, "wb")
 
 reader = pymarc.MARCReader(inputfile)
 
-for i, oldrecord in enumerate(reader, start=1):
+for oldrecord in reader:
 
     newrecord = marcx.Record()
 
@@ -99,9 +103,6 @@ for i, oldrecord in enumerate(reader, start=1):
     newrecord.add("980", a=f001, b="14", c="RISM")
 
     outputfile.write(newrecord.as_marc())
-
-    #if i == 500:
-    #    break
 
 inputfile.close()
 outputfile.close()
