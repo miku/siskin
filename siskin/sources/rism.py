@@ -32,76 +32,28 @@ base-url = http://example.com/export
 
 """
 
-import datetime
-import os
-import tempfile
-
 import luigi
 
-from gluish.intervals import monthly
-from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class RISMTask(DefaultTask):
-    """ Base task for RISM, refs. #4435. """
-    TAG = '14'
-
-    def closest(self):
-        return monthly(date=self.date)
+class MBPTask(DefaultTask):
+    """ Base task for MBP. """
+    TAG = "14"
 
 
-class RISMArchives(RISMTask):
-    """
-    Builds a list of RISM archive urls.
+class MBPMARC(MBPTask):
+    """ ??? """
 
-    Example pattern: rismExportBvb_YYYY-MM-DD.tar.gz
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
+    def requires(self):
+        ???
 
     def run(self):
-        output = shellout("""
-            curl --fail -sL "{url}" |
-            grep -Eo "rismExportBvbOut_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].tar.gz" |
-            sort | uniq |
-            awk '{{ print "{url}/"$1 }}' > {output}
-        """, url=self.config.get('rism', 'base-url'))
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets("14/14_marcbinary.py"),
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path())
-
-
-class RISMCombineBinaryMARC(RISMTask):
-    """
-    Combine and convert to binary MARC.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return RISMArchives()
-
-    def run(self):
-        """
-        URL -> TAR -> XML -> MARC.
-        """
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            for line in handle:
-                line = line.strip()
-                if not line:
-                    continue
-
-                archive = shellout(""" wget -O "{output}" "{url}" """, url=line)
-                xml = shellout("""tar -xzOf {input} > {output} """, input=archive)
-                shellout(""" yaz-marcdump -i marcxml -o marc {input} >> {output} """,
-                         input=xml, output=stopover)
-
-                os.remove(archive)
-                os.remove(xml)
-
-        luigi.LocalTarget(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
