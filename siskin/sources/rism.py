@@ -38,12 +38,12 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class MBPTask(DefaultTask):
-    """ Base task for MBP. """
+class RISMTask(DefaultTask):
+    """ Base task for RISM. """
     TAG = "14"
 
 
-class MBPMARC(MBPTask):
+class RISMMARC(RISMTask):
     """ ??? """
 
     def requires(self):
