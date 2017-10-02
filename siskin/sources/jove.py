@@ -34,11 +34,32 @@ import sys
 import luigi
 import requests
 
+from gluish.utils import shellout
+from siskin.decorator import deprecated
 from siskin.task import DefaultTask
 
 
 class JoveTask(DefaultTask):
-    TAG = "jove"
+    TAG = "143"
+
+
+class JoveBinaryMARC(JoveTask):
+    """
+    Turn MRK MARC (https://www.loc.gov/marc/makrbrkr.html) into binary MARC via
+    experimental marctexttoxml (https://git.io/vdCUN).
+    """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        url = 'https://www.jove.com/api/articles/v0/articlefeed.php?marc=1&sections[]=0&sections[]=4'
+        output = shellout("""curl -sLg '{url}' | head -n -1 > {output}""", url=url)
+        output = shellout("marctexttoxml < {input} > {output}", input=output)
+        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 
 class JoveIntermediateSchema(JoveTask):
@@ -46,6 +67,7 @@ class JoveIntermediateSchema(JoveTask):
     Download and convert.
     """
 
+    @deprecated
     def run(self):
         r = requests.get("https://www.jove.com/api/articles/v0/articlefeed.php?csv=1")
         s = io.StringIO(r.text)
