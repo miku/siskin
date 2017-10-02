@@ -319,11 +319,11 @@ for root, _, files in os.walk(input_directory):
                 subtest.append(subject)
                 marcrecord.add("689", a=subject)
 
-        marcrecord.add("856", q="text/html", _3="Petrucci-Musikbibliothek", u=f856u)
+        marcrecord.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=f856u)
 
         marcrecord.add("970", c="PN")
 
-        marcrecord.add("980", a=f001, b="15", c="Petrucci-Musikbibliothek")
+        marcrecord.add("980", a=f001, b="15", c="Petrucci Musikbibliothek")
 
         outputfile.write(marcrecord.as_marc())
 
