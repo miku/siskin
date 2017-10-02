@@ -29,6 +29,7 @@ import csv
 import datetime
 import io
 import json
+import os
 import sys
 
 import luigi
@@ -49,14 +50,29 @@ class JoveBinaryMARC(JoveTask):
     experimental marctexttoxml (https://git.io/vdCUN).
     """
 
+    debug = luigi.BooleanParameter(default=False, significant=False)
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
+        cleanup = []
+
         url = 'https://www.jove.com/api/articles/v0/articlefeed.php?marc=1&sections[]=0&sections[]=4'
         output = shellout("""curl -sLg '{url}' | head -n -1 > {output}""", url=url)
-        output = shellout("marctexttoxml < {input} > {output}", input=output)
+        cleanup.append(output)
+
+        cleanup.append(output)
+
         output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
+
+        try:
+            for item in cleanup:
+                if self.debug:
+                    self.logger.debug('keeping intermediate file: %s' % item)
+                else:
+                    os.remove(item)
+        except OSError:
+            self.logger.warn('could not delete temporary files')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
