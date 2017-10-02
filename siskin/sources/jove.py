@@ -60,6 +60,7 @@ class JoveBinaryMARC(JoveTask):
         output = shellout("""curl -sLg '{url}' | head -n -1 > {output}""", url=url)
         cleanup.append(output)
 
+        output = shellout("marctexttoxml < {input} | xmllint --format - > {output}", input=output)
         cleanup.append(output)
 
         output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
