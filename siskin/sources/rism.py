@@ -47,7 +47,7 @@ class RISMMARC(RISMTask):
     """ ??? """
 
     def requires(self):
-        ???
+        raise NotImplementedError()
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
