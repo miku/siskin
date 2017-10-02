@@ -102,7 +102,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	marc_record.add("935", b="cofz")
 
 	# Kollektion
-	values = ["a", f001, "b", "100", "c", "Medienwissenschaft: Berichte und Papiere"]
+	values = ["a", f001, "b", "100", "c", 'Medienwissenschaft "Berichte und Papiere"']
 	marc_record.add("980", subfields=values)
 
 	outputfile.write(marc_record.as_marc())
