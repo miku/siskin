@@ -4,12 +4,22 @@
 import marcx
 import pymarc
 
+# def copyfield(srec, sspec, drec, dspec):
+# 	"""
+# 	Source record and field specification. If this this field exists and is not None, then copy to destination record field. 
+
+# 	Example:
+#         ...
+# 	    copyfield(oldrecord, "520.a", newrecord, "689.b")
+# 	"""
+# 	pass
+
 oldrecords = pymarc.marcxml.parse_xml_to_array('143_input.xml')
 outputfile = open("143_output.mrc", "wb")
 
 for oldrecord in oldrecords:
     
-    if not oldrecord["001"] or not oldrecord.leader:
+    if not oldrecord["001"] or not oldrecord.leader or not oldrecord["856"] or not oldrecord["856"]["u"]:
 	    continue
 
     newrecord = marcx.Record(force_utf8=True) 
@@ -21,6 +31,9 @@ for oldrecord in oldrecords:
     # ID
     f001 = oldrecord["001"].data
     newrecord.add("001", data="finc-143-%s" % f001)
+
+    # 007
+    newrecord.add("007", data="vu")
     
     # 008
     f008 = oldrecord["008"].data
@@ -48,7 +61,7 @@ for oldrecord in oldrecords:
     f260a = oldrecord["260"]["a"]
     f260b = oldrecord["260"]["b"] 
     f260c = oldrecord["260"]["c"]
-    publisher = ["a", f260a, "b", f260b, "c", f260c]
+    publisher = ["a", f260a, "b", " : " + f260b, "c", ", " + f260c]
     newrecord.add("260", subfields=publisher) 
 
     # Umfangsangabe
@@ -91,12 +104,12 @@ for oldrecord in oldrecords:
     	pass
 
     # URL
-    try:
-    	f856u = oldrecord["856"]["u"]
-        newrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
-    except:
-    	continue
+    f856u = oldrecord["856"]["u"]
+    newrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
+    # 935
+    newrecord.add("935", c="vide")
+   
     # Kollektion
     f980a = "finc-143-%s" % f001
     newrecord.add("980", a=f980a, b="143", c="JOVE")   
