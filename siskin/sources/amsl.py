@@ -423,7 +423,8 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
         # Include OA list, refs #11579.
         shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
-                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' >> {output}""", output=stopover)
+                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' >> {output}""",
+                 output=stopover, preserve_whitespace=True)
 
         output = shellout("sort -u {input} > {output}", input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
