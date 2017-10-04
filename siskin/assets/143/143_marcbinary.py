@@ -71,7 +71,7 @@ for oldrecord in oldrecords:
     f260a = oldrecord["260"]["a"]
     f260b = oldrecord["260"]["b"]
     f260c = oldrecord["260"]["c"]
-    publisher = ["a", f260a, "b", " : " + f260b, "c", ", " + f260c]
+    publisher = ["a", f260a + " : ", "b", f260b + ", ", "c", f260c]
     newrecord.add("260", subfields=publisher)
 
     # Umfangsangabe
@@ -122,7 +122,12 @@ for oldrecord in oldrecords:
 
     # Kollektion
     f980a = "finc-143-%s" % f001
-    newrecord.add("980", a=f980a, b="143", c="JOVE")
+    if f490a == "Biology":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Biology)")
+    elif f490a == "Medicine":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Medicine)")
+    else:
+        print("Kollektion %s in Feld 490 unbekannt" % f490a)
 
     outputfile.write(newrecord.as_marc())
 
