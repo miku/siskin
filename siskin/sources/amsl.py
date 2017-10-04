@@ -420,6 +420,11 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
         shellout("cut -f 2 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
         shellout("cut -f 3 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
+
+        # Include OA list, refs #11579.
+        shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
+                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' >> {output}""", output=stopover)
+
         output = shellout("sort -u {input} > {output}", input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
