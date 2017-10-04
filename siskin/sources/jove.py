@@ -44,9 +44,9 @@ class JoveTask(DefaultTask):
     TAG = "143"
 
 
-class JoveBinaryMARC(JoveTask):
+class JoveMARC(JoveTask):
     """
-    Turn MRK MARC (https://www.loc.gov/marc/makrbrkr.html) into binary MARC via
+    Turn MRK MARC (https://www.loc.gov/marc/makrbrkr.html) into MARC XML via
     experimental marctexttoxml (https://git.io/vdCUN).
     """
 
@@ -61,19 +61,17 @@ class JoveBinaryMARC(JoveTask):
         cleanup.append(output)
 
         output = shellout("marctexttoxml < {input} | xmllint --format - > {output}", input=output)
-        cleanup.append(output)
-
-        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
-        try:
-            for item in cleanup:
-                if self.debug:
-                    self.logger.debug('keeping intermediate file: %s' % item)
-                else:
-                    os.remove(item)
-        except OSError:
-            self.logger.warn('could not delete temporary files')
+        for item in cleanup:
+            try:
+                os.remove(item)
+            except OSError:
+                self.logger.warn('could not delete temporary files')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
