@@ -77,9 +77,9 @@ class JoveMARC(JoveTask):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 
-class JoveIntermediateSchema(JoveTask):
+class JoveIntermediateSchemaFromCSV(JoveTask):
     """
-    Download and convert.
+    Download and convert. Just a prototype working with the CSV output.
     """
 
     @deprecated
