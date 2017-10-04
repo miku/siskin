@@ -31,7 +31,7 @@ import datetime
 import luigi
 
 from gluish.format import Gzip
-from gluish.intervals import semiyearly
+from gluish.intervals import quarterly
 from gluish.parameter import ClosestDateParameter
 from siskin.task import DefaultTask
 
@@ -43,7 +43,7 @@ class ZVDDTask(DefaultTask):
     TAG = '93'
 
     def closest(self):
-        return semiyearly(self.date)
+        return quarterly(self.date)
 
 
 class ZVDDHarvest(ZVDDTask):
