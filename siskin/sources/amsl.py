@@ -395,6 +395,8 @@ class AMSLOpenAccessISSNList(AMSLTask):
         0001-3714
         0001-3757
         0001-3765
+
+    TODO: Include https://pub.uni-bielefeld.de/download/2913654/2913655.
     """
 
     date = luigi.Parameter(default=datetime.date.today())
