@@ -50,7 +50,7 @@ class JoveMARC(JoveTask):
     experimental marctexttoxml (https://git.io/vdCUN).
     """
 
-    debug = luigi.BooleanParameter(default=False, significant=False)
+    debug = luigi.BoolParameter(default=False, significant=False)
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
