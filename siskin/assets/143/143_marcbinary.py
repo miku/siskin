@@ -7,14 +7,14 @@ import marcx
 import pymarc
 
 # def copyfield(srec, sspec, drec, dspec):
-# 	"""
-# 	Source record and field specification. If this this field exists and is not None, then copy to destination record field.
+#   """
+#   Source record and field specification. If this this field exists and is not None, then copy to destination record field.
 
-# 	Example:
+#   Example:
 #         ...
-# 	    copyfield(oldrecord, "520.a", newrecord, "689.b")
-# 	"""
-# 	pass
+#       copyfield(oldrecord, "520.a", newrecord, "689.b")
+#   """
+#   pass
 
 # Default input and output.
 inputfilename = "143_input.xml"
