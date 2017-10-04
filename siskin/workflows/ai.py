@@ -54,7 +54,7 @@ from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
-                                 AMSLOpenAccessISSNList, AMSLService)
+                                 AMSLOpenAccessKBART, AMSLService)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.ceeol import CeeolJournalsDumpIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
@@ -780,7 +780,7 @@ class AIApplyOpenAccessFlag(AITask):
 
     def requires(self):
         return {
-            'issns': AMSLOpenAccessISSNList(date=self.date),
+            'kbart': AMSLOpenAccessKBART(date=self.date),
             'file': AIIntermediateSchema(date=self.date),
         }
 
@@ -788,9 +788,9 @@ class AIApplyOpenAccessFlag(AITask):
         """
         Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min.
         """
-        output = shellout("unpigz -c {input} | span-oa-filter -f {file} | pigz -c > {output}",
+        output = shellout("unpigz -c {input} | span-oa-filter -f {kbart} | pigz -c > {output}",
                           input=self.input().get('file').path,
-                          file=self.input().get('issns').path)
+                          kbart=self.input().get('kbart').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

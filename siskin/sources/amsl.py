@@ -433,6 +433,41 @@ class AMSLOpenAccessISSNList(AMSLTask):
         return luigi.LocalTarget(path=self.path())
 
 
+class AMSLOpenAccessKBART(AMSLTask):
+    """
+    KBART version.
+    """
+
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def run(self):
+        """
+        Download, maybe unzip, combine with Gold List.
+        """
+        key = "http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS"
+        link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), key)
+
+        downloaded = shellout("curl --fail {link} > {output} ", link=link)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+
+        try:
+            _ = zipfile.ZipFile(downloaded)
+            output = shellout("unzip -p {input} >> {output}", input=downloaded)
+        except zipfile.BadZipfile:
+            # at least the file is not a zip.
+            output = shellout("cat {input} >> {output}", input=downloaded)
+
+        # # Include OA list, refs #11579.
+        shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
+                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' |
+                    awk '{{ print "\t\t"$0 }}' >> {output}""", output=output, preserve_whitespace=True)
+
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+
 class AMSLWisoPackages(AMSLTask):
     """
     Collect WISO packages.
