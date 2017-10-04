@@ -56,6 +56,8 @@ class ZVDDHarvest(ZVDDTask):
     style (errors ignored).
 
     Estimated number of records (Fall 2017): ~502638.
+
+    This harvest may take a day or two.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="http://zvdd.de/oai2/", significant=False)
