@@ -396,7 +396,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
         0001-3757
         0001-3765
 
-    TODO: Include https://pub.uni-bielefeld.de/download/2913654/2913655.
+    As of October 2017, this list includes: https://pub.uni-bielefeld.de/download/2913654/2913655.
     """
 
     date = luigi.Parameter(default=datetime.date.today())
@@ -435,7 +435,9 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
 class AMSLOpenAccessKBART(AMSLTask):
     """
-    KBART version.
+    Create a KBART file that contains open access and freely available journals only.
+
+    Used in conjunction with https://git.io/vdB29.
     """
 
     date = luigi.Parameter(default=datetime.date.today())
