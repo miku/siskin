@@ -415,7 +415,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
             _ = zipfile.ZipFile(downloaded)
             output = shellout("unzip -p {input} >> {output}", input=downloaded)
         except zipfile.BadZipfile:
-            # at least the file is not a zip.
+            # At least the file is not a zip.
             output = shellout("cat {input} >> {output}", input=downloaded)
 
         shellout("cut -f 2 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
@@ -454,10 +454,10 @@ class AMSLOpenAccessKBART(AMSLTask):
             _ = zipfile.ZipFile(downloaded)
             output = shellout("unzip -p {input} >> {output}", input=downloaded)
         except zipfile.BadZipfile:
-            # at least the file is not a zip.
+            # At least the file is not a zip.
             output = shellout("cat {input} >> {output}", input=downloaded)
 
-        # # Include OA list, refs #11579.
+        # Include OA list, refs #11579.
         shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
                     grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' |
                     awk '{{ print "\t\t"$0 }}' >> {output}""", output=output, preserve_whitespace=True)
