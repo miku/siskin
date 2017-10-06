@@ -438,6 +438,8 @@ class AMSLGoldListKBART(AMSLTask):
     Convert Bielefeld Gold List to KBART (for manual uploads in AMSL).
     """
 
+    date = luigi.DateParameter(default=datetime.date.today())
+
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout(""" echo "online_identifier" > {output}""", output=stopover)
