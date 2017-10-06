@@ -87,3 +87,21 @@ class ZVDDHarvest(ZVDDTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='data.gz'), format=Gzip)
+
+
+class ZVDDIntermediateSchema(ZVDDTask):
+    """
+    Experimental conversion to intermediate format.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return ZVDDHarvest(date=self.date)
+
+    def run(self):
+        output = shellout("unpigz -c {input} | span-import -i zvdd-mets | pigz -c > {output}",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path())
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
