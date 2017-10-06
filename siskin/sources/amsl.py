@@ -433,6 +433,27 @@ class AMSLOpenAccessISSNList(AMSLTask):
         return luigi.LocalTarget(path=self.path())
 
 
+class AMSLGoldListKBART(AMSLTask):
+    """
+    Convert Bielefeld Gold List to KBART (for manual uploads in AMSL).
+    """
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout(""" echo "online_identifier" > {output}""", output=stopover)
+        # Include OA list, refs #11579.
+        shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
+                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' |
+                    tr ',' '\n' |
+                    sort -u |
+                    grep -v ^$ >> {output}""",
+                 output=stopover, preserve_whitespace=True)
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+
 class AMSLOpenAccessKBART(AMSLTask):
     """
     Create a KBART file that contains open access and freely available journals only.
