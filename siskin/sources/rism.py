@@ -32,8 +32,12 @@ base-url = http://example.com/export
 
 """
 
+import datetime
+import os
 import luigi
 
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -42,12 +46,59 @@ class RISMTask(DefaultTask):
     """ Base task for RISM. """
     TAG = "14"
 
+    def closest(self):
+        return monthly(self.date)
+
+
+class RISMDownload(RISMTask):
+    """
+    Download raw data and prepare. Assume the URL (https://is.gd/ZTwzoT) of the
+    complete dump does not change.
+
+        Archive:  /tmp/gluish-S4wdR6
+        Length      Date    Time    Name
+        ---------  ---------- -----   ----
+        3804391409  2017-03-23 14:46   rism_170316.xml <<<< We are only interested in this for now.
+        52058685    2017-03-23 14:46   rism_ks.xml
+        26080795    2017-03-23 14:46   rism_lit.xml
+        191009578   2017-03-23 14:46   rism_pe.xml
+        ---------                     -------
+        4073540467                     4 files
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        """
+        Hack around the fact, that we do not know the exact filename
+        (rism_170316.xml), but let's assume there is a pattern.
+        """
+        cleanup = set()
+        url = "https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip"
+
+        output = shellout("""curl --fail "{url}" > {output} """, url=url)
+        cleanup.add(output)
+
+        output = shellout("""unzip -p {input} $(unzip -l {input} | grep -Eo "rism_[0-9]{{6,6}}.xml" | head -1) > {output}""", input=output)
+        cleanup.add(output)
+
+        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+        for file in cleanup:
+            os.remove(file)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
 
 class RISMMARC(RISMTask):
-    """ ??? """
+    """ Transform MARC. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        raise NotImplementedError()
+        return RISMDownload(date=self.date)
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
