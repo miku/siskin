@@ -22,10 +22,10 @@ copytags = ("003", "004", "005", "006", "007", "008", "009", "010", "011", "012"
             "130", "131", "134", "135", "138", "142", "145", "148", "149", "151", "155",
             "156", "157", "160", "162", "163", "164", "165", "166", "167", "173", "174",
             "175", "176", "178", "183", "184", "187", "192", "200", "204", "210", "212",
-            "234", "240", "243", "245", "246", "254", "256", "260", "300", "340", "383",
-            "386", "387", "447", "448", "456", "490", "500", "504", "510", "518", "520",
-            "541", "561", "563", "590", "591", "592", "593", "594", "595", "596", "597",
-            "650", "657", "700", "710", "730", "762", "772", "773", "775", "787", "852")
+            "234", "240", "243", "254", "256", "260", "300", "340", "383", "386", "387",
+            "447", "448", "456", "490", "500", "504", "510", "518", "520", "541", "561",
+            "563", "590", "591", "592", "593", "594", "595", "596", "597", "650", "657",
+            "700", "710", "730", "762", "773", "775", "787")
 
 
 def get_links(record):
@@ -40,9 +40,16 @@ def get_links(record):
         ['http://google.com']
 
     """
-    for field in record.get_fields('856'):
-        for url in field.get_subfields('u'):
+    for field in record.get_fields("856"):
+        for url in field.get_subfields("u"):
              yield url
+
+
+def get_titles(record):
+    for field in record.get_fields("772"):
+        for title in field.get_subfields("a"):
+            yield title
+
 
 # Default input and output.
 inputfilename, outputfilename = "14_input.mrc", "14_output.mrc"
@@ -87,6 +94,61 @@ for oldrecord in reader:
     for tag in copytags:
         for field in oldrecord.get_fields(tag):
             newrecord.add_field(field)
+
+    # Haupttitel
+    try:
+        f240a = oldrecord["240"]["a"]
+        if not f240a:
+            f240a = ""
+    except:
+        pass
+
+    try:
+        f240m = oldrecord["240"]["m"]
+        if not f240m:
+            f240m = ""
+    except:
+        pass
+    
+    try:
+        f240n = oldrecord["240"]["n"]
+        if not f240n:
+            f240n = ""
+    except:
+        pass
+    
+    f245a = "%s %s %s" % (f240a, f240m, f240n)
+    newrecord.add("245", a=f245a)
+
+    # Alternativtitel
+    try:
+        f246a = oldrecord["245"]["a"]
+        if f246a != "[without title]":
+            newrecord.add("246", a=f246a)
+    except:
+        pass
+
+    # Fußnote
+    try:
+        f852a = oldrecord["852"]["a"]
+        f852c = oldrecord["852"]["c"] # häufig None
+        f852x = oldrecord["852"]["x"]
+        f500a = "%s, %s, %s" % (f852a, f852c, f852x)
+        newrecord.add("500", a=f500a)
+    except:
+        pass
+
+    # enthaltene Werke
+    try:
+        #f505a = oldrecord["772"]["a"]
+        titles = list(get_titles(oldrecord))      
+        if titles:
+            f505a = ""
+            for title in titles:
+                f505a += title + "\n"
+            newrecord.add("505", a=f505a)
+    except:
+        pass
 
     # 856 (Digitalisat)
     links = list(get_links(oldrecord))
