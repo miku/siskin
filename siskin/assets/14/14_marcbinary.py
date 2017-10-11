@@ -139,14 +139,11 @@ for oldrecord in reader:
         pass
 
     # enthaltene Werke
-    try:
-        #f505a = oldrecord["772"]["a"]
+    try:      
         titles = list(get_titles(oldrecord))      
-        if titles:
-            f505a = ""
-            for title in titles:
-                f505a += title + "\n"
-            newrecord.add("505", a=f505a)
+        if titles:          
+            for title in titles:                      
+                newrecord.add("505", a=title)
     except:
         pass
 
