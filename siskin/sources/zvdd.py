@@ -101,7 +101,7 @@ class ZVDDIntermediateSchema(ZVDDTask):
     def run(self):
         output = shellout("unpigz -c {input} | span-import -i zvdd-mets | pigz -c > {output}",
                           input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path())
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
