@@ -82,14 +82,21 @@
       <data source="260  .c" name="rft.date">
         <regexp match="^\d\d\d\d"/>
       </data>
-      <data source="_id" name="rft.date">
-        <constant value="0000"/>
+      <data source="264  .c" name="rft.date">
+        <regexp match="^\d\d\d\d"/>
       </data>
+      <!-- <data source="_id" name="rft.date">
+        <constant value="0000"/>
+      </data> -->
     </choose>
     <!-- x.Date -->
     <data source="260  .c" name="x.date">
       <regexp match="^\d\d\d\d"/>
       <compose postfix="-01-01T00:00:00Z"/>
+    </data>
+    <!-- DOI -->
+    <data source="0247 .a" name="doi">
+      <regexp match="(10[.][0-9].*/.*)$" format="${1}" />
     </data>
     <!-- Publisher -->
     <entity name="rft.pub[]" flushWith="record">
