@@ -85,7 +85,7 @@ class SSOARIntermediateSchema(SSOARTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class SSOARFincSolr(SSOARTask):
+class SSOARExport(SSOARTask):
     """
     Export to finc solr schema by using span-export.
     """
