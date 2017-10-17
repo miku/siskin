@@ -43,8 +43,8 @@ import urllib
 import luigi
 import rdflib
 import requests
-
 import ujson as json
+
 from bs4 import BeautifulSoup
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
@@ -77,6 +77,7 @@ from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.sources.mag import MAGReferenceDB
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
+from siskin.sources.ssoar import SSOARIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
@@ -293,6 +294,7 @@ class AIIntermediateSchema(AITask):
             KielFMFIntermediateSchema(stamp=True),
             IJOCIntermediateSchema(stamp=True),
             CeeolJournalsDumpIntermediateSchema(stamp=True),
+            SSOARIntermediateSchema(stamp=True),
         ]
 
     @timed
