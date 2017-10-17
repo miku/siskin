@@ -30,6 +30,7 @@ import datetime
 
 import luigi
 
+from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -76,33 +77,28 @@ class SSOARIntermediateSchema(SSOARTask):
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
+        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
                           flux=self.assets("30/30.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class SSOARFincSolr(SSOARTask):
     """
     Export to finc solr schema by using span-export.
-    Change record type.
     """
     format = luigi.Parameter(default='solr5vu3', description='export format')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'file': SSOARIntermediateSchema(date=self.date)
-        }
+        return SSOARIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("""span-export -with-fullrecord -o {format} {input} > {output}""",
-                          format=self.format, input=self.input().get('file').path)
-        output = shellout(
-            """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
+        output = shellout("""unpigz -c {input} | span-export -with-fullrecord -o {format} | pigz -c > {output}""",
+                          format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj'))
+        return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj.gz'), format=Gzip)
