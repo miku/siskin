@@ -28,7 +28,7 @@ Helper for databases.
 
 import logging
 import sqlite3
-import urllib.parse
+import six.moves.urllib.parse
 from builtins import object
 
 import pymysql
@@ -36,7 +36,6 @@ from future import standard_library
 from pymysql.cursors import SSCursor
 
 standard_library.install_aliases()
-
 
 
 class sqlitedb(object):
