@@ -20,6 +20,9 @@
       <equals string="a"/>
       <constant value="ElectronicArticle"/>
     </data>
+    <data name="@mat" source="_id">
+      <constant value="ElectronicArticle" />
+    </data>
     <data source="@mat" name="finc.format"/>
     <!-- Format End-->
     <!-- Author -->
