@@ -47,7 +47,7 @@ class SSOARTask(DefaultTask):
 
 class SSOARHarvest(SSOARTask):
     """
-    Harvest.
+    Harvest from default http://www.ssoar.info/OAIHandler/request OAI endpoint.
     """
     format = luigi.Parameter(default="marcxml", significant=False)
     endpoint = luigi.Parameter(
@@ -67,8 +67,8 @@ class SSOARHarvest(SSOARTask):
 
 class SSOARIntermediateSchema(SSOARTask):
     """
-    Convert to intermediate schema via metafacture. Custom morphs and flux are kept in assets/30.
-    Maps are kept in assets/maps
+    Convert to intermediate schema via metafacture. Custom morphs and flux are
+    kept in assets/30. Maps are kept in assets/maps.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
