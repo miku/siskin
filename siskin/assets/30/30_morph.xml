@@ -85,6 +85,24 @@
       <data source="264  .c" name="rft.date">
         <regexp match="^\d\d\d\d"/>
       </data>
+      <data source="24500.a" name="rft.date">
+        <regexp match=".*(\d\d\d\d).*" format="${2}" />
+      </data>
+      <data source="24633.a" name="rft.date">
+        <regexp match=".*(\d\d\d\d).*" format="${2}" />
+      </data>
+      <data source="500  .a" name="rft.date">
+        <regexp match=".*[(](\d\d\d\d)[)].*" format="${2}" />
+      </data>
+      <data source="77318.g" name="rft.date">
+        <regexp match="year:(\d\d\d\d).*" format="${2}" />
+      </data>
+      <data source="4900 .v" name="rft.date">
+        <regexp match="(\d\d\d\d)" format="${2}" />
+      </data>
+      <data source="85640.u" name="rft.date">
+        <regexp match="-(\d\d\d\d)-" format="${2}" />
+      </data>
       <!-- <data source="_id" name="rft.date">
         <constant value="0000"/>
       </data> -->
