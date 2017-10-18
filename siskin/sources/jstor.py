@@ -168,9 +168,9 @@ class JstorXML(JstorTask):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
 
 
-class JstorIntermediateSchema(JstorTask):
+class JstorIntermediateSchemaGenericCollection(JstorTask):
     """
-    Convert to intermediate format via span.
+    Convert to intermediate format via span. Use generic JSTOR collection name.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -237,19 +237,17 @@ class JstorCollectionMapping(JstorTask):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
 
-class JstorIntermediateSchemaAdjustCollection(JstorTask):
+class JstorIntermediateSchema(JstorTask):
     """
     Turn single collection name "JStor" (https://git.io/vdHYh) into finer
-    grained names via title lists (https://is.gd/W37Uwg).
-
-    Experimental, refs #11467.
+    grained names via title lists (https://is.gd/W37Uwg), refs #11467.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'file': JstorIntermediateSchema(date=self.date),
+            'file': JstorIntermediateSchemaGenericCollection(date=self.date),
             'mapping': JstorCollectionMapping(date=self.date),
         }
 
