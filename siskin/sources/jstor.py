@@ -273,10 +273,9 @@ class JstorIntermediateSchemaAdjustCollection(JstorTask):
                         for name in mapping.get(issn, []):
                             names.add(name)
 
-                    if not len(names):
-                        continue
+                    if len(names) > 0:
+                        doc['finc.mega_collection'] = list(names)
 
-                    doc['finc.mega_collection'] = list(names)
                     json.dump(doc, output)
                     output.write("\n")
 
