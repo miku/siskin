@@ -31,10 +31,10 @@ VKFilmBerlin, UdK Berlin, #8697.
 import datetime
 
 import luigi
-
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.sources.b3kat import B3KatDownload
 from siskin.task import DefaultTask
 

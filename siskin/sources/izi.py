@@ -28,9 +28,9 @@ IZI Task #7755
 import datetime
 
 import luigi
-
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 

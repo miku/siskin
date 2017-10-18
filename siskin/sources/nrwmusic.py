@@ -40,9 +40,9 @@ import email.utils as eut
 
 import luigi
 import requests
-
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 

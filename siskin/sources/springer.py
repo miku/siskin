@@ -38,16 +38,16 @@ url = http://export.com/intermediate.file.gz
 from __future__ import print_function
 
 import datetime
-import json
 import re
 
 import luigi
 import six
-
+import ujson as json
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask

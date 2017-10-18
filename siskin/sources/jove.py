@@ -34,8 +34,8 @@ import sys
 
 import luigi
 import requests
-
 from gluish.utils import shellout
+
 from siskin.decorator import deprecated
 from siskin.task import DefaultTask
 

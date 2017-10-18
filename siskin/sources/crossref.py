@@ -44,7 +44,6 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 """
 
 import datetime
-import json
 import os
 import tempfile
 import time
@@ -55,14 +54,15 @@ from builtins import range
 
 import luigi
 import requests
+import ujson as json
 from future import standard_library
-
-import elasticsearch
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+
+import elasticsearch
 from siskin.benchmark import timed
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask

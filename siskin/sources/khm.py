@@ -39,12 +39,12 @@ import re
 import tempfile
 
 import luigi
-
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask

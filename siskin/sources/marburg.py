@@ -31,12 +31,12 @@ import json
 import sys
 
 import luigi
-
 import xmltodict
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 

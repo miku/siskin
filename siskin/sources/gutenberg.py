@@ -34,10 +34,10 @@ https://www.gutenberg.org/, refs #10875, #5520.
 import datetime
 
 import luigi
-
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 

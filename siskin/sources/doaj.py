@@ -33,20 +33,20 @@ http://doaj.org
 
 import datetime
 import itertools
-import json
 import operator
 import tempfile
 import time
 from builtins import map, range
 
 import luigi
-
-import elasticsearch
+import ujson as json
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
+import elasticsearch
 from siskin.benchmark import timed
 from siskin.task import DefaultTask
 from siskin.utils import load_set_from_file, load_set_from_target

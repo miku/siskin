@@ -119,10 +119,10 @@ import datetime
 import tempfile
 
 import luigi
-
 from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.configuration import Config
 from siskin.database import sqlitedb
 from siskin.task import DefaultTask
