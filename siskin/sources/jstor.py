@@ -189,6 +189,36 @@ class JstorIntermediateSchema(JstorTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 
+class JstorIntermediateSchemaAdjustCollection(JstorTask):
+    """
+    Turn single collection name "JStor" (https://git.io/vdHYh) into finer
+    grained names via title lists (https://is.gd/W37Uwg).
+
+    Experimental, refs #11467.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return []  # JstorIntermediateSchema(date=self.date)
+
+    @timed
+    def run(self):
+        """
+        TODO.
+        """
+        url = "www.jstor.org/kbart/collections/all-archive-titles"
+        output = shellout("""curl -sL "{url}" > {output} """, url=url)
+        with luigi.LocalTarget(output, format=TSV).open() as handle:
+            for line in handle.iter_tsv():
+                issn, entry = line[1:3], line[26]
+                parts = [p.strip() for p in entry.split(";")]
+                print(issn, parts)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
+
 class JstorExport(JstorTask):
     """
     Tag with ISILs, then export to various formats.
