@@ -154,7 +154,8 @@ class JstorXML(JstorTask):
                 cols=('archive', 'member')), lambda row: row.archive)
             for archive, items in groups:
                 for chunk in nwise(items, n=self.batch):
-                    margs = " ".join(["'%s'" % item.member.decode(encoding='utf-8').replace('[', r'\[').replace(']', r'\]') for item in chunk])
+                    margs = " ".join(["'%s'" % item.member.decode(
+                        encoding='utf-8').replace('[', r'\[').replace(']', r'\]') for item in chunk])
                     shellout("""unzip -p {archive} {members} |
                                 sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
                              archive=archive.decode(encoding='utf-8'), members=margs, output=stopover)
