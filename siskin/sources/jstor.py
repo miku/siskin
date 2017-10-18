@@ -32,8 +32,10 @@ ftp-path = /
 ftp-pattern = *
 """
 
+import collections
 import datetime
 import itertools
+import json
 import pipes
 import tempfile
 
@@ -47,7 +49,7 @@ from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
-from siskin.utils import nwise
+from siskin.utils import nwise, SetEncoder
 
 
 class JstorTask(DefaultTask):
@@ -207,16 +209,27 @@ class JstorIntermediateSchemaAdjustCollection(JstorTask):
         """
         TODO.
         """
+        names = collections.defaultdict(set)
         url = "www.jstor.org/kbart/collections/all-archive-titles"
         output = shellout("""curl -sL "{url}" > {output} """, url=url)
+
         with luigi.LocalTarget(output, format=TSV).open() as handle:
             for line in handle.iter_tsv():
-                issn, entry = line[1:3], line[26]
+                issns, entry = line[1:3], line[26]
                 parts = [p.strip() for p in entry.split(";")]
-                print(issn, parts)
+                for issn in [v.strip() for v in issns]:
+                    if not issn:
+                        continue
+                    for name in [v.strip() for v in parts]:
+                        if not name:
+                            continue
+                        names[issn].add(name)
+
+        with self.output().open('w') as output:
+            json.dump(names, output, cls=SetEncoder)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='json'))
 
 
 class JstorExport(JstorTask):
