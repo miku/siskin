@@ -50,6 +50,15 @@ def get_titles(record):
         for title in field.get_subfields("a"):
             yield title
 
+def get_field(record, field, subfield="a"):
+    """
+    Shortcut to get a record field and subfield or empty string, if no value is found.
+    """
+    try:
+        value = record[field][subfield]
+        return value if value is not None else ""
+    except (KeyError, TypeError):
+        return ""
 
 # Default input and output.
 inputfilename, outputfilename = "14_input.mrc", "14_output.mrc"
@@ -73,14 +82,11 @@ for oldrecord in reader:
 
     # prüfen, ob es sich um Digitalisat handelt
     f856 = oldrecord["856"]
-    if f856:
-        for field in oldrecord.get_fields("856"):
-            if "http" in field:
-                f856 = field
-            else:
-                f856 = ""
-    else:
+    if not f856:
         continue
+
+    for field in oldrecord.get_fields("856"):
+        f856 = field if "http" in field else ""
 
     # leader
     leader = "     " + oldrecord.leader[5:]
@@ -95,56 +101,32 @@ for oldrecord in reader:
         for field in oldrecord.get_fields(tag):
             newrecord.add_field(field)
 
-    # Haupttitel
-    try:
-        f240a = oldrecord["240"]["a"]
-        if not f240a:
-            f240a = ""
-    except:
-        pass
-
-    try:
-        f240m = oldrecord["240"]["m"]
-        if not f240m:
-            f240m = ""
-    except:
-        pass
-    
-    try:
-        f240n = oldrecord["240"]["n"]
-        if not f240n:
-            f240n = ""
-    except:
-        pass
-    
+    # Haupttitel  
+    f240a = get_field(oldrecord, "240", "a")
+    f240m = get_field(oldrecord, "240", "m")
+    f240n = get_field(oldrecord, "240", "n")
     f245a = "%s %s %s" % (f240a, f240m, f240n)
     newrecord.add("245", a=f245a)
 
     # Alternativtitel
-    try:
-        f246a = oldrecord["245"]["a"]
-        if f246a != "[without title]":
-            newrecord.add("246", a=f246a)
-    except:
-        pass
-
+    f246a = get_field(oldrecord, "245", "a")
+    if f246a != "[without title]":
+        newrecord.add("246", a=f246a)
+    
     # Fußnote
-    try:
-        f852a = oldrecord["852"]["a"]
-        f852c = oldrecord["852"]["c"] # häufig None
-        f852x = oldrecord["852"]["x"]
-        f500a = "%s, %s, %s" % (f852a, f852c, f852x)
-        newrecord.add("500", a=f500a)
-    except:
-        pass
-
+    f852a = get_field(oldrecord, "852", "a")
+    f852c = get_field(oldrecord, "852", "c") # häufig None
+    f852x = get_field(oldrecord, "852", "x")
+    f500a = "%s, %s, %s" % (f852a, f852c, f852x)
+    newrecord.add("500", a=f500a)
+    
     # enthaltene Werke
     try:      
         titles = list(get_titles(oldrecord))      
         if titles:          
             for title in titles:                      
                 newrecord.add("505", a=title)
-    except:
+    except (KeyError, TypeError):
         pass
 
     # 856 (Digitalisat)
