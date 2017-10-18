@@ -69,8 +69,7 @@ class B3KatLinks(B3KatTask):
 
 class B3KatDownload(B3KatTask):
     """
-    Download snapshot. Adjust the number of files with parameter 'last', which
-    holds the id of the last part. Output is a single (large) MARC file.
+    Download snapshot. Output is a single (large) MARC file.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
