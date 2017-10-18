@@ -30,10 +30,14 @@ Persee, refs #3133.
 import datetime
 
 import luigi
+import pymarc
+import ujson as json
+from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.sources.amsl import AMSLService
 from siskin.task import DefaultTask
 
 
@@ -86,3 +90,52 @@ class PerseeMARC(PerseeTask):
         because it might be deleted, when imported.
         """
         self.output().copy(self.path(ext='fincmarc.mrc.import'))
+
+
+class PerseeMARCIssue11349(PerseeTask):
+    """
+    Attach a special note to the item, namely another collection name, that,
+    when processed with solrmarc, yield some desired result, refs #11349.
+    TODO(miku): This is a temporary workaround.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'marc': PerseeMARC(date=self.date),
+            'amsl': AMSLService(date=self.date),
+        }
+
+    def run(self):
+        with self.input().get('amsl').open() as handle:
+            amsl = json.load(handle)
+
+        for item in amsl:
+            if item["sourceID"] == "39" and item["ISIL"] == "DE-15-FID":
+                link = item["linkToHoldingsFile"]
+                break
+        else:
+            raise ValueError("cannot find link to DE-15-FID holdings file for SID 39")
+
+        output = shellout("""curl --fail "{url}" > {output} """, url=link)
+
+        issns = set()
+
+        with luigi.LocalTarget(output, format=TSV).open() as handle:
+            for row in handle.iter_tsv(cols=('issn',)):
+                issns.add(row.issn.strip())
+
+        with self.input().get('marc').open('rb') as handle:
+            reader = pymarc.MARCReader(handle, to_unicode=True, force_utf8=True)
+            for i, record in enumerate(reader):
+                if not record["022"]:
+                    continue
+                if "a" in record["022"] and record["022"]["a"].strip() in issns:
+                    self.logger.debug("updating record %s", record["001"].data)
+                    record.add_field(pymarc.Field("980", subfields=["c", "persee.fr (adlr)"]))
+
+        # TODO(miku): RecordDirectoryInvalid: Invalid directory,
+        # (93642, u'finc-39-b2FpOnBlcnNlZTphcnRpY2xlL2FzaWVfMDc2Ni0xMTc3XzE5ODdfbnVtXzNfMV85MDM')
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
