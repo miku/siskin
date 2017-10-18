@@ -278,7 +278,7 @@ class JstorIntermediateSchema(JstorTask):
                     output.write("\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class JstorExport(JstorTask):
