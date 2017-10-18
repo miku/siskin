@@ -34,7 +34,7 @@ for oldrecord in reader:
     try:
     	f001 = oldrecord["001"].data
     	f245 = oldrecord["245"]["a"]
-    except:
+    except (KeyError, TypeError):
     	print("No title found: " + f001)
     	continue   
 
@@ -55,7 +55,7 @@ for oldrecord in reader:
     try:
         f689a = oldrecord["650"]["a"]     
         newrecord.add("689", a=f689a)
-    except:
+    except (KeyError, TypeError):
         pass
 
     # 856 (Datensatz) fehlt in der Quelle
