@@ -58,7 +58,7 @@ class B3KatLinks(B3KatTask):
 
     def run(self):
         output = shellout("""
-            curl -s "https://www.bib-bvb.de/web/b3kat/open-data" |
+            curl --fail -s "https://www.bib-bvb.de/web/b3kat/open-data" |
             grep -Eo "/OpenData/b3kat_export_[0-9]{{4,4}}_[0-9]{{1,2}}_teil[0-9]{{1,2}}.xml.gz" |
             awk '{{print "https://www.bib-bvb.de"$0 }}' > {output} """)
         luigi.LocalTarget(output).move(self.output().path)
