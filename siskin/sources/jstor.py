@@ -41,7 +41,7 @@ import tempfile
 
 import luigi
 
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -188,15 +188,14 @@ class JstorIntermediateSchema(JstorTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class JstorIntermediateSchemaAdjustCollection(JstorTask):
+class JstorCollectionMapping(JstorTask):
     """
-    Turn single collection name "JStor" (https://git.io/vdHYh) into finer
-    grained names via title lists (https://is.gd/W37Uwg).
+    Create a mapping from ISSN to collection name.
 
-    Experimental, refs #11467.
+    Experimental, refs #11467. See: http://www.jstor.org/kbart/collections/all-archive-titles
 
         {
         "1957-7745": [
@@ -212,19 +211,12 @@ class JstorIntermediateSchemaAdjustCollection(JstorTask):
         ],
         ...
     """
-
     date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return []  # JstorIntermediateSchema(date=self.date)
 
     @timed
     def run(self):
-        """
-        TODO.
-        """
         names = collections.defaultdict(set)
-        url = "www.jstor.org/kbart/collections/all-archive-titles"
+        url = "http://www.jstor.org/kbart/collections/all-archive-titles"
         output = shellout("""curl -sL "{url}" > {output} """, url=url)
 
         with luigi.LocalTarget(output, format=TSV).open() as handle:
@@ -243,6 +235,51 @@ class JstorIntermediateSchemaAdjustCollection(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
+
+
+class JstorIntermediateSchemaAdjustCollection(JstorTask):
+    """
+    Turn single collection name "JStor" (https://git.io/vdHYh) into finer
+    grained names via title lists (https://is.gd/W37Uwg).
+
+    Experimental, refs #11467.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'file': JstorIntermediateSchema(date=self.date),
+            'mapping': JstorCollectionMapping(date=self.date),
+        }
+
+    @timed
+    def run(self):
+        with self.input().get('mapping').open() as mapfile:
+            mapping = json.load(mapfile)
+
+        with self.input().get('file').open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    doc = json.loads(line)
+                    issns, names = set(), set()
+
+                    for issn in doc.get('rft.issn', []):
+                        issns.add(issn)
+                    for issn in doc.get('rft.eissn', []):
+                        issns.add(issn)
+
+                    for issn in issns:
+                        for name in mapping.get(issn, []):
+                            names.add(name)
+                    if not len(names):
+                        continue
+                    doc['finc.mega_collection'] = list(names)
+                    json.dump(doc, output)
+                    output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'), format=Gzip)
 
 
 class JstorExport(JstorTask):
