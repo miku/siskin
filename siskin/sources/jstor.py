@@ -197,6 +197,20 @@ class JstorIntermediateSchemaAdjustCollection(JstorTask):
     grained names via title lists (https://is.gd/W37Uwg).
 
     Experimental, refs #11467.
+
+        {
+        "1957-7745": [
+            "Arts & Sciences XIV Collection"
+        ],
+        "2159-4538": [
+            "Arts & Sciences XII Collection"
+        ],
+        "0272-5045": [
+            "Law Discipline Package",
+            "American Society of International Law Package",
+            "Arts & Sciences VI Collection"
+        ],
+        ...
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -215,12 +229,11 @@ class JstorIntermediateSchemaAdjustCollection(JstorTask):
 
         with luigi.LocalTarget(output, format=TSV).open() as handle:
             for line in handle.iter_tsv():
-                issns, entry = line[1:3], line[26]
-                parts = [p.strip() for p in entry.split(";")]
+                issns, parts = line[1:3], [p.strip() for p in line[26].split(";")]
                 for issn in [v.strip() for v in issns]:
                     if not issn:
                         continue
-                    for name in [v.strip() for v in parts]:
+                    for name in parts:
                         if not name:
                             continue
                         names[issn].add(name)
