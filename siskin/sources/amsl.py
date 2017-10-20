@@ -122,6 +122,15 @@ class AMSLService(AMSLTask):
         link = '%s/%s/list?do=%s' % (self.config.get('amsl', 'base').rstrip('/'), realm, name)
         output = shellout("""curl --fail "{link}" | sed -e 's@localhost@{host}@g' > {output} """,
                           host=self.config.get('amsl', 'base').replace("https://", ""), link=link)
+
+        # If we check here for valid JSON, debugging might be simpler.
+        with open(output) as handle:
+            try:
+                _ = json.load(handle)
+            except ValueError as err:
+                self.logger.warning("AMSL API did not return valid JSON")
+                raise
+
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
