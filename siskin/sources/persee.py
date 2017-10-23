@@ -30,6 +30,7 @@ Persee, refs #3133.
 import datetime
 
 import luigi
+import marcx
 import pymarc
 import ujson as json
 from gluish.format import TSV
@@ -125,17 +126,25 @@ class PerseeMARCIssue11349(PerseeTask):
             for row in handle.iter_tsv(cols=('issn',)):
                 issns.add(row.issn.strip())
 
+        updated = 0
         with self.input().get('marc').open('rb') as handle:
-            reader = pymarc.MARCReader(handle, to_unicode=True, force_utf8=True)
-            for i, record in enumerate(reader):
-                if not record["022"]:
-                    continue
-                if "a" in record["022"] and record["022"]["a"].strip() in issns:
-                    self.logger.debug("updating record %s", record["001"].data)
-                    record.add_field(pymarc.Field("980", subfields=["c", "persee.fr (adlr)"]))
+            with self.output().open('wb') as output:
+                reader = pymarc.MARCReader(handle, to_unicode=True, force_utf8=True)
+                writer = pymarc.MARCWriter(output)
+                for i, record in enumerate(reader):
+                    record = marcx.Record.from_record(record)
 
-        # TODO(miku): RecordDirectoryInvalid: Invalid directory,
-        # (93642, u'finc-39-b2FpOnBlcnNlZTphcnRpY2xlL2FzaWVfMDc2Ni0xMTc3XzE5ODdfbnVtXzNfMV85MDM')
+                    if not record["022"]:
+                        writer.write(record)
+                        continue
+
+                    if "a" in record["022"] and record["022"]["a"].strip() in issns:
+                        self.logger.debug("updating: %s", record["001"].data)
+                        record.add("980", c="persee.fr (adlr)")
+                        updated += 1
+                    writer.write(record)
+
+        self.logger.debug("updated %s records", updated)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))

@@ -1,6 +1,8 @@
 #!/usr/bin/dev python3
 # coding: utf-8
 
+from __future__ import print_function
+
 import base64
 import io
 import re
@@ -105,6 +107,12 @@ for i, line in enumerate(inputfile, start=1):
 
     # beschreibender Text
     f520a = get_field("<dc:description xml:lang=\"\w\w\w\">(.*?)</dc:description>")
+
+    FIELD_LENGTH_LIMIT = 8000  # Limit is 9999 bytes, but as we might not only have ASCII, add a margin.
+
+    if len(f520a) > FIELD_LENGTH_LIMIT:
+        print("cutting off long description (%s -> %s) for %s" % (len(f520a), FIELD_LENGTH_LIMIT, get_field("identifier")), file=sys.stderr)
+        f520a = f520a[:FIELD_LENGTH_LIMIT]  # Cut off long abstracts, refs #11349.
 
     # Quelle
     f773a = get_field("dcterms:bibliographicCitation\.jtitle")
