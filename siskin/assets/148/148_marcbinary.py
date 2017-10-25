@@ -63,10 +63,9 @@ for oldrecord in reader:
     # newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="???")
 
     # 980
-    newrecord.add("980", a=f001, b="148", c="Bundesarchiv (Filmarchiv)")
-    newrecord.add("980", a=f001, b="148", c="Verbundkatalog Film")
-
-
+    collections = ["a", f001, "b", "148", "c", "Bundesarchiv (Filmarchiv)", "c", "Verbundkatalog Film"]
+    newrecord.add("980", subfields=collections)
+  
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
