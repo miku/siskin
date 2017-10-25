@@ -170,8 +170,8 @@ for i, line in enumerate(inputfile, start=1):
 
     outputfile.write(marcrecord.as_marc())
 
-    if i > 20000:
-        break
+    #if i > 20000:
+    #    break
 
 inputfile.close()
 outputfile.close()
