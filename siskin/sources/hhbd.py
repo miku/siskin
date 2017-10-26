@@ -49,12 +49,13 @@ class HHBDCombine(HHBDTask):
     OAI, single file version.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='oai_dc')
     url = luigi.Parameter(default='http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi',
                           significant=False)
 
     def run(self):
-        shellout("metha-sync http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi")
-        output = shellout("metha-cat -root Records {url} > {output}", url=self.url)
+        shellout("metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
+        output = shellout("metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -68,7 +69,7 @@ class HHBDIntermediateSchema(HHBDTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return HHBDCombine(date=self.date)
+        return HHBDCombine(date=self.date, format='oai_dc')
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
