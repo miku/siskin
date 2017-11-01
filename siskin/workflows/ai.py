@@ -565,6 +565,9 @@ class AICollectionsAndSerialNumbers(AITask):
         return AIIntermediateSchema(date=self.date)
 
     def run(self):
+        """
+        Create a graph with two namespaces.
+        """
         g = rdflib.Graph()
         ns = {
             "amsl": rdflib.Namespace('http://amsl.technology/'),
@@ -578,13 +581,11 @@ class AICollectionsAndSerialNumbers(AITask):
             for i, line in enumerate(handle):
                 if i % 100000 == 0:
                     self.logger.debug("%s %s", i, len(g))
+
                 doc = json.loads(line)
-                issns = doc.get('rft.issn', []) + doc.get('rft.eissn', [])
-                if len(issns) == 0:
-                    continue
+                issns = list(itertools.chain(doc.get('rft.issn', []), doc.get('rft.eissn', [])))
                 colls = doc.get('finc.mega_collection', [])
-                if not colls:
-                    continue
+
                 for issn in issns:
                     for c in colls:
                         s = disco[urllib.quote(c.encode('utf-8'))]
