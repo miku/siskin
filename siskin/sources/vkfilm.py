@@ -64,8 +64,9 @@ class VKFilmMarc(VKFilmTask):
         return VKFilmFile()
 
     def run(self):
+        output = shellout("""iconv -f utf-8 -t utf-8 -c {input} > {output}""", input=self.input().path)
         output = shellout("""flux.sh {flux} in={input} > {output}""",
-                          flux=self.assets("127/127.flux"), input=self.input().path)
+                          flux=self.assets("127/127.flux"), input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
