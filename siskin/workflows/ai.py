@@ -557,7 +557,10 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
 class AICollectionsAndSerialNumbers(AITask):
     """
-    Turtlized <Collection> amsl:coveredMediumID <ISSN>, <ISSN>, ..., refs #5156.
+    Turtlized coverage report, ..., refs #5156.
+
+    XXX: The collection names are not that uniform. Would need to extract those
+    names from AMSL - however, the raw data contains these names ...
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
