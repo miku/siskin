@@ -27,6 +27,8 @@
 """
 VKFilm (Postdam), #8575, about 120000 records.
 
+TODO: Unify VK* tasks.
+
 Config
 ------
 

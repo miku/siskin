@@ -27,6 +27,8 @@
 """
 VKFilm, #8571. Hebis FTP.
 
+TODO: Unify VK* tasks.
+
 Config
 ------
 
