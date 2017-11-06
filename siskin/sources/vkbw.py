@@ -107,7 +107,9 @@ class VKBWDownload(VKBWTask):
                 if resp.status_code != 200:
                     print('failed to fetch %s: HTTP %s' % (url, resp.status_code))
                     continue
-                doc = parseString(resp.text.encode('utf-8').strip())  # XXX: clear encoding.
+                # XXX: clear encoding.
+                doc = parseString(resp.text.encode('utf-8').strip())
+                # XXX: Maybe rename "document" to "Record" for yaz.
                 output.write(doc.childNodes[0].childNodes[0].toxml("utf-8"))
                 self.logger.debug("fetched %s/%s", no, no_entries)
             output.write(u"</collection>")
