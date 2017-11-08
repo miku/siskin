@@ -59,7 +59,7 @@ class VKBWTask(DefaultTask):
     """
     Base task for VKFilm BW.
     """
-    TAG = 'vkbw'
+    TAG = '151'
 
     def closest(self):
         return monthly(date=self.date)
