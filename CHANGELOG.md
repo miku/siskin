@@ -1,3 +1,8 @@
+0.2.0 2017-09-06
+----------------
+
+* switch to a new versioning scheme, https://git.io/vF0QC
+
 0.1.37 2017-08-03
 -----------------
 
