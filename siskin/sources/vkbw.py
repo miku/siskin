@@ -85,7 +85,7 @@ class VKBWDownload(VKBWTask):
 
         r = requests.get(url)
         if r.status_code != 200:
-            raise RuntimeError('request returned HTTP %s: %s' % (r.status_code, url))
+            raise RuntimeError('got HTTP %s: %s' % (r.status_code, url))
 
         dd = xmltodict.parse(r.text)
         set_number = int(dd["find"]["set_number"])
@@ -105,7 +105,7 @@ class VKBWDownload(VKBWTask):
                 url = "%s?%s" % (baseurl, urllib.urlencode(query))
                 resp = requests.get(url)
                 if resp.status_code != 200:
-                    print('failed to fetch %s: HTTP %s' % (url, resp.status_code))
+                    print('failed with HTTP %s: %s' % (resp.status_code, url))
                     continue
 
                 doc = parseString(resp.text.encode('utf-8').strip())
