@@ -121,7 +121,7 @@ for oldrecord in oldrecords:
     newrecord.add("935", c="vide")
 
     # Kollektion
-    f980a = "finc-143-%s" % f001
+    f980a = f001
     if f490a == "Biology":
         newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Biology)")
     elif f490a == "Medicine":
