@@ -67,7 +67,7 @@ class VKBWTask(DefaultTask):
 
 class VKBWDownload(VKBWTask):
     """
-    Harvest MARCXML records from Alephino.
+    Harvest MARCXML-ish records from Alephino.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
