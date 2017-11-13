@@ -120,8 +120,7 @@ class AMSLService(AMSLTask):
         realm, name = parts
 
         link = '%s/%s/list?do=%s' % (self.config.get('amsl', 'base').rstrip('/'), realm, name)
-        output = shellout("""curl --fail "{link}" | sed -e 's@localhost@{host}@g' > {output} """,
-                          host=self.config.get('amsl', 'base').replace("https://", ""), link=link)
+        output = shellout("""curl --fail "{link}" > {output} """, link=link)
 
         # If we check here for valid JSON, debugging might be simpler.
         with open(output) as handle:
