@@ -792,9 +792,12 @@ class AIApplyOpenAccessFlag(AITask):
 
     def run(self):
         """
-        Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min.
+        Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min, refs #11285#note-17.
         """
-        output = shellout("unpigz -c {input} | span-oa-filter -f {kbart} | pigz -c > {output}",
+        output = shellout("""unpigz -c {input} |
+                             span-oa-filter -f {kbart} |
+                             jq 'if .["finc.source_id"] == "48" then .["x.oa"] = false else . end' |
+                             pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path)
         luigi.LocalTarget(output).move(self.output().path)
