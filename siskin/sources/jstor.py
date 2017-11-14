@@ -47,9 +47,9 @@ from gluish.utils import shellout
 
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
-from siskin.sources.amsl import AMSLFilterConfig
+from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, nwise
+from siskin.utils import SetEncoder, nwise, load_set_from_file
 
 
 class JstorTask(DefaultTask):
@@ -250,12 +250,30 @@ class JstorIntermediateSchema(JstorTask):
         return {
             'file': JstorIntermediateSchemaGenericCollection(date=self.date),
             'mapping': JstorCollectionMapping(date=self.date),
+            'amsl': AMSLService(date=self.date),
         }
 
     @timed
     def run(self):
+        """
+        Only use collection names, which we find in AMSL as well.
+        """
+        output = shellout("""cat {input} | jq -rc '.[] | select(.sourceID == "55") | .megaCollection' > {output} """,
+                          input=self.input().get("amsl").path)
+        allowed_collection_names = load_set_from_file(output)
+
+        # Add a few variants.
+        allowed_collection_names = allowed_collection_names.union(
+            set([s.replace("JSTOR ", "") for s in allowed_collection_names]))
+        allowed_collection_names = allowed_collection_names.union(
+            set([s.replace(" Archive", " Collection") for s in allowed_collection_names]))
+
+        self.logger.debug("allowing via AMSL: %s", allowed_collection_names)
+
         with self.input().get('mapping').open() as mapfile:
             mapping = json.load(mapfile)
+
+        counter = collections.Counter()
 
         with self.input().get('file').open() as handle:
             with self.output().open('w') as output:
@@ -273,10 +291,19 @@ class JstorIntermediateSchema(JstorTask):
                             names.add(name)
 
                     if len(names) > 0:
-                        doc['finc.mega_collection'] = list(names)
+                        doc['finc.mega_collection'] = list([name for name in names
+                                                            if name in allowed_collection_names])
+                        if len(doc['finc.mega_collection']) == 0:
+                            self.logger.warn("no collection name given to %s: %s", doc["finc.record_id"], names)
+                            counter["err.collection.not.in.amsl"] += 1
+                    else:
+                        self.logger.warn("JSTOR record without issn or issn mapping: %s", doc.get("finc.record_id"))
+                        counter["err.name"] += 1
 
                     json.dump(doc, output)
                     output.write("\n")
+
+        self.logger.debug(counter)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
