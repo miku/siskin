@@ -18,6 +18,16 @@
           <case to="lower"/>
           <lookup in="sprachliste"/>
         </data>
+        <data source="metadata.dc.language.value">
+          <case to="lower"/>
+          <lookup>
+            <entry name="sp" value="spa"/>
+            <entry name="pr" value="por"/>
+            <entry name="ke" value="eng"/>
+            <entry name="ge" value="ger"/>
+            <entry name="fe" value="fre"/>
+          </lookup>
+        </data>
         <!-- default source value -->
         <data source="metadata.dc.language.value"/>
       </choose>
