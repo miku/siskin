@@ -106,7 +106,12 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
         deep paging cursors. Any combination of query, filters and facets may be used
         with deep paging cursors. While rows may be specified along with cursor,
         offset and sample cannot be used. To use deep paging make a query as normal,
-        but include the cursor parameter with a value of *
+        but include the cursor parameter with a value of * (https://git.io/vFyAn).
+
+        > But we prefer carrots to sticks. As of September 18th 2017 any API
+        queries that use HTTPS and have appropriate contact information will be
+        directed to a special pool of API machines that are reserved for polite
+        users. (https://git.io/vFyN5).
         """
         cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
@@ -118,14 +123,16 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
         cursor = '*'
 
         with self.output().open('w') as output:
-            while True:
-                params = {
-                    'rows': rows,
-                    'filter': filter,
-                    'cursor': cursor
-                }
+            params = {'rows': rows, 'filter': filter}
 
-                url = 'http://api.crossref.org/works?%s' % (urllib.parse.urlencode(params))
+            while True:
+                params['cursor'] = cursor
+
+                # Do not fail, if user has not configured mailto, https://git.io/vFyN5.
+                if self.config.get('crossref', 'mailto', fallback=None):
+                    params['mailto'] = self.config.get('crossref', 'mailto')
+
+                url = 'https://api.crossref.org/works?%s' % (urllib.parse.urlencode(params))
 
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
