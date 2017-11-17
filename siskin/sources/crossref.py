@@ -111,7 +111,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
         > But we prefer carrots to sticks. As of September 18th 2017 any API
         queries that use HTTPS and have appropriate contact information will be
         directed to a special pool of API machines that are reserved for polite
-        users. (https://git.io/vFyN5).
+        users. (https://git.io/vFyN5), refs #9059.
         """
         cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
