@@ -796,7 +796,7 @@ class AIApplyOpenAccessFlag(AITask):
         """
         output = shellout("""unpigz -c {input} |
                              span-oa-filter -f {kbart} |
-                             jq 'if .["finc.source_id"] == "48" then .["x.oa"] = false else . end' |
+                             jq -rc 'if .["finc.source_id"] == "48" then .["x.oa"] = false else . end' |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path)
