@@ -25,14 +25,23 @@
 """
 Springer (testing).
 
+Options currently: Download via OwnCloud and (preferred) SFTP.
+
 Config
 ------
 
 [springer]
 
-username = nana
+username = admin
 password = s3cret
 url = http://export.com/intermediate.file.gz
+
+ftp-host = sftp://example.com
+ftp-base = /target_data/xyz
+ftp-username= admin
+ftp-password= s3cr3t
+ftp-pattern = *
+
 """
 
 from __future__ import print_function
@@ -43,11 +52,12 @@ import re
 import luigi
 import six
 import ujson as json
-from gluish.format import Gzip
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.common import FTPMirror
 from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
@@ -60,14 +70,30 @@ class SpringerTask(DefaultTask):
         return weekly(date=self.date)
 
 
-class SpringerProvided(SpringerTask, luigi.ExternalTask):
+class SpringerPaths(SpringerTask):
     """
-    Provided. This is deprecated via #6647. Data access via download, see: SpringerDownload.
+    Mirror SLUB FTP.
     """
 
-    @deprecated
+    date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=10, significant=False)
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description='timeout in seconds')
+
+    def requires(self):
+        return FTPMirror(host=self.config.get('springer', 'ftp-host'),
+                         base=self.config.get('springer', 'ftp-base'),
+                         username=self.config.get('springer', 'ftp-username'),
+                         password=self.config.get('springer', 'ftp-password'),
+                         pattern=self.config.get('springer', 'ftp-pattern'),
+                         max_retries=self.max_retries,
+                         timeout=self.timeout)
+
+    def run(self):
+        self.input().move(self.output().path)
+
     def output(self):
-        return luigi.LocalTarget(path=self.config.get('springer', 'intermediate-schema-file'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class SpringerDownload(SpringerTask):
