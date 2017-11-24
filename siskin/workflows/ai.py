@@ -792,11 +792,12 @@ class AIApplyOpenAccessFlag(AITask):
 
     def run(self):
         """
-        Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min, refs #11285#note-17.
+        Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min, refs #11285#note-17, refs #11969.
         """
         output = shellout("""unpigz -c {input} |
                              span-oa-filter -f {kbart} |
                              jq -rc 'if .["finc.source_id"] == "48" then .["x.oa"] = false else . end' |
+                             jq -rc 'if .["finc.source_id"] == "34" then .["x.oa"] = true else . end' |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path)
