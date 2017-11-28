@@ -72,7 +72,7 @@ class SpringerTask(DefaultTask):
 
 class SpringerPaths(SpringerTask):
     """
-    Mirror SLUB FTP.
+    Mirror SLUB FTP. Preferred as of November 2017.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -98,10 +98,11 @@ class SpringerPaths(SpringerTask):
 
 class SpringerDownload(SpringerTask):
     """
-    Attempt to download file from a configured URL.
+    Attempt to download file from a configured URL. Preferred up until October 2017.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
+    @deprecated
     def run(self):
         output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
                           username=self.config.get('springer', 'username'),
@@ -122,10 +123,38 @@ class SpringerIssue11557(SpringerTask):
     def requires(self):
         return SpringerDownload(date=self.date)
 
+    @deprecated
     def run(self):
         output = shellout("""
             jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"]) | .["finc.mega_collection"] = [.["finc.mega_collection"]]' < <(unpigz -c {input}) | pigz -c > {output}
         """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+class SpringerCleanup(SpringerTask):
+    """
+    2017-11-28: finc.mega_collection is now multi-valued; AIAccessFacet remains.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SpringerPaths(date=self.date)
+
+    def run(self):
+        realpath = None
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if not row.path.endswith("total_tpu.ldj.gz"):
+                    continue
+                realpath = row.path
+                break
+            else:
+                raise RuntimeError('FTP site does not contain total_tpu.ldj.gz')
+        output = shellout("""
+            jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"])' < <(unpigz -c {input}) | pigz -c > {output}
+        """, input=realpath)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -174,7 +203,7 @@ class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SpringerIssue11557(date=self.date)
+        return SpringerCleanup(date=self.date)
 
     def output(self):
         return self.input()
