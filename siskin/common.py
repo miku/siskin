@@ -95,7 +95,7 @@ class FTPMirror(CommonTask):
         base = os.path.dirname(self.output().path)
         subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(
             host=self.host, username=self.username, base=self.base,
-            pattern=self.pattern)).hexdigest()
+	    pattern=self.pattern).encode('utf-8')).hexdigest()
 
         # target is the root of the mirror
         target = os.path.join(base, subdir)
