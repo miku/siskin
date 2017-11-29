@@ -781,6 +781,11 @@ class AIISSNCoverageSolrMatches(AITask):
 class AIApplyOpenAccessFlag(AITask):
     """
     Apply OA-Flag. Experimental, refs. #8986.
+
+    1. Inhouse/Flag (per collection)
+    2. KBART
+    3. Gold-OA
+    4. Manual Overwrites
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
