@@ -31,6 +31,7 @@ Configuration:
 [genios]
 
 scp-src = user@ftp.example.com:/home/gbi
+issue-10707-kbart-url = http://example.com/kbart.csv
 
 ----
 
@@ -158,6 +159,19 @@ class GeniosDropbox(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+
+class GeniosIssue10707Download(GeniosTask):
+    """
+    Download kbart filter, specific to DE-15, refs #10707. Assume URL in config
+    does not change. If it does, reconfigure and rerun the task.
+    """
+    def run(self):
+        output = shellout("curl --fail {url} > {output}", url=self.config.get('genios', 'issue-10707-kbart-url'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
 
 
 class GeniosReloadDates(GeniosTask):
