@@ -449,6 +449,10 @@ class AILicensing(AITask):
     Take intermediate schema and a config and attach ISILs accordingly. As per
     MDM-2017-11-29 a fixed date should be used. We fix date to YYYY-MM-15, refs
     #11821. Note: Task AMSLService should be run via a daily cron.
+
+    Example cron entry (assuming virtual environment named siskin):
+
+        00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLService --local-scheduler
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
