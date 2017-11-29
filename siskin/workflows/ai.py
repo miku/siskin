@@ -113,8 +113,10 @@ class AIDOIList(AITask):
         """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        output = shellout("LC_ALL=C sort -S35% {input} > {output}", input=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
+        output = shellout(
+            "LC_ALL=C sort -S35% {input} > {output}", input=stopover)
         os.remove(stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -126,13 +128,15 @@ class AIDOIRedirectTable(AITask):
     """
     Generate a redirect table. Takes days. Make sure doi.org is in your hosts file so DNS is not stressed.
     """
-    hurrly_workers = luigi.IntParameter(default=4, description='number of workers for hurrly')
+    hurrly_workers = luigi.IntParameter(
+        default=4, description='number of workers for hurrly')
 
     def requires(self):
         return AIDOIList()
 
     def run(self):
-        output = shellout("hurrly -w {w} < {input} > {output}", w=self.hurrly_workers, input=self.input().path)
+        output = shellout("hurrly -w {w} < {input} > {output}",
+                          w=self.hurrly_workers, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -184,7 +188,8 @@ class AIISSNStats(AITask):
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+                output.write_tsv(k1, k2, len(s1), len(s2),
+                                 len(s1.intersection(s2)))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -235,7 +240,8 @@ class AIISSNList(AITask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for _, target in list(self.input().items()):
-            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
+            shellout("cat {input} | grep -v null >> {output}",
+                     input=target.path, output=output)
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -265,8 +271,10 @@ class AIQuality(AITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout(""" echo "S:{input}" >> {output} """, input=target.path, output=stopover)
-            shellout("span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}", input=target.path, output=stopover)
+            shellout(""" echo "S:{input}" >> {output} """,
+                     input=target.path, output=stopover)
+            shellout(
+                "span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -301,7 +309,8 @@ class AIIntermediateSchema(AITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -376,7 +385,8 @@ class AIErrorDistribution(AITask):
 
     @timed
     def run(self):
-        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path)
+        output = shellout(
+            "unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -421,9 +431,11 @@ class AIBlobDB(AITask):
         Extract intermediate schema file temporarily.
         """
         tempdir = tempfile.mkdtemp(prefix="siskin-")
-        extracted = shellout("unpigz -c {input} > {output}", input=self.input().path)
+        extracted = shellout(
+            "unpigz -c {input} > {output}", input=self.input().path)
 
-        shellout("microblob -db {tempdir} -file {input} -key finc.record_id", tempdir=tempdir, input=extracted)
+        shellout("microblob -db {tempdir} -file {input} -key finc.record_id",
+                 tempdir=tempdir, input=extracted)
         os.remove(extracted)
         os.makedirs(os.path.dirname(self.output().path))
         shutil.move(tempdir, self.output().path)
@@ -486,7 +498,8 @@ class AIInstitutionChanges(AITask):
         return AILocalData(date=self.date)
 
     def run(self):
-        output = shellout("""groupcover -prefs '85 55 89 60 50 105 34 101 49 28 48 121' < {input} > {output}""", input=self.input().path)
+        output = shellout(
+            """groupcover -prefs '85 55 89 60 50 105 34 101 49 28 48 121' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -586,7 +599,8 @@ class AICollectionsAndSerialNumbers(AITask):
                     self.logger.debug("%s %s", i, len(g))
 
                 doc = json.loads(line)
-                issns = list(itertools.chain(doc.get('rft.issn', []), doc.get('rft.eissn', [])))
+                issns = list(itertools.chain(
+                    doc.get('rft.issn', []), doc.get('rft.eissn', [])))
                 colls = doc.get('finc.mega_collection', [])
 
                 for issn in issns:
@@ -803,6 +817,7 @@ class AIApplyOpenAccessFlag(AITask):
                              span-oa-filter -f {kbart} |
                              jq -rc 'if .["finc.source_id"] == "48" then .["x.oa"] = false else . end' |
                              jq -rc 'if .["finc.source_id"] == "34" then .["x.oa"] = true else . end' |
+                             jq -rc 'if .["finc.source_id"] == "28" then .["x.oa"] = true else . end' |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path)
