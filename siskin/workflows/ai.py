@@ -446,14 +446,17 @@ class AIBlobDB(AITask):
 
 class AILicensing(AITask):
     """
-    Take intermediate schema and a config and attach ISILs accordingly.
+    Take intermediate schema and a config and attach ISILs accordingly. As per
+    MDM-2017-11-29 a fixed date should be used. We fix date to YYYY-MM-15, refs
+    #11821.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        fixed_date_for_amsl = datetime.date(self.date.year, self.date.month, 15)
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfig(date=self.date),
+            'config': AMSLFilterConfig(date=fixed_date_for_amsl),
         }
 
     def run(self):
