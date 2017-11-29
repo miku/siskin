@@ -796,6 +796,8 @@ class AIApplyOpenAccessFlag(AITask):
     """
     Apply OA-Flag. Experimental, refs. #8986.
 
+    TODO(miku):
+
     1. Inhouse/Flag (per collection)
     2. KBART
     3. Gold-OA
