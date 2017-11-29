@@ -70,6 +70,8 @@ class AMSLTask(DefaultTask):
 
 class AMSLService(AMSLTask):
     """
+    TODO(miku): Fix retrieval date.
+
     Retrieve AMSL API response. Outbound: discovery, holdingsfiles,
     contentfiles, metadata_usage.
 
