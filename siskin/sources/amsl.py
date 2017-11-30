@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=C0301,E1101,C0330
+# pylint: disable=C0301,E1101,C0330,C0111
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
@@ -575,6 +575,23 @@ class AMSLWisoPackages(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
+
+
+class AMSLFilterConfigFreeze(AMSLTask):
+    """
+    Create a frozen file. File will contain the filterconfig plus content of all URLs.
+    """
+    date = luigi.Parameter(default=datetime.date.today())
+
+    def requires(self):
+        return AMSLFilterConfig(date=self.date)
+
+    def run(self):
+        output = shellout("span-freeze -o {output} < {input}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='zip'))
 
 
 class AMSLFilterConfig(AMSLTask):
