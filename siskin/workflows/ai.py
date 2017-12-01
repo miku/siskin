@@ -465,7 +465,7 @@ class AILicensing(AITask):
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfigFreeze(date=jourfixe.strftime("%Y-%m-%d")),
+            'config': AMSLFilterConfigFreeze(date=jourfixe),
         }
 
     def run(self):
