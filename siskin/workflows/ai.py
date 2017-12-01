@@ -458,9 +458,14 @@ class AILicensing(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        if self.date.day < 15:
+            jourfixe = datetime.date(self.date.year, self.date.month - 1, 15)),
+        else:
+            jourfixe = datetime.date(self.date.year, self.date.month, 15)),
+
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfigFreeze(date=datetime.date(self.date.year, self.date.month, 15)),
+            'config': AMSLFilterConfigFreeze(date=jourfixe.strftime("%Y-%m-%d")),
         }
 
     def run(self):
