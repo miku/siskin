@@ -448,23 +448,23 @@ class AILicensing(AITask):
     """
     Take intermediate schema and a config and attach ISILs accordingly. As per
     MDM-2017-11-29 a fixed date should be used. We fix date to YYYY-MM-15, refs
-    #11821, #12021. Note: Task AMSLService should be run via a daily cron.
+    #11821, #12021. Note: Task AMSLFilterConfigFreeze should be run via a daily
+    cron.
 
-    Example cron entry (assuming virtual environment named siskin):
+    Example crontab (assuming virtual environment named siskin):
 
-        00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLService --local-scheduler
+        00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLFilterConfigFreeze --local-scheduler
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        fixed_date_for_amsl = datetime.date(self.date.year, self.date.month, 15)
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfig(date=fixed_date_for_amsl),
+            'config': AMSLFilterConfigFreeze(date=datetime.date(self.date.year, self.date.month, 15),
         }
 
     def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+        output = shellout("span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('is').path)
         luigi.LocalTarget(output).move(self.output().path)
 
