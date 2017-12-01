@@ -662,7 +662,7 @@ class AMSLFilterConfig(AMSLTask):
     [1] https://git.io/vQohE
     """
 
-    date = luigi.Parameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
