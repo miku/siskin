@@ -343,7 +343,7 @@ class AMSLHoldingsFile(AMSLTask):
     Output should be in standard KBART format, given the uploaded files in AMSL are KBART.
     """
     isil = luigi.Parameter(description='ISIL, case sensitive')
-    date = luigi.Parameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return AMSLService(date=self.date, name='outboundservices:holdingsfiles')
@@ -409,7 +409,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
     As of October 2017, this list includes: https://pub.uni-bielefeld.de/download/2913654/2913655.
     """
 
-    date = luigi.Parameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
         """
@@ -473,7 +473,7 @@ class AMSLOpenAccessKBART(AMSLTask):
     Used in conjunction with https://git.io/vdB29.
     """
 
-    date = luigi.Parameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
         """
@@ -507,7 +507,7 @@ class AMSLWisoPackages(AMSLTask):
     """
     Collect WISO packages.
     """
-    date = luigi.Parameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return AMSLService(date=self.date)
@@ -581,7 +581,7 @@ class AMSLFilterConfigFreeze(AMSLTask):
     """
     Create a frozen file. File will contain the filterconfig plus content of all URLs.
     """
-    date = luigi.Parameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return AMSLFilterConfig(date=self.date)
