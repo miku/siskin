@@ -53,7 +53,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfig, AMSLHoldingsFile,
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLHoldingsFile,
                                  AMSLOpenAccessKBART, AMSLService)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.ceeol import CeeolJournalsDumpIntermediateSchema
