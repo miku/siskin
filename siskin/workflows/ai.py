@@ -459,9 +459,9 @@ class AILicensing(AITask):
 
     def requires(self):
         if self.date.day < 15:
-            jourfixe = datetime.date(self.date.year, self.date.month - 1, 15)),
+            jourfixe = datetime.date(self.date.year, self.date.month - 1, 15),
         else:
-            jourfixe = datetime.date(self.date.year, self.date.month, 15)),
+            jourfixe = datetime.date(self.date.year, self.date.month, 15),
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
