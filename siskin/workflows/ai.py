@@ -460,7 +460,7 @@ class AILicensing(AITask):
     def requires(self):
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfigFreeze(date=datetime.date(self.date.year, self.date.month, 15),
+            'config': AMSLFilterConfigFreeze(date=datetime.date(self.date.year, self.date.month, 15)),
         }
 
     def run(self):
