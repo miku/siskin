@@ -69,3 +69,4 @@ docs/btag-2017/byoi/code/output/
 bin/freetasks
 bin/indexcompare
 *.py.bak
+/tags
