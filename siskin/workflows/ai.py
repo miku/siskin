@@ -54,7 +54,7 @@ from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLHoldingsFile,
-                                 AMSLOpenAccessKBART, AMSLService)
+                                 AMSLOpenAccessKBART, AMSLService, AMSLFreeContent)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.ceeol import CeeolJournalsDumpIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
@@ -822,6 +822,7 @@ class AIApplyOpenAccessFlag(AITask):
 
     def requires(self):
         return {
+            'amsl-free-content': AMSLFreeContent(date=self.date),
             'kbart': AMSLOpenAccessKBART(date=self.date),
             'file': AIIntermediateSchema(date=self.date),
         }
@@ -832,14 +833,34 @@ class AIApplyOpenAccessFlag(AITask):
 
         XXX: Adjust filtered file with data from AMSLFreeContent.
         """
+
+        'if (.["sid"] == %s) and (.["mega_collection"] == %s) andthen .["'
+
+        with self.input().get('amsl-free-content').open() as handle:
+            freecontent = json.loads(handle)
+
+        filters = []
+
+        for item in freecontent:
+            bmap = {
+                'Ja': 'true',
+                'Nein': 'false',
+            }
+            fltr = """
+                jq -rc 'if ((.["finc.source_id"] == "%s") and
+                            (.["finc.mega_collection"] == "%s")) .["x.oa"] = %s else . end'
+            """ % (item['sid'], item['mega_collection'], bmap[item['freeContent']])
+            filters.append(fltr)
+
+        filtercmd = ' | '.join(filters)
+
         output = shellout("""unpigz -c {input} |
                              span-oa-filter -f {kbart} |
-                             jq -rc 'if .["finc.source_id"] == "48" then .["x.oa"] = false else . end' |
-                             jq -rc 'if .["finc.source_id"] == "34" then .["x.oa"] = true else . end' |
-                             jq -rc 'if .["finc.source_id"] == "28" then .["x.oa"] = true else . end' |
+                             {filtercmd} |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
-                          kbart=self.input().get('kbart').path)
+                          kbart=self.input().get('kbart').path,
+                          filtercmd=filtercmd)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
