@@ -94,6 +94,7 @@ class DOAJDump(DOAJTask):
     batch_size = luigi.IntParameter(default=1000, significant=False)
     timeout = luigi.IntParameter(default=60, significant=False)
     max_retries = luigi.IntParameter(default=3, significant=False)
+    sleep = luigi.IntParameter(default=5, significant=False)
 
     @timed
     def run(self):
@@ -127,6 +128,7 @@ class DOAJDump(DOAJTask):
                         output.write("%s\n" % json.dumps(doc))
                     total = total or result['hits']['total']
                     offset += self.batch_size
+                    time.sleep(self.sleep)
                     break
 
     def output(self):
