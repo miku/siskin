@@ -466,6 +466,20 @@ class AMSLGoldListKBART(AMSLTask):
         return luigi.LocalTarget(path=self.path())
 
 
+class AMSLFreeContent(AMSLTask):
+    """
+    Free content. Revelant for OA flags.
+    """
+
+    def run(self):
+	output = shellout("curl -s '{base}/inhouseservices/list?do=freeContent' | jq -c > {output}",
+			  base=self.config.get('amsl', 'base'))
+	luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+	return luigi.LocalTarget(path=self.path())
+
+
 class AMSLOpenAccessKBART(AMSLTask):
     """
     Create a KBART file that contains open access and freely available journals only.
