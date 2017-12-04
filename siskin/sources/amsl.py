@@ -485,7 +485,7 @@ class AMSLFreeContent(AMSLTask):
     def run(self):
         output = shellout("curl -s '{base}/inhouseservices/list?do=freeContent' | jq -c . > {output}",
                           base=self.config.get('amsl', 'base'))
-        luigi.LocalTarget(stopover).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
