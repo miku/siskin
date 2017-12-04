@@ -829,6 +829,8 @@ class AIApplyOpenAccessFlag(AITask):
     def run(self):
         """
         Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min, refs #11285#note-17, refs #11969.
+
+        XXX: Adjust filtered file with data from AMSLFreeContent.
         """
         output = shellout("""unpigz -c {input} |
                              span-oa-filter -f {kbart} |
