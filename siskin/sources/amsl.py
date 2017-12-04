@@ -481,6 +481,7 @@ class AMSLFreeContent(AMSLTask):
     """
     Free content. Revelant for OA flags.
     """
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
         output = shellout("curl -s '{base}/inhouseservices/list?do=freeContent' | jq -c . > {output}",
