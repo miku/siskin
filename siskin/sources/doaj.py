@@ -41,7 +41,7 @@ from builtins import map, range
 import luigi
 import ujson as json
 from gluish.common import Executable
-from gluish.format import TSV
+from gluish.format import Gzip, TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -74,11 +74,28 @@ class DOAJCSV(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout('wget --retry-connrefused {url} -O {output}', url=self.url)
+        output = shellout(
+            'wget --retry-connrefused {url} -O {output}', url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='csv'))
+
+
+class DOAJHarvest(DOAJTask):
+    """
+    Via OAI, https://doaj.org/features.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        shellout("metha-sync http://www.doaj.org/oai")
+        output = shellout(
+            "metha-cat http://www.doaj.org/oai | pigz -c > {output}")
+        luigi.LocalTarget(output).move(path=self.path())
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
 
 
 class DOAJDump(DOAJTask):
@@ -105,13 +122,16 @@ class DOAJDump(DOAJTask):
         max_backoff_retry = 10
         backoff_interval_s = 0.05
 
-        hosts = [{'host': self.host, 'port': self.port, 'url_prefix': self.url_prefix}]
-        es = elasticsearch.Elasticsearch(hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
+        hosts = [{'host': self.host, 'port': self.port,
+                  'url_prefix': self.url_prefix}]
+        es = elasticsearch.Elasticsearch(
+            hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
         with self.output().open('w') as output:
             offset, total = 0, 0
             while offset <= total:
                 for i in range(1, max_backoff_retry + 1):
-                    self.logger.debug(json.dumps({'attempt': i, 'offset': offset, 'total': total}))
+                    self.logger.debug(json.dumps(
+                        {'attempt': i, 'offset': offset, 'total': total}))
 
                     try:
                         result = es.search(body={'constant_score': {'query': {'match_all': {}}}},
@@ -185,7 +205,8 @@ class DOAJFiltered(DOAJTask):
 
     @timed
     def run(self):
-        identifier_blacklist = load_set_from_target(self.input().get('blacklist'))
+        identifier_blacklist = load_set_from_target(
+            self.input().get('blacklist'))
         excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
                                       func=lambda line: line.replace("-", ""))
 
@@ -220,7 +241,8 @@ class DOAJIntermediateSchema(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i doaj {input} | pigz -c > {output}", input=self.input().get('input').path)
+        output = shellout(
+            "span-import -i doaj {input} | pigz -c > {output}", input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -238,7 +260,8 @@ class DOAJExport(DOAJTask):
         return DOAJIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout(
+            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -262,8 +285,10 @@ class DOAJISSNList(DOAJTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
+        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
+                 input=self.input().get('input').path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input(
+        ).get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
