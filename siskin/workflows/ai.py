@@ -469,6 +469,9 @@ class AILicensing(AITask):
         }
 
     def run(self):
+        """
+        span v0.1.204 or later.
+        """
         output = shellout("span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('is').path)
         luigi.LocalTarget(output).move(self.output().path)
