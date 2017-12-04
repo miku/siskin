@@ -118,10 +118,12 @@ class AMSLService(AMSLTask):
     def run(self):
         parts = self.name.split(':')
         if not len(parts) == 2:
-            raise RuntimeError('name must be of the form realm:name, e.g. outboundservices:discovery')
+	    raise RuntimeError(
+		'realm:name expected, e.g. outboundservices:discovery')
         realm, name = parts
 
-        link = '%s/%s/list?do=%s' % (self.config.get('amsl', 'base').rstrip('/'), realm, name)
+	link = '%s/%s/list?do=%s' % (
+	    self.config.get('amsl', 'base').rstrip('/'), realm, name)
         output = shellout("""curl --fail "{link}" > {output} """, link=link)
 
         # If we check here for valid JSON, debugging might be simpler.
@@ -169,8 +171,8 @@ class AMSLCollectionsShardFilter(AMSLTask):
 
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    shard = luigi.Parameter(
-        default='UBL-ai', description='only collect items for this shard')
+    shard = luigi.Parameter(default='UBL-ai',
+			    description='only collect items for this shard')
 
     def requires(self):
         return AMSLService(date=self.date, name='outboundservices:discovery')
@@ -307,7 +309,8 @@ class AMSLCollectionsISIL(AMSLTask):
     """
     date = luigi.DateParameter(default=datetime.date.today())
     isil = luigi.Parameter(description='ISIL, case sensitive')
-    shard = luigi.Parameter(default='UBL-ai', description='only collect items for this shard')
+    shard = luigi.Parameter(default='UBL-ai',
+			    description='only collect items for this shard')
 
     def requires(self):
         return AMSLService(date=self.date, name='outboundservices:discovery')
@@ -323,7 +326,8 @@ class AMSLCollectionsISIL(AMSLTask):
                 continue
             scmap[item['sourceID']].add(item['megaCollection'].strip())
             if not scmap:
-                raise RuntimeError('no collections found for ISIL: %s' % self.isil)
+		raise RuntimeError(
+		    'no collections found for ISIL: %s' % self.isil)
 
         with self.output().open('w') as output:
             output.write(json.dumps(scmap, cls=SetEncoder) + "\n")
@@ -367,17 +371,22 @@ class AMSLHoldingsFile(AMSLTask):
 
                 # refs. #7142
                 if 'kbart' not in holding[urikey].lower():
-                    self.logger.debug("skipping non-KBART holding URI: %s", holding[urikey])
+		    self.logger.debug("skipping non-KBART holding URI: %s",
+				      holding[urikey])
                     continue
 
-                link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), holding[urikey])
-                downloaded = shellout("curl --fail {link} > {output} ", link=link)
+		link = "%s%s" % (self.config.get(
+		    'amsl', 'uri-download-prefix'), holding[urikey])
+		downloaded = shellout(
+		    "curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
-                    shellout("unzip -p {input} >> {output}", input=downloaded, output=stopover)
+		    shellout("unzip -p {input} >> {output}",
+			     input=downloaded, output=stopover)
                 except zipfile.BadZipfile:
                     # at least the file is not a zip.
-                    shellout("cat {input} >> {output}", input=downloaded, output=stopover)
+		    shellout("cat {input} >> {output}",
+			     input=downloaded, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
@@ -428,8 +437,10 @@ class AMSLOpenAccessISSNList(AMSLTask):
             # At least the file is not a zip.
             output = shellout("cat {input} >> {output}", input=downloaded)
 
-        shellout("cut -f 2 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
-        shellout("cut -f 3 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}", input=output, output=stopover)
+	shellout("cut -f 2 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}",
+		 input=output, output=stopover)
+	shellout("cut -f 3 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}",
+		 input=output, output=stopover)
 
         # Include OA list, refs #11579.
         shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
@@ -552,12 +563,14 @@ class AMSLWisoPackages(AMSLTask):
             filters = []
 
             if include_fzs and isil != 'DE-15-FID':
-                packages = set(itertools.chain(*[c for _, c in list(blob.items())]))
+		packages = set(itertools.chain(
+		    *[c for _, c in list(blob.items())]))
                 filters.append({
                     'and': [
                         {'source': ['48']},
                         {'package': [fzs_package_name]},
-                        {'package': [name for name in packages if name != fzs_package_name]}
+			{'package': [
+			    name for name in packages if name != fzs_package_name]}
                     ]
                 })
 
@@ -569,7 +582,8 @@ class AMSLWisoPackages(AMSLTask):
                         'and': [
                             {'source': ['48']},
                             {'holdings': {'urls': [lthf]}},
-                            {'package': [c for c in colls if c != fzs_package_name]},
+			    {'package': [c for c in colls if c !=
+					 fzs_package_name]},
                         ]
                     }
                 else:
@@ -577,7 +591,8 @@ class AMSLWisoPackages(AMSLTask):
                         'and': [
                             {'source': ['48']},
                             {'holdings': {'urls': [lthf]}},
-                            {'package': [c for c in colls if c != fzs_package_name]},
+			    {'package': [c for c in colls if c !=
+					 fzs_package_name]},
                             {'not': {'package': [fzs_package_name]}}
                         ]
                     }
@@ -601,7 +616,8 @@ class AMSLFilterConfigFreeze(AMSLTask):
         return AMSLFilterConfig(date=self.date)
 
     def run(self):
-        output = shellout("span-freeze -o {output} < {input}", input=self.input().path)
+	output = shellout("span-freeze -o {output} < {input}",
+			  input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -702,7 +718,8 @@ class AMSLFilterConfig(AMSLTask):
         isilfilters = collections.defaultdict(list)
 
         for item in doc:
-            isil, sid, mega_collection = operator.itemgetter('ISIL', 'sourceID', 'megaCollection')(item)
+	    isil, sid, mega_collection = operator.itemgetter(
+		'ISIL', 'sourceID', 'megaCollection')(item)
 
             if sid == '48':  # Handled elsewhere.
                 continue
@@ -778,9 +795,11 @@ class AMSLFilterConfig(AMSLTask):
                                   isil, sid, mega_collection)
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(mega_collection)
+		    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(
+			mega_collection)
                 else:
-                    self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
+		    self.logger.warning(
+			"evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
@@ -791,9 +810,11 @@ class AMSLFilterConfig(AMSLTask):
                                     'productISIL']):
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
-                    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(mega_collection)
+		    isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(
+			mega_collection)
                 else:
-                    self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
+		    self.logger.warning(
+			"evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
@@ -806,7 +827,8 @@ class AMSLFilterConfig(AMSLTask):
                 isilfilters[isil].append({
                     "and": [
                         {"source": [sid]},
-                        {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
+			{"holdings": {
+			    "urls": [item["externalLinkToContentFile"]]}},
                     ]})
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
@@ -840,11 +862,14 @@ class AMSLFilterConfig(AMSLTask):
                     isilfilters[isil].append({
                         "and": [
                             {"source": [sid]},
-                            {"holdings": {"urls": [item["externalLinkToContentFile"]]}},
-                            {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
+			    {"holdings": {
+				"urls": [item["externalLinkToContentFile"]]}},
+			    {"holdings": {
+				"urls": [item["linkToHoldingsFile"]]}},
                         ]})
                 else:
-                    self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
+		    self.logger.warning(
+			"evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
@@ -860,17 +885,21 @@ class AMSLFilterConfig(AMSLTask):
                     isilfilters[isil].append({
                         "and": [
                             {"source": [sid]},
-                            {"holdings": {"urls": [item["linkToContentFile"]]}},
-                            {"holdings": {"urls": [item["linkToHoldingsFile"]]}},
+			    {"holdings": {
+				"urls": [item["linkToContentFile"]]}},
+			    {"holdings": {
+				"urls": [item["linkToHoldingsFile"]]}},
                         ]})
                 else:
-                    self.logger.warning("evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
+		    self.logger.warning(
+			"evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
             # ?   ?    ?    ?    ?    ?     ?
             else:
-                raise RuntimeError("unhandled combination of sid, collection and other parameters: %s", item)
+		raise RuntimeError(
+		    "unhandled combination of sid, collection and other parameters: %s", item)
 
         # A second pass.
         for isil, blob in list(isilsidcollections.items()):
