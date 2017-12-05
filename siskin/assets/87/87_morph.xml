@@ -39,8 +39,11 @@
 				<constant value="$[mega_collection]"/>
 			</data>
 		</entity>
-		<combine name="finc.record_id" value="finc-$[sid]-${identifier_key}">
-			<!-- Record-ID  -->
+		<!-- Record-ID  -->
+		<data source="header.identifier.value" name="finc.record_id">
+			<regexp match="^(oai:).*\/(\d.*)$" format="${2}"/>
+		</data>
+		<combine name="finc.id" value="finc-$[sid]-${identifier_key}">
 			<data source="header.identifier.value" name="identifier_key">
 				<regexp match="^(oai:).*\/(\d.*)$" format="${2}"/>
 			</data>

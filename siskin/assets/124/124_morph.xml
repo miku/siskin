@@ -52,8 +52,9 @@
         <constant value="$[mega_collection]"/>
       </data>
     </entity>
+    <data source="001" value="finc.record_id" />
     <!-- Record-ID, TODO: maybe b64 encode the key -->
-    <combine name="finc.record_id" value="ai-124-${key}">
+    <combine name="finc.id" value="ai-124-${key}">
       <data source="001" name="key"/>
     </combine>
     <!-- receive SID -->

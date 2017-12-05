@@ -4,7 +4,8 @@
 #	"finc.mega_collection":	"FID #5486",
 	"finc.mega_collection":	["MedienwRezensionen"],
 #	"finc.record_id":		["finc-73-",.id]|add,
-	"finc.record_id":		["finc-73-",  # type other or doi
+	"finc.record_id": .front."article-meta"."article-id" | map(select(."@pub-id-type" == "doi")) | .[]."#text",
+	"finc.id":		["finc-73-",  # type other or doi
 		(.front."article-meta"."article-id" | map(select(."@pub-id-type" == "other")) | .[]."#text" )] | add,
     "doi": .front."article-meta"."article-id" | map(select(."@pub-id-type" == "doi")) | .[]."#text" ,
 	"finc.source_id":		"73",

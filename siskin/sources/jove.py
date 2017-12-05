@@ -57,10 +57,12 @@ class JoveMARC(JoveTask):
         cleanup = []
 
         url = 'https://www.jove.com/api/articles/v0/articlefeed.php?marc=1&sections[]=0&sections[]=4'
-        output = shellout("""curl -sLg '{url}' | head -n -1 > {output}""", url=url)
+        output = shellout(
+            """curl -sLg '{url}' | head -n -1 > {output}""", url=url)
         cleanup.append(output)
 
-        output = shellout("marctexttoxml < {input} | xmllint --format - > {output}", input=output)
+        output = shellout(
+            "marctexttoxml < {input} | xmllint --format - > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
         for item in cleanup:
@@ -99,7 +101,8 @@ class JoveIntermediateSchemaFromCSV(JoveTask):
 
     @deprecated
     def run(self):
-        r = requests.get("https://www.jove.com/api/articles/v0/articlefeed.php?csv=1")
+        r = requests.get(
+            "https://www.jove.com/api/articles/v0/articlefeed.php?csv=1")
         s = io.StringIO(r.text)
         with self.output().open('w') as output:
             for doc in csv.DictReader(s):
@@ -109,8 +112,9 @@ class JoveIntermediateSchemaFromCSV(JoveTask):
                     'rft.atitle': doc['Article Title'],
                     'rft.jtitle': doc['Journal'],
                     'authors': [{"rft.au": name} for name in doc.get('Authors').split(';')],
-                    'finc.record_id': 'ai-jove-%s' % doc['ArticleID'],
+                    'finc.record_id': doc['ArticleID'],
                     'finc.source_id': 'jove',
+                    'finc.id': 'ai-jove-%s' % doc['ArticleID'],
                     'x.subjects': doc['Section'].split(','),
                     'rft.date': datetime.datetime.strptime(doc['Date Published'], '%m/%d/%Y').strftime("%Y-%m-%d"),
                     'rft.genre': 'article',

@@ -434,7 +434,7 @@ class AIBlobDB(AITask):
         extracted = shellout(
             "unpigz -c {input} > {output}", input=self.input().path)
 
-        shellout("microblob -db {tempdir} -file {input} -key finc.record_id",
+        shellout("microblob -db {tempdir} -file {input} -key finc.id",
                  tempdir=tempdir, input=extracted)
         os.remove(extracted)
         os.makedirs(os.path.dirname(self.output().path))

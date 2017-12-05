@@ -2,7 +2,8 @@
 <metamorph xmlns="http://www.culturegraph.org/metamorph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
   <rules>
     <!-- Record-ID  -->
-    <combine name="finc.record_id" value="finc-$[sid]-${identifier_key}">
+    <data source="url.value" name="finc.record_id" />
+    <combine name="finc.id" value="finc-$[sid]-${identifier_key}">
       <data source="url.value" name="identifier_key">
         <!-- <script file="$[FLUX_DIR]btoa.js" invoke="b64URLEncode"/> -->
         <script file="$[FLUX_DIR]/../js/btoa.js" invoke="b64URLEncode"/>

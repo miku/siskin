@@ -221,7 +221,8 @@ class JstorCollectionMapping(JstorTask):
 
         with luigi.LocalTarget(output, format=TSV).open() as handle:
             for line in handle.iter_tsv():
-                issns, parts = line[1:3], [p.strip() for p in line[26].split(";")]
+                issns, parts = line[1:3], [p.strip()
+                                           for p in line[26].split(";")]
                 for issn in [v.strip() for v in issns]:
                     if not issn:
                         continue
@@ -294,10 +295,12 @@ class JstorIntermediateSchema(JstorTask):
                         doc['finc.mega_collection'] = list([name for name in names
                                                             if name in allowed_collection_names])
                         if len(doc['finc.mega_collection']) == 0:
-                            self.logger.warn("no collection name given to %s: %s", doc["finc.record_id"], names)
+                            self.logger.warn(
+                                "no collection name given to %s: %s", doc["finc.id"], names)
                             counter["err.collection.not.in.amsl"] += 1
                     else:
-                        self.logger.warn("JSTOR record without issn or issn mapping: %s", doc.get("finc.record_id"))
+                        self.logger.warn(
+                            "JSTOR record without issn or issn mapping: %s", doc.get("finc.id"))
                         counter["err.name"] += 1
 
                     json.dump(doc, output)

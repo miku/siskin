@@ -89,13 +89,18 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     Harvest window with cursors (https://git.io/v1K27).
     """
     begin = luigi.DateParameter(description='start of harvesting window')
-    end = luigi.DateParameter(description='end of harvesting window, inclusive')
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    end = luigi.DateParameter(
+        description='end of harvesting window, inclusive')
+    filter = luigi.Parameter(
+        default='deposit', description='index, deposit, update')
 
     rows = luigi.IntParameter(default=1000, significant=False)
-    max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
-    attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
-    sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests')
+    max_retries = luigi.IntParameter(
+        default=10, significant=False, description='HTTP retries')
+    attempts = luigi.IntParameter(
+        default=3, significant=False, description='number of attempts to GET an URL that failed')
+    sleep = luigi.IntParameter(
+        default=1, significant=False, description='sleep between requests')
 
     def run(self):
         """
@@ -113,11 +118,13 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
         directed to a special pool of API machines that are reserved for polite
         users. (https://git.io/vFyN5), refs #9059.
         """
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(
+            tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
         cache.sess.mount('http://', adapter)
 
-        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(self=self)
+        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(
+            self=self)
         rows, offset = self.rows, 0
 
         cursor = '*'
@@ -132,7 +139,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 if self.config.get('crossref', 'mailto', fallback=None):
                     params['mailto'] = self.config.get('crossref', 'mailto')
 
-                url = 'https://api.crossref.org/works?%s' % (urllib.parse.urlencode(params))
+                url = 'https://api.crossref.org/works?%s' % (
+                    urllib.parse.urlencode(params))
 
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
@@ -149,7 +157,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
 
                         cache_file = cache.get_cache_file(url)
                         if os.path.exists(cache_file):
-                            self.logger.debug('trying to recover by removing cached entry at %s', cache_file)
+                            self.logger.debug(
+                                'trying to recover by removing cached entry at %s', cache_file)
                             os.remove(cache_file)
                     else:
                         break  # all fine
@@ -163,7 +172,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 offset += rows
 
                 if not 'next-cursor' in content['message']:
-                    raise RuntimeError('expected next-cursor in message, but missing')
+                    raise RuntimeError(
+                        'expected next-cursor in message, but missing')
                 cursor = content['message']['next-cursor']
 
     def output(self):
@@ -176,7 +186,8 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
-    update = luigi.Parameter(default='months', description='days, weeks or months')
+    update = luigi.Parameter(
+        default='months', description='days, weeks or months')
 
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
@@ -196,13 +207,15 @@ class CrossrefChunkItems(CrossrefTask):
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    filter = luigi.Parameter(
+        default='deposit', description='index, deposit, update')
 
     def requires(self):
         return CrossrefHarvestChunkWithCursor(begin=self.begin, end=self.end, filter=self.filter)
 
     def run(self):
-        output = shellout("jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
+        output = shellout(
+            "jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -215,19 +228,23 @@ class CrossrefRawItems(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    update = luigi.Parameter(default='months', description='days, weeks or months')
+    update = luigi.Parameter(
+        default='months', description='days, weeks or months')
 
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
             raise RuntimeError('update can only be: days, weeks or months')
-        dates = [dt for dt in date_range(self.begin, self.date, 1, self.update)]
-        tasks = [CrossrefChunkItems(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
+        dates = [dt for dt in date_range(
+            self.begin, self.date, 1, self.update)]
+        tasks = [CrossrefChunkItems(begin=dates[i - 1], end=dates[i])
+                 for i in range(1, len(dates))]
         return tasks
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
+            shellout("cat {input} >> {output}",
+                     input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -245,7 +262,8 @@ class CrossrefUniqItems(CrossrefTask):
         return CrossrefRawItems(begin=self.begin, date=self.closest())
 
     def run(self):
-        output = shellout("span-crossref-snapshot -verbose -z -o {output} {input}", input=self.input().path)
+        output = shellout(
+            "span-crossref-snapshot -verbose -z -o {output} {input}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -289,7 +307,7 @@ class CrossrefCollectionStats(CrossrefTask):
     def run(self):
         output = shellout("""
             unpigz -c {input} |
-            jq -rc '[.["finc.record_id"], .["finc.source_id"], .["finc.mega_collection"], .["doi"]] | @csv' | sed -e 's@","@\t@g' | tr -d '"' > {output}
+            jq -rc '[.["finc.id"], .["finc.source_id"], .["finc.mega_collection"], .["doi"]] | @csv' | sed -e 's@","@\t@g' | tr -d '"' > {output}
         """, input=self.input().path, preserve_whitespace=True)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -313,7 +331,8 @@ class CrossrefExport(CrossrefTask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+        output = shellout(
+            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -396,11 +415,13 @@ class CrossrefDOIList(CrossrefTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         # process substitution sometimes results in a broken pipe, so extract beforehand
-        output = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
+        output = shellout(
+            "unpigz -c {input} > {output}", input=self.input().get('input').path)
         shellout("""jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
                  input=output, output=stopover)
         os.remove(output)
-        output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
+        output = shellout(
+            """sort -S50% -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -420,7 +441,8 @@ class CrossrefISSNList(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("jq -r '.ISSN[]?' <(unpigz -c {input}) 2> /dev/null > {output}", input=self.input().get('input').path)
+        output = shellout(
+            "jq -r '.ISSN[]?' <(unpigz -c {input}) 2> /dev/null > {output}", input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -439,7 +461,8 @@ class CrossrefUniqISSNList(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("sort -u {input} > {output}", input=self.input().path)
+        output = shellout(
+            "sort -u {input} > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -459,7 +482,8 @@ class CrossrefDOIAndISSNList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        temp = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
+        temp = shellout("unpigz -c {input} > {output}",
+                        input=self.input().get('input').path)
         output = shellout("""jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
                           input=temp, output=stopover)
         os.remove(temp)
@@ -482,7 +506,8 @@ class CrossrefHarvestGeneric(CrossrefTask):
 
     @timed
     def run(self):
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(
+            tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
         cache.sess.mount('http://', adapter)
 
@@ -491,7 +516,8 @@ class CrossrefHarvestGeneric(CrossrefTask):
         with self.output().open('w') as output:
             while True:
                 params = {"rows": rows, "offset": offset}
-                url = 'http://api.crossref.org/%s?%s' % (self.kind, urllib.parse.urlencode(params))
+                url = 'http://api.crossref.org/%s?%s' % (
+                    self.kind, urllib.parse.urlencode(params))
                 for attempt in range(1, 3):
                     body = cache.get(url)
                     try:
@@ -503,7 +529,8 @@ class CrossrefHarvestGeneric(CrossrefTask):
                             self.logger.debug(body[:100])
                             raise
                         if os.path.exists(cache.get_cache_file(url)):
-                            self.logger.debug("trying to recover by removing cached entry")
+                            self.logger.debug(
+                                "trying to recover by removing cached entry")
                             os.remove(cache.get_cache_file(url))
                     else:
                         break
@@ -575,7 +602,8 @@ class CrossrefDOIHarvest(CrossrefTask):
         }
 
     def run(self):
-        output = shellout("hurrly -w 4 < {input} | pigz > {output}", input=self.input().get('input').path)
+        output = shellout(
+            "hurrly -w 4 < {input} | pigz > {output}", input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -602,7 +630,8 @@ class CrossrefDOIBlacklist(CrossrefTask):
                  input=self.input().path, output=stopover)
         shellout("""LC_ALL=C zgrep -v "^200" {input} >> {output}""",
                  input=self.input().path, output=stopover)
-        output = shellout("sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
+        output = shellout(
+            "sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}", input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
