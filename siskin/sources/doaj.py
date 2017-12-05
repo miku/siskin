@@ -84,7 +84,7 @@ class DOAJCSV(DOAJTask):
 
 class DOAJHarvest(DOAJTask):
     """
-    Via OAI, https://doaj.org/features.
+    Via OAI, https://doaj.org/features. Last harvest (12/2017) yielded only 13K records.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -108,7 +108,7 @@ class DOAJDump(DOAJTask):
     port = luigi.IntParameter(default=443, significant=False)
     url_prefix = luigi.Parameter(default='query', significant=False)
 
-    batch_size = luigi.IntParameter(default=1000, significant=False)
+    batch_size = luigi.IntParameter(default=100, significant=False)
     timeout = luigi.IntParameter(default=60, significant=False)
     max_retries = luigi.IntParameter(default=3, significant=False)
     sleep = luigi.IntParameter(default=5, significant=False)
