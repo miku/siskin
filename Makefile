@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+PY_FILES := $(shell find siskin -name \*.py -print)
 
 dist:
 	python setup.py sdist
@@ -23,3 +24,7 @@ clean:
 	rm -rf build/ dist/
 	find . -name "*.pyc" -exec rm -f {} \;
 	find . -name ".DS_Store" -exec rm -f {} \;
+
+docs/catalog/AIUpdate.png: $(PY_FILES)
+	taskdeps-dot AIUpdate | dot -Tpng > $@
+
