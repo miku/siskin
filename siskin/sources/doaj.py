@@ -108,10 +108,10 @@ class DOAJDump(DOAJTask):
     port = luigi.IntParameter(default=443, significant=False)
     url_prefix = luigi.Parameter(default='query', significant=False)
 
-    batch_size = luigi.IntParameter(default=100, significant=False)
+    batch_size = luigi.IntParameter(default=200, significant=False)
     timeout = luigi.IntParameter(default=60, significant=False)
     max_retries = luigi.IntParameter(default=3, significant=False)
-    sleep = luigi.IntParameter(default=5, significant=False)
+    sleep = luigi.IntParameter(default=4, significant=False)
 
     @timed
     def run(self):
