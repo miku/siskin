@@ -28,7 +28,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     except:      
         continue
 
-    # Closesd Access werden übersprungen
+    # Closed Access werden übersprungen
     access = f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:rights"][1]
     if access == "info:eu-repo/semantics/closedAccess":
         continue
