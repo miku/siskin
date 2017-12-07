@@ -4,7 +4,6 @@
 import io
 import re
 import sys
-import json
 
 import xmltodict
 import marcx
@@ -29,7 +28,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         continue
 
     # Closed Access werden übersprungen
-    access = f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:rights"][1]
+    access = xmlrecord["metadata"]["oai_dc:dc"]["dc:rights"][1]
     if access == "info:eu-repo/semantics/closedAccess":
         continue
     
@@ -62,8 +61,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         continue
     marcrecord.add("100", a=f100a)
 
-    # Titel
-   
+    # Titel   
     f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
     if isinstance(f245, list):
         f245a = f245[0]["#text"]
@@ -105,9 +103,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])  
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[3])
 
+    # Medientyp
     marcrecord.add("935", a="druck")
     marcrecord.add("935", c="hs")
 
+    # Kollektion
     marcrecord.add("980", a=f001, b="150", c="MOnAMi Hochschulschriftenserver Mittweida")
 
     
