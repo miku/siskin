@@ -850,7 +850,8 @@ class AIApplyOpenAccessFlag(AITask):
             """ % (item['sid'], item['mega_collection'], bmap[item['freeContent']])
             filters.append(fltr.encode('utf-8'))
 
-        filtercmd = ' | '.join(filters)
+        # filtercmd = ' | '.join(filters)
+        filtercmd = 'cat' # XXX: Disable filter for the moment, ARG_MAX.
 
         output = shellout("""unpigz -c {input} |
                              span-oa-filter -f {kbart} |
