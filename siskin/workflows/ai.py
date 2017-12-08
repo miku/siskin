@@ -833,11 +833,8 @@ class AIApplyOpenAccessFlag(AITask):
 
         XXX: Adjust filtered file with data from AMSLFreeContent.
         """
-
-        'if (.["sid"] == %s) and (.["mega_collection"] == %s) andthen .["'
-
         with self.input().get('amsl-free-content').open() as handle:
-            freecontent = json.loads(handle)
+            freecontent = json.load(handle)
 
         filters = []
 
@@ -845,12 +842,13 @@ class AIApplyOpenAccessFlag(AITask):
             bmap = {
                 'Ja': 'true',
                 'Nein': 'false',
+                'Nicht festgelegt': 'false',
             }
             fltr = """
                 jq -rc 'if ((.["finc.source_id"] == "%s") and
                             (.["finc.mega_collection"] == "%s")) .["x.oa"] = %s else . end'
             """ % (item['sid'], item['mega_collection'], bmap[item['freeContent']])
-            filters.append(fltr)
+            filters.append(fltr.encode('utf-8'))
 
         filtercmd = ' | '.join(filters)
 
