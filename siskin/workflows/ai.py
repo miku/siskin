@@ -811,12 +811,9 @@ class AIApplyOpenAccessFlag(AITask):
     """
     Apply OA-Flag. Experimental, refs. #8986.
 
-    TODO(miku):
-
     1. Inhouse/Flag (per collection)
     2. KBART
     3. Gold-OA
-    4. Manual Overwrites
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -831,31 +828,11 @@ class AIApplyOpenAccessFlag(AITask):
         """
         Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min, refs #11285#note-17, refs #11969.
 
-        XXX: Adjust filtered file with data from AMSLFreeContent.
+        XXX: Testing: Adjust filtered file with data from AMSLFreeContent.
         """
-        with self.input().get('amsl-free-content').open() as handle:
-            freecontent = json.load(handle)
-
-        filters = []
-
-        for item in freecontent:
-            bmap = {
-                'Ja': 'true',
-                'Nein': 'false',
-                'Nicht festgelegt': 'false',
-            }
-            fltr = """
-                jq -rc 'if ((.["finc.source_id"] == "%s") and
-                            (.["finc.mega_collection"] == "%s")) .["x.oa"] = %s else . end'
-            """ % (item['sid'], item['mega_collection'], bmap[item['freeContent']])
-            filters.append(fltr.encode('utf-8'))
-
-        # filtercmd = ' | '.join(filters)
-        filtercmd = 'cat' # XXX: Disable filter for the moment, ARG_MAX.
 
         output = shellout("""unpigz -c {input} |
-                             span-oa-filter -f {kbart} |
-                             {filtercmd} |
+                             span-oa-filter -f {kbart} -fc {amsl-free-content} |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path,
