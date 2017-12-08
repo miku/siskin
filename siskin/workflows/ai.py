@@ -819,7 +819,7 @@ class AIApplyOpenAccessFlag(AITask):
 
     def requires(self):
         return {
-            'amsl-free-content': AMSLFreeContent(date=self.date),
+            'amslfc': AMSLFreeContent(date=self.date),
             'kbart': AMSLOpenAccessKBART(date=self.date),
             'file': AIIntermediateSchema(date=self.date),
         }
@@ -832,11 +832,11 @@ class AIApplyOpenAccessFlag(AITask):
         """
 
         output = shellout("""unpigz -c {input} |
-                             span-oa-filter -f {kbart} -fc {amsl-free-content} |
+                             span-oa-filter -f {kbart} -fc {amslfc} |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
-                          kbart=self.input().get('kbart').path,
-                          filtercmd=filtercmd)
+                          kbart=self.input().get('kbart').path
+                          amslfc=self.input().get('amslfc'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
