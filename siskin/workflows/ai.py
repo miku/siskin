@@ -835,7 +835,7 @@ class AIApplyOpenAccessFlag(AITask):
                              span-oa-filter -f {kbart} -fc {amslfc} |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
-                          kbart=self.input().get('kbart').path
+                          kbart=self.input().get('kbart').path,
                           amslfc=self.input().get('amslfc'))
         luigi.LocalTarget(output).move(self.output().path)
 
