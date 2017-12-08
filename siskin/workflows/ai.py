@@ -836,7 +836,7 @@ class AIApplyOpenAccessFlag(AITask):
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path,
-                          amslfc=self.input().get('amslfc'))
+                          amslfc=self.input().get('amslfc').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
