@@ -133,9 +133,11 @@ class SpringerIssue11557(SpringerTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+
 class SpringerCleanup(SpringerTask):
     """
     2017-11-28: finc.mega_collection is now multi-valued; AIAccessFacet remains.
+    2017-12-12: new finc.id, refs #11821, #11960, #11961.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -153,7 +155,8 @@ class SpringerCleanup(SpringerTask):
             else:
                 raise RuntimeError('FTP site does not contain total_tpu.ldj.gz')
         output = shellout("""
-            jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"])' < <(unpigz -c {input}) | pigz -c > {output}
+            unpigz -c {input} | jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"])' |
+                jq -c '. + {{"finc.id": .["finc.record_id"], "finc.record_id": .doi}}' | pigz -c > {output}
         """, input=realpath)
         luigi.LocalTarget(output).move(self.output().path)
 
