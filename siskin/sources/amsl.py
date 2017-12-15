@@ -779,8 +779,8 @@ class AMSLFilterConfig(AMSLTask):
                                     'linkToContentFile',
                                     'externalLinkToContentFile']):
 
-                self.logger.debug("ignoring case with productISIL for AI %s, %s, %s",
-                                  isil, sid, item['productISIL'])
+                isilsidcollections[isil][sid].add(mega_collection)
+                self.logger.debug("productISIL given, but ignored: %s, %s, %s", isil, sid, item['productISIL'])
 
             # SID COLL ISIL LTHF LTCF ELTCF PI
             # --------------------------------
