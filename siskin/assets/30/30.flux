@@ -5,8 +5,8 @@
 
 // override default values if necessary
 default MAP_DIR ="/assets/maps/";
-default sid = "30"; 
-default mega_collection = "SSOAR";
+default sid = "30";
+default mega_collection = "SSOAR Social Science Open Access Repository";
 default fileName = in;
 //default fileName = FLUX_DIR + "marcxml.xml";
 //default out = FLUX_DIR + sid + ".json";
