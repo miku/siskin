@@ -448,8 +448,7 @@ class AILicensing(AITask):
     """
     Take intermediate schema and a config and attach ISILs accordingly. As per
     MDM-2017-11-29 a fixed date should be used. We fix date to YYYY-MM-15, refs
-    #11821, #12021. Note: Task AMSLFilterConfigFreeze should be run via a daily
-    cron.
+    #11821, #12021. AMSLFilterConfigFreeze should be run via a daily cron.
 
     Example crontab (assuming virtual environment named siskin):
 
