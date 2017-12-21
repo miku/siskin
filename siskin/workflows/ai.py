@@ -46,6 +46,7 @@ import requests
 import ujson as json
 
 from bs4 import BeautifulSoup
+from dateutil.relativedelta import relativedelta
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
@@ -457,10 +458,9 @@ class AILicensing(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        jourfixe = datetime.date(self.date.year, self.date.month, 15)
         if self.date.day < 15:
-            jourfixe = datetime.date(self.date.year, self.date.month - 1, 15)
-        else:
-            jourfixe = datetime.date(self.date.year, self.date.month, 15)
+            jourfixe = jourfixe - relativedelta(month=1)
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
