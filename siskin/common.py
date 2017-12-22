@@ -29,15 +29,17 @@ Common tasks.
 import datetime
 import email.utils as eut
 import hashlib
+import json
 import os
 import pipes
+import tempfile
 
 import luigi
 import requests
-
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles, random_string
 
@@ -48,7 +50,6 @@ class CommonTask(DefaultTask):
     systems tempdir.
     """
     TAG = 'common'
-
 
 class Directory(luigi.Task):
     """ Create directory or fail. """
@@ -66,7 +67,6 @@ class Directory(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.path)
-
 
 class FTPMirror(CommonTask):
     """
@@ -134,7 +134,6 @@ class FTPMirror(CommonTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
-
 class FTPFile(CommonTask):
     """ Just require a single file from an FTP server. """
     host = luigi.Parameter()
@@ -158,7 +157,6 @@ class FTPFile(CommonTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext=None))
-
 
 class HTTPDownload(CommonTask):
     """
@@ -196,7 +194,6 @@ class HTTPDownload(CommonTask):
     def output(self):
         return luigi.LocalTarget(path=self.filename())
 
-
 class RedmineDownload(CommonTask):
     """
     Download issue from Redmine via API.
@@ -209,6 +206,7 @@ class RedmineDownload(CommonTask):
     apikey = 123123123-456ABC
     """
     issue = luigi.Parameter(description="issue number")
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
 	# curl -H "X-Redmine-API-Key:$(cat $apikey)" "https://intern.finc.info/issues/$issue.json?include=attachments" > "/tmp/$issue/issue.json" 2>> "/tmp/$issue/curl.log"
@@ -216,9 +214,39 @@ class RedmineDownload(CommonTask):
 			 self.issue, self.config.get('redmine', 'baseurl'), self.issue)
 	url = "%s/issues/%s.json?include=attachments" % (
 	    self.config.get('redmine', 'baseurl'), self.issue)
-	output = shellout(""" curl --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
+	output = shellout(""" curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
 			  apikey=self.config.get("redmine", "apikey"), url=url, issue=self.issue)
 	luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.filename(ext="json"))
+	return luigi.LocalTarget(path=self.path(ext="json"))
+
+class RedmineDownloadAttachments(CommonTask):
+    """
+    Download all attachements for a ticketand make them temporarily accessible
+    to other tasks. Redmine attachments are by default limited to about 10M, so
+    it is ok to not cache anything here.
+    """
+    issue = luigi.Parameter(description="issue number")
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return RedmineDownload(issue=self.issue, date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.load(handle)
+        tempdir = tempfile.mkdtemp(prefix='tmp-siskin-')
+        for attachment in doc['issue']['attachments']:
+            target = os.path.join(tempdir, os.path.basename(attachment["content_url"]))
+            shellout("""curl -vL --fail -H "X-Redmine-API-Key:{apikey}" -o {target} "{url}" """,
+                     url=attachment["content_url"], apikey=self.config.get("redmine", "apikey"),
+                     target=target)
+
+        with self.output().open('w') as output:
+            for path in iterfiles(tempdir):
+                self.logger.debug("Downloaded: %s", path)
+                output.write_tsv(path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
