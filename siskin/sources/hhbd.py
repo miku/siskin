@@ -54,8 +54,10 @@ class HHBDCombine(HHBDTask):
                           significant=False)
 
     def run(self):
-        shellout("metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
-        output = shellout("metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
+	shellout(
+	    "metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
+	output = shellout(
+	    "metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -72,13 +74,12 @@ class HHBDIntermediateSchema(HHBDTask):
         return HHBDCombine(date=self.date, format='oai_dc')
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-                          flux=self.assets("107/107.flux"), mapdir=mapdir, input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
+	output = shellout(
+	    "span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
+	luigi.LocalTarget(output).move(self.output().path())
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), forma=Gzip)
 
 
 class HHBDExport(HHBDTask):
@@ -94,7 +95,7 @@ class HHBDExport(HHBDTask):
     def run(self):
         """ Tag by hand since not yet in AMSL. """
         output = shellout("""
-            cat {input} | span-tag -c '{{"DE-540": {{"any": {{}}}}}}' |
+	    unpigz -c {input} | span-tag -c '{{"DE-540": {{"any": {{}}}}}}' |
             span-export -with-fullrecord -o {format} > {output}
         """, format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
