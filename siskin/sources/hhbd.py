@@ -29,6 +29,7 @@ Heidelberger historische Bestände digital, #5964.
 import datetime
 
 import luigi
+from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -76,10 +77,10 @@ class HHBDIntermediateSchema(HHBDTask):
     def run(self):
 	output = shellout(
 	    "span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path())
+	luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), forma=Gzip)
+	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class HHBDExport(HHBDTask):
