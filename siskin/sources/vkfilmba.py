@@ -32,7 +32,7 @@ TODO: Unify VKFilm* tasks.
 Config
 ------
 
-[vkfilmff]
+[vkfilmba]
 
 baseurl = https://example.com
 
