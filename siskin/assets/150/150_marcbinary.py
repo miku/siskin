@@ -45,7 +45,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         marcrecord.add("001", data="finc-150-" + f001)
 
     # 007
-    marcrecord.add("007", data="tu")
+    marcrecord.add("007", data="cr")
 
     # Sprache
     language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
@@ -104,7 +104,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[3])
 
     # Medientyp
-    marcrecord.add("935", a="druck")
+    marcrecord.add("935", b="cofz")
     marcrecord.add("935", c="hs")
 
     # Kollektion
