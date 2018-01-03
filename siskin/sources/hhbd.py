@@ -55,10 +55,10 @@ class HHBDCombine(HHBDTask):
                           significant=False)
 
     def run(self):
-	shellout(
-	    "metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
-	output = shellout(
-	    "metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
+        shellout(
+            "metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
+        output = shellout(
+            "metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -75,12 +75,12 @@ class HHBDIntermediateSchema(HHBDTask):
         return HHBDCombine(date=self.date, format='oai_dc')
 
     def run(self):
-	output = shellout(
-	    "span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
-	luigi.LocalTarget(output).move(self.output().path)
+        output = shellout(
+            "span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class HHBDExport(HHBDTask):
