@@ -75,6 +75,8 @@ class VKFilmBATask(DefaultTask):
 class VKFilmBADump(VKFilmBATask):
     """
     Concatenate a list of URLs.
+
+    XXX: There is a "delete-list" of ID, which should be filtered here.
     """
 
     def run(self):
