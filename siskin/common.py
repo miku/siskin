@@ -51,6 +51,7 @@ class CommonTask(DefaultTask):
     """
     TAG = 'common'
 
+
 class Directory(luigi.Task):
     """ Create directory or fail. """
     path = luigi.Parameter(description='directory to create')
@@ -67,6 +68,7 @@ class Directory(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.path)
+
 
 class FTPMirror(CommonTask):
     """
@@ -134,6 +136,7 @@ class FTPMirror(CommonTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
+
 class FTPFile(CommonTask):
     """ Just require a single file from an FTP server. """
     host = luigi.Parameter()
@@ -158,6 +161,7 @@ class FTPFile(CommonTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext=None))
 
+
 class HTTPDownload(CommonTask):
     """
     Download a file via HTTP, read out the HTTP Last-modified header and use it as filename.
@@ -173,8 +177,8 @@ class HTTPDownload(CommonTask):
             raise RuntimeError('%s on %s' % (r.status_code, self.url))
         value = r.headers.get('Last-Modified')
         if value is None:
-	    raise RuntimeError(
-		'HTTPDownload relies on HTTP Last-Modified header at the moment')
+            raise RuntimeError(
+                'HTTPDownload relies on HTTP Last-Modified header at the moment')
         parsed_date = eut.parsedate(value)
         if parsed_date is None:
             raise RuntimeError('could not parse Last-Modifier header')
@@ -187,12 +191,13 @@ class HTTPDownload(CommonTask):
         We try just once. TODO(miku): Some retry bracket.
         Last-Modified date format: Wed, 25 Jan 2017 14:04:59 GMT
         """
-	output = shellout(
-	    """ curl --fail "{url}" > {output} """, input=self.url)
+        output = shellout(
+            """ curl --fail "{url}" > {output} """, input=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.filename())
+
 
 class RedmineDownload(CommonTask):
     """
@@ -209,17 +214,18 @@ class RedmineDownload(CommonTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-	# curl -H "X-Redmine-API-Key:$(cat $apikey)" "https://intern.finc.info/issues/$issue.json?include=attachments" > "/tmp/$issue/issue.json" 2>> "/tmp/$issue/curl.log"
-	self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...",
-			 self.issue, self.config.get('redmine', 'baseurl'), self.issue)
-	url = "%s/issues/%s.json?include=attachments" % (
-	    self.config.get('redmine', 'baseurl'), self.issue)
-	output = shellout(""" curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
-			  apikey=self.config.get("redmine", "apikey"), url=url, issue=self.issue)
-	luigi.LocalTarget(output).move(self.output().path)
+        # curl -H "X-Redmine-API-Key:$(cat $apikey)" "https://intern.finc.info/issues/$issue.json?include=attachments" > "/tmp/$issue/issue.json" 2>> "/tmp/$issue/curl.log"
+        self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...",
+                         self.issue, self.config.get('redmine', 'baseurl'), self.issue)
+        url = "%s/issues/%s.json?include=attachments" % (
+            self.config.get('redmine', 'baseurl'), self.issue)
+        output = shellout(""" curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
+                          apikey=self.config.get("redmine", "apikey"), url=url, issue=self.issue)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-	return luigi.LocalTarget(path=self.path(ext="json"))
+        return luigi.LocalTarget(path=self.path(ext="json"))
+
 
 class RedmineDownloadAttachments(CommonTask):
     """
@@ -238,9 +244,11 @@ class RedmineDownloadAttachments(CommonTask):
             doc = json.load(handle)
         tempdir = tempfile.mkdtemp(prefix='tmp-siskin-')
         for attachment in doc['issue']['attachments']:
-            target = os.path.join(tempdir, os.path.basename(attachment["content_url"]))
+            target = os.path.join(
+                tempdir, os.path.basename(attachment["content_url"]))
             shellout("""curl -vL --fail -H "X-Redmine-API-Key:{apikey}" -o {target} "{url}" """,
-                     url=attachment["content_url"], apikey=self.config.get("redmine", "apikey"),
+                     url=attachment["content_url"], apikey=self.config.get(
+                         "redmine", "apikey"),
                      target=target)
 
         with self.output().open('w') as output:
