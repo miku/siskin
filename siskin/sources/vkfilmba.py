@@ -51,7 +51,6 @@ from gluish.utils import shellout
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 
-
 class VKFilmBATask(DefaultTask):
     TAG = '148'
 
@@ -71,10 +70,11 @@ class VKFilmBATask(DefaultTask):
         h.update("".join(self.filenames).encode("utf-8"))
         return h.hexdigest()
 
-
 class VKFilmBADump(VKFilmBATask):
     """
     Concatenate a list of URLs.
+
+    Note: DO NOT DELETE the output of this task.
 
     XXX: There is a "delete-list" of ID, which should be filtered here.
     """
@@ -94,7 +94,6 @@ class VKFilmBADump(VKFilmBATask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
-
 
 class VKFilmBAMARC(VKFilmBATask):
     """
