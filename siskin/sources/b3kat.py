@@ -94,3 +94,22 @@ class B3KatDownload(B3KatTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+
+class B3KatMARCXML(B3KatTask):
+    """
+    Convert binary MARC to MARCXML.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return B3KatDownload(date=self.date)
+
+    def run(self):
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} | pigz -c > {output}",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
