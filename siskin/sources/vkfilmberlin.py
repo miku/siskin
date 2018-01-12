@@ -48,6 +48,31 @@ class VKFilmBerlinTask(DefaultTask):
         return monthly(date=self.date)
 
 
+class VKFilmBerlinFilteredNext(VKFilmBerlinTask):
+    """
+    Next version of filter, refs #12169.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return B3KatDownload(date=self.date)
+
+    def run(self):
+        output = shellout("marccount {input} > {output}", input=self.input().path)
+        record_count = int(open(output).read().strip())
+        output = shellout("python {script} {input} {output} {record_count}",
+                          script=self.assets("117/117_marcbinary.py"),
+                          input=self.input().path,
+                          record_count=record_count)
+        output = shellout(r"""
+            perl -CSDA -pe's/[^\x9\xA\xD\x20-\x{{D7FF}}\x{{E000}}-\x{{FFFD}}\x{{10000}}-\x{{10FFFF}}]+//g;' {input} > {output}
+        """, input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
 class VKFilmBerlinFiltered(VKFilmBerlinTask):
     """
     Apply filter.

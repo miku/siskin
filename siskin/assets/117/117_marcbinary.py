@@ -22,10 +22,10 @@ copytags = ["003", "005", "006", "007", "008", "010", "013", "015", "016",
             "850", "856", "880", "912", "924", "940", "999"]
 
 
-def get_links(record):   
+def get_links(record):
     for field in record.get_fields("856"):
         for url in field.get_subfields("u"):
-             yield url
+            yield url
 
 
 def get_titles(record):
@@ -33,7 +33,8 @@ def get_titles(record):
         for title in field.get_subfields("a"):
             yield title
 
-def get_field(record, field, subfield="a"):  
+
+def get_field(record, field, subfield="a"):
     try:
         value = record[field][subfield]
         return value if value is not None else ""
@@ -42,8 +43,13 @@ def get_field(record, field, subfield="a"):
 
 inputfilename, outputfilename = "117_input.mrc", "117_output.mrc"
 
-if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+if len(sys.argv) >= 3:
+    inputfilename, outputfilename = sys.argv[1:3]
+
+# Hidden parameter, total number of records, as a hint for tqdm.
+total = None
+if len(sys.argv) >= 4:
+    total = int(sys.argv[3])
 
 inputfile = io.open(inputfilename, "rb")
 outputfile = io.open(outputfilename, "wb")
@@ -52,7 +58,7 @@ reader = pymarc.MARCReader(inputfile)
 
 whitelist = set(["AN 1780", "AN 3900", "AN 3920", "AN 4030", "CV 3500", "DW 4000", "DW 4200", "MF 1000", "MF 1500", "NQ 2270"])
 
-for oldrecord in tqdm(reader):
+for oldrecord in tqdm(reader, total=total):
 
     newrecord = marcx.Record()
 
@@ -62,7 +68,7 @@ for oldrecord in tqdm(reader):
     rvk = [s for f in oldrecord.get_fields("084") for s in f.get_subfields("a")]
     for value in rvk:
         if value in whitelist:
-            print("%s whitelisted (%s), ok" % (oldrecord["001"].data, value))
+            # print("%s whitelisted (%s), ok" % (oldrecord["001"].data, value))
             break
     else:
         # print("%s not whitelisted, skipping" % oldrecord["001"].data)
@@ -71,7 +77,7 @@ for oldrecord in tqdm(reader):
     # prüfen, ob Titel vorhanden ist
     f245 = oldrecord["245"]
     if not f245:
-        continue   
+        continue
 
     for field in oldrecord.get_fields("856"):
         f856 = field if "http" in field else ""
@@ -87,7 +93,7 @@ for oldrecord in tqdm(reader):
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
         for field in oldrecord.get_fields(tag):
-            newrecord.add_field(field)    
+            newrecord.add_field(field)
 
     # 980
     collections = ["a", f001, "b", "117", "c", "UdK Berlin", "c", "Verbundkatalog Film"]
