@@ -69,7 +69,7 @@ class B3KatLinks(B3KatTask):
 
 class B3KatDownload(B3KatTask):
     """
-    Download snapshot. Output is a single (large) MARC file.
+    Download snapshot. Output is a single (large) MARC binary file.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
