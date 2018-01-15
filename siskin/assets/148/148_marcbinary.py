@@ -3,13 +3,14 @@
 
 from builtins import *
 import io
+import re
 import sys
 
 import pymarc
 import marcx
 
 copytags = ("002", "003", "004", "005", "006", "007", "008", "009", "010", "011", "012", "013", "014",
-            "016", "017", "018", "020", "022", "024", "030", "035", "040", "041", "100", "110", "111",
+            "016", "017", "018", "022", "024", "030", "035", "040", "041", "100", "110", "111",
             "240", "242", "243", "245", "246", "247", "249", "250", "260", "263", "300", "310", "362",
             "490", "500", "501", "502", "504", "505", "510", "515", "516", "538", "546", "547", "550",
             "590", "600", "610", "611", "630", "648", "649", "651", "655", "700", "710", "711", "730",
@@ -46,6 +47,24 @@ for oldrecord in reader:
     # 001
     f001 = oldrecord["001"].data
     newrecord.add("001", data="finc-148-%s" % f001)
+
+    # ISBN
+    try:
+        f020a = oldrecord["020"]["a"]        
+    except:
+        f020a = ""
+
+    if f020a != "":
+        f020a = f020a.replace(" ", "-")
+        f020a = f020a.replace(".", "-")       
+        regexp = re.search("([0-9xX-]{10,16})", f020a)
+     
+        if regexp:
+            f020a = regexp.group(1)
+            f020a = f020a.rstrip("-")
+            newrecord.add("020", a=f020a) 
+        else:
+            print("Die ISBN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f020a)
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
