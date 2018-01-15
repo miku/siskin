@@ -70,7 +70,7 @@ class VKFilmBerlinFilteredNext(VKFilmBerlinTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 
 class VKFilmBerlinFiltered(VKFilmBerlinTask):
