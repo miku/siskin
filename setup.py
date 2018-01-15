@@ -165,3 +165,9 @@ setup(name='siskin',
           'Programming Language :: Python',
           'Topic :: Text Processing',
       ])
+
+print("""
+      All fine, except one thing: Install python-daemon manually:
+
+      $ pip install python-daemon
+""")
