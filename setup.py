@@ -83,6 +83,19 @@ install_requires = [
 if sys.version_info.major < 3:
     install_requires += ['argparse>=1.2', 'wsgiref>=0.1.2']
 
+
+print("""
+      If you see an error like
+
+      > AttributeError: 'ChangelogAwareDistribution' object has no attribute '_egg_fetcher'
+
+      or similar from python-daemon, it's unfortunate but fixable: install
+      python-daemon manually, then run setup.py again:
+
+      $ pip install python-daemon
+      $ python setup.py develop
+""")
+
 setup(name='siskin',
       version=__version__,
       description='Various sources and workflows.',
@@ -166,8 +179,3 @@ setup(name='siskin',
           'Topic :: Text Processing',
       ])
 
-print("""
-      All fine, except one thing: Install python-daemon manually:
-
-      $ pip install python-daemon
-""")
