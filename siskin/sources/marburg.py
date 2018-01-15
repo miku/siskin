@@ -50,7 +50,11 @@ class MarburgTask(DefaultTask):
 
 
 class MarburgCombine(MarburgTask):
-    """ Harvest and combine into a single file. """
+    """
+    Harvest and combine into a single file.
+
+    XXX: NLM format has been discontinued as of 2018-01-01, refs #5486.
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='nlm')
