@@ -143,7 +143,7 @@ class MarburgCombineNext(MarburgTask):
 
     def run(self):
         endpoint = "http://archiv.ub.uni-marburg.de/ep/0002/oai"
-        output = shellout("oaicrawl -w 8 -f oai_dc {endpoint} > {output}", endpoint=endpoint)
+        output = shellout("oaicrawl -w 8 -verbose -f oai_dc {endpoint} > {output}", endpoint=endpoint)
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("echo '<records>' >> {output}", output=stopover)
         shellout("xmlcutty -path /OAI-PMH/GetRecord/record < {input} >> {output}", input=output, output=stopover)
