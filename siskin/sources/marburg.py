@@ -28,7 +28,8 @@ Medienwissenschaft, Rezensionen, Reviews. Archiv, Marburg, refs #5486, #11005.
 
 import datetime
 import json
-import sys
+import os
+import tempfile
 
 import luigi
 import xmltodict
@@ -128,3 +129,28 @@ class MarburgExport(MarburgTask):
 
     def output(self):
         return luigi.LocalTarget(self.path(ext='ldj'))
+
+
+class MarburgCombineNext(MarburgTask):
+    """
+    Harvest and combine into a single file.
+
+    Adjust format, refs #5486.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='nlm')
+
+    def run(self):
+        endpoint = "http://archiv.ub.uni-marburg.de/ep/0002/oai"
+        output = shellout("oaicrawl -w 8 -f oai_dc {endpoint} > {output}", endpoint=endpoint)
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        shellout("echo '<records>' >> {output}", output=stopover)
+        shellout("xmlcutty -path /OAI-PMH/GetRecord/record < {input} >> {output}", input=output, output=stopover)
+        shellout("echo '</records>' >> {output}", output=stopover)
+        luigi.LocalTarget(stopover).move(self.output().path)
+        # Remove raw data.
+        os.remove(output)
+
+    def output(self):
+        return luigi.LocalTarget(self.path())
