@@ -58,8 +58,26 @@ outputfile = io.open(outputfilename, "wb")
 
 reader = pymarc.MARCReader(inputfile)
 
+# Filtering by RVK. There are other classification schemes used in 084.2, e.g. in the matched subset:
+#
+#  274772 rvk
+#   34325 sdnb
+#   12453 ssgn
+#    9641 stub
+#    9222 ifzs
+#    1361 sbb
+#     763 dopaed
+#     406 fid
+#     190 z
+#      42 sfb
+#       6 kab
+#       5 ssd
+#       5 ghbs
+#       3 zdbs
+
 # A plain whitelist.
-whitelist = set(["AN 1780", "AN 3900", "AN 3920", "AN 4030", "CV 3500", "DW 4000", "DW 4200", "MF 1000", "MF 1500", "NQ 2270"])
+whitelist = set(["AN 1780", "AN 3900", "AN 3920", "AN 4030", "CV 3500",
+                 "DW 4000", "DW 4200", "MF 1000", "MF 1500", "NQ 2270"])
 
 # Extra patterns.
 pattern_ms = re.compile(r"^MS.7[89][56789].*$")
@@ -82,6 +100,7 @@ def filter_084a(value):
         return True
     return False
 
+# Transformation.
 for oldrecord in tqdm(reader, total=total):
 
     newrecord = marcx.Record()
