@@ -79,7 +79,7 @@ for oldrecord in reader:
         pass
 
     #n Link zum Datensatz
-    newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://apps.bundesarchiv.de/F?func=find-c&ccl_term=SYS%3D" + f001 + "&local_base=BAB01")
+    newrecord.add("856", q="text/html", _3="Link zum Bundesarchiv", u="https://apps.bundesarchiv.de/F?func=find-c&ccl_term=SYS%3D" + f001 + "&local_base=BAB01")
 
     # 980
     collections = ["a", f001, "b", "148", "c", "Bundesarchiv (Filmarchiv)", "c", "Verbundkatalog Film"]
