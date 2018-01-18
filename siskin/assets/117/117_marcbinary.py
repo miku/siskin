@@ -92,7 +92,7 @@ whitelist = set([
 # Extra patterns.
 pattern_ms = re.compile(r"^MS.7[89][56789].*$")
 pattern_ap = re.compile(r"^AP.*$")
-pattern_f2 = re.compile(r"^AP.99[012].*$")  # Via filter2_relevant_for_FID.xml
+pattern_f2 = re.compile(r"^AP.99[012].*$")  # via: filter2_relevant_for_FID.xml
 
 # Blacklist of signatures.
 blacklist = set([
