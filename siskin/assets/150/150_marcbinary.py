@@ -8,7 +8,7 @@ import sys
 import xmltodict
 import marcx
 
-inputfilename = "150_input.xml" 
+inputfilename = "150_input.xml"
 outputfilename = "150_output.mrc"
 
 if len(sys.argv) == 3:
@@ -21,22 +21,22 @@ xmlfile = inputfile.read()
 xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
-    
+
     try:
         f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
-    except:      
+    except:
         continue
 
     # Closed Access werden übersprungen
     access = xmlrecord["metadata"]["oai_dc:dc"]["dc:rights"][1]
     if access == "info:eu-repo/semantics/closedAccess":
         continue
-    
+
     marcrecord = marcx.Record(force_utf8=True)
 
     # Leader
     marcrecord.leader = "     cam  22        4500"
-    
+
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
     regexp = re.match("oai:opus.bsz-bw.de-hsmw:(\d+)", f001)
@@ -52,7 +52,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if language == "deu":
         language = "ger"
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-    marcrecord.add("041", a=language)   
+    marcrecord.add("041", a=language)
 
     # Verfasser
     try:
@@ -61,13 +61,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         continue
     marcrecord.add("100", a=f100a)
 
-    # Titel   
+    # Titel
     f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
     if isinstance(f245, list):
         f245a = f245[0]["#text"]
         f245b = f245[1]["#text"]
         marcrecord.add("245", a=f245a, b=f245b)
-    else:       
+    else:
         marcrecord.add("245", a=f245["#text"])
 
     # Erscheinungsvermerk
@@ -100,7 +100,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Link zu Datensatz und Ressource
     # Eventuell überprüfen, ob Reihenfolge der Links stimmt "files"
     f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
-    marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])  
+    marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[3])
 
     # Medientyp
@@ -110,7 +110,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Kollektion
     marcrecord.add("980", a=f001, b="150", c="MOnAMi Hochschulschriftenserver Mittweida")
 
-    
     outputfile.write(marcrecord.as_marc())
 
 
