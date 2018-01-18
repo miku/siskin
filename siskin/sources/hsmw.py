@@ -61,9 +61,9 @@ class HSMWHarvest(HSMWTask):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
 
-class HSMWIntermediateSchema(HSMWTask):
+class HSMWMARC(HSMWTask):
     """
-    Normalize to JSON.
+    Importable MARC.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
