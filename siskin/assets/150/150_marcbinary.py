@@ -12,7 +12,7 @@ inputfilename = "150_input.xml"
 outputfilename = "150_output.mrc"
 
 if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+    inputfilename, outputfilename = sys.argv[1:3]
 
 inputfile = open(inputfilename, "rb")
 outputfile = open(outputfilename, "wb")
