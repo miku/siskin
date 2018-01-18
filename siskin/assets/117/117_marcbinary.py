@@ -137,6 +137,11 @@ for oldrecord in tqdm(reader, total=total):
 
     newrecord = marcx.Record()
 
+    # via: filter_DE-B170.xml
+    isils = set([s for f in oldrecord.get_fields("049") for s in f.get_subfields("a")])
+    if "DE-B170" not in isils:
+        continue
+
     # prüfen, ob für adlr relevante RVK-Klasse
     # r = marcx.Record.from_record(oldrecord)
     # for value in r.itervalues("084.a"): ...
