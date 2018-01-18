@@ -76,8 +76,18 @@ reader = pymarc.MARCReader(inputfile)
 #       3 zdbs
 
 # A plain whitelist.
-whitelist = set(["AN 1780", "AN 3900", "AN 3920", "AN 4030", "CV 3500",
-                 "DW 4000", "DW 4200", "MF 1000", "MF 1500", "NQ 2270"])
+whitelist = set([
+    "AN 1780",
+    "AN 3900",
+    "AN 3920",
+    "AN 4030",
+    "CV 3500",
+    "DW 4000",
+    "DW 4200",
+    "MF 1000",
+    "MF 1500",
+    "NQ 2270"
+])
 
 # Extra patterns.
 pattern_ms = re.compile(r"^MS.7[89][56789].*$")
@@ -85,8 +95,29 @@ pattern_ap = re.compile(r"^AP.*$")
 pattern_f2 = re.compile(r"^AP.99[012].*$")  # Via filter2_relevant_for_FID.xml
 
 # Blacklist of signatures.
-blacklist = set(["AP 6000", "AP 6300", "AP 6400", "AP 6500", "AP 6582", "AP 6583", "AP 6586", "AP 6600", "AP 6630", "AP 6800",
-                 "AP 6930", "AP 7200", "AP 7250", "AP 7320", "AP 7337", "AP 7900", "AP 8300", "AP 8735", "AP 8786", "AP 9950", "AP 9954"])
+blacklist = set([
+    "AP 6000",
+    "AP 6300",
+    "AP 6400",
+    "AP 6500",
+    "AP 6582",
+    "AP 6583",
+    "AP 6586",
+    "AP 6600",
+    "AP 6630",
+    "AP 6800",
+    "AP 6930",
+    "AP 7200",
+    "AP 7250",
+    "AP 7320",
+    "AP 7337",
+    "AP 7900",
+    "AP 8300",
+    "AP 8735",
+    "AP 8786",
+    "AP 9950",
+    "AP 9954"
+])
 
 
 def filter_084a(value):
