@@ -71,7 +71,10 @@ class HSMWIntermediateSchema(HSMWTask):
         return HSMWHarvest(date=self.date)
 
     def run(self):
-        raise NotImplementedError()
+        output = shellout("python {script} <(unpigz -c {input}) {output}",
+                          script=self.assets("150/150_marcbinary.py"),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
