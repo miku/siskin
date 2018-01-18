@@ -55,7 +55,7 @@ class HSMWHarvest(HSMWTask):
                  set=set, endpoint=endpoint)
         output = shellout("""metha-cat -set "institutes:medien" {endpoint} | pigz -c > {output} """,
                           endpoint=endpoint)
-        luigi.LocalTarget(output).move(path=self.path())
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
