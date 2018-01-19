@@ -1,7 +1,8 @@
+<!-- DEPRECATED -->
 <?xml version="1.0" encoding="UTF-8"?>
-<metamorph xmlns="http://www.culturegraph.org/metamorph" version="1">
-  <meta>
-</meta>
+<metamorph 
+  xmlns="http://www.culturegraph.org/metamorph" version="1">
+  <meta></meta>
   <macros>
     <macro name="indi">
       <!-- datafields weiterreichen -->
@@ -197,6 +198,5 @@
     <call-macro name="indi" post="0 " datafield="689"/>
     <call-macro name="indi" post="  " datafield="901"/>
   </rules>
-  <maps>
-	</maps>
+  <maps></maps>
 </metamorph>
