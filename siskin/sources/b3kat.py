@@ -69,7 +69,8 @@ class B3KatLinks(B3KatTask):
 
 class B3KatDownload(B3KatTask):
     """
-    Download snapshot. Output is a single (large) MARC binary file.
+    Download snapshot. Output is a single (large) MARC binary file. Strip
+    non-sorting characters (\u0098, \u009C) from raw data.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -81,11 +82,14 @@ class B3KatDownload(B3KatTask):
         with self.input().open() as handle:
             for i, row in enumerate(handle.iter_tsv(cols=('url',)), start=1):
                 downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
-                output = shellout("""yaz-marcdump -i marcxml -o marc <(unpigz -c "{input}") > {output}""", input=downloaded)
-                shellout("cat {input} >> {stopover}", input=output, stopover=stopover)
-
+                cleaned = shellout(r"""CHARS=$(python -c 'print u"\u0098\u009C".encode("utf8")');
+                                       unpigz -c {input} | sed 's/['"$CHARS"']//g' > {output} """, input=downloaded)
+                output = shellout("""yaz-marcdump -i marcxml -o marc <(unpigz -c "{input}") > {output}""", input=cleaned)
+                shellout("cat {input} >> {stopover}",
+                         input=output, stopover=stopover)
                 try:
                     os.remove(downloaded)
+                    os.remove(cleaned)
                     os.remove(output)
                 except OSError as err:
                     self.logger.error(err)
@@ -112,4 +116,3 @@ class B3KatMARCXML(B3KatTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
-
