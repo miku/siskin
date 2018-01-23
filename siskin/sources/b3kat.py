@@ -78,6 +78,9 @@ class B3KatDownload(B3KatTask):
         return B3KatLinks(date=self.date)
 
     def run(self):
+        """
+        XXX: wrapped sed ineffective.
+        """
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
             for i, row in enumerate(handle.iter_tsv(cols=('url',)), start=1):
