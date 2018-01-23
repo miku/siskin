@@ -84,7 +84,7 @@ class B3KatDownload(B3KatTask):
                 downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
                 cleaned = shellout(r"""CHARS=$(python -c 'print u"\u0098\u009C".encode("utf8")');
                                        unpigz -c {input} | sed 's/['"$CHARS"']//g' > {output} """, input=downloaded)
-                output = shellout("""yaz-marcdump -i marcxml -o marc <(unpigz -c "{input}") > {output}""", input=cleaned)
+                output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" > {output}""", input=cleaned)
                 shellout("cat {input} >> {stopover}",
                          input=output, stopover=stopover)
                 try:
