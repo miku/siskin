@@ -55,7 +55,7 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return VKFilmBerlinRemoveIllegalChars(date=self.date)
+        return B3KatDownload(date=self.date)
 
     def run(self):
         """
