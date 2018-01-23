@@ -20,7 +20,7 @@ if len(sys.argv) == 3:
 inputfile = open(inputfilename, "rb")
 outputfile = open(outputfilename, "wb")
 
-reader = pymarc.MARCReader(inputfile)
+reader = pymarc.MARCReader(inputfile, force_utf8=True)
 
 for oldrecord in reader:
 
