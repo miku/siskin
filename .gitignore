@@ -70,3 +70,4 @@ bin/freetasks
 bin/indexcompare
 *.py.bak
 /tags
+/notebooks
