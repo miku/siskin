@@ -35,8 +35,7 @@ for oldrecord in reader:
     f001 = f001.replace("*", "")
     f001 = f001.replace("-", "")
     newrecord.add("001", data="finc-155-%s" % f001)
-    print(f001)
-
+   
      # ISBN
     try:
         f020a = oldrecord["020"]["a"]        
