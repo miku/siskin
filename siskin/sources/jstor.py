@@ -335,18 +335,19 @@ class JstorIntermediateSchema(JstorTask):
                             names.add(name)
 
                     if len(names) > 0:
-                        jstor_names = [name for name in names if name in allowed_collection_names]
-                        amsl_names = [jstor_amsl_collection_name_mapping.get(name) for name in jstor_names
-                                      if name in jstor_amsl_collection_name_mapping]
+                        # Translate JSTOR names to AMSL.
+                        amsl_names = [jstor_amsl_collection_name_mapping.get(name) for name in names if name in jstor_amsl_collection_name_mapping]
+                        # Check validity against AMSL names.
+                        clean_names = [name for name in amsl_names if name in allowed_collection_names]
 
-                        doc['finc.mega_collection'] = amsl_names
+                        # Use names that appear in AMSL.
+                        doc['finc.mega_collection'] = clean_names
+
                         if len(doc['finc.mega_collection']) == 0:
-                            self.logger.warn(
-                                "no collection name given to %s: %s", doc["finc.id"], jstor_names)
+                            self.logger.warn("no collection name given to %s: %s", doc["finc.id"], names)
                             counter["err.collection.not.in.amsl"] += 1
                     else:
-                        self.logger.warn(
-                            "JSTOR record without issn or issn mapping: %s", doc.get("finc.id"))
+                        self.logger.warn("JSTOR record without issn or issn mapping: %s", doc.get("finc.id"))
                         counter["err.name"] += 1
 
                     json.dump(doc, output)
