@@ -41,6 +41,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f001 = f001.encode("utf-8")
         f001 = base64.b64encode(f001)
         f001 = f001.decode("ascii")
+        f001 = f001.rstrip("=")
         marcrecord.add("001", data="finc-153-" + f001)        
     else:
         continue
@@ -51,7 +52,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Urheber
     try:
         f110a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
-        marcrecord.add("110", a=f110a)
+        if f110a != "Unknown":
+            marcrecord.add("110", a=f110a)
     except:
         pass
     
