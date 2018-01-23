@@ -286,14 +286,33 @@ class JstorIntermediateSchema(JstorTask):
         output = shellout("""cat {input} | jq -rc '.[] | select(.sourceID == "55") | .megaCollection' > {output} """,
                           input=self.input().get("amsl").path)
         allowed_collection_names = load_set_from_file(output)
-
-        # Add a few variants.
-        allowed_collection_names = allowed_collection_names.union(
-            set([s.replace("JSTOR ", "") for s in allowed_collection_names]))
-        allowed_collection_names = allowed_collection_names.union(
-            set([s.replace(" Archive", " Collection") for s in allowed_collection_names]))
-
         self.logger.debug("allowing via AMSL: %s", allowed_collection_names)
+
+        # XXX: Hack to map original JSTOR collection names to names in AMSL. We
+        # will need an authoritative source of such names.
+        jstor_amsl_collection_name_mapping = {
+            'Arts & Sciences I Collection': 'JSTOR Arts & Sciences I Archive',
+            'Arts & Sciences II Collection': 'JSTOR Arts & Sciences II Archive',
+            'Arts & Sciences III Collection': 'JSTOR Arts & Sciences III Archive',
+            'Arts & Sciences IV Collection': 'JSTOR Arts & Sciences IV Archive',
+            'Arts & Sciences IX Collection': 'JSTOR Arts & Sciences IX Archive',
+            'Arts & Sciences V Collection': 'JSTOR Arts & Sciences V Archive',
+            'Arts & Sciences VI Collection': 'JSTOR Arts & Sciences VI Archive',
+            'Arts & Sciences VII Collection': 'JSTOR Arts & Sciences VII Archive',
+            'Arts & Sciences VIII Collection': 'JSTOR Arts & Sciences VIII Archive',
+            'Arts & Sciences X Collection': 'JSTOR Arts & Sciences X Archive',
+            'Arts & Sciences XI Collection': 'JSTOR Arts & Sciences XI Archive',
+            'Arts & Sciences XII Collection': 'JSTOR Arts & Sciences XII Archive',
+            'Arts & Sciences XIII Collection': 'JSTOR Arts & Sciences XIII Archive',
+            'Arts & Sciences XIV Collection': 'JSTOR Arts & Sciences XIV Archive',
+            'Arts & Sciences XV Collection': 'JSTOR Arts & Sciences XV Archive',
+            'Business I Collection': 'JSTOR Business I Archive',
+            'Business II Collection': 'JSTOR Business II Archive',
+            'Film & Performing Arts Discipline Package': 'JSTOR Film and Performing Arts',
+            'Language & Literature Discipline Package': 'JSTOR Language & Literature Archive',
+            'Life Sciences Collection': 'JSTOR Life Sciences Archive',
+            'Music Collection': 'JSTOR Music Archive',
+        }
 
         with self.input().get('mapping').open() as mapfile:
             mapping = json.load(mapfile)
@@ -316,11 +335,14 @@ class JstorIntermediateSchema(JstorTask):
                             names.add(name)
 
                     if len(names) > 0:
-                        doc['finc.mega_collection'] = list([name for name in names
-                                                            if name in allowed_collection_names])
+                        jstor_names = [name for name in names if name in allowed_collection_names]
+                        amsl_names = [jstor_amsl_collection_name_mapping.get(name) for name in jstor_names
+                                      if name in jstor_amsl_collection_name_mapping]
+
+                        doc['finc.mega_collection'] = amsl_names
                         if len(doc['finc.mega_collection']) == 0:
                             self.logger.warn(
-                                "no collection name given to %s: %s", doc["finc.id"], names)
+                                "no collection name given to %s: %s", doc["finc.id"], jstor_names)
                             counter["err.collection.not.in.amsl"] += 1
                     else:
                         self.logger.warn(
