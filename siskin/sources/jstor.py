@@ -243,6 +243,30 @@ class JstorIntermediateSchema(JstorTask):
     """
     Turn single collection name "JStor" (https://git.io/vdHYh) into finer
     grained names via title lists (https://is.gd/W37Uwg), refs #11467.
+
+    @2017-01-23 JSTOR ISSN to Collection mapping: https://git.io/vNwSJ
+    @2017-01-23 AMSL:
+        JSTOR Arts & Sciences I Archive
+        JSTOR Arts & Sciences II Archive
+        JSTOR Arts & Sciences III Archive
+        JSTOR Arts & Sciences IV Archive
+        JSTOR Arts & Sciences IX Archive
+        JSTOR Arts & Sciences V Archive
+        JSTOR Arts & Sciences VI Archive
+        JSTOR Arts & Sciences VII Archive
+        JSTOR Arts & Sciences VIII Archive
+        JSTOR Arts & Sciences X Archive
+        JSTOR Arts & Sciences XI Archive
+        JSTOR Arts & Sciences XII Archive
+        JSTOR Arts & Sciences XIII Archive
+        JSTOR Arts & Sciences XIV Archive
+        JSTOR Arts & Sciences XV Archive
+        JSTOR Business I Archive
+        JSTOR Business II Archive
+        JSTOR Film and Performing Arts
+        JSTOR Language & Literature Archive
+        JSTOR Life Sciences Archive
+        JSTOR Music Archive
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -257,7 +281,7 @@ class JstorIntermediateSchema(JstorTask):
     @timed
     def run(self):
         """
-        Only use collection names, which we find in AMSL as well.
+        Only use collection names, which we find in AMSL as well. XXX: FIX deviations.
         """
         output = shellout("""cat {input} | jq -rc '.[] | select(.sourceID == "55") | .megaCollection' > {output} """,
                           input=self.input().get("amsl").path)
