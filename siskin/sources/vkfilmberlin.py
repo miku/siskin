@@ -48,9 +48,10 @@ class VKFilmBerlinTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class VKFilmBerlinMARC(VKFilmBerlinTask):
+class VKFilmBerlinRemoveIllegalChars(VKFilmBerlinTask):
     """
-    Next version of filter and transformation, refs #12169. Takes about 4h.
+    Remove Nichtsortierzeichen. XXX: Workaround. It would be faster to first
+    reduce the number of records first, then to clean up.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -58,10 +59,31 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
         return B3KatDownload(date=self.date)
 
     def run(self):
+        """ https://stackoverflow.com/a/7774512 """
+        output = shellout(r"""
+            perl -CSDA -pe's/[^\x9\xA\xD\x20-\x{{D7FF}}\x{{E000}}-\x{{FFFD}}\x{{10000}}-\x{{10FFFF}}]+//g;' {input} > {output}
+        """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.xml'))
+
+
+class VKFilmBerlinMARC(VKFilmBerlinTask):
+    """
+    Next version of filter and transformation, refs #12169. Takes about 4h.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VKFilmBerlinRemoveIllegalChars(date=self.date)
+
+    def run(self):
         """
         XXX: Nichtsortierzeichen?
         """
-        output = shellout("marccount {input} > {output}", input=self.input().path)
+        output = shellout(
+            "marccount {input} > {output}", input=self.input().path)
         record_count = int(open(output).read().strip())
         output = shellout("python {script} {input} {output} {record_count}",
                           script=self.assets("117/117_marcbinary.py"),
