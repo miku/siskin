@@ -57,10 +57,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     
     # Hauptitel
     f245a = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
-    if "Television Public Service" in f245a:
-        continue
-    else:
-        marcrecord.add("245", a=f245a)
+    marcrecord.add("245", a=f245a)
 
     # Filmstudio
     try:
