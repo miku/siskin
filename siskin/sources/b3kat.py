@@ -70,7 +70,7 @@ class B3KatLinks(B3KatTask):
 class B3KatDownload(B3KatTask):
     """
     Download snapshot. Output is a single (large) MARC binary file. Strip
-    non-sorting characters (\u0098, \u009C) from raw data.
+    non-sorting characters (\u0098, \u009C) from raw data. XXX: Single core.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
