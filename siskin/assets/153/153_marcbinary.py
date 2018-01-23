@@ -80,12 +80,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     subjects = xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject", "")
     if subjects != "":
         if isinstance(subjects, list):
-            for subject in subjects:
+            for subject in subjects:              
                 subject = subject.title()
                 marcrecord.add("650", a=subject)            
         else:
-            subject = subject.title()
-            marcrecord.add("650", a=subjects)
+            if subjects != "need keyword":
+                subject = subjects.title()
+                marcrecord.add("650", a=subject)
          
     # Link zur Ressource
     f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
