@@ -7,9 +7,9 @@ import sys
 import pymarc
 import marcx
 
-copytags = ("001", "003", "004", "005", "006", "007", "008", "009",
-            "010", "011", "020", "090", "100", "240", "245", "246",
-            "250", "260", "300", "490", "653", "700", "710", "773")
+copytags = ("003", "004", "005", "006", "007", "008", "009", "010",
+            "011", "020", "090", "100", "240", "245", "246", "250",
+            "260", "300", "490", "653", "700", "710", "773")
 
 inputfilename = "155_input.mrc" 
 outputfilename = "155_output.mrc"
@@ -32,7 +32,10 @@ for oldrecord in reader:
 
     # 001
     f001 = oldrecord["001"].data
+    f001 = f001.replace("*", "")
+    f001 = f001.replace("-", "")
     newrecord.add("001", data="finc-155-%s" % f001)
+    print(f001)
 
      # ISBN
     try:
