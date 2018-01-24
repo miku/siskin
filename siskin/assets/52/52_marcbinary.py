@@ -35,7 +35,9 @@ for oldrecord in reader:
     newrecord.leader = leader
 
     # 001
-    f001 = oldrecord["001"].data    
+    f001 = oldrecord["001"].data   
+    f001 = f001.replace("-", "")
+    f001 = f001.replace("_", "")
     newrecord.add("001", data="finc-52-%s" % f001)
 
     # ISBN
