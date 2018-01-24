@@ -65,11 +65,11 @@ for oldrecord in records:
         for field in oldrecord.get_fields(tag):
             newrecord.add_field(field)
 
-    # Inhaltsverzeichnis (has to be truncated)
+    # Inhaltsverzeichnis (muss trunkiert werden auf maximal 9999 Bytes)
     try:
         f505a = oldrecord["505"]["a"]
-        if len(f505a) > 9900:
-            f505a = f505a[:9899]
+        if len(f505a) > 9800:
+            f505a = f505a[:9799]
         newrecord.add("505", a=f505a)
     except (AttributeError, TypeError) as err:       
         pass
