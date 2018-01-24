@@ -126,6 +126,7 @@ setup(name='siskin',
               'assets/30/*',
               'assets/34/*',
               'assets/39/*',
+              'assets/52/*',
               'assets/56_57_58/*',
               'assets/73/*',
               'assets/78/*',
@@ -179,4 +180,3 @@ setup(name='siskin',
           'Programming Language :: Python',
           'Topic :: Text Processing',
       ])
-
