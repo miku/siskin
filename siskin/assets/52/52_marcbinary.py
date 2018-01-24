@@ -11,7 +11,7 @@ import marcx
 copytags = ("003", "005", "006", "007", "008", "020", "022", "024", "035", "040",
             "084", "100", "110", "245", "246", "260", "300", "310", "362", "490",
             "505", "520", "650", "651", "700", "710", "760", "762", "773", "775",
-            "780", "785", "830", "856")
+            "780", "785", "830")
 
 
 inputfilename = "52_input.mrc" 
@@ -38,6 +38,7 @@ for oldrecord in reader:
     f001 = oldrecord["001"].data   
     f001 = f001.replace("-", "")
     f001 = f001.replace("_", "")
+    print(f001)
     newrecord.add("001", data="finc-52-%s" % f001)
 
     # ISBN
@@ -69,6 +70,10 @@ for oldrecord in reader:
         newrecord.add("689", a=f689a)
     except (AttributeError, TypeError):
         pass
+
+    # URL
+    f856u = oldrecord["856"]["u"]
+    newrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
 	# 980
     collections = ["a", f001, "b", "52", "c", "OECD iLibrary"]
