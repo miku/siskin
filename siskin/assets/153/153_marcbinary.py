@@ -51,11 +51,12 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Urheber
     try:
-        f110a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
-        if f110a != "Unknown":
-            marcrecord.add("110", a=f110a)
+        f110a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]        
     except:
-        pass
+        f110a = ""
+
+    if f110a != "" and f110a != "Unknown":
+            marcrecord.add("110", a=f110a)
     
     # Hauptitel
     f245a = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
@@ -63,10 +64,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Filmstudio
     try:
-        f260b = xmlrecord["metadata"]["oai_dc:dc"]["dc:publisher"]
-        marcrecord.add("260", b=f260b)
+        f260b = xmlrecord["metadata"]["oai_dc:dc"]["dc:publisher"]        
     except:
-        pass
+        f260b = ""
+
+    # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind 
+    if f260b != "" and f260b != f110a:
+        marcrecord.add("260", b=f260b)
 
     # Annotation
     try:
