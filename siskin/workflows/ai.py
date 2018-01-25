@@ -549,6 +549,8 @@ class AIIntermediateSchemaDeduplicated(AITask):
 class AIExport(AITask):
     """
     Export to various formats
+
+    XXX: #11467, crossref vs JSTOR.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='solr5vu3', description='export format')

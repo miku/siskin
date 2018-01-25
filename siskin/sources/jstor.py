@@ -267,6 +267,8 @@ class JstorIntermediateSchema(JstorTask):
         JSTOR Language & Literature Archive
         JSTOR Life Sciences Archive
         JSTOR Music Archive
+
+    XXX: Why is JSTOR (about 500 records) still attached for DE-15, refs #12066.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
