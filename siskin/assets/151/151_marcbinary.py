@@ -105,7 +105,7 @@ for record in records:
 
 
     marcrecord.leader= "     nam  22        4500"
-    marcrecord.add("001", data="finc-151" + f001)
+    marcrecord.add("001", data="finc-151-" + f001)
     marcrecord.add("005", data="tu")
     marcrecord.strict = False
     marcrecord.add("100", a=f100a)
@@ -119,7 +119,7 @@ for record in records:
     
     for person in persons:
         marcrecord.add("700", a=person)
-        
+
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
