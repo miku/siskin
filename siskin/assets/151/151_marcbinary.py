@@ -110,16 +110,16 @@ for record in records:
     marcrecord.strict = False
     marcrecord.add("100", a=f100a)
     marcrecord.add("245", a=f245a)
-    marcrecord.add("260", a=f260a, b=f260b, c=f260c)
+    publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
+    marcrecord.add("260", subfields=publisher)
     
     for subject in subjects:
         marcrecord.add("650", a=subject)
-    
-    collections = ["a", f001, "b", "151", "c", "Filmakademie Baden-Württemberg"]
-    
+        
     for person in persons:
         marcrecord.add("700", a=person)
 
+    collections = ["a", f001, "b", "151", "c", "Filmakademie Baden-Württemberg"]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
