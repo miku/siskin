@@ -130,20 +130,24 @@ for record in records:
     format = ""
     f001 = ""
     f100a = ""
+    f100e = ""
     f245a = ""
     f260a = ""
     f260b = ""
     f260c = ""
     f650a = ""
     f700a = ""
+    f700e = ""
+
+    subjects = []
+    persons = []
+    f100 = []
+    f700 = []
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     fields = re.split("(</controlfield>|</datafield>)", record)
     
-    subjects = []
-    persons = []
-
     for field in fields:
 
         field = field.replace("\n", "")
@@ -163,39 +167,40 @@ for record in records:
             regexp3 = re.search("\d\]?\sBl", form)
             regexp4 = re.search("\s?Illl?\.", form)
             regexp5 = re.search("[XVI],\s", form)
-            regexp6 = re.search("^DVD", form)
-            regexp7 = re.search("^Blu.?-ray", form)
-            regexp8 = re.search("^H[DC] [Cc][Aa][Mm]", form)
-            regexp9 = re.search("^HDCAM", form)
-            regexp10 = re.search("[Bb]et.?-?[Cc]am", form)
-            regexp11 = re.search("CD", form)
-            regexp12 = re.search("[kKCc]asss?ette", form)
-            regexp13 = re.search("^VHS", form)
-            regexp14 = re.search("^Noten", form)
-            regexp15 = re.search("^Losebl", form)
-            regexp16 = re.search("^Film\s?\[", form)
-            regexp17 = re.search("\d\smin", form)
-            regexp18 = re.search("S\.\s\d+\s?-\s?\d+", form)
+            regexp6 = re.search("^\d+\s[SsPp]", form)
+            regexp7 = re.search("^DVD", form)
+            regexp8 = re.search("^Blu.?-ray", form)
+            regexp9 = re.search("^H[DC] [Cc][Aa][Mm]", form)
+            regexp10 = re.search("^HDCAM", form)
+            regexp11 = re.search("[Bb]et.?-?[Cc]am", form)
+            regexp12 = re.search("CD", form)
+            regexp13 = re.search("[kKCc]asss?ette", form)
+            regexp14 = re.search("^VHS", form)
+            regexp15 = re.search("^Noten", form)
+            regexp16 = re.search("^Losebl", form)
+            regexp17 = re.search("^Film\s?\[", form)
+            regexp18 = re.search("\d\smin", form)
+            regexp19 = re.search("S\.\s\d+\s?-\s?\d+", form)
 
-            if regexp1 or regexp2 or regexp3 or regexp4 or regexp5:
+            if regexp1 or regexp2 or regexp3 or regexp4 or regexp5 or regexp6:
                 format = "Buch"
-            elif regexp6:
-                format = "DVD"
             elif regexp7:
+                format = "DVD"
+            elif regexp8:
                 format = "Blu-ray"
-            elif regexp8 or regexp9 or regexp10:
+            elif regexp9 or regexp10 or regexp11:
                 format = "Videodatei"
-            elif regexp11:
+            elif regexp12:
                 format = "CD"
-            elif regexp12 or regexp13:
+            elif regexp13 or regexp14:
                 format = "Videokassette"
-            elif regexp14:
-                format = "Noten"
             elif regexp15:
+                format = "Noten"
+            elif regexp16:
                 format = "Loseblattsammlung"
-            elif regexp16 or regexp17:
+            elif regexp17 or regexp18:
                 format = "Film"
-            elif regexp18:
+            elif regexp19:
                 format = "Aufsatz"
             else:
                 if form != "":
@@ -204,8 +209,18 @@ for record in records:
 
         # 1. Urheber
         if f100a == "":
-            f100a = get_subfield("100", "a")
-        
+            f100a = get_subfield("100", "a")            
+            if f100a != "":
+                f100.append("a")
+                f100.append(f100a)
+                f100e = get_subfield("100", "b")
+                if f100e != "":
+                    f100e = f100e.split("]")                
+                    for role in f100e[:-1]:  # Slice :-1 damit das letzte ] ausgelassen wird
+                        role = role + "]"
+                        f100.append("e")
+                        f100.append(role)
+                                            
         # Haupttitel
         if f245a == "":
             f245a = get_field("331")
@@ -228,15 +243,24 @@ for record in records:
             subjects.append(f650a)
 
         # weitere Personen
-        # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife
-        # für die Personenfelder nicht bei jedem Feld durchlaufen wird
         regexp = re.search('tag="1\d\d"', field)
         if regexp:
-           for i in range(101, 197):
-               f700a = get_subfield(i, "a")
+           for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
+               f700a = get_subfield(i, "a")               
                if f700a != "":
-                   persons.append(f700a)
-                   break    
+                    f700.append("a")
+                    f700.append(f700a)
+                    f700e = get_subfield(i, "b")
+                    if f700e != "":
+                        f700e = f700e.split("]")                   
+                        for role in f700e[:-1]:  # Slice :-1 damit das letzte ] ausgelassen wird
+                            role = role + "]"
+                            f700.append("e")
+                            f700.append(role)                           
+                    persons.append(f700)
+                    f700 = []              
+                    break
+
     
     if format == "":
         format = "Buch"
@@ -249,18 +273,18 @@ for record in records:
     f007 = get_field_007(format=format)
     marcrecord.add("007", data=f007)
     
-    marcrecord.add("100", a=f100a)
+    marcrecord.add("100", subfields=f100)
     
     marcrecord.add("245", a=f245a)
     
     publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
     
-    for subject in subjects:
-        marcrecord.add("650", a=subject)
+    for f650a in subjects:
+        marcrecord.add("650", a=f650a)
         
-    for person in persons:
-        marcrecord.add("700", a=person)
+    for f700 in persons:
+        marcrecord.add("700", subfields=f700)
 
     f935b = get_field_935b(format=format)
     f935c = get_field_935c(format=format)
