@@ -9,10 +9,74 @@ import html
 import marcx
 
 
+formatmap = {
+    "Buch":
+    {
+        "leader": "cam",
+        "007": "tu",
+        "935b": "druck"
+    },
+    "DVD":
+    {
+        "leader": "ngm",
+        "007": "vd",
+        "935b": "dvdv",
+        "935c": "vide"
+    },
+    "Blu-ray":
+    {
+        "leader": "ngm",
+        "007": "vd",
+        "935b": "bray",
+        "935c": "vide"
+    },
+    "Videodatei":
+    {
+        "leader": "cam",
+        "007": "cr",
+        "935b": "cofz",
+        "935c": "vide"
+    },
+    "CD":
+    {
+        "leader": "  m",
+        "007": "c",
+        "935b": "cdda"
+    },
+    "Videokassette":
+    {
+        "leader": "cgm",
+        "007": "vf",
+        "935b": "vika",
+        "935c": "vide"
+    },
+    "Noten":
+    {
+        "leader": "nom",
+        "007": "zm",
+        "935c": "muno"
+    },
+    "Loseblattsammlung":
+    {
+        "leader": "nai",
+        "007": "td",
+    },
+    "Film":
+    {
+        "leader": "cam",
+        "007": "mu",
+        "935b": "sobildtt"
+    },
+    "Aufsatz":
+    {
+        "leader": "naa",
+        "007": "tu"
+    },
+}
+
+
 def get_field(tag):
-
     regexp = re.search('<.*? tag="%s">(.*)$' % tag, field)
-
     if regexp:
         _field = regexp.group(1)
         _field = html.unescape(_field)
@@ -21,15 +85,31 @@ def get_field(tag):
         return ""
 
 def get_subfield(tag, subfield):
-
     regexp = re.search('^<datafield.*tag="%s".*><subfield code="%s">(.*?)<\/subfield>' % (tag, subfield), field)
-
     if regexp:
         _field = regexp.group(1)
         _field = html.unescape(_field)
         return _field
     else:
         return ""
+
+def get_leader(format="Buch"):
+    return "     %s  22        4500" % formatmap[format]["leader"]
+
+def get_field_007(format="Buch"):
+    if "007" not in formatmap[format]:
+        return ""
+    return formatmap[format]["007"]
+
+def get_field_935b(format="Buch"):
+    if "935b" not in formatmap[format]:
+        return ""
+    return formatmap[format]["935b"]
+
+def get_field_935c(format="Buch"):
+    if "935c" not in formatmap[format]:
+        return ""
+    return formatmap[format]["935c"]
 
 
 # Default input and output.
@@ -58,6 +138,7 @@ for record in records:
     f700a = ""
 
     marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
     fields = re.split("(</controlfield>|</datafield>)", record)
     
     subjects = []
@@ -75,26 +156,26 @@ for record in records:
 
         # Format
         if format == "":
-            format = get_field("433")          
+            form = get_field("433")         
             
-            regexp1 = re.search("\d\]?\sS\.", format)
-            regexp2 = re.search("\d\]?\sSeit", format)
-            regexp3 = re.search("\d\]?\sBl", format)
-            regexp4 = re.search("\s?Illl?\.", format)
-            regexp5 = re.search("[XVI],\s", format)
-            regexp6 = re.search("^DVD", format)
-            regexp7 = re.search("^Blu.?-ray", format)
-            regexp8 = re.search("^H[DC] [Cc][Aa][Mm]", format)
-            regexp9 = re.search("^HDCAM", format)
-            regexp10 = re.search("[Bb]et.?-?[Cc]am", format)
-            regexp11 = re.search("CD", format)
-            regexp12 = re.search("[kKCc]asss?ette", format)
-            regexp13 = re.search("^VHS", format)
-            regexp14 = re.search("^Noten", format)
-            regexp15 = re.search("^Losebl", format)
-            regexp16 = re.search("^Film\s?\[", format)
-            regexp17 = re.search("\d\smin", format)
-            regexp18 = re.search("S\.\s\d+\s?-\s?\d+", format)
+            regexp1 = re.search("\d\]?\sS\.", form)
+            regexp2 = re.search("\d\]?\sSeit", form)
+            regexp3 = re.search("\d\]?\sBl", form)
+            regexp4 = re.search("\s?Illl?\.", form)
+            regexp5 = re.search("[XVI],\s", form)
+            regexp6 = re.search("^DVD", form)
+            regexp7 = re.search("^Blu.?-ray", form)
+            regexp8 = re.search("^H[DC] [Cc][Aa][Mm]", form)
+            regexp9 = re.search("^HDCAM", form)
+            regexp10 = re.search("[Bb]et.?-?[Cc]am", form)
+            regexp11 = re.search("CD", form)
+            regexp12 = re.search("[kKCc]asss?ette", form)
+            regexp13 = re.search("^VHS", form)
+            regexp14 = re.search("^Noten", form)
+            regexp15 = re.search("^Losebl", form)
+            regexp16 = re.search("^Film\s?\[", form)
+            regexp17 = re.search("\d\smin", form)
+            regexp18 = re.search("S\.\s\d+\s?-\s?\d+", form)
 
             if regexp1 or regexp2 or regexp3 or regexp4 or regexp5:
                 format = "Buch"
@@ -117,9 +198,9 @@ for record in records:
             elif regexp18:
                 format = "Aufsatz"
             else:
-                if format != "":
+                if form != "":
                     format = "Buch"
-                    print("Format nicht erkannt: %s (Default = Buch)" % format)
+                    print("Format nicht erkannt: %s (Default = Buch)" % form)
 
         # 1. Urheber
         if f100a == "":
@@ -156,14 +237,22 @@ for record in records:
                if f700a != "":
                    persons.append(f700a)
                    break    
+    
+    if format == "":
+        format = "Buch"
 
-
-    marcrecord.leader= "     nam  22        4500"
+    leader = get_leader(format=format)
+    marcrecord.leader = leader
+    
     marcrecord.add("001", data="finc-151-" + f001)
-    marcrecord.add("005", data="tu")
-    marcrecord.strict = False
+    
+    f007 = get_field_007(format=format)
+    marcrecord.add("007", data=f007)
+    
     marcrecord.add("100", a=f100a)
+    
     marcrecord.add("245", a=f245a)
+    
     publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
     
@@ -172,6 +261,10 @@ for record in records:
         
     for person in persons:
         marcrecord.add("700", a=person)
+
+    f935b = get_field_935b(format=format)
+    f935c = get_field_935c(format=format)
+    marcrecord.add("935", b=f935b, c=f935c)
 
     collections = ["a", f001, "b", "151", "c", "Filmakademie Baden-Württemberg"]
     marcrecord.add("980", subfields=collections)
