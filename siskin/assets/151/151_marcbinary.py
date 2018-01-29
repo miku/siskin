@@ -5,6 +5,7 @@ import io
 import sys
 import re
 
+import html
 import marcx
 
 
@@ -13,7 +14,9 @@ def get_field(tag):
     regexp = re.search('<.*? tag="%s">(.*)$' % tag, field)
 
     if regexp:
-        return regexp.group(1)
+        _field = regexp.group(1)
+        _field = html.unescape(_field)
+        return _field
     else:
         return ""
 
@@ -22,7 +25,9 @@ def get_subfield(tag, subfield):
     regexp = re.search('^<datafield.*tag="%s".*><subfield code="%s">(.*?)<\/subfield>' % (tag, subfield), field)
 
     if regexp:
-        return regexp.group(1)
+        _field = regexp.group(1)
+        _field = html.unescape(_field)
+        return _field
     else:
         return ""
 
@@ -42,6 +47,7 @@ records = records.split("</record>")
 
 for record in records:
 
+    format = ""
     f001 = ""
     f100a = ""
     f245a = ""
@@ -66,6 +72,54 @@ for record in records:
         # Identfikator
         if f001 == "":
             f001 = get_field("001")
+
+        # Format
+        if format == "":
+            format = get_field("433")          
+            
+            regexp1 = re.search("\d\]?\sS\.", format)
+            regexp2 = re.search("\d\]?\sSeit", format)
+            regexp3 = re.search("\d\]?\sBl", format)
+            regexp4 = re.search("\s?Illl?\.", format)
+            regexp5 = re.search("[XVI],\s", format)
+            regexp6 = re.search("^DVD", format)
+            regexp7 = re.search("^Blu.?-ray", format)
+            regexp8 = re.search("^H[DC] [Cc][Aa][Mm]", format)
+            regexp9 = re.search("^HDCAM", format)
+            regexp10 = re.search("[Bb]et.?-?[Cc]am", format)
+            regexp11 = re.search("CD", format)
+            regexp12 = re.search("[kKCc]asss?ette", format)
+            regexp13 = re.search("^VHS", format)
+            regexp14 = re.search("^Noten", format)
+            regexp15 = re.search("^Losebl", format)
+            regexp16 = re.search("^Film\s?\[", format)
+            regexp17 = re.search("\d\smin", format)
+            regexp18 = re.search("S\.\s\d+\s?-\s?\d+", format)
+
+            if regexp1 or regexp2 or regexp3 or regexp4 or regexp5:
+                format = "Buch"
+            elif regexp6:
+                format = "DVD"
+            elif regexp7:
+                format = "Blu-ray"
+            elif regexp8 or regexp9 or regexp10:
+                format = "Videodatei"
+            elif regexp11:
+                format = "CD"
+            elif regexp12 or regexp13:
+                format = "Videokassette"
+            elif regexp14:
+                format = "Noten"
+            elif regexp15:
+                format = "Loseblattsammlung"
+            elif regexp16 or regexp17:
+                format = "Film"
+            elif regexp18:
+                format = "Aufsatz"
+            else:
+                if format != "":
+                    format = "Buch"
+                    print("Format nicht erkannt: %s (Default = Buch)" % format)
 
         # 1. Urheber
         if f100a == "":
