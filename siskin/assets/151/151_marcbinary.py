@@ -170,7 +170,7 @@ for record in records:
             regexp5 = re.search("[XVI],\s", form)
             regexp6 = re.search("^\d+\s[SsPp]", form)
             regexp7 = re.search("^DVD", form)
-            regexp8 = re.search("^Blu.?-ray", form)
+            regexp8 = re.search("^Blu.?-[Rr]ay", form)
             regexp9 = re.search("^H[DC] [Cc][Aa][Mm]", form)
             regexp10 = re.search("^HDCAM", form)
             regexp11 = re.search("[Bb]et.?-?[Cc]am", form)
@@ -250,11 +250,15 @@ for record in records:
 
             if regexp1:
                 f300a, f300b, f300c = regexp1.groups()
+                f300a = f300a + " : "
+                f300b = f300b + " ; "
             elif regexp2:
                 f300a, f300b = regexp2.groups()
+                f300a = f300a + " : "              
                 f300c = ""
             elif regexp3:
                 f300a, f300c = regexp3.groups()
+                f300a + " ; "
                 f300b = ""
             else:
                 f300a = f300
