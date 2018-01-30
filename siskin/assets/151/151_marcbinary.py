@@ -135,6 +135,7 @@ for record in records:
     f260a = ""
     f260b = ""
     f260c = ""
+    f300a = ""
     f650a = ""
     f700a = ""
     f700e = ""
@@ -237,6 +238,25 @@ for record in records:
         if f260c == "":
             f260c = get_field("425")
 
+        # Kollationsangabe 000051473
+        if f300a == "":
+            f300 = get_field("433")
+            f300 = f300.split(" : ")
+            if len(f300) > 1:
+                f300a = f300[0]
+                f300bc = f300[1]
+                f300bc = f300bc.split(" ; ")
+                if len(f300bc) > 1:
+                    f300b = f300bc[0]
+                    f300c = f300bc[1]
+                else:
+                    f300b = f300bc[0]
+                    f300c = ""
+            else:
+                f300a = f300[0]
+                f300b = ""
+                f300c = ""
+
         # Schlagwörter
         f650a = get_subfield("710", "a")
         if f650a != "":
@@ -279,6 +299,9 @@ for record in records:
     
     publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
+
+    physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
+    marcrecord.add("300", subfields=physicaldescription)
     
     for f650a in subjects:
         marcrecord.add("650", a=f650a)
