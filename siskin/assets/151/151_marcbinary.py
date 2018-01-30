@@ -238,24 +238,28 @@ for record in records:
         if f260c == "":
             f260c = get_field("425")
 
-        # Kollationsangabe 000051473
+        # physische Beschreibung
         if f300a == "":
             f300 = get_field("433")
-            f300 = f300.split(" : ")
-            if len(f300) > 1:
-                f300a = f300[0]
-                f300bc = f300[1]
-                f300bc = f300bc.split(" ; ")
-                if len(f300bc) > 1:
-                    f300b = f300bc[0]
-                    f300c = f300bc[1]
-                else:
-                    f300b = f300bc[0]
-                    f300c = ""
-            else:
-                f300a = f300[0]
-                f300b = ""
+            # 335 S. : zahlr. Ill. ; 32 cm
+            regexp1 = re.search("(.*)\s?:\s(.*);\s(.*)", f300)
+            # 289 S.: Zahlr. Ill.
+            regexp2 = re.search("(.*)\s?:\s(.*)", f300)
+            # 106 S. ; 21 cm
+            regexp3 = re.search("(.*)\s?;\s(.*)", f300)
+
+            if regexp1:
+                f300a, f300b, f300c = regexp1.groups()
+            elif regexp2:
+                f300a, f300b = regexp2.groups()
                 f300c = ""
+            elif regexp3:
+                f300a, f300c = regexp3.groups()
+                f300b = ""
+            else:
+                f300a = f300
+                f300b = ""
+                f300c = ""       
 
         # Schlagwörter
         f650a = get_subfield("710", "a")
