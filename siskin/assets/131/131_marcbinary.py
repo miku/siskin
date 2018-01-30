@@ -1,4 +1,4 @@
-#/usr/local/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
 import io
@@ -7,135 +7,38 @@ import json
 
 import marcx
 
+
 formatmap = {
-    "Buch":
-    {
-        "leader": "nam",
-        "007": "tu",
-        "935b" : "druck"
-    },
-    "Zeitschrift":
-    {
-        "leader": "nas",
-        "007": "tu",
-        "935b" : "cofz"
-    },
-    "Dissertation":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Manuskript":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Bericht":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Wörterbuch":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Tagungsband":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Tagungsbericht":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Literaturzusammenstellung":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Konferenzbericht":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Diplomarbeit":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Software":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "CD-ROM":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Karte":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Verzeichnis":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Datenbank":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Seminarvortrag":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Prospektmaterial":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    },
-    "Proceedings":
-    {
-        "leader": "ckm",
-        "007": "ta",        
-        "935b" : "foto"
-    }
+
+    "Buch": "Buch",
+    "Konferenzbericht": "Buch",
+    "Literaturzusammenstellung": "Buch",
+    "Manuskript": "Buch",
+    "Proceedings": "Buch",
+    "Prospektmaterial": "Buch",
+    "Seminarvortrag": "Buch",
+    "Tagungsband": "Buch",
+    "Verzeichnis": "Buch",
+    "Wörterbuch": "Buch",
+    "Bericht": "Buch",
+    "Tagungsbericht": "Buch",
+    "Diplomarbeit": "Hochschulschrift",
+    "Dissertation": "Hochschulschrift",
+    "Zeitschrift": "Zeitschrift",
+    "Artikel": "Artikel",
+    "Aufsatz": "Artikel",
+    "Aufsatz Kinderzeitschrift": "Artikel",
+    "Rezension": "Artikel",
+    "Verweisung": "Artikel",
+    "Zeitschriftenartikel": "Artikel",
+    "Zeitungsartikel": "Artikel",
+    "Karte": "Karte",
+    "Software": "Software",
+    "CD-ROM": "Video",
+    "Datenbank": "Webseite"
 }
 
-def get_leader(format="photograph"):
-    return "     %s  22        450 " % formatmap[format]["leader"]
 
-def get_field_007(format="photograph"):
-    return formatmap[format]["007"]
-
-def get_field_935b(format="photograph"):
-    if "935b" not in formatmap[format]:
-        return ""
-    return formatmap[format]["935b"]
-
-# Default input and output.
 inputfilename = "131_input.json"
 outputfilename = "131_output.mrc"
 
@@ -143,7 +46,7 @@ if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
 with open(inputfilename, "r") as inputfile:
-	jsonrecords = json.load(inputfile)
+    jsonrecords = json.load(inputfile)
 
 outputfile = io.open(outputfilename, "wb")
 
@@ -155,9 +58,59 @@ for jsonrecord in jsonrecords:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     format = jsonrecord["FORMAT"]
+    
+    if formatmap[format] == "Buch":
+       leader = "     nam  22        4500"
+       f007 = "tu"
+       f008 = ""
+       f935b = "druck"
+       f935c = ""
+    elif formatmap[format] == "Hochschulschrift":
+        leader = "     nam  22        4500"
+        f007 = "tu"
+        f008 = ""
+        f935b = ""
+        f935c = "hs" 
+    elif formatmap[format] == "Zeitschrift":
+        leader = "     cgs  22        4500"
+        f007 = "tu"
+        f008 = "                     p"
+        f935b = ""
+        f935c = "" 
+    elif formatmap[format] == "Artikel":
+        leader = "     cga  22        4500"
+        f007 = "tu"
+        f008 = ""
+        f935b = ""
+        f935c = ""
+    elif formatmap[format] == "Karte":
+        leader = "     cfm  22        4500"
+        f007 = "a"
+        f008 = ""
+        f935b = ""
+        f935c = "" 
+    elif formatmap[format] == "Software":
+        leader = "     cgm  22        4500"
+        f007 = ""
+        f008 = ""
+        f935b = ""
+        f935c = "kart"
+    elif formatmap[format] == "Video":
+        leader = "     cgm  22        4500"
+        f007 = "v"
+        f008 = ""
+        f935b = "vika"
+        f935c = ""
+    elif formatmap[format] == "Webseite":
+        leader = "     cgm  22        4500"
+        f007 = "c"
+        f008 = ""
+        f935b = ""
+        f935c = ""
+    else:
+        print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
 
-	# Leader
-    leader = get_leader(format)
+    # Leader
     marcrecord.leader = leader
 
     #Identifikator
@@ -166,9 +119,11 @@ for jsonrecord in jsonrecords:
     f001 = f001[1] 
     marcrecord.add("001", data="finc-131-" + f001)
 
-    # Format (007)
-    f007 = get_field_007(format)
+    # Format (007)   
     marcrecord.add("007", data=f007)
+
+    # Erscheinungsweise (008)
+    marcrecord.add("008", data=f008)
     
     # ISBN
     f020a = jsonrecord["ISBN"]
@@ -181,7 +136,7 @@ for jsonrecord in jsonrecords:
         f100a = authors[0]     
         marcrecord.add("100", a=f100a)     
     else:
-    	authors = ""
+        authors = ""
 
     # Haupttitel
     f245a = jsonrecord["TITLE"]
@@ -196,16 +151,16 @@ for jsonrecord in jsonrecords:
     keywords = jsonrecord["TOPIC_DETAILED"]
     
     if "Buch" in keywords:
-    	keywords.remove("Buch")
+        keywords.remove("Buch")
     
     if "Zeitschrift" in keywords:
-    	keywords.remove("Zeitschrift")
+        keywords.remove("Zeitschrift")
     
     for keyword in keywords:
-    	marcrecord.add("689", a=keyword)    
+        marcrecord.add("689", a=keyword)    
  
     if substance not in keywords:
-    	marcrecord.add("689", a=substance)
+        marcrecord.add("689", a=substance)
 
     if format not in keywords and format != "Buch" and format != "Zeitschrift":
         marcrecord.add("689", a=format)
@@ -213,27 +168,26 @@ for jsonrecord in jsonrecords:
     # weitere Schöpfer
     if len(authors) > 1:
         for f700a in authors[1:]:
-            f700a = f700a.strip()    		
+            f700a = f700a.strip()           
             if f700a != "u.a.":
                 marcrecord.add("700", a=f700a)
 
     # Quelle
     f773t = jsonrecord["CONT_TITLE"] # wenn kein vollständiges f773g, ist f773t meist nur "Buch" oder "Beitrag"
     f773 = jsonrecord["VOL_ISSUE"]
-    f773 = f773.split("/")   
+    f773 = f773.split("/")
     if len(f773) == 3:
-    	volume = f773[0]
-    	issue = f773[1]
-    	pages = f773[2]
-    	year = jsonrecord["YEAR"]
-    	f773g = "%s(%s) Heft %s, S. %s" % (volume, year, issue, pages)
+        volume = f773[0]
+        issue = f773[1]
+        pages = f773[2]
+        year = jsonrecord["YEAR"]
+        f773g = "%s(%s) Heft %s, S. %s" % (volume, year, issue, pages)
     else:
-    	f773g = f773[0] # hier steht viel Murks, eventuell f773g = ""
+        f773g = f773[0] # hier steht viel Murks, eventuell f773g = ""
     marcrecord.add("773", t=f773t, g=f773g)
 
-    # Format (935b)
-    f935b = get_field_935b(format)
-    marcrecord.add("935", b=f935b)
+    # Format (935bc)  
+    marcrecord.add("935", b=f935b, c=f935c)
 
     # Kollektion
     marcrecord.add("980", a=f001, b="131", c="gdmb")
