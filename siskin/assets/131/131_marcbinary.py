@@ -151,13 +151,13 @@ for jsonrecord in jsonrecords:
         keywords.remove("Zeitschrift")
     
     for keyword in keywords:
-        marcrecord.add("689", a=keyword)    
+        marcrecord.add("650", a=keyword)    
  
     if substance not in keywords:
-        marcrecord.add("689", a=substance)
+        marcrecord.add("650", a=substance)
 
     if format not in keywords and format != "Buch" and format != "Zeitschrift":
-        marcrecord.add("689", a=format)
+        marcrecord.add("650", a=format)
 
     # weitere Schöpfer
     if len(authors) > 1:
