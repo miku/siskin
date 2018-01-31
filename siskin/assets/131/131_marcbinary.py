@@ -24,7 +24,7 @@ formatmap = {
     "Tagungsbericht": "Buch",
     "Diplomarbeit": "Hochschulschrift",
     "Dissertation": "Hochschulschrift",
-    "Zeitschrift": "Zeitschrift",
+    "Zeitschrift": "Artikel", # Zeitschriften sind hier Zeitschriftenaufsätze
     "Artikel": "Artikel",
     "Aufsatz": "Artikel",
     "Aufsatz Kinderzeitschrift": "Artikel",
@@ -70,31 +70,25 @@ for jsonrecord in jsonrecords:
         f007 = "tu"
         f008 = ""
         f935b = ""
-        f935c = "hs" 
-    elif formatmap[format] == "Zeitschrift":
-        leader = "     cgs  22        4500"
-        f007 = "tu"
-        f008 = "                     p"
-        f935b = ""
-        f935c = "" 
+        f935c = "hs"    
     elif formatmap[format] == "Artikel":
-        leader = "     cga  22        4500"
+        leader = "     caa  22        4500"
         f007 = "tu"
         f008 = ""
-        f935b = ""
-        f935c = ""
+        f935b = "SAXB"
+        f935c = "druck"
     elif formatmap[format] == "Karte":
-        leader = "     cfm  22        4500"
-        f007 = "a"
+        leader = "     cem  22        4500"
+        f007 = "au"
         f008 = ""
-        f935b = ""
-        f935c = "" 
+        f935b = "druck"
+        f935c = "kart" 
     elif formatmap[format] == "Software":
         leader = "     cgm  22        4500"
-        f007 = ""
+        f007 = "co"
         f008 = ""
-        f935b = ""
-        f935c = "kart"
+        f935b = "crom"
+        f935c = "lo"
     elif formatmap[format] == "Video":
         leader = "     cgm  22        4500"
         f007 = "v"
@@ -102,11 +96,11 @@ for jsonrecord in jsonrecords:
         f935b = "vika"
         f935c = ""
     elif formatmap[format] == "Webseite":
-        leader = "     cgm  22        4500"
-        f007 = "c"
+        leader = "     cmi  22        4500"
+        f007 = "cr"
         f008 = ""
-        f935b = ""
-        f935c = ""
+        f935b = "cofz"
+        f935c = "website"
     else:
         print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
 
@@ -173,8 +167,10 @@ for jsonrecord in jsonrecords:
                 marcrecord.add("700", a=f700a)
 
     # Quelle
-    f773t = jsonrecord["CONT_TITLE"] # wenn kein vollständiges f773g, ist f773t meist nur "Buch" oder "Beitrag"
+    f773t = jsonrecord["CONT_TITLE"] # wenn kein vollständiges f773g, ist f773t meist nur "Buch" oder "Beitrag"    
     f773 = jsonrecord["VOL_ISSUE"]
+    if f773 == "" and f773t == "" and format == "Zeitschrift":       
+        print("Der folgende Aufsatz hat keine übergordnete Zeitschrift:" + f001)
     f773 = f773.split("/")
     if len(f773) == 3:
         volume = f773[0]
