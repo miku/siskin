@@ -3,13 +3,13 @@
 
 import io
 import sys
+import re
 import json
 
 import marcx
 
 
 formatmap = {
-
     "Buch": "Buch",
     "Konferenzbericht": "Buch",
     "Literaturzusammenstellung": "Buch",
@@ -113,7 +113,7 @@ for jsonrecord in jsonrecords:
     f001 = f001[1] 
     marcrecord.add("001", data="finc-131-" + f001)
 
-    # Format (007)   
+    # Format (007)
     marcrecord.add("007", data=f007)
 
     # Erscheinungsweise (008)
@@ -135,10 +135,31 @@ for jsonrecord in jsonrecords:
     # Haupttitel
     f245a = jsonrecord["TITLE"]
     marcrecord.add("245", a=f245a)
-
+   
     # Erscheinungsvermerk   
     f260c = jsonrecord["YEAR"]
     marcrecord.add("260", c=f260c)
+
+    # Seitenzahl    
+    f300 = jsonrecord["VOL_ISSUE"]
+    f300 = f300.split("/")
+    if len(f300) == 3:     
+        pages = f300[2]      
+        regexp = re.search("\D1-(\d+)", pages)
+        if regexp:
+            f300a = regexp.group(1)
+            f300a = f300a + " S."
+        else:
+            f300a = ""
+        marcrecord.add("300", a=f300a)
+
+    # Hochschulvermerk
+    if formatmap[format] == "Hochschulschrift":
+        f502a = jsonrecord["CONT_TITLE"]
+        marcrecord.add("502", a=f502a)
+   
+    # Format (935bc)  
+    marcrecord.add("935", b=f935b, c=f935c)
 
     # Schlagwörter
     substance = jsonrecord["SUBSTANCE"]
@@ -177,13 +198,11 @@ for jsonrecord in jsonrecords:
         issue = f773[1]
         pages = f773[2]
         year = jsonrecord["YEAR"]
-        f773g = "%s(%s) Heft %s, S. %s" % (volume, year, issue, pages)
+        f773g = "%s(%s) Heft %s, S. %s" % (volume, year, issue, pages)        
     else:
         f773g = f773[0] # hier steht viel Murks, eventuell f773g = ""
-    marcrecord.add("773", t=f773t, g=f773g)
-
-    # Format (935bc)  
-    marcrecord.add("935", b=f935b, c=f935c)
+    if formatmap[format] == "Artikel":
+        marcrecord.add("773", t=f773t, g=f773g)
 
     # Kollektion
     marcrecord.add("980", a=f001, b="131", c="gdmb")
