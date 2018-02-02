@@ -24,7 +24,7 @@ formatmap = {
     "Tagungsbericht": "Buch",
     "Diplomarbeit": "Hochschulschrift",
     "Dissertation": "Hochschulschrift",
-    "Zeitschrift": "Artikel", # Zeitschriften sind hier Zeitschriftenaufsätze
+    "Zeitschrift": "Artikel", # Zeitschriften sind hier eigentlich Zeitschriftenaufsätze
     "Artikel": "Artikel",
     "Aufsatz": "Artikel",
     "Aufsatz Kinderzeitschrift": "Artikel",
@@ -34,8 +34,8 @@ formatmap = {
     "Zeitungsartikel": "Artikel",
     "Karte": "Karte",
     "Software": "Software",
-    "CD-ROM": "Video",
-    "Datenbank": "Webseite"
+    "CD-ROM": "Datenträger",
+    "Datenbank": "Datenträger"
 }
 
 
@@ -58,7 +58,7 @@ for jsonrecord in jsonrecords:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     format = jsonrecord["FORMAT"]
-    
+   
     if formatmap[format] == "Buch":
        leader = "     nam  22        4500"
        f007 = "tu"
@@ -89,18 +89,12 @@ for jsonrecord in jsonrecords:
         f008 = ""
         f935b = "crom"
         f935c = "lo"
-    elif formatmap[format] == "Video":
+    elif formatmap[format] == "Datenträger":
         leader = "     cgm  22        4500"
         f007 = "v"
         f008 = ""
-        f935b = "vika"
-        f935c = ""
-    elif formatmap[format] == "Webseite":
-        leader = "     cmi  22        4500"
-        f007 = "cr"
-        f008 = ""
-        f935b = "cofz"
-        f935c = "website"
+        f935b = "soerd"
+        f935c = ""    
     else:
         print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
 
