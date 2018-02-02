@@ -72,7 +72,7 @@ for jsonrecord in jsonrecords:
         f935b = ""
         f935c = "hs"    
     elif formatmap[format] == "Artikel":
-        leader = "     caa  22        4500"
+        leader = "     cab  22        4500"
         f007 = "tu"
         f008 = ""
         f935b = "SAXB"
