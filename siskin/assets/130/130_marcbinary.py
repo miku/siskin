@@ -47,6 +47,7 @@ for record in records:
     f020a = ""
     f041a = ""
     f100a = ""
+    f100e = ""
     f110a = ""
     f245a = ""
     f245b = ""
@@ -59,6 +60,7 @@ for record in records:
     f300b = ""
     f300c = ""
     f650a = ""
+    f700e = ""
     subjects = []
     persons = []
     corporates = []
@@ -99,6 +101,11 @@ for record in records:
         # 1. Urheber
         if f100a == "":
             f100a = get_field("100")
+            if f100a != "":
+                regexp = re.search(".\s¬(\[.*\])", f100a)
+                if regexp:
+                    f100e = regexp.group(1)
+                    f100a = re.sub(".\s¬\[.*\]¬", "", f100a) 
 
         # 1. Körperschaft
         if f110a == "":
@@ -173,8 +180,12 @@ for record in records:
                 if f700a != "":
                     regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
                     if not regexp:
+                        regexp = re.search(".\s¬(\[.*\])", f700a)
+                        if regexp:
+                            f700e = regexp.group(1)
+                            f700a = re.sub(".\s¬\[.*\]¬", "", f700a)
                         persons.append(f700a)
-                        break
+                        break                    
 
         # weitere Körperschaften
         regexp = re.search('nr="2\d\d"', field)
@@ -195,7 +206,7 @@ for record in records:
     marcrecord.add("007", data="tu")
     marcrecord.add("020", a=f020a)
     marcrecord.add("041", a=f041a)
-    marcrecord.add("100", a=f100a)
+    marcrecord.add("100", a=f100a, e=f100e)
     marcrecord.add("110", a=f110a)
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=titleparts)    
@@ -207,7 +218,7 @@ for record in records:
     for subject in subjects:
         marcrecord.add("650", a=subject)
     for person in persons:
-        marcrecord.add("700", a=person)
+        marcrecord.add("700", a=person, e=f700e)
     for corporate in corporates:
         marcrecord.add("710", a=corporate)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
