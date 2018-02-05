@@ -31,6 +31,9 @@ outputfilename = "130_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
+#hierarchyfile = open("130_hierarchy.txt", "r")
+#hierarchy = hierarchyfile.readlines()
+
 inputfile = open(inputfilename, "r")    
 outputfile = open(outputfilename, "wb")
 
@@ -44,6 +47,7 @@ for record in records:
     f020a = ""
     f041a = ""
     f100a = ""
+    f110a = ""
     f245a = ""
     f245b = ""
     f245c = ""
@@ -57,6 +61,7 @@ for record in records:
     f650a = ""
     subjects = []
     persons = []
+    corporates = []
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
@@ -95,15 +100,19 @@ for record in records:
         if f100a == "":
             f100a = get_field("100")
 
-        # Titel
+        # 1. Körperschaft
+        if f110a == "":
+            f110a = get_field("200")
+
+        # Haupttitel
         if f245a == "":
             f245a = get_field("331")
 
-        # Titel
+        # Titelzusatz
         if f245b == "":
             f245b = get_field("335")
 
-        # Titel
+        # Verantwortlichenangabe
         if f245c == "":
             f245c = get_field("359")
 
@@ -167,13 +176,27 @@ for record in records:
                         persons.append(f700a)
                         break
 
+        # weitere Körperschaften
+        regexp = re.search('nr="2\d\d"', field)
+        if regexp:
+            for i in range(201, 299):
+                f710a = get_field(i)               
+                if f710a != "":
+                    regexp = re.search("^\d+", f710a)
+                    if not regexp:
+                        corporates.append(f710a)
+                        break
+
+    if f245a == "": # einzelne Zeitschriftenhefte werden übersprungen 
+        continue
 
     marcrecord.leader = "     cam  22        4500"
     marcrecord.add("001", data="finc-130-" + f001)
     marcrecord.add("007", data="tu")
     marcrecord.add("020", a=f020a)
     marcrecord.add("041", a=f041a)
-    marcrecord.add("100", a=f100a)    
+    marcrecord.add("100", a=f100a)
+    marcrecord.add("110", a=f110a)
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=titleparts)    
     marcrecord.add("250", a=f250a)
@@ -185,6 +208,8 @@ for record in records:
         marcrecord.add("650", a=subject)
     for person in persons:
         marcrecord.add("700", a=person)
+    for corporate in corporates:
+        marcrecord.add("710", a=corporate)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
 
     outputfile.write(marcrecord.as_marc())
