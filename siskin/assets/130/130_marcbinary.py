@@ -8,6 +8,20 @@ import re
 import marcx
 
 
+formatmap = {
+    "p||||||z|||||||": "Zeitschrift",   
+    "z||||||z|||||||": "Zeitung",
+    "r||||||z|||||||": "Reihe",
+    "r||||||||||||||": "Reihe",
+    "a|a|||||||||||": "Monografie",
+    "a|||||||||||||": "Monografie",
+    "a|a|||||||": "Monografie",
+    "|||||ca||||||": "Videokassette",
+    "a|||||||g|||||": "Datenträger",
+    "||||||||g|": "Datenträger"
+}
+
+
 def get_field(tag):
     regexp = re.search('<.*?\snr="%s".*>(.*)$' % tag, field)
     if regexp:
@@ -61,6 +75,8 @@ for record in records:
     f300c = ""
     f650a = ""
     f700e = ""
+    format1 = ""
+    format2 = ""
     subjects = []
     persons = []
     corporates = []
@@ -77,12 +93,7 @@ for record in records:
 
         # Identfikator
         if f001 == "":
-            f001 = get_field("001")
-
-        # Format
-        if f007 == "":
-            f007 = get_field("050")
-            # ToDo: Format-Mapping MAB -> MARC
+            f001 = get_field("001")     
 
         # ISBN
         if f020a == "":
@@ -198,12 +209,68 @@ for record in records:
                         corporates.append(f710a)
                         break
 
+        if format1 == "":
+            format1 = get_field("052")
+        
+        if format2 == "":
+            format2 = get_field("050")
+        
+    if format1 != "" or format2 != "":
+        format = format1 or format2        
+    else:
+        format = "a|a|||||||||||"
+
+    if formatmap.get(format) == "Zeitschrift":
+        leader = "     cas a2202221 4500"
+        f007 = "tu"
+        f008 = "                      p"
+        f935b = "druck"
+        f935c = "az"
+    elif formatmap.get(format) == "Zeitung":
+        leader = "     cas a2202221 4500"
+        f007 = "tu"
+        f008 = "                      n"
+        f935b = "druck"
+        f935c = "az"
+    elif formatmap.get(format) == "Reihe":
+        leader = "     cas a2202221 4500"
+        f007 = "tu"
+        f008 = "                      m"
+        f935b = "druck"
+        f935c = "az"
+    elif formatmap.get(format) == "Monografie":
+        leader = "     nam  22        4500"
+        f007 = "tu"
+        f008 = ""
+        f935b = "druck"
+        f935c = ""
+    elif formatmap.get(format) == "Videokassette":
+        leader = "     cgm  22        4500"
+        f007 = "v"
+        f008 = ""
+        f935b = "vika"
+        f935c = "vide"    
+    elif formatmap.get(format) == "Datenträger":
+        leader = "     cgm  22        4500"
+        f007 = "v"
+        f008 = ""
+        f935b = "soerd"
+        f935c = ""    
+    else:
+        print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
+        leader = "     nam  22        4500"
+        f007 = "tu"
+        f008 = ""
+        f935b = "druck"
+        f935c = ""
+
     if f245a == "": # einzelne Zeitschriftenhefte werden übersprungen 
         continue
-
-    marcrecord.leader = "     cam  22        4500"
+    
+    marcrecord.leader = leader
     marcrecord.add("001", data="finc-130-" + f001)
-    marcrecord.add("007", data="tu")
+    marcrecord.add("007", data=f007)
+    marcrecord.add("008", data=f008)
     marcrecord.add("020", a=f020a)
     marcrecord.add("041", a=f041a)
     marcrecord.add("100", a=f100a, e=f100e)
@@ -221,6 +288,7 @@ for record in records:
         marcrecord.add("700", a=person, e=f700e)
     for corporate in corporates:
         marcrecord.add("710", a=corporate)
+    marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
 
     outputfile.write(marcrecord.as_marc())
