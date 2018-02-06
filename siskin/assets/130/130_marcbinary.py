@@ -221,21 +221,21 @@ for record in records:
         format = "a|a|||||||||||"
 
     if formatmap.get(format) == "Zeitschrift":
-        leader = "     cas a2202221 4500"
+        leader = "     cas a2202221   4500"
         f007 = "tu"
-        f008 = "                      p"
+        f008 = "                     p"
         f935b = "druck"
         f935c = "az"
     elif formatmap.get(format) == "Zeitung":
-        leader = "     cas a2202221 4500"
+        leader = "     cas a2202221   4500"
         f007 = "tu"
-        f008 = "                      n"
+        f008 = "                     n"
         f935b = "druck"
         f935c = "az"
     elif formatmap.get(format) == "Reihe":
-        leader = "     cas a2202221 4500"
+        leader = "     cas a2202221   4500"
         f007 = "tu"
-        f008 = "                      m"
+        f008 = "                     m"
         f935b = "druck"
         f935c = "az"
     elif formatmap.get(format) == "Monografie":
@@ -267,6 +267,7 @@ for record in records:
     if f245a == "": # einzelne Zeitschriftenhefte werden übersprungen 
         continue
     
+    assert(len(leader) == 24)
     marcrecord.leader = leader
     marcrecord.add("001", data="finc-130-" + f001)
     marcrecord.add("007", data=f007)
@@ -290,7 +291,7 @@ for record in records:
         marcrecord.add("710", a=corporate)
     marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
-
+  
     outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
