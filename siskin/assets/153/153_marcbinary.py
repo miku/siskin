@@ -68,9 +68,29 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     except:
         f260b = ""
 
+    # Erscheinungsjahr
+    try:
+        f260c = xmlrecord["metadata"]["oai_dc:dc"]["dc:date"]        
+    except:
+        f260c = ""
+
+    if f260c != "":
+        regexp = re.search("(\d\d\d\d)", f260c)
+        if regexp:
+            f260c = regexp.group(1)
+
     # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind 
-    if f260b != "" and f260b != f110a:
-        marcrecord.add("260", b=f260b)
+    if f260b != "" and f260b == f110a:
+        f260b = ""
+
+    # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden 
+    if f260b != "" and f260c != "":
+        f260b = f260b + ", "
+
+    marcrecord.strict = False
+    publisher = ["b", f260b, "c", f260c]
+    marcrecord.add("260", subfields=publisher)
+    marcrecord.strict = True
 
     # Annotation
     try:
