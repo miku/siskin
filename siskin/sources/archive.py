@@ -29,6 +29,7 @@ archive.org, refs #8000
 import datetime
 
 import luigi
+from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -80,3 +81,64 @@ class ArchiveMARC(ArchiveTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+
+class ArchiveSearch(ArchiveTask):
+    """
+    Search archive via the ia tool. Requires Archive.org account:
+
+    https://archive.org/account/login.createaccount.php
+
+    The command `ia configure` will set you up.
+
+        $ cat ~/.config/ia.ini
+        [s3]
+        access = asudiasd77xsdlds
+        secret = oasdu888s8x9a0sd
+
+        [cookies]
+        logged-in-user = user@example.com
+        logged-in-sig = secret
+
+    Refs #8000.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    query = luigi.Parameter(default='collection:prelinger')
+
+    def requires(self):
+        """
+        The setup of siskin should install this automatically.
+        """
+        return Executable(name='ia',
+                          message='https://pypi.python.org/pypi/internetarchive')
+
+    def run(self):
+        output = shellout("ia search '{query}' > {output}", query=self.query)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj', digest=True))
+
+
+class ArchiveSearchMetadata(ArchiveTask):
+    """
+    For a given search query, harvest all metadata. This can take a long time,
+    since each record is requested separately. Maybe there is some faster way.
+
+    Currently 1 record/s.
+
+    Refs #8000.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    query = luigi.Parameter(default='collection:prelinger')
+
+    def requires(self):
+        return ArchiveSearch(date=self.date, query=self.query)
+
+    def run(self):
+        output = shellout("for i in $(jq -r .identifier {input}); do ia metadata $i; done >> {output}",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj', digest=True))

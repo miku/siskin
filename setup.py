@@ -50,6 +50,7 @@ install_requires = [
     'future>=0.16',
     'gluish>=0.2.10',
     'gspread>=0.2.2',
+    'internetarchive>=1.7.6',
     'jsonpath-rw>=1.3.0',
     'logilab-common>=0.61.0',
     'luigi>=2.2',
