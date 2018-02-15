@@ -36,6 +36,9 @@ Config
 
 baseurl = https://example.com
 
+data = http://example.com/data.zip
+deletions = http://example.com/del.txt
+
 """
 
 import datetime
@@ -50,6 +53,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
+
 
 class VKFilmBATask(DefaultTask):
     TAG = '148'
@@ -69,6 +73,45 @@ class VKFilmBATask(DefaultTask):
         h = hashlib.sha1()
         h.update("".join(self.filenames).encode("utf-8"))
         return h.hexdigest()
+
+
+class VKFilmBADownload(VKFilmBATask):
+    """
+    Download raw data daily. At least try, since as of 2018-02-15, file seems
+    missing, refs #12460.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""curl --fail "{url}" > {output} """,
+                          url=self.config.get('vkfilmba', 'data'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        """
+        We expect zip, but to guarantee.
+        """
+        return luigi.LocalTarget(path=self.path(ext="zip"))
+
+
+class VKFilmBADownloadDeletions(VKFilmBATask):
+    """
+    Download raw deletions daily. At least try, since as of 2018-02-15, file seems
+    missing, refs #12460.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""curl --fail "{url}" > {output} """,
+                          url=self.config.get('vkfilmba', 'deletions'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        """
+        We expect txt, but to guarantee.
+        """
+        return luigi.LocalTarget(path=self.path(ext="txt"))
+
 
 class VKFilmBADump(VKFilmBATask):
     """
@@ -94,6 +137,7 @@ class VKFilmBADump(VKFilmBATask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
+
 
 class VKFilmBAMARC(VKFilmBATask):
     """
