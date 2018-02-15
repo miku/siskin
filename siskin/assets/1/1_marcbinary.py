@@ -97,7 +97,7 @@ for line in inputfile:
     line = line.strip()
 
     f001 = ""
-    f007 = "cr"
+    f007 = "sr"
     f010a = ""
     f020a = ""
     f041a = ""
@@ -318,7 +318,7 @@ for line in inputfile:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
         # Medienform
-        marcrecord.add("935", b="cofz")
+        marcrecord.add("935", b="cofz", b="sott")
 
         # Ansigelung
         marcrecord.add("980", a=f001, b="1", c="Project Gutenberg")
