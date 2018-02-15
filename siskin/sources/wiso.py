@@ -37,18 +37,19 @@ apikey = d24411122381317432647264876234
 
 import luigi
 import datetime
-import pandas as pd
 import tempfile
 import os
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 from siskin.common import RedmineDownloadAttachments
 
+
 class WisoTask(DefaultTask):
     """
     An auxiliary namespace for WISO related tasks, refs #12301.
     """
     TAG = 'wiso'
+
 
 class Wiso2018Files(WisoTask):
     """
@@ -67,9 +68,10 @@ class Wiso2018Files(WisoTask):
         dtype='object')
 
     """
+
     def requires(self):
         return RedmineDownloadAttachments(issue="12301")
-    
+
     def run(self):
         with self.input().open() as handle:
             _, combined = tempfile.mkstemp(prefix='siskin-')
@@ -78,7 +80,7 @@ class Wiso2018Files(WisoTask):
                 filename = os.path.basename(row.path)
                 shellout(""" awk '{{print "{filename};"$0}}' < {input} >> {output}""",
                          filename=filename, input=row.path, output=combined)
-        
+
         luigi.LocalTarget(combined).move(self.output().path)
 
     def output(self):
