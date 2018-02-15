@@ -49,5 +49,8 @@ except (AttributeError, ImportError):
 __version__ = '0.13.0'
 
 config = Config.instance()
-tempfile.tempdir = config.get(
-    'core', 'tempdir', fallback=tempfile.gettempdir())
+if sys.version_info.major == 2:
+    tempfile.tempdir = config.get('core', 'tempdir')
+else:
+    tempfile.tempdir = config.get(
+        'core', 'tempdir', fallback=tempfile.gettempdir())

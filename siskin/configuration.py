@@ -26,7 +26,11 @@
 Configuration handling, taken from luigi - ini format.
 """
 
-import configparser
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import SafeConfigParser as ConfigParser
+
 import datetime
 import logging
 import os
@@ -35,7 +39,7 @@ import sys
 logger = logging.getLogger('siskin')
 
 
-class Config(configparser.ConfigParser):
+class Config(ConfigParser):
     """
     Access to ini file.
     """
