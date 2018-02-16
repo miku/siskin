@@ -142,3 +142,22 @@ class ArchiveSearchMetadata(ArchiveTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj', digest=True))
+
+class ArchiveTelevisionTexts(ArchiveTask, luigi.WrapperTask):
+    """
+    Temporary task for harvesting special query from archive, refs #8000.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        """
+        loans__status__status:NULL (as in web) would not work.
+        """
+        query = 'subject:television AND mediatype:texts AND -loans__status__status:"AVAILABLE" AND -loans__status__status:"UNAVAILABLE"'
+        return ArchiveSearchMetadata(date=self.date, query=query)
+
+    def run(self):
+        luigi.LocalTarget(self.input().path).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj', digest=True))
