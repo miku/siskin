@@ -1,30 +1,77 @@
-# /usr/bin/env python
+#!/usr/bin/env python
 # coding: utf-8
 
 import io
 import re
 import sys
+import json
 import base64
 
 import marcx
 import xmltodict
 
-# Default input and output.
-inputfilename = "153_input.xml" 
+
+colormap = {
+    "black and white": "Schwarzweiß",
+    "black & white": "Schwarzweiß",
+    "B&W": "Schwarzweiß",
+    "color": "Farbe",
+    "b&w": "Schwarzweiß",
+    "Color": "Farbe",
+    "Mix": "Schwarzweiß / Farbe",  
+    "B&W (tinded)": "Schwarzweiß (koloriert)",
+    "b/w": "Schwarzweiß",
+    "c": "Farbe",
+    "tinted": "Schwarzweiß (koloriert)",
+    "bw": "Schwarzweiß",
+    "C": "Farbe",  
+    "B&W/C": "Schwarzweiß / Farbe",
+    "tinted B&W": "Schwarzweiß (koloriert)",
+    "B&W (tinted)": "Schwarzweiß (koloriert)",
+    "sepia": "Farbe",
+    "B/W": "Farbe",
+    "color/B&W": "Schwarzweiß / Farbe",
+    "b&w/color": "Schwarzweiß / Farbe",
+    "Black and White": "Schwarzweiß",
+    "B&w": "Schwarzweiß"
+}
+
+soundmap = {
+    "black and white": "Schwarzweiß",
+    "sound": "Ton",
+    "silent": "Stumm",
+    "No": "Stumm",
+    "Yes": "Ton",
+    "Sd": "Ton",
+    "si": "Stumm",
+    "Si": "Stumm",  
+    "silen": "Stumm",  
+    "sd": "Ton",
+    "SD": "Ton"
+}
+
+
+def get_field(tag):
+    try:
+        return jsonrecord[tag]        
+    except:
+        return ""
+
+
+inputfilename = "153_input.ldj" 
 outputfilename = "153_output.mrc"
 
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "rb")
+inputfile = open(inputfilename, "r")
 outputfile = open(outputfilename, "wb")
-xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile)
 
-urls = []
+for line in inputfile:
 
-for xmlrecord in xmlrecords["Records"]["Record"]:
-    
+    jsonobject = json.loads(line)
+    jsonrecord = jsonobject["metadata"]    
+
     marcrecord = marcx.Record(force_utf8=True)
 
     # Leader
@@ -32,75 +79,107 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Identifier
     try:
-        f001 = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]       
+        f001 = jsonrecord["identifier"]       
     except:
         continue
-
-    if f001 not in urls:
-        urls.append(f001)
-        f001 = f001.encode("utf-8")
-        f001 = base64.b64encode(f001)
-        f001 = f001.decode("ascii")
-        f001 = f001.rstrip("=")
-        marcrecord.add("001", data="finc-153-" + f001)        
-    else:
-        continue
-
+    
+    f001 = f001.encode("utf-8")
+    f001 = base64.b64encode(f001)
+    f001 = f001.decode("ascii")
+    f001 = f001.rstrip("=")
+    marcrecord.add("001", data="finc-153-" + f001)        
+   
     # Format
     marcrecord.add("007", data="cr")
 
     # Urheber
-    try:
-        f110a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]        
-    except:
-        f110a = ""
-
+    f110a = get_field("creator")
     if f110a != "" and f110a != "Unknown":
-            marcrecord.add("110", a=f110a)
+        marcrecord.add("110", a=f110a)
     
     # Hauptitel
-    f245a = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
+    f245a = get_field("title")
     marcrecord.add("245", a=f245a)
 
+    # gestattet leere Felder, solange der Titel und der Identifier vorhanden sind
+    marcrecord.strict = False
+
     # Filmstudio
-    try:
-        f260b = xmlrecord["metadata"]["oai_dc:dc"]["dc:publisher"]        
-    except:
-        f260b = ""
-
+    f260b = get_field("publisher")        
+  
     # Erscheinungsjahr
-    try:
-        f260c = xmlrecord["metadata"]["oai_dc:dc"]["dc:date"]        
-    except:
-        f260c = ""
-
+    f260c = get_field("date")
     if f260c != "":
         regexp = re.search("(\d\d\d\d)", f260c)
         if regexp:
             f260c = regexp.group(1)
+    
+    # Verlag    
+    if f260b != "" and f260b == f110a:  
+        f260b = ""  # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind
 
-    # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind 
-    if f260b != "" and f260b == f110a:
-        f260b = ""
-
-    # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden 
     if f260b != "" and f260c != "":
-        f260b = f260b + ", "
-
-    marcrecord.strict = False
+        f260b = f260b + ", "  # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden   
     publisher = ["b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=publisher)
-    marcrecord.strict = True
+    marcrecord.add("260", subfields=publisher)  
 
-    # Annotation
-    try:
-        f520a = xmlrecord["metadata"]["oai_dc:dc"]["dc:description"]
-        marcrecord.add("520", a=f520a)
-    except:
-        pass
+    # Spielzeit
+    runtime = get_field("runtime")
+   
+    # Bild
+    color_old = get_field("color")
+    if color_old != "":
+        color = colormap.get(color_old, "")
+    else:
+        color = ""
+    if color == "" and color_old != "":
+        print("Die Farbe %s wurde in der Colormap nicht gefunden" % color_old)
+  
+    # Ton
+    sound_old = get_field("sound")
+    if sound_old != "":
+        sound = soundmap.get(sound_old, "")
+    else:
+        sound = ""
+    if sound == "" and sound_old != "":
+        print("Der Sound %s wurde in der Soundmap nicht gefunden" % sound_old)
+   
+    if color != "" and sound != "":
+        f300b = color + " + " + sound
+    elif color != "":
+        f300b = color
+    elif sound != "":
+        f300b = sound
+    else:
+        f300b = ""
+
+    if runtime != "":      
+        runtime = runtime.lstrip("00:")
+        runtime = runtime.lstrip("0:")
+        runtime = " (" + runtime
+        runtime = runtime + " min.)"
+        f300a = f300b + runtime
+    else:
+        f300a = f300b  
+ 
+    marcrecord.add("300", a=f300a)
+
+    # Spielzeit (extra MARC-Feld)
+    f306a = get_field("runtime")  
+    marcrecord.add("306", a=f306a)   
+
+    # Soundformat (extra MARC-Feld)
+    marcrecord.add("344", a=sound)  
+    
+    # Bildformat (extra -MARC-Feld)
+    marcrecord.add("346", a=color)
+
+    # Annotation 
+    f520a = get_field("description")
+    marcrecord.add("520", a=f520a)
 
     # Schlagwörter
-    subjects = xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject", "")
+    subjects = jsonrecord.get("subject", "")    
     if subjects != "":
         if isinstance(subjects, list):
             for subject in subjects:              
@@ -109,18 +188,23 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         else:
             if subjects != "need keyword":
                 subject = subjects.title()
+                subject = subject.replace(";", " ; ")
                 marcrecord.add("650", a=subject)
-         
+
+
+    # hebt die Erlaubnis für leere Felder wieder auf
+    marcrecord.strict = True         
+    
     # Link zur Ressource
-    f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
-    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+   
+    f856u = get_field("identifier")
+    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u="https://archive.org/details/" + f856u)
 
     # Medienform
     marcrecord.add("935", b="cofz", c="vide")
 
     # Kollektion   
     marcrecord.add("980", a=f001, b="153", c="Internet Archive / Prelinger")
-
 
     outputfile.write(marcrecord.as_marc())
 
