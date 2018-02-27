@@ -32,9 +32,6 @@ def clear_format(format):
 def get_leader(format='photograph'):
     return "     %s  22        450 " % formatmaps[format]["leader"]
 
-def get_field_007(format='photograph'):
-    return formatmaps[format]["007"]
-
 def get_field_008(format='photograph', f041_a="   "):
     if "008" not in formatmaps[format]:
         return "130227uu20uuuuuuxx uuup%s  c" % f041_a
@@ -56,65 +53,54 @@ langmap = {
 
 formatmaps = {
     'periodical':
-    {
-        '007': 'tu',
+    {    
         '008': 'n',
         'leader': 'nas',
         '935b' : 'cofz'
     },
     'ephemera':
-    {
-        '007': 'ta',
+    {   
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'magazine cover':
-    {
-        '007': 'ta',
+    {  
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'photograph':
-    {
-        '007': 'ta',
+    {  
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'postcard':
-    {
-        '007': 'ta',
+    {  
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'clipping':
-    {
-        '007': 'ta',
+    {   
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'flier (printed matter)':
-    {
-        '007': 'kf',
+    { 
         'leader': 'nam'
     },
     'storyboard':
-    {
-        '007': 'kf',
+    { 
         'leader': 'nam'
     },
     'sheet music':
-    {
-        '007': 'qu',
+    { 
         'leader': 'ncs'
     },
     'correspondence':
-    {
-        '007': 'kf',
+    {    
         'leader': 'nam'
     },
     'pamphlet':
-    {
-        '007': 'kf',
+    {    
         'leader': 'nam'
     },
     'correspondence document':
@@ -123,66 +109,55 @@ formatmaps = {
         'leader': 'nam'
     },
     'lobby card':
-    {
-        '007': 'ta',
+    { 
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'photomechanical print':
     {
-        '007': 'kf',
         'leader': 'nam'
     },
     'cigarette cards':
-    {
-        '007': 'kd',
+    {  
         'leader': 'nam'
     },
     'souvenir handkerchief box':
-    {
-        '007': 'ta',
+    { 
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'scrapbook':
-    {
-        '007': 'cr',
+    {  
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'slides (photographs)':
-    {
-        '007': 'ta',
+    {  
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'program (document)':
-    {
-        '007': 'cr',
+    {  
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'pressbook':
     {
-        '007': 'cr',
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'autograph album':
-    {
-        '007': 'tu',
+    { 
         'leader': 'ntm',
         '935b' : 'handschr'
     },
     'monograph':
-    {
-        '007': 'cr',
+    { 
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'drawing':
-    {
-        '007': 'kd',
+    {       
         'leader': 'nam'
     },
 }
@@ -413,8 +388,7 @@ for row in rows:
 
     f001 = "finc-103-%s" % identifier
     leader = get_leader(format=format)
-    f007 = get_field_007(format=format)
-
+  
     if language != "":
         language = language.rstrip(";") # manchmal endet die Sprache auf ";"
         language = language.replace(" ", "") # manchmal gibt es Leerzeichen mittendrin oder am Ende
@@ -538,8 +512,7 @@ for row in rows:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     marcrecord.leader = leader
-    marcrecord.add("001", data=f001)
-    # marcrecord.add("007", data=f007)
+    marcrecord.add("001", data=f001)  
     marcrecord.add("007", data="cr")
     marcrecord.add("008", data=f008)
     marcrecord.add("041", a=f041_a)
