@@ -27,7 +27,12 @@
 Music Treasures Consortium Online, refs #5798.
 """
 
+from __future__ import print_function     
+
 import datetime
+import json
+import requests
+import sys
 
 import luigi
 from gluish.utils import shellout
@@ -46,8 +51,23 @@ class MTCHarvest(MTCTask):
     """
     Harvest.
     """
-    def run(self):
-        raise NotImplementedError()
+    def run(self):         
+
+        page = 1
+        with self.output().open("w") as output:            
+            while True:
+                url = "https://www.loc.gov/collections/music-treasures-consortium/?sp=%s&fo=json" % page
+                r = requests.get(url)
+                if r.status_code >= 400:
+                    raise RuntimeError("failed with %s: %s", r.status_code, url)
+
+                doc = json.loads(r.text)
+                if doc.get("status") == 404:
+                    print("404 at %s" % url, file=sys.stderr)
+                    break
+                output.write(r.text)
+                page += 1
+
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
