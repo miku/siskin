@@ -54,27 +54,26 @@ class MTCHarvest(MTCTask):
     max_retries = luigi.IntParameter(default=3, significant=False)
 
     def run(self):
-
         page, retry_count = 1, self.max_retries
+        headers = {'user-agent': 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0'}
+
         with self.output().open("w") as output:
             while True:
                 url = "https://www.loc.gov/collections/music-treasures-consortium/?sp=%s&fo=json" % page
                 self.logger.debug(url)
-                headers = {'user-agent': 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0'}
                 r = requests.get(url, headers=headers)
                 if r.status_code >= 400:
                     if retry_count == 0:
                         raise RuntimeError("failed after %s attempts with %s: %s",
-                                           retry_count, r.status_code, url)
+                                           self.max_retries, r.status_code, url)
                     else:
                         self.logger.debug("retrying %s, got %s", url, r.status_code)
                         retry_count -= 1
                         continue
 
-
                 doc = json.loads(r.text)
                 if doc.get("status") == 404:
-                    print("404 at %s" % url, file=sys.stderr)
+                    self.logger.debug("404 at %s", url)
                     break
                 output.write(r.text)
 
