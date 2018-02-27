@@ -165,7 +165,9 @@ for line in inputfile:
     marcrecord.add("300", a=f300a)
 
     # Spielzeit (extra MARC-Feld)
-    f306a = get_field("runtime")  
+    f306a = get_field("runtime")
+    if "min" not in f306a:
+        f306a = f306a + " (min.)" 
     marcrecord.add("306", a=f306a)   
 
     # Soundformat (extra MARC-Feld)
@@ -187,9 +189,14 @@ for line in inputfile:
                 marcrecord.add("650", a=subject)            
         else:
             if subjects != "need keyword":
-                subject = subjects.title()
-                subject = subject.replace(";", " ; ")
-                marcrecord.add("650", a=subject)
+                subject = subjects.title()             
+                subjects = subject.split(";")
+                if isinstance(subjects, list):
+                    for subject in subjects:              
+                        subject = subject.title()
+                        marcrecord.add("650", a=subject)
+                else:
+                    marcrecord.add("650", a=subject)
 
 
     # hebt die Erlaubnis für leere Felder wieder auf
