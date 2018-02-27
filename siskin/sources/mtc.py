@@ -27,14 +27,14 @@
 Music Treasures Consortium Online, refs #5798.
 """
 
-from __future__ import print_function     
+from __future__ import print_function
 
 import datetime
 import json
-import requests
 import sys
 
 import luigi
+import requests
 from gluish.utils import shellout
 
 from siskin.task import DefaultTask
@@ -46,15 +46,14 @@ class MTCTask(DefaultTask):
     """
     TAG = '10'
 
-
 class MTCHarvest(MTCTask):
     """
     Harvest.
     """
-    def run(self):         
+    def run(self):
 
         page = 1
-        with self.output().open("w") as output:            
+        with self.output().open("w") as output:
             while True:
                 url = "https://www.loc.gov/collections/music-treasures-consortium/?sp=%s&fo=json" % page
                 r = requests.get(url)
@@ -68,10 +67,8 @@ class MTCHarvest(MTCTask):
                 output.write(r.text)
                 page += 1
 
-
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
-
 
 class MTCMARC(MTCTask):
     """
