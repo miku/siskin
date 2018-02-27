@@ -32,6 +32,7 @@ from __future__ import print_function
 import datetime
 import json
 import sys
+import time
 
 import luigi
 import requests
@@ -50,23 +51,36 @@ class MTCHarvest(MTCTask):
     """
     Harvest.
     """
+    max_retries = luigi.IntParameter(default=3, significant=False)
+
     def run(self):
 
-        page = 1
+        page, retry_count = 1, self.max_retries
         with self.output().open("w") as output:
             while True:
                 url = "https://www.loc.gov/collections/music-treasures-consortium/?sp=%s&fo=json" % page
                 self.logger.debug(url)
-                r = requests.get(url)
+                headers = {'user-agent': 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0'}
+                r = requests.get(url, headers=headers)
                 if r.status_code >= 400:
-                    raise RuntimeError("failed with %s: %s", r.status_code, url)
+                    if retry_count == 0:
+                        raise RuntimeError("failed after %s attempts with %s: %s",
+                                           retry_count, r.status_code, url)
+                    else:
+                        self.logger.debug("retrying %s, got %s", url, r.status_code)
+                        retry_count -= 1
+                        continue
+
 
                 doc = json.loads(r.text)
                 if doc.get("status") == 404:
                     print("404 at %s" % url, file=sys.stderr)
                     break
                 output.write(r.text)
+
                 page += 1
+                retry_count = self.max_retries
+                time.sleep(5)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
