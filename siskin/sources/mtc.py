@@ -56,6 +56,7 @@ class MTCHarvest(MTCTask):
         with self.output().open("w") as output:
             while True:
                 url = "https://www.loc.gov/collections/music-treasures-consortium/?sp=%s&fo=json" % page
+                self.logger.debug(url)
                 r = requests.get(url)
                 if r.status_code >= 400:
                     raise RuntimeError("failed with %s: %s", r.status_code, url)
