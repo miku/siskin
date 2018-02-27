@@ -87,11 +87,11 @@ class ThiemeIntermediateSchema(ThiemeTask):
     set = luigi.Parameter(default='journalarticles')
 
     def requires(self):
-        return ThiemeCombine(date=self.date, prefix='tm', set=self.set)
+        return ThiemeCombine(date=self.date, prefix='nlm', set=self.set)
 
     def run(self):
         output = shellout(
-            "span-import -i thieme-tm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+            "span-import -i thieme-nlm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
