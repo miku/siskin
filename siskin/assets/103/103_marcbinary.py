@@ -539,7 +539,8 @@ for row in rows:
     marcrecord.strict = False
     marcrecord.leader = leader
     marcrecord.add("001", data=f001)
-    marcrecord.add("007", data=f007)
+    # marcrecord.add("007", data=f007)
+    marcrecord.add("007", data="cr")
     marcrecord.add("008", data=f008)
     marcrecord.add("041", a=f041_a)
     marcrecord.add("100", a=f100_a)
