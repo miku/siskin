@@ -89,7 +89,7 @@ class MTCMARC(MTCTask):
     Convert custom JSON.
     """
     def requires(self):
-        return MTCHarvest(date=self.date)
+        return MTCHarvest()
 
     def run(self):
         output = shellout("python {script} {input} {output}",
