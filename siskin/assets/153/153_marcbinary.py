@@ -157,7 +157,10 @@ for line in inputfile:
         runtime = runtime.lstrip("00:")
         runtime = runtime.lstrip("0:")
         runtime = " (" + runtime
-        runtime = runtime + " min.)"
+        if "min." not in runtime:
+            runtime = runtime + " min.)"
+        else:
+            runtime = runtime + ")"
         f300a = f300b + runtime
     else:
         f300a = f300b  
@@ -166,8 +169,11 @@ for line in inputfile:
 
     # Spielzeit (extra MARC-Feld)
     f306a = get_field("runtime")
-    if f306a != "" and "min" not in f306a:
-        f306a = f306a + " min."
+    if f306a != "":
+        f306a = f306a.lstrip("00:")
+        f306a = f306a.lstrip("0:")
+        if "min" not in f306a:
+            f306a = f306a + " min."
     marcrecord.add("306", a=f306a)   
 
     # Soundformat (extra MARC-Feld)
