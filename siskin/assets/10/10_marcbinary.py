@@ -36,7 +36,7 @@ for line in inputfile:
         marcrecord.strict = False
 
         # Leader
-        marcrecord.leader = "     ncm  22        4500"
+        marcrecord.leader = "     ckm  22        4500"
 
         # Format
         marcrecord.add("007", data="cr")
@@ -71,7 +71,7 @@ for line in inputfile:
         for subject in subjects:
             subject = subject.title()
             marcrecord.add("650", a=subject)
-
+       
         # weitere Urheber
         persons = get_field("contributor")
         if persons != "":
@@ -80,11 +80,11 @@ for line in inputfile:
                 marcrecord.add("700", a=person)
 
         #n Link zum Datensatz
-        f856u = get_field("url")
+        f856u = get_field("url")       
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
         # Format
-        marcrecord.add("935", b="druck", c="muno")
+        marcrecord.add("935", b="foto")
 
         # Kollektion
         marcrecord.add("980", a=f001, b="10", c="Music Treasures Consortium")
