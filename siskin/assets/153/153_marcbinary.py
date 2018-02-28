@@ -125,7 +125,7 @@ for line in inputfile:
 
     # Spielzeit
     runtime = get_field("runtime")
-
+   
     # Bild
     color_old = get_field("color")
     if color_old != "":
@@ -167,7 +167,7 @@ for line in inputfile:
     # Spielzeit (extra MARC-Feld)
     f306a = get_field("runtime")
     if f306a != "" and "min" not in f306a:
-        f306a = f306a + " (min.)"
+        f306a = f306a + " min."
     marcrecord.add("306", a=f306a)   
 
     # Soundformat (extra MARC-Feld)
