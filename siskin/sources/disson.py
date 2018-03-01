@@ -40,6 +40,11 @@ class DissonTask(DefaultTask):
 class DissonHarvest(DissonTask):
     """
     Via OAI, access might be restricted.
+
+    ;; ANSWER SECTION:
+    services.dnb.de.	3539	IN	CNAME	httpd-e02.dnb.de.
+    httpd-e02.dnb.de.	3539	IN	CNAME	prodche-02.dnb.de.
+    prodche-02.dnb.de.	3539	IN	A	    193.175.100.222
     """
     format = luigi.Parameter(default='MARC21-xml')
     set = luigi.Parameter(default='dnb-all:online:dissertations')
