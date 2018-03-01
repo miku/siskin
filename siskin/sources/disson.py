@@ -61,7 +61,7 @@ class DissonHarvest(DissonTask):
 
     def run(self):
         endpoint = "http://services.dnb.de/oai/repository"
-        shellout("metha-sync -format {format} -set {set} {endpoint}",
+        shellout("metha-sync -daily -format {format} -set {set} {endpoint}",
                  format=self.format, set=self.set, endpoint=endpoint)
         output = shellout("""metha-cat -format {format} -set {set} {endpoint} |
                              pigz -c > {output}""", format=self.format, set=self.set,
