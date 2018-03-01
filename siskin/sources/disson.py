@@ -26,15 +26,24 @@
 Disson, Dissertations Online, refs #3422.
 """
 
+import datetime
+
 import luigi
+
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+
 
 class DissonTask(DefaultTask):
     """
     Base task for disson.
     """
     TAG = '13'
+
+    def closest(self):
+        return monthly(date=self.date)
 
 
 class DissonHarvest(DissonTask):
@@ -46,6 +55,7 @@ class DissonHarvest(DissonTask):
     httpd-e02.dnb.de.	3539	IN	CNAME	prodche-02.dnb.de.
     prodche-02.dnb.de.	3539	IN	A	    193.175.100.222
     """
+    date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='MARC21-xml')
     set = luigi.Parameter(default='dnb-all:online:dissertations')
 
@@ -60,3 +70,19 @@ class DissonHarvest(DissonTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz', digest=True))
+
+class DissonMARC(DissonTask):
+    """
+    Create a binary MARC version.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DissonHarvest(date=self.date)
+
+    def run(self):
+        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
