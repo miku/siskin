@@ -82,11 +82,12 @@ class DissonHarvest(DissonTask):
                  format=self.format, set=self.set, endpoint=endpoint)
         output = shellout("""metha-cat -format {format} -set {set} {endpoint} |
                              pigz -c > {output}""", format=self.format, set=self.set,
-                             endpoint=endpoint)
+                          endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz', digest=True))
+
 
 class DissonMARC(DissonTask):
     """
@@ -98,7 +99,8 @@ class DissonMARC(DissonTask):
         return DissonHarvest(date=self.date)
 
     def run(self):
-        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=self.input().path)
+        output = shellout("yaz-marcdump -i marcxml -o marc <(unpigz -c {input}) > {output}",
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
