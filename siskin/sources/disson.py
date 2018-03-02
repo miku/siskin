@@ -54,6 +54,23 @@ class DissonHarvest(DissonTask):
     services.dnb.de.	3539	IN	CNAME	httpd-e02.dnb.de.
     httpd-e02.dnb.de.	3539	IN	CNAME	prodche-02.dnb.de.
     prodche-02.dnb.de.	3539	IN	A	    193.175.100.222
+
+    Format options (2018-03-02):
+
+    * baseDc-xml
+    * BibframeRDFxml
+    * JATS-xml
+    * MARC21plus-1-xml
+    * MARC21plus-xml
+    * MARC21-xml
+    * mods-xml
+    * oai_dc
+    * ONIX-xml
+    * PicaPlus-xml
+    * RDFxml
+    * sync-repo-xml
+    * xMetaDiss
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='MARC21-xml')
