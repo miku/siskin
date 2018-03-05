@@ -1,6 +1,6 @@
 appnope==0.1.0
 args==0.1.0
-astroid==1.6.0
+astroid==1.6.1
 backoff==1.4.3
 backports.csv==1.0.5
 beautifulsoup4==4.6.0
