@@ -1,0 +1,7 @@
+search: False
+
+requirements:
+  - requirements.txt
+
+branch: master
+
