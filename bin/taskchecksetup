@@ -24,6 +24,12 @@
 
 """
 Check external tools dependencies.
+
+There is a tool called verchew for a more generic approach:
+
+* https://github.com/jacebrowning/verchew
+
+Can it handle programs, that do not report their version? -- https://github.com/jacebrowning/verchew/pull/38
 """
 
 import os
