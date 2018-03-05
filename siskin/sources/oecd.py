@@ -32,8 +32,13 @@ Config
 url = http://example.com/sample.xml
 """
 
-from gluish.utils import shellout
+import datetime
+
 import luigi
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 
@@ -41,11 +46,15 @@ class OECDTask(DefaultTask):
     """ OECD base task. """
     TAG = '52'
 
+    def closest(self):
+        return monthly(date=self.date)
+
 
 class OECDDownload(OECDTask):
     """
     Download from a single URL.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         output = shellout("curl -sL --fail {url} > {output}", url=self.config.get('oecd', 'url'))
@@ -59,6 +68,7 @@ class OECDMARC(OECDTask):
     """
     Convert to importable MARC.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return OECDDownload()
