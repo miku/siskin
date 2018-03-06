@@ -163,7 +163,7 @@ class Issue7049ExportExcel(AdhocTask):
 
         for _, key in enumerate(keys):
             worksheet = workbook.add_worksheet(name=key)
-            for j, item in enumerate(doc[key]):
+            for j, item in enumerate(sorted(doc[key])):
                 worksheet.write(j, 0, counts.get(item, 'NA'))
                 worksheet.write(j, 1, item)
 
