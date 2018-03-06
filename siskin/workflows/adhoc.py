@@ -149,8 +149,9 @@ class Issue7049ExportExcel(AdhocTask):
         keys = doc.keys()
 
         worksheet.write(0, 0, "#7049")
+        worksheet.write(1, 0, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
-        for i, key in enumerate(keys, start=2):
+        for i, key in enumerate(keys, start=3):
             worksheet.write(i, 1, key)
             worksheet.write(i, 2, len(doc[key]))
 
