@@ -44,6 +44,7 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 """
 
 import datetime
+import itertools
 import os
 import tempfile
 import time
@@ -359,6 +360,34 @@ class CrossrefCollections(CrossrefTask):
         output = shellout("""jq -rc '.["finc.mega_collection"][]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""",
                           input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class CrossrefCollectionsCount(CrossrefTask):
+    """
+    Report collections and the number of titles per collection.
+    """
+    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {'input': CrossrefIntermediateSchema(begin=self.begin, date=self.date),
+                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+
+    @timed
+    def run(self):
+        output = shellout("""jq -rc '.["finc.mega_collection"][]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% > {output}""",
+                          input=self.input().get('input').path)
+
+        groups = {}  # Map collection name to its size.
+        with open(output) as handle:
+            for k, g in itertools.groupby(handle):
+                groups[k] = len(list(g))
+
+        with self.output().open('w') as output:
+            json.dump(groups, output)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
