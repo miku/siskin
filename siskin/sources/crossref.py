@@ -384,13 +384,14 @@ class CrossrefCollectionsCount(CrossrefTask):
         groups = {}  # Map collection name to its size.
         with open(output) as handle:
             for k, g in itertools.groupby(handle):
-                groups[k] = len(list(g))
+                name = k.strip()
+                groups[name] = len(list(g))
 
         with self.output().open('w') as output:
             json.dump(groups, output)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='json'))
 
 
 class CrossrefCollectionsDifference(CrossrefTask):
