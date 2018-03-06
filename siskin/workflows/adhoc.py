@@ -36,7 +36,7 @@ import luigi
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.sources.amsl import AMSLService, AMSLCollections
-from siskin.sources.crossref import CrossrefExport, CrossrefCollections, CrossrefCollectionsDifference
+from siskin.sources.crossref import CrossrefExport, CrossrefCollections, CrossrefCollectionsDifference, CrossrefCollectionsCount
 from siskin.sources.degruyter import DegruyterExport
 from siskin.sources.doaj import DOAJExport
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
@@ -135,10 +135,16 @@ class Issue7049ExportExcel(AdhocTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return Issue7049(date=self.date)
+        return {
+            'issue7049': Issue7049(date=self.date),
+            'counts': CrossrefCollectionsCount(date=self.date),
+        }
 
     def run(self):
-        with self.input().open() as handle:
+        with self.input().get('counts').open() as handle:
+            counts = json.load(handle)
+
+        with self.input().get('issue7049').open() as handle:
             doc = json.load(handle)
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
@@ -158,7 +164,8 @@ class Issue7049ExportExcel(AdhocTask):
         for _, key in enumerate(keys):
             worksheet = workbook.add_worksheet(name=key)
             for j, item in enumerate(doc[key]):
-                worksheet.write(j, 0, item)
+                worksheet.write(j, 0, counts.get(item, 'NA'))
+                worksheet.write(j, 1, item)
 
         workbook.close()
         luigi.LocalTarget(stopover).move(self.output().path)
