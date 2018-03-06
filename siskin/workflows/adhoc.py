@@ -27,17 +27,25 @@
 # =====
 #
 
+import datetime
+import json
+import tempfile
+
 import luigi
 
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
-from siskin.sources.crossref import CrossrefExport
+from siskin.sources.amsl import AMSLService, AMSLCollections
+from siskin.sources.crossref import CrossrefExport, CrossrefCollections, CrossrefCollectionsDifference
 from siskin.sources.degruyter import DegruyterExport
 from siskin.sources.doaj import DOAJExport
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
 from siskin.sources.highwire import HighwireExport
 from siskin.sources.jstor import JstorExport
 from siskin.task import DefaultTask
+from siskin.utils import load_set_from_target, SetEncoder
+
+import xlsxwriter
 
 
 class AdhocTask(DefaultTask):
@@ -88,3 +96,71 @@ class OADOIDatasetStatusByDOI(AdhocTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="csv.gz"), format=Gzip)
+
+
+class Issue7049(AdhocTask):
+    """
+    Prepare a few bits about collections, refs #7049.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'amsl': AMSLCollections(date=self.date),
+            'crossref': CrossrefCollections(date=self.date),
+        }
+
+    def run(self):
+        amsl = load_set_from_target(self.input().get('amsl'))
+        crossref = load_set_from_target(self.input().get('crossref'))
+
+        with self.output().open('w') as output:
+            stats = {
+                'amsl': amsl,
+                'crossref': crossref,
+                'amsl_only': amsl - crossref,
+                'crossref_only': crossref - amsl,
+                'both': amsl & crossref,
+            }
+            output.write(json.dumps(stats, cls=SetEncoder))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="json"))
+
+
+class Issue7049ExportExcel(AdhocTask):
+    """
+    Create a simple Excel file, with one sheet per kind.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return Issue7049(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            doc = json.load(handle)
+
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        workbook = xlsxwriter.Workbook(stopover)
+
+        worksheet = workbook.add_worksheet(name='Overview')
+
+        keys = doc.keys()
+
+        worksheet.write(0, 0, "https://projekte.ub.uni-leipzig.de/issues/7049")
+
+        for i, key in enumerate(keys, start=2):
+            worksheet.write(i, 1, key)
+            worksheet.write(i, 2, len(doc[key]))
+
+        for _, key in enumerate(keys):
+            worksheet = workbook.add_worksheet(name=key)
+            for j, item in enumerate(doc[key]):
+                worksheet.write(j, 0, item)
+
+        workbook.close()
+        luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="xlsx"))

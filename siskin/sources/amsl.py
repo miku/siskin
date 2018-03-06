@@ -140,6 +140,23 @@ class AMSLService(AMSLTask):
         return luigi.LocalTarget(path=self.path(digest=True, ext='json'))
 
 
+class AMSLCollections(AMSLTask):
+    """
+    Report all collections, that appear in AMSL.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AMSLService(date=self.date, name='outboundservices:discovery')
+
+    def run(self):
+        output = shellout("""jq -rc '.[]|.megaCollection' {input} | sort -u > {output}""", input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
 class AMSLCollectionsShardFilter(AMSLTask):
     """
     A per-shard list of collection entries. One record per line.
