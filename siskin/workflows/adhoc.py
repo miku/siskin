@@ -148,7 +148,7 @@ class Issue7049ExportExcel(AdhocTask):
 
         keys = doc.keys()
 
-        worksheet.write(0, 0, "https://projekte.ub.uni-leipzig.de/issues/7049")
+        worksheet.write(0, 0, "#7049")
 
         for i, key in enumerate(keys, start=2):
             worksheet.write(i, 1, key)
