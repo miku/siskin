@@ -19,7 +19,7 @@ gluish==0.2.11
 gspread==0.6.2
 idna==2.6
 internetarchive==1.7.7
-ipython==6.2.1
+# ipython==6.2.1
 ipython-genutils==0.2.0
 isodate==0.6.0
 isort==4.3.4
@@ -61,11 +61,9 @@ requests==2.18.4
 schema==0.6.7
 simplegeneric==0.8.1
 simplejson==3.13.2
--e git+gh:miku/siskin@b65ddf344b25008f78df051580ee57a1052ddbed#egg=siskin
 six==1.11.0
 snakebite==2.11.0
 SQLAlchemy==1.2.0
-sqlitebck==1.4
 tornado==4.5.3
 tqdm==4.19.6
 traitlets==4.3.2

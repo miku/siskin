@@ -73,11 +73,11 @@ install_requires = [
     'simplejson>=3.6.0',
     'six>=1.9.0',
     'snakebite>=2.5.1',
-    'sqlitebck>=1.2.1',
     'tqdm>=4',
     'ujson>=1.35',
     'urllib3>=1.10',
     'xlrd==1.0.0',
+    'XlsxWriter>=1.0.2',
     'xmltodict==0.11.0',
 ]
 
