@@ -356,7 +356,7 @@ class CrossrefCollections(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("""jq -r '.["finc.mega_collection"]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""",
+        output = shellout("""jq -rc '.["finc.mega_collection"][]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""",
                           input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
