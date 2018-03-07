@@ -69,7 +69,7 @@ tqdm==4.19.6
 traitlets==4.3.2
 ujson==1.35
 urllib3==1.22
-verchew==1.3
+verchew==1.4
 wcwidth==0.1.7
 wrapt==1.10.11
 xlrd==1.1.0
