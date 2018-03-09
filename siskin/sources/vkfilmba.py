@@ -117,7 +117,10 @@ class VKFilmBADump(VKFilmBATask):
     """
     Concatenate a list of URLs.
 
-    Note: DO NOT DELETE the output of this task.
+    Note: DO NOT DELETE the output of this task. There are copies:
+
+    * https://goo.gl/FvhXnL
+    * https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP
 
     XXX: There is a "delete-list" of ID, which should be filtered here.
     """
