@@ -505,7 +505,7 @@ for row in rows:
     else:
         f856_u = ""
 
-    f935_b = get_field_935b(format=format)
+    #f935_b = get_field_935b(format=format)
     f980_a = identifier
     f980_b = "103"
 
@@ -543,7 +543,7 @@ for row in rows:
     else:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856_u)
 
-    marcrecord.add("935", b=f935_b)
+    #marcrecord.add("935", b=f935_b)
     marcrecord.add("980", a=f980_a, b=f980_b, c="Margaret Herrick Library")
     outputfile.write(marcrecord.as_marc())
 
