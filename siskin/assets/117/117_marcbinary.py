@@ -11,7 +11,7 @@ import marcx
 import pymarc
 from tqdm import tqdm
 
-copytags = ["003", "005", "006", "007", "008", "010", "013", "015", "016",
+copytags = ["003", "005", "006", "008", "010", "013", "015", "016",
             "017", "020", "022", "024", "026", "028", "029", "030", "032", "033", "035",
             "040", "041", "044", "045", "049", "050", "080", "082", "084", "086", "088",
             "100", "110", "111", "130", "210", "240", "242", "243", "245", "246", "247",
@@ -145,6 +145,9 @@ for oldrecord in tqdm(reader, total=total):
     # 001
     f001 = oldrecord["001"].data
     newrecord.add("001", data="finc-117-%s" % f001)
+
+    # 007
+    newrecord.add("007", data="tu")
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
