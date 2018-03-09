@@ -132,26 +132,30 @@ class ListUniqueValuesHandler(xml.sax.ContentHandler):
 
     def __init__(self, tag):
         self.tag = tag
-        self.current = None
-        self.values = []
+        self.current_tag = None
+        self.current_values = [] # Collect chars within a tag here.
+        self.seen = set() # All values, that have been printed already.
 
     def startElement(self, name, attr):
-        self.current = name
+        self.current_tag = name
 
     def characters(self, value):
-        name = self.current
-        if name == self.tag:
-            value = value.strip()
-            if value and value not in self.values:
-                self.values.append(value)
-                print(value)
+        if self.current_tag == self.tag:
+            self.current_values.append(value)
 
+    def endElement(self, name):
+        if name == self.tag:
+            value = ''.join(self.current_values)
+            if value not in self.seen: 
+                print(value)
+                self.seen.add(value)
+            self.current_values = []
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v",
                     action="version",
                     help="show version",
-                    version="0.2.2")
+                    version="0.2.3")
 parser.add_argument("-f",
                     dest="inputfile",
                     help="file to parse",
@@ -200,4 +204,3 @@ elif args.task == "list_unique_values":
     parser.setContentHandler(handler)
     with open(args.inputfile, "r") as handle:
         parser.parse(handle)
-    print("???")
