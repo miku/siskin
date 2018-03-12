@@ -35,8 +35,28 @@ for line in inputfile:
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
 
+        format = get_field("original_format")       
+        if "notated music" in format:
+            leader = "     com  22        4500"
+            f935c = "muno"        
+        elif "web page" in format:
+            leader = "     nmi  22        4500"
+            f935c = "website"
+        #elif "audio recording" in format:
+        #    leader = "     nmi  22        4500"
+        #    f935c = "muto"
+        #elif "collection" in format:
+        #    leader = "     nom  22        4500"
+        #    f935c = ""
+        elif "photo" in format:
+            leader = "     ckm  22        4500"
+            f935c = "foto"
+        else:
+            leader = "     cam  22        4500"
+            f935c = "text"
+        
         # Leader
-        marcrecord.leader = "     ckm  22        4500"
+        marcrecord.leader = leader
 
         # Format
         marcrecord.add("007", data="cr")
@@ -84,7 +104,7 @@ for line in inputfile:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
         # Format
-        marcrecord.add("935", b="foto")
+        marcrecord.add("935", b="cofz", c=f935c)
 
         # Kollektion
         marcrecord.add("980", a=f001, b="10", c="Music Treasures Consortium")
