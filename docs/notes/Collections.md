@@ -9,7 +9,7 @@ collection it belongs to. Sometimes it does not.
 Where do collections play a role?
 ---------------------------------
 
-### In [siskin](https://github.com/miku/siskin)
+### [siskin](https://github.com/miku/siskin)
 
 ```shell
 $ tasknames | grep -i collection
@@ -26,7 +26,7 @@ JstorCollectionMapping
 JstorIntermediateSchemaGenericCollection
 ```
 
-### In [span](https://github.com/miku/span) as filter
+### [span](https://github.com/miku/span) filter
 
 ```
 Process:
@@ -75,7 +75,7 @@ A few month back, we recorded seven cases for attachments, all involving the nam
 * [How to attach and
   ISIL?](https://github.com/miku/siskin/blob/732d0c0683ae744bf37dc34b8795301cb76360aa/siskin/sources/amsl.py#L651-L657)
 
-### Hard-Coded in Go converters:
+### Hard-Coded in Go converters
 
 * [doaj](https://github.com/miku/span/blob/a1c1b604f9320fa2c4d5f390c560f69f65e04f8a/formats/doaj/document.go#L42)
 * [ceeol](https://github.com/miku/span/blob/94878b24fa18cddc00af56ce075aae904c5821e2/formats/ceeol/article.go#L20)
@@ -108,7 +108,7 @@ from things like #12301.
 * [Crossref artifacts](https://github.com/miku/span/blob/9ee898530614277bd9705f0e42b760955817972d/formats/crossref/document.go#L322-L333)
 * [Crossref unknown publisher](https://github.com/miku/span/blob/9ee898530614277bd9705f0e42b760955817972d/formats/crossref/document.go#L336)
 
-### Hard-coded in Metafacture snippets
+### Hard-coded in [Metafacture](https://github.com/metafacture/metafacture-core/wiki) snippets
 
 * [30.xml](https://github.com/miku/siskin/blob/0209586991cbb501b10b0672ac9d793b53b76925/siskin/assets/30/30_morph.xml#L56-L60)
 * [34.xml](https://github.com/miku/siskin/blob/447f48b80423e5e221b3dc1cea5e4c1790a98997/siskin/assets/34/morph.xml#L54-L58)
@@ -124,12 +124,12 @@ from things like #12301.
 * (unused) [datacite.xml](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/datacite/morph.xml#L44-L48)
 * (unused) [oai.xml](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/oai/morph.xml#L44-L48)
 
-### Hard-coded in jq snippets
+### Hard-coded in [jq](https://stedolan.github.io/jq/) snippets
 
 * [73.jq](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/73/filter.jq#L5)
 * [80.jq](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/80/filter.jq#L5)
 
-### Hard-coded in luigi tasks
+### Hard-coded in [luigi](https://github.com/spotify/luigi) tasks
 
 * [55.py](https://github.com/miku/siskin/blob/a87d04d7126f7be721bf37fe4b47048504c16fda/siskin/sources/jstor.py#L425),
   [Jstor and AMSL
