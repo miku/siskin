@@ -118,8 +118,79 @@ class JstorLatestMembers(JstorTask):
 
     This way, it is possible to sort the shipments by date, run `tac` and
     only keep the latest entries.
+
+    2018-03-10: There is a slight change in format, refs #12669.
+
+    Previously, update would ship in folders starting with MMS:
+
+        MMS_2015-03-23-18-04-17/...
+
+    with each folder containing a couple of ZIP files containing a couple of XML files.
+
+        MMS_2015-03-23-18-04-17/ocealing_20170904T133503_1.zip
+
+    These XML files are listed in the second column of this tasks' output.
+
+        $ unzip -l MMS_2017-09-04-13-31-15/ocealing_20170904T133503_1.zip
+        Archive:  MMS_2017-09-04-13-31-15/ocealing_20170904T133503_1.zip
+        Length      Date    Time    Name
+        ---------  ---------- -----   ----
+            3053  2017-09-04 13:35   ocealing/2002-06-01/3623336/3623336.xml
+            3392  2017-09-04 13:35   ocealing/2002-06-01/3623338/3623338.xml
+            4960  2017-09-04 13:35   ocealing/2002-06-01/3623326/3623326.xml
+            3002  2017-09-04 13:35   ocealing/2002-06-01/3623335/3623335.xml
+            4815  2017-09-04 13:35   ocealing/2002-06-01/3623327/3623327.xml
+            3980  2017-09-04 13:35   ocealing/2002-06-01/3623330/3623330.xml
+            2463  2017-09-04 13:35   ocealing/2002-06-01/3623339/3623339.xml
+            2814  2017-09-04 13:35   ocealing/2002-06-01/3623325/3623325.xml
+            2425  2017-09-04 13:35   ocealing/2002-06-01/3623340/3623340.xml
+            3170  2017-09-04 13:35   ocealing/2002-06-01/3623337/3623337.xml
+            3973  2017-09-04 13:35   ocealing/2002-06-01/3623329/3623329.xml
+            3874  2017-09-04 13:35   ocealing/2002-06-01/3623332/3623332.xml
+            3051  2017-09-04 13:35   ocealing/2002-06-01/3623334/3623334.xml
+            3536  2017-09-04 13:35   ocealing/2002-06-01/3623333/3623333.xml
+            2423  2017-09-04 13:35   ocealing/2002-06-01/3623324/3623324.xml
+            3600  2017-09-04 13:35   ocealing/2002-06-01/3623331/3623331.xml
+            4254  2017-09-04 13:35   ocealing/2002-06-01/3623328/3623328.xml
+        ---------                     -------
+            58785                     17 files
+
+    As of 2018-03-13 there are 30 new zip files in the root folder, 29 of which follow the naming scheme:
+
+        jstor-journals-2018-03-10T06-52-44Z-part-[0-9]{3,3}.zip
+
+    And one:
+
+        jstor-journals-csp-2018-03-10T17-46-45Z-part-001.zip
+
+    This tasks picked up all the files, which is why the number of records increased:
+
+        $ taskcat JstorLatestMembers --date 2018-03-05 | wc -l
+        10290925
+
+        $ taskcat JstorLatestMembers --date 2018-03-13 | wc -l
+        22136409
+
+    One simple way to distinguish these sets:
+
+        $ taskcat JstorLatestMembers --date 2018-03-05 | grep -c metadata
+        0
+
+        $ taskcat JstorLatestMembers --date 2018-03-13 | grep -c metadata
+        11845484
+
+        $ echo 22136409-10290925 | bc -l
+        11845484
+
+    We assume, this is a complete set of the content, so we can choose either the one or the other.
+
+    TODO: Observe update handling.
+
+    Issue, refs #12669.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.IntParameter(default=2, description="#12669")
 
     def requires(self):
         return JstorMembers(date=self.date)
@@ -129,8 +200,16 @@ class JstorLatestMembers(JstorTask):
         """
         Expect input to be sorted by shipment date, so tac will actually be a perfect rewind.
         """
-        output = shellout("tac {input} | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}",
-                          input=self.input().path)
+        if self.version not in (1, 2):
+            raise ValueError("supported versions: 1, 2 (refs #12669)")
+
+        if self.version == 1:
+            output = shellout("tac {input} | grep -v metadata | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}",
+                              input=self.input().path)
+        if self.version == 2:
+            output = shellout("tac {input} | grep metadata | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}",
+                              input=self.input().path)
+
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
