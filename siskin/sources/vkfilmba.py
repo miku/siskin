@@ -184,6 +184,8 @@ class VKFilmBAMARC(VKFilmBATask):
     Run conversion script.
     """
 
+    date = luigi.DateParameter(default=datetime.date.today())
+
     def requires(self):
         return VKFilmBAConvert()  # return VKFilmBADump()
 
@@ -194,4 +196,4 @@ class VKFilmBAMARC(VKFilmBATask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
