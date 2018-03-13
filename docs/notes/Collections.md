@@ -70,9 +70,9 @@ Example from DE-14 config:
       ...
 ```
 
-A few month back, we record seven cases for attachments, all involving the name of a collection:
+A few month back, we recorded seven cases for attachments, all involving the name of a collection:
 
-* [how to attach and
+* [How to attach and
   ISIL?](https://github.com/miku/siskin/blob/732d0c0683ae744bf37dc34b8795301cb76360aa/siskin/sources/amsl.py#L651-L657)
 
 ### Hard-Coded in Go converters:
@@ -121,7 +121,6 @@ from things like #12301.
   [107.flux](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/107/107.flux#L5)
 * [121.xml](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/arxiv/121_morph.xml#L46-L50)
 * [124.xml](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/124/124_morph.xml#L50-L54)
-
 * (unused) [datacite.xml](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/datacite/morph.xml#L44-L48)
 * (unused) [oai.xml](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/assets/oai/morph.xml#L44-L48)
 
