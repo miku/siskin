@@ -28,6 +28,17 @@ JstorIntermediateSchemaGenericCollection
 
 ### In [span](https://github.com/miku/span) as filter
 
+```
+Process:
+            AMSL Discovery API
+                    |
+                    v
+            AMSLFilterConfig
+                    |
+                    v
+    $ span-tag -c config.json < input.is > output.is
+```
+
 * [filter/collection.go](https://github.com/miku/span/blob/2f582de074ece435548ae577febdbb57395ad4aa/filter/collection.go)
 
 A collection filter is used 497 times in the current (2018-03-13)
