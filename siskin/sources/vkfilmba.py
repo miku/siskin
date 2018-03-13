@@ -142,13 +142,50 @@ class VKFilmBADump(VKFilmBATask):
         return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
 
 
+class VKFilmBAConvert(VKFilmBATask):
+    """
+    Convert download, refs #12460.
+    """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'dump': VKFilmBADump(),
+            'download': VKFilmBADownload(),
+        }
+
+    def run(self):
+        # XXX: workaround; we want a single file for further processing.
+        filenames = [
+            'adlr_1m1',
+            'adlr_1801',
+            'adlr',
+        ]
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+
+        for fn in filenames:
+            output = shellout(""" unzip -p "{input}" {fn} > "{output}" """, input=self.input().get('download').path, fn=fn)
+            output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" > "{output}"  """,
+                              input=output, ignoremap={5: "Fixme."})
+            shellout("""cat "{input}" >> "{stopover}" """,
+                     input=output, stopover=stopover)
+
+        # Concatenate, since download was only 150k, while dump was 9M?
+        output = shellout("cat {a} {b} > {output}", a=self.input().get('dump').path, b=stopover)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
+
+
 class VKFilmBAMARC(VKFilmBATask):
     """
     Run conversion script.
     """
 
     def requires(self):
-        return VKFilmBADump()
+        return VKFilmBAConvert()  # return VKFilmBADump()
 
     def run(self):
         output = shellout("python {script} {input} {output}",
