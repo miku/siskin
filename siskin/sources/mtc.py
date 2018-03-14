@@ -47,6 +47,7 @@ class MTCTask(DefaultTask):
     """
     TAG = '10'
 
+
 class MTCHarvest(MTCTask):
     """
     Harvest.
@@ -62,7 +63,7 @@ class MTCHarvest(MTCTask):
                 url = "https://www.loc.gov/collections/music-treasures-consortium/?sp=%s&fo=json" % page
                 self.logger.debug(url)
                 r = requests.get(url, headers=headers)
-                if r.status_code >= 400:
+                if r.status_code >= 500:
                     if retry_count == 0:
                         raise RuntimeError("failed after %s attempts with %s: %s",
                                            self.max_retries, r.status_code, url)
@@ -84,10 +85,12 @@ class MTCHarvest(MTCTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
+
 class MTCMARC(MTCTask):
     """
     Convert custom JSON.
     """
+
     def requires(self):
         return MTCHarvest()
 
