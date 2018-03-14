@@ -77,6 +77,7 @@ class MTCHarvest(MTCTask):
                     self.logger.debug("404 at %s", url)
                     break
                 output.write(r.text)
+                output.write("\n")
 
                 page += 1
                 retry_count = self.max_retries
