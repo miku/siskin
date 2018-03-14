@@ -5,7 +5,9 @@ import io
 import sys
 import re
 
+import tqdm
 import marcx
+import collections
 
 
 formatmap = {
@@ -42,15 +44,38 @@ def get_subfield(tag, subfield):
 inputfilename = "130_input.xml"
 outputfilename = "130_output.mrc"
 
+hierarchymap = collections.defaultdict(list)
+
+with open(inputfilename, "r") as inputfile:
+
+    records = inputfile.read()
+    records = records.split("</datensatz>")
+
+    for record in records:
+        
+        f010 = ""
+        f089 = ""
+
+        record = record.replace("\n", "")            
+        pattern = """<feld nr="010" ind=" ">(.*?)</feld>.*?nr="089" ind=" ">(.*?)</feld>"""
+        regexp = re.search(pattern, record)
+        if regexp:
+            f010, f089 = regexp.groups()
+
+        if f010 != "" and f089 != "":
+            f010 = f010.lstrip("0")
+            hierarchymap[f010].append(f089)
+    
+    #print(hierarchymap)
+
+
+
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-#hierarchyfile = open("130_hierarchy.txt", "r")
-#hierarchy = hierarchyfile.readlines()
-
 inputfile = open(inputfilename, "r")    
 outputfile = open(outputfilename, "wb")
-
+ 
 records = inputfile.read()
 records = records.split("</datensatz>")
 
@@ -73,6 +98,7 @@ for record in records:
     f300a = ""
     f300b = ""
     f300c = ""
+    f500a = ""
     f650a = ""
     f700e = ""
     format1 = ""
@@ -84,7 +110,7 @@ for record in records:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     fields = re.split("(</feld>)", record)
-  
+    
     for field in fields:
 
         field = field.replace("\n", "")
@@ -176,6 +202,10 @@ for record in records:
             if f300c != "":
                 f300c = " ; " + f300c
 
+        # Bestandsnachweis als Fußnoten
+        x = f001.lstrip("0")
+        footnotes = hierarchymap.get(x, "")    
+
         # Schlagwörter
         if f650a == "":
             f650a = get_field("710")
@@ -266,7 +296,7 @@ for record in records:
 
     if f245a == "": # einzelne Zeitschriftenhefte werden übersprungen 
         continue
-    
+
     assert(len(leader) == 24)
     marcrecord.leader = leader
     marcrecord.add("001", data="finc-130-" + f001)
@@ -283,6 +313,10 @@ for record in records:
     marcrecord.add("260", subfields=publisher)
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
     marcrecord.add("300", subfields=physicaldescription)
+    if footnotes != "":
+        marcrecord.add("500", a="verfügbare Ausgaben:")
+    for footnote in footnotes:
+        marcrecord.add("500", a=footnote)
     for subject in subjects:
         marcrecord.add("650", a=subject)
     for person in persons:
