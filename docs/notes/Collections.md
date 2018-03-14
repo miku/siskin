@@ -137,6 +137,6 @@ from things like #12301.
 * [123.py](https://github.com/miku/siskin/blob/ea069dbeb189237c6d0b5791a63046846b786075/siskin/sources/jove.py#L123)
 * [141.py](https://github.com/miku/siskin/blob/342c55300c72fa97ef047089000fd146727c3a3d/siskin/sources/lynda.py#L121)
 
-Special cases
+### Special cases
 
 * 39, [Persee](https://github.com/miku/siskin/blob/381f754b7758466ae68af751ed1a2231b51c6d9d/siskin/sources/persee.py#L96-L150) requires a special step to add MARC 980c field, which in turn is used to differentiate a collection for two different client, e.g. here *Persee != Persee*.
