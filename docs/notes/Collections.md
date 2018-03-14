@@ -142,4 +142,4 @@ from things like #12301.
 * 39, [Persee](https://github.com/miku/siskin/blob/381f754b7758466ae68af751ed1a2231b51c6d9d/siskin/sources/persee.py#L96-L150)
   requires a special step to add MARC 980c field, which in turn is used to
   differentiate a collection for two different client, e.g. here *Persee !=
-  Persee* (here, [via ISSN list](https://github.com/miku/siskin/blob/381f754b7758466ae68af751ed1a2231b51c6d9d/siskin/sources/persee.py#L141-L143).
+  Persee* (here, [via ISSN list](https://github.com/miku/siskin/blob/381f754b7758466ae68af751ed1a2231b51c6d9d/siskin/sources/persee.py#L141-L143)).
