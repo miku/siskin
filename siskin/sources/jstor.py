@@ -222,7 +222,8 @@ class JstorXML(JstorTask):
     TODO(miku): maybe shard by journal and reduce update time.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    batch = luigi.IntParameter(default=512, significant=False)
+    batch_size = luigi.IntParameter(default=256, description='number of files to extract from zip at once',
+                                    significant=False)
 
     def requires(self):
         return JstorLatestMembers(date=self.date)
@@ -234,7 +235,7 @@ class JstorXML(JstorTask):
             groups = itertools.groupby(handle.iter_tsv(
                 cols=('archive', 'member')), lambda row: row.archive)
             for archive, items in groups:
-                for chunk in nwise(items, n=self.batch):
+                for chunk in nwise(items, n=self.batch_size):
                     margs = " ".join(["'%s'" % item.member.decode(
                         encoding='utf-8').replace('[', r'\[').replace(']', r'\]') for item in chunk])
                     shellout("""unzip -p {archive} {members} |
