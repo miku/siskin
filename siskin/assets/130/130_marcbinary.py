@@ -101,6 +101,7 @@ for record in records:
     f500a = ""
     f650a = ""
     f700e = ""
+    f972h = ""
     format1 = ""
     format2 = ""
     subjects = []
@@ -200,11 +201,7 @@ for record in records:
         if f300c == "":
             f300c = get_field("435")
             if f300c != "":
-                f300c = " ; " + f300c
-
-        # Bestandsnachweis als Fußnoten
-        x = f001.lstrip("0")
-        footnotes = hierarchymap.get(x, "")    
+                f300c = " ; " + f300c        
 
         # Schlagwörter
         if f650a == "":
@@ -238,6 +235,10 @@ for record in records:
                     if not regexp:
                         corporates.append(f710a)
                         break
+
+        #Bestandsnachweis (972h)       
+        f972h = f001.lstrip("0")
+        f972h = hierarchymap.get(f972h, "")    
 
         if format1 == "":
             format1 = get_field("052")
@@ -312,11 +313,7 @@ for record in records:
     publisher = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
-    marcrecord.add("300", subfields=physicaldescription)
-    if footnotes != "":
-        marcrecord.add("500", a="verfügbare Ausgaben:")
-    for footnote in footnotes:
-        marcrecord.add("500", a=footnote)
+    marcrecord.add("300", subfields=physicaldescription)   
     for subject in subjects:
         marcrecord.add("650", a=subject)
     for person in persons:
@@ -324,6 +321,8 @@ for record in records:
     for corporate in corporates:
         marcrecord.add("710", a=corporate)
     marcrecord.add("935", b=f935b, c=f935c)
+    f972h = "; ".join(f972h)
+    marcrecord.add("972", h=f972h)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
   
     outputfile.write(marcrecord.as_marc())
