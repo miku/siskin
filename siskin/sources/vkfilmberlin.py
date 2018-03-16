@@ -59,7 +59,7 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
 
     def run(self):
         """
-        XXX: Nichtsortierzeichen?
+        XXX: Nichtsortierzeichen? XXX: cache the number of records, somewhere.
         """
         output = shellout(
             "marccount {input} > {output}", input=self.input().path)
