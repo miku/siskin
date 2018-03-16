@@ -75,9 +75,6 @@ for oldrecord in reader:
 
     newrecord = marcx.Record()
 
-    # Format 007
-    newrecord.add("007", data="cr")
-
     # prüfen, ob Titel vorhanden ist
     f245 = oldrecord["245"]
     if not f245:
@@ -98,6 +95,9 @@ for oldrecord in reader:
     # 001
     f001 = oldrecord["001"].data
     newrecord.add("001", data="finc-14-%s" % f001)
+
+    # Format 007
+    newrecord.add("007", data="cr")
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
