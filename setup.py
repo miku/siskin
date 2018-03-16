@@ -117,6 +117,7 @@ setup(name='siskin',
           'siskin': [
               'assets/*',
               'assets/1/*',
+              'assets/10/*',
               'assets/100/*',
               'assets/101/*',
               'assets/103/*',
