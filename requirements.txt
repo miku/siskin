@@ -65,7 +65,7 @@ six==1.11.0
 snakebite==2.11.0
 SQLAlchemy==1.2.0
 tornado==4.5.3
-tqdm==4.19.6
+tqdm==4.19.8
 traitlets==4.3.2
 ujson==1.35
 urllib3==1.22
