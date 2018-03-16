@@ -147,10 +147,11 @@ for oldrecord in tqdm(reader, total=total):
     newrecord.add("001", data="finc-117-%s" % f001)
 
     # 007
-    f007 = oldrecord["007"].data
-    if len(f007) < 2:
-        f007 = f007 + "u"
-    newrecord.add("007", data=f007)
+    if "007" in oldrecord:
+        f007 = oldrecord["007"].data
+        if len(f007) < 2:
+            f007 = f007 + "u"
+        newrecord.add("007", data=f007)
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
