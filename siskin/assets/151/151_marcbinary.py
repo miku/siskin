@@ -129,6 +129,7 @@ for record in records:
 
     format = ""
     f001 = ""
+    f020a = ""
     f100a = ""
     f100e = ""
     f245a = ""
@@ -158,6 +159,10 @@ for record in records:
         # Identfikator
         if f001 == "":
             f001 = get_field("001")
+
+        # ISBN
+        if f020a == "":
+            f020a = get_subfield("540", "a")
 
         # Format
         if format == "":
@@ -264,7 +269,7 @@ for record in records:
                 f300a = f300
                 f300b = ""
                 f300c = ""       
-
+        
         # Schlagwörter
         f650a = get_subfield("710", "a")
         if f650a != "":
@@ -300,6 +305,8 @@ for record in records:
     
     f007 = get_field_007(format=format)
     marcrecord.add("007", data=f007)
+
+    marcrecord.add("020", a=f020a)
     
     marcrecord.add("100", subfields=f100)
     
@@ -321,7 +328,7 @@ for record in records:
     f935c = get_field_935c(format=format)
     marcrecord.add("935", b=f935b, c=f935c)
 
-    collections = ["a", f001, "b", "151", "c", "Filmakademie Baden-Württemberg"]
+    collections = ["a", f001, "b", "151", "c", "Filmakademie Baden-Württemberg", "c", "Verbundkatalog Film"]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
