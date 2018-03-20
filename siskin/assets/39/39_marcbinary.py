@@ -114,6 +114,20 @@ for i, line in enumerate(inputfile, start=1):
         print("cutting off long description (%s -> %s) for %s" % (len(f520a), FIELD_LENGTH_LIMIT, get_field("identifier")), file=sys.stderr)
         f520a = f520a[:FIELD_LENGTH_LIMIT]  # Cut off long abstracts, refs #11349.
 
+    format = get_field("dc:type")
+    if format == "notebiblio":
+        leader = "     naa  22        4500"
+    elif format == "illustration":
+        leader = "     ckm  22        4500"
+    elif format == "liminaire":
+        leader = "     naa  22        4500"
+    elif format == "table":
+        leader = "     naa  22        4500" 
+    elif format == "book":
+        leader = "     cam  22        4500"   
+    else:
+        leader = "     cab  22        4500"
+
     # Quelle
     f773a = get_field("dcterms:bibliographicCitation\.jtitle")
     volume = get_field("dcterms:bibliographicCitation\.volume")
@@ -133,10 +147,10 @@ for i, line in enumerate(inputfile, start=1):
 
     marcrecord = marcx.Record(force_utf8=True, to_unicode=True)
     marcrecord.strict = False
-    marcrecord.leader = "       b  22        450 "
+    marcrecord.leader = leader
     marcrecord.add("001", data="finc-39-%s" % f001)
-    marcrecord.add("007", data="tu")
-    marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
+    marcrecord.add("007", data="cr")
+    #marcrecord.add("008", data=f008)
     marcrecord.add("022", a=f022a)
     marcrecord.add("041", a=f041a)
 
@@ -170,8 +184,8 @@ for i, line in enumerate(inputfile, start=1):
 
     outputfile.write(marcrecord.as_marc())
 
-    #if i > 20000:
-    #    break
+    if i > 20000:
+        break
 
 inputfile.close()
 outputfile.close()
