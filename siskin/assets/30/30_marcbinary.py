@@ -251,12 +251,15 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", b=f935b, c=f935c)
   
     # Kollektion
+    collection_with_adlr = ["a", f001, "b", "30", "c", "SSOAR Social Science Open Access Repository", "c", "ssoarAdlr"]
+    collection_without_adlr = ["a", f001, "b", "30", "c", "SSOAR Social Science Open Access Repository"]
     collections = xmlrecord["header"]["setSpec"]
     for relevant_set in relevant_sets:
         if relevant_set in collections:
-            marcrecord.add("980", a=f001, b="30", c="ssoarAdlr")
+            marcrecord.add("980", subfields=collection_with_adlr)
+            break
     else:
-        marcrecord.add("980", a=f001, b="30", c="SSOAR Social Science Open Access Repository")
+        marcrecord.add("980", subfields=collection_without_adlr)
       
     
     outputfile.write(marcrecord.as_marc())
