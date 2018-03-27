@@ -236,17 +236,24 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
       
     # Link zu Datensatz und Ressource
     identifiers = get_field("dc:identifier")
+    urn = False
+    ssoar = ""
     if identifiers == "":
         continue
     for identifier in identifiers:
         if identifier:  # Martin fragen, warum hier sonst "argument of type 'NoneType' is not iterable" kommt
-            if "urn:nbn" in identifier:
-                marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u="http://nbn-resolving.de/" + identifier)
-            elif "http://www.ssoar" in identifier: # ist manchmal ausschließlich in der Form angegeben
-                marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=identifier)
+                                       
+            if "http://www.ssoar" in identifier: # ist manchmal ausschließlich in der Form angegeben
+                ssoar = identifier
+            elif "urn:nbn" in identifier:
+                marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u="http://nbn-resolving.de/" + identifier)  
+                urn = True                                   
             elif ".pdf" in identifier:
-                marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=identifier)
-          
+                marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=identifier)
+   
+    if urn == False:
+        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=ssoar) # Muss sein, damit der Link zum Datensatz nur einmal angezeigt wird
+        
     # Medientyp
     marcrecord.add("935", b=f935b, c=f935c)
   
