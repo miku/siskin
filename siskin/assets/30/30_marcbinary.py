@@ -57,13 +57,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
            
     marcrecord = marcx.Record(force_utf8=True)
 
-    collections = xmlrecord["header"]["setSpec"]
-    for relevant_set in relevant_sets:
-        if relevant_set in collections:
-            break
-    else:
-        continue
-
     # Format   
     format = get_field("dc:type")
     if "Monographie" in format or "Sammelwerk" in format or "Konferenzband" in format:
@@ -103,11 +96,12 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # ISBN
     identifiers = get_field("dc:identifier")
     for identifier in identifiers:
-        regexp = re.search("^(978-.*)", identifier)       
-        if regexp:
-            f020a = regexp.group(1)        
-            marcrecord.add("020", a=f020a)
-            break       
+        if isinstance(identifier, str):
+            regexp = re.search("^(978-.*)", identifier)       
+            if regexp:
+                f020a = regexp.group(1)        
+                marcrecord.add("020", a=f020a)
+                break       
 
     # ISSN
     identifiers = get_field("dc:identifier")
@@ -220,15 +214,18 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             marcrecord.add("700", a=contributor, e="ctb")
 
     # übergeordnetes Werk
-    f773a = ""
-    f773g = ""    
+    journal = ""
+    volume = ""
+    issue = "" 
+    pages = ""
     sources = get_field("dc:source")
     if "Zeitschriftenartikel" in format and len(sources) == 4:
         journal = sources[0]
         volume = sources[1]
         issue = sources[2]
         pages = sources[3]
-        marcrecord.add("773", a=journal, g=volume + "(" + f260c + ")" + issue + ", S. " + pages)
+        f773g = "%s(%s)%s, S. %s" % (volume, f260c, issue, pages)
+        marcrecord.add("773", a=journal, g=f773g)
     elif sources != "":
         for source in sources:
             regexp = re.search("^(\D+)", source)
@@ -254,8 +251,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", b=f935b, c=f935c)
   
     # Kollektion
-    marcrecord.add("980", a=f001, b="30", c="SSOAR Social Science Open Access Repository")      
-
+    collections = xmlrecord["header"]["setSpec"]
+    for relevant_set in relevant_sets:
+        if relevant_set in collections:
+            marcrecord.add("980", a=f001, b="30", c="ssoarAdlr")
+    else:
+        marcrecord.add("980", a=f001, b="30", c="SSOAR Social Science Open Access Repository")
+      
     
     outputfile.write(marcrecord.as_marc())
 
