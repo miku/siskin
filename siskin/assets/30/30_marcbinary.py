@@ -249,7 +249,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u="http://nbn-resolving.de/" + identifier)  
                 urn = True                                   
             elif ".pdf" in identifier:
-                marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=identifier)
+                marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=identifier)
    
     if urn == False:
         marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=ssoar) # Muss sein, damit der Link zum Datensatz nur einmal angezeigt wird
