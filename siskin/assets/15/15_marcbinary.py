@@ -259,7 +259,7 @@ for root, _, files in os.walk(input_directory):
             pass
 
         # URL
-        f856u = record["url"]
+        f856u = record["url"]["#text"]
         marcrecord.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=f856u)
 
         marcrecord.add("970", c="PN")
