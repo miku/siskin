@@ -44,6 +44,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
@@ -108,6 +109,7 @@ class ThiemeIntermediateSchemaNext(ThiemeTask):
     def requires(self):
         return ThiemeCombine(date=self.date, prefix='oai_dc', set=self.set)
 
+    @deprecated
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
