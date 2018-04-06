@@ -61,7 +61,7 @@ class ThiemeCombine(ThiemeTask):
     """ Combine files."""
 
     date = ClosestDateParameter(default=datetime.date.today())
-    prefix = luigi.Parameter(default="tm")
+    prefix = luigi.Parameter(default="nlm")
     set = luigi.Parameter(default='journalarticles')
 
     def requires(self):
