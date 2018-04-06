@@ -99,27 +99,6 @@ class ThiemeIntermediateSchema(ThiemeTask):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
 
-class ThiemeIntermediateSchemaNext(ThiemeTask):
-    """
-    Next: Thieme with flux.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    set = luigi.Parameter(default='journalarticles')
-
-    def requires(self):
-        return ThiemeCombine(date=self.date, prefix='oai_dc', set=self.set)
-
-    @deprecated
-    def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("60/flux.flux"), mapdir=mapdir, input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
-
-
 class ThiemeExport(ThiemeTask):
     """
     Create something solr importable. Attach a single ISIL to all records.
