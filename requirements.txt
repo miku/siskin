@@ -55,7 +55,7 @@ PyMySQL==0.8.0
 pyparsing==2.2.0
 python-daemon==2.1.2
 python-dateutil==2.2
-pytz==2018.3
+pytz==2018.4
 rdflib==4.2.2
 requests==2.18.4
 schema==0.6.7
