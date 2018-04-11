@@ -48,7 +48,7 @@ class UMBITask(DefaultTask):
 
 
 class UMBIMARC(UMBITask):
-    """ Convert Excel to BinaryMarc """
+    """ Convert MARCxml to BinaryMarc """
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
