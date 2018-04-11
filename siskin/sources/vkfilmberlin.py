@@ -48,7 +48,7 @@ class VKFilmBerlinTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class VKFilmBerlinMARC(VKFilmBerlinTask):
+class VKFilmBerlinRawMARC(VKFilmBerlinTask):
     """
     Next version of filter and transformation, refs #12169. Takes about 4h.
     """
@@ -74,14 +74,14 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
 
 
-class VKFilmBerlinMARCXMLCleaned(VKFilmBerlinTask):
+class VKFilmBerlinMARC(VKFilmBerlinTask):
     """
     Convert binary to XML and remove "Nichtsortierzeichen".
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return VKFilmBerlinMARC(date=self.date)
+        return VKFilmBerlinRawMARC(date=self.date)
 
     def run(self):
         """
