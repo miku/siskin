@@ -72,3 +72,29 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+
+class VKFilmBerlinMARCXMLCleaned(VKFilmBerlinTask):
+    """
+    Convert binary to XML and remove "Nichtsortierzeichen".
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VKFilmBerlinMARC(date=self.date)
+
+    def run(self):
+        """
+        XXX: Nichtsortierzeichen? XXX: cache the number of records, somewhere.
+        """
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}",
+                          input=self.input().path)
+        output = shellout("sed 's/\xc2\x98\|\xc2\x9c//g' < {input} > {output}",
+                          input=output)
+        # MARCXML should be fine as well.
+        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}",
+                          input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
