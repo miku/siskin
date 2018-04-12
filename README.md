@@ -4,7 +4,7 @@ siskin
 Various tasks for heterogeneous metadata handling. Based on
 [luigi](https://github.com/spotify/luigi) from Spotify.
 
-[![pypi version](http://img.shields.io/pypi/v/siskin.svg?style=flat)](https://pypi.python.org/pypi/siskin)
+[![pypi version](https://badge.fury.io/py/siskin.png)](https://pypi.python.org/pypi/siskin)
 
 * Overview in a [few markdown slides](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
 
