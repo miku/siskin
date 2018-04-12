@@ -16,7 +16,7 @@ docutils==0.14
 elasticsearch==6.1.1
 future==0.16.0
 gluish==0.2.11
-gspread==0.6.2
+gspread==2.1.1
 idna==2.6
 internetarchive==1.7.7
 # ipython==6.2.1
