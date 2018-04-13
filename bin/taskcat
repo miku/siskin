@@ -35,14 +35,22 @@ if [[ ! -f "$OUTPUT" ]]; then
     fi
 fi
 
+fastzcat() {
+    if hash unpigz 2>/dev/null; then
+        unpigz -c "$@"
+    else
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            gzcat "$@"
+        else
+            zcat "$@"
+        fi
+    fi
+}
+
 if [[ "$OUTPUT" == *mrc ]]; then
     yaz-marcdump "$OUTPUT"
 elif [[ "$OUTPUT" == *gz ]]; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        gzcat "$OUTPUT"
-    else
-        zcat "$OUTPUT"
-    fi
+    fastzcat "$OUTPUT"
 else
     cat "$OUTPUT"
 fi
