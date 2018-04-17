@@ -121,8 +121,8 @@ outputfilename = "151_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "r")    
-outputfile = open(outputfilename, "wb")
+inputfile = io.open(inputfilename, "r")
+outputfile = io.open(outputfilename, "wb")
 
 records = inputfile.read()
 records = records.split("</record>")
