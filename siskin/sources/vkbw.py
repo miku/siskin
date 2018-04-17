@@ -52,6 +52,7 @@ import requests
 import xmltodict
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 
 from siskin.task import DefaultTask
 
@@ -120,3 +121,21 @@ class VKBWDownload(VKBWTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
+class VKBWMARC(VKBWTask):
+    """ Convert to MARC binary. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VKBWDownload(date=self.date)
+
+    def run(self):
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets("151/151_marcbinary.py"),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
