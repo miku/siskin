@@ -57,7 +57,7 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class VKBWTask(DefaultTask):
+class VKFilmBWTask(DefaultTask):
     """
     Base task for VKFilm BW.
     """
@@ -67,7 +67,7 @@ class VKBWTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class VKBWDownload(VKBWTask):
+class VKFilmBWDownload(VKFilmBWTask):
     """
     Harvest MARCXML-ish records from Alephino.
     """
@@ -123,13 +123,13 @@ class VKBWDownload(VKBWTask):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
-class VKBWMARC(VKBWTask):
+class VKFilmBWMARC(VKFilmBWTask):
     """ Convert to MARC binary. """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return VKBWDownload(date=self.date)
+        return VKFilmBWDownload(date=self.date)
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
