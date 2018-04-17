@@ -47,6 +47,7 @@ import urllib
 from xml.dom.minidom import parseString
 
 import luigi
+import tqdm
 import requests
 import xmltodict
 from gluish.intervals import monthly
@@ -94,7 +95,7 @@ class VKBWDownload(VKBWTask):
         with self.output().open('w') as output:
             output.write(u"""<?xml version="1.0" encoding="UTF-8" ?>""")
             output.write(u"<collection>")
-            for no in range(1, no_entries + 1):
+            for no in tqdm.tqdm(range(1, no_entries + 1)):
                 query = {
                     'op': 'getrec',
                     'set_number': set_number,
@@ -115,7 +116,6 @@ class VKBWDownload(VKBWTask):
                 document.removeAttribute('idn')
                 output.write(document.toxml("utf-8"))
 
-                self.logger.debug("fetched %s/%s", no, no_entries)
             output.write(u"</collection>")
 
     def output(self):
