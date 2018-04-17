@@ -32,7 +32,7 @@ TODO: Unify VK* tasks.
 Config
 ------
 
-[vkbw]
+[vkfilmbw]
 
 baseurl = http://alephino.club/x
 username = ADMIN
@@ -75,13 +75,13 @@ class VKFilmBWDownload(VKFilmBWTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        baseurl = self.config.get('vkbw', 'baseurl')
+        baseurl = self.config.get('vkfilmbw', 'baseurl')
         query = {
             'op': 'find',
             'base': 'B-TIT',
             'query': 'IDN=1 < *',
-            'usr': self.config.get('vkbw', 'username'),
-            'pwd': self.config.get('vkbw', 'password'),
+            'usr': self.config.get('vkfilmbw', 'username'),
+            'pwd': self.config.get('vkfilmbw', 'password'),
         }
         url = "%s?%s" % (baseurl, urllib.urlencode(query))
 
@@ -101,8 +101,8 @@ class VKFilmBWDownload(VKFilmBWTask):
                     'op': 'getrec',
                     'set_number': set_number,
                     'number_entry': no,
-                    'usr': self.config.get('vkbw', 'username'),
-                    'pwd': self.config.get('vkbw', 'password'),
+                    'usr': self.config.get('vkfilmbw', 'username'),
+                    'pwd': self.config.get('vkfilmbw', 'password'),
                 }
                 url = "%s?%s" % (baseurl, urllib.urlencode(query))
                 resp = requests.get(url)
