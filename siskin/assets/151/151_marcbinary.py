@@ -5,7 +5,7 @@ import io
 import sys
 import re
 
-import html
+from six.moves import html_parser
 import marcx
 
 
@@ -74,12 +74,14 @@ formatmap = {
     },
 }
 
+parser = html_parser.HTMLParser()
+
 
 def get_field(tag):
     regexp = re.search('<.*? tag="%s">(.*)$' % tag, field)
     if regexp:
         _field = regexp.group(1)
-        _field = html.unescape(_field)
+        _field = parser.unescape(_field)
         return _field
     else:
         return ""
@@ -88,7 +90,7 @@ def get_subfield(tag, subfield):
     regexp = re.search('^<datafield.*tag="%s".*><subfield code="%s">(.*?)<\/subfield>' % (tag, subfield), field)
     if regexp:
         _field = regexp.group(1)
-        _field = html.unescape(_field)
+        _field = parser.unescape(_field)
         return _field
     else:
         return ""
