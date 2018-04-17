@@ -15,6 +15,14 @@ import pymarc
 import feedparser
 
 
+langmap = {
+    "English": "eng",
+    "French": "fre",
+    "Russian": "rus",
+    "Greek": "gre"
+}
+
+
 def get_field(tag):  
     try:
         return record[tag]
@@ -47,15 +55,21 @@ for record in records.entries:
     marcrecord.add("007", data="cr")
 
     # Sprache
-    f041a = get_field("geoscan_language")
-    if f041a == "English":
-        f041a = "eng"
-    elif f041a == "French":
-        f041a = "fre"
-    else:        
-        print("Sprache ergänzen: " + f041a)
-        f041a = "eng"
-    marcrecord.add("041", a=f041a)
+    languages = get_field("geoscan_language")
+    if ";" in languages:
+        languages = languages.split("; ")
+        lang = []
+        for language in languages:
+            f041a = langmap.get(language, "")
+            if f041a != "":
+                lang.append("a")
+                lang.append(f041a)
+                marcrecord.add("041", subfields=lang)                
+            else:                
+                print("Die folgende Sprache fehlt in der Langmap: %s" % language)
+    else:
+        f041a = langmap.get(languages, "")
+        marcrecord.add("041", a=f041a)
 
     # 1. Urheber
     f100a = get_field("geoscan_author")
