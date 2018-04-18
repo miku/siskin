@@ -100,6 +100,10 @@ for record in records.entries:
     # Seitenzahl
     marcrecord.add("300", a=f300a)
 
+    # Anzahl der Karten
+    f300a = get_field("geoscan_maps")
+    marcrecord.add("300", a=f300a)
+
     # DOI
     marcrecord.add("500", a=f500a)
 
