@@ -26,9 +26,15 @@
 Disson, Dissertations Online, refs #3422.
 """
 
+import collections
 import datetime
+import json
+import re
 
 import luigi
+import pymarc
+import marcx
+import tqdm
 
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
@@ -105,3 +111,78 @@ class DissonMARC(DissonTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+
+class DissonIntermediateSchema(DissonTask):
+    """
+    Convert MARC to intermediate schema.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DissonMARC(date=self.date)
+
+    def run(self):
+
+        stats = collections.Counter()
+
+        def parse_date(record):
+            """
+            XXX: Factor this out.
+            """
+            v = rr.firstvalue('264.c')
+            if not v:
+                v = rr.firstvalue('502.a')
+                if not v:
+                    v = rr["005"].value()[:4]
+                    if not v:
+                        raise RuntimeError('unparsed date (no 264.a, 502.a, 005):\n%s' % record)
+                    stats['005'] += 1
+                else:
+                    stats['502.a'] += 1
+
+                match = re.search(r'.*(\d\d\d\d).*', v)
+                if match:
+                    v = match.group(1)
+                else:
+                    raise RuntimeError("ignoring broken (%s) record: %s" % (v, rr["001"].value()))
+
+            else:
+                stats['264.c'] += 1
+
+            v = re.sub("[^0-9]", "", v)
+            if v and len(v) == 4:
+                return '%s-01-01' % v
+
+            raise RuntimeError('unparsed date %s: %s' % (v, record))
+
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                reader = pymarc.MARCReader(handle, to_unicode=True)
+                for record in tqdm.tqdm(reader):
+                    rr = marcx.Record().from_record(record)
+                    identifier = rr['001'].value()
+
+                    try:
+                        date = parse_date(rr)
+                    except RuntimeError as err:
+                        self.logger.debug(u"%s" % err)
+                        stats['ignored'] += 1
+                        continue
+
+                    doc = {
+                        'finc.source_id': '13',
+                        'finc.record_id': identifier,
+                        'finc.id': 'ai-13-%s' % (identifier),
+                        'rft.date': date,
+                        'urls': list(rr.itervalues('856.u')),
+                        'rft.btitle': rr.firstvalue('245.a'),
+                        'subjects': list(rr.itervalues('689.a', '650.a')),
+                        'authors': [{'rft.au': name} for name in rr.itervalues('100.a')],
+                    }
+                    output.write("%s\n" % json.dumps(doc))
+
+        self.logger.debug(json.dumps(stats.most_common()))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
