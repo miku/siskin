@@ -1,6 +1,7 @@
-#!/bin/bash
+# coding: utf-8
+# pylint: disable=C0301,E1101
 
-# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
@@ -21,36 +22,26 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
-set -eu
+"""
 
-OUTPUT=$(taskoutput "$@")
+Cambridge University Press Journals
 
-if [[ ! -f "$OUTPUT" ]]; then
-    read -p "output does not exists, should we try to run this task now [y/N]? " -r
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        taskdo "$@"
-    else
-        exit 1
-    fi
-fi
+refs #10167.
+----
 
-fastzcat() {
-    if hash unpigz 2>/dev/null; then
-        unpigz -c "$@"
-    else
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            gzcat "$@"
-        else
-            zcat "$@"
-        fi
-    fi
-}
+Config:
 
-if [[ "$OUTPUT" == *mrc ]]; then
-    yaz-marcdump "$OUTPUT"
-elif [[ "$OUTPUT" == *gz ]]; then
-    fastzcat "$OUTPUT"
-else
-    cat "$OUTPUT"
-fi
+[cambridge]
+
+XXX
+
+"""
+
+from siskin.task import DefaultTask
+
+
+class CambridgeTask(DefaultTask):
+    """
+    Base task.
+    """
+    TAG = '133'

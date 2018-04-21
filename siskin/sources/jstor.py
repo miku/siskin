@@ -35,6 +35,7 @@ ftp-pattern = *
 import collections
 import datetime
 import itertools
+import os
 import pipes
 import tempfile
 
@@ -216,7 +217,7 @@ class JstorLatestMembers(JstorTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
-class JstorXML(JstorTask):
+class JstorXMLSlow(JstorTask):
     """
     Create a snapshot of the latest data.
     TODO(miku): maybe shard by journal and reduce update time.
@@ -243,6 +244,50 @@ class JstorXML(JstorTask):
                              archive=archive.decode(encoding='utf-8'), members=margs, output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
+
+
+class JstorXML(JstorTask):
+    """
+    Create a snapshot of the latest data. Using unzippa[1] to speed up
+    extraction.
+
+    [1] https://github.com/miku/unzippa
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return JstorLatestMembers(date=self.date)
+
+    @timed
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        with self.input().open() as handle:
+            groups = itertools.groupby(handle.iter_tsv(
+                cols=('archive', 'member')), lambda row: row.archive)
+
+            for archive, items in groups:
+                # Write members to extract to temporary file.
+                _, memberfile = tempfile.mkstemp(prefix='siskin-')
+                with open(memberfile, 'w') as output:
+                    for item in items:
+                        output.write("%s\n" % item.member)
+
+                self.logger.debug("for archive %s extract via: %s", archive, memberfile)
+
+                # The unzippa will not exhaust ARG_MAX.
+                shellout("""unzippa -v -m {memberfile} {archive} |
+                            sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
+                         archive=archive.decode(encoding='utf-8'), memberfile=memberfile, output=stopover)
+
+                try:
+                    os.remove(output.name)
+                except OSError as err:
+                    self.logger.warn(err)
+
+            luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)

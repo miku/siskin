@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<metamorph xmlns="http://www.culturegraph.org/metamorph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
+<metamorph 
+  xmlns="http://www.culturegraph.org/metamorph" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
   <rules>
     <!-- Record-ID  -->
     <data source="url.value" name="finc.record_id" />
@@ -19,14 +21,7 @@
     </combine>
     <!-- This can be done via span-tag. -->
     <!--
-		<entity name="x.labels[]" flushWith="record">
-			<data source="_id" >
-				<constant value="DE-15-FID" />
-			</data>
-			<data source="_id" >
-				<constant value="DE-L152" />
-			</data>
-		</entity>
+		<entity name="x.labels[]" flushWith="record"><data source="_id"><constant value="DE-15-FID" /></data><data source="_id"><constant value="DE-L152" /></data></entity>
 		-->
     <entity name="authors[]" flushWith="record">
       <entity name="" sameEntity="true" reset="true">
@@ -73,5 +68,10 @@
     <data source="_id" name="finc.format">
       <constant value="ElectronicArticle"/>
     </data>
+    <entity name="languages[]" flushWith="record">
+      <data source="_id">
+        <constant value="ger"/>
+      </data>
+    </entity>
   </rules>
 </metamorph>
