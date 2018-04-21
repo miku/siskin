@@ -24,7 +24,7 @@ ipython-genutils==0.2.0
 isodate==0.6.0
 isort==4.3.4
 jdcal==1.3
-jedi==0.11.1
+jedi==0.12.0
 jsonpatch==1.23
 jsonpath-rw==1.4.0
 jsonpointer==2.0
