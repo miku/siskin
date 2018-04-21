@@ -14,7 +14,7 @@ copytags = ("003", "005", "006", "007", "008", "020", "022", "024", "035", "040"
             "785", "830")
 
 
-inputfilename = "52_input.xml"
+inputfilename = "52_input.xml" 
 outputfilename = "52_output.mrc"
 
 if len(sys.argv) == 3:
@@ -37,26 +37,26 @@ for oldrecord in records:
     newrecord.leader = leader
 
     # 001
-    f001 = oldrecord["001"].data
+    f001 = oldrecord["001"].data   
     f001 = f001.replace("-", "")
-    f001 = f001.replace("_", "")
+    f001 = f001.replace("_", "")  
     newrecord.add("001", data="finc-52-%s" % f001)
 
     # ISBN
     try:
-        f020a = oldrecord["020"]["a"]
+        f020a = oldrecord["020"]["a"]        
     except:
         f020a = ""
 
     if f020a != "":
         f020a = f020a.replace(" ", "-")
-        f020a = f020a.replace(".", "-")
-        regexp = re.search("([0-9xX-]{10,16})", f020a)
-
+        f020a = f020a.replace(".", "-")       
+        regexp = re.search("([0-9xX-]{10,17})", f020a)
+     
         if regexp:
             f020a = regexp.group(1)
             f020a = f020a.rstrip("-")
-            newrecord.add("020", a=f020a)
+            newrecord.add("020", a=f020a) 
         else:
             print("Die ISBN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f020a)
 
@@ -71,12 +71,12 @@ for oldrecord in records:
         if len(f505a) > 9800:
             f505a = f505a[:9799]
         newrecord.add("505", a=f505a)
-    except (AttributeError, TypeError) as err:
+    except (AttributeError, TypeError) as err:       
         pass
 
     # Schlagwort
     try:
-        f689a = oldrecord["653"]["a"]
+        f689a = oldrecord["653"]["a"]     
         newrecord.add("689", a=f689a)
     except (AttributeError, TypeError):
         pass
@@ -88,7 +88,7 @@ for oldrecord in records:
     # 980
     collections = ["a", f001, "b", "52", "c", "OECD iLibrary"]
     newrecord.add("980", subfields=collections)
-
+  
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()

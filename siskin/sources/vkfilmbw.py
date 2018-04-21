@@ -32,7 +32,7 @@ TODO: Unify VK* tasks.
 Config
 ------
 
-[vkbw]
+[vkfilmbw]
 
 baseurl = http://alephino.club/x
 username = ADMIN
@@ -47,15 +47,17 @@ import urllib
 from xml.dom.minidom import parseString
 
 import luigi
+import tqdm
 import requests
 import xmltodict
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 
 from siskin.task import DefaultTask
 
 
-class VKBWTask(DefaultTask):
+class VKFilmBWTask(DefaultTask):
     """
     Base task for VKFilm BW.
     """
@@ -65,7 +67,7 @@ class VKBWTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class VKBWDownload(VKBWTask):
+class VKFilmBWDownload(VKFilmBWTask):
     """
     Harvest MARCXML-ish records from Alephino.
     """
@@ -73,13 +75,13 @@ class VKBWDownload(VKBWTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        baseurl = self.config.get('vkbw', 'baseurl')
+        baseurl = self.config.get('vkfilmbw', 'baseurl')
         query = {
             'op': 'find',
             'base': 'B-TIT',
             'query': 'IDN=1 < *',
-            'usr': self.config.get('vkbw', 'username'),
-            'pwd': self.config.get('vkbw', 'password'),
+            'usr': self.config.get('vkfilmbw', 'username'),
+            'pwd': self.config.get('vkfilmbw', 'password'),
         }
         url = "%s?%s" % (baseurl, urllib.urlencode(query))
 
@@ -94,13 +96,13 @@ class VKBWDownload(VKBWTask):
         with self.output().open('w') as output:
             output.write(u"""<?xml version="1.0" encoding="UTF-8" ?>""")
             output.write(u"<collection>")
-            for no in range(1, no_entries + 1):
+            for no in tqdm.tqdm(range(1, no_entries + 1)):
                 query = {
                     'op': 'getrec',
                     'set_number': set_number,
                     'number_entry': no,
-                    'usr': self.config.get('vkbw', 'username'),
-                    'pwd': self.config.get('vkbw', 'password'),
+                    'usr': self.config.get('vkfilmbw', 'username'),
+                    'pwd': self.config.get('vkfilmbw', 'password'),
                 }
                 url = "%s?%s" % (baseurl, urllib.urlencode(query))
                 resp = requests.get(url)
@@ -115,8 +117,25 @@ class VKBWDownload(VKBWTask):
                 document.removeAttribute('idn')
                 output.write(document.toxml("utf-8"))
 
-                self.logger.debug("fetched %s/%s", no, no_entries)
             output.write(u"</collection>")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
+class VKFilmBWMARC(VKFilmBWTask):
+    """ Convert to MARC binary. """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VKFilmBWDownload(date=self.date)
+
+    def run(self):
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets("151/151_marcbinary.py"),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
