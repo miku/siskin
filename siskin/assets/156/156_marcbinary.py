@@ -49,7 +49,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
     if f020a != "":
         f020a = f020a.replace(" ", "-")
         f020a = f020a.replace(".", "-")       
-        regexp = re.search("([0-9xX-]{10,16})", f020a)
+        regexp = re.search("([0-9xX-]{10,17})", f020a)
      
         if regexp:
             f020a = regexp.group(1)

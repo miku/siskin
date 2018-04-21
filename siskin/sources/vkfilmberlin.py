@@ -48,7 +48,7 @@ class VKFilmBerlinTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class VKFilmBerlinMARC(VKFilmBerlinTask):
+class VKFilmBerlinRawMARC(VKFilmBerlinTask):
     """
     Next version of filter and transformation, refs #12169. Takes about 4h.
     """
@@ -68,6 +68,32 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
                           script=self.assets("117/117_marcbinary.py"),
                           input=self.input().path,
                           record_count=record_count)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+
+class VKFilmBerlinMARC(VKFilmBerlinTask):
+    """
+    Convert binary to XML and remove "Nichtsortierzeichen".
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VKFilmBerlinRawMARC(date=self.date)
+
+    def run(self):
+        """
+        XXX: Nichtsortierzeichen? XXX: cache the number of records, somewhere.
+        """
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}",
+                          input=self.input().path)
+        output = shellout("sed 's/\xc2\x98\|\xc2\x9c//g' < {input} > {output}",
+                          input=output)
+        # MARCXML should be fine as well.
+        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}",
+                          input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
