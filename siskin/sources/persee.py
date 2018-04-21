@@ -24,7 +24,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Persee, refs #3133.
+Persee, refs #3133, #11349.
 """
 
 import datetime
