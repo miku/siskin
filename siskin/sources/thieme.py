@@ -44,6 +44,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
@@ -60,7 +61,7 @@ class ThiemeCombine(ThiemeTask):
     """ Combine files."""
 
     date = ClosestDateParameter(default=datetime.date.today())
-    prefix = luigi.Parameter(default="tm")
+    prefix = luigi.Parameter(default="nlm")
     set = luigi.Parameter(default='journalarticles')
 
     def requires(self):
@@ -96,26 +97,6 @@ class ThiemeIntermediateSchema(ThiemeTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
-
-
-class ThiemeIntermediateSchemaNext(ThiemeTask):
-    """
-    Next: Thieme with flux.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    set = luigi.Parameter(default='journalarticles')
-
-    def requires(self):
-        return ThiemeCombine(date=self.date, prefix='oai_dc', set=self.set)
-
-    def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("60/flux.flux"), mapdir=mapdir, input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 
 class ThiemeExport(ThiemeTask):

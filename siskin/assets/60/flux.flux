@@ -1,3 +1,4 @@
+// @deprecated: use span-import -i thieme-nlm
 // read XML (look for tagname "Record" foreach record), filter deleted records,
 // morph to intermediate schema
 

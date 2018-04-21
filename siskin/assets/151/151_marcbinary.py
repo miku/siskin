@@ -5,7 +5,7 @@ import io
 import sys
 import re
 
-import html
+from six.moves import html_parser
 import marcx
 
 
@@ -74,37 +74,44 @@ formatmap = {
     },
 }
 
+parser = html_parser.HTMLParser()
+
 
 def get_field(tag):
     regexp = re.search('<.*? tag="%s">(.*)$' % tag, field)
     if regexp:
         _field = regexp.group(1)
-        _field = html.unescape(_field)
+        _field = parser.unescape(_field)
         return _field
     else:
         return ""
+
 
 def get_subfield(tag, subfield):
     regexp = re.search('^<datafield.*tag="%s".*><subfield code="%s">(.*?)<\/subfield>' % (tag, subfield), field)
     if regexp:
         _field = regexp.group(1)
-        _field = html.unescape(_field)
+        _field = parser.unescape(_field)
         return _field
     else:
         return ""
 
+
 def get_leader(format="Buch"):
     return "     %s  22        4500" % formatmap[format]["leader"]
+
 
 def get_field_007(format="Buch"):
     if "007" not in formatmap[format]:
         return ""
     return formatmap[format]["007"]
 
+
 def get_field_935b(format="Buch"):
     if "935b" not in formatmap[format]:
         return ""
     return formatmap[format]["935b"]
+
 
 def get_field_935c(format="Buch"):
     if "935c" not in formatmap[format]:
@@ -119,8 +126,8 @@ outputfilename = "151_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "r")    
-outputfile = open(outputfilename, "wb")
+inputfile = io.open(inputfilename, "r")
+outputfile = io.open(outputfilename, "wb")
 
 records = inputfile.read()
 records = records.split("</record>")
@@ -149,13 +156,13 @@ for record in records:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     fields = re.split("(</controlfield>|</datafield>)", record)
-    
+
     for field in fields:
 
         field = field.replace("\n", "")
         field = field.replace("</datafield>", "")
         field = field.replace("</controlfield>", "")
-       
+
         # Identfikator
         if f001 == "":
             f001 = get_field("001")
@@ -166,8 +173,8 @@ for record in records:
 
         # Format
         if format == "":
-            form = get_field("433")         
-            
+            form = get_field("433")
+
             regexp1 = re.search("\d\]?\sS\.", form)
             regexp2 = re.search("\d\]?\sSeit", form)
             regexp3 = re.search("\d\]?\sBl", form)
@@ -215,18 +222,18 @@ for record in records:
 
         # 1. Urheber
         if f100a == "":
-            f100a = get_subfield("100", "a")            
+            f100a = get_subfield("100", "a")
             if f100a != "":
                 f100.append("a")
                 f100.append(f100a)
                 f100e = get_subfield("100", "b")
                 if f100e != "":
-                    f100e = f100e.split("]")                
+                    f100e = f100e.split("]")
                     for role in f100e[:-1]:  # Slice :-1 damit das letzte ] ausgelassen wird
                         role = role + "]"
                         f100.append("e")
                         f100.append(role)
-                                            
+
         # Haupttitel
         if f245a == "":
             f245a = get_field("331")
@@ -259,7 +266,7 @@ for record in records:
                 f300b = f300b + " ; "
             elif regexp2:
                 f300a, f300b = regexp2.groups()
-                f300a = f300a + " : "              
+                f300a = f300a + " : "
                 f300c = ""
             elif regexp3:
                 f300a, f300c = regexp3.groups()
@@ -268,8 +275,8 @@ for record in records:
             else:
                 f300a = f300
                 f300b = ""
-                f300c = ""       
-        
+                f300c = ""
+
         # Schlagwörter
         f650a = get_subfield("710", "a")
         if f650a != "":
@@ -278,49 +285,48 @@ for record in records:
         # weitere Personen
         regexp = re.search('tag="1\d\d"', field)
         if regexp:
-           for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
-               f700a = get_subfield(i, "a")               
-               if f700a != "":
+            for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
+                f700a = get_subfield(i, "a")
+                if f700a != "":
                     f700.append("a")
                     f700.append(f700a)
                     f700e = get_subfield(i, "b")
                     if f700e != "":
-                        f700e = f700e.split("]")                   
+                        f700e = f700e.split("]")
                         for role in f700e[:-1]:  # Slice :-1 damit das letzte ] ausgelassen wird
                             role = role + "]"
                             f700.append("e")
-                            f700.append(role)                           
+                            f700.append(role)
                     persons.append(f700)
-                    f700 = []              
+                    f700 = []
                     break
 
-    
     if format == "":
         format = "Buch"
 
     leader = get_leader(format=format)
     marcrecord.leader = leader
-    
+
     marcrecord.add("001", data="finc-151-" + f001)
-    
+
     f007 = get_field_007(format=format)
     marcrecord.add("007", data=f007)
 
     marcrecord.add("020", a=f020a)
-    
+
     marcrecord.add("100", subfields=f100)
-    
+
     marcrecord.add("245", a=f245a)
-    
+
     publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
     marcrecord.add("300", subfields=physicaldescription)
-    
+
     for f650a in subjects:
         marcrecord.add("650", a=f650a)
-        
+
     for f700 in persons:
         marcrecord.add("700", subfields=f700)
 
@@ -328,7 +334,7 @@ for record in records:
     f935c = get_field_935c(format=format)
     marcrecord.add("935", a="vkfilm", b=f935b, c=f935c)
 
-    collections = ["a", f001, "b", "151", "c", "Filmakademie Baden-Württemberg"]
+    collections = ["a", f001, "b", "151", "c", u"Filmakademie Baden-Württemberg"]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
