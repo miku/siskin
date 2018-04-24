@@ -24,6 +24,15 @@
 
 """
 Medienwissenschaft, Rezensionen, Reviews. Archiv, Marburg, refs #5486, #11005.
+
+Previously:
+
+* http://archiv.ub.uni-marburg.de/ep/0002/oai
+
+Now (2018-04-23):
+
+* http://archiv.ub.uni-marburg.de/ubfind/OAI/Server
+
 """
 
 import datetime
@@ -61,7 +70,7 @@ class MarburgCombine(MarburgTask):
     format = luigi.Parameter(default='nlm')
 
     def run(self):
-        endpoint = "http://archiv.ub.uni-marburg.de/ep/0002/oai"
+        endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
         shellout("metha-sync -format nlm {endpoint}", endpoint=endpoint)
         output = shellout("metha-cat -format nlm {endpoint} > {output}", endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
@@ -142,7 +151,7 @@ class MarburgCombineNext(MarburgTask):
     format = luigi.Parameter(default='nlm')
 
     def run(self):
-        endpoint = "http://archiv.ub.uni-marburg.de/ep/0002/oai"
+        endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
         output = shellout("oaicrawl -w 8 -verbose -f oai_dc {endpoint} > {output}", endpoint=endpoint)
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("echo '<records>' >> {output}", output=stopover)
