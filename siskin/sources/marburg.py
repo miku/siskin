@@ -79,6 +79,25 @@ class MarburgCombine(MarburgTask):
         return luigi.LocalTarget(self.path())
 
 
+class MarburgMarc(MarburgTask):
+    """
+    Convert XML to Marc.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='datacite')
+
+    def requires(self):
+        return MarburgCombine(format=self.format)
+
+    def run(self):
+        output = shellout("python {script} {input} > {output}",
+                          script=self.assets("73/73_marcbinary.py"), input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(self.path(ext='mrc'))
+
+
 class MarburgJSON(MarburgTask):
     """
     Convert XML to JSON in one go. Preparation, so we can use jq(1).
