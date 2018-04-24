@@ -70,6 +70,7 @@ class IMSLPConvert(IMSLPTask):
     """ Extract and transform. """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    debug = luigi.BoolParameter(description='do not delete temporary folder')
 
     def requires(self):
         return IMSLPDownload(date=self.date)
@@ -79,7 +80,10 @@ class IMSLPConvert(IMSLPTask):
         shellout("tar -xzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
         output = shellout("python {script} {tempdir} {output}",
                           script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
-        shutil.rmtree(tempdir)
+        if not self.debug:
+            shutil.rmtree(tempdir)
+        else:
+            self.logger.debug("not deleting temporary folder at %s", tempdir)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
