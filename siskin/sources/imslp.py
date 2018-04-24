@@ -67,7 +67,15 @@ class IMSLPDownload(IMSLPTask):
 
 
 class IMSLPConvert(IMSLPTask):
-    """ Extract and transform. """
+    """
+    Extract and transform.
+
+    TODO, refs #13055.
+
+    File "/usr/lib/python2.7/site-packages/siskin/assets/15/15_marcbinary.py", line 165, in <module>
+        record = record["document"]
+    KeyError: 'document'
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
     debug = luigi.BoolParameter(description='do not delete temporary folder')
