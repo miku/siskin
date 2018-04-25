@@ -59,18 +59,89 @@ class IMSLPDownload(IMSLPTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""wget -O {output} {url}""", url=self.config.get('imslp', 'url'))
+        output = shellout("""wget -O {output} {url}""",
+                          url=self.config.get('imslp', 'url'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tar.gz'))
 
 
+class IMSLPDownloadNext(IMSLPTask):
+    """
+    Download raw data, roughly once per month. Should be a tar.gz.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        raise NotImplementedError(
+            "use pattern: imslpOut_YYYY-MM-DD.tar.gz, could be any day of the month")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tar.gz'))
+
+
+class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
+    """
+
+    Path to JSON file mapping record id to viaf id and worktitle ("Werktitel").
+
+    This is a fixed file.
+
+    Example:
+
+        {
+            "fantasiano10mudarraalonso": {
+                "title": "Fantasie No.10",
+                "viaf": "(VIAF)100203803"
+            }
+        }
+    """
+
+    def output(self):
+        return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
+
+
+class IMSLPConvertNext(IMSLPTask):
+    """
+    Take a current version of the data plus legacy mapping and convert.
+
+    WIP, refs #12288, refs #13055.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    debug = luigi.BoolParameter(description='do not delete temporary folder')
+
+    def requires(self):
+        return {
+            'legacy-mapping': IMSLPLegacyMapping(),
+            'data': IMSLPDownloadNext(date=self.date),
+        }
+
+    def run(self):
+        """
+        TODO: add --legacy-mapping flag to 15_marcbinary.py
+        """
+        tempdir = tempfile.mkdtemp(prefix='siskin-')
+        shellout("tar -xzf {archive} -C {tempdir}",
+                 archive=self.input().path, tempdir=tempdir)
+        output = shellout("python {script} --legacy-mapping {mapping} {tempdir} {output}",
+                          script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
+        if not self.debug:
+            shutil.rmtree(tempdir)
+        else:
+            self.logger.debug("not deleting temporary folder at %s", tempdir)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+
 class IMSLPConvert(IMSLPTask):
     """
     Extract and transform.
 
-    TODO, refs #13055.
+    TODO, refs #13055 -- see IMSLPDownloadNext and IMSLPConvertNext and IMSLPLegacyMapping.
 
     File "/usr/lib/python2.7/site-packages/siskin/assets/15/15_marcbinary.py", line 165, in <module>
         record = record["document"]
@@ -85,7 +156,8 @@ class IMSLPConvert(IMSLPTask):
 
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
-        shellout("tar -xzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
+        shellout("tar -xzf {archive} -C {tempdir}",
+                 archive=self.input().path, tempdir=tempdir)
         output = shellout("python {script} {tempdir} {output}",
                           script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
         if not self.debug:
