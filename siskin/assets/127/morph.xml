@@ -650,6 +650,9 @@
       <data source="_id" name="c">
         <constant value="Filmuniversität Konrad Wolf Potsdam (VK Film)"/>
       </data>
+      <data source="_id" name="c">
+        <constant value="Verbundkatalog Film" />
+      </data>
     </entity>
   </rules>
   <maps>
