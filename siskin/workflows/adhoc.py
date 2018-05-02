@@ -29,6 +29,7 @@
 
 import datetime
 import json
+import requests
 import tempfile
 
 import luigi
@@ -155,7 +156,8 @@ class Issue7049ExportExcel(AdhocTask):
         keys = doc.keys()
 
         worksheet.write(0, 0, "#7049")
-        worksheet.write(1, 0, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        worksheet.write(
+            1, 0, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
         for i, key in enumerate(keys, start=3):
             worksheet.write(i, 1, key)
@@ -172,3 +174,48 @@ class Issue7049ExportExcel(AdhocTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xlsx"))
+
+
+class K10Matches(AdhocTask):
+    """
+    How many of the ISSN in K10Plus are indexed in finc?
+
+    CSV list: https://is.gd/AW3bCB
+    """
+
+    ai = luigi.Parameter(default="http://localhost:8983/solr/biblio")
+    finc = luigi.Parameter(default="http://localhost:8983/solr/biblio")
+
+    def run(self):
+        r = requests.get("https://is.gd/AW3bCB")
+        with self.output().open("w") as output:
+            for line in r.text.split('\n'):
+                try:
+                    issn, count = line.split(',')
+
+                    results = {}
+
+                    results['ai'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" %
+                                                 (self.ai, issn))
+                    if results['ai'].status_code != 200:
+                        raise RuntimeError(
+                            "ai reponded with %s" % rr.status_code)
+
+                    results['finc'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" %
+                                                   (self.finc, issn))
+                    if results['finc'].status_code != 200:
+                        raise RuntimeError(
+                            "finc reponded with %s" % rr.status_code)
+
+                    output.write_tsv(issn, count,
+                                     str(results['ai'].json().get(
+                                         "response").get("numFound")),
+                                     str(results['finc'].json().get(
+                                         "response").get("numFound")),
+                                     )
+
+                except ValueError as exc:
+                    self.logger.debug(exc)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
