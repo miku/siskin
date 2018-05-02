@@ -12,11 +12,13 @@ import marcx
 import xmltodict
 
 lang_map = {
+    "": "ger",
+    "de": "ger",
     "deu": "ger"
 }
 
 # Default input and output.
-inputfilename = "73_input.xml" 
+inputfilename = "73_input_datacite.xml" 
 outputfilename = "73_output.mrc"
 
 if len(sys.argv) == 3:
@@ -28,7 +30,6 @@ xmlfile = inputfile.read()
 xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
-    
     marcrecord = marcx.Record(force_utf8=True)
 
     # Leader
@@ -38,7 +39,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     f001 = xmlrecord["header"]["identifier"]
     f001 = f001.encode("utf-8")
     f001 = base64.b64encode(f001)
-    f001 = f001.decode("ascii")
+    f001 = f001.decode("ascii").rstrip("=")
     marcrecord.add("001", data="finc-73-" + f001)
 
     # 007
@@ -46,38 +47,52 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # ISSN
     try:
-        f022 = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:source", "")
-        f022a = f022[1]
-        # elektronisch
-        marcrecord.add("022", a=f022a)
-        # print
-        f022a = f022[2]
-        marcrecord.add("022", a=f022a)
-    except:
-        pass
+        identifiers = xmlrecord.get("metadata").get("dcite:resource").get("dcite:relatedIdentifiers").get("dcite:relatedIdentifier")
+        for identifier in identifiers:
+            if identifier["@relatedIdentifierType"] == "ISSN":
+                f022a = identifier["#text"]    
+                marcrecord.add("022", a=f022a)
+                break
+    except Exception as exc:
+        raise
 
     # Sprache
     try:
-        language = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:language", "")
+        language = xmlrecord.get("metadata").get("dcite:resource").get("dcite:language", "")
         f041a = lang_map.get(language, "")
         if f041a != "":
             marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
             marcrecord.add("041", a=f041a)          
         else:
             print("Die Sprache %s fehlt in der Lang_Map!" % language)
-    except:
-        pass
+    except Exception as exc:
+        print(exc, file=sys.stderr)
 
     # 1. Urheber
     try:
-        f100a = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:creator", "")
-        marcrecord.add("100", a=f100a)
-    except:
-        pass
+        f100a = xmlrecord.get("metadata").get("dcite:resource").get("dcite:creators").get("dcite:creator")        
+    except Exception as exc:
+        f100a = ""
+        print(type(f100a))    
+    if isinstance(f100a, list):
+        f100a = f100a[0]
+    elif isinstance(f100a, dict):
+        f100a = f100a["dcite:creatorName"]["#text"]
+    elif isinstance(f100a, str):
+        print(f100a)
+    marcrecord.add("100", a=f100a)
 
     # Haupttitel, Titelzusatz, Verantwortlichenangabe
     try:
-        f245 = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:title", "").get("#text")
+        f245 = xmlrecord.get("metadata").get("dcite:resource").get("dcite:titles").get("dcite:title")
+        
+        if "MEDIENwissenschaft: Rezensionen | Reviews" in f245: # überspringt Gesamtaufnahmen der Zeitschriftehefte
+            continue
+
+        if not isinstance(f245, str):
+            print("245 is not a string: %s" % (f245), file=sys.stderr)
+            continue
+        
         f245 = f245.split(":")
         f245a = f245[0] 
         f245a = f245a.strip(" ")
@@ -91,61 +106,62 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         else:
             f245b = ""        
         marcrecord.add("245", a=f245a, b=f245b.rstrip(" : "))
-    except:
+    except Exception as exc:
+        print("%s: %s" % (f245, exc), file=sys.stderr)
         continue
 
     # Erscheinungsvermerk
-    f260c = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:date", "")
-    regexp = re.search("(\d\d\d\d)", f260c)
-    if regexp:
-        f260c = regexp.group(1)
+    f260c = xmlrecord.get("metadata").get("dcite:resource").get("dcite:publicationYear")   
     publisher = ["a", "Marburg", "b", " : " + "Schüren Verlag, ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
+    # Rechtehinweis
+    try:
+        f500a = xmlrecord.get("metadata").get("dcite:resource").get("dcite:rightsList")
+        if f500a:
+            f500a = f500a.get("dcite:rights")
+            f500a = f500a[0]
+            marcrecord.add("500", a=f500a)
+    except Exception as exc:
+        raise
+
     # Schlagwort
     try:
-        f689a = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:subject", "").get("#text")
-        marcrecord.add("689", a=f689a)
-    except:
-        pass
+        f650a = xmlrecord.get("metadata").get("dcite:resource").get("dcite:subjects")
+        if f650a:
+            f650a = f650a.get("dcite:subject")
+            if isinstance(f650a, list):
+                for subject in f650a:
+                    if subject:
+                        marcrecord.add("650", a=subject)
+            else:
+                marcrecord.add("650", a=f650a)
+    except Exception as exc:
+        raise
 
     # übergeordnete Ressource
-    f773 = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:source", "")
-    f773 = f773[0]
-    f773g = f773.get("#text")
-
-    regexp1 = re.search("Nr\.\s(\d.*?)\s\((\d\d\d\d)\);\s(\d+)", f773g)
-    regexp2 = re.search(";\s(\d\d\d\d):\s(.*?);\s(\d+)", f773g)
-
-    if regexp1:  
-        issue = regexp1.group(1)
-        year =  regexp1.group(2)
-        startpage= regexp1.group(3)
-        f773g = "(%s) Heft %s, S. %s-" % (year, issue, startpage)    
-        marcrecord.add("773", g=f773g, t="MEDIENwissenschaft: Rezensionen | Reviews")
-    elif regexp2:       
-        year =  regexp2.group(1)
-        issue = regexp2.group(2)
-        startpage= regexp2.group(3)
-        f773g = "(%s), %s, S. %s-" % (year, issue, startpage)    
-        marcrecord.add("773", g=f773g, t="MEDIENwissenschaft: Rezensionen | Reviews")       
-    else:
-        print("Regexp konnte nicht gelesen werden: %s" % f773)
-    
+    f773g = xmlrecord.get("metadata").get("dcite:resource").get("dcite:publicationYear")
+    marcrecord.add("773", g="(" + f773g + ")", t="MEDIENwissenschaft: Rezensionen | Reviews")       
+       
     # Link zur Ressource
-    f856u = xmlrecord.get("metadata").get("oai_dc:dc").get("dc:relation", "")
-    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+    try:
+        identifiers = xmlrecord.get("metadata").get("dcite:resource").get("dcite:relatedIdentifiers").get("dcite:relatedIdentifier")
+        for identifier in identifiers:
+            if identifier["@relatedIdentifierType"] == "URL":
+                f856u = identifier["#text"]
+                marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+                break
+    except Exception as exc:
+        raise
 
     # Medienform
     marcrecord.add("935", b="cofz")
-
+    
     # Kollektion
-    # marcrecord.add("980", a=f001, b="73", c="Medienwissenschaft, Rezensionen, Reviews")
     marcrecord.add("980", a=f001, b="73", c="MedienwRezensionen")
 
     
     outputfile.write(marcrecord.as_marc())
-
 
 inputfile.close()
 outputfile.close()
