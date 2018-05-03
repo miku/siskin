@@ -214,7 +214,7 @@ class K10Matches(AdhocTask):
                                          "response").get("numFound")),
                                      )
 
-                except ValueError as exc:
+                except Exception as exc:
                     self.logger.debug(exc)
 
     def output(self):
