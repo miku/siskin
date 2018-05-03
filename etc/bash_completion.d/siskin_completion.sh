@@ -33,6 +33,7 @@ _siskin_task_names()
 }
 
 complete -F _siskin_task_names taskcat
+complete -F _siskin_task_names taskdeps
 complete -F _siskin_task_names taskdeps-dot
 complete -F _siskin_task_names taskdir
 complete -F _siskin_task_names taskdo
