@@ -24,11 +24,23 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Turn task dependencies into pretty graphs.
+Usage: taskdeps TASKNAME
 
-Usage: taskdeps-dot TASKNAME
+Example output:
 
-Example outputs images: http://imgur.com/a/12Dag, http://i.imgur.com/8bFvSvN.gif
+$ taskdeps JstorIntermediateSchema
+  └─ JstorIntermediateSchema(date=2018-05-03)
+      └─ AMSLService(date=2018-05-03, name=outboundservices:discovery)
+      └─ JstorCollectionMapping(date=2018-05-03)
+      └─ JstorIntermediateSchemaGenericCollection(date=2018-05-03)
+          └─ Executable(name=span-import, message=http://git.io/vI8NV)
+          └─ JstorXML(date=2018-05-03)
+              └─ JstorLatestMembers(date=2018-05-03, version=2)
+                  └─ JstorMembers(date=2018-05-03)
+                      └─ JstorPaths(date=2018-05-03)
+                          └─ FTPMirror(host=example.com, username=xxxx, password=xxxx, pattern=*, base=., indicator=JsJcPTUicYqGhCRG)
+                              └─ Executable(name=lftp, message=http://lftp.yar.ru/)
+
 """
 
 from __future__ import print_function
@@ -60,6 +72,9 @@ def sanitize(s):
 
 
 def dump(root=None, indent=0, output=None):
+    """
+    Taken from https://git.io/vp2zB.
+    """
     output.write('%s  └─ %s\n' % ('    ' * indent, root))
     for dep in sorted(g[root]):
         dump(root=dep, indent=indent + 1, output=output)
