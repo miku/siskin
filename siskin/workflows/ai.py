@@ -459,8 +459,11 @@ class AILicensing(AITask):
 
     def requires(self):
         jourfixe = datetime.date(self.date.year, self.date.month, 15)
+
         if self.date.day < 15:
-            jourfixe = jourfixe - relativedelta(month=1)
+            jourfixe = jourfixe + relativedelta(months=-1)
+
+        self.logger.debug("AILicensing jour-fixe at %s", jourfixe)
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
