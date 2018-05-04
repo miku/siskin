@@ -53,7 +53,7 @@ for csv_record in csv_records.iterrows():
     marc_record.add("935", b=csv_record["935b"], c=csv_record["935c"])
 
     # Kollektion
-    marc_record.add("980", a=f001, b="160", c="diplspowi")
+    marc_record.add("980", a=str(csv_record["001"], b="160", c="diplspowi")
 
 
     writer.write(marc_record)
