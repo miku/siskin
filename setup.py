@@ -57,6 +57,7 @@ install_requires = [
     'lxml>=3.4.2',
     'marcx>=0.2.9',
     'nose>=1.3.3',
+    'pandas>=0.20.0',
     'parso>=0.2.0',
     'ply>=3.4',
     'prettytable>=0.7.2',
