@@ -65,6 +65,24 @@ class SSOARHarvest(SSOARTask):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
+class SSOARMARC(SSOARTask):
+    """
+    Use RS script for conversion, refs #12686.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return SSOARHarvest(date=self.date)
+
+    def run(self):
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets('30/30_marcbinary.py'), input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+
 class SSOARIntermediateSchema(SSOARTask):
     """
     Convert to intermediate schema via metafacture. Custom morphs and flux are
