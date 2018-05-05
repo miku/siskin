@@ -142,6 +142,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # In den anderen Fällen ist es so sehr Kraut und Rüben, dass hier bloß das Erscheinungsjahr angegeben und der Rest weggelassen wird.
     # Andenfalls fällt die Datenqualität zu sehr ab.
     f260 = get_field("dc:publisher")    
+    f260c = ""
     if isinstance(f260, list) and len(f260) == 4:
         f260a = f260[3]
         f260b = f260[0]
