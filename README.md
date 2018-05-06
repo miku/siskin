@@ -1,8 +1,9 @@
 siskin
 ======
 
-Various tasks for heterogeneous metadata handling. Based on
-[luigi](https://github.com/spotify/luigi) from Spotify.
+Various tasks for heterogeneous metadata handling for Project
+[finc](https://finc.info). Based on [luigi](https://github.com/spotify/luigi)
+from Spotify.
 
 [![pypi version](https://badge.fury.io/py/siskin.png)](https://pypi.python.org/pypi/siskin)
 
