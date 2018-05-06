@@ -114,11 +114,47 @@
       </data>
       <!-- <data source="_id" name="rft.date"><constant value="0000"/></data> -->
     </choose>
+
+    <choose>
+      <data source="260  .c" name="x.date">
+        <regexp match="^\d\d\d\d"/>
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="264  .c" name="x.date">
+        <regexp match="^\d\d\d\d"/>
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="24500.a" name="x.date">
+        <regexp match=".*(\d\d\d\d).*" format="${2}" />
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="24633.a" name="x.date">
+        <regexp match=".*(\d\d\d\d).*" format="${2}" />
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="500  .a" name="x.date">
+        <regexp match=".*[(](\d\d\d\d)[)].*" format="${2}" />
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="77318.g" name="x.date">
+        <regexp match="year:(\d\d\d\d).*" format="${2}" />
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="4900 .v" name="x.date">
+        <regexp match="(\d\d\d\d)" format="${2}" />
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+      <data source="85640.u" name="x.date">
+        <regexp match="-(\d\d\d\d)-" format="${2}" />
+        <compose postfix="-01-01T00:00:00Z"/>
+      </data>
+    </choose>
+
     <!-- x.Date -->
-    <data source="260  .c" name="x.date">
+    <!-- <data source="260  .c" name="x.date">
       <regexp match="^\d\d\d\d"/>
       <compose postfix="-01-01T00:00:00Z"/>
-    </data>
+    </data> -->
     <!-- DOI -->
     <data source="0247 .a" name="doi">
       <regexp match="(10[.][0-9].*/.*)$" format="${1}" />
