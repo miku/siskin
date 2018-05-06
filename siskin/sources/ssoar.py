@@ -94,9 +94,8 @@ class SSOARIntermediateSchema(SSOARTask):
         return SSOARHarvest(date=self.date)
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("30/30.flux"), mapdir=mapdir, input=self.input().path)
+        output = shellout("""span-import -i ssoar {input} > {output}""",
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
