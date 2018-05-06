@@ -833,10 +833,12 @@ class AIApplyOpenAccessFlag(AITask):
         Python: 500k recs/min, Go (span-oa-filter): 2.5M recs/min, refs #11285#note-17, refs #11969.
 
         XXX: Testing: Adjust filtered file with data from AMSLFreeContent.
+
+        Exclude 48 explicitlty (span 0.1.225 and later) with -xsid, refs #12738.
         """
 
         output = shellout("""unpigz -c {input} |
-                             span-oa-filter -f {kbart} -fc {amslfc} |
+                             span-oa-filter -xsid 48 -f {kbart} -fc {amslfc} |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path,
