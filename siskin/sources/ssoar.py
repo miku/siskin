@@ -94,7 +94,7 @@ class SSOARIntermediateSchema(SSOARTask):
         return SSOARHarvest(date=self.date)
 
     def run(self):
-        output = shellout("""span-import -i ssoar {input} > {output}""",
+        output = shellout("""span-import -i ssoar {input} | pigz -c > {output}""",
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
