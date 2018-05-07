@@ -64,6 +64,7 @@ from siskin.sources.crossref import (CrossrefDOIList,
 from siskin.sources.degruyter import (DegruyterDOIList,
                                       DegruyterIntermediateSchema,
                                       DegruyterISSNList)
+from siskin.sources.disson import DissonIntermediateSchema
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
@@ -292,6 +293,7 @@ class AIIntermediateSchema(AITask):
             ArxivIntermediateSchema(date=self.date, stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
+            DissonIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
