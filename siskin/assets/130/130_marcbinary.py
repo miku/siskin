@@ -101,7 +101,7 @@ for record in records:
     f500a = ""
     f650a = ""
     f700e = ""
-    f972h = ""
+    f866a = ""
     format1 = ""
     format2 = ""
     subjects = []
@@ -236,9 +236,9 @@ for record in records:
                         corporates.append(f710a)
                         break
 
-        #Bestandsnachweis (972h)       
-        f972h = f001.lstrip("0")
-        f972h = hierarchymap.get(f972h, "")    
+        #Bestandsnachweis (866a)       
+        f866a = f001.lstrip("0")
+        f866a = hierarchymap.get(f866a, "")    
 
         if format1 == "":
             format1 = get_field("052")
@@ -320,9 +320,9 @@ for record in records:
         marcrecord.add("700", a=person, e=f700e)
     for corporate in corporates:
         marcrecord.add("710", a=corporate)
+    f866a = "; ".join(f866a)
+    marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
-    f972h = "; ".join(f972h)
-    marcrecord.add("972", h=f972h)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
   
     outputfile.write(marcrecord.as_marc())
