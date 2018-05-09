@@ -25,11 +25,12 @@ Example:
 import argparse
 import json
 import logging
+import sys
 
 import requests
 from six.moves.urllib.parse import urlencode
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S')
 
@@ -76,9 +77,34 @@ if __name__ == '__main__':
     parser.add_argument("--server", "-r", type=str, default="http://localhost:8983/solr/biblio")
     parser.add_argument("--field", "-f", type=str, default="format")
     parser.add_argument("--source-id", "-s", type=str, default="49")
+    parser.add_argument("--all", action="store_true", help="Run all queries from #12756#note-2")
+
     args = parser.parse_args()
 
     solr = Solr(server=args.server)
+
+    if args.all:
+        source_ids = (28, 30, 34, 48, 49, 50, 53, 55, 60, 85, 87, 89, 101, 105)
+        fields = (
+            'format',
+            'format_de15',
+            'facet_avail',
+            'access_facet',
+            'author_facet',
+            'publishDateSort',
+            'language',
+            'mega_collection',
+            'finc_class_facet',
+        )
+
+        for source_id in source_ids:
+            query = "source_id:%s" % (source_id)
+            for field in fields:
+                resp = solr.facets(field=field, q=query)
+                for name, count in facet_response_values(resp):
+                    print("%s\t%s" % (name, count))
+
+        sys.exit(0)
 
     query = "source_id:%s" % (args.source_id)
     resp = solr.facets(field=args.field, q=query)
