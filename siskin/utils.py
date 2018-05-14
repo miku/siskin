@@ -235,6 +235,9 @@ class URLCache(object):
     requests for the same URL, the last one wins. Raises exception on any HTTP
     status >= 400. Retries supported.
 
+    It is not very efficient, as it creates lots of directories.
+    > 396140 directories, 334024 files ... ...
+
     >>> cache = URLCache()
     >>> cache.get_cache_file("https://www.google.com")
     /tmp/ef/7e/fc/ef7efc9839c3ee036f023e9635bc3b056d6ee2d
