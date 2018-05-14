@@ -134,7 +134,7 @@ def dictcheck(obj, contains=None, absent=None):
     the same time it does not contain values for keys, which are given in
     `absent`.
 
-    >>> diccheck({"name": "x"}, contains=["name"])
+    >>> dictcheck({"name": "x"}, contains=["name"])
     True
 
     >>> dictcheck({"name": "x"}, contains=["name"], absent=["key"])
