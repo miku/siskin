@@ -327,10 +327,10 @@ def scrape_html_listing(url, with_head=False):
 
     # Find base url to prepend on relative links.
     pr = urlparse(url)
-    pr._replace(path=os.path.dirname(pr.path))
-    pr._replace(params="")
-    pr._replace(query="")
-    pr._replace(fragment="")
+    pr = pr._replace(path=os.path.dirname(pr.path))
+    pr = pr._replace(params="")
+    pr = pr._replace(query="")
+    pr = pr._replace(fragment="")
     baseurl = pr.geturl()
 
     r = requests.get(url)
