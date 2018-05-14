@@ -248,6 +248,8 @@ class URLCache(object):
 
     >>> cache.is_cached("https://www.google.com")
     True
+
+    >>> page = cache.get("https://www.google.com", force=True) # Always download.
     """
 
     def __init__(self, directory=None, max_tries=12):
@@ -285,7 +287,7 @@ class URLCache(object):
     def is_cached(self, url):
         return os.path.exists(self.get_cache_file(url))
 
-    def get(self, url):
+    def get(self, url, force=False):
         """
         Return URL, either from cache or the web.
         """
@@ -302,7 +304,7 @@ class URLCache(object):
                 output.write(r.text.encode('utf-8'))
             os.rename(output.name, self.get_cache_file(url))
 
-        if not self.is_cached(url):
+        if not self.is_cached(url) or force is True:
             fetch(url)
 
         with open(self.get_cache_file(url)) as handle:
