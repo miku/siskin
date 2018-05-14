@@ -155,8 +155,8 @@ def dictcheck(obj, contains=None, absent=None):
         raise ValueError('dictionary only')
     if contains is None:
         contains = []
-    if missing is None:
-        missing = []
+    if absent is None:
+        absent = []
 
     for key in contains:
         if key not in obj:
@@ -164,7 +164,7 @@ def dictcheck(obj, contains=None, absent=None):
         if not bool(operator.itemgetter(key)(obj)):
             return False
 
-    for key in missing:
+    for key in absent:
         if key not in obj:
             continue
         if bool(operator.itemgetter(key)(obj)):
