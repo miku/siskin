@@ -24,7 +24,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-IMSLP, refs #1240.
+IMSLP, refs #1240, #13055.
 
 Config
 ------
@@ -32,17 +32,20 @@ Config
 [imslp]
 
 url = http://example.com/imslpOut_2016-12-25.tar.gz
+listings-url = http://example.com/export/
 """
 
 import datetime
+import os
 import shutil
 import tempfile
 
 import luigi
+
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.task import DefaultTask
+from siskin.utils import scrape_html_listing
 
 
 class IMSLPTask(DefaultTask):
@@ -51,7 +54,6 @@ class IMSLPTask(DefaultTask):
 
     def closest(self):
         return datetime.date(2017, 12, 25)
-
 
 class IMSLPDownload(IMSLPTask):
     """ Download raw data. Should be a single URL pointing to a tar.gz. """
@@ -66,21 +68,41 @@ class IMSLPDownload(IMSLPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tar.gz'))
 
-
 class IMSLPDownloadNext(IMSLPTask):
     """
-    Download raw data, roughly once per month. Should be a tar.gz.
+    Download raw data. Actually keeps the original filename. Should be a tar.gz.
     """
 
-    date = ClosestDateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def latest_link(self):
+        listings_url = self.config.get("imslp", "listings-url")
+        links = sorted([link for link in scrape_html_listing(listings_url)
+                        if "imslpOut_" in link])
+
+        self.logger.debug("found %s links on IMSLP download site", len(links))
+
+        # Use only the last version for now.
+        if len(links) == 0:
+            raise ValueError("could not find any links of IMSLP download site: %s",
+                             listings_url)
+
+        return links[-1]
 
     def run(self):
-        raise NotImplementedError(
-            "use pattern: imslpOut_YYYY-MM-DD.tar.gz, could be any day of the month")
+        """
+        Assume, links are sortable, the last item should contain the latest link.
+        XXX: Do not download, if not newer than last downloaded file.
+        """
+        most_recent = self.latest_link()
+        self.logger.debug("most recent package seem to be: %s", most_recent)
+        output = shellout(""" wget -O {output} "{url}" """, url=most_recent)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tar.gz'))
-
+        filename = os.path.basename(self.latest_link())
+        dst = os.path.join(self.taskdir(), filename)
+        return luigi.LocalTarget(path=dst)
 
 class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     """
@@ -101,7 +123,6 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
-
 
 class IMSLPConvertNext(IMSLPTask):
     """
@@ -135,7 +156,6 @@ class IMSLPConvertNext(IMSLPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
-
 
 class IMSLPConvert(IMSLPTask):
     """
