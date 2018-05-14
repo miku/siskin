@@ -37,6 +37,7 @@ legacy-mapping = /path/to/json.file
 """
 
 import datetime
+import json
 import os
 import shutil
 import tempfile
@@ -47,7 +48,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 from siskin.utils import scrape_html_listing
-
+from siskin.conversions import imslp_tarball_to_marc
 
 class IMSLPTask(DefaultTask):
     """ Base task for IMSLP. """
@@ -113,13 +114,12 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
 
     This is a fixed file.
 
-    Example:
-
         {
             "fantasiano10mudarraalonso": {
                 "title": "Fantasie No.10",
                 "viaf": "(VIAF)100203803"
-            }
+            },
+            ...
         }
     """
 
@@ -133,7 +133,6 @@ class IMSLPConvertNext(IMSLPTask):
     WIP, refs #12288, refs #13055.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    debug = luigi.BoolParameter(description='do not delete temporary folder')
 
     def requires(self):
         return {
@@ -143,17 +142,13 @@ class IMSLPConvertNext(IMSLPTask):
 
     def run(self):
         """
-        TODO: add --legacy-mapping flag to 15_marcbinary.py
+        Load mapping, convert, write.
         """
-        tempdir = tempfile.mkdtemp(prefix='siskin-')
-        shellout("tar -xzf {archive} -C {tempdir}",
-                 archive=self.input().path, tempdir=tempdir)
-        output = shellout("python {script} --legacy-mapping {mapping} {tempdir} {output}",
-                          script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
-        if not self.debug:
-            shutil.rmtree(tempdir)
-        else:
-            self.logger.debug("not deleting temporary folder at %s", tempdir)
+        with self.input().get("legacy-mapping").open() as handle:
+            mapping = json.load(handle)
+
+        output = imslp_tarball_to_marc(self.input().get("data").path,
+                                       legacy_mapping=mapping)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
