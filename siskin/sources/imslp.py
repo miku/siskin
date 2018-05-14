@@ -153,7 +153,9 @@ class IMSLPConvertNext(IMSLPTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+        filename = os.path.basename(self.latest_link())
+        dst = os.path.join(self.taskdir(), filename.replace("tar.gz", "fincmarc.mrc"))
+        return luigi.LocalTarget(path=dst)
 
 class IMSLPConvert(IMSLPTask):
     """
