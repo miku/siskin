@@ -44,10 +44,12 @@ import string
 import sys
 import tempfile
 from builtins import map, object, range, zip
-
+import re
+import bs4
 import luigi
 import requests
 from future import standard_library
+from six.moves.urllib.parse import urlparse
 
 import backoff
 from dateutil import relativedelta
@@ -298,3 +300,55 @@ class URLCache(object):
 
         with open(self.get_cache_file(url)) as handle:
             return handle.read()
+
+def scrape_html_listing(url, with_head=False):
+    """
+    Given a URL to a webpage, try to create a JSON representation of files on
+    the page.
+
+        >>> scrape_html_listing("https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/")
+        ['https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/BFieldPictures.doc',
+         'https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/BFieldPictures.pdf',
+         ...
+        ]
+
+    Will fail if the request fails. If parsing fails, return empty list.
+    Optionally, only include links in the list which return something ok on
+    HTTP HEAD - which might take a while.
+    """
+    filelike_p = re.compile(r"[0-9-_\w.]*[.][a-z0-9]{2,4}")
+
+    # Find base url to prepend on relative links.
+    pr = urlparse(url)
+    pr._replace(path=os.path.dirname(pr.path))
+    pr._replace(params="")
+    pr._replace(query="")
+    pr._replace(fragment="")
+    baseurl = pr.geturl()
+
+    r = requests.get(url)
+    if r.status_code >= 400:
+        raise RuntimeError("fetch failed with %s: %s", r.status_code, url)
+
+    soup = bs4.BeautifulSoup(r.text)
+    links = set()
+
+    for a in soup.find_all("a"):
+        match = filelike_p.search(a.get("href"))
+        if not match:
+            continue
+
+        fn = match.group()
+
+        # Probably an absolute location.
+        if fn.startswith("http") or fn.startswith("/"):
+            if not with_head or requests.head(fn).status_code < 400:
+                links.add(fn)
+            continue
+
+        # Probably a relative link.
+        link = os.path.join(baseurl, fn)
+        if not with_head or requests.head(link).status_code < 400:
+            links.add(link)
+
+    return sorted(links)
