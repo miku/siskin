@@ -345,9 +345,9 @@ def scrape_html_listing(url, with_head=False):
         if not match:
             continue
 
+        # This might be an absolute link or just a filename.
         link = match.group()
-        if not fn.startswith("http") and not fn.startswith("/"):
-            # Probably relative.
+        if not link.startswith("http") and not link.startswith("/"):
             link = os.path.join(baseurl, link)
         if not with_head or requests.head(link).status_code < 400:
             links.add(link)
