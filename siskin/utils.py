@@ -177,6 +177,13 @@ def get_task_import_cache():
     """
     Load `taskname: modulename` mappings from dictionary. Return a tuple containing
     the dictionary and the path to the cache file.
+
+    The command line entry points (e.g. taskdo and friends) need to import all
+    modules in order to find a task. The import process actually takes a while,
+    so the import cache shortens the startup time of the command line tools by
+    only importing the module the given task is in.
+
+    It is save to remove the path returned by `taskimportcache` at any time.
     """
     task_import_cache = None
     path = os.path.join(tempfile.gettempdir(),
