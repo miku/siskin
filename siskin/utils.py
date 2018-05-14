@@ -128,28 +128,28 @@ def nwise(iterable, n=2):
         piece = tuple(itertools.islice(i, n))
 
 
-def dictcheck(obj, contains=None, missing=None):
+def dictcheck(obj, contains=None, absent=None):
     """
-
-    Check if a dictionary contains values for the keys given in contains and at
+    Check if a dictionary contains values for the keys given in `contains` and at
     the same time it does not contain values for keys, which are given in
-    missing.
+    `absent`.
 
-    >>> dictcheck({"name": "x"}, contains=["name"])
+    >>> diccheck({"name": "x"}, contains=["name"])
     True
 
-    >>> dictcheck({"name": "x"}, contains=["name"], missing=["key"])
+    >>> dictcheck({"name": "x"}, contains=["name"], absent=["key"])
     True
 
-    >>> dictcheck({"name": "x", "key": "1234"}, contains=["name"], missing=["key"])
+    >>> dictcheck({"name": "x", "key": "1234"}, contains=["name"], absent=["key"])
     False
 
-    >>> dictcheck({"key": None}, missing=["key"])
+    >>> dictcheck({"key": None}, absent=["key"])
     True
 
-    >>> dictcheck({}, missing=["key"])
+    >>> dictcheck({}, absent=["key"])
     True
 
+    This is a helper for AMSL-API cases (https://git.io/vpHgS).
     """
     if not isinstance(obj, dict):
         raise ValueError('dictionary only')

@@ -781,7 +781,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    -    -    -     -
             if dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL'],
-                         missing=['linkToHoldingsFile',
+                         absent=['linkToHoldingsFile',
                                   'linkToContentFile',
                                   'externalLinkToContentFile',
                                   'productISIL']):
@@ -792,7 +792,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    -    -    -     X
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'productISIL'],
-                           missing=['linkToHoldingsFile',
+                           absent=['linkToHoldingsFile',
                                     'linkToContentFile',
                                     'externalLinkToContentFile']):
 
@@ -807,7 +807,7 @@ class AMSLFilterConfig(AMSLTask):
                                            'ISIL',
                                            'linkToHoldingsFile',
                                            'productISIL'],
-                           missing=['linkToContentFile', 'externalLinkToContentFile']):
+                           absent=['linkToContentFile', 'externalLinkToContentFile']):
 
                 self.logger.debug("productISIL is set, but we do not have a filter for it yet: %s, %s, %s",
                                   isil, sid, mega_collection)
@@ -823,7 +823,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    X    -    -     -
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile'],
-                           missing=['linkToContentFile',
+                           absent=['linkToContentFile',
                                     'externalLinkToContentFile',
                                     'productISIL']):
 
@@ -838,7 +838,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    -    -    X     -
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'externalLinkToContentFile'],
-                           missing=['linkToHoldingsFile',
+                           absent=['linkToHoldingsFile',
                                     'linkToContentFile',
                                     'productISIL']):
 
@@ -856,7 +856,7 @@ class AMSLFilterConfig(AMSLTask):
                                            'megaCollection',
                                            'ISIL',
                                            'linkToContentFile'],
-                           missing=['linkToHoldingsFile',
+                           absent=['linkToHoldingsFile',
                                     'externalLinkToContentFile',
                                     'productISIL']):
 
@@ -874,7 +874,7 @@ class AMSLFilterConfig(AMSLTask):
                                            'ISIL',
                                            'linkToHoldingsFile',
                                            'externalLinkToContentFile'],
-                           missing=['linkToContentFile', 'productISIL']):
+                           absent=['linkToContentFile', 'productISIL']):
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
                     isilfilters[isil].append({
@@ -897,7 +897,7 @@ class AMSLFilterConfig(AMSLTask):
                                            'ISIL',
                                            'linkToHoldingsFile',
                                            'linkToContentFile'],
-                           missing=['externalLinkToContentFile', 'productISIL']):
+                           absent=['externalLinkToContentFile', 'productISIL']):
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
                     isilfilters[isil].append({
