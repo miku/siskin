@@ -95,6 +95,8 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     Convert a string containing a single IMSLP record to MARC.
 
     Optionally take a legacy mapping, mappings identifiers to VIAF identifiers.
+
+    Blueprint: https://git.io/vpQPd
     """
     dd = xmltodict.parse(s, force_list={"subject"})
    
