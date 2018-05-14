@@ -338,16 +338,10 @@ def scrape_html_listing(url, with_head=False):
         if not match:
             continue
 
-        fn = match.group()
-
-        # Probably an absolute location.
-        if fn.startswith("http") or fn.startswith("/"):
-            if not with_head or requests.head(fn).status_code < 400:
-                links.add(fn)
-            continue
-
-        # Probably a relative link.
-        link = os.path.join(baseurl, fn)
+        link = match.group()
+        if not fn.startswith("http") and not fn.startswith("/"):
+            # Probably relative.
+            link = os.path.join(baseurl, link)
         if not with_head or requests.head(link).status_code < 400:
             links.add(link)
 
