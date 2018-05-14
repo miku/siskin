@@ -33,6 +33,7 @@ Config
 
 url = http://example.com/imslpOut_2016-12-25.tar.gz
 listings-url = http://example.com/export/
+legacy-mapping = /path/to/json.file
 """
 
 import datetime
@@ -76,16 +77,17 @@ class IMSLPDownloadNext(IMSLPTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def latest_link(self):
+        """
+        Find the lastest link on the listing.
+        """
         listings_url = self.config.get("imslp", "listings-url")
         links = sorted([link for link in scrape_html_listing(listings_url)
                         if "imslpOut_" in link])
 
         self.logger.debug("found %s links on IMSLP download site", len(links))
 
-        # Use only the last version for now.
         if len(links) == 0:
-            raise ValueError("could not find any links of IMSLP download site: %s",
-                             listings_url)
+            raise ValueError("could not find any suitable links: %s", listings_url)
 
         return links[-1]
 
