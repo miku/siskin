@@ -75,7 +75,7 @@ def dump(root=None, indent=0, output=None):
     """
     Taken from https://git.io/vp2zB.
     """
-    output.write('%s  └─ %s\n' % ('    ' * indent, root))
+    output.write(u'%s  └─ %s\n' % ('    ' * indent, root))
     for dep in sorted([str(task) for task in g[root]]):
         dump(root=dep, indent=indent + 1, output=output)
 
