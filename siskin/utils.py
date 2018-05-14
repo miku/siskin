@@ -312,9 +312,9 @@ def scrape_html_listing(url, with_head=False):
          ...
         ]
 
-    Will fail if the request fails. If parsing fails, return empty list.
+    Will fail if the request fails. If parsing fails, return an empty list.
     Optionally, only include links in the list which return something ok on
-    HTTP HEAD - which might take a while.
+    HTTP HEAD (might take a while).
     """
     filelike_p = re.compile(r"[0-9-_\w.]*[.][a-z0-9]{2,4}")
 
