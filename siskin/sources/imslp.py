@@ -55,7 +55,23 @@ class IMSLPTask(DefaultTask):
     TAG = "15"
 
     def closest(self):
+        """ XXX: adjust. """
         return datetime.date(2017, 12, 25)
+
+    def latest_link(self):
+        """
+        Find the lastest link on the listing.
+        """
+        listings_url = self.config.get("imslp", "listings-url")
+        links = sorted([link for link in scrape_html_listing(listings_url)
+                        if "imslpOut_" in link])
+
+        self.logger.debug("found %s links on IMSLP download site", len(links))
+
+        if len(links) == 0:
+            raise ValueError("could not find any suitable links: %s", listings_url)
+
+        return links[-1]
 
 class IMSLPDownload(IMSLPTask):
     """ Download raw data. Should be a single URL pointing to a tar.gz. """
@@ -76,21 +92,6 @@ class IMSLPDownloadNext(IMSLPTask):
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
-
-    def latest_link(self):
-        """
-        Find the lastest link on the listing.
-        """
-        listings_url = self.config.get("imslp", "listings-url")
-        links = sorted([link for link in scrape_html_listing(listings_url)
-                        if "imslpOut_" in link])
-
-        self.logger.debug("found %s links on IMSLP download site", len(links))
-
-        if len(links) == 0:
-            raise ValueError("could not find any suitable links: %s", listings_url)
-
-        return links[-1]
 
     def run(self):
         """
