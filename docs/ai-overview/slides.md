@@ -2,7 +2,7 @@ Building Metadata Indices
 =========================
 
 2017-05-17, 12:30-15:00, Leipzig University Library
-[Martin Czygan](martin.czygan@uni-leipzig.de), [Tracy Hoffmann](tracy.hoffmann@uni-leipzig.de), [Robert Schenk](robert.schenk@uni-leipzig.de), et al.
+[Martin Czygan](mailto:martin.czygan@uni-leipzig.de), [Tracy Hoffmann](mailto:tracy.hoffmann@uni-leipzig.de), [Robert Schenk](mailto:robert.schenk@uni-leipzig.de), et al.
 
 ----
 
