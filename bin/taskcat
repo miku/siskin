@@ -51,6 +51,8 @@ if [[ "$OUTPUT" == *mrc ]]; then
     yaz-marcdump "$OUTPUT"
 elif [[ "$OUTPUT" == *gz ]]; then
     fastzcat "$OUTPUT"
+elif [[ "$OUTPUT" == *zip ]]; then
+    unzip -l "$OUTPUT"
 else
     cat "$OUTPUT"
 fi
