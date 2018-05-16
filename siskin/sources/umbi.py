@@ -1,6 +1,6 @@
 # coding: utf-8
 #
-# Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #                   Robert Schenk, <robert.schenk@uni-leipzig.de>#                   
