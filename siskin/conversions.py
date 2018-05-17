@@ -55,13 +55,16 @@ def html_unescape(text):
     return unescape(text, html_unescape_table)
 
 @timed
-def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None):
+def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
+                          max_failures=30):
     """
     Convert an IMSLP tarball to MARC binary without extracting it. Optionally
     write to a outputfile (filename). If outputfile is not given, write to a
     temporary location.
 
     Returns the location of the resulting MARC file.
+
+    A maximum number of failed conversion can be specified with `max_failures`.
     """
     if outputfile is None:
         _, outputfile = tempfile.mkstemp(prefix="siskin-")
@@ -78,14 +81,18 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None):
                                                legacy_mapping=legacy_mapping)
                     writer.write(record)
                 except ValueError as exc:
-                    logger.warn("conversion failed: %s", exc)       
+                    logger.warn("conversion failed: %s", exc)
                     stats["failed"] += 1
                     continue
                 finally:
                     fobj.close()
                     stats["processed"] += 1
 
-        writer.close() 
+        writer.close()
+
+        if stats["failed"] > max_failures:
+            raise Runtime("more than %d record failed", max_failures)
+
         logger.debug("%d/%d record failed/processed", stats["failed"], stats["processed"])
 
     return outputfile
@@ -99,22 +106,22 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     Blueprint: https://git.io/vpQPd
     """
     dd = xmltodict.parse(s, force_list={"subject"})
-   
+
     if legacy_mapping is None:
         legacy_mapping = collections.defaultdict(lambda: collections.defaultdict(str))
 
-    record = marcx.Record(force_utf8=True)  
+    record = marcx.Record(force_utf8=True)
     record.strict = False
 
     doc = dd["document"]
-    
+
     try:
         record.add("245", a=doc["title"])
     except KeyError:
         raise ValueError("cannot find title: %s ..." % s[:300])
 
     record.leader = "     ncs  22        450 "
-    
+
     identifier = doc["identifier"]["#text"]
     record.add("001", data="finc-15-%s".format(identifier))
     record.add("007", data="cr")
@@ -144,13 +151,13 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
         else:
             raise ValueError("cannot handle %d subjects", len(doc["subject"]))
 
-        record.add("590", a=for689[0],
-                   b=doc.get("music_arrangement_of", ""))
+        record.add("590", a=for689[0].title(),
+                   b=doc.get("music_arrangement_of", "").title())
 
         for689.append(doc.get("music_arrangement_of", ""))
-        
+
         for subject in set(for689):
-            record.add("689", a=subject)
+            record.add("689", a=subject.title())
 
     record.add("700", a=doc.get("contributor", {}).get("mainForm", ""), e="ctb")
     record.add("856", q="text/html", _3="Petrucci Musikbibliothek",
