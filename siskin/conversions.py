@@ -64,7 +64,8 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
 
     Returns the location of the resulting MARC file.
 
-    A maximum number of failed conversion can be specified with `max_failures`.
+    A maximum number of failed conversion can be specified with `max_failures`,
+    as of 2018-04-25, there where 30 records w/o title.
     """
     if outputfile is None:
         _, outputfile = tempfile.mkstemp(prefix="siskin-")
