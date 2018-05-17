@@ -102,9 +102,11 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     """
     Convert a string containing a single IMSLP record to MARC.
 
-    Optionally take a legacy mapping, mappings identifiers to VIAF identifiers.
+    Optionally take a legacy mapping, associating IMSLP Names with VIAF
+    identifiers.  Blueprint: https://git.io/vpQPd, with one difference: We
+    allow records with no subjects.
 
-    Blueprint: https://git.io/vpQPd
+    A record w/o title is an error. We check for them, when we add the field.
     """
     dd = xmltodict.parse(s, force_list={"subject"})
 
@@ -115,8 +117,6 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.strict = False
 
     doc = dd["document"]
-
-    # A record w/o title is an error. We check for them, when we add the field.
 
     record.leader = "     ncs  22        450 "
 
@@ -169,3 +169,4 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.add("970", c="PN")
     record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
     return record
+
