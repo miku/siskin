@@ -36,7 +36,6 @@ import xmltodict
 
 import marcx
 import pymarc
-from siskin.benchmark import timed
 
 html_escape_table = {
     '"': "&quot;",
@@ -54,18 +53,16 @@ def html_unescape(text):
     """ Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml"""
     return unescape(text, html_unescape_table)
 
-@timed
 def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
                           max_failures=30):
     """
-    Convert an IMSLP tarball to MARC binary without extracting it. Optionally
-    write to a outputfile (filename). If outputfile is not given, write to a
-    temporary location.
+    Convert an IMSLP tarball to MARC binary output file without extracting it.
+    If outputfile is not given, write to a temporary location.
 
     Returns the location of the resulting MARC file.
 
-    A maximum number of failed conversion can be specified with `max_failures`,
-    as of 2018-04-25, there where 30 records w/o title.
+    A maximum number of failed conversions can be specified with `max_failures`,
+    as of 2018-04-25, there were 30 records w/o title.
     """
     if outputfile is None:
         _, outputfile = tempfile.mkstemp(prefix="siskin-")
@@ -78,13 +75,11 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
             for member in tar.getmembers():
                 fobj = tar.extractfile(member)
                 try:
-                    record = imslp_xml_to_marc(fobj.read(),
-                                               legacy_mapping=legacy_mapping)
+                    record = imslp_xml_to_marc(fobj.read(), legacy_mapping=legacy_mapping)
                     writer.write(record)
                 except ValueError as exc:
                     logger.warn("conversion failed: %s", exc)
                     stats["failed"] += 1
-                    continue
                 finally:
                     fobj.close()
                     stats["processed"] += 1
@@ -92,9 +87,9 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
         writer.close()
 
         if stats["failed"] > max_failures:
-            raise Runtime("more than %d record failed", max_failures)
+            raise RuntimeError("more than %d records failed", max_failures)
 
-        logger.debug("%d/%d record failed/processed", stats["failed"], stats["processed"])
+        logger.debug("%d/%d records failed/processed", stats["failed"], stats["processed"])
 
     return outputfile
 
