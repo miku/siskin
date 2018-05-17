@@ -53,7 +53,7 @@ class COAEBMARC(COAEBTask):
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("161/161_marcbinary.py"),
-                          input=self.config("coaeb", "input"))
+                          input=self.config.get("coaeb", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
