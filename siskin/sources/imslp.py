@@ -73,11 +73,12 @@ class IMSLPTask(DefaultTask):
 
         return links[-1]
 
-class IMSLPDownload(IMSLPTask):
+class IMSLPDownloadDeprecated(IMSLPTask):
     """ Download raw data. Should be a single URL pointing to a tar.gz. """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
+    @deprecated
     def run(self):
         output = shellout("""wget -O {output} {url}""",
                           url=self.config.get('imslp', 'url'))
@@ -86,7 +87,7 @@ class IMSLPDownload(IMSLPTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tar.gz'))
 
-class IMSLPDownloadNext(IMSLPTask):
+class IMSLPDownload(IMSLPTask):
     """
     Download raw data. Actually keeps the original filename. Should be a tar.gz.
     """
@@ -127,7 +128,7 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     def output(self):
         return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
 
-class IMSLPConvertNext(IMSLPTask):
+class IMSLPConvert(IMSLPTask):
     """
     Take a current version of the data plus legacy mapping and convert.
 
@@ -138,7 +139,7 @@ class IMSLPConvertNext(IMSLPTask):
     def requires(self):
         return {
             'legacy-mapping': IMSLPLegacyMapping(),
-            'data': IMSLPDownloadNext(date=self.date),
+            'data': IMSLPDownload(date=self.date),
         }
 
     def run(self):
@@ -157,7 +158,7 @@ class IMSLPConvertNext(IMSLPTask):
         dst = os.path.join(self.taskdir(), filename.replace("tar.gz", "fincmarc.mrc"))
         return luigi.LocalTarget(path=dst)
 
-class IMSLPConvert(IMSLPTask):
+class IMSLPConvertDeprecated(IMSLPTask):
     """
     Extract and transform.
 
@@ -172,8 +173,9 @@ class IMSLPConvert(IMSLPTask):
     debug = luigi.BoolParameter(description='do not delete temporary folder')
 
     def requires(self):
-        return IMSLPDownload(date=self.date)
+        return IMSLPDownloadDeprecated(date=self.date)
 
+    @deprecated
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
         shellout("tar -xzf {archive} -C {tempdir}",
