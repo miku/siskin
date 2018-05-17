@@ -142,7 +142,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # In den anderen Fällen ist es so sehr Kraut und Rüben, dass hier bloß das Erscheinungsjahr angegeben und der Rest weggelassen wird.
     # Andenfalls fällt die Datenqualität zu sehr ab.
     f260 = get_field("dc:publisher")    
-    f260c = ""
     if isinstance(f260, list) and len(f260) == 4:
         f260a = f260[3]
         f260b = f260[0]
@@ -238,9 +237,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Link zu Datensatz und Ressource
     identifiers = get_field("dc:identifier")
     urn = False
-    ssoar = ""
-    if identifiers == "":
-        continue
+    ssoar = ""   
     for identifier in identifiers:
         if identifier:  # Martin fragen, warum hier sonst "argument of type 'NoneType' is not iterable" kommt
                                        
@@ -248,7 +245,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 ssoar = identifier
             elif "urn:nbn" in identifier:
                 marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u="http://nbn-resolving.de/" + identifier)  
-                urn = True                                   
+                urn = True # damit bevorzugt der Permalink angezeigt wird und nicht der Link auf http://www.ssoar ...                           
             elif ".pdf" in identifier:
                 marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=identifier)
    
