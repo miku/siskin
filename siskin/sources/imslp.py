@@ -31,7 +31,6 @@ Config
 
 [imslp]
 
-url = http://example.com/imslpOut_2016-12-25.tar.gz
 listings-url = http://example.com/export/
 legacy-mapping = /path/to/json.file
 """
