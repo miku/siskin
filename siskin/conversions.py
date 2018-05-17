@@ -123,7 +123,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.leader = "     ncs  22        450 "
 
     identifier = doc["identifier"]["#text"]
-    record.add("001", data="finc-15-%s".format(identifier))
+    record.add("001", data="finc-15-{}".format(identifier))
     record.add("007", data="cr")
     language = doc.get("languages", "")
     record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
