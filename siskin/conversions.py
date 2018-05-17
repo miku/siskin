@@ -103,7 +103,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
 
     A record w/o title is an error. We check for them, when we add the field.
     """
-    dd = xmltodict.parse(s, force_list={"subject"})
+    dd = xmltodict.parse(s, force_list={"subject", "languages"})
 
     if legacy_mapping is None:
         legacy_mapping = collections.defaultdict(lambda: collections.defaultdict(str))
@@ -119,10 +119,14 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.add("001", data=u"finc-15-{}".format(identifier))
 
     record.add("007", data="cr")
-    language = doc.get("languages", "")
-    record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
 
-    record.add("041", a=language)
+    if doc.get("languages", []):
+        langs = [l for l in doc["languages"] if l != "unbekannt"]
+        if langs:
+            record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % langs[0])
+            for l in langs:
+                record.add("041", a=l)
+
     creator = doc["creator"]["mainForm"]
     record.add("100", a=creator, e="cmp",
                _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
