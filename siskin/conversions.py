@@ -115,15 +115,13 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
 
     doc = dd["document"]
 
-    try:
-        record.add("245", a=doc["title"])
-    except KeyError:
-        raise ValueError("cannot find title: %s ..." % s[:300])
+    # A record w/o title is an error. We check for them, when we add the field.
 
     record.leader = "     ncs  22        450 "
 
     identifier = doc["identifier"]["#text"]
     record.add("001", data=u"finc-15-{}".format(identifier))
+
     record.add("007", data="cr")
     language = doc.get("languages", "")
     record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
@@ -134,7 +132,12 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
                _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
 
     record.add("240", a=legacy_mapping.get(identifier, {}).get("title", ""))
-    record.add("245", a=html_unescape(doc.get("title", "")))
+
+    try:
+        record.add("245", a=html_unescape(doc["title"]))
+    except KeyError:
+        raise ValueError("cannot find title: %s ..." % s[:300])
+
     record.add("246", a=html_unescape(doc.get("additionalTitle", "")))
 
     record.add("260", c=doc.get("date", ""))
