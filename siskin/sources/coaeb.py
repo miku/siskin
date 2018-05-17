@@ -23,7 +23,9 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Cambridge Open Access eBooks, refs #13120
+Cambridge Open Access eBooks, refs #13120.
+
+Download data manually from https://www.cambridge.org/core/services/librarians/marc-records.
 
 Configuration:
 
@@ -51,8 +53,9 @@ class COAEBMARC(COAEBTask):
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("161/161_marcbinary.py"),
-                          input=self.input().path)
+                          input=self.config("coaeb", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
