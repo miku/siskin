@@ -26,6 +26,7 @@
 A new module for conversions. Complement assets.
 """
 
+import base64
 import collections
 import logging
 import tarfile
@@ -116,7 +117,8 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.leader = "     ncs  22        450 "
 
     identifier = doc["identifier"]["#text"]
-    record.add("001", data=u"finc-15-{}".format(identifier))
+    encoded_id = base64.b64encode(identifier.encode("utf-8")).rstrip("=")
+    record.add("001", data=u"finc-15-{}".format(encoded_id))
 
     record.add("007", data="cr")
 
