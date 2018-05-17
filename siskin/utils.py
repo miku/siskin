@@ -28,31 +28,28 @@ Various utilities.
 
 from __future__ import print_function
 
-import collections
 import errno
-import functools
 import hashlib
-import io as StringIO
 import itertools
 import json
 import logging
 import operator
 import os
-import pprint
 import random
+import re
 import string
 import sys
 import tempfile
 from builtins import map, object, range, zip
-import re
+
 import bs4
 import luigi
 import requests
+from dateutil import relativedelta
 from future import standard_library
 from six.moves.urllib.parse import urlparse
 
 import backoff
-from dateutil import relativedelta
 from siskin import __version__
 
 standard_library.install_aliases()
