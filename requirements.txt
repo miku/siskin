@@ -2,7 +2,7 @@ appnope==0.1.0
 args==0.1.0
 astroid==1.6.4
 backoff==1.5.0
-backports.csv==1.0.5
+backports.csv==1.0.6
 beautifulsoup4==4.6.0
 certifi==2018.4.16
 chardet==3.0.4
