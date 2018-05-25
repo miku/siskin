@@ -96,7 +96,7 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
 
 def imslp_xml_to_marc(s, legacy_mapping=None):
     """
-    Convert a string containing a single IMSLP record to MARC.
+    Convert a string containing a single IMSLP record to a pymarc MARC record.
 
     Optionally take a legacy mapping, associating IMSLP Names with VIAF
     identifiers.  Blueprint: https://git.io/vpQPd, with one difference: We
