@@ -67,10 +67,21 @@ Documentation:
 
     $ taskdocs | less -R
 
-Configure
----------
+Remove artefacts of a task:
 
-The installation script adds basic config files. Edit them.
+    $ taskrm DOAJDump
+
+Configuration
+-------------
+
+The siskin package harvests all kinds of data sources, some of which might be
+protected. All credentials and a few other configuration options go into
+`siskin.ini`, either below `/etc/siskin/` or `~/.config/siskin/`.
+
+Luigi uses a bit of configuration as well, put it under `/etc/luigi/`.
+
+Completions on task names will save you typing and time, so put
+`siskin_compeletion.sh` under `/etc/bash_completion.d` or somewhere else.
 
 ```
 #   $ tree etc
@@ -82,6 +93,23 @@ The installation script adds basic config files. Edit them.
 #   │   └── logging.ini
 #   └── siskin
 #       └── siskin.ini
+```
+
+All configuration values can be inspected quickly with:
+
+```
+$ taskconfig
+[core]
+home = /var/siskin
+
+[imslp]
+listings-url = https://example.org/abc
+
+[jstor]
+
+ftp-username = abc
+ftp-password = d3f
+...
 ```
 
 Software versioning
@@ -112,6 +140,26 @@ $ tasknames | grep IntermediateSchema | xargs -I {} taskrm {}
 
 Apart from that, all upstream tasks need to be removed manually (consult the
 [map](https://git.io/v5sdS)) as this is not automatic yet.
+
+Task dependencies
+-----------------
+
+Inspect task dependencies with:
+
+```
+$ taskdeps JstorIntermediateSchema
+  └─ JstorIntermediateSchema(date=2018-05-25)
+      └─ AMSLService(date=2018-05-25, name=outboundservices:discovery)
+      └─ JstorCollectionMapping(date=2018-05-25)
+      └─ JstorIntermediateSchemaGenericCollection(date=2018-05-25)
+```
+
+Or visually via [graphviz](https://www.graphviz.org/).
+
+```
+$ taskdeps-dot JstorIntermediateSchema | dot -Tpng > deps.png
+```
+
 
 Evolving workflows
 ------------------
