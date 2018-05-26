@@ -84,6 +84,7 @@ class ZVDDHarvest(ZVDDTask):
         """
         output = shellout("""oaicrawl -w 12 -retry 5 -e 15s -f {prefix} -b -verbose "{url}" | pigz -c > {output}""",
                           prefix=self.prefix, url=self.url)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='data.gz'), format=Gzip)
