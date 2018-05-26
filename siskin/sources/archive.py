@@ -143,6 +143,7 @@ class ArchiveSearchMetadata(ArchiveTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj', digest=True))
 
+
 class ArchiveTelevisionTexts(ArchiveTask, luigi.WrapperTask):
     """
     Temporary task for harvesting special query from archive, refs #8000.
