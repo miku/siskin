@@ -52,14 +52,12 @@ from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder, nwise, load_set_from_file
 
-
 class JstorTask(DefaultTask):
     """ Jstor base. """
     TAG = 'jstor'
 
     def closest(self):
         return weekly(self.date)
-
 
 class JstorPaths(JstorTask):
     """
@@ -83,7 +81,6 @@ class JstorPaths(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
 
 class JstorMembers(JstorTask):
     """
@@ -109,7 +106,6 @@ class JstorMembers(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
 
 class JstorLatestMembers(JstorTask):
     """
@@ -216,7 +212,6 @@ class JstorLatestMembers(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-
 class JstorXMLSlow(JstorTask):
     """
     Create a snapshot of the latest data.
@@ -247,7 +242,6 @@ class JstorXMLSlow(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
-
 
 class JstorXML(JstorTask):
     """
@@ -292,7 +286,6 @@ class JstorXML(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
 
-
 class JstorIntermediateSchemaGenericCollection(JstorTask):
     """
     Convert to intermediate format via span. Use generic JSTOR collection name.
@@ -315,7 +308,6 @@ class JstorIntermediateSchemaGenericCollection(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
-
 class JstorCollectionMapping(JstorTask):
     """
     Create a mapping from ISSN to collection name.
@@ -335,6 +327,42 @@ class JstorCollectionMapping(JstorTask):
             "Arts & Sciences VI Collection"
         ],
         ...
+
+    The KBART fields are:
+
+     0 publication_title                                                                                                                                                                                              │·
+     1 print_identifier                                                                                                                                                                                               │·
+     2 online_identifier                                                                                                                                                                                              │·
+     3 date_first_issue_online                                                                                                                                                                                        │·
+     4 num_first_vol_online                                                                                                                                                                                           │·
+     5 num_first_issue_online                                                                                                                                                                                         │·
+     6 date_last_issue_online                                                                                                                                                                                         │·
+     7 num_last_vol_online                                                                                                                                                                                            │·
+     8 num_last_issue_online                                                                                                                                                                                          │·
+     9 title_url                                                                                                                                                                                                      │·
+    10 first_author                                                                                                                                                                                                   │·
+    11 title_id                                                                                                                                                                                                       │·
+    12 embargo_info                                                                                                                                                                                                   │·
+    13 coverage_depth                                                                                                                                                                                                 │·
+    14 notes                                                                                                                                                                                                          │·
+    15 publisher_name                                                                                                                                                                                                 │·
+    16 publication_type                                                                                                                                                                                               │·
+    17 date_monograph_published_print                                                                                                                                                                                 │·
+    18 date_monograph_published_online                                                                                                                                                                                │·
+    19 monograph_volume                                                                                                                                                                                               │·
+    20 monograph_edition                                                                                                                                                                                              │·
+    21 first_editor                                                                                                                                                                                                   │·
+    22 parent_publication_title_id                                                                                                                                                                                    │·
+    23 preceding_publication_title_id                                                                                                                                                                                 │·
+    24 access_type                                                                                                                                                                                                    │·
+    25 full_coverage                                                                                                                                                                                                  │·
+    26 collection                                                                                                                                                                                                     │·
+    27 discipline                                                                                                                                                                                                     │·
+    28 catalog_identifier_oclc                                                                                                                                                                                        │·
+    29 catalog_identifier_lccn                                                                                                                                                                                        │·
+    30 archive_release_date                                                                                                                                                                                           │·
+    31 publication_date
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -345,9 +373,13 @@ class JstorCollectionMapping(JstorTask):
         output = shellout("""curl -sL "{url}" > {output} """, url=url)
 
         with luigi.LocalTarget(output, format=TSV).open() as handle:
-            for line in handle.iter_tsv():
-                issns, parts = line[1:3], [p.strip()
-                                           for p in line[26].split(";")]
+            for row in handle.iter_tsv():
+                if len(row) < 27:
+                    self.logger.warn("short KBART row, skipping: %s", row)
+                    continue
+
+                issns, parts = row[1:3], [p.strip()
+                                           for p in row[26].split(";")]
                 for issn in [v.strip() for v in issns]:
                     if not issn:
                         continue
@@ -362,7 +394,6 @@ class JstorCollectionMapping(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
-
 
 class JstorIntermediateSchema(JstorTask):
     """
@@ -485,7 +516,6 @@ class JstorIntermediateSchema(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
-
 class JstorExport(JstorTask):
     """
     Tag with ISILs, then export to various formats.
@@ -513,7 +543,6 @@ class JstorExport(JstorTask):
         }
         return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
 
-
 class JstorISSNList(JstorTask):
     """
     A list of JSTOR ISSNs.
@@ -535,7 +564,6 @@ class JstorISSNList(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
 
 class JstorDOIList(JstorTask):
     """
