@@ -34,6 +34,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.decorator import deprecated
 from siskin.task import DefaultTask
 
 
@@ -68,12 +69,19 @@ class SSOARHarvest(SSOARTask):
 class SSOARMARC(SSOARTask):
     """
     Use RS script for conversion, refs #12686.
+
+    As of 2018-05-28:
+
+    > Traceback (most recent call last):
+      File "/home/tir/code/miku/siskin/siskin/assets/30/30_marcbinary.py", line 166, in <module>
+          publisher = ["a", f260a, "b", f260b, "c", f260c]
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return SSOARHarvest(date=self.date)
 
+    @deprecated
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets('30/30_marcbinary.py'), input=self.input().path)

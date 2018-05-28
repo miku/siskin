@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+"""
+Issues: refs #7462, #12737, #13168, #13234, #13261.
+
+Note: This source moved from FINC to AI (from MARC to IS), cf.
+https://git.io/vhY3u.  Keeping this file as documentation for now, as
+intermediate schema export might miss a few fields.
+"""
+
 import io
 import re
 import sys
