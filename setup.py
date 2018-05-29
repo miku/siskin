@@ -23,7 +23,8 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-siskin is a set of tasks for library metadata management.
+siskin is a set of tasks for library metadata management. For more information
+on the project, please refer to https://finc.info.
 """
 
 from __future__ import print_function
