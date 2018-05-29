@@ -401,6 +401,10 @@ class CrossrefCollectionsDifference(CrossrefTask):
     """
     Refs. #7049. Check list of collections against AMSL Crossref collections and
     report difference.
+
+    This task uses an experimental email template in ../assets/mail/7049.tmpl, by
+    default no email is sent, only when --to is set to one or more comma
+    separated email addresses.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
