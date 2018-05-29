@@ -46,6 +46,7 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 import datetime
 import itertools
 import os
+import socket
 import tempfile
 import time
 import urllib.error
@@ -53,18 +54,20 @@ import urllib.parse
 import urllib.request
 from builtins import range
 
+import elasticsearch
 import luigi
 import requests
-import ujson as json
 from future import standard_library
+
+import ujson as json
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
-
-import elasticsearch
+from siskin import __version__
 from siskin.benchmark import timed
+from siskin.mail import send_mail
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
@@ -438,32 +441,17 @@ class CrossrefCollectionsDifference(CrossrefTask):
         self.logger.debug("%s collections seem to be missing in AMSL", len(missing_in_amsl))
 
         if self.to is not None:
-            # Try to send a message.
+            # Try to send a message, experimental.
             tolist = [v.strip() for v in self.to.split(",")]
 
-            from siskin import __version__
-            from siskin.mail import send_mail
-            import socket
+            subject = "%s %s %s" % (self.__class__.__name__,
+                                    datetime.datetime.today().strftime("%Y-%M-%d"),
+                                    len(missing_in_amsl))
 
-            # XXX: Move this to a template file.
-            subject = "[TESTING] %s %s %s" % (self.__class__.__name__,
-                                              datetime.datetime.today().strftime("%Y-%M-%d"),
-                                              len(missing_in_amsl))
+            with open(self.assets("mail/7049.tmpl")) as fh:
+                template = fh.read()
 
-            message = u"""
-To whom it may concern,
-
-This is an automated mail sent by siskin {version}. We looked at the following files on {hostname}
-
-- {xref}
-- {amsl}
-
-and compared the collection identifiers.
-
-The following {count} crossref collection names have been not been found in AMSL:
-
-{clist}
-            """.format(
+            message = template.format(
                 version=__version__,
                 count=len(missing_in_amsl),
                 clist="\n".join(missing_in_amsl),
@@ -472,7 +460,6 @@ The following {count} crossref collection names have been not been found in AMSL
                 amsl=self.input().get("amsl").path,
             )
             message = message.encode("utf-8")
-
             send_mail(tolist=tolist, subject=subject, message=message)
 
     def output(self):
