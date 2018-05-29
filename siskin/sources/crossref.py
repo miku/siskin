@@ -421,11 +421,16 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         self.logger.debug("found %s crossref collections in AMSL" % len(amsl))
 
+        missing_in_amsl = 0
+
         with self.input().get('crossref').open() as handle:
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('name',)):
                     if row.name not in amsl:
+                        missing_in_amsl += 1
                         output.write_tsv(row.name)
+
+        self.logger.debug("%d collections seem to be missing in AMSL", missing_in_amsl)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
