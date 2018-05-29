@@ -402,6 +402,8 @@ class CrossrefCollectionsDifference(CrossrefTask):
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
+    to = luigi.Parameter(default=None, description="email address of recipient")
+
     def requires(self):
         return {
             'crossref': CrossrefCollections(begin=self.begin, date=self.date),
@@ -410,6 +412,9 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
     @timed
     def run(self):
+        if self.to is None:
+            self.logger.debug("not sending any email, use --to my@mail.com to send out a report")
+
         amsl = set()
 
         with self.input().get('amsl').open() as handle:
@@ -421,16 +426,30 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         self.logger.debug("found %s crossref collections in AMSL" % len(amsl))
 
-        missing_in_amsl = 0
+        missing_in_amsl = []
 
         with self.input().get('crossref').open() as handle:
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('name',)):
                     if row.name not in amsl:
-                        missing_in_amsl += 1
+                        missing_in_amsl.append(row.name)
                         output.write_tsv(row.name)
 
-        self.logger.debug("%d collections seem to be missing in AMSL", missing_in_amsl)
+        self.logger.debug("%s collections seem to be missing in AMSL", len(missing_in_amsl))
+
+        if self.to is not None:
+            # Try to send a message.
+            from siskin.mail import send_mail
+            subject = "%s %s" % (self.__class__.__name__, datetime.datetime.today())
+            message = """
+            To whom it may concern,
+
+            The following %s crossref collection names have been found missing in AMSL:
+
+            %s
+            """ % (len(missing_in_amsl), "\n".join(missing_in_amsl))
+            message = message.encode("utf-8")
+            send_mail(tolist=self.to, subject=subject, message=message)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
