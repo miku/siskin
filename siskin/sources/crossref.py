@@ -402,7 +402,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
 
-    to = luigi.Parameter(default=None, description="email address of recipient")
+    to = luigi.Parameter(default=None, description="email address of recipient, comma separated, if multiple")
 
     def requires(self):
         return {
@@ -439,17 +439,41 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         if self.to is not None:
             # Try to send a message.
+            tolist = [v.strip() for v in self.to.split(",")]
+
+            from siskin import __version__
             from siskin.mail import send_mail
-            subject = "%s %s" % (self.__class__.__name__, datetime.datetime.today())
-            message = """
-            To whom it may concern,
+            import socket
 
-            The following %s crossref collection names have been found missing in AMSL:
+            # XXX: Move this to a template file.
+            subject = "[TESTING] %s %s %s" % (self.__class__.__name__,
+                                              datetime.datetime.today().strftime("%Y-%M-%d"),
+                                              len(missing_in_amsl))
 
-            %s
-            """ % (len(missing_in_amsl), "\n".join(missing_in_amsl))
+            message = u"""
+To whom it may concern,
+
+This is an automated mail sent by siskin {version}. We looked at the following files on {hostname}
+
+- {xref}
+- {amsl}
+
+and compared the collection identifiers.
+
+The following {count} crossref collection names have been not been found in AMSL:
+
+{clist}
+            """.format(
+                version=__version__,
+                count=len(missing_in_amsl),
+                clist="\n".join(missing_in_amsl),
+                hostname=socket.gethostname(),
+                xref=self.input().get("crossref").path,
+                amsl=self.input().get("amsl").path,
+            )
             message = message.encode("utf-8")
-            send_mail(tolist=self.to, subject=subject, message=message)
+
+            send_mail(tolist=tolist, subject=subject, message=message)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
