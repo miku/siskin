@@ -44,6 +44,7 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 """
 
 import datetime
+import io
 import itertools
 import os
 import socket
@@ -452,7 +453,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
                                     datetime.datetime.today().strftime("%Y-%M-%d"),
                                     len(missing_in_amsl))
 
-            with open(self.assets("mail/7049.tmpl")) as fh:
+            with io.open(self.assets("mail/7049.tmpl"), encoding="utf-8") as fh:
                 template = fh.read()
 
             message = template.format(
