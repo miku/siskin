@@ -22,6 +22,10 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
+"""
+Helper for sending mail.
+"""
+
 import logging
 import smtplib
 import socket

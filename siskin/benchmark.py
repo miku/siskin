@@ -26,11 +26,11 @@
 Provides a basic benchmark decorator. Usage:
 
     @timed
-    def run(self):
+    def run():
         print('Running...')
 
-Just logs the output. Could be extended to send this information to some service
-if available.
+Just logs the output. Could be extended to send this information to some
+service if available.
 """
 
 import functools
@@ -53,48 +53,53 @@ class bcolors(object):
 
 
 def red(s):
-    """ Color string red. """
     return bcolors.FAIL + s + bcolors.ENDC
 
 
 def yellow(s):
-    """ Color string yellow. """
     return bcolors.WARNING + s + bcolors.ENDC
 
 
 def green(s):
-    """ Color string green. """
     return bcolors.OKGREEN + s + bcolors.ENDC
 
 
 class Timer(object):
-    """ A timer as a context manager. """
+    """
+    A timer as a context manager, slight visual language.
+    """
 
     def __init__(self, green=10, yellow=60):
-        """ Indicate runtimes with colors, green < 10s, yellow < 60s. """
-        self.timer = default_timer
+        """
+        Indicate runtimes with colors, green < 10s, yellow < 60s.
+        """
         # measures wall clock time, not CPU time!
         # On Unix systems, it corresponds to time.time
         # On Windows systems, it corresponds to time.clock
+        self.timer = default_timer
 
         self.green = green
         self.yellow = yellow
 
     def __enter__(self):
-        self.start = self.timer()  # measure start time
+        self.start = self.timer()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        self.end = self.timer()  # measure end time
-        self.elapsed_s = self.end - self.start  # elapsed time, in seconds
-        self.elapsed_ms = self.elapsed_s * 1000  # elapsed time, in milliseconds
+        self.end = self.timer()
+        self.elapsed_s = self.end - self.start
+        self.elapsed_ms = self.elapsed_s * 1000
 
 
 def timed(method):
-    """ A @timed decorator. """
+    """
+    A @timed decorator.
+    """
     @functools.wraps(method)
     def _timed(*args, **kwargs):
-        """ Benchmark decorator. """
+        """
+        Benchmark decorator.
+        """
         with Timer() as timer:
             result = method(*args, **kwargs)
         klass = args[0].__class__.__name__

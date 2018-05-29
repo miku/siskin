@@ -52,6 +52,7 @@ from six.moves.urllib.parse import urlparse
 import backoff
 from siskin import __version__
 
+# XXX: move to six.
 standard_library.install_aliases()
 
 
@@ -61,10 +62,15 @@ logger = logging.getLogger('siskin')
 class SetEncoder(json.JSONEncoder):
     """
     Helper to encode python sets into JSON lists.
-    """
 
+    So you can write something like this:
+
+        json.dumps({"things": set([1, 2, 3], cls=SetEncoder)}
+    """
     def default(self, obj):
-        """ Decorate call to standard implementation. """
+        """
+        Decorate call to standard implementation.
+        """
         if isinstance(obj, set):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
@@ -104,14 +110,6 @@ def random_string(length=16):
     defaults to 16.
     """
     return ''.join(random.choice(string.ascii_letters) for _ in range(length))
-
-
-def pairwise(obj):
-    """
-    Iterator over a iterable in steps of two.
-    """
-    iterable = iter(obj)
-    return zip(iterable, iterable)
 
 
 def nwise(iterable, n=2):
@@ -172,15 +170,15 @@ def dictcheck(obj, contains=None, absent=None):
 
 def get_task_import_cache():
     """
-    Load `taskname: modulename` mappings from dictionary. Return a tuple containing
+    Load or create `taskname: modulename` mappings. Return a tuple containing
     the dictionary and the path to the cache file.
 
     The command line entry points (e.g. taskdo and friends) need to import all
-    modules in order to find a task. The import process actually takes a while,
-    so the import cache shortens the startup time of the command line tools by
-    only importing the module the given task is in.
+    modules in order to find a task. The import process actually takes a while
+    (few seconds), so the import cache shortens the startup time of the command
+    line tools by only importing the module the given task is in.
 
-    It is save to remove the path returned by `taskimportcache` at any time.
+    It is save to remove the file returned by `taskimportcache` at any time.
     """
     task_import_cache = None
     path = os.path.join(tempfile.gettempdir(),
@@ -235,6 +233,8 @@ class URLCache(object):
     It is not very efficient, as it creates lots of directories.
     > 396140 directories, 334024 files ... ...
 
+    To clean the cache just remove the cache directory.
+
     >>> cache = URLCache()
     >>> cache.get_cache_file("https://www.google.com")
     /tmp/ef/7e/fc/ef7efc9839c3ee036f023e9635bc3b056d6ee2d
@@ -249,14 +249,16 @@ class URLCache(object):
     >>> cache.is_cached("https://www.google.com")
     True
 
-    >>> page = cache.get("https://www.google.com", force=True) # Always download.
+    It is possible to force a download, too:
+
+    >>> page = cache.get("https://www.google.com", force=True)
     """
 
     def __init__(self, directory=None, max_tries=12):
         """
         If `directory` is not explictly given, all files will be stored under
         the temporary directory. Requests can be retried, if they resulted in
-        a non 200 HTTP status code. The server might send a HTTP 500 (Internal
+        a non 200 HTTP status code. A server might send a HTTP 500 (Internal
         Server Error), even if it really is a HTTP 503 (Service Unavailable).
         We therefore treat HTTP 500 errors as something to retry on,
         at most `max_tries` times.
@@ -312,8 +314,8 @@ class URLCache(object):
 
 def scrape_html_listing(url, with_head=False):
     """
-    Given a URL to a webpage, try to create a JSON representation of files on
-    the page.
+    Given a URL to a webpage containing a simple file listing, try to return a
+    list of links to the files on the page.
 
         >>> scrape_html_listing("https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/")
         ['https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/BFieldPictures.doc',

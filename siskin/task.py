@@ -51,8 +51,8 @@ class DefaultTask(BaseTask):
 
     It sets the base directory, where all task artifacts will be stored. It
     also provides shortcuts to config, assets and logging objects. A command
-    line parameter named stamp is used to update timestamps in AMSL electronic
-    resource management system.
+    line parameter named --stamp is used to optionally update timestamps in
+    AMSL electronic resource management system.
     """
     BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
@@ -99,6 +99,9 @@ class DefaultTask(BaseTask):
             ...
 
             OK
+
+        Note that if a subclass overwrites `on_success` this method is not
+        called, so you have to call it manually.
         """
 
         if not self.stamp:
