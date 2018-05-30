@@ -39,8 +39,11 @@ Find all TAGs (usually source ids) for which tasks exist. Output a list like:
     amsl      |  AMSLFilterConfig
     amsl      |  AMSLFilterConfigFreeze
     ...
+
+    Optionally emit header with `-h`.
 """
 
+import sys
 
 from luigi.task import Register
 
@@ -48,6 +51,9 @@ from siskin.sources import *
 from siskin.workflows import *
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == "-h":
+        print("Tag", "Class")
+
     for name in Register.task_names():
         klass = Register.get_task_cls(name)
         if not hasattr(klass, "TAG"):
