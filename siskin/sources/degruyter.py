@@ -139,7 +139,7 @@ class DegruyterCombine(DegruyterTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for fn in sorted(files):
             shellout(r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
-                     output=stopover, path=row.path,
+                     output=stopover, path=fn,
                      ignoremap={1: 'OK', 9: 'skip corrupt file'})
         luigi.LocalTarget(stopover).move(self.output().path)
 
