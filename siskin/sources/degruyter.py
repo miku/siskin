@@ -122,6 +122,7 @@ class DegruyterCombine(DegruyterTask):
     def requires(self):
         return DegruyterPaths(date=self.date)
 
+    @timed
     def run(self):
         files = []
         with self.input().open() as handle:
@@ -131,6 +132,16 @@ class DegruyterCombine(DegruyterTask):
                 files.append(row.path)
 
         self.logger.debug("found %s files", len(files))
+
+        # Sort files, so we get an approximate update chronology. Later items
+        # will shadow earlier items. XXX: If unzip -p is slow, extend the
+        # unzippa(1).
+        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        for fn in sorted(files):
+            shellout(r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
+                     output=stopover, path=row.path,
+                     ignoremap={1: 'OK', 9: 'skip corrupt file'})
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
