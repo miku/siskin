@@ -7,7 +7,7 @@
 ```
 $ tasktags | csvtomd
 ```
-Tag       |  Klass
+Tag       |  Class
 ----------|-------------------------------------------
 adhoc     |  AdhocFormetaSamples
 adhoc     |  AdhocTask
