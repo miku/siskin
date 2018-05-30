@@ -7,9 +7,9 @@
 ```
 $ tasktags | csvtomd
 ```
-
-adhoc     |  AdhocFormetaSamples
+Tag       |  Klass
 ----------|-------------------------------------------
+adhoc     |  AdhocFormetaSamples
 adhoc     |  AdhocTask
 adhoc     |  Issue7049
 adhoc     |  Issue7049ExportExcel
