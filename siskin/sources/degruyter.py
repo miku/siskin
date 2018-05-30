@@ -110,6 +110,30 @@ class DegruyterPaths(DegruyterTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
+class DegruyterCombine(DegruyterTask):
+    """
+    Combine all XML files contained in the zip files, in chronological order,
+    so oldest are added first, latest last. This way do not need to
+    deduplicate.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    group = luigi.Parameter(default="SSH", description="main subdirectory")
+
+    def requires(self):
+        return DegruyterPaths(date=self.date)
+
+    def run(self):
+        files = []
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if not '/%s/' % self.group in row.path:
+                    continue
+                files.append(row.path)
+
+        self.logger.debug("found %s files", len(files))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 class DegruyterXML(DegruyterTask):
     """
