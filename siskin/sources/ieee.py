@@ -57,7 +57,7 @@ from siskin.task import DefaultTask
 
 
 class IEEETask(DefaultTask):
-    TAG = 'ieee'
+    TAG = '89'
 
     def closest(self):
         return weekly(date=self.date)

@@ -92,7 +92,7 @@ class GeniosTask(DefaultTask):
     The database_blacklist lists database names, that should excluded from processing, #9534.
 
     """
-    TAG = '048'
+    TAG = '48'
 
     allowed_kinds = set([
         'ebooks',

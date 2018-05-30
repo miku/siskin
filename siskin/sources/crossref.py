@@ -80,7 +80,7 @@ class CrossrefTask(DefaultTask):
     """
     Crossref related tasks. See: http://www.crossref.org/
     """
-    TAG = 'crossref'
+    TAG = '49'
 
     def closest(self):
         """

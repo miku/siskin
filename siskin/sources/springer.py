@@ -64,7 +64,7 @@ from siskin.task import DefaultTask
 
 
 class SpringerTask(DefaultTask):
-    TAG = 'springer'
+    TAG = '105'
 
     def closest(self):
         return weekly(date=self.date)
