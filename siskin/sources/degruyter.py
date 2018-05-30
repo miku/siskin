@@ -80,7 +80,7 @@ class DegruyterTask(DefaultTask):
     197G    /Nationallizenz_Zeitschriften
 
     """
-    TAG = 'degruyter'
+    TAG = '50'
     TIMESTAMP = '1497254827738'  # TODO(miku): partial updates are possible and missed by this.
 
     def closest(self):
