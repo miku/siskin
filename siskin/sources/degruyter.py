@@ -137,7 +137,7 @@ class DegruyterXML(DegruyterTask):
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class DegruyterIntermediateSchema(DegruyterTask):
