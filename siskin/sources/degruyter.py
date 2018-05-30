@@ -70,6 +70,15 @@ class DegruyterTask(DefaultTask):
         1041 1424176025682
            2 1478602063508
 
+    As of 2018-05-30 we can get rid of what we wish:
+
+    $ find $(taskhome)/common/FTPMirror/4b687bc55ec031b805fde3e4bd061ff2680420a2 -type d -exec du -hs {} \; | cut -d '/' -f 1,8
+    516G
+    3.3G    /finc
+    315G    /SSH
+    1.8G    /Nationallizenz_Jahrbuecher
+    197G    /Nationallizenz_Zeitschriften
+
     """
     TAG = 'degruyter'
     TIMESTAMP = '1497254827738'  # TODO(miku): partial updates are possible and missed by this.
@@ -79,7 +88,9 @@ class DegruyterTask(DefaultTask):
 
 
 class DegruyterPaths(DegruyterTask):
-    """ A list of Degruyter ile paths (via FTP). """
+    """
+    A list of Degruyter file paths (via FTP).
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -120,7 +131,8 @@ class DegruyterXML(DegruyterTask):
                     continue
                 if '-%s.zip' % self.ts not in row.path:
                     continue
-                shellout(r"unzip -p {path} \*.xml 2> /dev/null >> {output}", output=stopover, path=row.path,
+                shellout(r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
+                         output=stopover, path=row.path,
                          ignoremap={1: 'OK', 9: 'skip corrupt file'})
         luigi.LocalTarget(stopover).move(self.output().path)
 
@@ -129,13 +141,16 @@ class DegruyterXML(DegruyterTask):
 
 
 class DegruyterIntermediateSchema(DegruyterTask):
-    """ Convert to intermediate format via span. """
-
+    """
+    Convert to intermediate format via span.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'),
-                'file': DegruyterXML(date=self.date)}
+        return {
+            'span': Executable(name='span-import', message='http://git.io/vI8NV'),
+            'file': DegruyterXML(date=self.date)
+        }
 
     @timed
     def run(self):
@@ -175,8 +190,9 @@ class DegruyterExport(DegruyterTask):
 
 
 class DegruyterISSNList(DegruyterTask):
-    """ List of ISSNs. """
-
+    """
+    List of ISSNs.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -195,12 +211,16 @@ class DegruyterISSNList(DegruyterTask):
 
 
 class DegruyterDOIList(DegruyterTask):
-    """ A list of Degruyter DOIs. """
+    """
+    A list of Degruyter DOIs.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': DegruyterIntermediateSchema(date=self.date),
-                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+        return {
+            'input': DegruyterIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
+        }
 
     @timed
     def run(self):
