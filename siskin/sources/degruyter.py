@@ -81,7 +81,8 @@ class DegruyterTask(DefaultTask):
 
     """
     TAG = '50'
-    TIMESTAMP = '1497254827738'  # TODO(miku): partial updates are possible and missed by this.
+    # TODO(miku): partial updates are possible and missed by this.
+    TIMESTAMP = '1497254827738'
 
     def closest(self):
         return datetime.date(2017, 8, 1)
@@ -99,7 +100,8 @@ class DegruyterPaths(DegruyterTask):
         password = self.config.get('degruyter', 'ftp-password')
         base = self.config.get('degruyter', 'ftp-path')
         pattern = self.config.get('degruyter', 'ftp-pattern')
-        exclude_glob = self.config.get('degruyter', 'ftp-exclude-glob', fallback='')
+        exclude_glob = self.config.get('degruyter', 'ftp-exclude-glob',
+                                       fallback='')
         return FTPMirror(host=host, username=username, password=password,
                          base=base, pattern=pattern, exclude_glob=exclude_glob)
 
@@ -110,10 +112,11 @@ class DegruyterPaths(DegruyterTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
+
 class DegruyterCombine(DegruyterTask):
     """
     Combine all XML files contained in the zip files, in chronological order,
-    so oldest are added first, latest last. This way do not need to
+    so oldest are added first, latest last. This way we do not need to
     deduplicate.
     """
     date = luigi.DateParameter(default=datetime.date.today())
@@ -145,6 +148,7 @@ class DegruyterCombine(DegruyterTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
 
 class DegruyterXML(DegruyterTask):
     """
@@ -189,7 +193,8 @@ class DegruyterIntermediateSchema(DegruyterTask):
 
     @timed
     def run(self):
-        output = shellout("span-import -i degruyter {input} | pigz -c > {output}", input=self.input().get('file').path)
+        output = shellout("span-import -i degruyter {input} | pigz -c > {output}",
+                          input=self.input().get('file').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -213,7 +218,8 @@ class DegruyterExport(DegruyterTask):
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path, input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", input=output, format=self.format)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          input=output, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -236,8 +242,10 @@ class DegruyterISSNList(DegruyterTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """,
+                 input=self.input().path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """,
+                 input=self.input().path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
