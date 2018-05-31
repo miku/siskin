@@ -59,7 +59,7 @@ for filename in filenames:
     records = inputfile.getmembers()
 
     for i, record in enumerate(records):
-        if i == 5000:
+        if i == 1000:
             break
         xmlrecord = inputfile.extractfile(record)
         xmlrecord = xmlrecord.read()
@@ -74,7 +74,7 @@ for filename in filenames:
 
         # Identifier
         f001 = get_datafield("001", "a")
-        marcrecord.add("001", data="finc-73-" + f001)
+        marcrecord.add("001", data="finc-109-" + f001)
 
         # ISBN
         f020a = get_datafield("540", "a")
