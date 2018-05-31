@@ -450,7 +450,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
             tolist = [v.strip() for v in self.to.split(",")]
 
             subject = "%s %s %s" % (self.__class__.__name__,
-                                    datetime.datetime.today().strftime("%Y-%M-%d"),
+                                    datetime.datetime.today().strftime("%Y-%m-%d %H:%M"),
                                     len(missing_in_amsl))
 
             with io.open(self.assets("mail/7049.tmpl"), encoding="utf-8") as fh:
