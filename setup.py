@@ -45,7 +45,6 @@ install_requires = [
     'beautifulsoup4',
     'colorama>=0.3.3',
     'configparser>=3.5.0',
-    'csvkit>=0.9.1',
     'decorator>=3.4.0',
     'elasticsearch>=2',
     'future>=0.16',
