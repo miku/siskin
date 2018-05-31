@@ -350,7 +350,7 @@ class CrossrefExport(CrossrefTask):
 
 class CrossrefCollections(CrossrefTask):
     """
-    A collection of crossref collections, refs. #6985.
+    A collection of crossref collections, refs. #6985. XXX: Save counts as well.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
