@@ -12,18 +12,27 @@ import xmltodict
 import tarfile
 
 
-def get_datafield(tag, code):
+def get_datafield(tag, code, all=False):
+    """
+    Return string value for (tag, code) or list of values if all is True.
+    """
+    values = []
     for field in datafield:        
-        if field["@tag"] == tag:           
-            if isinstance(field["subfield"], list):
-                for subfield in field["subfield"]:
-                    if subfield["@code"] == code:
-                        return subfield["#text"]
-            else:
-                if field["subfield"]["@code"] == code:
+        if field["@tag"] != tag:      
+            continue
+        if isinstance(field["subfield"], list):
+            for subfield in field["subfield"]:
+                if subfield["@code"] != code:
+                    continue
+                if not all:
+                    return subfield["#text"]
+                values.append(subfield["#text"])
+        else:
+            if field["subfield"]["@code"] == code:
+                if not all:
                     return field["subfield"]["#text"]
-    return ""
-
+                values.append(field["subfield"]["#text"])
+    return values
 
 inputfilename1 = "109_input1.tar.gz"
 inputfilename2 = "109_input2.tar.gz"
@@ -40,8 +49,8 @@ for filename in filenames:
     records = inputfile.getmembers()
 
     for i, record in enumerate(records):
-        #if i == 1000:
-        #    break
+        if i == 1000:
+            break
         xmlrecord = inputfile.extractfile(record)
         xmlrecord = xmlrecord.read()
         xmlrecord = xmltodict.parse(xmlrecord)
@@ -76,7 +85,7 @@ for filename in filenames:
         f245c = get_datafield("359", "a")
         f245 = ["a", f245a, "c", f245c]
         marcrecord.add("245", subfields=f245)
-        if f245a == "":
+        if not f245a:
             #print(f001, file=sys.stderr)
             continue
 
@@ -91,13 +100,13 @@ for filename in filenames:
         f300a = get_datafield("433", "a")
         f300b = get_datafield("434", "a")
         f300 = ["a", f300a, "b", f300b]
-        marcrecord.add("300", subfields=f300)
+        marcrecord.add("300", subfields=f300)       
 
-        # Schlagwörter
-        f650a = get_datafield("710", "a")
-        marcrecord.add("650", a=f650a)
-        f650a = get_datafield("711", "a")
-        marcrecord.add("650", a=f650a)
+        for f650a in set(get_datafield("710", "a", all=True)):
+            marcrecord.add("650", a=f650a)
+
+        for f650a in set(get_datafield("711", "a", all=True)):
+            marcrecord.add("650", a=f650a)
 
         # weitere Urheber
         for tag in range(101, 200):
