@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+#                by The Finc Authors, http://finc.info
+#                by Martin Czygan, <martin.czygan@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+#
+
+"""
+Find all TAGs (usually source ids) for which tasks exist. Output a list like:
+
+    $ tasktags | csvtomd -d '<CTRL-V> <TAB>'
+    ...
+    ai        |  AIQuality
+    ai        |  AIRedact
+    ai        |  AITask
+    ai        |  AIUpdate
+    amsl      |  AMSLCollections
+    amsl      |  AMSLCollectionsISIL
+    amsl      |  AMSLCollectionsISILList
+    amsl      |  AMSLCollectionsShardFilter
+    amsl      |  AMSLFilterConfig
+    amsl      |  AMSLFilterConfigFreeze
+    ...
+
+    Optionally emit header with `-h`.
+"""
+
+import sys
+
+from luigi.task import Register
+
+from siskin.sources import *
+from siskin.workflows import *
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == "-h":
+        print("Tag", "Class")
+
+    for name in Register.task_names():
+        klass = Register.get_task_cls(name)
+        if not hasattr(klass, "TAG"):
+            continue
+        print("%s\t%s" % (getattr(klass, "TAG"), name))

@@ -58,7 +58,7 @@ from siskin.utils import iterfiles
 
 class ElsevierJournalsTask(DefaultTask):
     """ Elsevier journals base. """
-    TAG = '085'
+    TAG = '85'
 
 
 class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):

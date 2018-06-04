@@ -44,8 +44,10 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 """
 
 import datetime
+import io
 import itertools
 import os
+import socket
 import tempfile
 import time
 import urllib.error
@@ -53,18 +55,20 @@ import urllib.parse
 import urllib.request
 from builtins import range
 
+import elasticsearch
 import luigi
 import requests
-import ujson as json
 from future import standard_library
+
+import ujson as json
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
-
-import elasticsearch
+from siskin import __version__
 from siskin.benchmark import timed
+from siskin.mail import send_mail
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import URLCache
@@ -76,7 +80,7 @@ class CrossrefTask(DefaultTask):
     """
     Crossref related tasks. See: http://www.crossref.org/
     """
-    TAG = 'crossref'
+    TAG = '49'
 
     def closest(self):
         """
@@ -346,7 +350,7 @@ class CrossrefExport(CrossrefTask):
 
 class CrossrefCollections(CrossrefTask):
     """
-    A collection of crossref collections, refs. #6985.
+    A collection of crossref collections, refs. #6985. XXX: Save counts as well.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -398,9 +402,15 @@ class CrossrefCollectionsDifference(CrossrefTask):
     """
     Refs. #7049. Check list of collections against AMSL Crossref collections and
     report difference.
+
+    This task uses an experimental email template in ../assets/mail/7049.tmpl, by
+    default no email is sent, only when --to is set to one or more comma
+    separated email addresses.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
+
+    to = luigi.Parameter(default=None, description="email address of recipient, comma separated, if multiple")
 
     def requires(self):
         return {
@@ -410,6 +420,9 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
     @timed
     def run(self):
+        if self.to is None:
+            self.logger.debug("not sending any email, use --to my@mail.com to send out a report")
+
         amsl = set()
 
         with self.input().get('amsl').open() as handle:
@@ -421,16 +434,38 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         self.logger.debug("found %s crossref collections in AMSL" % len(amsl))
 
-        missing_in_amsl = 0
+        missing_in_amsl = []
 
         with self.input().get('crossref').open() as handle:
             with self.output().open('w') as output:
                 for row in handle.iter_tsv(cols=('name',)):
                     if row.name not in amsl:
-                        missing_in_amsl += 1
+                        missing_in_amsl.append(row.name)
                         output.write_tsv(row.name)
 
-        self.logger.debug("%d collections seem to be missing in AMSL", missing_in_amsl)
+        self.logger.debug("%s collections seem to be missing in AMSL", len(missing_in_amsl))
+
+        if self.to is not None:
+            # Try to send a message, experimental.
+            tolist = [v.strip() for v in self.to.split(",")]
+
+            subject = "%s %s %s" % (self.__class__.__name__,
+                                    datetime.datetime.today().strftime("%Y-%m-%d %H:%M"),
+                                    len(missing_in_amsl))
+
+            with io.open(self.assets("mail/7049.tmpl"), encoding="utf-8") as fh:
+                template = fh.read()
+
+            message = template.format(
+                version=__version__,
+                count=len(missing_in_amsl),
+                clist="\n".join(missing_in_amsl),
+                hostname=socket.gethostname(),
+                xref=self.input().get("crossref").path,
+                amsl=self.input().get("amsl").path,
+            )
+            message = message.encode("utf-8")
+            send_mail(tolist=tolist, subject=subject, message=message)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)

@@ -47,11 +47,15 @@ html_unescape_table = {v: k for k, v in html_escape_table.items()}
 logger = logging.getLogger('siskin')
 
 def html_escape(text):
-    """ Escape HTML, see also: https://wiki.python.org/moin/EscapingHtml"""
+    """
+    Escape HTML, see also: https://wiki.python.org/moin/EscapingHtml
+    """
     return escape(text, html_escape_table)
 
 def html_unescape(text):
-    """ Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml"""
+    """
+    Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml
+    """
     return unescape(text, html_unescape_table)
 
 def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
@@ -96,10 +100,10 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
 
 def imslp_xml_to_marc(s, legacy_mapping=None):
     """
-    Convert a string containing a single IMSLP record to a pymarc MARC record.
+    Convert a string containing a single IMSLP XML record to a pymarc MARC record.
 
     Optionally take a legacy mapping, associating IMSLP Names with VIAF
-    identifiers.  Blueprint: https://git.io/vpQPd, with one difference: We
+    identifiers. Blueprint: https://git.io/vpQPd, with one difference: We
     allow records with no subjects.
 
     A record w/o title is an error. We check for them, when we add the field.

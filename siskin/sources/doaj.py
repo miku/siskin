@@ -56,7 +56,7 @@ class DOAJTask(DefaultTask):
     """
     Base task for DOAJ.
     """
-    TAG = '028'
+    TAG = '28'
 
     def closest(self):
         return monthly(date=self.date)

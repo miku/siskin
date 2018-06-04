@@ -35,12 +35,13 @@ import pymysql
 from future import standard_library
 from pymysql.cursors import SSCursor
 
+# XXX: move to six.
 standard_library.install_aliases()
 
 
 class sqlitedb(object):
     """
-    Simple context manager for sqlite3 databases. Commits everything at exit.
+    Simple cursor context manager for sqlite3 databases. Commits everything at exit.
 
         with sqlitedb('/tmp/test.db') as cursor:
             query = cursor.execute('SELECT * FROM items')
@@ -67,12 +68,12 @@ class sqlitedb(object):
 
 
 class mysqldb(object):
-    """ Context manager for MySQL database access.
+    """
+    Context manager for MySQL database access. Example:
 
         with mysqldb('mysql://user:pass@host/db', stream=True) as cursor:
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
-
     """
 
     def __init__(self, url, stream=False, commit_on_exit=False):

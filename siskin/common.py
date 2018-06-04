@@ -52,29 +52,11 @@ class CommonTask(DefaultTask):
     TAG = 'common'
 
 
-class Directory(luigi.Task):
-    """ Create directory or fail. """
-    path = luigi.Parameter(description='directory to create')
-
-    def run(self):
-        try:
-            os.makedirs(self.path)
-        except OSError as err:
-            if err.errno == 17:
-                # file exists, this can happen in parallel execution evns
-                pass
-            else:
-                raise RuntimeError(err)
-
-    def output(self):
-        return luigi.LocalTarget(self.path)
-
-
 class FTPMirror(CommonTask):
     """
-    A generic FTP directory sync. Required lftp (http://lftp.yar.ru/).
-    The output of this task is a single file, that contains the paths
-    to all the mirrored files.
+    A generic FTP directory sync. Requires lftp (http://lftp.yar.ru/).  The
+    output of this task is a single file, that contains the paths to all the
+    mirrored files.
     """
     host = luigi.Parameter()
     username = luigi.Parameter(default='anonymous')
@@ -137,31 +119,6 @@ class FTPMirror(CommonTask):
         return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
 
 
-class FTPFile(CommonTask):
-    """ Just require a single file from an FTP server. """
-    host = luigi.Parameter()
-    username = luigi.Parameter()
-    password = luigi.Parameter()
-    filepath = luigi.Parameter()
-
-    def requires(self):
-        return Executable(name='lftp')
-
-    def run(self):
-        command = """lftp -u {username},{password}
-        -e "set net:max-retries 5; set net:timeout 10; get -c
-        {filepath} -o {output}; exit" {host}"""
-
-        output = shellout(command, host=self.host,
-                          username=pipes.quote(self.username),
-                          password=pipes.quote(self.password),
-                          filepath=pipes.quote(self.filepath))
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext=None))
-
-
 class HTTPDownload(CommonTask):
     """
     Download a file via HTTP, read out the HTTP Last-modified header and use it as filename.
@@ -214,7 +171,6 @@ class RedmineDownload(CommonTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        # curl -H "X-Redmine-API-Key:$(cat $apikey)" "https://intern.finc.info/issues/$issue.json?include=attachments" > "/tmp/$issue/issue.json" 2>> "/tmp/$issue/curl.log"
         self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...",
                          self.issue, self.config.get('redmine', 'baseurl'), self.issue)
         url = "%s/issues/%s.json?include=attachments" % (
@@ -229,9 +185,11 @@ class RedmineDownload(CommonTask):
 
 class RedmineDownloadAttachments(CommonTask):
     """
-    Download all attachements for a ticketand make them temporarily accessible
+    Download all attachements for a ticket and make them temporarily accessible
     to other tasks. Redmine attachments are by default limited to about 10M, so
     it is ok to not cache anything here.
+
+    Target is a file containing a list of filenames downloaded.
     """
     issue = luigi.Parameter(description="issue number")
     date = luigi.DateParameter(default=datetime.date.today())

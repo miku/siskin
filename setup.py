@@ -23,7 +23,8 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-siskin is a set of tasks for library metadata management.
+siskin is a set of tasks for library metadata management. For more information
+on the project, please refer to https://finc.info.
 """
 
 from __future__ import print_function
@@ -44,7 +45,6 @@ install_requires = [
     'beautifulsoup4',
     'colorama>=0.3.3',
     'configparser>=3.5.0',
-    'csvkit>=0.9.1',
     'decorator>=3.4.0',
     'elasticsearch>=2',
     'future>=0.16',
@@ -122,6 +122,7 @@ setup(name='siskin',
               'assets/arxiv/*',
               'assets/datacite/*',
               'assets/js/*',
+              'assets/mail/*',
               'assets/maps/*',
               'assets/oai/*',
               'assets/1/*',
@@ -179,6 +180,7 @@ setup(name='siskin',
           'bin/taskredo',
           'bin/taskrm',
           'bin/taskstatus',
+          'bin/tasktags',
           'bin/tasktree',
           'bin/taskversion',
           'bin/taskwc',

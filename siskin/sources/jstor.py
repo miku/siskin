@@ -54,7 +54,7 @@ from siskin.utils import SetEncoder, nwise, load_set_from_file
 
 class JstorTask(DefaultTask):
     """ Jstor base. """
-    TAG = 'jstor'
+    TAG = '55'
 
     def closest(self):
         return weekly(self.date)

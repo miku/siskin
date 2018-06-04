@@ -89,19 +89,3 @@ class PubmedJournalList(PubmedTask):
         return luigi.LocalTarget(path=self.path())
 
 
-class PubmedJournalListReduced(PubmedTask):
-    """
-    Just a small excerpt (cols 1,3,4,9,10).
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return PubmedJournalList(date=self.date)
-
-    def run(self):
-        output = shellout(
-            r"""cat {input} | csvcut -c1,3,4,9,10 | tr ',' '\t' > {output}""", input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)

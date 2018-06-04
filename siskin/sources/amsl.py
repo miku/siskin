@@ -460,7 +460,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
                  input=output, output=stopover)
 
         # Include OA list, refs #11579.
-        shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
+        shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
                     grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' >> {output}""",
                  output=stopover, preserve_whitespace=True)
 
@@ -482,7 +482,7 @@ class AMSLGoldListKBART(AMSLTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout(""" echo "online_identifier" > {output}""", output=stopover)
         # Include OA list, refs #11579.
-        shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
+        shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
                     grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' |
                     tr ',' '\n' |
                     sort -u |
@@ -536,7 +536,7 @@ class AMSLOpenAccessKBART(AMSLTask):
             output = shellout("cat {input} >> {output}", input=downloaded)
 
         # Include OA list, refs #11579.
-        shellout("""csvcut -c1,2 <(curl -s https://pub.uni-bielefeld.de/download/2913654/2913655) |
+        shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
                     grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' |
                     awk '{{ print "\t\t"$0 }}' >> {output}""", output=output, preserve_whitespace=True)
 
