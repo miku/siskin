@@ -958,6 +958,16 @@ class AMSLFilterConfig(AMSLTask):
                 for filter in tree.get('or', []):
                     filterconfig[isil]['or'].append(filter)
 
+        # XXX: Adjust a few items for DE-14, cf. 2018-06-11, namely, add links
+        # to external holding files, which are not included into the AMSL
+        # discovery API response, refs #13378.
+        # https://dbod.de/SLUB-EZB-KBART.zip
+        for term in filterconfig["DE-14"]["or"]:
+            for t in term["and"]:
+                if (not 'holdings' in t) and (not 'urls' in t.get('holdings', [])):
+                    continue
+                t['holdings']['urls'].append("https://dbod.de/SLUB-EZB-KBART.zip")
+
         with self.output().open('w') as output:
             json.dump(filterconfig, output, cls=SetEncoder)
 
