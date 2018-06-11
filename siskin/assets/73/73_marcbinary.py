@@ -32,6 +32,7 @@ xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
 
     # Leader
     marcrecord.leader = "     nab  22        4500"
@@ -48,7 +49,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # ISSN
     try:
-        identifiers = xmlrecord.get("metadata").get("dcite:resource").get("dcite:relatedIdentifiers").get("dcite:relatedIdentifier")
+        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:relatedIdentifiers", {}).get("dcite:relatedIdentifier", [])
         for identifier in identifiers:
             if identifier["@relatedIdentifierType"] == "ISSN":
                 f022a = identifier["#text"]    
