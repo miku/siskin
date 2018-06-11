@@ -72,8 +72,9 @@ class MarburgCombine(MarburgTask):
 
     def run(self):
         endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
-        shellout("metha-sync -format nlm {endpoint}", endpoint=endpoint)
-        output = shellout("metha-cat -format nlm {endpoint} > {output}", endpoint=endpoint)
+        shellout("metha-sync -format {format} {endpoint}", format=self.format, endpoint=endpoint)
+        output = shellout("metha-cat -format {format} {endpoint} > {output}", format=self.format,
+                          endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
