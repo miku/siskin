@@ -92,7 +92,7 @@ class MarburgMarc(MarburgTask):
         return MarburgCombine(format=self.format)
 
     def run(self):
-        output = shellout("python {script} {input} > {output}",
+        output = shellout("python {script} {input} {output}",
                           script=self.assets("73/73_marcbinary.py"), input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
