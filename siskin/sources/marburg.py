@@ -78,7 +78,7 @@ class MarburgCombine(MarburgTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path())
+        return luigi.LocalTarget(self.path(ext="xml"))
 
 
 class MarburgMarc(MarburgTask):
