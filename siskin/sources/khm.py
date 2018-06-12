@@ -24,6 +24,9 @@
 """
 KHM Koeln, refs #9269, #8391.
 
+Update usually comes in two tarballs, carrying a 8 digit date string, but file
+location might differ.
+
 Configuration keys:
 
 [khm]
