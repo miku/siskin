@@ -53,7 +53,6 @@ from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 
-
 class KHMTask(DefaultTask):
     """ Base task for KHM Koeln (sid 109) """
     TAG = '109'
@@ -61,7 +60,6 @@ class KHMTask(DefaultTask):
 
     def closest(self):
         return monthly(date=self.date)
-
 
 class KHMDropbox(KHMTask):
     """
@@ -88,7 +86,6 @@ class KHMDropbox(KHMTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-
 class KHMLatestDate(KHMTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -110,6 +107,20 @@ class KHMLatestDate(KHMTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class KHMMARC(KHMTask):
+    """
+    Convert tarball to binary MARC.
+    """
+    def requires(self):
+        raise NotImplementedError("Currently the converter script requires exactly two tarballs.")
+
+    def run(self):
+        output = shellout("python {script} {input} {output}",
+                          script=self.assets("109/109_marcbinary.py")
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
 
 class KHMLatest(KHMTask):
     """
@@ -159,7 +170,6 @@ class KHMLatest(KHMTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=self.ext))
-
 
 class KHMIntermediateSchema(KHMTask):
     """
