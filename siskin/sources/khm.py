@@ -116,7 +116,7 @@ class KHMMARC(KHMTask):
 
     def run(self):
         output = shellout("python {script} {input} {output}",
-                          script=self.assets("109/109_marcbinary.py")
+                          script=self.assets("109/109_marcbinary.py"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
