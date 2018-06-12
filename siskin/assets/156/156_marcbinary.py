@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+from __future__ import print_function
+
 import re
 import sys
 
@@ -56,7 +58,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
             f020a = f020a.rstrip("-")
             newrecord.add("020", a=f020a) 
         else:
-            print("Die ISBN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f020a)
+            print(u"Die ISBN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f020a, file=sys.stderr)
 
     # ISSN
     try:
@@ -74,7 +76,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
             f022a = f022a.rstrip("-")
             newrecord.add("022", a=f022a) 
         else:
-            print("Die ISSN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f022a)
+            print(u"Die ISSN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f022a, file=sys.stderr)
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:

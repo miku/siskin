@@ -46,9 +46,24 @@ class UMBITask(DefaultTask):
     """
     TAG = '156'
 
+class UMBIXML(UMBITask):
+    """
+    Convert binary MARC to XML, refs #11786#note-16.
+    """
+
+    def run(self):
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}",
+                          input=self.config.get("umbi", "input"))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="xml"))
 
 class UMBIMARC(UMBITask):
     """ Convert MARCxml to BinaryMarc """
+
+    def requires(self):
+        return UMBIXML()
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
