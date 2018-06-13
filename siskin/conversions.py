@@ -44,6 +44,11 @@ html_escape_table = {
 }
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
 
+marburg_language_mapping = {
+    "de": "ger",
+    "deu": "ger",
+}
+
 logger = logging.getLogger('siskin')
 
 def html_escape(text):
@@ -175,3 +180,36 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
     return record
 
+def marburg_to_marc(s):
+    """
+    Convert a string containing a single XML in datacite from
+    http://archiv.ub.uni-marburg.de/ubfind/OAI/Server into a binary MARC.
+    """
+    dd = xmltodict.parse(s, force_list={"dcite:creators", "dcite:titles"})
+    record = marcx.Record()
+
+    header, metadata = dd["Record"]["header"], dd["Record"]["metadata"]
+    identifier = header["identifier"]
+
+    record.add("001", data=base64.b64encode(identifier).rstrip("="))
+    record.add("007", data="cr")
+
+    related = metadata["dcite:resource"]["dcite:relatedIdentifiers"]
+    for rid in related:
+        if rid["@relatedIdentifierType"] != "ISSN":
+            continue
+        record.add("022", a=rid["#text"])
+
+    language = metadata["dcite:resource"]["dcite:language"]
+    language = marburg_language_mapping.get(language)
+    record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
+    record.add("041", a=marburg_language_mapping.get(language))
+
+    for item in metadata["dcite:resource"]["dcite:creators"]:
+        name = item["dcite:creator"]["dcite:creatorName"]["#text"]
+        record.add("100", a=name)
+
+    for item in metadata["dcite:resource"]["dcite:titles"]:
+        title = item["dcite:title"]
+
+    # WIP.
