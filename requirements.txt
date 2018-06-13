@@ -44,7 +44,7 @@ pickleshare==0.7.4
 ply==3.11
 prettytable==0.7.2
 prompt-toolkit==2.0.2
-protobuf==3.5.2.post1
+protobuf==3.6.0
 ptyprocess==0.5.2
 Pygments==2.2.0
 pyisbn==1.1.0
