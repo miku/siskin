@@ -40,7 +40,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
 
     # 001
     f001 = str(i)
-    newrecord.add("001", data=f001)
+    newrecord.add("001", data="finc-156-" + f001)
 
     # ISBN
     try:
