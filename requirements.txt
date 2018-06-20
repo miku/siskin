@@ -12,7 +12,7 @@ configparser==3.5.0
 decorator==4.2.1
 docopt==0.6.2
 docutils==0.14
-elasticsearch==6.2.0
+elasticsearch==6.3.0
 future==0.16.0
 gluish==0.2.11
 gspread==3.0.0
