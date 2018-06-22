@@ -50,7 +50,7 @@ for record in records.entries:
 
     # Identifikator
     f001 = get_field("guid")
-    marcrecord.add("001", data="finc-126-" + f001)
+    marcrecord.add("001", data="finc-129-" + f001)
     
     # Format
     marcrecord.add("007", data="cr")
