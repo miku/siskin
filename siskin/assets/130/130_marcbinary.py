@@ -101,6 +101,7 @@ for record in records:
     f500a = ""
     f650a = ""
     f700e = ""
+    f856u = ""
     f866a = ""
     format1 = ""
     format2 = ""
@@ -236,6 +237,10 @@ for record in records:
                         corporates.append(f710a)
                         break
 
+        # Link zum Datensatz
+        if f856u == "":
+            f856u = get_subfield("655", "u")       
+           
         #Bestandsnachweis (866a)       
         f866a = f001.lstrip("0")
         f866a = hierarchymap.get(f866a, "")    
@@ -320,7 +325,9 @@ for record in records:
         marcrecord.add("700", a=person, e=f700e)
     for corporate in corporates:
         marcrecord.add("710", a=corporate)
-    f866a = "; ".join(f866a)
+    if f856u != "":
+        marcrecord.add("856", q="text/html", _3="Link zum Inhaltsverzeichnis", u=f856u)
+    f866a = "; ".join(f866a)    
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
