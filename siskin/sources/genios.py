@@ -55,6 +55,29 @@ Ebooks are reloaded monthy:
 * konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_IFOK_reload_201606.zip
 * konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_update_20161122091046.zip
 
+Update 2018-06-01
+-----------------
+
+A new Module tag has been added to the GENIOS DTD.
+
+The 201805 shipment contains the following tags:
+
+8737651 <Module>ebooks_wiwi</Module>
+6968578 <Module>journal_wiwi</Module>
+4161228 <Module>ebooks_recht</Module>
+3870607 <Module>ebooks_technik</Module>
+3212909 <Module>ebooks_sozi</Module>
+2233928 <Module>journal_technik</Module>
+ 419720 <Module>journal_recht</Module>
+ 345542 <Module>ebooks_psycho</Module>
+  58221 <Module>press_bild</Module>
+  26946 <Module>journal_sozi</Module>
+  26116 <Module>journal_psycho</Module>
+     36 <Module>ebooks_grinsozi</Module>
+      3 <Module>0WISOWIWI</Module>
+      3 <Module>0WISOSOZI</Module>
+      2 <Module>0WISOPSYC</Module>
+
 """
 
 import datetime
