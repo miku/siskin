@@ -76,6 +76,7 @@ from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.kielfmf import KielFMFIntermediateSchema
+from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.mag import MAGReferenceDB
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
@@ -306,6 +307,7 @@ class AIIntermediateSchema(AITask):
             IJOCIntermediateSchema(stamp=True),
             CeeolJournalsDumpIntermediateSchema(stamp=True),
             SSOARIntermediateSchema(stamp=True),
+            LyndaIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed
