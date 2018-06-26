@@ -326,7 +326,7 @@ for record in records:
     for corporate in corporates:
         marcrecord.add("710", a=corporate)
     if f856u != "":
-        marcrecord.add("856", q="text/html", _3="Link zum Inhaltsverzeichnis", u=f856u)
+        marcrecord.add("856", q="text/html", u=f856u)
     f866a = "; ".join(f866a)    
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
