@@ -79,15 +79,42 @@ class LyndaPaths(LyndaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+class LyndaIntermediateSchema(LyndaTask):
+    """
+    XXX: Workaround SOLR, refs #11477.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
 
-class LyndaDownload(LyndaTask):
+    def requires(self):
+        return LyndaPaths(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith("latest"):
+                    output = shellout(""" gunzip -c {input} |
+                                      jq -rc '.fullrecord' |
+                                      jq -rc 'del(.["x.labels"])' > {output} """,
+                                      input=row.path)
+                    luigi.LocalTarget(output).move(self.output().path)
+                    break
+            else:
+                raise RuntimeError("no latest symlink found in folder")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj"))
+
+class LyndaDownloadDeprecated(LyndaTask):
     """
     Download list.
+
+    Deprecated: Use SLUB processed version via FTP download.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     language = luigi.Parameter(default="en",
                                description="available languages: de, en")
 
+    @deprecated
     def run(self):
         url = "https://www.lynda.com/courselist?library=%s&retired=true" % self.language
         output = shellout("""curl --fail "{url}" > {output}""", url=url)
@@ -97,16 +124,18 @@ class LyndaDownload(LyndaTask):
         return luigi.LocalTarget(path=self.path(ext='zip'))
 
 
-class LyndaIntermediateSchema(LyndaTask):
+class LyndaIntermediateSchemaDeprecated(LyndaTask):
     """
     Intermediate schema conversion.
+
+    Deprecated: Use SLUB processed version via FTP download.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     language = luigi.Parameter(default="en",
                                description="available languages: de, en")
 
     def requires(self):
-        return LyndaDownload(language=self.language, date=self.date)
+        return LyndaDownloadDeprecated(language=self.language, date=self.date)
 
     @deprecated
     def run(self):
