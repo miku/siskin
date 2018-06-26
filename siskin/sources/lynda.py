@@ -30,16 +30,19 @@ Lynda, refs #11477.
 
 """
 
-from siskin.task import DefaultTask
-from siskin.decorator import deprecated
-
-from gluish.intervals import monthly
-from gluish.parameter import ClosestDateParameter
-import luigi
 import csv
-from gluish.utils import shellout
 import datetime
 import json
+
+import luigi
+
+from gluish.format import TSV
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
+from siskin.common import FTPMirror
+from siskin.decorator import deprecated
+from siskin.task import DefaultTask
 
 
 class LyndaTask(DefaultTask):
@@ -50,6 +53,31 @@ class LyndaTask(DefaultTask):
 
     def closest(self):
         return monthly(date=self.date)
+
+
+class LyndaPaths(LyndaTask):
+    """
+    Mirror SLUB FTP.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=10, significant=False)
+    timeout = luigi.IntParameter(default=20, significant=False,
+                                 description='timeout in seconds')
+
+    def requires(self):
+        return FTPMirror(host=self.config.get('lynda', 'ftp-host'),
+                         base=self.config.get('lynda', 'ftp-base'),
+                         username=self.config.get('lynda', 'ftp-username'),
+                         password=self.config.get('lynda', 'ftp-password'),
+                         pattern=self.config.get('lynda', 'ftp-pattern'),
+                         max_retries=self.max_retries,
+                         timeout=self.timeout)
+
+    def run(self):
+        self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class LyndaDownload(LyndaTask):
