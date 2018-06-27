@@ -118,6 +118,8 @@ class DOAJDump(DOAJTask):
         """
         Connect to ES and issue queries. Use exponential backoff to mitigate
         gateway timeouts. Be light on resources and do not crawl in parallel.
+
+        XXX: This task might stop before completion, investigate.
         """
         max_backoff_retry = 10
         backoff_interval_s = 0.05
