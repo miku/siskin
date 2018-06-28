@@ -120,6 +120,8 @@ class DOAJDump(DOAJTask):
         gateway timeouts. Be light on resources and do not crawl in parallel.
 
         XXX: This task might stop before completion, investigate.
+        XXX: Completed dump 2018-06-01 is only 495M (about 150k records),
+        expected 10G.
         """
         max_backoff_retry = 10
         backoff_interval_s = 0.05
