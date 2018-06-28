@@ -44,7 +44,6 @@ from siskin.common import FTPMirror
 from siskin.decorator import deprecated
 from siskin.task import DefaultTask
 
-
 class LyndaTask(DefaultTask):
     """
     Base class for lynda.com courses.
@@ -53,7 +52,6 @@ class LyndaTask(DefaultTask):
 
     def closest(self):
         return monthly(date=self.date)
-
 
 class LyndaPaths(LyndaTask):
     """
@@ -94,7 +92,8 @@ class LyndaIntermediateSchema(LyndaTask):
                 if row.path.endswith("latest"):
                     output = shellout(""" gunzip -c {input} |
                                       jq -rc '.fullrecord' |
-                                      jq -rc 'del(.["x.labels"])' | gzip -c > {output} """,
+                                      jq -rc 'del(.["x.labels"])' |
+                                      jq -rc '. + {{"finc.id": .["finc.record_id"]}}' | gzip -c > {output} """,
                                       input=row.path)
                     luigi.LocalTarget(output).move(self.output().path)
                     break
@@ -122,7 +121,6 @@ class LyndaDownloadDeprecated(LyndaTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='zip'))
-
 
 class LyndaIntermediateSchemaDeprecated(LyndaTask):
     """
