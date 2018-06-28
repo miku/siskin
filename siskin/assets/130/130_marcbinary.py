@@ -9,9 +9,8 @@ import tqdm
 import marcx
 import collections
 
-
 formatmap = {
-    "p||||||z|||||||": "Zeitschrift",   
+    "p||||||z|||||||": "Zeitschrift",
     "z||||||z|||||||": "Zeitung",
     "r||||||z|||||||": "Reihe",
     "r||||||||||||||": "Reihe",
@@ -23,7 +22,6 @@ formatmap = {
     "||||||||g|": "Datenträger"
 }
 
-
 def get_field(tag):
     regexp = re.search('<.*?\snr="%s".*>(.*)$' % tag, field)
     if regexp:
@@ -32,31 +30,33 @@ def get_field(tag):
     else:
         return ""
 
-def get_subfield(tag, subfield):  
-    regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)   
-    if regexp:        
+def get_subfield(tag, subfield):
+    regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)
+    if regexp:
         _field = regexp.group(1)
         return _field
     else:
         return ""
 
-
 inputfilename = "130_input.xml"
 outputfilename = "130_output.mrc"
 
+if len(sys.argv) == 3:
+    inputfilename, outputfilename = sys.argv[1:]
+
 hierarchymap = collections.defaultdict(list)
 
-with open(inputfilename, "r") as inputfile:
+with io.open(inputfilename, "r") as inputfile:
 
     records = inputfile.read()
     records = records.split("</datensatz>")
 
     for record in records:
-        
+
         f010 = ""
         f089 = ""
 
-        record = record.replace("\n", "")            
+        record = record.replace("\n", "")
         pattern = """<feld nr="010" ind=" ">(.*?)</feld>.*?nr="089" ind=" ">(.*?)</feld>"""
         regexp = re.search(pattern, record)
         if regexp:
@@ -65,17 +65,15 @@ with open(inputfilename, "r") as inputfile:
         if f010 != "" and f089 != "":
             f010 = f010.lstrip("0")
             hierarchymap[f010].append(f089)
-    
+
     #print(hierarchymap)
-
-
 
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "r")    
-outputfile = open(outputfilename, "wb")
- 
+inputfile = io.open(inputfilename, "r")
+outputfile = io.open(outputfilename, "wb")
+
 records = inputfile.read()
 records = records.split("</datensatz>")
 
@@ -109,10 +107,10 @@ for record in records:
     persons = []
     corporates = []
 
-    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord = marcx.Record(force_utf8=True, to_unicode=True)
     marcrecord.strict = False
     fields = re.split("(</feld>)", record)
-    
+
     for field in fields:
 
         field = field.replace("\n", "")
@@ -121,7 +119,7 @@ for record in records:
 
         # Identfikator
         if f001 == "":
-            f001 = get_field("001")     
+            f001 = get_field("001")
 
         # ISBN
         if f020a == "":
@@ -132,7 +130,7 @@ for record in records:
                     f020a = regexp.group(1)
                 else:
                     print("Die ISBN konnte nicht bereinigt werden: " + f020a)
-     
+
         # Sprache
         if f041a == "":
             f041a = get_field("037")
@@ -144,7 +142,7 @@ for record in records:
                 regexp = re.search(".\s¬(\[.*\])", f100a)
                 if regexp:
                     f100e = regexp.group(1)
-                    f100a = re.sub(".\s¬\[.*\]¬", "", f100a) 
+                    f100a = re.sub(".\s¬\[.*\]¬", "", f100a)
 
         # 1. Körperschaft
         if f110a == "":
@@ -202,7 +200,7 @@ for record in records:
         if f300c == "":
             f300c = get_field("435")
             if f300c != "":
-                f300c = " ; " + f300c        
+                f300c = " ; " + f300c
 
         # Schlagwörter
         if f650a == "":
@@ -215,7 +213,7 @@ for record in records:
         regexp = re.search('nr="1\d\d"', field)
         if regexp:
             for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
-                f700a = get_field(i)               
+                f700a = get_field(i)
                 if f700a != "":
                     regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
                     if not regexp:
@@ -224,13 +222,13 @@ for record in records:
                             f700e = regexp.group(1)
                             f700a = re.sub(".\s¬\[.*\]¬", "", f700a)
                         persons.append(f700a)
-                        break                    
+                        break
 
         # weitere Körperschaften
         regexp = re.search('nr="2\d\d"', field)
         if regexp:
             for i in range(201, 299):
-                f710a = get_field(i)               
+                f710a = get_field(i)
                 if f710a != "":
                     regexp = re.search("^\d+", f710a)
                     if not regexp:
@@ -239,20 +237,20 @@ for record in records:
 
         # Link zum Datensatz
         if f856u == "":
-            f856u = get_subfield("655", "u")       
-           
-        #Bestandsnachweis (866a)       
+            f856u = get_subfield("655", "u")
+
+        #Bestandsnachweis (866a)
         f866a = f001.lstrip("0")
-        f866a = hierarchymap.get(f866a, "")    
+        f866a = hierarchymap.get(f866a, "")
 
         if format1 == "":
             format1 = get_field("052")
-        
+
         if format2 == "":
             format2 = get_field("050")
-        
+
     if format1 != "" or format2 != "":
-        format = format1 or format2        
+        format = format1 or format2
     else:
         format = "a|a|||||||||||"
 
@@ -285,13 +283,13 @@ for record in records:
         f007 = "v"
         f008 = ""
         f935b = "vika"
-        f935c = "vide"    
+        f935c = "vide"
     elif formatmap.get(format) == "Datenträger":
         leader = "     cgm  22        4500"
         f007 = "v"
         f008 = ""
         f935b = "soerd"
-        f935c = ""    
+        f935c = ""
     else:
         print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
         leader = "     nam  22        4500"
@@ -300,7 +298,7 @@ for record in records:
         f935b = "druck"
         f935c = ""
 
-    if f245a == "" or "Arkady" in f245a: # einzelne Zeitschriftenhefte und die fehlerhaften Arkady-Records werden übersprungen 
+    if f245a == "" or "Arkady" in f245a: # einzelne Zeitschriftenhefte und die fehlerhaften Arkady-Records werden übersprungen
         continue
 
     assert(len(leader) == 24)
@@ -313,12 +311,12 @@ for record in records:
     marcrecord.add("100", a=f100a, e=f100e)
     marcrecord.add("110", a=f110a)
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
-    marcrecord.add("245", subfields=titleparts)    
+    marcrecord.add("245", subfields=titleparts)
     marcrecord.add("250", a=f250a)
     publisher = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
-    marcrecord.add("300", subfields=physicaldescription)   
+    marcrecord.add("300", subfields=physicaldescription)
     for subject in subjects:
         marcrecord.add("650", a=subject)
     for person in persons:
@@ -327,11 +325,11 @@ for record in records:
         marcrecord.add("710", a=corporate)
     if f856u != "":
         marcrecord.add("856", q="text/html", u=f856u)
-    f866a = "; ".join(f866a)    
+    f866a = "; ".join(f866a)
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
-  
+
     outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
