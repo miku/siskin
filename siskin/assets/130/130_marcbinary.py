@@ -300,7 +300,7 @@ for record in records:
         f935b = "druck"
         f935c = ""
 
-    if f245a == "": # einzelne Zeitschriftenhefte werden übersprungen 
+    if f245a == "" or "Arkady" in f245a: # einzelne Zeitschriftenhefte und die fehlerhaften Arkady-Records werden übersprungen 
         continue
 
     assert(len(leader) == 24)
