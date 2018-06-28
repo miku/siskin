@@ -29,6 +29,7 @@
 # AMSL (api) + AIIntermediateSchema (sources) = AILicensing (isil) -> AIExport (for solr)
 #
 
+import binascii
 import collections
 import datetime
 import itertools
@@ -312,6 +313,14 @@ class AIIntermediateSchema(AITask):
 
     @timed
     def run(self):
+        """
+        Check, if all files are gzipped before we concatenate.
+        """
+        for target in self.input():
+            with open(target.path) as f:
+                if binascii.hexlify(f.read(2)) != b'1f8b':
+                    raise RuntimeError('AIIntermediateSchema requires gzipped inputs, failed: %s' % target.path)
+
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}",
