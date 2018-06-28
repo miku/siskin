@@ -36,7 +36,7 @@ import json
 
 import luigi
 
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -94,7 +94,7 @@ class LyndaIntermediateSchema(LyndaTask):
                 if row.path.endswith("latest"):
                     output = shellout(""" gunzip -c {input} |
                                       jq -rc '.fullrecord' |
-                                      jq -rc 'del(.["x.labels"])' > {output} """,
+                                      jq -rc 'del(.["x.labels"])' | gzip -c > {output} """,
                                       input=row.path)
                     luigi.LocalTarget(output).move(self.output().path)
                     break
@@ -102,7 +102,7 @@ class LyndaIntermediateSchema(LyndaTask):
                 raise RuntimeError("no latest symlink found in folder")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj"))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
 
 class LyndaDownloadDeprecated(LyndaTask):
     """
