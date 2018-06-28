@@ -32,6 +32,8 @@ Configuration:
 [vdeh]
 
 input = /path/to/mab (ask RS)
+Mab2Mabxml.jar = /path/to/local/copy.jar
+
 """
 
 import luigi
@@ -49,11 +51,14 @@ class VDEHTask(DefaultTask):
 class VDEHXML(VDEHTask):
     """
     Convert binary MAB to MABxml.
+
+    Requires Mab2Mabxml, downloadable from https://sourceforge.net/projects/dnb-conv-tools/.
     """
 
     def run(self):        
-        output = shellout("java -jar dnbtools.jar - Mab2Mabxml -{input} -{output}",
-                          input=self.config.get("VDEH", "input"))
+        output = shellout("java -jar {jarfile} -i {input} -o {output}",
+                          jarfile=self.config.get("vdeh", "Mab2Mabxml.jar"),
+                          input=self.config.get("vdeh", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
