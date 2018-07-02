@@ -27,6 +27,8 @@ Cambridge Open Access eBooks, refs #13120.
 
 Download data manually from https://www.cambridge.org/core/services/librarians/marc-records.
 
+As of 2018-07-01, the download site uses a visual captcha (https://visualcaptcha.net/).
+
 Configuration:
 
 [coaeb]
