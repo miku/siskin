@@ -40,7 +40,9 @@ import datetime
 import logging
 import os
 import re
+import socket
 import tempfile
+import traceback
 
 import luigi
 
@@ -95,24 +97,33 @@ class DefaultTask(BaseTask):
         """
         try:
             tolist = self.config.get("core", "error-email").split(",")
-            subject = "%s %s %s" % (self.__class__.__name__,
+            subject = "%s %s %s" % (self.config.get("core", "email-prefix"),
+                                    self,
                                     datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
+
+            # XXX: Move into a template.
             message = """
             This is siskin {version} on {host}.
 
-            An error occured in Task {name}, this is the stacktrace:
+            An error occured in Task {name}, this is the error message:
 
             {exc}
+
+            Stacktrace:
+
+            {tb}
             """.format(
                 version=__version__,
-                name=self.__class_.__name__,
+                name=self,
                 exc=exception,
+                tb=traceback.format_exc(),
                 host=socket.gethostname(),
             )
             message = message.encode("utf-8")
             send_mail(tolist=tolist, subject=subject, message=message)
+            self.logger.debug("sent error emails to %s", ", ".join(tolist))
         except TypeError as err:
-            self.logger.debug("error-email not configured, not sending mail: %s", err)
+            self.logger.debug("error-email may not be configured, not sending mail: %s", err)
         except Exception as err:
             self.logger.debug("failed to send error email: %s", err)
 
