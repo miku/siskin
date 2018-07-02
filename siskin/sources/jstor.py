@@ -231,9 +231,10 @@ class JstorXML(JstorTask):
     [1] https://github.com/miku/unzippa
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.IntParameter(default=2, description="#12669")
 
     def requires(self):
-        return JstorLatestMembers(date=self.date)
+        return JstorLatestMembers(date=self.date, version=self.version)
 
     @timed
     def run(self):
