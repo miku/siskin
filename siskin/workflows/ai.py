@@ -72,6 +72,7 @@ from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
 from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
                                    GeniosISSNList)
+from siskin.sources.hhbd import HHBDIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
@@ -309,6 +310,7 @@ class AIIntermediateSchema(AITask):
             CeeolJournalsDumpIntermediateSchema(stamp=True),
             SSOARIntermediateSchema(stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
+            HHBDIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed
