@@ -181,7 +181,18 @@ class JstorLatestMembers(JstorTask):
 
     We assume, this is a complete set of the content, so we can choose either the one or the other.
 
-    TODO: Observe update handling.
+    Assumed update handling. As of 2018-07-01, there are five updates files:
+
+        jstor-journals-updates-csp-2018-06-28T20-35-03Z-part-001.zip
+        jstor-journals-updates-csp-2018-06-29T13-06-49Z-part-001.zip
+        jstor-journals-updates-archives-2018-06-28T19-38-43Z-part-001.zip
+        jstor-journals-updates-archives-2018-06-28T19-38-43Z-part-002.zip
+        jstor-journals-updates-archives-2018-06-29T13-07-02Z-part-001.zip
+        jstor-journals-updates-archives-2018-06-30T13-00-03Z-part-001.zip
+
+    These files range in size from a few kB to almost a GB.
+
+    XXX: Adjust snapshotting accordingly.
 
     Issue, refs #12669.
     """
