@@ -25,12 +25,18 @@
 """
 Define a siskin wide task with artifacts under core.home directory.
 
+[core]
+
+error-email = a@c.com, d@e.com
+home = /path/to/dir
+
 [amsl]
 
 write-url = https://live.abc.xyz/w/i/write
 
 """
 
+import datetime
 import logging
 import os
 import re
@@ -38,9 +44,11 @@ import tempfile
 
 import luigi
 
+from siskin import __version__
 from gluish.task import BaseTask
 from gluish.utils import shellout
 from siskin.configuration import Config
+from siskin.mail import send_mail
 
 config = Config.instance()
 
@@ -80,6 +88,33 @@ class DefaultTask(BaseTask):
         Return the logger. Module logging uses singleton internally, so no worries.
         """
         return logging.getLogger('siskin')
+
+    def on_failure(self, exception):
+        """
+        If a task fails, try to send an email.
+        """
+        try:
+            tolist = self.config.get("core", "error-email").split(",")
+            subject = "%s %s %s" % (self.__class__.__name__,
+                                    datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
+            message = """
+            This is siskin {version} on {host}.
+
+            An error occured in Task {name}, this is the stacktrace:
+
+            {exc}
+            """.format(
+                version=__version__,
+                name=self.__class_.__name__,
+                exc=exception,
+                host=socket.gethostname(),
+            )
+            message = message.encode("utf-8")
+            send_mail(tolist=tolist, subject=subject, message=message)
+        except TypeError as err:
+            self.logger.debug("error-email not configured, not sending mail: %s", err)
+        except Exception as err:
+            self.logger.debug("failed to send error email: %s", err)
 
     def on_success(self):
         """
