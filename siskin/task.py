@@ -97,9 +97,7 @@ class DefaultTask(BaseTask):
         """
         try:
             tolist = self.config.get("core", "error-email").split(",")
-            subject = "%s %s %s" % (self.config.get("core", "email-prefix"),
-                                    self,
-                                    datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
+            subject = "%s %s" % (self, datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
 
             # XXX: Move into a template.
             message = """
