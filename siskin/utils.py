@@ -55,9 +55,7 @@ from siskin import __version__
 # XXX: move to six.
 standard_library.install_aliases()
 
-
 logger = logging.getLogger('siskin')
-
 
 class SetEncoder(json.JSONEncoder):
     """
@@ -75,7 +73,6 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
 
-
 def date_range(start_date, end_date, increment, period):
     """
     Generate `date` objects between `start_date` and `end_date` in `increment`
@@ -88,7 +85,6 @@ def date_range(start_date, end_date, increment, period):
         result.append(nxt)
         nxt += delta
     return result
-
 
 def iterfiles(directory='.', fun=None):
     """
@@ -103,14 +99,12 @@ def iterfiles(directory='.', fun=None):
             if fun(path):
                 yield path
 
-
 def random_string(length=16):
     """
     Return a random string(upper and lowercase letters) of length `length`,
     defaults to 16.
     """
     return ''.join(random.choice(string.ascii_letters) for _ in range(length))
-
 
 def nwise(iterable, n=2):
     """
@@ -121,7 +115,6 @@ def nwise(iterable, n=2):
     while piece:
         yield piece
         piece = tuple(itertools.islice(i, n))
-
 
 def dictcheck(obj, contains=None, absent=None):
     """
@@ -167,7 +160,6 @@ def dictcheck(obj, contains=None, absent=None):
 
     return True
 
-
 def get_task_import_cache():
     """
     Load or create `taskname: modulename` mappings. Return a tuple containing
@@ -198,7 +190,6 @@ def get_task_import_cache():
 
     return task_import_cache, path
 
-
 def load_set_from_target(target):
     """
     Given a luigi.LocalTarget, load each line of the file into a set.
@@ -208,7 +199,6 @@ def load_set_from_target(target):
         for line in handle:
             s.add(line.strip())
     return s
-
 
 def load_set_from_file(filename, func=lambda v: v):
     """
@@ -221,7 +211,6 @@ def load_set_from_file(filename, func=lambda v: v):
                 continue
             s.add(func(line))
     return s
-
 
 class URLCache(object):
     """
@@ -357,3 +346,25 @@ def scrape_html_listing(url, with_head=False):
             links.add(link)
 
     return sorted(links)
+
+def compare_files(a, b):
+    """
+    Compare two paths by checksum. Returns True, if files are byte-identical.
+    """
+    with open(a) as fa:
+        chka = hashlib.sha1()
+        while True:
+            data = fa.read(4096)
+            if not data:
+                break
+            chka.update(data)
+
+    with open(b) as fb:
+        chkb = hashlib.sha1()
+        while True:
+            data = fb.read(4096)
+            if not data:
+                break
+            chkb.update(data)
+
+    return chka.hexdigest() == chkb.hexdigest()
