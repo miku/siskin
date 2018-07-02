@@ -27,6 +27,9 @@ Define a siskin wide task with artifacts under core.home directory.
 
 [core]
 
+smtp = server.example.com
+default-sender = my@mail.com
+default-replyto = my@mail.com
 error-email = a@c.com, d@e.com
 home = /path/to/dir
 
