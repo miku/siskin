@@ -31,7 +31,7 @@ Configuration:
 
 [gdmb]
 
-input = /path/to/xml (ask RS)
+input = /path/to/json (ask RS)
 """
 
 import luigi
