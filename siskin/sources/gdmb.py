@@ -31,7 +31,7 @@ Configuration:
 
 [gdmb]
 
-input = /path/to/mrc (ask RS)
+input = /path/to/xml (ask RS)
 """
 
 import luigi
