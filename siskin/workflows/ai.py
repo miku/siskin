@@ -471,14 +471,17 @@ class AILicensing(AITask):
         00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLFilterConfigFreeze --local-scheduler
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    override = luigi.BoolParameter(description="do not use jour fixe")
 
     def requires(self):
-        jourfixe = datetime.date(self.date.year, self.date.month, 15)
+        if self.override:
+            jourfixe = self.date
+        else:
+            jourfixe = datetime.date(self.date.year, self.date.month, 15)
+            if self.date.day < 15:
+                jourfixe = jourfixe + relativedelta(months=-1)
 
-        if self.date.day < 15:
-            jourfixe = jourfixe + relativedelta(months=-1)
-
-        self.logger.debug("AILicensing jour-fixe at %s", jourfixe)
+        self.logger.debug("AILicensing date: %s (override=%s)", jourfixe, self.override)
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
