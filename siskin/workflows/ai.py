@@ -471,7 +471,7 @@ class AILicensing(AITask):
         00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLFilterConfigFreeze --local-scheduler
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    override = luigi.BoolParameter(description="do not use jour fixe")
+    override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
 
     def requires(self):
         if self.override:
