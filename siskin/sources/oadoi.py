@@ -118,13 +118,12 @@ class OADOIList(OADOIDump):
                     doc = json.loads(line)
                 except ValueError as err:
                     self.logger.debug("at line %d" % i)
-                    self.logger.debug(line)
                     error_lines.append(i)
                     continue
         # output = shellout("unpigz -c {input} | jq -rc '[.doi, .is_oa] | @csv' | pigz -c > {output}",
         #                  input=self.input().path)
         # luigi.LocalTarget(output).move(self.output().path)
-        self.logger.debug("errors in lines: %s", ", ".join(error_lines))
+        self.logger.debug("errors in lines: %s", ", ".join(str(i) for i in error_lines))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="csv.gz"), format=Gzip)
