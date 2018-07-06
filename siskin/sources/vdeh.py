@@ -71,6 +71,8 @@ class VDEHRemoveIllegalChars(VDEHTask):
     Remove Nichtsortierzeichen. XXX: Workaround. It would be faster to first
     reduce the number of records first, then to clean up.
     """
+    def requires(self):
+        return VDEHXML()
 
     def run(self):
         """ https://stackoverflow.com/a/7774512 """
@@ -78,8 +80,9 @@ class VDEHRemoveIllegalChars(VDEHTask):
             perl -CSDA -pe's/[^\x9\xA\xD\x20-\x{{D7FF}}\x{{E000}}-\x{{FFFD}}\x{{10000}}-\x{{10FFFF}}]+//g;' {input} > {output}
         """, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
+
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincmarc.xml'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class VDEHMARC(VDEHTask):
