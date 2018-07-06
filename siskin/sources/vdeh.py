@@ -52,7 +52,8 @@ class VDEHXML(VDEHTask):
     """
     Convert binary MAB to MABxml.
 
-    Requires Mab2Mabxml, downloadable from https://sourceforge.net/projects/dnb-conv-tools/.
+    Requires Mab2Mabxml, downloadable from
+    https://sourceforge.net/projects/dnb-conv-tools/.
     """
 
     def run(self):        
