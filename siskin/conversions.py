@@ -51,8 +51,171 @@ marburg_language_mapping = {
 
 logger = logging.getLogger('siskin')
 
+def html_escape(text):
+    """
+    Escape HTML, see also: https://wiki.python.org/moin/EscapingHtml
+    """
+    return escape(text, html_escape_table)
+
+def html_unescape(text):
+    """
+    Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml
+    """
+    return unescape(text, html_unescape_table)
+
+def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
+                          max_failures=30):
+    """
+    Convert an IMSLP tarball to MARC binary output file without extracting it.
+    If outputfile is not given, write to a temporary location.
+
+    Returns the location of the resulting MARC file.
+
+    A maximum number of failed conversions can be specified with `max_failures`,
+    as of 2018-04-25, there were 30 records w/o title.
+    """
+    if outputfile is None:
+        _, outputfile = tempfile.mkstemp(prefix="siskin-")
+
+    stats = collections.Counter()
+
+    with open(outputfile, "wb") as output:
+        writer = pymarc.MARCWriter(output)
+        with tarfile.open(tarball) as tar:
+            for member in tar.getmembers():
+                fobj = tar.extractfile(member)
+                try:
+                    record = imslp_xml_to_marc(fobj.read(), legacy_mapping=legacy_mapping)
+                    writer.write(record)
+                except ValueError as exc:
+                    logger.warn("conversion failed: %s", exc)
+                    stats["failed"] += 1
+                finally:
+                    fobj.close()
+                    stats["processed"] += 1
+
+        writer.close()
+
+        if stats["failed"] > max_failures:
+            raise RuntimeError("more than %d records failed", max_failures)
+
+        logger.debug("%d/%d records failed/processed", stats["failed"], stats["processed"])
+
+    return outputfile
+
+def imslp_xml_to_marc(s, legacy_mapping=None):
+    """
+    Convert a string containing a single IMSLP XML record to a pymarc MARC record.
+
+    Optionally take a legacy mapping, associating IMSLP Names with VIAF
+    identifiers. Blueprint: https://git.io/vpQPd, with one difference: We
+    allow records with no subjects.
+
+    A record w/o title is an error. We check for them, when we add the field.
+    """
+    dd = xmltodict.parse(s, force_list={"subject", "languages"})
+
+    if legacy_mapping is None:
+        legacy_mapping = collections.defaultdict(lambda: collections.defaultdict(str))
+
+    record = marcx.Record(force_utf8=True)
+    record.strict = False
+
+    doc = dd["document"]
+
+    record.leader = "     ncs  22        450 "
+
+    identifier = doc["identifier"]["#text"]
+    encoded_id = base64.b64encode(identifier.encode("utf-8")).rstrip("=")
+    record.add("001", data=u"finc-15-{}".format(encoded_id))
+
+    record.add("007", data="cr")
+
+    if doc.get("languages", []):
+        langs = [l for l in doc["languages"] if l != "unbekannt"]
+        if langs:
+            record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % langs[0])
+            for l in langs:
+                record.add("041", a=l)
+
+    creator = doc["creator"]["mainForm"]
+    record.add("100", a=creator, e="cmp",
+               _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
+
+    record.add("240", a=legacy_mapping.get(identifier, {}).get("title", ""))
+
+    try:
+        record.add("245", a=html_unescape(doc["title"]))
+    except KeyError:
+        raise ValueError("cannot find title: %s ..." % s[:300])
+
+    record.add("246", a=html_unescape(doc.get("additionalTitle", "")))
+
+    record.add("260", c=doc.get("date", ""))
+    record.add("650", y=doc.get("date", ""))
+    record.add("500", a=doc.get("abstract", ""))
+
+    for689 = []
+
+    if "subject" in doc:
+        if len(doc["subject"]) == 1:
+            for689.append(doc["subject"][0]["mainForm"])
+        elif len(doc["subject"]) == 2:
+            for689.append(doc["subject"][1]["mainForm"])
+        else:
+            raise ValueError("cannot handle %d subjects", len(doc["subject"]))
+
+        record.add("590", a=for689[0].title(),
+                   b=doc.get("music_arrangement_of", "").title())
+
+        for689.append(doc.get("music_arrangement_of", ""))
+
+        for subject in set(for689):
+            record.add("689", a=subject.title())
+
+    record.add("700", a=doc.get("contributor", {}).get("mainForm", ""), e="ctb")
+    record.add("856", q="text/html", _3="Petrucci Musikbibliothek",
+               u=doc["url"]["#text"])
+    record.add("970", c="PN")
+    record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
+    return record
+
+def marburg_to_marc(s):
+    """
+    Convert a string containing a single XML in datacite from
+    http://archiv.ub.uni-marburg.de/ubfind/OAI/Server into a binary MARC.
+    """
+    dd = xmltodict.parse(s, force_list={"dcite:creators", "dcite:titles"})
+    record = marcx.Record()
+
+    header, metadata = dd["Record"]["header"], dd["Record"]["metadata"]
+    identifier = header["identifier"]
+
+    record.add("001", data=base64.b64encode(identifier).rstrip("="))
+    record.add("007", data="cr")
+
+    related = metadata["dcite:resource"]["dcite:relatedIdentifiers"]
+    for rid in related:
+        if rid["@relatedIdentifierType"] != "ISSN":
+            continue
+        record.add("022", a=rid["#text"])
+
+    language = metadata["dcite:resource"]["dcite:language"]
+    language = marburg_language_mapping.get(language)
+    record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
+    record.add("041", a=marburg_language_mapping.get(language))
+
+    for item in metadata["dcite:resource"]["dcite:creators"]:
+        name = item["dcite:creator"]["dcite:creatorName"]["#text"]
+        record.add("100", a=name)
+
+    for item in metadata["dcite:resource"]["dcite:titles"]:
+        title = item["dcite:title"]
+
+    # WIP.
+
 # Facet fields values from author2_role field across all sources.
-# TODO: fill out empty strings.
+# TODO: fill out empty strings, maybe add https://git.io/fNLwY, too.
 author_role_mapping = {
     "\xc3\xbcbers": "",
     "\xc3\xbcbersetzer": "",
@@ -371,165 +534,3 @@ author_role_mapping = {
     "wst": "wst",
 }
 
-def html_escape(text):
-    """
-    Escape HTML, see also: https://wiki.python.org/moin/EscapingHtml
-    """
-    return escape(text, html_escape_table)
-
-def html_unescape(text):
-    """
-    Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml
-    """
-    return unescape(text, html_unescape_table)
-
-def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
-                          max_failures=30):
-    """
-    Convert an IMSLP tarball to MARC binary output file without extracting it.
-    If outputfile is not given, write to a temporary location.
-
-    Returns the location of the resulting MARC file.
-
-    A maximum number of failed conversions can be specified with `max_failures`,
-    as of 2018-04-25, there were 30 records w/o title.
-    """
-    if outputfile is None:
-        _, outputfile = tempfile.mkstemp(prefix="siskin-")
-
-    stats = collections.Counter()
-
-    with open(outputfile, "wb") as output:
-        writer = pymarc.MARCWriter(output)
-        with tarfile.open(tarball) as tar:
-            for member in tar.getmembers():
-                fobj = tar.extractfile(member)
-                try:
-                    record = imslp_xml_to_marc(fobj.read(), legacy_mapping=legacy_mapping)
-                    writer.write(record)
-                except ValueError as exc:
-                    logger.warn("conversion failed: %s", exc)
-                    stats["failed"] += 1
-                finally:
-                    fobj.close()
-                    stats["processed"] += 1
-
-        writer.close()
-
-        if stats["failed"] > max_failures:
-            raise RuntimeError("more than %d records failed", max_failures)
-
-        logger.debug("%d/%d records failed/processed", stats["failed"], stats["processed"])
-
-    return outputfile
-
-def imslp_xml_to_marc(s, legacy_mapping=None):
-    """
-    Convert a string containing a single IMSLP XML record to a pymarc MARC record.
-
-    Optionally take a legacy mapping, associating IMSLP Names with VIAF
-    identifiers. Blueprint: https://git.io/vpQPd, with one difference: We
-    allow records with no subjects.
-
-    A record w/o title is an error. We check for them, when we add the field.
-    """
-    dd = xmltodict.parse(s, force_list={"subject", "languages"})
-
-    if legacy_mapping is None:
-        legacy_mapping = collections.defaultdict(lambda: collections.defaultdict(str))
-
-    record = marcx.Record(force_utf8=True)
-    record.strict = False
-
-    doc = dd["document"]
-
-    record.leader = "     ncs  22        450 "
-
-    identifier = doc["identifier"]["#text"]
-    encoded_id = base64.b64encode(identifier.encode("utf-8")).rstrip("=")
-    record.add("001", data=u"finc-15-{}".format(encoded_id))
-
-    record.add("007", data="cr")
-
-    if doc.get("languages", []):
-        langs = [l for l in doc["languages"] if l != "unbekannt"]
-        if langs:
-            record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % langs[0])
-            for l in langs:
-                record.add("041", a=l)
-
-    creator = doc["creator"]["mainForm"]
-    record.add("100", a=creator, e="cmp",
-               _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
-
-    record.add("240", a=legacy_mapping.get(identifier, {}).get("title", ""))
-
-    try:
-        record.add("245", a=html_unescape(doc["title"]))
-    except KeyError:
-        raise ValueError("cannot find title: %s ..." % s[:300])
-
-    record.add("246", a=html_unescape(doc.get("additionalTitle", "")))
-
-    record.add("260", c=doc.get("date", ""))
-    record.add("650", y=doc.get("date", ""))
-    record.add("500", a=doc.get("abstract", ""))
-
-    for689 = []
-
-    if "subject" in doc:
-        if len(doc["subject"]) == 1:
-            for689.append(doc["subject"][0]["mainForm"])
-        elif len(doc["subject"]) == 2:
-            for689.append(doc["subject"][1]["mainForm"])
-        else:
-            raise ValueError("cannot handle %d subjects", len(doc["subject"]))
-
-        record.add("590", a=for689[0].title(),
-                   b=doc.get("music_arrangement_of", "").title())
-
-        for689.append(doc.get("music_arrangement_of", ""))
-
-        for subject in set(for689):
-            record.add("689", a=subject.title())
-
-    record.add("700", a=doc.get("contributor", {}).get("mainForm", ""), e="ctb")
-    record.add("856", q="text/html", _3="Petrucci Musikbibliothek",
-               u=doc["url"]["#text"])
-    record.add("970", c="PN")
-    record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
-    return record
-
-def marburg_to_marc(s):
-    """
-    Convert a string containing a single XML in datacite from
-    http://archiv.ub.uni-marburg.de/ubfind/OAI/Server into a binary MARC.
-    """
-    dd = xmltodict.parse(s, force_list={"dcite:creators", "dcite:titles"})
-    record = marcx.Record()
-
-    header, metadata = dd["Record"]["header"], dd["Record"]["metadata"]
-    identifier = header["identifier"]
-
-    record.add("001", data=base64.b64encode(identifier).rstrip("="))
-    record.add("007", data="cr")
-
-    related = metadata["dcite:resource"]["dcite:relatedIdentifiers"]
-    for rid in related:
-        if rid["@relatedIdentifierType"] != "ISSN":
-            continue
-        record.add("022", a=rid["#text"])
-
-    language = metadata["dcite:resource"]["dcite:language"]
-    language = marburg_language_mapping.get(language)
-    record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-    record.add("041", a=marburg_language_mapping.get(language))
-
-    for item in metadata["dcite:resource"]["dcite:creators"]:
-        name = item["dcite:creator"]["dcite:creatorName"]["#text"]
-        record.add("100", a=name)
-
-    for item in metadata["dcite:resource"]["dcite:titles"]:
-        title = item["dcite:title"]
-
-    # WIP.
