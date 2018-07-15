@@ -48,7 +48,7 @@ protobuf==3.5.2.post1
 ptyprocess==0.5.2
 Pygments==2.2.0
 pyisbn==1.1.0
-pylint==1.9.1
+pylint==2.0.0
 pymarc==3.1.10
 PyMySQL==0.8.1
 pyparsing==2.2.0
