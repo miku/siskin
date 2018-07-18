@@ -30,17 +30,19 @@ Lynda, refs #11477.
 
 """
 
-from siskin.task import DefaultTask
-from siskin.decorator import deprecated
-
-from gluish.intervals import monthly
-from gluish.parameter import ClosestDateParameter
-import luigi
 import csv
-from gluish.utils import shellout
 import datetime
 import json
 
+import luigi
+
+from gluish.format import TSV, Gzip
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
+from siskin.common import FTPMirror
+from siskin.decorator import deprecated
+from siskin.task import DefaultTask
 
 class LyndaTask(DefaultTask):
     """
@@ -51,15 +53,67 @@ class LyndaTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+class LyndaPaths(LyndaTask):
+    """
+    Mirror SLUB FTP.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=10, significant=False)
+    timeout = luigi.IntParameter(default=20, significant=False,
+                                 description='timeout in seconds')
 
-class LyndaDownload(LyndaTask):
+    def requires(self):
+        return FTPMirror(host=self.config.get('lynda', 'ftp-host'),
+                         base=self.config.get('lynda', 'ftp-base'),
+                         username=self.config.get('lynda', 'ftp-username'),
+                         password=self.config.get('lynda', 'ftp-password'),
+                         pattern=self.config.get('lynda', 'ftp-pattern'),
+                         max_retries=self.max_retries,
+                         timeout=self.timeout)
+
+    def run(self):
+        self.input().move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class LyndaIntermediateSchema(LyndaTask):
+    """
+    XXX: Workaround SOLR, refs #11477.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return LyndaPaths(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('path',)):
+                if row.path.endswith("latest"):
+                    output = shellout(""" gunzip -c {input} |
+                                      jq -rc '.fullrecord' |
+                                      jq -rc 'del(.["x.labels"])' |
+                                      jq -rc '. + {{"finc.id": .["finc.record_id"]}}' | gzip -c > {output} """,
+                                      input=row.path)
+                    luigi.LocalTarget(output).move(self.output().path)
+                    break
+            else:
+                raise RuntimeError("no latest symlink found in folder")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+
+class LyndaDownloadDeprecated(LyndaTask):
     """
     Download list.
+
+    Deprecated: Use SLUB processed version via FTP download.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     language = luigi.Parameter(default="en",
                                description="available languages: de, en")
 
+    @deprecated
     def run(self):
         url = "https://www.lynda.com/courselist?library=%s&retired=true" % self.language
         output = shellout("""curl --fail "{url}" > {output}""", url=url)
@@ -68,17 +122,18 @@ class LyndaDownload(LyndaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='zip'))
 
-
-class LyndaIntermediateSchema(LyndaTask):
+class LyndaIntermediateSchemaDeprecated(LyndaTask):
     """
     Intermediate schema conversion.
+
+    Deprecated: Use SLUB processed version via FTP download.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     language = luigi.Parameter(default="en",
                                description="available languages: de, en")
 
     def requires(self):
-        return LyndaDownload(language=self.language, date=self.date)
+        return LyndaDownloadDeprecated(language=self.language, date=self.date)
 
     @deprecated
     def run(self):

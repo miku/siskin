@@ -181,7 +181,18 @@ class JstorLatestMembers(JstorTask):
 
     We assume, this is a complete set of the content, so we can choose either the one or the other.
 
-    TODO: Observe update handling.
+    Assumed update handling. As of 2018-07-01, there are five updates files:
+
+        jstor-journals-updates-csp-2018-06-28T20-35-03Z-part-001.zip
+        jstor-journals-updates-csp-2018-06-29T13-06-49Z-part-001.zip
+        jstor-journals-updates-archives-2018-06-28T19-38-43Z-part-001.zip
+        jstor-journals-updates-archives-2018-06-28T19-38-43Z-part-002.zip
+        jstor-journals-updates-archives-2018-06-29T13-07-02Z-part-001.zip
+        jstor-journals-updates-archives-2018-06-30T13-00-03Z-part-001.zip
+
+    These files range in size from a few kB to almost a GB.
+
+    XXX: Adjust snapshotting accordingly.
 
     Issue, refs #12669.
     """
@@ -212,37 +223,6 @@ class JstorLatestMembers(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-class JstorXMLSlow(JstorTask):
-    """
-    Create a snapshot of the latest data.
-    TODO(miku): maybe shard by journal and reduce update time.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    batch_size = luigi.IntParameter(default=256, description='number of files to extract from zip at once',
-                                    significant=False)
-
-    def requires(self):
-        return JstorLatestMembers(date=self.date)
-
-    @timed
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            groups = itertools.groupby(handle.iter_tsv(
-                cols=('archive', 'member')), lambda row: row.archive)
-            for archive, items in groups:
-                for chunk in nwise(items, n=self.batch_size):
-                    margs = " ".join(["'%s'" % item.member.decode(
-                        encoding='utf-8').replace('[', r'\[').replace(']', r'\]') for item in chunk])
-                    shellout("""unzip -p {archive} {members} |
-                                sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
-                             archive=archive.decode(encoding='utf-8'), members=margs, output=stopover)
-
-        luigi.LocalTarget(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
-
 class JstorXML(JstorTask):
     """
     Create a snapshot of the latest data. Using unzippa[1] to speed up
@@ -251,9 +231,10 @@ class JstorXML(JstorTask):
     [1] https://github.com/miku/unzippa
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    version = luigi.IntParameter(default=2, description="#12669")
 
     def requires(self):
-        return JstorLatestMembers(date=self.date)
+        return JstorLatestMembers(date=self.date, version=self.version)
 
     @timed
     def run(self):
