@@ -86,26 +86,31 @@ for record in records.entries:
     # Verlag
     f260a = get_field("geoscan_publisher")
     description = get_field("description")
-    regexp = re.search("(\d\d\d\d),\s(.*?),\s(https.*)", description)
-    if regexp:
-        f260c, f300a, f500a = regexp.groups()
+    regexp1 = re.search("(\d\d\d\d),\s(.*?),\s(https.*)", description)
+    regexp2 = re.search("(\d\d\d\d)\.,\s(https.*)", description)
+    if regexp1:
+        f260c, f300a, doi = regexp1.groups()
         f260c = ", " + f260c
+    elif regexp2:
+        f260c, doi = regexp2.groups()
+        f260c = ", " + f260c
+        f300a = ""
     else:
         print("Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description)
         f260c = ""
         f300a = ""
-        f500a = ""
+        doi = ""
     marcrecord.add("260", a=f260a, c=f260c)
 
     # Seitenzahl
     marcrecord.add("300", a=f300a)
 
     # Anzahl der Karten
-    f300a = get_field("geoscan_maps")
-    marcrecord.add("300", a=f300a)
+    f500a = get_field("geoscan_maps")
+    marcrecord.add("500", a=f500a)
 
     # DOI
-    marcrecord.add("500", a=f500a)
+    marcrecord.add("500", a=doi)
 
     # Angaben zur Karte
     f500a = get_field("geoscan_mapinfo")
@@ -142,11 +147,11 @@ for record in records.entries:
     # URL
     f856u = get_field("link")
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
-    
+
     # 980
     collections = ["a", f001, "b", "129", "c", "geoscan"]
     marcrecord.add("980", subfields=collections)
-   
+
     outputfile.write(marcrecord.as_marc())
 
 outputfile.close()

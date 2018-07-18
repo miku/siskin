@@ -52,7 +52,8 @@ class VDEHXML(VDEHTask):
     """
     Convert binary MAB to MABxml.
 
-    Requires Mab2Mabxml, downloadable from https://sourceforge.net/projects/dnb-conv-tools/.
+    Requires Mab2Mabxml, downloadable from
+    https://sourceforge.net/projects/dnb-conv-tools/.
     """
 
     def run(self):        
@@ -64,11 +65,30 @@ class VDEHXML(VDEHTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml"))
 
+
+class VDEHRemoveIllegalChars(VDEHTask):
+    """
+    Remove Nichtsortierzeichen. XXX: Workaround. It would be faster to first
+    reduce the number of records first, then to clean up.
+    """
+    def requires(self):
+        return VDEHXML()
+
+    def run(self):
+        """ https://stackoverflow.com/a/7774512 """
+        output = shellout(r" sed $'s/\u00AC//g' < {input} > {output}",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
 class VDEHMARC(VDEHTask):
     """ Convert MABxml to BinaryMarc """
 
     def requires(self):
-        return VDEHXML()
+        return VDEHRemoveIllegalChars()
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",

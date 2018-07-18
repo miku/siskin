@@ -65,13 +65,13 @@ from siskin.sources.crossref import (CrossrefDOIList,
 from siskin.sources.degruyter import (DegruyterDOIList,
                                       DegruyterIntermediateSchema,
                                       DegruyterISSNList)
-from siskin.sources.disson import DissonIntermediateSchema
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
 from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
                                    GeniosISSNList)
+from siskin.sources.hhbd import HHBDIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
@@ -295,7 +295,6 @@ class AIIntermediateSchema(AITask):
             ArxivIntermediateSchema(date=self.date, stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
-            DissonIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
@@ -309,6 +308,7 @@ class AIIntermediateSchema(AITask):
             CeeolJournalsDumpIntermediateSchema(stamp=True),
             SSOARIntermediateSchema(stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
+            HHBDIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed
@@ -469,14 +469,17 @@ class AILicensing(AITask):
         00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLFilterConfigFreeze --local-scheduler
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
 
     def requires(self):
-        jourfixe = datetime.date(self.date.year, self.date.month, 15)
+        if self.override:
+            jourfixe = self.date
+        else:
+            jourfixe = datetime.date(self.date.year, self.date.month, 15)
+            if self.date.day < 15:
+                jourfixe = jourfixe + relativedelta(months=-1)
 
-        if self.date.day < 15:
-            jourfixe = jourfixe + relativedelta(months=-1)
-
-        self.logger.debug("AILicensing jour-fixe at %s", jourfixe)
+        self.logger.debug("AILicensing date: %s (override=%s)", jourfixe, self.override)
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
