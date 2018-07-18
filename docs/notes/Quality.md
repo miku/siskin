@@ -86,3 +86,18 @@ Real world data issues. List of links to data corrections in code.
 * if no publisher can be determined, use the string "X-U (Crossref)" as
   publisher ([X-Unknown](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L338))
 
+## 50
+
+* skip [too long ids](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/degruyter/article.go#L76-L78)
+
+## 85
+
+* some tar files seem to be [missing some
+  items](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L463-L466),
+  but that is not clear --
+  [another](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L473-L476)
+* sanitize [HTML](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L514)
+* date [is
+  required](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L503-L507),
+  various fields [are
+  considered](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L323-L347)
