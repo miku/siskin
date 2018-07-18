@@ -1,5 +1,6 @@
 # Inventory (WIP)
 
+* Spring 2018
 * Sources, Source Format, Target Format, Tools (filename, mappings), Workflow, Data Hosts
 
 ## Sources
@@ -333,5 +334,4 @@ wiso      |  WisoTask
 156       |  UMBITask
 161       |  COAEBMARC
 161       |  COAEBTask
-
 
