@@ -4,6 +4,43 @@
 
 Real world data issues. List of links to data corrections in code.
 
+## 48
+
+* restrict languages to a minimal subset, via
+  [acceptedLanguages](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L82-L83),
+  if [no suitable
+  language](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L215-L217)
+  is detected, leave field blank (which [violates
+  schema](https://github.com/ubleipzig/intermediateschema/blob/805ee5a1e9beb39d17cecbdbcecab6ab4ed4ed36/is-0.9.json#L9))
+* restrict author length, between [four and 200](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L54-L55)
+* limit title length to [4096](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L56)
+* if abstract is missing, is a [limited
+  number](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L51-L52)
+  of chars (2000) from [fulltext for abstract](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L245-L247)
+* if a single author field is very long, try to break it down into smaller
+  parts using [various
+  delimiters](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L155-L160)
+* if a lowercases field matches the string "n.n.", [treat it as essentially
+  empty](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L134-L138)
+* hard-coded, [blacklist of
+  strings](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L172-L177),
+  that probably are not authors
+* slightly [inconsistent
+  dates](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L108-L122)
+  require some
+  [cleanup](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L81)
+  and fallback; if no date can be parsed, [skip record
+  entirely](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L233-L236)
+* remove newlines in [journal
+  titles](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L258)
+* some opaque [hack](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L282-L283), for package preferences
+* at one point in time, at least one document id would have been [longer than
+  250
+  chars](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L300-L309),
+  skip
+* at one point, one had to [guess the
+  identifier](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L124-L127)
+
 ## 49
 
 * publisher, first name, last name, title, subtitle, container title are
@@ -48,3 +85,4 @@ Real world data issues. List of links to data corrections in code.
   skip the record entirely
 * if no publisher can be determined, use the string "X-U (Crossref)" as
   publisher ([X-Unknown](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L338))
+
