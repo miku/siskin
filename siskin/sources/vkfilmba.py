@@ -83,6 +83,9 @@ class VKFilmBADownload(VKFilmBATask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
+        """
+        XXX: Maybe check, if we already downloaded this.
+        """
         output = shellout("""curl --fail "{url}" > {output} """,
                           url=self.config.get('vkfilmba', 'data'))
         luigi.LocalTarget(output).move(self.output().path)
