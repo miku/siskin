@@ -18,6 +18,7 @@ import io
 import os
 import re
 import sys
+import json
 from xml.sax.saxutils import escape, unescape
 
 import marcx
@@ -139,7 +140,12 @@ for root, _, files in os.walk(input_directory):
                 fieldmap[f001]["viaf"] = f1000
 
     inputfile.close()
-             
+ 
+with open("15_fieldmap.json", "w") as output:
+    json.dump(fieldmap, output)
+
+#sys.exit(0)
+
 input_directory = "IMSLP_neu"
 output_filename = "15_output.mrc"
 
@@ -166,7 +172,7 @@ for root, _, files in os.walk(input_directory):
 
         try:
             title = record["title"]
-            title = record["subject"]
+            #title = record["subject"]
         except:
             continue
 
@@ -222,18 +228,22 @@ for root, _, files in os.walk(input_directory):
         marcrecord.add("500", a=f500a)
     
         # Stil / Epoche       
-        subject = record["subject"]       
-        if isinstance(subject, list):
-            # [OrderedDict([('mainForm', 'Piano piece')]), OrderedDict([('mainForm', 'Romantic')])]
-            style = subject[0]["mainForm"]
-            style = style.title()
-            epoch = subject[1]["mainForm"] # Martin fragen, wegen "TypeError: string indices must be integers"
-            epoch = epoch.title()
-        else:
-            epoch = record["subject"]["mainForm"]
-            epoch = epoch.title()
-        f650a.append(epoch)
-        f590a = epoch
+        try:
+            subject = record["subject"]
+        except:
+            subject = ""
+        if subject != "":
+            if isinstance(subject, list):
+                # [OrderedDict([('mainForm', 'Piano piece')]), OrderedDict([('mainForm', 'Romantic')])]
+                style = subject[0]["mainForm"]
+                style = style.title()
+                epoch = subject[1]["mainForm"] # Martin fragen, wegen "TypeError: string indices must be integers"
+                epoch = epoch.title()
+            else:
+                epoch = record["subject"]["mainForm"]
+                epoch = epoch.title()
+            f650a.append(epoch)
+            f590a = epoch
       
         # Besetzung
         instrumentation = get_field("music_arrangement_of")
@@ -261,6 +271,8 @@ for root, _, files in os.walk(input_directory):
         # URL
         f856u = record["url"]["#text"]
         marcrecord.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=f856u)
+
+        marcrecord.add("935", b="cofz", c="muno")
 
         marcrecord.add("970", c="PN")
 

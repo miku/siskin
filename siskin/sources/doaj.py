@@ -118,6 +118,10 @@ class DOAJDump(DOAJTask):
         """
         Connect to ES and issue queries. Use exponential backoff to mitigate
         gateway timeouts. Be light on resources and do not crawl in parallel.
+
+        XXX: This task might stop before completion, investigate.
+        XXX: Completed dump 2018-06-01 is only 495M (about 150k records),
+        expected 10G.
         """
         max_backoff_retry = 10
         backoff_interval_s = 0.05
@@ -154,6 +158,22 @@ class DOAJDump(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class DOAJDumpNext(DOAJTask):
+    """
+    Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    batch_size = luigi.IntParameter(default=1000, significant=False)
+    sleep = luigi.IntParameter(default=4, significant=False, description="sleep seconds between requests")
+
+    def run(self):
+        output = shellout("doajfetch -sleep {sleep}s -size {size} -P | jq -rc '.hits.hits[]' > {output}",
+                          sleep=self.sleep, size=self.batch_size)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class DOAJIdentifierBlacklist(DOAJTask):
     """

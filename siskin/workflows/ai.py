@@ -29,6 +29,7 @@
 # AMSL (api) + AIIntermediateSchema (sources) = AILicensing (isil) -> AIExport (for solr)
 #
 
+import binascii
 import collections
 import datetime
 import itertools
@@ -64,18 +65,19 @@ from siskin.sources.crossref import (CrossrefDOIList,
 from siskin.sources.degruyter import (DegruyterDOIList,
                                       DegruyterIntermediateSchema,
                                       DegruyterISSNList)
-from siskin.sources.disson import DissonIntermediateSchema
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
 from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
                                    GeniosISSNList)
+from siskin.sources.hhbd import HHBDIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.kielfmf import KielFMFIntermediateSchema
+from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.mag import MAGReferenceDB
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
@@ -293,7 +295,6 @@ class AIIntermediateSchema(AITask):
             ArxivIntermediateSchema(date=self.date, stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
-            DissonIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
@@ -306,10 +307,20 @@ class AIIntermediateSchema(AITask):
             IJOCIntermediateSchema(stamp=True),
             CeeolJournalsDumpIntermediateSchema(stamp=True),
             SSOARIntermediateSchema(stamp=True),
+            LyndaIntermediateSchema(date=self.date, stamp=True),
+            HHBDIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed
     def run(self):
+        """
+        Check, if all files are gzipped before we concatenate.
+        """
+        for target in self.input():
+            with open(target.path) as f:
+                if binascii.hexlify(f.read(2)) != b'1f8b':
+                    raise RuntimeError('AIIntermediateSchema requires gzipped inputs, failed: %s' % target.path)
+
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
             shellout("cat {input} >> {output}",
@@ -458,14 +469,17 @@ class AILicensing(AITask):
         00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLFilterConfigFreeze --local-scheduler
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
 
     def requires(self):
-        jourfixe = datetime.date(self.date.year, self.date.month, 15)
+        if self.override:
+            jourfixe = self.date
+        else:
+            jourfixe = datetime.date(self.date.year, self.date.month, 15)
+            if self.date.day < 15:
+                jourfixe = jourfixe + relativedelta(months=-1)
 
-        if self.date.day < 15:
-            jourfixe = jourfixe + relativedelta(months=-1)
-
-        self.logger.debug("AILicensing jour-fixe at %s", jourfixe)
+        self.logger.debug("AILicensing date: %s (override=%s)", jourfixe, self.override)
 
         return {
             'is': AIApplyOpenAccessFlag(date=self.date),
