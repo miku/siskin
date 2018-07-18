@@ -47,4 +47,4 @@ Real world data issues. List of links to data corrections in code.
   a blacklist](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L325-L329),
   skip the record entirely
 * if no publisher can be determined, use the string "X-U (Crossref)" as
-  publisher (X-Unknown)
+  publisher ([X-Unknown](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L338))
