@@ -158,6 +158,22 @@ class DOAJDump(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class DOAJDumpNext(DOAJTask):
+    """
+    Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    batch_size = luigi.IntParameter(default=1000, significant=False)
+    sleep = luigi.IntParameter(default=4, significant=False, description="sleep seconds between requests")
+
+    def run(self):
+        output = shellout("doajfetch -sleep {sleep}s -size {size} -P | jq -rc '.hits.hits[]' > {output}",
+                          sleep=self.sleep, size=self.batch_size)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj'))
 
 class DOAJIdentifierBlacklist(DOAJTask):
     """

@@ -21,29 +21,42 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-OADOI dataset.
-
+Priem, Jason and Piwowar, Heather. (2018) The Unpaywall Dataset. DOI:
+https://doi.org/10.6084/m9.figshare.6020078
 
 Config
 ------
 
 [oadoi]
 
-dump = /path/to/full_dois_2018-03-29T113154.jsonl
+dump = /path/to/full_dois_2018-03-29T113154.jsonl.gz
 
-----
+"""
 
-Priem, Jason and Piwowar, Heather. (2018) The Unpaywall Dataset. DOI:
-https://doi.org/10.6084/m9.figshare.6020078
+from __future__ import print_function
 
-> File description
-> name: full_dois_2018-03-29T113154.jsonl
-> description: This file has one row per DOI, with the best OA location for every DOI, as well as some metadata for each DOI.
-> size: 16GB (83G unzipped)
-> lines: 95,842,233 lines 
-> lines with at least one Open Access URL: ~16 million
+import json
+import sys
 
-Sample row:
+import luigi
+from luigi.format import Gzip
+from gluish.utils import shellout
+from siskin.task import DefaultTask
+
+
+class OADOITask(DefaultTask):
+    """
+    Base task for oadoi.
+    """
+    TAG = 'oadoi'
+
+
+class OADOIDump(OADOITask, luigi.ExternalTask):
+    """
+    Provided data dump gzipped. See also release notes at:
+    https://docs.google.com/document/d/1Whfe26oyjTedeW1GGWkq3NADgDbL2R2eXqrJCWS8vcc/edit#
+
+    The data format is documented at: http://unpaywall.org/data-format.
 
     {
         "doi": "10.4135/9781412950534.n2123",
@@ -79,26 +92,7 @@ Sample row:
         "x_reported_noncompliant_copies": []
     }
 
-"""
-
-import luigi
-from luigi.format import Gzip
-from gluish.utils import shellout
-from siskin.task import DefaultTask
-
-
-class OADOITask(DefaultTask):
-    """
-    Base task for oadoi.
-    """
-    TAG = 'oadoi'
-
-
-class OADOIDump(OADOITask, luigi.ExternalTask):
-    """
-    Provided data dump. See also release notes at:
-
-    * https://docs.google.com/document/d/1Whfe26oyjTedeW1GGWkq3NADgDbL2R2eXqrJCWS8vcc/edit#
+    Snapshot 2018-06-21 has 97751914 rows.
     """
 
     def output(self):
@@ -117,9 +111,19 @@ class OADOIList(OADOIDump):
         """
         XXX: parse error: Invalid numeric literal at line 12536737, column 0
         """
-        output = shellout("unpigz -c {input} | jq -rc '[.doi, .is_oa] | @csv' | pigz -c > {output}",
-                          input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
+        error_lines = []
+        with self.input().open() as handle:
+            for i, line in enumerate(handle, start=1):
+                try:
+                    doc = json.loads(line)
+                except ValueError as err:
+                    self.logger.debug("at line %d" % i)
+                    error_lines.append(i)
+                    continue
+        # output = shellout("unpigz -c {input} | jq -rc '[.doi, .is_oa] | @csv' | pigz -c > {output}",
+        #                  input=self.input().path)
+        # luigi.LocalTarget(output).move(self.output().path)
+        self.logger.debug("errors in lines: %s", ", ".join(str(i) for i in error_lines))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="csv.gz"), format=Gzip)
