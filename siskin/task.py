@@ -25,22 +25,35 @@
 """
 Define a siskin wide task with artifacts under core.home directory.
 
+[core]
+
+smtp = server.example.com
+default-sender = my@mail.com
+default-replyto = my@mail.com
+error-email = a@c.com, d@e.com
+home = /path/to/dir
+
 [amsl]
 
 write-url = https://live.abc.xyz/w/i/write
 
 """
 
+import datetime
 import logging
 import os
 import re
+import socket
 import tempfile
+import traceback
 
 import luigi
 
+from siskin import __version__
 from gluish.task import BaseTask
 from gluish.utils import shellout
 from siskin.configuration import Config
+from siskin.mail import send_mail
 
 config = Config.instance()
 
@@ -80,6 +93,40 @@ class DefaultTask(BaseTask):
         Return the logger. Module logging uses singleton internally, so no worries.
         """
         return logging.getLogger('siskin')
+
+    def on_failure(self, exception):
+        """
+        If a task fails, try to send an email.
+        """
+        try:
+            tolist = self.config.get("core", "error-email").split(",")
+            subject = "%s %s" % (self, datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
+
+            # XXX: Move into a template.
+            message = """
+            This is siskin {version} on {host}.
+
+            An error occured in Task {name}, this is the error message:
+
+            {exc}
+
+            Stacktrace:
+
+            {tb}
+            """.format(
+                version=__version__,
+                name=self,
+                exc=exception,
+                tb=traceback.format_exc(),
+                host=socket.gethostname(),
+            )
+            message = message.encode("utf-8")
+            send_mail(tolist=tolist, subject=subject, message=message)
+            self.logger.debug("sent error emails to %s", ", ".join(tolist))
+        except TypeError as err:
+            self.logger.debug("error-email may not be configured, not sending mail: %s", err)
+        except Exception as err:
+            self.logger.debug("failed to send error email: %s", err)
 
     def on_success(self):
         """

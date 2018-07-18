@@ -23,17 +23,15 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Cambridge Open Access eBooks, refs #13120.
+GDMB Gesellschaft der Metallurgen und Bergleute, refs #9950.
 
-Download data manually from https://www.cambridge.org/core/services/librarians/marc-records.
-
-As of 2018-07-01, the download site uses a visual captcha (https://visualcaptcha.net/).
+Download data manually from https://ownsky.hrz.tu-freiberg.de/owncloud/index.php/s/NCRbjTu3ab0oLsj
 
 Configuration:
 
-[coaeb]
+[gdmb]
 
-input = /path/to/mrc (ask RS)
+input = /path/to/json (ask RS)
 """
 
 import luigi
@@ -42,20 +40,20 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class COAEBTask(DefaultTask):
+class GDMBTask(DefaultTask):
     """
     This task inherits functionality from `siskin.task.DefaultTask`.
     """
-    TAG = '161'
+    TAG = '131'
 
 
-class COAEBMARC(COAEBTask):
-    """ Convert BinaryMARC to BinaryFincMarc """
+class GDMBMARC(GDMBTask):
+    """ Convert JSON to BinaryFincMarc """
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
-                          script=self.assets("161/161_marcbinary.py"),
-                          input=self.config.get("coaeb", "input"))
+                          script=self.assets("131/131_marcbinary.py"),
+                          input=self.config.get("GDMB", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

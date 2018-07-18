@@ -40,8 +40,10 @@ DEFAULT_SUBJECT_PREFIX = "[siskin at %s]" % (socket.gethostname())
 def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None):
     """
     Send out an email. Configure `smtp`, `default-sender` in `core` config
-    section. A subject prefix is always prepended. The `tolist` parameter can a
-    single string or a list of strings.
+    section. A subject prefix is always prepended. The `tolist` parameter can
+    be a single string or a list of strings.
+
+    XXX: ATM no FROM: line, maybe add that.
     """
     if subject is None:
         subject = DEFAULT_SUBJECT
