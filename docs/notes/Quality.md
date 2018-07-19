@@ -4,6 +4,15 @@
 
 Real world data issues. List of links to data corrections in code.
 
+## 34
+
+* use a [swedish
+  locale](https://github.com/miku/siskin/blob/5909fcc05b808d86baaa727ead2617f13dff3c06/siskin/assets/34/morph.xml#L74-L78)
+  for date parsering, since it is by accident the one matching the format in
+  the data
+* regex for [journal title](https://github.com/miku/siskin/blob/5909fcc05b808d86baaa727ead2617f13dff3c06/siskin/assets/34/morph.xml#L95-L97)
+* regex for [volume](https://github.com/miku/siskin/blob/5909fcc05b808d86baaa727ead2617f13dff3c06/siskin/assets/34/morph.xml#L103-L106)
+
 ## 48
 
 * restrict languages to a minimal subset, via
@@ -90,6 +99,16 @@ Real world data issues. List of links to data corrections in code.
 
 * skip [too long ids](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/degruyter/article.go#L76-L78)
 
+## 53
+
+* skip too short (4) [authors](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ceeol/article.go#L97-L99)
+* author [blacklist](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ceeol/article.go#L100-L107)
+* handle [roman numbers](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ceeol/article.go#L70-L75) for volume
+* handle multilingual titles, if [titles
+  differ](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ceeol/article.go#L60-L67),
+  similarly for [journal
+  title](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ceeol/article.go#L76-L82)
+
 ## 55
 
 * skip [too long identifier](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/jstor/article.go#L131-L133)
@@ -117,8 +136,22 @@ Real world data issues. List of links to data corrections in code.
   various fields [are
   considered](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L323-L347)
 
+## 87
+
+* regex and open questions regarding [journal title](https://github.com/miku/siskin/blob/5909fcc05b808d86baaa727ead2617f13dff3c06/siskin/assets/87/87_morph.xml#L72-L83)
+
 ## 89
 
 * inconsistent [dates](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L238-L243)
 * skip records where article [starts with "["](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L281-L283)
 * dates [might be broken](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L291-L295)
+
+## 101
+
+* regex for [place](https://github.com/miku/siskin/blob/5909fcc05b808d86baaa727ead2617f13dff3c06/siskin/assets/101/101_morph.xml#L41-L43)
+
+## 105
+
+* [some
+  cleanup](https://github.com/miku/siskin/blob/5909fcc05b808d86baaa727ead2617f13dff3c06/siskin/sources/springer.py#L137-L164)
+  due to schema changes, single-values vs multi-values, id field change
