@@ -90,6 +90,21 @@ Real world data issues. List of links to data corrections in code.
 
 * skip [too long ids](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/degruyter/article.go#L76-L78)
 
+## 55
+
+* skip [too long identifier](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/jstor/article.go#L131-L133)
+* [regex blacklist](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/jstor/article.go#L51-L55) for titles
+* suppress certain record types, or adjust article title, [based on type](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/jstor/article.go#L165-L171)
+* [normalize](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/jstor/article.go#L146-L150) ISSN
+
+## 60
+
+* publisher [name consolidation](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/thieme/record.go#L257-L265)
+* skip record, if publisher is [completely empty](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/thieme/record.go#L276-L278)
+* [remove newlines](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/thieme/record.go#L269) from publisher
+* [sanitize HTML](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/thieme/record.go#L255) for abstract
+* date [might be invalid](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/thieme/record.go#L235-L238)
+
 ## 85
 
 * some tar files seem to be [missing some
@@ -101,3 +116,9 @@ Real world data issues. List of links to data corrections in code.
   required](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L503-L507),
   various fields [are
   considered](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/elsevier/dataset.go#L323-L347)
+
+## 89
+
+* inconsistent [dates](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L238-L243)
+* skip records where article [starts with "["](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L281-L283)
+* dates [might be broken](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L291-L295)
