@@ -10,6 +10,7 @@ import sys
 import marcx
 import xmltodict
 import tarfile
+import io
 
 
 def get_datafield(tag, code, all=False):
@@ -42,7 +43,7 @@ if len(sys.argv) == 4:
     inputfilename1, inputfilename2, outputfilename = sys.argv[1:]
 
 filenames = [inputfilename1, inputfilename2]
-outputfile = open(outputfilename, "wb")
+outputfile = io.open(outputfilename, "wb")
 
 for filename in filenames:
     inputfile = tarfile.open(filename, "r:gz")
@@ -119,7 +120,7 @@ for filename in filenames:
             marcrecord.add("710", a=f710a)
                     
         # Kollektion
-        collection = ["a", f001, "b", "109", "c", "Kunsthochschule für Medien Köln", "c", "Verbundkatalog Film"]
+        collection = ["a", f001, "b", "109", "c", u"Kunsthochschule für Medien Köln", "c", "Verbundkatalog Film"]
         marcrecord.add("980", subfields=collection)
 
         outputfile.write(marcrecord.as_marc())
