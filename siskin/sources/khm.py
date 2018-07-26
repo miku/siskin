@@ -95,6 +95,8 @@ class KHMLatestDate(KHMTask):
     def run(self):
         """
         Naming schema: aleph.ALL_RECS.20170316.123655.2.tar.gz. aleph.ALL_RECS.YYYYMMDD.HHMMSS.NO.tar.gz
+
+        XXX: Sort after grouping.
         """
         with self.input().open() as handle:
             with self.output().open('w') as output:
