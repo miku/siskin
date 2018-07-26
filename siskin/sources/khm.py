@@ -100,7 +100,8 @@ class KHMLatestDate(KHMTask):
         """
         with self.input().open() as handle:
             with self.output().open('w') as output:
-                records = sorted(handle.iter_tsv(cols=('path',)), reverse=True)
+                records = sorted(handle.iter_tsv(cols=('path',)), reverse=True,
+                                 key=lambda row: os.path.basename(row.path))
                 if len(records) == 0:
                     raise RuntimeError('no files found, cannot determine latest date')
                 groups = re.search(self.FILEPATTERN, records[0].path).groupdict()
