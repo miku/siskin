@@ -69,6 +69,7 @@ from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
                                  DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
                                              ElsevierJournalsISSNList)
+from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
                                    GeniosISSNList)
 from siskin.sources.hhbd import HHBDIntermediateSchema
@@ -297,6 +298,7 @@ class AIIntermediateSchema(AITask):
             DegruyterIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
+            GenderopenIntermediateSchema(date=self.date, stamp=True),
             GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
             IEEEIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchema(date=self.date, stamp=True),
