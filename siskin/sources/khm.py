@@ -86,7 +86,13 @@ class KHMDropbox(KHMTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
-class KHMLatestDate(KHMTask):
+class KHMLatest(KHMTask):
+    """
+    Write out a file with latest date and path to latest files.
+
+    20180725        .../109/KHMDropbox/mirror/khmkoeln/august-2018/aleph.ALL_RECS.20180725.125558.2.tar.gz
+    20180725        .../109/KHMDropbox/mirror/khmkoeln/august-2018/aleph.ALL_RECS.20180725.125255.1.tar.gz
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -95,8 +101,6 @@ class KHMLatestDate(KHMTask):
     def run(self):
         """
         Naming schema: aleph.ALL_RECS.20170316.123655.2.tar.gz. aleph.ALL_RECS.YYYYMMDD.HHMMSS.NO.tar.gz
-
-        XXX: Sort after grouping.
         """
         with self.input().open() as handle:
             with self.output().open('w') as output:
@@ -105,78 +109,19 @@ class KHMLatestDate(KHMTask):
                 if len(records) == 0:
                     raise RuntimeError('no files found, cannot determine latest date')
                 groups = re.search(self.FILEPATTERN, records[0].path).groupdict()
-                output.write_tsv(groups["date"])
+                latest_date = groups['date']
+                for record in records:
+                    gg = re.search(self.FILEPATTERN, record.path).groupdict()
+                    if gg['date'] == latest_date:
+                        output.write_tsv(latest_date, record.path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 class KHMMARC(KHMTask):
     """
-    Convert tarball to binary MARC.
-    """
-    def requires(self):
-        raise NotImplementedError("Currently the converter script requires exactly two tarballs.")
-
-    def run(self):
-        output = shellout("python {script} {input} {output}",
-                          script=self.assets("109/109_marcbinary.py"))
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
-
-class KHMLatest(KHMTask):
-    """
-    Decompress and join files from the (presumably) lastest version.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    ext = luigi.Parameter(default="xml", description="mrc, xml", significant=False)
-
-    def requires(self):
-        return {
-            'dropbox': KHMDropbox(date=self.date),
-            'date': KHMLatestDate(date=self.date),
-        }
-
-    def run(self):
-        """
-        Naming schema: aleph.ALL_RECS.20170316.123655.2.tar.gz. aleph.ALL_RECS.YYYYMMDD.HHMMSS.NO.tar.gz
-
-        Ugly XML merge.
-        """
-        with self.input().get('date').open() as handle:
-            latest_date = handle.read().strip()
-
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-
-        shellout(""" echo '<?xml version = "1.0" encoding = "UTF-8"?>
-                           <collection xmlns="http://www.loc.gov/MARC21/slim"
-                                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                       xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
-            ' >> {stopover} """, stopover=stopover, preserve_whitespace=True)
-
-        with self.input().get('dropbox').open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                groups = re.search(self.FILEPATTERN, row.path).groupdict()
-                if groups["date"] != latest_date:
-                    continue
-                shellout("tar xOf {input} | xmlcutty -path /OAI-PMH/ListRecords/record/metadata/record >> {stopover}", input=row.path, stopover=stopover)
-
-        shellout(""" echo '</collection>' >> {stopover} """, stopover=stopover)
-        output = shellout(""" xmllint --format {input} |
-                              grep -v '<controlfield tag="LDR">' |
-                              grep -v '<controlfield tag="FMT">' > {output} """, input=stopover)
-        if self.ext == "mrc":
-            output = shellout(""" yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output)
-
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext=self.ext))
-
-class KHMIntermediateSchema(KHMTask):
-    """
-    Convert to intermediate schema via metafacture.
+    Convert tarball to binary MARC. Note: we expect exactly two tarballs, which
+    is a bit brittle at the moment.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -184,10 +129,18 @@ class KHMIntermediateSchema(KHMTask):
         return KHMLatest(date=self.date)
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-                          flux=self.assets("109/109.flux"), mapdir=mapdir, input=self.input().path)
+        tarballs = []
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('x', 'path')):
+                tarballs.append(row.path)
+
+        if not len(tarballs) == 2:
+            raise RuntimeError('limitation: we need exactly two tarballs')
+
+        output = shellout("python {script} {t1} {t2} {output}",
+                          script=self.assets("109/109_marcbinary.py"),
+                          t1=tarballs[0], t2=tarballs[1])
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
