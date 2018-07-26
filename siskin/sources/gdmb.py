@@ -53,7 +53,7 @@ class GDMBMARC(GDMBTask):
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("131/131_marcbinary.py"),
-                          input=self.config.get("GDMB", "input"))
+                          input=self.config.get("gdmb", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
