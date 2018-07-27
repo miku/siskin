@@ -76,7 +76,7 @@ class VDEHRemoveIllegalChars(VDEHTask):
 
     def run(self):
         """ https://stackoverflow.com/a/7774512 """
-        output = shellout(r" sed $'s/\u00AC//g' < {input} > {output}",
+        output = shellout(r" sed $'s/\u00AC//g; s/\u00C2//g' < {input} > {output}",
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
