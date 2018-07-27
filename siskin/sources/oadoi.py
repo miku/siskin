@@ -109,7 +109,9 @@ class OADOIList(OADOIDump):
 
     def run(self):
         """
-        XXX: parse error: Invalid numeric literal at line 12536737, column 0
+        XXX: parse error: Invalid numeric literal at line 12536737, column 0 -
+        error reported Thu, Jul 5, 2018 at 4:53 PM to Unpaywall discussion
+        <unpaywall@googlegroups.com>.
         """
         error_lines = []
         with self.input().open() as handle:
