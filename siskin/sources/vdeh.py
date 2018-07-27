@@ -80,6 +80,8 @@ class VDEHRemoveIllegalChars(VDEHTask):
     which is used for control chars as well (https://is.gd/GRIjmy).
 
     s/\u00AC\u00C2//g would not work for some reason.
+
+    Anecdata: The stripped file is 57740 bytes smaller.
     """
     def requires(self):
         return VDEHXML()
