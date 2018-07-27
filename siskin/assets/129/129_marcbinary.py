@@ -6,6 +6,7 @@
 # Collection: geoscan
 # refs: #9871
 
+from __future__ import print_function
 
 import io
 import re
@@ -67,7 +68,7 @@ for record in records.entries:
                 lang.append(f041a)
                 marcrecord.add("041", subfields=lang)                
             else:                
-                print("Die folgende Sprache fehlt in der Langmap: %s" % language)
+                print(u"Die folgende Sprache fehlt in der Langmap: %s" % language, file=sys.stderr)
     else:
         f041a = langmap.get(languages, "")
         marcrecord.add("041", a=f041a)
@@ -96,7 +97,7 @@ for record in records.entries:
         f260c = ", " + f260c
         f300a = ""
     else:
-        print("Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description)
+        print(u"Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description, file=sys.stderr)
         f260c = ""
         f300a = ""
         link = ""
