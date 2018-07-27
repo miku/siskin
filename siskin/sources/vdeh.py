@@ -3,7 +3,7 @@
 # Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
-#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#                   
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#
 #
 # This file is part of some open source application.
 #
@@ -41,7 +41,6 @@ from gluish.utils import shellout
 
 from siskin.task import DefaultTask
 
-
 class VDEHTask(DefaultTask):
     """
     This task inherits functionality from `siskin.task.DefaultTask`.
@@ -56,7 +55,7 @@ class VDEHXML(VDEHTask):
     https://sourceforge.net/projects/dnb-conv-tools/.
     """
 
-    def run(self):        
+    def run(self):
         output = shellout("java -jar {jarfile} -i {input} -o {output}",
                           jarfile=self.config.get("vdeh", "Mab2Mabxml.jar"),
                           input=self.config.get("vdeh", "input"))
@@ -65,24 +64,32 @@ class VDEHXML(VDEHTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml"))
 
-
 class VDEHRemoveIllegalChars(VDEHTask):
     """
-    Remove Nichtsortierzeichen. XXX: Workaround. It would be faster to first
-    reduce the number of records first, then to clean up.
+    Remove Nichtsortierzeichen.
+
+    https://stackoverflow.com/a/7774512, https://stackoverflow.com/a/36371662
+
+    We want to remove unicode codepoint U+00AC (c2ac, o302 o254), aka the
+    "NOT SIGN", aka the "Nichtsortierzeichen".
+
+    When removing only o254, the dangling o302 causes problems (invalid
+    continuation byte) - but not always.
+
+    tr -d '[:cntrl:]' would not remove it, since c2ac starts with 0302,
+    which is used for control chars as well (https://is.gd/GRIjmy).
+
+    s/\u00AC\u00C2//g would not work for some reason.
     """
     def requires(self):
         return VDEHXML()
 
     def run(self):
-        """ https://stackoverflow.com/a/7774512 """
-        output = shellout(r" sed -e 's/\u00AC//g; s/\u00C2//g' < {input} > {output}",
-                          input=self.input().path)
+        output = shellout(r" sed -e $(echo -e 's/\o302\o254//g') < {input} > {output} ", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
-
 
 class VDEHMARC(VDEHTask):
     """ Convert MABxml to BinaryMarc """
