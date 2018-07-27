@@ -89,17 +89,17 @@ for record in records.entries:
     regexp1 = re.search("(\d\d\d\d),\s(.*?),\s(https.*)", description)
     regexp2 = re.search("(\d\d\d\d)\.,\s(https.*)", description)
     if regexp1:
-        f260c, f300a, doi = regexp1.groups()
+        f260c, f300a, link = regexp1.groups()
         f260c = ", " + f260c
     elif regexp2:
-        f260c, doi = regexp2.groups()
+        f260c, link = regexp2.groups()
         f260c = ", " + f260c
         f300a = ""
     else:
         print("Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description)
         f260c = ""
         f300a = ""
-        doi = ""
+        link = ""
     marcrecord.add("260", a=f260a, c=f260c)
 
     # Seitenzahl
@@ -142,8 +142,8 @@ for record in records.entries:
             marcrecord.add("700", a=f700a)
 
     # URL
-    if doi != "":
-        f856u = doi
+    if link != "":
+        f856u = link
     else:
         f856u = get_field("link")
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
