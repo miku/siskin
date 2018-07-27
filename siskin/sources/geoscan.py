@@ -27,11 +27,17 @@
 Geoscan, refs #9871.
 
 * http://geoscan.nrcan.gc.ca/rss/newpub_e.rss
+
+XXX: Only recent works?
 """
 
-import luigi
-from gluish.utils import shellout
+import datetime
 
+import luigi
+
+from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
@@ -41,11 +47,15 @@ class GeoscanTask(DefaultTask):
     """
     TAG = "129"
 
+    def closest(self):
+        return weekly(date=self.date)
+
 
 class GeoscanMARC(GeoscanTask):
     """
-    Geoscan RSS to MARC.
+    Geoscan RSS to MARC. Currently, only the current feed is converted.
     """
+    date = ClosestDateParameter(default=datetime.date.today())
     link = luigi.Parameter(default="http://geoscan.nrcan.gc.ca/rss/newpub_e.rss",
                            significant=False)
 
@@ -57,4 +67,3 @@ class GeoscanMARC(GeoscanTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
-
