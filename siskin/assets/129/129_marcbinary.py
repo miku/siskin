@@ -109,9 +109,6 @@ for record in records.entries:
     f500a = get_field("geoscan_maps")
     marcrecord.add("500", a=f500a)
 
-    # DOI
-    marcrecord.add("500", a=doi)
-
     # Angaben zur Karte
     f500a = get_field("geoscan_mapinfo")
     marcrecord.add("500", a=f500a)
@@ -145,7 +142,10 @@ for record in records.entries:
             marcrecord.add("700", a=f700a)
 
     # URL
-    f856u = get_field("link")
+    if doi != "":
+        f856u = doi
+    else:
+        f856u = get_field("link")
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
     # 980
