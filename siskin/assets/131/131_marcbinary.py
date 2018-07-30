@@ -157,7 +157,7 @@ for jsonrecord in jsonrecords:
 
     # Schlagwörter
     substances = jsonrecord["SUBSTANCE"].split("/")
-    element = jsonrecord["ELEMENTS"]
+    elements = jsonrecord["ELEMENTS"]
     #content = jsonrecord["CONTENTS"]  # keine richtigen Schlagwörter, eher kurze Metatexte
     keywords = jsonrecord["TOPIC_DETAILED"]
     
@@ -172,13 +172,16 @@ for jsonrecord in jsonrecords:
 
     #if content not in keywords:
     #    marcrecord.add("650", a=content)
-   
+      
     for substance in substances:
         if substance not in keyword:
             marcrecord.add("650", a=substance)
 
-    if element not in keywords:
-        marcrecord.add("650", a=element)
+    elements = elements.replace(" ", "")
+    elements = elements.split(",")
+    for element in elements:
+        if element not in keyword:
+            marcrecord.add("650", a=element)
 
     if format not in keywords and format != "Buch" and format != "Zeitschrift":
         marcrecord.add("650", a=format)
