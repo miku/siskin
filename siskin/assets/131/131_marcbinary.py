@@ -191,8 +191,7 @@ for jsonrecord in jsonrecords:
             if substance not in keyword:
                 marcrecord.add("650", a=substance.strip())
     
-    if len(elements) == 2:
-        if elements[1][0].islower():         
+    if len(elements) == 2 and elements[1][0].islower():         
             element = ", ".join(elements)
             marcrecord.add("650", a=element.strip())
     else:
