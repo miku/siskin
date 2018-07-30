@@ -193,7 +193,7 @@ for jsonrecord in jsonrecords:
     
     if len(elements) == 2:
         if elements[1][0].islower():         
-            element = " ".join(elements)
+            element = ", ".join(elements)
             marcrecord.add("650", a=element.strip())
     else:
         for element in elements:
