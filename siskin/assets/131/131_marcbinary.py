@@ -39,6 +39,11 @@ formatmap = {
 }
 
 
+def getSubjects(tag):
+    subjects = jsonrecord[tag]                
+    return subjects
+
+
 inputfilename = "131_input.json"
 outputfilename = "131_output.mrc"
 
@@ -156,32 +161,44 @@ for jsonrecord in jsonrecords:
     marcrecord.add("935", b=f935b, c=f935c)
 
     # Schlagwörter
-    substances = jsonrecord["SUBSTANCE"].split("/")
-    elements = jsonrecord["ELEMENTS"]
-    #content = jsonrecord["CONTENTS"]  # keine richtigen Schlagwörter, eher kurze Metatexte
-    keywords = jsonrecord["TOPIC_DETAILED"]
-    
+    keywords = getSubjects("TOPIC_DETAILED")  # ist immer eine Liste
     if "Buch" in keywords:
         keywords.remove("Buch")
     
     if "Zeitschrift" in keywords:
-        keywords.remove("Zeitschrift")
+       keywords.remove("Zeitschrift")
+
+    substances = getSubjects("SUBSTANCE")
+    if "/" in substances:
+        substances = substances.split("/")
+    else:
+        substances = substances.split(",")
     
+    elements = getSubjects("ELEMENTS")
+    if "/" in elements:
+        elements = elements.split("/")
+    else:
+        elements = elements.split(",")
+        
     for keyword in keywords:
-        marcrecord.add("650", a=keyword)
-
-    #if content not in keywords:
-    #    marcrecord.add("650", a=content)
-      
-    for substance in substances:
-        if substance not in keyword:
-            marcrecord.add("650", a=substance)
-
-    elements = elements.replace(" ", "")
-    elements = elements.split(",")
-    for element in elements:
-        if element not in keyword:
-            marcrecord.add("650", a=element)
+        marcrecord.add("650", a=keyword.strip())
+    
+    if len(substances) == 2 and substances[1][0].islower():            
+        substance = ", ".join(substances)
+        marcrecord.add("650", a=substance.strip())
+    else:
+        for substance in substances:
+            if substance not in keyword:
+                marcrecord.add("650", a=substance.strip())
+    
+    if len(elements) == 2:
+        if elements[1][0].islower():         
+            element = " ".join(elements)
+            marcrecord.add("650", a=element.strip())
+    else:
+        for element in elements:
+            if element not in keyword:
+                marcrecord.add("650", a=element.strip())
 
     if format not in keywords and format != "Buch" and format != "Zeitschrift":
         marcrecord.add("650", a=format)
