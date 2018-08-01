@@ -124,6 +124,10 @@ class DBInetIntermediateSchema(DBInetTask):
                     okurls = []
                     for url in doc.get("url"):
                         try:
+                            # Prevent MissingSchema errors.
+                            if not url.startswith("http"):
+                                url = "http://%s" % url
+
                             resp = requests.get(url, timeout=20)
                             self.logger.debug("[%s] #%d %s", resp.status_code, i, url)
                             if resp.status_code >= 400:
