@@ -40,8 +40,7 @@ formatmap = {
 
 
 def getSubjects(tag):
-    subjects = jsonrecord[tag]                
-    return subjects
+    return jsonrecord[tag]
 
 
 inputfilename = "131_input.json"
