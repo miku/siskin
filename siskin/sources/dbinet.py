@@ -119,13 +119,13 @@ class DBInetIntermediateSchema(DBInetTask):
 
         with luigi.LocalTarget(output).open() as handle:
             with self.output().open('w') as output:
-                for line in handle:
+                for i, line in enumerate(handle):
                     doc = json.loads(line)
                     okurls = []
                     for url in doc.get("url"):
                         try:
                             resp = requests.get(url, timeout=20)
-                            self.logger.debug("[%s] %s", resp.status_code, url)
+                            self.logger.debug("[%s] #%d %s", resp.status_code, i, url)
                             if resp.status_code >= 400:
                                 continue
                             okurls.append(url)
