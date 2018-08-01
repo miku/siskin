@@ -25,7 +25,9 @@
 """
 Datenbank Internetquellen, #5374, #9913, #11005.
 
-Fixed source from a single file from a defunct http://www.medien-buehne-film.de/.
+Fixed source from the defunct http://www.medien-buehne-film.de/.
+
+About 214M in 163 XML files, no schema, root is called DBClear.
 
 Configuration
 -------------
@@ -50,7 +52,9 @@ from siskin.task import DefaultTask
 
 
 class DBInetTask(DefaultTask):
-    """ Base task. """
+    """
+    Base task, refs #5374, #9913, #11005.
+    """
     TAG = "80"
 
 
@@ -93,7 +97,9 @@ class DBInetJSON(DBInetTask):
 
 
 class DBInetIntermediateSchema(DBInetTask):
-    """ Convert via jq. Filter out dead links (takes a while). """
+    """
+    Convert via jq. With --urlcheck, filter out dead links (takes a while).
+    """
 
     urlcheck = luigi.BoolParameter(default=False, significant=False)
 
@@ -101,7 +107,9 @@ class DBInetIntermediateSchema(DBInetTask):
         return DBInetJSON()
 
     def run(self):
-        """ When URLs are checked, only write records with at least one reachable URL. """
+        """
+        When URLs are checked, only write records with at least one reachable URL.
+        """
         output = shellout("jq -rc -f {filter} {input} > {output}",
                           filter=self.assets('80/filter.jq'), input=self.input().path)
 
