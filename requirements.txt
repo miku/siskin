@@ -32,7 +32,7 @@ lockfile==0.12.2
 logilab-common==1.4.2
 logilab-common==1.4.1
 luigi==2.7.6
-lxml==4.2.3
+lxml==4.2.4
 marcx==0.2.9
 mccabe==0.6.1
 nose==1.3.7
