@@ -101,6 +101,10 @@ class DOAJHarvest(DOAJTask):
 class DOAJDump(DOAJTask):
     """
     Complete DOAJ Elasticsearch dump., refs: #2089.
+
+    XXX: Switch to API (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query)
+
+    curl -X GET --header "Accept: application/json" "https://doaj.org/api/v1/search/articles/*"
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -161,6 +165,8 @@ class DOAJDump(DOAJTask):
 class DOAJDumpNext(DOAJTask):
     """
     Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la).
+
+    XXX: Switch to API (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query)
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
