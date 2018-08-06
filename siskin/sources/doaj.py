@@ -268,7 +268,7 @@ class DOAJIntermediateSchema(DOAJTask):
     @timed
     def run(self):
         output = shellout(
-            "span-import -i doaj {input} | pigz -c > {output}", input=self.input().get('input').path)
+            "span-import -i doaj-api {input} | pigz -c > {output}", input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
