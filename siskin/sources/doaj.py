@@ -170,11 +170,11 @@ class DOAJDumpNext(DOAJTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
-    batch_size = luigi.IntParameter(default=1000, significant=False)
-    sleep = luigi.IntParameter(default=4, significant=False, description="sleep seconds between requests")
+    batch_size = luigi.IntParameter(default=100, significant=False, description="probably not more than 100 allowed")
+    sleep = luigi.IntParameter(default=2, significant=False, description="sleep seconds between requests")
 
     def run(self):
-        output = shellout("doajfetch -sleep {sleep}s -size {size} -P | jq -rc '.hits.hits[]' > {output}",
+        output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P | jq -rc '.results[]' > {output}",
                           sleep=self.sleep, size=self.batch_size)
         luigi.LocalTarget(output).move(self.output().path)
 
