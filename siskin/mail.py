@@ -46,7 +46,7 @@ def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None):
     XXX: ATM no FROM: line, maybe add that.
     """
     if subject is None:
-        subject = DEFAULT_SUBJECT
+        subject = "[automessage]"
     if smtp is None:
         smtp = config.get("core", "smtp")
     if sender is None:
