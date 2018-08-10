@@ -258,8 +258,12 @@ class DOAJFiltered(DOAJTask):
 class DOAJIntermediateSchema(DOAJTask):
     """
     Convert to intermediate schema via span.
+
+    XXX: Default format is "doaj" for now. As soon as API is functional, switch to doaj-api.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="doaj",
+                             description="kind of source document, doaj or doaj-api")
 
     def requires(self):
         return {'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
@@ -267,8 +271,9 @@ class DOAJIntermediateSchema(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout(
-            "span-import -i doaj-api {input} | pigz -c > {output}", input=self.input().get('input').path)
+        output = shellout("span-import -i {format} {input} | pigz -c > {output}",
+                          input=self.input().get('input').path,
+                          format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
