@@ -3,7 +3,7 @@ args==0.1.0
 astroid==2.0
 backoff==1.6.0
 backports.csv==1.0.6
-beautifulsoup4==4.6.0
+beautifulsoup4==4.6.3
 certifi==2018.4.16
 chardet==3.0.4
 clint==0.5.1
