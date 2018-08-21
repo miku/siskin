@@ -50,16 +50,14 @@ class SSOARHarvest(SSOARTask):
     """
     Harvest from default http://www.ssoar.info/OAIHandler/request OAI endpoint.
     """
-    format = luigi.Parameter(default="marcxml", significant=False)
-    endpoint = luigi.Parameter(
-        default='http://www.ssoar.info/OAIHandler/request', significant=False)
+    format = luigi.Parameter(default="marcxml")
     date = ClosestDateParameter(default=datetime.date.today())
+    endpoint = luigi.Parameter(default='http://www.ssoar.info/OAIHandler/request', significant=False)
 
     def run(self):
-        shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint,
-                 format=self.format)
-        output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""", endpoint=self.endpoint,
-                          format=self.format)
+        shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
+        output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""",
+                          endpoint=self.endpoint, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -77,9 +75,10 @@ class SSOARMARC(SSOARTask):
           publisher = ["a", f260a, "b", f260b, "c", f260c]
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='oai_dc')
 
     def requires(self):
-        return SSOARHarvest(date=self.date)
+        return SSOARHarvest(date=self.date, format=self.format)
 
     @deprecated
     def run(self):
