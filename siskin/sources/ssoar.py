@@ -93,13 +93,12 @@ class SSOARMARC(SSOARTask):
 
 class SSOARIntermediateSchema(SSOARTask):
     """
-    Convert to intermediate schema via metafacture. Custom morphs and flux are
-    kept in assets/30. Maps are kept in assets/maps.
+    Use span-import for conversion.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SSOARHarvest(date=self.date)
+        return SSOARHarvest(date=self.date, format='marcxml')
 
     def run(self):
         output = shellout("""span-import -i ssoar {input} | pigz -c > {output}""",
