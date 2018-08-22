@@ -4,10 +4,10 @@
 """
 Issues: refs #7462, #12737, #13168, #13234, #13261.
 
-Note: This source moved from FINC to AI (from MARC to IS), cf.
-https://git.io/vhY3u.  Keeping this file as documentation for now, as
-intermediate schema export might miss a few fields.
+This source is manually profiled for ADLR.
 """
+
+from __future__ import print_function
 
 import io
 import re
@@ -17,28 +17,28 @@ import xmltodict
 import marcx
 
 relevant_sets = ["com_community_1080400", "com_community_10800", "col_collection_1080401", "col_collection_1080402", "col_collection_1080403",
-                "col_collection_1080404", "col_collection_1080405", "col_collection_1080406", "col_collection_1080407", "col_collection_1080408",
-                "col_collection_1080409", "col_collection_1080410", "col_collection_1080411", "col_collection_1080412", "col_collection_10800",
-                "col_collection_1080400", "col_collection_10899"]
+                 "col_collection_1080404", "col_collection_1080405", "col_collection_1080406", "col_collection_1080407", "col_collection_1080408",
+                 "col_collection_1080409", "col_collection_1080410", "col_collection_1080411", "col_collection_1080412", "col_collection_10800",
+                 "col_collection_1080400", "col_collection_10899"]
 
 collection_map = {
-    "com_community_1080400": "Massenkommunikation",
-    "com_community_10800": "Kommunikationswissenschaften",
-    "col_collection_1080401": "Rundfunk, Telekommunikation",
-    "col_collection_1080402": "Druckmedien",
-    "col_collection_1080403": "Andere Medien",
-    "col_collection_1080404": "Interaktive, elektronische Medien",
-    "col_collection_1080405": "Medieninhalte, Aussagenforschung",
-    "col_collection_1080406": "Kommunikatorforschung, Journalismus",
-    "col_collection_1080407": "Wirkungsforschung, Rezipientenforschung",
-    "col_collection_1080408": "Meinungsforschung",
-    "col_collection_1080409": "Werbung, Public Relations, Öffentlichkeitsarbeit",
-    "col_collection_1080410": "Medienpädagogik",
-    "col_collection_1080411": "Medienpolitik, Informationspolitik, Medienrecht",
-    "col_collection_1080412": "Medienökonomie, Medientechnik",
-    "col_collection_10800": "Kommunikationswissenschaften",
-    "col_collection_1080400": "Massenkommunikation (allgemein)",
-    "col_collection_10899": "Sonstiges zu Kommunikationswissenschaften"
+    "com_community_1080400": u"Massenkommunikation",
+    "com_community_10800": u"Kommunikationswissenschaften",
+    "col_collection_1080401": u"Rundfunk, Telekommunikation",
+    "col_collection_1080402": u"Druckmedien",
+    "col_collection_1080403": u"Andere Medien",
+    "col_collection_1080404": u"Interaktive, elektronische Medien",
+    "col_collection_1080405": u"Medieninhalte, Aussagenforschung",
+    "col_collection_1080406": u"Kommunikatorforschung, Journalismus",
+    "col_collection_1080407": u"Wirkungsforschung, Rezipientenforschung",
+    "col_collection_1080408": u"Meinungsforschung",
+    "col_collection_1080409": u"Werbung, Public Relations, Öffentlichkeitsarbeit",
+    "col_collection_1080410": u"Medienpädagogik",
+    "col_collection_1080411": u"Medienpolitik, Informationspolitik, Medienrecht",
+    "col_collection_1080412": u"Medienökonomie, Medientechnik",
+    "col_collection_10800": u"Kommunikationswissenschaften",
+    "col_collection_1080400": u"Massenkommunikation (allgemein)",
+    "col_collection_10899": u"Sonstiges zu Kommunikationswissenschaften"
 }
 
 
@@ -49,7 +49,7 @@ def get_field(tag):
         return ""
 
 
-inputfilename = "30_input.xml" 
+inputfilename = "30_input.xml"
 outputfilename = "30_output.mrc"
 
 if len(sys.argv) == 3:
@@ -62,15 +62,15 @@ xmlfile = inputfile.read()
 xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
-           
-    marcrecord = marcx.Record(force_utf8=True)
 
-    # Format   
+    marcrecord = marcx.Record(to_unicode=True, force_utf8=True)
+
+    # Format
     format = get_field("dc:type")
     if "Monographie" in format or "Sammelwerk" in format or "Konferenzband" in format:
         leader = "     cam  22        4500"
         f935b = "cofz"
-        f935c = ""   
+        f935c = ""
     if "Sammelwerksbeitrag" in format:
         leader = "     naa  22        4500"
         f935b = "cofz"
@@ -78,7 +78,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     elif "Diplomarbeit" in format or "Habilitationsschrift" in format or "Magisterarbeit" in format or "Dissertation" in format:
         leader = "     cam  22        4500"
         f935b = "cofz"
-        f935c = "hs"   
+        f935c = "hs"
     else:
         leader = "     naa  22        4500"
         f935b = "cofz"
@@ -86,9 +86,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Leader
     marcrecord.leader = leader
-      
+
     # Identifier
-    f001 = xmlrecord["header"]["identifier"] 
+    f001 = xmlrecord["header"]["identifier"]
     regexp = re.match("oai:gesis\.izsoz\.de:document\/(\d+)", f001)
     if regexp:
         f001 = regexp.group(1)
@@ -105,26 +105,29 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     identifiers = get_field("dc:identifier")
     for identifier in identifiers:
         if isinstance(identifier, str):
-            regexp = re.search("^(978-.*)", identifier)       
+            regexp = re.search("^(978-.*)", identifier)
             if regexp:
-                f020a = regexp.group(1)        
+                f020a = regexp.group(1)
                 marcrecord.add("020", a=f020a)
-                break       
+                break
 
     # ISSN
     identifiers = get_field("dc:identifier")
     for identifier in identifiers:
-        regexp = re.search("^(\d\d\d\d-\d\d\d\d)", identifier)       
+        if identifier is None:
+            print('skipping None id', file=sys.stderr)
+            continue
+        regexp = re.search("^(\d\d\d\d-\d\d\d\d)", identifier)
         if regexp:
-            f022a = regexp.group(1)        
+            f022a = regexp.group(1)
             marcrecord.add("022", a=f022a)
             break
-    
+
     # Sprache
     """ Ist nur zweimal enthalten bei über 45.000 Titeln und einmal davon fehlerhaft, deshalb wird sie hier komplett weggelassen. """
 
     # 1. geistiger Schöpfer
-    authors = get_field("dc:creator")   
+    authors = get_field("dc:creator")
     if isinstance(authors, list):
         marcrecord.add("100", a=authors[0], e="aut")
     else:
@@ -132,7 +135,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Haupttitel
     f245 = get_field("dc:title")
-    if isinstance(f245, list): # Muss mit rein, weil an einer Stelle ein falscher, zusätzlicher title-Tag vorkommt.
+    # Muss mit rein, weil an einer Stelle ein falscher, zusätzlicher title-Tag vorkommt.
+    if isinstance(f245, list):
         f245 = f245[0]
     f245 = f245.split(" : ")
     if len(f245) > 1:
@@ -149,13 +153,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Und wenn das Feld dreimal vorhanden ist im letzten der Ort
     # In den anderen Fällen ist es so sehr Kraut und Rüben, dass hier bloß das Erscheinungsjahr angegeben und der Rest weggelassen wird.
     # Andenfalls fällt die Datenqualität zu sehr ab.
-    f260 = get_field("dc:publisher")    
+    f260 = get_field("dc:publisher")
     if isinstance(f260, list) and len(f260) == 4:
         f260a = f260[3]
         f260b = f260[0]
     elif isinstance(f260, list) and len(f260) == 3:
         f260a = f260[2]
-        f260b = ""  
+        f260b = ""
     else:
         f260a = ""
         f260b = ""
@@ -181,11 +185,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         marcrecord.add("490", a=f490a)
 
     # Rechte
-    f500a= get_field("dc:rights")
+    f500a = get_field("dc:rights")
     if isinstance(f500a, list):
-        marcrecord.add("500", a="Rechtehinweis: " + f500a[0]) 
+        marcrecord.add("500", a="Rechtehinweis: " + f500a[0])
     else:
-        marcrecord.add("500", a="Rechtehinweis: " + f500a) 
+        marcrecord.add("500", a="Rechtehinweis: " + f500a)
 
     # Abstract
     f520a = get_field("dc:description")
@@ -196,16 +200,17 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     subjects = get_field("dc:subject")
     for subject in subjects:
         if subject:
-            if subject[0].isupper(): # damit werden die englischen Schlagwörter weitestgehend herausgefiltert
-                if subject not in unique_subjects: # weil die Schlagwörter sich teilweise wiederholen
+            # damit werden die englischen Schlagwörter weitestgehend herausgefiltert
+            if subject[0].isupper():
+                if subject not in unique_subjects:  # weil die Schlagwörter sich teilweise wiederholen
                     marcrecord.add("650", a=subject)
-                    unique_subjects.append(subject)                 
+                    unique_subjects.append(subject)
             else:
-                if " " in subject: # für solche Fälle: soziale Lage, internationaler Vergleich
+                if " " in subject:  # für solche Fälle: soziale Lage, internationaler Vergleich
                     s = subject.split(" ")
                     x = s[1]
                     if x.isupper():
-                        if subject not in unique_subjects: # weil die Schlagwörter sich teilweise wiederholen
+                        if subject not in unique_subjects:  # weil die Schlagwörter sich teilweise wiederholen
                             marcrecord.add("650", a=subject)
                             unique_subjects.append(subject)
 
@@ -224,7 +229,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # übergeordnetes Werk
     journal = ""
     volume = ""
-    issue = "" 
+    issue = ""
     pages = ""
     sources = get_field("dc:source")
     if "Zeitschriftenartikel" in format and len(sources) == 4:
@@ -232,7 +237,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         volume = sources[1]
         issue = sources[2]
         pages = sources[3]
-        f773g = "%s(%s)%s, S. %s" % (volume, f260c, issue, pages)
+        f773g = u"%s(%s)%s, S. %s" % (volume, f260c, issue, pages)
         marcrecord.add("773", a=journal, g=f773g)
     elif sources != "":
         for source in sources:
@@ -241,31 +246,37 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 journal = regexp.group(1)
                 marcrecord.add("773", a=journal)
                 break
-      
+
     # Link zu Datensatz und Ressource
     identifiers = get_field("dc:identifier")
     urn = False
-    ssoar = ""   
+    ssoar = ""
     for identifier in identifiers:
         if identifier:  # Martin fragen, warum hier sonst "argument of type 'NoneType' is not iterable" kommt
-                                       
-            if "http://www.ssoar" in identifier: # ist manchmal ausschließlich in der Form angegeben
+
+            if "http://www.ssoar" in identifier:  # ist manchmal ausschließlich in der Form angegeben
                 ssoar = identifier
             elif "urn:nbn" in identifier:
-                marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u="http://nbn-resolving.de/" + identifier)  
-                urn = True # damit bevorzugt der Permalink angezeigt wird und nicht der Link auf http://www.ssoar ...                           
+                marcrecord.add("856", q="text/html", _3="Link zum Datensatz",
+                               u="http://nbn-resolving.de/" + identifier)
+                # damit bevorzugt der Permalink angezeigt wird und nicht der Link auf http://www.ssoar ...
+                urn = True
             elif ".pdf" in identifier:
-                marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=identifier)
-   
+                marcrecord.add("856", q="text/html",
+                               _3="Link zur Ressource", u=identifier)
+
     if urn == False:
-        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=ssoar) # Muss sein, damit der Link zum Datensatz nur einmal angezeigt wird
-        
+        # Muss sein, damit der Link zum Datensatz nur einmal angezeigt wird
+        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=ssoar)
+
     # Medientyp
     marcrecord.add("935", b=f935b, c=f935c)
-  
+
     # Kollektion
-    collection_with_adlr = ["a", f001, "b", "30", "c", "SSOAR Social Science Open Access Repository", "c", "ssoarAdlr"]
-    collection_without_adlr = ["a", f001, "b", "30", "c", "SSOAR Social Science Open Access Repository"]
+    collection_with_adlr = ["a", f001, "b", "30", "c",
+                            "SSOAR Social Science Open Access Repository", "c", "ssoarAdlr"]
+    collection_without_adlr = ["a", f001, "b", "30",
+                               "c", "SSOAR Social Science Open Access Repository"]
     collections = xmlrecord["header"]["setSpec"]
     for relevant_set in relevant_sets:
         if relevant_set in collections:
@@ -273,8 +284,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             break
     else:
         marcrecord.add("980", subfields=collection_without_adlr)
-      
-    
+
     outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
