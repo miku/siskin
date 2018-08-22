@@ -67,12 +67,6 @@ class SSOARHarvest(SSOARTask):
 class SSOARMARC(SSOARTask):
     """
     Use RS script for conversion, refs #12686.
-
-    As of 2018-05-28:
-
-    > Traceback (most recent call last):
-      File "/home/tir/code/miku/siskin/siskin/assets/30/30_marcbinary.py", line 166, in <module>
-          publisher = ["a", f260a, "b", f260b, "c", f260c]
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='oai_dc')
@@ -87,7 +81,7 @@ class SSOARMARC(SSOARTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
 
 
 class SSOARIntermediateSchema(SSOARTask):
