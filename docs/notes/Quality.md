@@ -23,13 +23,13 @@ Real world data issues. List of links to data corrections in code.
   schema](https://github.com/ubleipzig/intermediateschema/blob/805ee5a1e9beb39d17cecbdbcecab6ab4ed4ed36/is-0.9.json#L9))
 * restrict author length, between [four and 200](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L54-L55)
 * limit title length to [4096](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L56)
-* if abstract is missing, is a [limited
+* if abstract is missing, use a [limited
   number](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L51-L52)
   of chars (2000) from [fulltext for abstract](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L245-L247)
 * if a single author field is very long, try to break it down into smaller
   parts using [various
   delimiters](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L155-L160)
-* if a lowercases field matches the string "n.n.", [treat it as essentially
+* if a lowercased field matches the string "n.n.", [treat it as essentially
   empty](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L134-L138)
 * hard-coded, [blacklist of
   strings](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/genios/document.go#L172-L177),
@@ -58,8 +58,7 @@ Real world data issues. List of links to data corrections in code.
 * a regular expression for
   [authors](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L56-L57)
   applied to [first and last
-  name](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L145-L146)
-  - this never skips, just replaces parts of the name strings.
+  name](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L145-L146) - this never skips, just replaces parts of the name strings.
 * [title
   blocker](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L59-L60),
   a blacklist applied on
@@ -71,7 +70,7 @@ Real world data issues. List of links to data corrections in code.
   parts](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L272-L274)
 * if an document id (ai-xx-yy) [exceed a given
   limit](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L249-L251)
-  (here: 250, since this was the maximum memcachedb could handle), the skip the
+  (here: 250, since this was the maximum memcachedb could handle), then skip the
   record entirely
 * if the chosen date of a record lies [too far in the
   future](https://github.com/miku/span/blob/815d2fe2d623e88f7cee07e33bc0e4bc5ee28a1c/formats/crossref/document.go#L253-L255),
@@ -143,7 +142,7 @@ Real world data issues. List of links to data corrections in code.
 ## 89
 
 * inconsistent [dates](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L238-L243)
-* skip records where article [starts with "["](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L281-L283)
+* skip records where article [starts with](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L281-L283) a bracket "["
 * dates [might be broken](https://github.com/miku/span/blob/33019fedd1dfd21c5e1978a1f8a8e09606570eba/formats/ieee/publication.go#L291-L295)
 
 ## 101

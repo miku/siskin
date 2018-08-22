@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- DEPRECATED(2018-08-15): Use span-import -h hhbd -->
 <metamorph xmlns="http://www.culturegraph.org/metamorph" version="1">
   <rules>
     <data source="metadata.dc.description.value" name="abstract"/>

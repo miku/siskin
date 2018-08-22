@@ -50,16 +50,14 @@ class SSOARHarvest(SSOARTask):
     """
     Harvest from default http://www.ssoar.info/OAIHandler/request OAI endpoint.
     """
-    format = luigi.Parameter(default="marcxml", significant=False)
-    endpoint = luigi.Parameter(
-        default='http://www.ssoar.info/OAIHandler/request', significant=False)
+    format = luigi.Parameter(default="marcxml")
     date = ClosestDateParameter(default=datetime.date.today())
+    endpoint = luigi.Parameter(default='http://www.ssoar.info/OAIHandler/request', significant=False)
 
     def run(self):
-        shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint,
-                 format=self.format)
-        output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""", endpoint=self.endpoint,
-                          format=self.format)
+        shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
+        output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""",
+                          endpoint=self.endpoint, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -69,17 +67,12 @@ class SSOARHarvest(SSOARTask):
 class SSOARMARC(SSOARTask):
     """
     Use RS script for conversion, refs #12686.
-
-    As of 2018-05-28:
-
-    > Traceback (most recent call last):
-      File "/home/tir/code/miku/siskin/siskin/assets/30/30_marcbinary.py", line 166, in <module>
-          publisher = ["a", f260a, "b", f260b, "c", f260c]
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default='oai_dc')
 
     def requires(self):
-        return SSOARHarvest(date=self.date)
+        return SSOARHarvest(date=self.date, format=self.format)
 
     @deprecated
     def run(self):
@@ -88,18 +81,17 @@ class SSOARMARC(SSOARTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
 
 
 class SSOARIntermediateSchema(SSOARTask):
     """
-    Convert to intermediate schema via metafacture. Custom morphs and flux are
-    kept in assets/30. Maps are kept in assets/maps.
+    Use span-import for conversion.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return SSOARHarvest(date=self.date)
+        return SSOARHarvest(date=self.date, format='marcxml')
 
     def run(self):
         output = shellout("""span-import -i ssoar {input} | pigz -c > {output}""",

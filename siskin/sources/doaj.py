@@ -170,11 +170,11 @@ class DOAJDumpNext(DOAJTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
-    batch_size = luigi.IntParameter(default=1000, significant=False)
-    sleep = luigi.IntParameter(default=4, significant=False, description="sleep seconds between requests")
+    batch_size = luigi.IntParameter(default=100, significant=False, description="probably not more than 100 allowed")
+    sleep = luigi.IntParameter(default=2, significant=False, description="sleep seconds between requests")
 
     def run(self):
-        output = shellout("doajfetch -sleep {sleep}s -size {size} -P | jq -rc '.hits.hits[]' > {output}",
+        output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P | jq -rc '.results[]' > {output}",
                           sleep=self.sleep, size=self.batch_size)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -258,8 +258,12 @@ class DOAJFiltered(DOAJTask):
 class DOAJIntermediateSchema(DOAJTask):
     """
     Convert to intermediate schema via span.
+
+    XXX: Default format is "doaj" for now. As soon as API is functional, switch to doaj-api.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="doaj",
+                             description="kind of source document, doaj or doaj-api")
 
     def requires(self):
         return {'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
@@ -267,8 +271,9 @@ class DOAJIntermediateSchema(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout(
-            "span-import -i doaj {input} | pigz -c > {output}", input=self.input().get('input').path)
+        output = shellout("span-import -i {format} {input} | pigz -c > {output}",
+                          input=self.input().get('input').path,
+                          format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
