@@ -98,31 +98,15 @@ class AITask(DefaultTask):
 
 class AIDOIList(AITask):
     """
-    List of DOI for ai.
+    Raw kist of DOI for ai.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [
-            CrossrefDOIList(date=self.date),
-            DegruyterDOIList(date=self.date),
-            DOAJDOIList(date=self.date),
-            ElsevierJournalsISSNList(date=self.date),
-            IEEEDOIList(date=self.date),
-            JstorDOIList(date=self.date),
-        ]
+        return AIIntermediateSchema(date=self.date)
 
     def run(self):
-        """
-        Concatenate files and run sort -u.
-        """
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}",
-                     input=target.path, output=stopover)
-        output = shellout(
-            "LC_ALL=C sort -S35% {input} > {output}", input=stopover)
-        os.remove(stopover)
+        output = shellout("unpigz -c {input} | jq -rc .doi | grep -v '^null$' > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -140,7 +124,7 @@ class AIDOIRedirectTable(AITask):
         return AIDOIList()
 
     def run(self):
-        output = shellout("hurrly -w {w} < {input} > {output}",
+        output = shellout("hurrly -w {w} <(sort -S30% -u {input}) > {output}",
                           w=self.hurrly_workers, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -514,7 +498,7 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort -S20% -t, -k3 > {output} """,
+        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
                           size=self.batchsize, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -865,3 +849,4 @@ class AIApplyOpenAccessFlag(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+

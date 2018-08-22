@@ -1,3 +1,4 @@
+// DEPRECATED(2018-08-15): Use span-import -h hhbd
 // liest XML ein (Trennung der einzelnen Records durch "Record"), uebergibt an morph und speichert in json
 // die default Werte werden beim Aufruf des Skripts ueberschrieben
 
