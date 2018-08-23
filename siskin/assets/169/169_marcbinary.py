@@ -93,6 +93,10 @@ for line in lines:
             print(exc, file=sys.stderr)
 
 
+        if record["timestamp"] == "":
+            continue
+            
+
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
         
