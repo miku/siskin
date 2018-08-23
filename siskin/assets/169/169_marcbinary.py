@@ -121,6 +121,14 @@ for i, line in enumerate(lines, start=1):
 
         marcrecord.add("306", a=record["hr_duration"])
 
+        description = record["description"]
+        if " / " not in description:
+            marcrecord.add("520", a=description)
+        else:
+            descriptions = description.split(" / ")
+            for description in descriptions:
+                marcrecord.add("505", a=description)
+
         marcrecord.add("520", a=record["description"])
 
         if record["url_website"] != "":
