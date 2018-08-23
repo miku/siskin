@@ -49,7 +49,7 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
-for line in lines:
+for i, line in enumerate(lines, start=1):
     try:
         doc = json.loads(line)
     except Exception as exc:
@@ -94,11 +94,11 @@ for line in lines:
         
         marcrecord.leader = "     cam  22        4500"
 
-        f001 = record["url_website"]
-        f001 = bytes(f001, "utf-8")
-        f001 = base64.b64encode(f001)
-        f001 = f001.decode("utf-8").rstrip("=")
-        marcrecord.add("001", data="finc-169-" + f001)
+        f001 = i
+        #f001 = bytes(f001, "utf-8")
+        #f001 = base64.b64encode(f001)
+        #f001 = f001.decode("utf-8").rstrip("=")
+        marcrecord.add("001", data="finc-169-" + str(f001))
         
         marcrecord.add("007", data="cr")
         marcrecord.add("245", a=record["title"])
@@ -136,7 +136,7 @@ for line in lines:
       
         marcrecord.add("935", b="cofz", c="vide")
 
-        collections = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
+        collections = ["a", str(i), "b", "169", "c", "MediathekViewWeb"]
         marcrecord.add("980", subfields=collections)
 
         #print(json.dumps(record))
