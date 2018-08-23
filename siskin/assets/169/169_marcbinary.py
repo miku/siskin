@@ -53,7 +53,7 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
-for i, line in enumerate(lines, start=1):
+for line in lines:
     try:
         doc = json.loads(line)
     except Exception as exc:
@@ -98,11 +98,8 @@ for i, line in enumerate(lines, start=1):
         
         marcrecord.leader = "     cam  22        4500"
 
-        f001 = i
-        #f001 = bytes(f001, "utf-8")
-        #f001 = base64.b64encode(f001)
-        #f001 = f001.decode("utf-8").rstrip("=")
-        marcrecord.add("001", data="finc-169-" + str(f001))
+        f001 = record["channel"].lower() + record["timestamp"]
+        marcrecord.add("001", data="finc-169-" + f001)
         
         marcrecord.add("007", data="cr")
         marcrecord.add("245", a=record["title"])
@@ -137,7 +134,7 @@ for i, line in enumerate(lines, start=1):
       
         marcrecord.add("935", b="cofz", c="vide")
 
-        collections = ["a", str(i), "b", "169", "c", "MediathekViewWeb"]
+        collections = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
         marcrecord.add("980", subfields=collections)
    
         outputfile.write(marcrecord.as_marc())
