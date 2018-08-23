@@ -36,6 +36,10 @@ import base64
 import datetime
 
 
+channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB",
+            "SR", "SRF", "SRF.Podcast", "SWR", "WDR", "ZDF", "ZDF-tivi")
+
+
 inputfilename = "169_input.json" 
 outputfilename = "169_output.mrc"
 
@@ -103,31 +107,22 @@ for i, line in enumerate(lines, start=1):
         marcrecord.add("007", data="cr")
         marcrecord.add("245", a=record["title"])
 
+        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] not in record["title"]:
+            marcrecord.add("520", a=record["topic"])
+            #print(record["topic"] + " (" + record["channel"] + ")")
+
         timestamp = record["timestamp"]
         if timestamp != "":
             timestamp = int(timestamp)
             f260c = datetime.datetime.fromtimestamp(timestamp).strftime(", %d.%m.%Y, %H:%M:%S Uhr")
         else:
             f260c = ""
-        marcrecord.add("260", b=record["channel"], c=f260c)
+        publisher = ["b", record["channel"], "c", f260c]
+        marcrecord.add("260", subfields=publisher)
         
-        topic = record["topic"]
-        if " / " not in topic:
-            marcrecord.add("490", a=topic)
-        else:
-            topics = topic.split(" / ")
-            for topic in topics:
-                marcrecord.add("505", a=topic)
+        marcrecord.add("306", a=record["hr_duration"])        
 
-        marcrecord.add("306", a=record["hr_duration"])
-
-        description = record["description"]
-        if " / " not in description:
-            marcrecord.add("520", a=description)
-        else:
-            descriptions = description.split(" / ")
-            for description in descriptions:
-                marcrecord.add("505", a=description)
+        marcrecord.add("520", a=record["description"])
 
         if record["url_website"] != "":
             marcrecord.add("856", q="text/html", _3="Link zur Webseite", u=record["url_website"])
@@ -144,9 +139,6 @@ for i, line in enumerate(lines, start=1):
 
         collections = ["a", str(i), "b", "169", "c", "MediathekViewWeb"]
         marcrecord.add("980", subfields=collections)
-
-        #print(json.dumps(record))
-       
    
         outputfile.write(marcrecord.as_marc())
 
