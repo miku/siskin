@@ -78,7 +78,6 @@ for line in lines:
                 topic_map[topic] = 1
             else:
                 topic_map[topic] += 1
-
    
 inputfile = open(inputfilename, "r")
 outputfile = open(outputfilename, "wb")
@@ -137,11 +136,7 @@ for line in lines:
         
         marcrecord.add("007", data="cr")
         marcrecord.add("245", a=record["title"])
-
-        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] not in record["title"]:
-            marcrecord.add("520", a=record["topic"])
-            #print(record["topic"] + " (" + record["channel"] + ")")
-
+          
         timestamp = record["timestamp"]
         if timestamp != "":
             timestamp = int(timestamp)
@@ -151,9 +146,15 @@ for line in lines:
         publisher = ["b", record["channel"], "c", f260c]
         marcrecord.add("260", subfields=publisher)
         
-        marcrecord.add("306", a=record["hr_duration"])        
+        marcrecord.add("306", a=record["hr_duration"])
+
+        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] not in record["title"] and topic_map[record["topic"]] > 9:
+            marcrecord.add("490", a=record["topic"])
 
         marcrecord.add("520", a=record["description"])
+
+        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] not in record["title"] and topic_map[record["topic"]] <= 9:
+            marcrecord.add("650", a=record["topic"])
 
         if record["url_website"] != "":
             marcrecord.add("856", q="text/html", _3="Link zur Webseite", u=record["url_website"])
