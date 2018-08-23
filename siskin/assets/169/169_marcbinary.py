@@ -97,7 +97,7 @@ for line in lines:
         f001 = record["url_website"]
         f001 = bytes(f001, "utf-8")
         f001 = base64.b64encode(f001)
-        f001 = f001.decode("utf-8")
+        f001 = f001.decode("utf-8").rstrip("=")
         marcrecord.add("001", data="finc-169-" + f001)
         
         marcrecord.add("007", data="cr")
