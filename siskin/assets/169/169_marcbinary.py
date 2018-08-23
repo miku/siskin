@@ -46,6 +46,40 @@ outputfilename = "169_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
+with open(inputfilename) as handle:
+    content = handle.read()
+
+
+# Topic Map
+pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
+lines = pattern.split(content)
+topic_map = {}
+
+for line in lines:
+    try:
+        doc = json.loads(line)
+    except Exception as exc:
+        print(exc, file=sys.stderr) 
+    else:
+        if doc[0] != "":
+            current_channel = doc[0]
+        if doc[1] != "":
+            current_topic = doc[1]
+        record = {
+            "channel": current_channel,
+            "topic": current_topic,
+            "title": doc[2],            
+            "timestamp": doc[16],
+        }
+    
+        topic = record["topic"]
+        if topic not in channels and " / " not in topic and topic not in record["title"]:
+            if topic not in topic_map:
+                topic_map[topic] = 1
+            else:
+                topic_map[topic] += 1
+
+   
 inputfile = open(inputfilename, "r")
 outputfile = open(outputfilename, "wb")
 content = inputfile.read()
