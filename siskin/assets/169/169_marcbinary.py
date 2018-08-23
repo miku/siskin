@@ -129,8 +129,6 @@ for i, line in enumerate(lines, start=1):
             for description in descriptions:
                 marcrecord.add("505", a=description)
 
-        marcrecord.add("520", a=record["description"])
-
         if record["url_website"] != "":
             marcrecord.add("856", q="text/html", _3="Link zur Webseite", u=record["url_website"])
         if record["url_video_low"] != "":
