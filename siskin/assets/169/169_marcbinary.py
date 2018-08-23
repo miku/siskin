@@ -98,7 +98,7 @@ for line in lines:
         
         marcrecord.leader = "     cam  22        4500"
 
-        f001 = record["channel"].lower() + record["timestamp"]
+        f001 = record["channel"].lower()replace(".", "") + record["timestamp"]
         marcrecord.add("001", data="finc-169-" + f001)
         
         marcrecord.add("007", data="cr")
