@@ -27,18 +27,22 @@ The url_video_low, url_video_hd are encoded like "offset|s", where the final
 url will be: url_video[offset] + s
 """
 
-
+import collections
 import re
 import sys
 import json
 import marcx
 import base64
+import hashlib
 import datetime
+import tqdm
 
 
 channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB",
             "SR", "SRF", "SRF.Podcast", "SWR", "WDR", "ZDF", "ZDF-tivi", "3sat")
 
+records = collections.defaultdict(dict)
+seen = set()
 
 inputfilename = "169_input.json" 
 outputfilename = "169_output.mrc"
@@ -53,10 +57,9 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
-# sort -u dups.ndj > uniq.ndj 
-seen = set()
+for line in tqdm.tqdm(lines):
 
-for line in lines:
+    # sort -u dups.ndj > uniq.ndj 
     if line in seen:
         print('dropping duplicate line: %s ...' % line[:40], file=sys.stderr)
         continue
@@ -103,63 +106,89 @@ for line in lines:
 
 
         if record["timestamp"] == "":
-            continue          
+            continue
 
-        marcrecord = marcx.Record(force_utf8=True)
-        marcrecord.strict = False
-        
-        marcrecord.leader = "     cam  22        4500"
-       
+        hash = hashlib.sha1()
+        fields = record["channel"] + record["topic"] + record["title"] + record["description"] + record["hr_duration"] + record["timestamp"] 
+        hash.update(fields.encode("utf-8").strip())
+        hash_record = hash.hexdigest()
+
         f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record["timestamp"]
         f001 = bytes(f001, "utf-8")
-        f001 = base64.b64encode(f001)
+        f001 = base64.urlsafe_b64encode(f001)
         f001 = f001.decode("utf-8").rstrip("=")
-        marcrecord.add("001", data="finc-169-" + f001)
-               
-        marcrecord.add("007", data="cr")
-        marcrecord.add("245", a=record["title"])
-          
+        records[hash_record].update({"f001": f001})
+       
+        f245a = record["title"]
+        records[hash_record].update({"f245a": f245a})
+
         timestamp = record["timestamp"]
-        if timestamp != "":
+        if timestamp:
             timestamp = int(timestamp)
             f260c = datetime.datetime.fromtimestamp(timestamp).strftime(", %Y")
         else:
             f260c = ""
         publisher = ["b", record["channel"], "c", f260c]
-        marcrecord.add("260", subfields=publisher)
-        
-        marcrecord.add("306", a=record["hr_duration"])
+        records[hash_record].update({"f260": publisher})
 
-        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] != record["title"]:
-            marcrecord.add("490", a=record["topic"])
+        f306a = record["hr_duration"]
+        records[hash_record].update({"f306a": f306a})
+
+        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] != record["title"]:           
+            records[hash_record].update({"f490a": record["topic"]})
 
         timestamp = record["timestamp"]
-        if timestamp != "":
+        if timestamp:
             timestamp = int(timestamp)
             f500a = datetime.datetime.fromtimestamp(timestamp).strftime("%d.%m.%Y um %H:%M Uhr")
-            f500a = "Ausgestrahlt am " + f500a
+            f500a = "Gesendet am " + f500a
             if "00:00:00" in f500a:
-                f500a = f500a.replace("00:00:00 Uhr", "")
-                f500a = f500a.replace(" um ", "")
-            marcrecord.add("500", a=f500a)
+                f500a = f500a.replace("00:00:00 Uhr", "").replace(" um ", "")
+            records[hash_record].update({"f500a": f500a})
 
-        marcrecord.add("520", a=record["description"])
+        f520a = record["description"]
+        records[hash_record].update({"f520a": f520a})
+        
+        if record["url_website"]:
+            records[hash_record].setdefault("website", []).append(record["url_website"])
+        if record["url_video_low"]:
+           records[hash_record].setdefault("low", []).append(record["url_video_low"])
+        if record["url_video"]:
+          records[hash_record].setdefault("medium", []).append(record["url_video"])
+        if record["url_video_hd"]:
+          records[hash_record].setdefault("high", []).append(record["url_video_hd"])
+    
+for record in tqdm.tqdm(records.values(), total=len(records)):
 
-        if record["url_website"] != "":
-            marcrecord.add("856", q="text/html", _3="Link zur Webseite", u=record["url_website"])
-        if record["url_video_low"] != "":
-            marcrecord.add("856", q="text/html", _3="Link zum Video (LD)", u=record["url_video_low"])
-        if record["url_video"] != "":
-            marcrecord.add("856", q="text/html", _3="Link zum Video (SD)", u=record["url_video"])
-        if record["url_video_hd"] != "":
-            marcrecord.add("856", q="text/html", _3="Link zum Video (HD)", u=record["url_video_hd"])
-             
-        marcrecord.add("935", b="cofz", c="vide")
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+    marcrecord.leader = "     cam  22        4500"
+    marcrecord.add("001", data="finc-169-" + record["f001"])           
+    marcrecord.add("007", data="cr")
+    marcrecord.add("245", a=record["f245a"])    
+    marcrecord.add("260", subfields=record["f260"])   
+    marcrecord.add("306", a=record["f306a"])
+    marcrecord.add("490", a=record.get("f490a"))    
+    marcrecord.add("500", a=record["f500a"])
+    marcrecord.add("520", a=record["f520a"])
 
-        collections = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
-        marcrecord.add("980", subfields=collections)
-   
-        outputfile.write(marcrecord.as_marc())
+    for i, url in enumerate(record.get("website", []), start=1):
+        marcrecord.add("856", q="text/html", _3="Link zur Webseite %d" % i, u=url)
+
+    for i, url in enumerate(record.get("low", []), start=1):
+        marcrecord.add("856", q="text/html", _3="Link zu Video %d (LD)" % i, u=url)
+
+    for i, url in enumerate(record.get("medium", []), start=1):
+        marcrecord.add("856", q="text/html", _3="Link zu Video %d (SD)" % i, u=url)
+
+    for i, url in enumerate(record.get("high", []), start=1):
+        marcrecord.add("856", q="text/html", _3="Link zu Video %d (HD)" % i, u=url)
+     
+    marcrecord.add("935", b="cofz", c="vide")
+    subfields = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
+    marcrecord.add("980", subfields=subfields)
+
+    outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
 outputfile.close()
