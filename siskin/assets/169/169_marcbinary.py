@@ -122,7 +122,7 @@ for line in lines:
         timestamp = record["timestamp"]
         if timestamp != "":
             timestamp = int(timestamp)
-            f260c = datetime.datetime.fromtimestamp(timestamp).strftime(", %d.%m.%Y")
+            f260c = datetime.datetime.fromtimestamp(timestamp).strftime(", %Y")
         else:
             f260c = ""
         publisher = ["b", record["channel"], "c", f260c]
@@ -132,6 +132,16 @@ for line in lines:
 
         if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] != record["title"]:
             marcrecord.add("490", a=record["topic"])
+
+        timestamp = record["timestamp"]
+        if timestamp != "":
+            timestamp = int(timestamp)
+            f500a = datetime.datetime.fromtimestamp(timestamp).strftime("%d.%m.%Y um %H:%M Uhr")
+            f500a = "Ausgestrahlt am " + f500a
+            if "00:00:00" in f500a:
+                f500a = f500a.replace("00:00:00 Uhr", "")
+                f500a = f500a.replace(" um ", "")
+            marcrecord.add("500", a=f500a)
 
         marcrecord.add("520", a=record["description"])
 
