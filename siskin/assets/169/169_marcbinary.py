@@ -33,7 +33,6 @@ import sys
 import json
 import marcx
 import base64
-import hashlib
 import datetime
 
 
@@ -144,9 +143,7 @@ for line in lines:
             marcrecord.add("856", q="text/html", _3="Link zum Video (SD)", u=record["url_video"])
         if record["url_video_hd"] != "":
             marcrecord.add("856", q="text/html", _3="Link zum Video (HD)", u=record["url_video_hd"])
-        if record["url_subtitle"] != "":
-            marcrecord.add("856", q="text/html", _3="Link zum Video (Untertitel)", u=record["url_subtitle"])
-      
+             
         marcrecord.add("935", b="cofz", c="vide")
 
         collections = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
