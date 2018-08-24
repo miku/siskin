@@ -122,7 +122,7 @@ for line in lines:
         timestamp = record["timestamp"]
         if timestamp != "":
             timestamp = int(timestamp)
-            f260c = datetime.datetime.fromtimestamp(timestamp).strftime(", %d.%m.%Y, %H:%M:%S Uhr")
+            f260c = datetime.datetime.fromtimestamp(timestamp).strftime(", %d.%m.%Y")
         else:
             f260c = ""
         publisher = ["b", record["channel"], "c", f260c]
