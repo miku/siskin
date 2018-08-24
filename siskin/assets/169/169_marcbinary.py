@@ -33,6 +33,7 @@ import sys
 import json
 import marcx
 import base64
+import hashlib
 import datetime
 
 
@@ -53,7 +54,16 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
+# sort -u dups.ndj > uniq.ndj 
+seen = set()
+
 for line in lines:
+    if line in seen:
+        print('dropping duplicate line: %s ...' % line[:40], file=sys.stderr)
+        continue
+    # XXX: up to a few 100000 lines this is ok
+    seen.add(line)
+
     try:
         doc = json.loads(line)
     except Exception as exc:
@@ -94,17 +104,19 @@ for line in lines:
 
 
         if record["timestamp"] == "":
-            continue
-            
+            continue          
 
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
         
         marcrecord.leader = "     cam  22        4500"
-
-        f001 = record["channel"].lower().replace(".", "") + record["timestamp"]
+       
+        f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record["timestamp"]
+        f001 = bytes(f001, "utf-8")
+        f001 = base64.b64encode(f001)
+        f001 = f001.decode("utf-8").rstrip("=")
         marcrecord.add("001", data="finc-169-" + f001)
-        
+               
         marcrecord.add("007", data="cr")
         marcrecord.add("245", a=record["title"])
           
