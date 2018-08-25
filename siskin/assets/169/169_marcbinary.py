@@ -173,16 +173,24 @@ for record in tqdm.tqdm(records.values(), total=len(records)):
     marcrecord.add("520", a=record["f520a"])
 
     for i, url in enumerate(record.get("website", []), start=1):
-        marcrecord.add("856", q="text/html", _3="Link zur Webseite %d" % i, u=url)
+        if len(record["website"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zur Webseite %s" % i, u=url)
 
     for i, url in enumerate(record.get("low", []), start=1):
-        marcrecord.add("856", q="text/html", _3="Link zu Video %d (LD)" % i, u=url)
+        if len(record["low"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zu Video %s (LD)" % i, u=url)
 
     for i, url in enumerate(record.get("medium", []), start=1):
-        marcrecord.add("856", q="text/html", _3="Link zu Video %d (SD)" % i, u=url)
+        if len(record["medium"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zu Video %s (SD)" % i, u=url)
 
     for i, url in enumerate(record.get("high", []), start=1):
-        marcrecord.add("856", q="text/html", _3="Link zu Video %d (HD)" % i, u=url)
+        if len(record["high"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zu Video %s (HD)" % i, u=url)
      
     marcrecord.add("935", b="cofz", c="vide")
     subfields = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
