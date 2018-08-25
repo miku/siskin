@@ -150,13 +150,13 @@ for line in tqdm.tqdm(lines):
         records[hash_record].update({"f520a": f520a})
         
         if record["url_website"]:
-            records[hash_record].setdefault("website", []).append(record["url_website"])
+            records[hash_record].setdefault("website", set()).add(record["url_website"])            
         if record["url_video_low"]:
-           records[hash_record].setdefault("low", []).append(record["url_video_low"])
+            records[hash_record].setdefault("low", []).append(record["url_video_low"])
         if record["url_video"]:
-          records[hash_record].setdefault("medium", []).append(record["url_video"])
+            records[hash_record].setdefault("medium", []).append(record["url_video"])
         if record["url_video_hd"]:
-          records[hash_record].setdefault("high", []).append(record["url_video_hd"])
+            records[hash_record].setdefault("high", []).append(record["url_video_hd"])
     
 for record in tqdm.tqdm(records.values(), total=len(records)):
 
