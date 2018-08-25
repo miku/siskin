@@ -138,12 +138,11 @@ for line in tqdm.tqdm(lines):
             records[hash_record].update({"f490a": record["topic"]})
 
         timestamp = record["timestamp"]
-        if timestamp:
+        if timestamp:            
             timestamp = int(timestamp)
-            f500a = datetime.datetime.fromtimestamp(timestamp).strftime("%d.%m.%Y um %H:%M Uhr")
-            f500a = "Gesendet am " + f500a
-            if "00:00:00" in f500a:
-                f500a = f500a.replace("00:00:00 Uhr", "").replace(" um ", "")
+            f500a = datetime.datetime.fromtimestamp(timestamp).strftime("Gesendet am %d.%m.%Y um %H:%M Uhr")           
+            if "00:00" in f500a:                 
+                f500a = f500a.replace(" um 00:00 Uhr", "")
             records[hash_record].update({"f500a": f500a})
 
         f520a = record["description"]
