@@ -116,7 +116,7 @@ for line in lines:
         hash_record = hash.hexdigest()
 
         f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record["timestamp"]
-        f001 = bytes(f001, "utf-8")
+        f001 = f001.encode("utf-8") # f001 = bytes(f001, "utf-8")
         f001 = base64.urlsafe_b64encode(f001)
         f001 = f001.decode("utf-8").rstrip("=")
         records[hash_record].update({"f001": f001})
