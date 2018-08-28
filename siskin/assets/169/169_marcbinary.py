@@ -27,8 +27,6 @@ The url_video_low, url_video_hd are encoded like "offset|s", where the final
 url will be: url_video[offset] + s
 """
 
-from __future__ import print_function
-
 import collections
 import re
 import sys
@@ -59,7 +57,7 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
-for line in lines:
+for line in tqdm.tqdm(lines):
 
     # sort -u dups.ndj > uniq.ndj 
     if line in seen:
@@ -111,12 +109,12 @@ for line in lines:
             continue
 
         hash = hashlib.sha1()
-        fields = record["channel"] + record["topic"] + record["title"] + record["description"] + record["hr_duration"] + record["timestamp"] 
+        fields = record["channel"] + record["topic"] + record["title"] + record["timestamp"] 
         hash.update(fields.encode("utf-8").strip())
         hash_record = hash.hexdigest()
 
         f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record["timestamp"]
-        f001 = f001.encode("utf-8") # f001 = bytes(f001, "utf-8")
+        f001 = bytes(f001, "utf-8")
         f001 = base64.urlsafe_b64encode(f001)
         f001 = f001.decode("utf-8").rstrip("=")
         records[hash_record].update({"f001": f001})
@@ -148,10 +146,14 @@ for line in lines:
             records[hash_record].update({"f500a": f500a})
 
         f520a = record["description"]
-        records[hash_record].update({"f520a": f520a})
-        
+        desc = records[hash_record].setdefault("f520a", [])
+        if f520a not in desc:
+            records[hash_record].setdefault("f520a", []).append(f520a)
+                
         if record["url_website"]:
-            records[hash_record].setdefault("website", set()).add(record["url_website"])            
+            sites = records[hash_record].setdefault("website", [])
+            if record["url_website"] not in sites:
+                records[hash_record].setdefault("website", []).append(record["url_website"])            
         if record["url_video_low"]:
             records[hash_record].setdefault("low", []).append(record["url_video_low"])
         if record["url_video"]:
@@ -166,12 +168,19 @@ for record in tqdm.tqdm(records.values(), total=len(records)):
     marcrecord.leader = "     cam  22        4500"
     marcrecord.add("001", data="finc-169-" + record["f001"])           
     marcrecord.add("007", data="cr")
+    marcrecord.add("008", data="050228s%s r 000 0 ger d" % record["f260"][3])
     marcrecord.add("245", a=record["f245a"])    
     marcrecord.add("260", subfields=record["f260"])   
     marcrecord.add("306", a=record["f306a"])
     marcrecord.add("490", a=record.get("f490a"))    
     marcrecord.add("500", a=record["f500a"])
-    marcrecord.add("520", a=record["f520a"])
+  
+    for i, f520a in enumerate(record.get("f520a", []), start=1):      
+        if len(record["f520a"]) == 1:
+            label = ""
+        else:           
+            label = "Video " + str(i) + ":\n"
+        marcrecord.add("520", a=label+f520a)
 
     for i, url in enumerate(record.get("website", []), start=1):
         if len(record["website"]) == 1:
@@ -196,7 +205,7 @@ for record in tqdm.tqdm(records.values(), total=len(records)):
     marcrecord.add("935", b="cofz", c="vide")
     subfields = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
     marcrecord.add("980", subfields=subfields)
-
+   
     outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
