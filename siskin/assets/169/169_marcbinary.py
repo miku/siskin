@@ -59,7 +59,7 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
-for line in tqdm.tqdm(lines):
+for line in lines:
 
     # sort -u dups.ndj > uniq.ndj 
     if line in seen:
