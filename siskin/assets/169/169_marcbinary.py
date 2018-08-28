@@ -27,6 +27,8 @@ The url_video_low, url_video_hd are encoded like "offset|s", where the final
 url will be: url_video[offset] + s
 """
 
+from __future__ import print_function
+
 import collections
 import re
 import sys
