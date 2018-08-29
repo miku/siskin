@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+taskcleanup removes date based tasks.
+
+    $ taskcleanup TASKNAME DATE
+
+This will remove all outputs from TASKNAME where the date lies strictly before DATE.
+
+With GNU date, one can write, e.g for a task MVWMARC:
+
+    $ taskcleanup MVWMARC $(date +"%Y-%m-%d" --date='14 days ago')
+
+This will only work for tasks, that do not require additional parameters.
+"""
+
+from __future__ import print_function
+
+import datetime
+import importlib
+import os
+import sys
+import re
+
+from luigi.cmdline_parser import CmdlineParser
+from luigi.parameter import MissingParameterException
+from luigi.task_register import TaskClassNotFoundException
+
+from siskin.utils import get_task_import_cache, iterfiles
+
+date_pattern = re.compile(r"date-[\d]{4,4}-[\d]{2,2}-[\d]{2,2}")
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print('taskcleanup TASKNAME DATE', file=sys.stderr)
+        sys.exit(1)
+
+    taskname = sys.argv[1]
+    boundary = datetime.datetime.strptime(sys.argv[2], "%Y-%m-%d")
+
+    # fast access through a bit of caching
+    task_import_cache, path = get_task_import_cache()
+    if taskname in task_import_cache:
+        importlib.import_module(task_import_cache[taskname])
+    else:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+        from siskin.sources import *
+        from siskin.workflows import *
+
+    try:
+        parser = CmdlineParser(sys.argv[1:2])
+        task = parser.get_task_obj()
+        try:
+            for path in iterfiles(task.taskdir()):
+                match = date_pattern.search(path)
+                if not match:
+                    continue
+                parsed = datetime.datetime.strptime(match.group(), "date-%Y-%m-%d")
+                if parsed < boundary:
+                    os.remove(path)
+        except AttributeError as err:
+            print('output of task has no path', file=sys.stderr)
+            sys.exit(1)
+    except MissingParameterException as err:
+        print('missing parameter: %s' % err, file=sys.stderr)
+        sys.exit(1)
+    except TaskClassNotFoundException as err:
+        print(err, file=sys.stderr)
+        sys.exit(1)
+
