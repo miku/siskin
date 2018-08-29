@@ -27,6 +27,8 @@ The url_video_low, url_video_hd are encoded like "offset|s", where the final
 url will be: url_video[offset] + s
 """
 
+from __future__ import print_function
+
 import collections
 import re
 import sys
@@ -57,7 +59,7 @@ content = inputfile.read()
 pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
 lines = pattern.split(content)
 
-for line in tqdm.tqdm(lines):
+for line in lines:
 
     # sort -u dups.ndj > uniq.ndj 
     if line in seen:
@@ -104,7 +106,6 @@ for line in tqdm.tqdm(lines):
         except Exception as exc:
             print(exc, file=sys.stderr)
 
-
         if record["timestamp"] == "":
             continue
 
@@ -114,7 +115,7 @@ for line in tqdm.tqdm(lines):
         hash_record = hash.hexdigest()
 
         f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record["timestamp"]
-        f001 = bytes(f001, "utf-8")
+        f001 = f001.encode("utf-8")
         f001 = base64.urlsafe_b64encode(f001)
         f001 = f001.decode("utf-8").rstrip("=")
         records[hash_record].update({"f001": f001})
