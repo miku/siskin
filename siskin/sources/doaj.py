@@ -222,15 +222,34 @@ class DOAJFiltered(DOAJTask):
     Filter DOAJ by ISSN in assets. Slow.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="doaj", description="kind of source document, doaj or doaj-api")
 
     def requires(self):
+        """
+        Temporarily support both formats. XXX: Switch to doaj-api.
+        """
+        dump = DOAJDump(date=self.date)
+        if self.format == "doaj-api":
+            dump = DOAJDumpNext(date=self.date)
+
         return {
-            'dump': DOAJDump(date=self.date),
+            'dump': dump,
             'blacklist': DOAJIdentifierBlacklist(date=self.date),
         }
 
-    @timed
     def run(self):
+        if self.format == "doaj":
+            self.run_doaj()
+        elif self.format == "doaj-api":
+            self.run_doaj_api()
+        else:
+            raise ValueError("format must be: doaj or doaj-api")
+
+    @timed
+    def run_doaj(self):
+        """
+        XXX: Deprecated elasticsearch export. Switch to API harvest soon.
+        """
         identifier_blacklist = load_set_from_target(
             self.input().get('blacklist'))
         excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
@@ -243,6 +262,28 @@ class DOAJFiltered(DOAJTask):
                     if record['_source']['id'] in identifier_blacklist:
                         continue
                     for issn in record["_source"]["index"]["issn"]:
+                        issn = issn.replace("-", "").strip()
+                        if issn in excludes:
+                            skip = True
+                            break
+                    if skip:
+                        continue
+                    output.write(line)
+
+    @timed
+    def run_doaj_api(self):
+        identifier_blacklist = load_set_from_target(
+            self.input().get('blacklist'))
+        excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
+                                      func=lambda line: line.replace("-", ""))
+
+        with self.output().open('w') as output:
+            with self.input().get('dump').open() as handle:
+                for line in handle:
+                    record, skip = json.loads(line), False
+                    if record['id'] in identifier_blacklist:
+                        continue
+                    for issn in record["bibjson"]["journal"]["issns"]:
                         issn = issn.replace("-", "").strip()
                         if issn in excludes:
                             skip = True
@@ -267,7 +308,7 @@ class DOAJIntermediateSchema(DOAJTask):
 
     def requires(self):
         return {'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
-                'input': DOAJFiltered(date=self.date)}
+                'input': DOAJFiltered(date=self.date, format=self.format)}
 
     @timed
     def run(self):
