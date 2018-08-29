@@ -24,6 +24,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
+Refs #13842.
 
 Mediathekviewweb (https://mediathekviewweb.de/) is a German media archival
 project.  Its archive can currently be found at
@@ -56,21 +57,24 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
+def yesterday():
+    """
+    Refs: #13842, #note-30.
+    """
+    return datetime.date.today() - datetime.timedelta(1)
+
 class MVWTask(DefaultTask):
     """
     Media view web.
     """
     TAG = '169'
 
-    # Fix a single date.
-    DATE = datetime.date(2018, 8, 1)
-
 
 class MVWDownload(MVWTask):
     """
     Download file list for a given date.
     """
-    date = luigi.DateParameter(default=MVWTask.DATE)
+    date = luigi.DateParameter(default=yesterday())
 
     def run(self):
         url = "%s/%04d/%02d/%s-filme.xz" % (self.config.get("mediathekviewweb", "archive"),
@@ -85,11 +89,18 @@ class MVWDownload(MVWTask):
 class MVWMARC(MVWTask):
     """
     Convert to a MARC via script.
+
+    Note: The MARC file for today will request the download for yesterday.
+
+        $ taskdeps MVWMARC
+          └─ MVWMARC(date=2018-08-29)
+                └─ MVWDownload(date=2018-08-28)
+
     """
-    date = luigi.DateParameter(default=MVWTask.DATE)
+    date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return MVWDownload(date=self.date)
+        return MVWDownload(date=self.date - datetime.timedelta(1))
 
     def run(self):
         output = shellout("python {script} <(xz -dc {input}) {output}",
@@ -98,4 +109,5 @@ class MVWMARC(MVWTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="mrc"))
+        return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
+
