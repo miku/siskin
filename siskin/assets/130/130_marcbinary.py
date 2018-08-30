@@ -82,6 +82,7 @@ for record in records:
     f001 = ""
     f007 = ""
     f020a = ""
+    f022a = ""
     f041a = ""
     f100a = ""
     f100e = ""
@@ -130,6 +131,16 @@ for record in records:
                     f020a = regexp.group(1)
                 else:
                     print("Die ISBN konnte nicht bereinigt werden: " + f020a)
+
+        # ISSN
+        if f022a == "":
+            f022a = get_field("542")
+            if f022a != "":
+                regexp = re.search("\s?([\d-]+)\s?", f022a)
+                if regexp:
+                    f022a = regexp.group(1)
+                else:
+                    print("Die ISSN konnte nicht bereinigt werden: " + f022a)
 
         # Sprache
         if f041a == "":
