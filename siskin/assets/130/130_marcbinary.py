@@ -42,17 +42,18 @@ def get_subfield(tag, subfield):
         return ""
 
 def check_swb_isbn(isbn):
-    req = requests.get("https://index.ub.uni-leipzig.de/solr/biblio/select?q=source_id:0+institution:DE-105+isbn:%s&wt=csv&fl=id" % isbn)
+    req = requests.get("%s?q=source_id:0+institution:DE-105+isbn:%s&wt=csv&fl=id" % (servername, isbn))
     x =  req.text
     return len(x)
 
 def check_swb_issn(issn):
-    req = requests.get("https://index.ub.uni-leipzig.de/solr/biblio/select?q=source_id:0+institution:DE-105+issn:%s&wt=csv&fl=id" % issn)
+    req = requests.get("%s?q=source_id:0+institution:DE-105+issn:%s&wt=csv&fl=id" % (servername, issn))
     x =  req.text
     return len(x)
 
 inputfilename = "130_input.xml"
 outputfilename = "130_output.mrc"
+servername = "https://index.ub.uni-leipzig.de/solr/biblio/select"
 
 hierarchymap = collections.defaultdict(list)
 
@@ -75,13 +76,10 @@ with open(inputfilename, "r") as inputfile:
         if f010 != "" and f089 != "":
             f010 = f010.lstrip("0")
             hierarchymap[f010].append(f089)
-    
-    #print(hierarchymap)
+      
 
-
-
-if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+if len(sys.argv) == 4:
+    inputfilename, outputfilename, servername = sys.argv[1:]
 
 inputfile = open(inputfilename, "r")    
 outputfile = open(outputfilename, "wb")
