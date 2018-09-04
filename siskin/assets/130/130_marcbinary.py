@@ -46,8 +46,11 @@ def check_swb_isbn(isbn):
     x =  req.text
     return len(x)
 
-def check_swb_issn(issn):
-    req = requests.get("%s?q=source_id:0+institution:DE-105+issn:%s&wt=csv&fl=id" % (servername, issn))
+def check_swb_issn(issn, title):
+    req = requests.get("%s?q=source_id:0+institution:DE-105+issn:%s+title_short=%s&wt=csv&fl=id" % (servername, issn, title))
+    f = "%s?q=source_id:0+institution:DE-105+issn:%s+title_short=%s&wt=csv&fl=id" % (servername, issn, title)
+    print(f)
+    sys.exit()
     x =  req.text
     return len(x)
 
@@ -325,7 +328,7 @@ for record in records:
             continue
 
     if f022a != "":
-        x = check_swb_issn(f022a)
+        x = check_swb_issn(f022a, f245a)
         if x > 3:
             continue
 
