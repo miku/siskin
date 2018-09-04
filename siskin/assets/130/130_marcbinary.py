@@ -47,7 +47,8 @@ def check_swb_isbn(isbn):
     return len(x)
 
 def check_swb_issn(issn, title):
-    req = requests.get("%s?q=source_id:0+institution:DE-105+issn:%s+title_short=%s&wt=csv&fl=id" % (servername, issn, title))
+
+    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' % (servername, issn, title))    
     x =  req.text
     return len(x)
 
