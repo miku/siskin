@@ -226,10 +226,22 @@ for filename in filenames:
         marcrecord.add("245", subfields=f245)
         
         # Erscheinungsvermerk
-        f260a = get_datafield("410", "a")       
-        f260b = get_datafield("412", "a")      
+        f260a = get_datafield("410", "a")
+        if isinstance(f260a, list):
+            f260a = ""
+        f260b = get_datafield("412", "a")
+        if isinstance(f260b, list):
+            f260b = ""   
         f260b = remove_brackets(f260b)
         f260c = get_datafield("425", "a")
+        if isinstance(f260c, list):
+            f260c = ""
+        if f260a != "" and f260b != "":
+            f260b = " : " + f260b
+        if f260a != "" and f260b == "" and f260c != "":
+            f260a = f260a + ", "        
+        if f260b != "" and f260c != "":
+            f260b = f260b + ", "
         f260 = ["a", f260a, "b", f260b, "c", f260c]
         marcrecord.add("260", subfields=f260)
 
