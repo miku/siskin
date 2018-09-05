@@ -164,10 +164,11 @@ for filename in filenames:
         format = get_datafield("433", "a")
         format = str(format)
         isbn = get_datafield("540", "a")
+        isbn = len(isbn)
         regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
         if ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
-                           or "X," in format or "Bde." in format or ": graph" in format) or isbn != "":
-            format = "Buch"
+                           or "X," in format or "Bde." in format or ": graph" in format) or isbn > 0:
+            format = "Buch"        
         elif "CD" in format:
             format = "CD"
         elif "DVD" in format:
