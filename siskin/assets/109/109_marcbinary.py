@@ -128,6 +128,11 @@ def get_field_935c(format="Buch"):
         return ""
     return formatmap[format]["935c"]
 
+def remove_brackets(field):
+    if isinstance(field, list) and len(field) == 0:
+        field = ""
+    return field.replace("<<", "").replace(">>", "")
+
 
 inputfilename1 = "109_input1.tar.gz"
 inputfilename2 = "109_input2.tar.gz"
@@ -179,7 +184,7 @@ for filename in filenames:
                                  or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
             format = "Objekt"
         else:
-            print("unbekannt:", format, "Default = Sonstiges")
+            #print("unbekannt:", format, "Default = Sonstiges")
             format = "Sonstiges"
 
         # Leader
@@ -205,45 +210,53 @@ for filename in filenames:
         marcrecord.add("041", a=f041a)
 
         # 1. Urheber
-        f100a = get_datafield("100", "a")
+        f100a = get_datafield("100", "a")        
+        f100a = remove_brackets(f100a)
         marcrecord.add("100", a=f100a)    
         
         # Haupttitel & Verantwortlichenangabe
         f245a = get_datafield("331", "a")
-        f245c = get_datafield("359", "a")
-        f245 = ["a", f245a, "c", f245c]
-        marcrecord.add("245", subfields=f245)
         if not f245a:
             #print(f001, file=sys.stderr)
             continue
-
+        f245a = remove_brackets(f245a)
+        f245c = get_datafield("359", "a")
+        f245 = ["a", f245a, "c", f245c]
+        marcrecord.add("245", subfields=f245)
+        
         # Erscheinungsvermerk
-        f260a = get_datafield("410", "a")
-        f260b = get_datafield("412", "a")
+        f260a = get_datafield("410", "a")       
+        f260b = get_datafield("412", "a")      
+        f260b = remove_brackets(f260b)
         f260c = get_datafield("425", "a")
         f260 = ["a", f260a, "b", f260b, "c", f260c]
         marcrecord.add("260", subfields=f260)
 
         # Umfangsangabe
-        f300a = get_datafield("433", "a")
+        f300a = get_datafield("433", "a")       
+        f300a = remove_brackets(f300a)
         f300b = get_datafield("434", "a")
         f300 = ["a", f300a, "b", f300b]
         marcrecord.add("300", subfields=f300)       
 
         for f650a in set(get_datafield("710", "a", all=True)):
+            f650a = remove_brackets(f650a)
             marcrecord.add("650", a=f650a)
 
         for f650a in set(get_datafield("711", "a", all=True)):
+            f650a = remove_brackets(f650a)
             marcrecord.add("650", a=f650a)
 
         # weitere Urheber
         for tag in range(101, 200):
-            f700a = get_datafield(str(tag), "a")
+            f700a = get_datafield(str(tag), "a")           
+            f700a = remove_brackets(f700a)
             marcrecord.add("700", a=f700a)
 
         # weitere Körperschaften
         for tag in range(200, 300):
-            f710a = get_datafield(str(tag), "a")
+            f710a = get_datafield(str(tag), "a")           
+            f710a = remove_brackets(f710a)
             marcrecord.add("710", a=f710a)
 
         # Format
