@@ -163,9 +163,10 @@ for filename in filenames:
         # Format
         format = get_datafield("433", "a")
         format = str(format)
+        isbn = get_datafield("540", "a")
         regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
         if ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
-                           or "X," in format or "Bde." in format or ": graph" in format):
+                           or "X," in format or "Bde." in format or ": graph" in format) or isbn != "":
             format = "Buch"
         elif "CD" in format:
             format = "CD"
@@ -184,8 +185,7 @@ for filename in filenames:
                                  or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
             format = "Objekt"
         else:
-            #print("unbekannt:", format, "Default = Sonstiges")
-            format = "Sonstiges"
+            continue
 
         # Leader
         leader = get_leader(format=format)
