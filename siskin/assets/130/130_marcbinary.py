@@ -33,9 +33,9 @@ def get_field(tag):
     else:
         return ""
 
-def get_subfield(tag, subfield):  
-    regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)   
-    if regexp:        
+def get_subfield(tag, subfield):
+    regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)
+    if regexp:
         _field = regexp.group(1)
         return _field
     else:
@@ -48,7 +48,7 @@ def check_swb_isbn(isbn):
 
 def check_swb_issn(issn, title):
 
-    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' % (servername, issn, title))    
+    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' % (servername, issn, title))
     x =  req.text
     return len(x)
 
@@ -64,11 +64,11 @@ with open(inputfilename, "r") as inputfile:
     records = records.split("</datensatz>")
 
     for record in records:
-        
+
         f010 = ""
         f089 = ""
 
-        record = record.replace("\n", "")            
+        record = record.replace("\n", "")
         pattern = """<feld nr="010" ind=" ">(.*?)</feld>.*?nr="089" ind=" ">(.*?)</feld>"""
         regexp = re.search(pattern, record)
         if regexp:
@@ -122,7 +122,7 @@ for record in records:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     fields = re.split("(</feld>)", record)
-    
+
     for field in fields:
 
         field = field.replace("\n", "")
@@ -131,7 +131,7 @@ for record in records:
 
         # Identfikator
         if f001 == "":
-            f001 = get_field("001")     
+            f001 = get_field("001")
 
         # ISBN
         if f020a == "":
@@ -139,7 +139,7 @@ for record in records:
             if f020a != "":
                 regexp = re.search("\s?([\d-]+)\s?", f020a)
                 if regexp:
-                    f020a = regexp.group(1)                   
+                    f020a = regexp.group(1)
                 else:
                     print("Die ISBN konnte nicht bereinigt werden: " + f020a)
 
@@ -149,10 +149,10 @@ for record in records:
             if f022a != "":
                 regexp = re.search("\s?([\d-]+)\s?", f022a)
                 if regexp:
-                    f022a = regexp.group(1)                    
+                    f022a = regexp.group(1)
                 else:
                     print("Die ISSN konnte nicht bereinigt werden: " + f022a)
-     
+
         # Sprache
         if f041a == "":
             f041a = get_field("037")
@@ -161,10 +161,10 @@ for record in records:
         if f100a == "":
             f100a = get_field("100")
             if f100a != "":
-                regexp = re.search(".\s¬(\[.*\])", f100a)
+                regexp = re.search(u".\s¬(\[.*\])", f100a)
                 if regexp:
                     f100e = regexp.group(1)
-                    f100a = re.sub(".\s¬\[.*\]¬", "", f100a) 
+                    f100a = re.sub(u".\s¬\[.*\]¬", "", f100a)
 
         # 1. Körperschaft
         if f110a == "":
@@ -222,7 +222,7 @@ for record in records:
         if f300c == "":
             f300c = get_field("435")
             if f300c != "":
-                f300c = " ; " + f300c        
+                f300c = " ; " + f300c
 
         # Schlagwörter
         if f650a == "":
@@ -235,7 +235,7 @@ for record in records:
         regexp = re.search('nr="1\d\d"', field)
         if regexp:
             for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
-                f700a = get_field(i)               
+                f700a = get_field(i)
                 if f700a != "":
                     regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
                     if not regexp:
@@ -244,13 +244,13 @@ for record in records:
                             f700e = regexp.group(1)
                             f700a = re.sub(".\s¬\[.*\]¬", "", f700a)
                         persons.append(f700a)
-                        break                    
+                        break
 
         # weitere Körperschaften
         regexp = re.search('nr="2\d\d"', field)
         if regexp:
             for i in range(201, 299):
-                f710a = get_field(i)               
+                f710a = get_field(i)
                 if f710a != "":
                     regexp = re.search("^\d+", f710a)
                     if not regexp:
@@ -259,20 +259,20 @@ for record in records:
 
         # Link zum Datensatz
         if f856u == "":
-            f856u = get_subfield("655", "u")       
-           
-        #Bestandsnachweis (866a)       
+            f856u = get_subfield("655", "u")
+
+        #Bestandsnachweis (866a)
         f866a = f001.lstrip("0")
-        f866a = hierarchymap.get(f866a, "")    
+        f866a = hierarchymap.get(f866a, "")
 
         if format1 == "":
             format1 = get_field("052")
-        
+
         if format2 == "":
             format2 = get_field("050")
-        
+
     if format1 != "" or format2 != "":
-        format = format1 or format2        
+        format = format1 or format2
     else:
         format = "a|a|||||||||||"
 
@@ -305,13 +305,13 @@ for record in records:
         f007 = "v"
         f008 = ""
         f935b = "vika"
-        f935c = "vide"    
+        f935c = "vide"
     elif formatmap.get(format) == "Datenträger":
         leader = "     cgm  22        4500"
         f007 = "v"
         f008 = ""
         f935b = "soerd"
-        f935c = ""    
+        f935c = ""
     else:
         print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
         leader = "     nam  22        4500"
@@ -330,7 +330,7 @@ for record in records:
         if x > 3:
             continue
 
-    if f245a == "" or "Arkady" in f245a: # einzelne Zeitschriftenhefte und die fehlerhaften Arkady-Records werden übersprungen 
+    if f245a == "" or "Arkady" in f245a: # einzelne Zeitschriftenhefte und die fehlerhaften Arkady-Records werden übersprungen
         continue
 
     assert(len(leader) == 24)
