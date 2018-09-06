@@ -38,6 +38,7 @@ Configuration:
 
 input = /path/to/mab (ask RS)
 Mab2Mabxml.jar = /path/to/local/copy.jar
+index-url = http://localhost:8983/solr/biblio/select
 
 """
 
@@ -105,9 +106,10 @@ class VDEHMARC(VDEHTask):
         return VDEHRemoveIllegalChars()
 
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""python {script} {input} {output} {server}""",
                           script=self.assets("130/130_marcbinary.py"),
-                          input=self.input().path)
+                          input=self.input().path,
+                          server=self.config.get('vdeh', 'index-url'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
