@@ -12,16 +12,16 @@ import collections
 
 
 formatmap = {
-    "p||||||z|||||||": "Zeitschrift",   
-    "z||||||z|||||||": "Zeitung",
-    "r||||||z|||||||": "Reihe",
-    "r||||||||||||||": "Reihe",
-    "a|a|||||||||||": "Monografie",
-    "a|||||||||||||": "Monografie",
-    "a|a|||||||": "Monografie",
-    "|||||ca||||||": "Videokassette",
-    "a|||||||g|||||": "Datenträger",
-    "||||||||g|": "Datenträger"
+    "p||||||z|||||||": u"Zeitschrift",
+    "z||||||z|||||||": u"Zeitung",
+    "r||||||z|||||||": u"Reihe",
+    "r||||||||||||||": u"Reihe",
+    "a|a|||||||||||": u"Monografie",
+    "a|||||||||||||": u"Monografie",
+    "a|a|||||||": u"Monografie",
+    "|||||ca||||||": u"Videokassette",
+    "a|||||||g|||||": u"Datenträger",
+    "||||||||g|": u"Datenträger"
 }
 
 
