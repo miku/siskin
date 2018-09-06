@@ -29,7 +29,7 @@ def get_field(tag):
     regexp = re.search('<.*?\snr="%s".*>(.*)$' % tag, field)
     if regexp:
         _field = regexp.group(1)
-        return _field
+        return _field.decode('utf-8')
     else:
         return ""
 
