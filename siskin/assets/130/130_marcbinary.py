@@ -56,6 +56,9 @@ inputfilename = "130_input.xml"
 outputfilename = "130_output.mrc"
 servername = "https://index.ub.uni-leipzig.de/solr/biblio/select"
 
+if len(sys.argv) == 4:
+    inputfilename, outputfilename, servername = sys.argv[1:]
+
 hierarchymap = collections.defaultdict(list)
 
 with open(inputfilename, "r") as inputfile:
@@ -77,14 +80,10 @@ with open(inputfilename, "r") as inputfile:
         if f010 != "" and f089 != "":
             f010 = f010.lstrip("0")
             hierarchymap[f010].append(f089)
-      
 
-if len(sys.argv) == 4:
-    inputfilename, outputfilename, servername = sys.argv[1:]
-
-inputfile = open(inputfilename, "r")    
+inputfile = open(inputfilename, "r")
 outputfile = open(outputfilename, "wb")
- 
+
 records = inputfile.read()
 records = records.split("</datensatz>")
 
