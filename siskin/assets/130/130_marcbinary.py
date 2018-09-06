@@ -343,12 +343,12 @@ for record in records:
     marcrecord.add("100", a=f100a, e=f100e)
     marcrecord.add("110", a=f110a)
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
-    marcrecord.add("245", subfields=titleparts)    
+    marcrecord.add("245", subfields=titleparts)
     marcrecord.add("250", a=f250a)
     publisher = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
-    marcrecord.add("300", subfields=physicaldescription)   
+    marcrecord.add("300", subfields=physicaldescription)
     for subject in subjects:
         marcrecord.add("650", a=subject)
     for person in persons:
@@ -357,11 +357,11 @@ for record in records:
         marcrecord.add("710", a=corporate)
     if f856u != "":
         marcrecord.add("856", q="text/html", u=f856u)
-    f866a = "; ".join(f866a)    
+    f866a = "; ".join(f866a)
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
-  
+
     outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
