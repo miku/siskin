@@ -42,15 +42,18 @@ def get_subfield(tag, subfield):
         return ""
 
 def check_swb_isbn(isbn):
+    """
+    The length of the response can indicate, whether records exist.
+    """
     req = requests.get("%s?q=source_id:0+institution:DE-105+isbn:%s&wt=csv&fl=id" % (servername, isbn))
-    x =  req.text
-    return len(x)
+    return len(req.text)
 
 def check_swb_issn(issn, title):
-
+    """
+    The length of the response can indicate, whether records exist.
+    """
     req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' % (servername, issn, title))
-    x =  req.text
-    return len(x)
+    return len(req.text)
 
 inputfilename = "130_input.xml"
 outputfilename = "130_output.mrc"
