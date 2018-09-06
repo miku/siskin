@@ -37,7 +37,7 @@ def get_subfield(tag, subfield):
     regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)
     if regexp:
         _field = regexp.group(1)
-        return _field
+        return _field.decode('utf-8')
     else:
         return ""
 
