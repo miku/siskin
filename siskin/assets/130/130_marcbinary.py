@@ -360,7 +360,7 @@ for record in records:
         marcrecord.add("710", a=corporate)
     if f856u != "":
         marcrecord.add("856", q="text/html", u=f856u)
-    f866a = u"; ".join(f866a)
+    f866a = "; ".join(f866a).decode('utf-8')
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")
