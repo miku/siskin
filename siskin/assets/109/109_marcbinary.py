@@ -275,6 +275,13 @@ for filename in filenames:
             f710a = remove_brackets(f710a)
             marcrecord.add("710", a=f710a)
 
+        f856u = get_datafield("655", "u")
+        f8563 = get_datafield("655", "x")
+        if len(f8563) == 0:
+            f8563 = "zusätzliche Informationen"
+        if "http" in f856u:
+            marcrecord.add("856", q="text/html", _3=f8563, u=f856u)
+
         # Format
         f935b = get_field_935b(format=format)
         f935c = get_field_935c(format=format)
