@@ -250,7 +250,10 @@ for filename in filenames:
         f300a = remove_brackets(f300a)
         f300b = get_datafield("434", "a")
         f300 = ["a", f300a, "b", f300b]
-        marcrecord.add("300", subfields=f300)       
+        marcrecord.add("300", subfields=f300)
+
+        f490a = get_datafield("451", "a")
+        marcrecord.add("490", a=f490a)   
 
         for f650a in set(get_datafield("710", "a", all=True)):
             f650a = remove_brackets(f650a)
