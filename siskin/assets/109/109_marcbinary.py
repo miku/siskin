@@ -252,9 +252,17 @@ for filename in filenames:
         f300 = ["a", f300a, "b", f300b]
         marcrecord.add("300", subfields=f300)
 
-        f490a = get_datafield("451", "a")
-        marcrecord.add("490", a=f490a)   
-
+        f490 = get_datafield("451", "a")
+        if len(f490) > 0:
+            f490 = f490.split(" ; ")
+            if len(f490) == 2:
+                f490a = f490[0]
+                f490v = f490[1]
+            else:
+                f490a = f490
+                f490v = ""
+            marcrecord.add("490", a=f490a, v=f490v)
+    
         for f650a in set(get_datafield("710", "a", all=True)):
             f650a = remove_brackets(f650a)
             marcrecord.add("650", a=f650a)
