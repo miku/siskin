@@ -152,10 +152,18 @@ for filename in filenames:
         if i == 1000:
             #break
             pass
+
         xmlrecord = inputfile.extractfile(record)
         xmlrecord = xmlrecord.read()
         xmlrecord = xmltodict.parse(xmlrecord)
         datafield = xmlrecord["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
+
+        # Records ohne Titel werden übersprungen
+        # child-Records werden übersprungen, da in Quelle parent-Records fehlen 
+        title = get_datafield("331", "a")
+        child = get_datafield("010", "a")
+        if child or not title:
+            continue
 
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
@@ -216,10 +224,7 @@ for filename in filenames:
         marcrecord.add("100", a=f100a)    
         
         # Haupttitel & Verantwortlichenangabe
-        f245a = get_datafield("331", "a")
-        if not f245a:
-            #print(f001, file=sys.stderr)
-            continue
+        f245a = get_datafield("331", "a")     
         f245a = remove_brackets(f245a)
         f245c = get_datafield("359", "a")
         f245 = ["a", f245a, "c", f245c]
