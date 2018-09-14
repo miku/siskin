@@ -275,6 +275,7 @@ for filename in filenames:
         # Haupttitel & Verantwortlichenangabe      
         f245a = remove_brackets(f245a)
         f245c = get_datafield("359", "a")
+        f245p = remove_brackets(f245p)
         f245 = ["a", f245a, "c", f245c, "p", f245p]
         marcrecord.add("245", subfields=f245)
         
