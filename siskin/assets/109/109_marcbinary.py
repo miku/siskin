@@ -82,6 +82,12 @@ formatmap = {
         "007": "zz",
         "935b": "gegenst"
     },
+    "Zeitschrift":
+    {
+        "leader": "nas",
+        "007": "tu",
+        "008": "                     p"
+    },
     "Sonstiges":
     {
         "leader": "npa",
@@ -118,6 +124,11 @@ def get_leader(format="Buch"):
 def get_field_007(format="Buch"):
     return formatmap[format]["007"]
 
+def get_field_008(format="Zeitschrift"):
+    if "008" not in formatmap[format]:
+        return ""
+    return formatmap[format]["008"]
+
 def get_field_935b(format="Buch"):
     if "935b" not in formatmap[format]:
         return ""
@@ -148,31 +159,63 @@ for filename in filenames:
     inputfile = tarfile.open(filename, "r:gz")
     records = inputfile.getmembers()
 
-    for i, record in enumerate(records):
-        if i == 1000:
-            #break
-            pass
+    parent_title = {}
 
+    for record in records:
+       
         xmlrecord = inputfile.extractfile(record)
         xmlrecord = xmlrecord.read()
         xmlrecord = xmltodict.parse(xmlrecord)
         datafield = xmlrecord["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
 
-        # Records ohne Titel werden übersprungen
-        # child-Records werden übersprungen, da in Quelle parent-Records fehlen 
+        parent = get_datafield("010", "a")      
+        if len(parent) > 0:
+            parent_title[parent] = ""
+
+    for record in records:
+       
+        xmlrecord = inputfile.extractfile(record)
+        xmlrecord = xmlrecord.read()
+        xmlrecord = xmltodict.parse(xmlrecord)
+        datafield = xmlrecord["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
+
+        parent = get_datafield("001", "a")
         title = get_datafield("331", "a")
-        child = get_datafield("010", "a")
-        if child or not title:
-            continue
+
+        if parent in parent_title and len(title) > 0:
+            parent_title[parent] = title        
+
+    for i, record in enumerate(records):
+                   
+        xmlrecord = inputfile.extractfile(record)
+        xmlrecord = xmlrecord.read()
+        xmlrecord = xmltodict.parse(xmlrecord)
+        datafield = xmlrecord["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
 
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
+        
+        parent = get_datafield("010", "a")
+        title = get_datafield("331", "a")        
+
+        if len(title) > 0 and len(parent) > 0 and parent in parent_title:
+            f245a = parent_title[parent]
+            if f245a == "":
+                continue
+            f245p = title           
+        elif len(title) > 0 :
+            f245a = title
+            f245p = ""          
+        else:
+            continue
 
         # Format
         format = get_datafield("433", "a")
         format = str(format)
         isbn = get_datafield("540", "a")
         isbn = len(isbn)
+        parent = get_datafield("010", "a")
+        parent = len(parent)
         regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
         if ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
                            or "X," in format or "Bde." in format or ": graph" in format) or isbn > 0:
@@ -193,6 +236,8 @@ for filename in filenames:
                                  or "Teile" in format or "USB" in format or "Schachtel" in format or "Schautafel" in format
                                  or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
             format = "Objekt"
+        elif parent > 0 and isbn == 0:
+            format = "Zeitschrift"
         else:
             continue
 
@@ -207,6 +252,10 @@ for filename in filenames:
         # 007
         f007 = get_field_007(format=format)
         marcrecord.add("007", data=f007)
+
+         # 008
+        f008 = get_field_008(format=format)
+        marcrecord.add("008", data=f008)
 
         # ISBN
         f020a = get_datafield("540", "a")
@@ -223,11 +272,10 @@ for filename in filenames:
         f100a = remove_brackets(f100a)
         marcrecord.add("100", a=f100a)    
         
-        # Haupttitel & Verantwortlichenangabe
-        f245a = get_datafield("331", "a")     
+        # Haupttitel & Verantwortlichenangabe      
         f245a = remove_brackets(f245a)
         f245c = get_datafield("359", "a")
-        f245 = ["a", f245a, "c", f245c]
+        f245 = ["a", f245a, "c", f245c, "p", f245p]
         marcrecord.add("245", subfields=f245)
         
         # Erscheinungsvermerk
