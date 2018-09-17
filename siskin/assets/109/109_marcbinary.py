@@ -13,7 +13,7 @@ import xmltodict
 import tarfile
 
 
-formatmap = {
+formatmap = {    
     "Buch":
     {
         "leader": "cam",
@@ -119,7 +119,10 @@ def get_datafield(tag, code, all=False):
     return values
 
 def get_leader(format="Buch"):
-    return "     %s  22        4500" % formatmap[format]["leader"]
+    if format != "Mehrbänder":
+        return "     %s  22        4500" % formatmap[format]["leader"]
+    else:
+        return "00000cam00000000000a4500"
 
 def get_field_007(format="Buch"):
     return formatmap[format]["007"]
@@ -196,27 +199,29 @@ for filename in filenames:
         marcrecord.strict = False
         
         parent = get_datafield("010", "a")
-        title = get_datafield("331", "a")        
+        title = get_datafield("331", "a")
 
         if len(title) > 0 and len(parent) > 0 and parent in parent_title:
             f245a = parent_title[parent]
             if f245a == "":
                 continue
-            f245p = title           
+            f245p = title
+            f773w = "(DE-576)" + parent
         elif len(title) > 0 :
             f245a = title
-            f245p = ""          
+            f245p = ""         
+            f773w = ""
         else:
             continue
 
-        # Format
+        # Format     
         format = get_datafield("433", "a")
         format = str(format)
         isbn = get_datafield("540", "a")
         isbn = len(isbn)
         parent = get_datafield("010", "a")
         parent = len(parent)
-        regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
+        regexp = re.search("S\.\s\d+\s?-\s?\d+", format)      
         if ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
                            or "X," in format or "Bde." in format or ": graph" in format) or isbn > 0:
             format = "Buch"        
@@ -242,11 +247,16 @@ for filename in filenames:
             continue
 
         # Leader
-        leader = get_leader(format=format)
+        f001 = get_datafield("001", "a")
+        if f001 in parent_title:          
+            leader = get_leader(format="Mehrbänder")
+            print(leader)
+        else:
+            leader = get_leader(format=format)       
         marcrecord.leader = leader
+      
 
         # Identifier
-        f001 = get_datafield("001", "a")
         marcrecord.add("001", data="finc-109-" + f001)
 
         # 007
@@ -337,6 +347,10 @@ for filename in filenames:
             f710a = remove_brackets(f710a)
             marcrecord.add("710", a=f710a)
 
+        # übergeordnetes Werk
+        marcrecord.add("773", w=f773w)
+
+        # Links
         f856u = get_datafield("655", "u")
         f8563 = get_datafield("655", "x")
         if len(f8563) == 0:
@@ -344,7 +358,7 @@ for filename in filenames:
         if "http" in f856u:
             marcrecord.add("856", q="text/html", _3=f8563, u=f856u)
 
-        # Format
+        # Format      
         f935b = get_field_935b(format=format)
         f935c = get_field_935c(format=format)
         marcrecord.add("935", b=f935b, c=f935c)
