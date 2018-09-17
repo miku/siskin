@@ -1,22 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
-from builtins import *
-
-import marcx
 import xlrd
+import marcx
 
-# Default input and output.
-inputfilename = "99 Media Perspektiven Aug 2017.xlsx"
-outputfilename = "99_output.mrc"
+outputfile = open("99_output.mrc", "wb")
 
-if len(sys.argv) == 3:
-	inputfilename, outputfilename = sys.argv[1:]
-
-outputfile = open(outputfilename, "wb")
-
-workbook = xlrd.open_workbook(inputfilename)
-sheet = workbook.sheet_by_name("Tabelle3")
+workbook = xlrd.open_workbook("99_input.xlsx")
+sheet = workbook.sheet_by_name("SID 99 Sep17")
 
 for i, row in enumerate(range(sheet.nrows), start=0):
 	
@@ -72,8 +63,10 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	
 	# Seitenzahl
 	f300a = csv_record[11]
-	f300a = str(f300a).rstrip(".0")
-	marc_record.add("300", a=f300a)
+	if f300a != "":
+		f300a = str(f300a).rstrip(".0")
+		f300a = f300a + " S."
+		marc_record.add("300", a=f300a)
 
 	# weitere Schöpfer
 	f700a = csv_record[0]
