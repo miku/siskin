@@ -209,7 +209,7 @@ for record in tqdm.tqdm(records.values(), total=len(records)):
         marcrecord.add("856", q="text/html", _3="Link zu Video %s (HD)" % i, u=url)
 
     marcrecord.add("935", b="cofz", c="vide")
-    subfields = ["a", f001, "b", "169", "c", "MediathekViewWeb"]
+    subfields = ["a", f001, "b", "169", "c", "sid-169-col-mediathek"]
     marcrecord.add("980", subfields=subfields)
 
     outputfile.write(marcrecord.as_marc())
