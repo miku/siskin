@@ -493,17 +493,10 @@ for row in rows:
 
     if url != "":
         url = url.split("||")
-        if len(url) == 1:
-            url = url[0]
-            f856_u = url
-        else:
-            items = len(url)
+        f856_u = set(url)
+        if len(f856_u) > 1:           
+            items = len(f856_u)
             f520_a = "Contains a collection of %s Pictures." % items
-            f856_u = []
-            for url_part in url:
-                f856_u.append(url_part)
-    else:
-        f856_u = ""
 
     #f935_b = get_field_935b(format=format)
     f980_a = identifier
@@ -537,9 +530,9 @@ for row in rows:
     for value in f700_a:
         marcrecord.add("700", a=value)
 
-    if isinstance(f856_u, list):
+    if len(f856_u) > 1:
         for i, url in enumerate(f856_u, start=1):
-            marcrecord.add("856", q="text/html", _3="Picture %s" % i, u=url)
+            marcrecord.add("856", q="text/html", _3="Picture %s" % i, u=url)        
     else:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856_u)
 
