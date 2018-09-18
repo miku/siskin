@@ -443,7 +443,7 @@ for row in rows:
         if match:
             f260_c = match.group(1)
             if publisher != "":
-                f260_c = ", %s" % f260_c
+                f260_b = f260_b + ", "
         else:
             f260_c = ""
     else:
