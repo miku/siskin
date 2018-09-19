@@ -30,12 +30,12 @@ def clear_format(format):
     return format
 
 def get_leader(format='photograph'):
-    return "     %s  22        450 " % formatmaps[format]["leader"]
+    return "     %s  22        4500" % formatmaps[format]["leader"]
 
-def get_field_008(format='photograph', f041_a="   "):
+def get_field_008(format='photograph', f041_a="   ", f260_c="20uu"):
     if "008" not in formatmaps[format]:
-        return "130227uu20uuuuuuxx uuup%s  c" % f041_a
-    return "130227%s20uuuuuuxx uuup%s  c" % (formatmaps[format]["008"], f041_a)
+        return "130227u%suuuuxx uuup%s  c" % (f260_c, f041_a)
+    return "130227%s%suuuuxx uuup%s  c" % (formatmaps[format]["008"], f260_c, f041_a)
 
 def get_field_935b(format='photograph'):
     if "935b" not in formatmaps[format]:
@@ -507,6 +507,7 @@ for row in rows:
     marcrecord.leader = leader
     marcrecord.add("001", data=f001)  
     marcrecord.add("007", data="cr")
+    f008 = get_field_008(format=format, f041_a=f041_a, f260_c=f260_c)
     marcrecord.add("008", data=f008)
     marcrecord.add("041", a=f041_a)
     marcrecord.add("100", a=f100_a)
