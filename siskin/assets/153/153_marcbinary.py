@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import io
+import os
 import re
 import sys
 import json
@@ -58,168 +59,186 @@ def get_field(tag):
         return ""
 
 
-inputfilename = "153_input.ldj" 
+input_directory = "153"
 outputfilename = "153_output.mrc"
 
 if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+    input_directory, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "r")
 outputfile = open(outputfilename, "wb")
 
-for line in inputfile:
+for root, _, files in os.walk(input_directory):
+    for filename in files:
+        filepath = os.path.join(root, filename)
+        inputfile = io.open(filepath, "r", encoding="utf-8")
 
-    jsonobject = json.loads(line)
-    jsonrecord = jsonobject["metadata"]    
+        for line in inputfile:
 
-    marcrecord = marcx.Record(force_utf8=True)
+            jsonobject = json.loads(line)
 
-    # Leader
-    marcrecord.leader = "     cam  22        4500"
+            try:
+                jsonrecord = jsonobject["metadata"]
+            except:
+                print(filename)
+                continue
 
-    # Identifier
-    try:
-        f001 = jsonrecord["identifier"]       
-    except:
-        continue
-    
-    f001 = f001.encode("utf-8")
-    f001 = base64.b64encode(f001)
-    f001 = f001.decode("ascii")
-    f001 = f001.rstrip("=")
-    marcrecord.add("001", data="finc-153-" + f001)        
-   
-    # Format
-    marcrecord.add("007", data="cr")
+            marcrecord = marcx.Record(force_utf8=True)
 
-    # Urheber
-    f110a = get_field("creator")
-    if f110a != "" and f110a != "Unknown":
-        marcrecord.add("110", a=f110a)
-    
-    # Hauptitel
-    f245a = get_field("title")
-    marcrecord.add("245", a=f245a)
+            # Leader
+            marcrecord.leader = "     cam  22        4500"
 
-    # gestattet leere Felder, solange der Titel und der Identifier vorhanden sind
-    marcrecord.strict = False
+            # Identifier
+            try:
+                f001 = jsonrecord["identifier"]       
+            except:
+                continue
+            
+            f001 = f001.encode("utf-8")
+            f001 = base64.b64encode(f001)
+            f001 = f001.decode("ascii")
+            f001 = f001.rstrip("=")
+            marcrecord.add("001", data="finc-153-" + f001)        
+           
+            # Format
+            marcrecord.add("007", data="cr")
 
-    # Filmstudio
-    f260b = get_field("publisher")        
-  
-    # Erscheinungsjahr
-    f260c = get_field("date")
-    if f260c != "":
-        regexp = re.search("(\d\d\d\d)", f260c)
-        if regexp:
-            f260c = regexp.group(1)
-    
-    # Verlag    
-    if f260b != "" and f260b == f110a:  
-        f260b = ""  # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind
+            # Urheber
+            f110a = get_field("creator")
+            if f110a != "" and f110a != "Unknown":
+                marcrecord.add("110", a=f110a)
+            
+            # Hauptitel
+            f245a = get_field("title")
+            marcrecord.add("245", a=f245a)
 
-    if f260b != "" and f260c != "":
-        f260b = f260b + ", "  # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden   
-    publisher = ["b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=publisher)  
+            # gestattet leere Felder, solange der Titel und der Identifier vorhanden sind
+            marcrecord.strict = False
 
-    # Spielzeit
-    runtime = get_field("runtime")
-   
-    # Bild
-    color_old = get_field("color")
-    if color_old != "":
-        color = colormap.get(color_old, "")
-    else:
-        color = ""
-    if color == "" and color_old != "":
-        print("Die Farbe %s wurde in der Colormap nicht gefunden" % color_old)
-  
-    # Ton
-    sound_old = get_field("sound")
-    if sound_old != "":
-        sound = soundmap.get(sound_old, "")
-    else:
-        sound = ""
-    if sound == "" and sound_old != "":
-        print("Der Sound %s wurde in der Soundmap nicht gefunden" % sound_old)
-   
-    if color != "" and sound != "":
-        f300b = color + " + " + sound
-    elif color != "":
-        f300b = color
-    elif sound != "":
-        f300b = sound
-    else:
-        f300b = ""
+            # Filmstudio
+            f260b = get_field("publisher")        
+          
+            # Erscheinungsjahr
+            f260c = get_field("date")
+            if f260c != "":
+                regexp = re.search("(\d\d\d\d)", f260c)
+                if regexp:
+                    f260c = regexp.group(1)
+            
+            # Verlag    
+            if f260b != "" and f260b == f110a:  
+                f260b = ""  # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind
 
-    if runtime != "":      
-        runtime = runtime.lstrip("00:")
-        runtime = runtime.lstrip("0:")
-        runtime = " (" + runtime
-        if "min." not in runtime:
-            runtime = runtime + " min.)"
-        else:
-            runtime = runtime + ")"
-        f300a = f300b + runtime
-    else:
-        f300a = f300b  
- 
-    marcrecord.add("300", a=f300a)
+            if f260b != "" and f260c != "":
+                f260b = f260b + ", "  # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden   
+            publisher = ["b", f260b, "c", f260c]
+            marcrecord.add("260", subfields=publisher)  
 
-    # Spielzeit (extra MARC-Feld)
-    f306a = get_field("runtime")
-    if f306a != "":
-        f306a = f306a.lstrip("00:")
-        f306a = f306a.lstrip("0:")
-        if "min" not in f306a:
-            f306a = f306a + " min."
-    marcrecord.add("306", a=f306a)   
+            # Spielzeit
+            runtime = get_field("runtime")
+           
+            # Bild
+            color_old = get_field("color")
+            if color_old != "":
+                color = colormap.get(color_old, "")
+            else:
+                color = ""
+            if color == "" and color_old != "":
+                print("Die Farbe %s wurde in der Colormap nicht gefunden" % color_old)
+          
+            # Ton
+            sound_old = get_field("sound")
+            if sound_old != "":
+                sound = soundmap.get(sound_old, "")
+            else:
+                sound = ""
+            if sound == "" and sound_old != "":
+                print("Der Sound %s wurde in der Soundmap nicht gefunden" % sound_old)
+           
+            if color != "" and sound != "":
+                f300b = color + " + " + sound
+            elif color != "":
+                f300b = color
+            elif sound != "":
+                f300b = sound
+            else:
+                f300b = ""
 
-    # Soundformat (extra MARC-Feld)
-    marcrecord.add("344", a=sound)  
-    
-    # Bildformat (extra -MARC-Feld)
-    marcrecord.add("346", a=color)
+            if runtime != "":      
+                runtime = runtime.lstrip("00:")
+                runtime = runtime.lstrip("0:")
+                runtime = " (" + runtime
+                if "min." not in runtime:
+                    runtime = runtime + " min.)"
+                else:
+                    runtime = runtime + ")"
+                f300a = f300b + runtime
+            else:
+                f300a = f300b  
+         
+            marcrecord.add("300", a=f300a)
 
-    # Annotation 
-    f520a = get_field("description")
-    marcrecord.add("520", a=f520a)
+            # Spielzeit (extra MARC-Feld)
+            f306a = get_field("runtime")
+            if f306a != "":
+                f306a = f306a.lstrip("00:")
+                f306a = f306a.lstrip("0:")
+                if "min" not in f306a:
+                    f306a = f306a + " min."
+            marcrecord.add("306", a=f306a)   
 
-    # Schlagwörter
-    subjects = jsonrecord.get("subject", "")    
-    if subjects != "":
-        if isinstance(subjects, list):
-            for subject in subjects:              
-                subject = subject.title()
-                marcrecord.add("650", a=subject)            
-        else:
-            if subjects != "need keyword":
-                subject = subjects.title()             
-                subjects = subject.split(";")
+            # Soundformat (extra MARC-Feld)
+            marcrecord.add("344", a=sound)  
+            
+            # Bildformat (extra -MARC-Feld)
+            marcrecord.add("346", a=color)
+
+            # Annotation 
+            f520a = get_field("description")
+            marcrecord.add("520", a=f520a)
+
+            # Schlagwörter
+            subjects = jsonrecord.get("subject", "")    
+            if subjects != "":
                 if isinstance(subjects, list):
                     for subject in subjects:              
                         subject = subject.title()
-                        marcrecord.add("650", a=subject)
+                        marcrecord.add("650", a=subject)            
                 else:
-                    marcrecord.add("650", a=subject)
+                    if subjects != "need keyword":
+                        subject = subjects.title()             
+                        subjects = subject.split(";")
+                        if isinstance(subjects, list):
+                            for subject in subjects:              
+                                subject = subject.title()
+                                marcrecord.add("650", a=subject)
+                        else:
+                            marcrecord.add("650", a=subject)
 
 
-    # hebt die Erlaubnis für leere Felder wieder auf
-    marcrecord.strict = True         
-    
-    # Link zur Ressource
-   
-    f856u = get_field("identifier")
-    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u="https://archive.org/details/" + f856u)
+            # hebt die Erlaubnis für leere Felder wieder auf
+            marcrecord.strict = True         
+            
+            # Link zur Ressource           
+            f856u = get_field("identifier")
+            marcrecord.add("856", q="text/html", _3="Link zur Ressource", u="https://archive.org/details/" + f856u)
 
-    # Medienform
-    marcrecord.add("935", b="cofz", c="vide")
+            # Medienform
+            marcrecord.add("935", b="cofz", c="vide")
 
-    # Kollektion   
-    marcrecord.add("980", a=f001, b="153", c="Internet Archive / Prelinger")
+            # Kollektion
+            if filename == "prelinger.ldj":
+                f980c = "Internet Archive / Prelinger"
+            elif filename == "classic_cartoons.ldj":
+                f980c = "Internet Archive / Classic Cartoons"
+            elif filename == "feature_films.ldj":
+                f980c = "Internet Archive / Feature Films"
+            elif filename == "more_animation.ldj":
+                f980c = "Internet Archive / More Animation"
+            elif filename == "vintage_cartoons.ldj":
+                f980c = "Internet Archive / Vintage Cartoons"
+            marcrecord.add("980", a=f001, b="153", c=f980c)
 
-    outputfile.write(marcrecord.as_marc())
+            outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
 outputfile.close()
