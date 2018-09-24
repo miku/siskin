@@ -21,13 +21,13 @@ colormap = {
     "color": "Farbe",
     "b&w": "Schwarzweiß",
     "Color": "Farbe",
-    "Mix": "Schwarzweiß / Farbe",  
+    "Mix": "Schwarzweiß / Farbe",
     "B&W (tinded)": "Schwarzweiß (koloriert)",
     "b/w": "Schwarzweiß",
     "c": "Farbe",
     "tinted": "Schwarzweiß (koloriert)",
     "bw": "Schwarzweiß",
-    "C": "Farbe",  
+    "C": "Farbe",
     "B&W/C": "Schwarzweiß / Farbe",
     "tinted B&W": "Schwarzweiß (koloriert)",
     "B&W (tinted)": "Schwarzweiß (koloriert)",
@@ -47,8 +47,8 @@ soundmap = {
     "Yes": "Ton",
     "Sd": "Ton",
     "si": "Stumm",
-    "Si": "Stumm",  
-    "silen": "Stumm",  
+    "Si": "Stumm",
+    "silen": "Stumm",
     "sd": "Ton",
     "SD": "Ton"
 }
@@ -56,7 +56,7 @@ soundmap = {
 
 def get_field(tag):
     try:
-        return jsonrecord[tag]        
+        return jsonrecord[tag]
     except:
         return ""
 
@@ -91,16 +91,16 @@ for root, _, files in os.walk(input_directory):
 
             # Identifier
             try:
-                f001 = jsonrecord["identifier"]       
+                f001 = jsonrecord["identifier"]
             except:
                 continue
-            
+
             f001 = f001.encode("utf-8")
             f001 = base64.b64encode(f001)
             f001 = f001.decode("ascii")
             f001 = f001.rstrip("=")
-            marcrecord.add("001", data="finc-153-" + f001)        
-           
+            marcrecord.add("001", data="finc-153-" + f001)
+
             # Format
             marcrecord.add("007", data="cr")
 
@@ -108,7 +108,7 @@ for root, _, files in os.walk(input_directory):
             f110a = get_field("creator")
             if f110a != "" and f110a != "Unknown":
                 marcrecord.add("110", a=f110a)
-            
+
             # Hauptitel
             f245a = get_field("title")
             marcrecord.add("245", a=f245a)
@@ -117,27 +117,27 @@ for root, _, files in os.walk(input_directory):
             marcrecord.strict = False
 
             # Filmstudio
-            f260b = get_field("publisher")        
-          
+            f260b = get_field("publisher")
+
             # Erscheinungsjahr
             f260c = get_field("date")
             if f260c != "":
                 regexp = re.search("(\d\d\d\d)", f260c)
                 if regexp:
                     f260c = regexp.group(1)
-            
-            # Verlag    
-            if f260b != "" and f260b == f110a:  
+
+            # Verlag
+            if f260b != "" and f260b == f110a:
                 f260b = ""  # verhindert, dass Körperschaft und Verlag nebeneinander im Katalog angezeigt werden, wenn beide identisch sind
 
             if f260b != "" and f260c != "":
-                f260b = f260b + ", "  # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden   
+                f260b = f260b + ", "  # ergänzt das Trennzeichen zwischen Produktionsfirma und Jahr, wenn beides vorhanden
             publisher = ["b", f260b, "c", f260c]
-            marcrecord.add("260", subfields=publisher)  
+            marcrecord.add("260", subfields=publisher)
 
             # Spielzeit
             runtime = get_field("runtime")
-           
+
             # Bild
             color_old = get_field("color")
             if color_old != "":
@@ -165,7 +165,7 @@ for root, _, files in os.walk(input_directory):
             else:
                 f300b = ""
 
-            if runtime != "":      
+            if runtime != "":
                 runtime = runtime.lstrip("00:")
                 runtime = runtime.lstrip("0:")
                 runtime = " (" + runtime
@@ -175,8 +175,8 @@ for root, _, files in os.walk(input_directory):
                     runtime = runtime + ")"
                 f300a = f300b + runtime
             else:
-                f300a = f300b  
-         
+                f300a = f300b
+
             marcrecord.add("300", a=f300a)
 
             # Spielzeit (extra MARC-Feld)
@@ -186,31 +186,31 @@ for root, _, files in os.walk(input_directory):
                 f306a = f306a.lstrip("0:")
                 if "min" not in f306a:
                     f306a = f306a + " min."
-            marcrecord.add("306", a=f306a)   
+            marcrecord.add("306", a=f306a)
 
             # Soundformat (extra MARC-Feld)
-            marcrecord.add("344", a=sound)  
-            
+            marcrecord.add("344", a=sound)
+
             # Bildformat (extra -MARC-Feld)
             marcrecord.add("346", a=color)
 
-            # Annotation 
+            # Annotation
             f520a = get_field("description")
             marcrecord.add("520", a=f520a)
 
             # Schlagwörter
-            subjects = jsonrecord.get("subject", "")    
+            subjects = jsonrecord.get("subject", "")
             if subjects != "":
                 if isinstance(subjects, list):
-                    for subject in subjects:              
+                    for subject in subjects:
                         subject = subject.title()
-                        marcrecord.add("650", a=subject)            
+                        marcrecord.add("650", a=subject)
                 else:
                     if subjects != "need keyword":
-                        subject = subjects.title()             
+                        subject = subjects.title()
                         subjects = subject.split(";")
                         if isinstance(subjects, list):
-                            for subject in subjects:              
+                            for subject in subjects:
                                 subject = subject.title()
                                 marcrecord.add("650", a=subject)
                         else:
@@ -218,9 +218,9 @@ for root, _, files in os.walk(input_directory):
 
 
             # hebt die Erlaubnis für leere Felder wieder auf
-            marcrecord.strict = True         
-            
-            # Link zur Ressource           
+            marcrecord.strict = True
+
+            # Link zur Ressource
             f856u = get_field("identifier")
             marcrecord.add("856", q="text/html", _3="Link zur Ressource", u="https://archive.org/details/" + f856u)
 
