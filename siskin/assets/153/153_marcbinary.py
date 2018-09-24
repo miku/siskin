@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from __future__ import print_function
+
 import io
 import os
 import re
@@ -79,7 +81,7 @@ for root, _, files in os.walk(input_directory):
             try:
                 jsonrecord = jsonobject["metadata"]
             except:
-                print(filename)
+                print(filename, file=sys.stderr)
                 continue
 
             marcrecord = marcx.Record(force_utf8=True)
@@ -143,8 +145,8 @@ for root, _, files in os.walk(input_directory):
             else:
                 color = ""
             if color == "" and color_old != "":
-                print("Die Farbe %s wurde in der Colormap nicht gefunden" % color_old)
-          
+                print("Die Farbe %s wurde in der Colormap nicht gefunden" % color_old, file=sys.stderr)
+
             # Ton
             sound_old = get_field("sound")
             if sound_old != "":
@@ -152,8 +154,8 @@ for root, _, files in os.walk(input_directory):
             else:
                 sound = ""
             if sound == "" and sound_old != "":
-                print("Der Sound %s wurde in der Soundmap nicht gefunden" % sound_old)
-           
+                print("Der Sound %s wurde in der Soundmap nicht gefunden" % sound_old, file=sys.stderr)
+
             if color != "" and sound != "":
                 f300b = color + " + " + sound
             elif color != "":
