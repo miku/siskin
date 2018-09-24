@@ -51,54 +51,54 @@ langmap = {
 
 formatmaps = {
     'periodical':
-    {    
+    {
         '008': 'n',
         'leader': 'nas',
         '935b' : 'cofz'
     },
     'ephemera':
-    {   
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'magazine cover':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'photograph':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'postcard':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'clipping':
-    {   
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'flier (printed matter)':
-    { 
+    {
         'leader': 'nam'
     },
     'storyboard':
-    { 
+    {
         'leader': 'nam'
     },
     'sheet music':
-    { 
+    {
         'leader': 'ncs'
     },
     'correspondence':
-    {    
+    {
         'leader': 'nam'
     },
     'pamphlet':
-    {    
+    {
         'leader': 'nam'
     },
     'correspondence document':
@@ -107,7 +107,7 @@ formatmaps = {
         'leader': 'nam'
     },
     'lobby card':
-    { 
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
@@ -116,26 +116,26 @@ formatmaps = {
         'leader': 'nam'
     },
     'cigarette cards':
-    {  
+    {
         'leader': 'nam'
     },
     'souvenir handkerchief box':
-    { 
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'scrapbook':
-    {  
+    {
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'slides (photographs)':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'program (document)':
-    {  
+    {
         'leader': 'nam',
         '935b' : 'cofz'
     },
@@ -145,17 +145,17 @@ formatmaps = {
         '935b' : 'cofz'
     },
     'autograph album':
-    { 
+    {
         'leader': 'ntm',
         '935b' : 'handschr'
     },
     'monograph':
-    { 
+    {
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'drawing':
-    {       
+    {
         'leader': 'nam'
     },
 }
@@ -386,7 +386,7 @@ for row in rows:
 
     f001 = "finc-103-%s" % identifier
     leader = get_leader(format=format)
-  
+
     if language != "":
         language = language.rstrip(";") # manchmal endet die Sprache auf ";"
         language = language.replace(" ", "") # manchmal gibt es Leerzeichen mittendrin oder am Ende
@@ -492,7 +492,7 @@ for row in rows:
     if url != "":
         url = url.split("||")
         f856_u = set(url)
-        if len(f856_u) > 1:           
+        if len(f856_u) > 1:
             items = len(f856_u)
             f520_a = "Contains a collection of %s Pictures." % items
 
@@ -503,7 +503,7 @@ for row in rows:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     marcrecord.leader = leader
-    marcrecord.add("001", data=f001)  
+    marcrecord.add("001", data=f001)
     marcrecord.add("007", data="cr")
     f008 = get_field_008(format=format, f041_a=f041_a, f260_c=f260_c)
     marcrecord.add("008", data=f008)
@@ -531,7 +531,7 @@ for row in rows:
 
     if len(f856_u) > 1:
         for i, url in enumerate(f856_u, start=1):
-            marcrecord.add("856", q="text/html", _3="Picture %s" % i, u=url)        
+            marcrecord.add("856", q="text/html", _3="Picture %s" % i, u=url)
     else:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856_u)
 
