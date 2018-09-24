@@ -20,13 +20,11 @@ import xmltodict
 def clear_format(format):
     if isinstance(format, list):
         format = format[0]
-    format = format.lstrip()
-    format = format.rstrip()
+    format = format.strip()
     format = format.rstrip(";")
     format = format.lower()
     format = format.split("; ") # manchmal sind mehrere Formate angegeben
-    if isinstance(format, list):
-        format = format[0] # nur das zuerst angegebene Format wird genommen
+    format = format[0] # nur das zuerst angegebene Format wird genommen
     return format
 
 def get_leader(format='photograph'):
