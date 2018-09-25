@@ -56,7 +56,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 marcrecord.add("022", a=f022a)
                 break
     except Exception as exc:
-        raise
+        #raise
+        pass
 
     # Sprache
     try:
