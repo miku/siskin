@@ -102,7 +102,7 @@ class MarburgMarc(MarburgTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path(ext='mrc', digest=True))
+        return luigi.LocalTarget(self.path(ext='fincmarc.mrc', digest=True))
 
 
 class MarburgJSON(MarburgTask):
