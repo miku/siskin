@@ -68,17 +68,21 @@ class MarburgCombine(MarburgTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='nlm')
+    format = luigi.Parameter(default='datacite')
+    set = luigi.Parameter(default='issn:2196-4270')
 
     def run(self):
         endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
-        shellout("metha-sync -format {format} {endpoint}", format=self.format, endpoint=endpoint)
-        output = shellout("metha-cat -format {format} {endpoint} > {output}", format=self.format,
+        shellout("metha-sync -set {set} -format {format} {endpoint}",
+                 set=self.set, format=self.format, endpoint=endpoint)
+        output = shellout("metha-cat -set {set} -format {format} {endpoint} > {output}",
+                          set=self.set,
+                          format=self.format,
                           endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path(ext="xml"))
+        return luigi.LocalTarget(self.path(ext="xml", digest=True))
 
 
 class MarburgMarc(MarburgTask):
@@ -87,9 +91,10 @@ class MarburgMarc(MarburgTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='datacite')
+    set = luigi.Parameter(default='issn:2196-4270')
 
     def requires(self):
-        return MarburgCombine(format=self.format)
+        return MarburgCombine(format=self.format, set=self.set)
 
     def run(self):
         output = shellout("python {script} {input} {output}",
@@ -97,7 +102,7 @@ class MarburgMarc(MarburgTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path(ext='mrc'))
+        return luigi.LocalTarget(self.path(ext='mrc', digest=True))
 
 
 class MarburgJSON(MarburgTask):
