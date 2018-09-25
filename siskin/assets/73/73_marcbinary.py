@@ -115,7 +115,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Erscheinungsvermerk
     f260c = xmlrecord.get("metadata").get("dcite:resource").get("dcite:publicationYear")   
-    publisher = ["a", "Marburg", "b", " : " + "Schüren Verlag, ", "c", f260c]
+    publisher = ["a", "Marburg", "b", " : " + u"Schüren Verlag, ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
     # Rechtehinweis
