@@ -549,11 +549,32 @@ class AMSLOpenAccessKBART(AMSLTask):
 class AMSLWisoPackages(AMSLTask):
     """
     Collect WISO packages.
+
+    XXX(miku): Throw this away.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return AMSLService(date=self.date)
+
+    def hardcoded_list_of_wiso_journal_identifiers(self):
+        ids = set()
+        with open(self.assets('wiso/whitelist.txt') as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                ids.add(line)
+        return sorted(ids)
+
+    def resolve_ubl_profile(self, colls):
+        """
+        Given a list of collection names, replace the complete list with
+        hardcoded WISO journal identifiers from attachments/4444.
+        """
+        if 'wiso UB Leipzig Profil' in colls:
+            return self.hardcoded_list_of_wiso_journal_identifiers()
+        return colls
 
     def run(self):
         with self.input().open() as handle:
