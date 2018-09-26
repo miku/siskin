@@ -5,6 +5,7 @@
 # Collection: Kunsthochschule für Medien Köln (VK Film)
 # refs: #8391
 
+from __future__ import print_function
 
 import sys
 import re
@@ -165,7 +166,7 @@ filenames = [inputfilename1, inputfilename2]
 outputfile = open(outputfilename, "wb")
 
 for filename in filenames:
-    inputfile = tarfile.open(filename, "r:gz")
+    inputfile = tarfile.open(filename, "r:gz", encoding='utf-8')
     records = inputfile.getmembers()
 
     parent_title = {}
@@ -359,7 +360,7 @@ for filename in filenames:
         f856u = get_datafield("655", "u")
         f8563 = get_datafield("655", "x")
         if len(f8563) == 0:
-            f8563 = "zusätzliche Informationen"
+            f8563 = u"zusätzliche Informationen"
         if "http" in f856u:
             marcrecord.add("856", q="text/html", _3=f8563, u=f856u)
 
@@ -370,10 +371,13 @@ for filename in filenames:
 
         # Kollektion
         collection = ["a", f001, "b", "109", "c",
-                      "Kunsthochschule für Medien Köln", "c", "Verbundkatalog Film"]
+                      u"Kunsthochschule für Medien Köln", "c", "Verbundkatalog Film"]
         marcrecord.add("980", subfields=collection)
 
-        outputfile.write(marcrecord.as_marc())
+        try:
+            outputfile.write(marcrecord.as_marc())
+        except UnicodeEncodeError as exc:
+            print("%s: %s" % (marcrecord["001"], exc), file=sys.stderr)
 
     inputfile.close()
 outputfile.close()
