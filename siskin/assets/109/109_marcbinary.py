@@ -231,7 +231,7 @@ for filename in filenames:
 
         # Format
         format = get_datafield("433", "a")
-        format = str(format)
+        format = u'%s' % format
         isbn = get_datafield("540", "a")
         isbn = len(isbn)
         parent = get_datafield("010", "a")
