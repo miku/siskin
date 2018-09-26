@@ -41,18 +41,20 @@ import os
 import tempfile
 
 import luigi
+
 import xmltodict
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
 class MarburgTask(DefaultTask):
-    """ Base task for Marburg. """
+    """
+    Base task for Marburg.
+    """
     TAG = '73'
 
     def closest(self):
@@ -61,35 +63,39 @@ class MarburgTask(DefaultTask):
 
 class MarburgCombine(MarburgTask):
     """
-    Harvest and combine into a single file.
+    Harvest and combine a given set into a single file.
 
-    XXX: NLM format has been discontinued as of 2018-01-01, refs #5486.
-    XXX: Maybe datacite.
+    NLM format has been discontinued as of 2018-01-01, refs #5486. Using datacite.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='nlm')
+    format = luigi.Parameter(default='datacite')
+    set = luigi.Parameter(default='issn:2196-4270')
 
     def run(self):
         endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
-        shellout("metha-sync -format {format} {endpoint}", format=self.format, endpoint=endpoint)
-        output = shellout("metha-cat -format {format} {endpoint} > {output}", format=self.format,
+        shellout("metha-sync -set {set} -format {format} {endpoint}",
+                 set=self.set, format=self.format, endpoint=endpoint)
+        output = shellout("metha-cat -set {set} -format {format} {endpoint} > {output}",
+                          set=self.set,
+                          format=self.format,
                           endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path(ext="xml"))
+        return luigi.LocalTarget(self.path(ext="xml", digest=True))
 
 
-class MarburgMarc(MarburgTask):
+class MarburgMARC(MarburgTask):
     """
-    Convert XML to Marc.
+    Convert XML to binary MARC.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='datacite')
+    set = luigi.Parameter(default='issn:2196-4270')
 
     def requires(self):
-        return MarburgCombine(format=self.format)
+        return MarburgCombine(format=self.format, set=self.set)
 
     def run(self):
         output = shellout("python {script} {input} {output}",
@@ -97,90 +103,4 @@ class MarburgMarc(MarburgTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(self.path(ext='mrc'))
-
-
-class MarburgJSON(MarburgTask):
-    """
-    Convert XML to JSON in one go. Preparation, so we can use jq(1).
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return MarburgCombine(date=self.date)
-
-    def run(self):
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                json.dump(xmltodict.parse(handle.read()), output)
-
-    def output(self):
-        return luigi.LocalTarget(self.path(ext='json'))
-
-
-class MarburgIntermediateSchema(MarburgTask):
-    """
-    Convert to intermediate schema.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return MarburgJSON(date=self.date)
-
-    def run(self):
-        output = shellout(""" cat {input} | \
-                              jq '.Records.Record[]|.metadata.article' | \
-                              jq -f {filter} -cr | gzip -c > {output}""",
-                          input=self.input().path, filter=self.assets('73/filter.jq'))
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(self.path(ext='ldj.gz'), format=Gzip)
-
-
-class MarburgExport(MarburgTask):
-    """
-    Attach and export.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3')
-
-    def requires(self):
-        return {
-            'data': MarburgIntermediateSchema(date=self.date),
-            'config': AMSLFilterConfig(date=self.date),
-        }
-
-    def run(self):
-        output = shellout("span-tag -c {config} <(gunzip -c {input}) | span-export -o {format} > {output}",
-                          config=self.input().get("config").path, input=self.input().get("data").path,
-                          format=self.format)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(self.path(ext='ldj'))
-
-
-class MarburgCombineNext(MarburgTask):
-    """
-    Harvest and combine into a single file.
-
-    Adjust format, refs #5486.
-    """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='nlm')
-
-    def run(self):
-        endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
-        output = shellout("oaicrawl -w 8 -verbose -f oai_dc {endpoint} > {output}", endpoint=endpoint)
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("echo '<records>' >> {output}", output=stopover)
-        shellout("xmlcutty -path /OAI-PMH/GetRecord/record < {input} >> {output}", input=output, output=stopover)
-        shellout("echo '</records>' >> {output}", output=stopover)
-        luigi.LocalTarget(stopover).move(self.output().path)
-        # Remove raw data.
-        os.remove(output)
-
-    def output(self):
-        return luigi.LocalTarget(self.path())
+        return luigi.LocalTarget(self.path(ext='fincmarc.mrc', digest=True))

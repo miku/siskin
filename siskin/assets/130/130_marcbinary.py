@@ -29,6 +29,8 @@ def get_field(tag):
     regexp = re.search('<.*?\snr="%s".*>(.*)$' % tag, field)
     if regexp:
         _field = regexp.group(1)
+        if isinstance(_field, str):
+            return _field
         return _field.decode('utf-8')
     else:
         return ""
@@ -37,6 +39,8 @@ def get_subfield(tag, subfield):
     regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)
     if regexp:
         _field = regexp.group(1)
+        if isinstance(_field, str):
+            return _field
         return _field.decode('utf-8')
     else:
         return ""
@@ -360,7 +364,9 @@ for record in records:
         marcrecord.add("710", a=corporate)
     if f856u != "":
         marcrecord.add("856", q="text/html", u=f856u)
-    f866a = "; ".join(f866a).decode('utf-8')
+    f866a = "; ".join(f866a)
+    if not isinstance(f866a, str):
+        f866a = f866a.decode('utf-8')
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
     marcrecord.add("980", a=f001, b="130", c="VDEH")

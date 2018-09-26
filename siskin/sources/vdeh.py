@@ -27,7 +27,7 @@ VDEH, refs #9868.
 
 Note: These tasks are based on an MABxml version of the original binary MAB.
 
-External Java app required:
+External Java app required (https://sourceforge.net/projects/dnb-conv-tools/):
 
     $ sha1sum Mab2Mabxml-1.9.9.jar
     b37c4663fe6e4dcc55e71253266516e417ec9c44  Mab2Mabxml-1.9.9.jar
@@ -42,16 +42,24 @@ index-url = http://localhost:8983/solr/biblio/select
 
 """
 
-import luigi
-from gluish.utils import shellout
+import datetime
 
+import luigi
+
+from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.task import DefaultTask
+
 
 class VDEHTask(DefaultTask):
     """
     This task inherits functionality from `siskin.task.DefaultTask`.
     """
     TAG = '130'
+
+    def closest(self):
+        return weekly(date=self.date)
 
 class VDEHXML(VDEHTask):
     """
@@ -101,6 +109,8 @@ class VDEHRemoveIllegalChars(VDEHTask):
 
 class VDEHMARC(VDEHTask):
     """ Convert MABxml to BinaryMarc """
+
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return VDEHRemoveIllegalChars()

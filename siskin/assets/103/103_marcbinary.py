@@ -20,22 +20,20 @@ import xmltodict
 def clear_format(format):
     if isinstance(format, list):
         format = format[0]
-    format = format.lstrip()
-    format = format.rstrip()
+    format = format.strip()
     format = format.rstrip(";")
     format = format.lower()
     format = format.split("; ") # manchmal sind mehrere Formate angegeben
-    if isinstance(format, list):
-        format = format[0] # nur das zuerst angegebene Format wird genommen
+    format = format[0] # nur das zuerst angegebene Format wird genommen
     return format
 
 def get_leader(format='photograph'):
-    return "     %s  22        450 " % formatmaps[format]["leader"]
+    return "     %s  22        4500" % formatmaps[format]["leader"]
 
-def get_field_008(format='photograph', f041_a="   "):
+def get_field_008(format='photograph', f041_a="   ", f260_c="20uu"):
     if "008" not in formatmaps[format]:
-        return "130227uu20uuuuuuxx uuup%s  c" % f041_a
-    return "130227%s20uuuuuuxx uuup%s  c" % (formatmaps[format]["008"], f041_a)
+        return "130227u%suuuuxx uuup%s  c" % (f260_c, f041_a)
+    return "130227%s%suuuuxx uuup%s  c" % (formatmaps[format]["008"], f260_c, f041_a)
 
 def get_field_935b(format='photograph'):
     if "935b" not in formatmaps[format]:
@@ -53,54 +51,54 @@ langmap = {
 
 formatmaps = {
     'periodical':
-    {    
+    {
         '008': 'n',
         'leader': 'nas',
         '935b' : 'cofz'
     },
     'ephemera':
-    {   
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'magazine cover':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'photograph':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'postcard':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'clipping':
-    {   
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'flier (printed matter)':
-    { 
+    {
         'leader': 'nam'
     },
     'storyboard':
-    { 
+    {
         'leader': 'nam'
     },
     'sheet music':
-    { 
+    {
         'leader': 'ncs'
     },
     'correspondence':
-    {    
+    {
         'leader': 'nam'
     },
     'pamphlet':
-    {    
+    {
         'leader': 'nam'
     },
     'correspondence document':
@@ -109,7 +107,7 @@ formatmaps = {
         'leader': 'nam'
     },
     'lobby card':
-    { 
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
@@ -118,26 +116,26 @@ formatmaps = {
         'leader': 'nam'
     },
     'cigarette cards':
-    {  
+    {
         'leader': 'nam'
     },
     'souvenir handkerchief box':
-    { 
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'scrapbook':
-    {  
+    {
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'slides (photographs)':
-    {  
+    {
         'leader': 'ckm',
         '935b' : 'foto'
     },
     'program (document)':
-    {  
+    {
         'leader': 'nam',
         '935b' : 'cofz'
     },
@@ -147,17 +145,17 @@ formatmaps = {
         '935b' : 'cofz'
     },
     'autograph album':
-    { 
+    {
         'leader': 'ntm',
         '935b' : 'handschr'
     },
     'monograph':
-    { 
+    {
         'leader': 'nam',
         '935b' : 'cofz'
     },
     'drawing':
-    {       
+    {
         'leader': 'nam'
     },
 }
@@ -388,7 +386,7 @@ for row in rows:
 
     f001 = "finc-103-%s" % identifier
     leader = get_leader(format=format)
-  
+
     if language != "":
         language = language.rstrip(";") # manchmal endet die Sprache auf ";"
         language = language.replace(" ", "") # manchmal gibt es Leerzeichen mittendrin oder am Ende
@@ -443,7 +441,7 @@ for row in rows:
         if match:
             f260_c = match.group(1)
             if publisher != "":
-                f260_c = ", %s" % f260_c
+                f260_b = f260_b + ", "
         else:
             f260_c = ""
     else:
@@ -493,17 +491,10 @@ for row in rows:
 
     if url != "":
         url = url.split("||")
-        if len(url) == 1:
-            url = url[0]
-            f856_u = url
-        else:
-            items = len(url)
+        f856_u = set(url)
+        if len(f856_u) > 1:
+            items = len(f856_u)
             f520_a = "Contains a collection of %s Pictures." % items
-            f856_u = []
-            for url_part in url:
-                f856_u.append(url_part)
-    else:
-        f856_u = ""
 
     #f935_b = get_field_935b(format=format)
     f980_a = identifier
@@ -512,8 +503,9 @@ for row in rows:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
     marcrecord.leader = leader
-    marcrecord.add("001", data=f001)  
+    marcrecord.add("001", data=f001)
     marcrecord.add("007", data="cr")
+    f008 = get_field_008(format=format, f041_a=f041_a, f260_c=f260_c)
     marcrecord.add("008", data=f008)
     marcrecord.add("041", a=f041_a)
     marcrecord.add("100", a=f100_a)
@@ -537,7 +529,7 @@ for row in rows:
     for value in f700_a:
         marcrecord.add("700", a=value)
 
-    if isinstance(f856_u, list):
+    if len(f856_u) > 1:
         for i, url in enumerate(f856_u, start=1):
             marcrecord.add("856", q="text/html", _3="Picture %s" % i, u=url)
     else:
