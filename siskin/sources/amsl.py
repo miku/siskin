@@ -559,7 +559,7 @@ class AMSLWisoPackages(AMSLTask):
 
     def hardcoded_list_of_wiso_journal_identifiers(self):
         ids = set()
-        with open(self.assets('wiso/whitelist.txt') as handle:
+        with open(self.assets('wiso/whitelist.txt')) as handle:
             for line in handle:
                 line = line.strip()
                 if not line:
