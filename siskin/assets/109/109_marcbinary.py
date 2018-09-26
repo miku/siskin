@@ -150,7 +150,7 @@ def get_field_935c(format="Buch"):
 
 def remove_brackets(field):
     if isinstance(field, list) and len(field) == 0:
-        field = ""
+        return ""
     return field.replace("<<", "").replace(">>", "")
 
 
