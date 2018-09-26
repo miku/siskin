@@ -5,6 +5,15 @@
 # Collection: Kunsthochschule für Medien Köln (VK Film)
 # refs: #8391
 
+"""
+Review notes:
+
+* get_datafield depends on a name in module scope, brittle
+* get_field_* might be a single function
+* format = str(format), seems format can be a list, too
+* format, large if/else
+"""
+
 from __future__ import print_function
 
 import re
