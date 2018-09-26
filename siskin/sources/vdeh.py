@@ -27,7 +27,7 @@ VDEH, refs #9868.
 
 Note: These tasks are based on an MABxml version of the original binary MAB.
 
-External Java app required:
+External Java app required (https://sourceforge.net/projects/dnb-conv-tools/):
 
     $ sha1sum Mab2Mabxml-1.9.9.jar
     b37c4663fe6e4dcc55e71253266516e417ec9c44  Mab2Mabxml-1.9.9.jar
