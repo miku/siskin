@@ -7,12 +7,12 @@
 
 from __future__ import print_function
 
-import sys
 import re
-import marcx
-import xmltodict
+import sys
 import tarfile
 
+import marcx
+import xmltodict
 
 formatmap = {
     "Buch":
