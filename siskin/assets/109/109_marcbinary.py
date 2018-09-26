@@ -256,7 +256,6 @@ for filename in filenames:
         f001 = get_datafield("001", "a")
         if f001 in parent_title:
             leader = get_leader(format="Mehrbänder")
-            print(leader)
         else:
             leader = get_leader(format=format)
         marcrecord.leader = leader
