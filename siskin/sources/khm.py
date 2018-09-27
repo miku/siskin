@@ -53,6 +53,7 @@ from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 
+
 class KHMTask(DefaultTask):
     """ Base task for KHM Koeln (sid 109) """
     TAG = '109'
@@ -60,6 +61,7 @@ class KHMTask(DefaultTask):
 
     def closest(self):
         return monthly(date=self.date)
+
 
 class KHMDropbox(KHMTask):
     """
@@ -73,7 +75,8 @@ class KHMDropbox(KHMTask):
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
-                 rsync_options=self.config.get('khm', 'rsync-options', fallback='-avzP'),
+                 rsync_options=self.config.get('khm', 'rsync-options',
+                                               fallback='-avzP'),
                  src=self.config.get('khm', 'scp-src'), target=target)
 
         if not os.path.exists(self.taskdir()):
@@ -85,6 +88,7 @@ class KHMDropbox(KHMTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
 
 class KHMLatest(KHMTask):
     """
@@ -107,8 +111,10 @@ class KHMLatest(KHMTask):
                 records = sorted(handle.iter_tsv(cols=('path',)), reverse=True,
                                  key=lambda row: os.path.basename(row.path))
                 if len(records) == 0:
-                    raise RuntimeError('no files found, cannot determine latest date')
-                groups = re.search(self.FILEPATTERN, records[0].path).groupdict()
+                    raise RuntimeError(
+                        'no files found, cannot determine latest date')
+                groups = re.search(
+                    self.FILEPATTERN, records[0].path).groupdict()
                 latest_date = groups['date']
                 for record in records:
                     gg = re.search(self.FILEPATTERN, record.path).groupdict()
@@ -117,6 +123,7 @@ class KHMLatest(KHMTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class KHMMARC(KHMTask):
     """
