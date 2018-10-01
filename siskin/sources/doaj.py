@@ -125,7 +125,7 @@ class DOAJDump(DOAJTask):
 
         XXX: This task might stop before completion, investigate.
         XXX: Completed dump 2018-06-01 is only 495M (about 150k records),
-        expected 10G.
+        expected 10G - https://is.gd/JRRFO1.
         """
         max_backoff_retry = 10
         backoff_interval_s = 0.05
