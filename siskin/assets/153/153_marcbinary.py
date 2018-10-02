@@ -3,12 +3,13 @@
 
 from __future__ import print_function
 
+import base64
+import glob
 import io
+import json
 import os
 import re
 import sys
-import json
-import base64
 
 import marcx
 import xmltodict
@@ -69,6 +70,7 @@ def remove_tags(field):
 
 # input_directory = "153"
 outputfilename = "153_output.mrc"
+input_filenames = glob.glob('153/*.ldj')
 
 if len(sys.argv) > 2:
     outputfilename, input_filenames = sys.argv[1], sys.argv[2:]
