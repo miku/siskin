@@ -66,17 +66,26 @@ class ArchiveDownload(ArchiveTask):
 
 class ArchiveMARC(ArchiveTask):
     """
-    Convert.
+    Convert. XXX(miku): Adjust to search.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return ArchiveDownload(date=self.date)
+        queries = [
+            'collection:prelinger',
+            'collection:classic_cartoons',
+            'collection:feature_films',
+            'collection:more_animation',
+            'collection:vintage_cartoons',
+        ]
+        return [ArchiveSearchMetadata(date=self.date, query=query)
+                for query in queries]
 
     def run(self):
-        output = shellout("python {script} {input} {output}",
+        inputs = [target.path for target in self.input()]
+        output = shellout("python {script} {output} {inputs}",
                           script=self.assets("153/153_marcbinary.py"),
-                          input=self.input().path)
+                          inputs=' '.join(inputs))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
