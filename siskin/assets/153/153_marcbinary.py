@@ -238,16 +238,19 @@ for filepath in input_filenames:
         marcrecord.add("935", b="cofz", c="vide")
 
         # Kollektion
-        if filename == "prelinger.ldj":
+        if "prelinger" in jsonrecord["collection"]:
             f980c = "Internet Archive / Prelinger"
-        elif filename == "classic_cartoons.ldj":
+        elif "classic_cartoons" in jsonrecord["collection"]:
             f980c = "Internet Archive / Classic Cartoons"
-        elif filename == "feature_films.ldj":
+        elif "feature_films" in jsonrecord["collection"]:
             f980c = "Internet Archive / Feature Films"
-        elif filename == "more_animation.ldj":
+        elif "more_animation" in jsonrecord["collection"]:
             f980c = "Internet Archive / More Animation"
-        elif filename == "vintage_cartoons.ldj":
+        elif "vintage_cartoons" in jsonrecord["collection"]:
             f980c = "Internet Archive / Vintage Cartoons"
+        else:
+            raise ValueError('collection mapping missing: %s', jsonrecord['collection'])
+
         marcrecord.add("980", a=f001, b="153", c=f980c)
 
         outputfile.write(marcrecord.as_marc())
