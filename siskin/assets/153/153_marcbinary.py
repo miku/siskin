@@ -60,6 +60,12 @@ def get_field(tag):
     except:
         return ""
 
+def remove_tags(field):
+    if isinstance(field, str):
+        return re.sub("\<.*?\>", "", field)
+    else:
+        return ""
+
 
 input_directory = "153"
 outputfilename = "153_output.mrc"
@@ -111,6 +117,8 @@ for root, _, files in os.walk(input_directory):
 
             # Hauptitel
             f245a = get_field("title")
+            if "delete" in f245a or "Delete" in f245a:
+                continue
             marcrecord.add("245", a=f245a)
 
             # gestattet leere Felder, solange der Titel und der Identifier vorhanden sind
@@ -196,6 +204,7 @@ for root, _, files in os.walk(input_directory):
 
             # Annotation
             f520a = get_field("description")
+            f520a = remove_tags(f520a)
             marcrecord.add("520", a=f520a)
 
             # Schlagwörter
