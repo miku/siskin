@@ -77,7 +77,7 @@ if len(sys.argv) > 2:
 
 outputfile = open(outputfilename, "wb")
 
-for filename in input_filesnames:
+for filename in input_filenames:
     inputfile = io.open(filename, "r", encoding="utf-8")
 
     for line in inputfile:
