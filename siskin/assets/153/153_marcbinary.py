@@ -117,7 +117,7 @@ for root, _, files in os.walk(input_directory):
 
             # Hauptitel
             f245a = get_field("title")
-            if "delete" in f245a:
+            if "delete" in f245a or "Delete" in f245a:
                 continue
             marcrecord.add("245", a=f245a)
 
