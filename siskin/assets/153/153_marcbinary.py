@@ -111,6 +111,8 @@ for root, _, files in os.walk(input_directory):
 
             # Hauptitel
             f245a = get_field("title")
+            if "delete" in f245:
+                continue
             marcrecord.add("245", a=f245a)
 
             # gestattet leere Felder, solange der Titel und der Identifier vorhanden sind
