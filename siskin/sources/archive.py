@@ -44,29 +44,9 @@ class ArchiveTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class ArchiveDownload(ArchiveTask):
-    """
-    OAI harvest.
-    """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def run(self):
-        url = "http://archive.org/services/oai.php"
-        collection = "collection:prelinger"
-        shellout("""metha-sync -set {collection} {url}""",
-                 collection=collection, url=url)
-        output = shellout("""metha-cat -set {collection} {url} > {output}""",
-                          url=url, collection=collection)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="xml"))
-
-
 class ArchiveMARC(ArchiveTask):
     """
-    Convert. XXX(miku): Adjust to search.
+    Convert. Hard-coded collections, currently.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
