@@ -1,6 +1,23 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+Archive.org to MARC. Allows variable number of inputs.
+
+    $ python 153_marcbinary.py OUTPUT INPUT [INPUT, ...]
+
+Post-process link check via [clinker](https://github.com/miku/clinker), 17min
+for about 12000 records.
+
+    $ time marctojson -p $(taskoutput ArchiveMARC) | \
+        jq -c -r '.["856"][] | .["u"][] | {"url": .}' | \
+        clinker -w 16 > 153.report.ndj
+
+    $ jq .status 153.report.ndj | sort | uniq -c | sort -nr                                                                                                      │·
+    12801 200
+
+"""
+
 from __future__ import print_function
 
 import base64
