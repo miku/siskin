@@ -253,7 +253,10 @@ for filepath in input_filenames:
 
         marcrecord.add("980", a=f001, b="153", c=f980c)
 
-        outputfile.write(marcrecord.as_marc())
+        try:
+            outputfile.write(marcrecord.as_marc())
+        except UnicodeDecodeError as exc:
+            raise ValueError("%s: %s" % (marcrecord["001"].value(), exc))
 
     inputfile.close()
 
