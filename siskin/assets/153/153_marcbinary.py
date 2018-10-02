@@ -251,5 +251,5 @@ for root, _, files in os.walk(input_directory):
 
             outputfile.write(marcrecord.as_marc())
 
-inputfile.close()
+    inputfile.close()
 outputfile.close()
