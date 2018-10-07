@@ -558,22 +558,35 @@ class AMSLWisoPackages(AMSLTask):
         return AMSLService(date=self.date)
 
     def hardcoded_list_of_wiso_journal_identifiers(self):
+        """
+        Refs. #10707, Att. #4444.
+        """
         ids = set()
-        with open(self.assets('wiso/whitelist.txt')) as handle:
-            for line in handle:
+        with open(self.assets('wiso/645896059854847ce4ccd1416e11ba372e45bfd6.csv')) as handle:
+            for i, line in enumerate(handle):
+                if i == 0:
+                    continue
                 line = line.strip()
                 if not line:
                     continue
-                ids.add(line)
+                fields = line.split(';')
+                if len(fields) < 12:
+                    raise ValueError('expected ; separated KBART-ish file with journal identifier at column 11')
+                id = fields[11].strip()
+                if not id:
+                    continue
+                ids.add(id)
+
         return sorted(ids)
 
     def resolve_ubl_profile(self, colls):
         """
         Given a list of collection names, replace the complete list with
-        hardcoded WISO journal identifiers from attachments/4444.
+        hardcoded WISO journal identifiers from #10707/4444.
         """
         if 'wiso UB Leipzig Profil' in colls:
             return self.hardcoded_list_of_wiso_journal_identifiers()
+
         return colls
 
     def run(self):
@@ -604,6 +617,7 @@ class AMSLWisoPackages(AMSLTask):
             if include_fzs and isil != 'DE-15-FID':
                 packages = set(itertools.chain(
                     *[c for _, c in list(blob.items())]))
+                packages = self.resolve_ubl_profile(packages)
                 filters.append({
                     'and': [
                         {'source': ['48']},
@@ -617,6 +631,7 @@ class AMSLWisoPackages(AMSLTask):
                 if lthf is None or lthf == 'null':
                     continue
                 if isil == 'DE-15-FID':
+                    colls = self.resolve_ubl_profile(colls)
                     filter = {
                         'and': [
                             {'source': ['48']},
