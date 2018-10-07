@@ -24,11 +24,13 @@
 
 set -eu
 
-OUTPUT=$(taskoutput "$@")
+for name in "$@"; do
+    OUTPUT=$(taskoutput "$name")
 
-if [ "$?" -ne 0 ]; then
-    echo "cannot determine task output"
-    exit 1
-else
-    rm -v "$OUTPUT"
-fi
+    if [ "$?" -ne 0 ]; then
+        printf "cannot determine task output [%d]\n" $?
+        exit 1
+    else
+        rm -vf "$OUTPUT"
+    fi
+done
