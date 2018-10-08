@@ -96,7 +96,7 @@ class IEEEUpdatesIntermediateSchema(IEEETask):
 
     def run(self):
         output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}", input=self.input().path)
-        luigi.LocalTarget(stopover).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
