@@ -262,7 +262,8 @@ for filename in filenames:
               or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
             format = "Objekt"
         elif parent > 0 and isbn == 0:
-            format = "Zeitschrift"
+            #format = "Zeitschrift"
+            continue
         else:
             continue
 
