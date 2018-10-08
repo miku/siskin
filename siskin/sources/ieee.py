@@ -95,12 +95,7 @@ class IEEEUpdatesIntermediateSchema(IEEETask):
         return IEEEPaths(date=self.date)
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                if not 'IEEEUpdates_' in row.path:
-                    continue
-                shellout(r'unzip -p {input} \*.xml | span-import -i ieee | pigz -c >> {output}', input=row.path, output=stopover)
+        output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
