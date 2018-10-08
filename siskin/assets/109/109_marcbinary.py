@@ -216,6 +216,9 @@ for filename in filenames:
         parent = get_datafield("010", "a")
         title = get_datafield("331", "a")
 
+        if "Brockhaus" in title:
+            continue
+
         if len(title) > 0 and len(parent) > 0 and parent in parent_title:
             f245a = parent_title[parent]
             if f245a == "":
