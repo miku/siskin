@@ -237,8 +237,10 @@ for filename in filenames:
         parent = get_datafield("010", "a")
         parent = len(parent)
         regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
-        if ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
-                or "X," in format or "Bde." in format or ": graph" in format) or isbn > 0:
+         if isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
+            format = "Buch"
+        elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format
+                             or "XV" in format or "X," in format or "Bde." in format or ": graph" in format):
             format = "Buch"
         elif "CD" in format:
             format = "CD"
