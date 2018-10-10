@@ -3,8 +3,8 @@
 
 from __future__ import print_function
 import collections
-import fileinput
 import json
+import io
 import re
 import sys
 import tqdm
@@ -13,8 +13,14 @@ import pandas as pd
 import requests
 from six.moves import urllib
 
+if len(sys.argv) != 3:
+    raise("Es muss eine Inputdatei und eine URL angegeben werden!") 
 
-def search(query, base_url="http://10.1.1.10:8080/solr/biblio/select"):
+inputfilename, base_url = sys.argv[1:]
+
+inputfile = io.open(inputfilename, "r")
+
+def search(query, base_url):
     """
     Search SOLR, return a minimal response.
     """
@@ -37,18 +43,25 @@ names = {}
 counters = collections.defaultdict(collections.Counter)
 
 
-for line in tqdm.tqdm(fileinput.input(), total=941528):
+for line in tqdm.tqdm(inputfile):
+
     doc = json.loads(line)
-    if doc["issn"] is None:
+
+    try:
+        doc["title"]
+        doc["issn"]
+    except:
         continue
 
-    for issn in doc.get("issn", []):
+    for issn in doc.get("issn", ""):
+        if issn == "":
+            continue
         issn = issn.upper()
         if len(issn) == 8:
             issn = issn[:4] + "-" + issn[4:]
 
         match = re.search(r'([0-9]{4,4}-[0-9X]{4,4})', issn)
-        if not match:
+        if not match:         
             raise ValueError('failed to parse ISSN: %s', issn)
         issn = match.group(1)
 
@@ -56,21 +69,21 @@ for line in tqdm.tqdm(fileinput.input(), total=941528):
 
         counters["c"][issn] += 1
 
-        if isinstance(doc["name"], list):
-            names[issn] = doc["name"][0]
+        if isinstance(doc["title"], list):
+            names[issn] = doc["title"][0]
         else:
-            names[issn] = doc["name"]
+            names[issn] = doc["title"]
 
         # Search ISSN in AI (w/o 68)
         if not issn in counters["ai"]:
             query = 'issn:"%s" AND NOT source_id:68' % issn
-            resp = search(query)
+            resp = search(query, base_url)
             counters["ai"][issn] = resp["response"]["numFound"]
 
         # Search ISSN in AI (w/o 68) and DE-15-FID.
         if not issn in counters["fid"]:
             query = 'issn:"%s" AND NOT source_id:68 AND institution:DE-15-FID' % issn
-            resp = search(query)
+            resp = search(query, base_url)
             counters["fid"][issn] = resp["response"]["numFound"]
 
 data = [(names[k], k, v,
@@ -79,5 +92,5 @@ data = [(names[k], k, v,
          '%0.2f%%' % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])))
         for k, v in counters["c"].most_common()]
 
-df = pd.DataFrame(data, columns=["name", "issn", "count", "ai", "ai-fid", "pct"])
+df = pd.DataFrame(data, columns=["title", "issn", "count", "ai", "ai-fid", "pct"])
 df.to_excel("68.xlsx")
