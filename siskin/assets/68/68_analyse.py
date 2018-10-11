@@ -30,6 +30,7 @@ def search(query, base_url):
         'rows': 0,
     }
     link = "%s?%s" % (base_url, urllib.parse.urlencode(params))
+    print(link)
     r = requests.get(link)
     if r.status_code != 200:
         raise RuntimeError("%s on %s" % (r.status_code, link))
@@ -43,18 +44,15 @@ names = {}
 counters = collections.defaultdict(collections.Counter)
 
 
-for line in tqdm.tqdm(inputfile):
+for line in inputfile:
 
     doc = json.loads(line)
 
-    try:
-        doc["title"]
-        doc["issn"]
-    except:
+    if not (doc.get("title") and doc.get("issn")):
         continue
 
-    for issn in doc.get("issn", ""):
-        if issn == "":
+    for issn in doc.get("issn", []):
+        if not issn:
             continue
         issn = issn.upper()
         if len(issn) == 8:
@@ -86,11 +84,11 @@ for line in tqdm.tqdm(inputfile):
             resp = search(query, base_url)
             counters["fid"][issn] = resp["response"]["numFound"]
 
-data = [(names[k], k, v,
-         counters["ai"][k],
-         counters["fid"][k],
-         '%0.2f%%' % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])))
-        for k, v in counters["c"].most_common()]
+data = [(names[issn], issn, freq,
+         counters["ai"][issn],
+         counters["fid"][issn],
+         '%0.2f%%' % (100 * float(counters["fid"][issn]) / max(0.01, counters["ai"][issn])))
+        for issn, freq in counters["c"].most_common()]
 
 df = pd.DataFrame(data, columns=["title", "issn", "count", "ai", "ai-fid", "pct"])
 df.to_excel("68.xlsx")
