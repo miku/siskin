@@ -30,7 +30,6 @@ def search(query, base_url):
         'rows': 0,
     }
     link = "%s?%s" % (base_url, urllib.parse.urlencode(params))
-    print(link)
     r = requests.get(link)
     if r.status_code != 200:
         raise RuntimeError("%s on %s" % (r.status_code, link))
