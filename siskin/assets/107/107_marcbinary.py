@@ -91,12 +91,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                     if ";" not in subject:
                         marcrecord.add("689", a=subject)
 
-    # Link zu Datensatz und Ressource
-    # ????
+    # Link zu Datensatz und Ressource  
     f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
-    if len(f856u) == 3:
+    if len(f856u) == 2:
         marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])  
-        marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[3])
+        marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[1])
+    else:
+        print("Die URLs weichen vom üblichen Schema ab: " + f001)
 
     # Medientyp
     marcrecord.add("935", b="cofz")
