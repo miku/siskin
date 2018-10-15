@@ -51,7 +51,7 @@ class SPOWIMARC(SPOWITask):
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("160/160_marcbinary.py"),
-                          input=self.input().path)
+                          input=self.config.get('spowi', 'input'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
