@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# https://stackoverflow.com/a/40846742/89391
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 import re
 import io
 import sys
@@ -34,11 +39,11 @@ for csv_record in csv_records.iterrows():
     marc_record.add("100", a=csv_record["100a"])
     marc_record.add("245", a=csv_record["245a"])
 
-    publisher = ["b", "Universität Leipzig, Sportwissenschaftliche Fakultät, ", "c", csv_record["260c"]]
+    publisher = ["b", u"Universität Leipzig, Sportwissenschaftliche Fakultät, ", "c", csv_record["260c"]]
     marc_record.add("260", subfields=publisher)
 
     marc_record.add("300", a=csv_record["300a"])
-    marc_record.add("500", a="Signatur: " + csv_record["Signatur\ngesamt"])
+    marc_record.add("500", a=u"Signatur: " + csv_record["Signatur\ngesamt"])
     marc_record.add("502", a=csv_record["502a"])
     
     # weitere Urheber
@@ -53,7 +58,7 @@ for csv_record in csv_records.iterrows():
     marc_record.add("935", b=csv_record["935b"], c=csv_record["935c"])
 
     # Kollektion
-    marc_record.add("980", a=str(csv_record["001"], b="160", c="sid-160-col-diplspowi")
+    marc_record.add("980", a=str(csv_record["001"]), b="160", c="sid-160-col-diplspowi")
 
 
     writer.write(marc_record)
