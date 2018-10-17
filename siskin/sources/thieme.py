@@ -71,8 +71,8 @@ class ThiemeCombine(ThiemeTask):
         url = self.config.get('thieme', 'oai')
         shellout("METHA_DIR={dir} metha-sync -set {set} -format {prefix} {url}",
                  set=self.set, prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
+        output = shellout("METHA_DIR={dir} metha-cat -set {set} -format {prefix} {url} | pigz -c > {output}",
+                          set=self.set, prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
