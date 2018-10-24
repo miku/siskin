@@ -35,7 +35,8 @@ for csv_record in csv_records.iterrows():
     marc_record.add("001", data=f001)
     
     marc_record.add("007", data="tu")
-    marc_record.add("041", a=csv_record["041a"])    
+    marc_record.add("041", a=csv_record["041a"])
+    marc_record.add("084", a="ZX 3900", _2="rvk")    
     marc_record.add("100", a=csv_record["100a"])
     marc_record.add("245", a=csv_record["245a"])
 
