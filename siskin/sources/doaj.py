@@ -164,9 +164,11 @@ class DOAJDump(DOAJTask):
 
 class DOAJDumpNext(DOAJTask):
     """
-    Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la).
-
-    XXX: Switch to API (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query)
+    Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la), which will use
+    the API
+    (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query).
+    As of Fall 2018 DOAJ works on a few infrastructure issue
+    (https://blog.doaj.org/2018/10/01/infrastructure-and-why-sustainable-funding-so-important-to-services-like-doaj/).
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
