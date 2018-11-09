@@ -176,8 +176,9 @@ class DOAJDumpNext(DOAJTask):
     sleep = luigi.IntParameter(default=2, significant=False, description="sleep seconds between requests")
 
     def run(self):
-        output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P | jq -rc '.results[]' > {output}",
+        output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P -o {output}",
                           sleep=self.sleep, size=self.batch_size)
+        output = shellout("jq -rc '.results[]' < {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
