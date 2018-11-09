@@ -14,7 +14,7 @@ docopt==0.6.2
 docutils==0.14
 elasticsearch==6.3.1
 future==0.16.0
-gluish==0.2.11
+gluish==0.2.12
 gspread==3.0.1
 idna==2.7
 internetarchive==1.8.1
