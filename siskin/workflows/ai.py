@@ -262,8 +262,8 @@ class AIQuality(AITask):
         for target in self.input():
             shellout(""" echo "S:{input}" >> {output} """,
                      input=target.path, output=stopover)
-            shellout(
-                "span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}", input=target.path, output=stopover)
+            shellout("span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}",
+                     input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
