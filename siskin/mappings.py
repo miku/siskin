@@ -1,7 +1,7 @@
 # coding: utf-8
-# pylint: disable=C0103,C0301
+# pylint: disable=C0103,W0232,C0301,W0703
 
-# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
@@ -23,34 +23,8 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Define version, disable some warnings and ensure temporary and log directories
-are there and writeable.
+Static mappings for reuse.
 """
 
-from __future__ import print_function
+formats = {}
 
-import os
-import sys
-import tempfile
-import warnings
-
-from siskin.configuration import Config
-
-warnings.filterwarnings("ignore")
-
-# https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning
-# wrap into try-except, since at install-time urllib3 might not be installed yet
-try:
-    import urllib3
-    urllib3.disable_warnings()
-except (AttributeError, ImportError):
-    pass
-
-__version__ = '0.39.0'
-
-config = Config.instance()
-if sys.version_info.major == 2:
-    tempfile.tempdir = config.get('core', 'tempdir')
-else:
-    tempfile.tempdir = config.get(
-        'core', 'tempdir', fallback=tempfile.gettempdir())

@@ -47,6 +47,7 @@ from __future__ import print_function
 
 import collections
 import datetime
+import io
 import itertools
 import json
 import operator
@@ -553,6 +554,7 @@ class AMSLWisoPackages(AMSLTask):
     XXX(miku): Throw this away.
     """
     date = luigi.DateParameter(default=datetime.date.today())
+    encoding = luigi.Parameter(default='latin-1', description='wiso journal id csv file encoding', significant=False)
 
     def requires(self):
         return AMSLService(date=self.date)
@@ -562,7 +564,8 @@ class AMSLWisoPackages(AMSLTask):
         Refs. #10707, Att. #4444.
         """
         ids = set()
-        with open(self.assets('wiso/645896059854847ce4ccd1416e11ba372e45bfd6.csv')) as handle:
+        filename = self.assets('wiso/645896059854847ce4ccd1416e11ba372e45bfd6.csv')
+        with io.open(filename, encoding=self.encoding) as handle:
             for i, line in enumerate(handle):
                 if i == 0:
                     continue

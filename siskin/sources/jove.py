@@ -22,21 +22,28 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-JOVE refs #11308.
+JOVE refs #11308, #14062.
+
+Example input file in ticket #14062, attachment 6494.
+
+    $ ls ~/.redminesync/14062/6494/
+    'JoVE_MARC_journal 2.mrk'
+
+Config
+------
+
+[jove]
+
+input = path/to/some.mrk
+
 """
 
-import csv
 import datetime
-import io
-import json
-import os
-import sys
 
 import luigi
 import requests
-from gluish.utils import shellout
 
-from siskin.decorator import deprecated
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
@@ -49,27 +56,13 @@ class JoveMARC(JoveTask):
     Turn MRK MARC (https://www.loc.gov/marc/makrbrkr.html) into MARC XML via
     experimental marctexttoxml (https://git.io/vdCUN).
     """
-
-    debug = luigi.BoolParameter(default=False, significant=False)
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        cleanup = []
-
-        url = 'https://www.jove.com/api/articles/v0/articlefeed.php?marc=1&sections[]=0&sections[]=4'
-        output = shellout(
-            """curl -sLg '{url}' | head -n -1 > {output}""", url=url)
-        cleanup.append(output)
-
-        output = shellout(
-            "marctexttoxml < {input} | xmllint --format - > {output}", input=output)
+        output = shellout("""marctexttoxml < {input} |
+                          xmllint --format - > {output}""",
+                          input=self.config.get("jove", "input"))
         luigi.LocalTarget(output).move(self.output().path)
-
-        for item in cleanup:
-            try:
-                os.remove(item)
-            except OSError:
-                self.logger.warn('could not delete temporary files')
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
@@ -92,39 +85,3 @@ class JoveFincMARC(JoveTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
-
-
-class JoveIntermediateSchemaFromCSV(JoveTask):
-    """
-    Download and convert. Just a prototype working with the CSV output.
-    """
-
-    @deprecated
-    def run(self):
-        r = requests.get(
-            "https://www.jove.com/api/articles/v0/articlefeed.php?csv=1")
-        s = io.StringIO(r.text)
-        with self.output().open('w') as output:
-            for doc in csv.DictReader(s):
-                converted = {
-                    'doi': doc['DOI'],
-                    'url': [doc['DOI Link'], doc['Link']],
-                    'rft.atitle': doc['Article Title'],
-                    'rft.jtitle': doc['Journal'],
-                    'authors': [{"rft.au": name} for name in doc.get('Authors').split(';')],
-                    'finc.record_id': doc['ArticleID'],
-                    'finc.source_id': 'jove',
-                    'finc.id': 'ai-jove-%s' % doc['ArticleID'],
-                    'x.subjects': doc['Section'].split(','),
-                    'rft.date': datetime.datetime.strptime(doc['Date Published'], '%m/%d/%Y').strftime("%Y-%m-%d"),
-                    'rft.genre': 'article',
-                    'version': '0.9',
-                    'ris.type': 'EJOUR',
-                    'finc.mega_collection': 'JoVE',
-                    'abstract': doc.get('Summary'),
-                }
-                output.write(json.dumps(converted))
-                output.write("\n")
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))

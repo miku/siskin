@@ -1,9 +1,9 @@
 # coding: utf-8
-# pylint: disable=C0103,C0301
-
-# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+#
+# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#                   
 #
 # This file is part of some open source application.
 #
@@ -23,34 +23,36 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Define version, disable some warnings and ensure temporary and log directories
-are there and writeable.
+SpoWi Diplomarbeiten, refs #13065.
+
+Configuration:
+
+[spowi]
+
+input = /path/to/csv (ask RS)
 """
 
-from __future__ import print_function
+import luigi
+from gluish.utils import shellout
 
-import os
-import sys
-import tempfile
-import warnings
+from siskin.task import DefaultTask
 
-from siskin.configuration import Config
 
-warnings.filterwarnings("ignore")
+class SPOWITask(DefaultTask):
+    """
+    This task inherits functionality from `siskin.task.DefaultTask`.
+    """
+    TAG = '160'
 
-# https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning
-# wrap into try-except, since at install-time urllib3 might not be installed yet
-try:
-    import urllib3
-    urllib3.disable_warnings()
-except (AttributeError, ImportError):
-    pass
 
-__version__ = '0.39.0'
+class SPOWIMARC(SPOWITask):
+    """ Convert CSV to BinaryMarc """
 
-config = Config.instance()
-if sys.version_info.major == 2:
-    tempfile.tempdir = config.get('core', 'tempdir')
-else:
-    tempfile.tempdir = config.get(
-        'core', 'tempdir', fallback=tempfile.gettempdir())
+    def run(self):
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets("160/160_marcbinary.py"),
+                          input=self.config.get('spowi', 'input'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))

@@ -216,6 +216,9 @@ for filename in filenames:
         parent = get_datafield("010", "a")
         title = get_datafield("331", "a")
 
+        if "Brockhaus" in title:
+            continue
+
         if len(title) > 0 and len(parent) > 0 and parent in parent_title:
             f245a = parent_title[parent]
             if f245a == "":
@@ -237,8 +240,10 @@ for filename in filenames:
         parent = get_datafield("010", "a")
         parent = len(parent)
         regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
-        if ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
-                or "X," in format or "Bde." in format or ": graph" in format) or isbn > 0:
+         if isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
+            format = "Buch"
+        elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format
+                             or "XV" in format or "X," in format or "Bde." in format or ": graph" in format):
             format = "Buch"
         elif "CD" in format:
             format = "CD"
@@ -257,7 +262,8 @@ for filename in filenames:
               or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
             format = "Objekt"
         elif parent > 0 and isbn == 0:
-            format = "Zeitschrift"
+            #format = "Zeitschrift"
+            continue
         else:
             continue
 

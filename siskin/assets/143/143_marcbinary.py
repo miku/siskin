@@ -50,8 +50,11 @@ for oldrecord in oldrecords:
     newrecord.add("008", data=f008)
 
     # 035
-    f035a = oldrecord["035"]["a"]
-    newrecord.add("035", a=f035a)
+    try:
+        f035a = oldrecord["035"]["a"]
+        newrecord.add("035", a=f035a)
+    except:
+        pass
 
     # 040
     f040a = oldrecord["040"]["a"]
@@ -118,6 +121,7 @@ for oldrecord in oldrecords:
     newrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
     # 935
+    newrecord.add("935", b="cofz")
     newrecord.add("935", c="vide")
 
     # Kollektion
@@ -126,6 +130,28 @@ for oldrecord in oldrecords:
         newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Biology)")
     elif f490a == "Medicine":
         newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Medicine)")
+    elif f490a == "Neuroscience":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Neuroscience)")
+    elif f490a == "Immunology and Infection":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Immunology and Infection)")
+    elif f490a == "Bioengineering":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Bioengineering)")
+    elif f490a == "Behavior":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Behavior)")
+    elif f490a == "Biochemistry":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Biochemistry)")
+    elif f490a == "Cancer Research":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Cancer Research)")
+    elif f490a == "Engineering":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Engineering)")
+    elif f490a == "Environment":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Environment)")
+    elif f490a == "Chemistry":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Chemistry)")
+    elif f490a == "Developmental Biology":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Developmental Biology)")
+    elif f490a == "Genetics":
+        newrecord.add("980", a=f980a, b="143", c="JOVE Journal of Visualized Experiments (Genetics)")
     else:
         print("Kollektion %s in Feld 490 unbekannt" % f490a)
 
