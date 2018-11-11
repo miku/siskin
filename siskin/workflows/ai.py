@@ -58,7 +58,7 @@ from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLHoldingsFile,
                                  AMSLOpenAccessKBART, AMSLService, AMSLFreeContent)
 from siskin.sources.arxiv import ArxivIntermediateSchema
-from siskin.sources.ceeol import CeeolJournalsDumpIntermediateSchema
+from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
                                      CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)
@@ -291,7 +291,7 @@ class AIIntermediateSchema(AITask):
             PQDTIntermediateSchema(date=self.date, stamp=True),
             KielFMFIntermediateSchema(stamp=True),
             IJOCIntermediateSchema(stamp=True),
-            CeeolJournalsDumpIntermediateSchema(stamp=True),
+            CeeolJournalsIntermediateSchema(stamp=True),
             SSOARIntermediateSchema(stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
             HHBDIntermediateSchema(date=self.date, stamp=True),
