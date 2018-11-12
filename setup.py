@@ -107,7 +107,7 @@ Installation note:
 
 setup(name='siskin',
       version=__version__,
-      description='Various sources and workflows.',
+      description='Luigi tasks for building an article metadata index for https://finc.info',
       url='https://github.com/ubleipzig/siskin',
       author='The Finc Authors',
       author_email='team@finc.info',
