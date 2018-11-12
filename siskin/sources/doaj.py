@@ -187,22 +187,24 @@ class DOAJDumpNext(DOAJTask):
 class DOAJIdentifierBlacklist(DOAJTask):
     """
     Create a blacklist of identifiers.
+
+    XXX: Remove DOAJDump dependency.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     min_title_length = luigi.IntParameter(default=30,
                                           description='Only consider titles with at least this length.')
 
     def requires(self):
-        return DOAJDump(date=self.date)
+        return DOAJDumpNext(date=self.date)
 
     def run(self):
         """
         Output a list of identifiers of documents, which have the same title. Use the newest.
         """
         output = shellout("""jq -rc '[
-                                .["_source"]["bibjson"]["title"],
-                                .["_source"]["last_updated"],
-                                .["_source"]["id"]
+                                .["bibjson"]["title"],
+                                .["last_updated"],
+                                .["id"]
                             ]' {input} | sort -S35% > {output}""", input=self.input().path)
 
         with open(output) as handle:
