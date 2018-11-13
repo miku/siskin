@@ -108,12 +108,27 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if language == "de" or language == "deu":
         language = "ger"
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-    marcrecord.add("041", a=language)   
+    marcrecord.add("041", a=language)
 
-    # Verfasser
+    # Fachgebiet
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
+        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
+        if isinstance(subjects, list):
+            for subject in subjects:
+                if len(subject) == 3:
+                    marcrecord.add("084", a=subject, _2="ddc")
+                    break
+        else:
+            if len(subject) == 3:
+                marcrecord.add("084", a=subject, _2="ddc")
+
+    # 1. Urheber
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:creator"):
-        f100a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
-        marcrecord.add("100", a=f100a)
+        creator = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
+        if isinstance(creator, list):
+            marcrecord.add("100", a=creator[0])
+        else:
+            marcrecord.add("100", a=creator)
 
     # Titel   
     f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]   
@@ -125,19 +140,40 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         publisher = ["b", "Hochschule Mittweida,", "c", f260c]
         marcrecord.add("260", subfields=publisher)
 
+    # Fußnote
+    sources = xmlrecord["metadata"]["oai_dc:dc"]["dc:source"]
+    if isinstance(sources, list):
+        for source in sources:
+            if ":" in source:
+                f500a = source.split("In: ")
+                if len(f500a) == 2:
+                    marcrecord.add("500", a=f500a[1])
+                else:
+                    marcrecord.add("500", a=f500a[0])
+    else:
+        f500a = sources.split("In: ")
+        if len(f500a) == 2:
+            marcrecord.add("500", a=f500a[1])
+        else:
+            marcrecord.add("500", a=f500a[0])
+
     # Schlagwörter   
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
-        f689a = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
-        if isinstance(f689a, list):
-            for subject in f689a:
-                if ";" not in subject:
-                    marcrecord.add("689", a=subject)
-        else:          
-            f689a = f689a.split(" , ")
-            if len(f689a) > 1:
-                for subject in f689a:
-                    if ";" not in subject:
-                        marcrecord.add("689", a=subject)
+        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
+        if isinstance(subjects, list):
+            for subject in subjects:
+                if len(subject) != 3:
+                    marcrecord.add("650", a=subject)
+        else:
+            if len(subject) != 3:
+                marcrecord.add("650", a=subject)
+
+    # weitere Urheber
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:creator"):
+        creators = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
+        if isinstance(creators, list):
+            for creator in creators[1:]:
+                marcrecord.add("700", a=creator)              
 
     # Link zu Datensatz und Ressource  
     urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
