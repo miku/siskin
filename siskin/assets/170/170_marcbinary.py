@@ -9,19 +9,6 @@ import xmltodict
 import marcx
 
 
-#Article</dc:type>
-#Charter</dc:type>
-#Fragment</dc:type>
-#Letter</dc:type>
-#Manuscript</dc:type>
-#Map</dc:type>
-#Monograph</dc:type>
-#Multivolume_work</dc:
-#Periodical</dc:type>
-#Series</dc:type>
-#Text</dc:type>
-#Volume</dc:type>
-
 formatmaps = {
     '':
     {    
@@ -106,18 +93,20 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
-    regexp = re.match("oai:digi.ub.uni-heidelberg.de:(\d+)", f001)
+    regexp = re.match("oai:mediarep.org:doc/(\d+)", f001)
     if regexp:
         f001 = regexp.group(1)
         marcrecord.add("001", data="finc-170-" + f001)
     else:
-        print("Der Identifier konnte nicht zerlegt werden: " + f001)
+        print(u"Der Identifier konnte nicht zerlegt werden: " + f001)
 
     # 007
     marcrecord.add("007", data="cr")
 
     # Sprache
-    language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]   
+    language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
+    if language == "de" or language == "deu":
+        language = "ger"
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
     marcrecord.add("041", a=language)   
 
@@ -151,18 +140,17 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                         marcrecord.add("689", a=subject)
 
     # Link zu Datensatz und Ressource  
-    f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
-    if len(f856u) == 2:
-        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])  
-        marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[1])
-    else:
-        print("Die URLs weichen vom üblichen Schema ab: " + f001)
-
+    urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
+    for f856u in urls:
+        if "https://mediarep.org" in f856u:
+            marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+            continue
+    
     # Medientyp
     marcrecord.add("935", b="cofz")
    
     # Kollektion   
-    collection = ["a", f001 "b", "170", "c", "sid-170-col-mediarep"]
+    collection = ["a", f001, "b", "170", "c", "sid-170-col-mediarep"]
     marcrecord.add("980", subfields=collection)
 
     
