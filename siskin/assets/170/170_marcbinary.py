@@ -115,12 +115,12 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
         if isinstance(subjects, list):
             for subject in subjects:
-                if len(subject) == 3:
+                if re.search("\d\d\d", subject):
                     marcrecord.add("084", a=subject, _2="ddc")
                     break
         else:
-            if len(subject) == 3:
-                marcrecord.add("084", a=subject, _2="ddc")
+            if re.search("\d\d\d", subjects):
+                marcrecord.add("084", a=subjects, _2="ddc")
 
     # 1. Urheber
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:creator"):
@@ -135,10 +135,18 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("245", a=f245)
 
     # Erscheinungsvermerk
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:publisher"):
+        f260b = xmlrecord["metadata"]["oai_dc:dc"]["dc:publisher"]
+    else:
+        f260b = ""
+
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:date"):
         f260c = xmlrecord["metadata"]["oai_dc:dc"]["dc:date"]
-        publisher = ["b", "Hochschule Mittweida,", "c", f260c]
-        marcrecord.add("260", subfields=publisher)
+    else:
+        f260c = ""
+
+    publisher = ["b", f260b, "c", f260c]
+    marcrecord.add("260", subfields=publisher)
 
     # Fußnote
     sources = xmlrecord["metadata"]["oai_dc:dc"]["dc:source"]
@@ -162,10 +170,10 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
         if isinstance(subjects, list):
             for subject in subjects:
-                if len(subject) != 3:
+                if not re.search("\d\d\d", subject):
                     marcrecord.add("650", a=subject)
         else:
-            if len(subject) != 3:
+            if not re.search("\d\d\d", subject):
                 marcrecord.add("650", a=subject)
 
     # weitere Urheber
@@ -173,7 +181,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         creators = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
         if isinstance(creators, list):
             for creator in creators[1:]:
-                marcrecord.add("700", a=creator)              
+                marcrecord.add("700", a=creator)
+
+    # Zeitschrift
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:relation"):
+        f773a = xmlrecord["metadata"]["oai_dc:dc"]["dc:relation"]
+        marcrecord.add("773", a=f773a)
+
 
     # Link zu Datensatz und Ressource  
     urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
