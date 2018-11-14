@@ -107,6 +107,25 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # 007
     marcrecord.add("007", data="cr")
 
+    # ISBN
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
+        identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]   
+        if isinstance(identifiers, list):
+            for identifier in identifiers:
+                if re.search("([0-9xX-]{10,17})", identifier):
+                    marcrecord.add("020", a=identifier)
+                    break
+
+    # ISSN
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
+        identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]   
+        if isinstance(identifiers, list):
+            for identifier in identifiers:
+                identifier = identifier.replace("issn:", "")
+                if re.search("\d\d\d\d-\d\d\d\d$", identifier):
+                    marcrecord.add("022", a=identifier)
+                    break
+
     # Sprache
     language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
     if language == "de" or language == "deu":
