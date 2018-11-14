@@ -171,6 +171,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     publisher = ["b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
+    # Beschreibung
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:description"):
+        f520a = xmlrecord["metadata"]["oai_dc:dc"]["dc:description"]
+        marcrecord.add("520", a=f520a)
+
     # Schlagwörter   
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
