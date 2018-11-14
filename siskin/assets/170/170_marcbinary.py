@@ -169,7 +169,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f260c = ""
 
     publisher = ["b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=publisher)
+    marcrecord.add("260", subfields=publisher)    
 
     # Beschreibung
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:description"):
@@ -217,8 +217,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     for f856u in urls:
         if "https://mediarep.org" in f856u:
             marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
-            continue
-    
+        elif "doi.org" in f856u:
+            marcrecord.add("856", q="text/html", _3="Zitierlink (DOI)", u=f856u)
+            
     # Medientyp
     marcrecord.add("935", b="cofz")
    
