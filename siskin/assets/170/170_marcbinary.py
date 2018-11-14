@@ -89,7 +89,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord = marcx.Record(force_utf8=True)
 
     # Leader
-    marcrecord.leader = "     cam  22        4500"
+    format = xmlrecord["metadata"]["oai_dc:dc"]["dc:type"]
+    if format[0] == "article":
+        marcrecord.leader = "     nab  22        4500"
+    else:
+        marcrecord.leader = "     cam  22        4500"
     
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
