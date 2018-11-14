@@ -152,23 +152,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     publisher = ["b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
-    # Fußnote
-    sources = xmlrecord["metadata"]["oai_dc:dc"]["dc:source"]
-    if isinstance(sources, list):
-        for source in sources:
-            if ":" in source:
-                f500a = source.split("In: ")
-                if len(f500a) == 2:
-                    marcrecord.add("500", a=f500a[1])
-                else:
-                    marcrecord.add("500", a=f500a[0])
-    else:
-        f500a = sources.split("In: ")
-        if len(f500a) == 2:
-            marcrecord.add("500", a=f500a[1])
-        else:
-            marcrecord.add("500", a=f500a[0])
-
     # Schlagwörter   
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
@@ -188,9 +171,21 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 marcrecord.add("700", a=creator)
 
     # Zeitschrift
-    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:relation"):
-        f773a = xmlrecord["metadata"]["oai_dc:dc"]["dc:relation"]
-        marcrecord.add("773", a=f773a)
+    sources = xmlrecord["metadata"]["oai_dc:dc"]["dc:source"]
+    if isinstance(sources, list):
+        for source in sources:
+            if ":" in source:
+                f773a = source.split("In: ")
+                if len(f773a) == 2:
+                    marcrecord.add("773", a=f773a[1])
+                else:
+                    marcrecord.add("773", a=f773a[0])
+    else:
+        f773a = sources.split("In: ")
+        if len(f773a) == 2:
+            marcrecord.add("773", a=f773a[1])
+        else:
+            marcrecord.add("773", a=f773a[0])
 
 
     # Link zu Datensatz und Ressource  
