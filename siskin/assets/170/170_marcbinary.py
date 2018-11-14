@@ -116,7 +116,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         if isinstance(subjects, list):
             for subject in subjects:
                 if re.search("\d\d\d", subject):
-                    marcrecord.add("084", a=subject, _2="ddc")
+                    marcrecord.add("082", a=subject, _2="ddc")
                     break
         else:
             if re.search("\d\d\d", subjects):
