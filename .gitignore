@@ -71,3 +71,4 @@ bin/indexcompare
 *.py.bak
 /tags
 /notebooks
+/siskin.pex

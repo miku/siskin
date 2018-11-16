@@ -24,7 +24,11 @@ clean:
 	rm -rf build/ dist/
 	find . -name "*.pyc" -exec rm -f {} \;
 	find . -name ".DS_Store" -exec rm -f {} \;
+	rm -f siskin.pex
 
 docs/catalog/AIUpdate.png: $(PY_FILES)
 	taskdeps-dot AIUpdate | dot -Tpng > $@
 
+# Experimental: build a single file executable for `taskdo` command.
+siskin.pex:
+	pex -v -r <(pip freeze) --disable-cache -c taskdo -o $@
