@@ -194,6 +194,11 @@ setup(name='siskin',
           'bin/taskwc',
           'bin/xmltools.py',
       ],
+      entry_points={
+        'console_scripts': [
+            'siskin=siskin.main:main',
+        ],
+      },
       install_requires=install_requires,
       zip_safe=False,
       classifier=[
