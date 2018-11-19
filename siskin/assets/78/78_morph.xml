@@ -22,6 +22,11 @@
         <!--<data source="KORP_URHEBER.value" name="rft.aucorp" /> verursacht Probleme beim Intermediate Schema-->
       </entity>
     </entity>
+    <entity name="facet_avail[]" flushWith="record">
+      <data source="_id">
+        <constant value="Online" />
+      </data>
+    </entity>
     <data source="TITEL.value" name="rft.btitle"/>
     <data source="ZEITSCHRIFT.value" name="rft.jtitle">
       <regexp match="^(.*\S)\s(\S.*)(\/\d\d\d\d)(\/.*\d,)\s(S\..*\.)$" format="${1}"/>
