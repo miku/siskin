@@ -47,6 +47,28 @@ class MediarepTask(DefaultTask):
         return monthly(date=self.date)
 
 
+class MediarepMARC(MediarepTask):
+    """
+    Harvest and convert to MARC.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    url = luigi.Parameter(default="https://mediarep.org/oai/request",
+                          significant=False)
+    prefix = luigi.Parameter(default="oai_dc", significant=False)
+
+    def requires(self):
+        return Executable(name='metha-sync', message='https://github.com/miku/metha'),
+
+    def run(self):
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
+                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+        output = shellout("""METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} > {output}""", dir=self.config.get('core', 'metha-dir'), prefix=self.prefix, url=self.url)
+        output = shellout("""python {script} {input} {output}""", script=self.assets('170/170_marcbinary.py'), input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="mrc"))
+
 class MediarepIntermediateSchema(MediarepTask):
     """
     Single file dump.
