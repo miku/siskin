@@ -7,7 +7,7 @@
     </combine>
     <entity name="finc.mega_collection[]" flushWith="record">
       <data source="_id">
-        <constant value="$[mega_collection]"/>
+        <constant value="IZI-Datenbank"/>
       </data>
     </entity>
     <combine name="finc.source_id" value="78">
