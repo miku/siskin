@@ -28,24 +28,30 @@ IZI Task #7755, #13652.
 """
 
 import datetime
+import os
 
 import luigi
+
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.task import DefaultTask
 
 
 class IZITask(DefaultTask):
-    """ Base task for IZI """
+    """ Base task for IZI. """
     TAG = '78'
 
 class IZIIntermediateSchema(IZITask):
-    """ Convert XML to intermediate schema via metafacture """
+    """
+    Convert XML to intermediate schema via metafacture.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
-    iziFile = luigi.Parameter(default='/tmp/IZI_XML.xml', description='path izi datadump', significant=False)
+    iziFile = luigi.Parameter(default='/tmp/izi.xml', description='path izi datadump', significant=False)
 
     def run(self):
+        if not os.path.exists(self.iziFile):
+            raise RuntimeError('input file does not exist, see #7755')
+
         output = shellout("""flux.sh {flux} in={iziFile} > {output}""",
                          flux=self.assets("78/78.flux"), iziFile=self.iziFile)
         luigi.LocalTarget(output).move(self.output().path)
