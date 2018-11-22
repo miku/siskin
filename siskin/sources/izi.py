@@ -58,28 +58,3 @@ class IZIIntermediateSchema(IZITask):
     
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class IZIFincSolr(IZITask):
-    """
-    Export to finc solr schema by using span-export.
-    Tag with ISIL for FID and change record type.
-    """
-    format = luigi.Parameter(default='solr5vu3', description='export format')
-    isil = luigi.Parameter(default='DE-15-FID', description='isil FID')
-    date = ClosestDateParameter(default=datetime.date.today())
-    iziFile = luigi.Parameter(default='/tmp/IZI_XML.xml', description='path izi datadump', significant=False)
-
-    def requires(self):
-        return {
-            'file': IZIIntermediateSchema(date=self.date, iziFile=self.iziFile)
-        }
-    
-    def run(self):
-        output = shellout("""span-export -o {format} -with-fullrecord <(span-tag -c <(echo '{{"{isil}": {{"any": {{}}}}}}') {input}) > {output}""",
-                          format=self.format, isil=self.isil, input=self.input().get('file').path)
-        output = shellout(
-            """cat {input} | sed 's/"recordtype":"ai"/"recordtype":"is"/g' > {output}""", input=output)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincsolr.ndj'))
