@@ -256,15 +256,15 @@ for filepath in input_filenames:
 
         # Kollektion
         if "prelinger" in jsonrecord["collection"]:
-            f980c = "Internet Archive / Prelinger"
+            f980c = "sid-153-prelinger"
         elif "classic_cartoons" in jsonrecord["collection"]:
-            f980c = "Internet Archive / Classic Cartoons"
+            f980c = "sid-153-col-classiccartoons"
         elif "feature_films" in jsonrecord["collection"]:
-            f980c = "Internet Archive / Feature Films"
+            f980c = "sid-153-col-featurefilms"
         elif "more_animation" in jsonrecord["collection"]:
-            f980c = "Internet Archive / More Animation"
+            f980c = "sid-153-col-moreanimation"
         elif "vintage_cartoons" in jsonrecord["collection"]:
-            f980c = "Internet Archive / Vintage Cartoons"
+            f980c = "sid-153-col-vintagecartoons"
         else:
             raise ValueError('collection mapping missing: %s', jsonrecord['collection'])
 
