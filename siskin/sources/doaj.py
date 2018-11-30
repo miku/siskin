@@ -74,8 +74,8 @@ class DOAJCSV(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout(
-            'wget --retry-connrefused {url} -O {output}', url=self.url)
+        output = shellout('wget --retry-connrefused {url} -O {output}',
+                          url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -312,8 +312,10 @@ class DOAJIntermediateSchema(DOAJTask):
                              description="kind of source document, doaj or doaj-api")
 
     def requires(self):
-        return {'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
-                'input': DOAJFiltered(date=self.date, format=self.format)}
+        return {
+            'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
+            'input': DOAJFiltered(date=self.date, format=self.format),
+        }
 
     @timed
     def run(self):
@@ -337,8 +339,8 @@ class DOAJExport(DOAJTask):
         return DOAJIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout(
-            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -364,8 +366,8 @@ class DOAJISSNList(DOAJTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
                  input=self.input().get('input').path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input(
-        ).get('input').path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
+                 input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -380,8 +382,10 @@ class DOAJDOIList(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': DOAJIntermediateSchema(date=self.date),
-                'jq': Executable(name='jq', message='http://git.io/NYpfTw')}
+        return {
+            'input': DOAJIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='http://git.io/NYpfTw'),
+        }
 
     @timed
     def run(self):
