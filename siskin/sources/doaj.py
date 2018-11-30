@@ -64,7 +64,7 @@ class DOAJTask(DefaultTask):
 
 class DOAJCSV(DOAJTask):
     """
-    CSV dump, updated every 30 minutes. Not sure what's in there.
+    CSV dump, updated every 30 minutes. Winter 2018: 12313x58.
     """
     date = luigi.DateParameter(default=datetime.date.today())
     url = luigi.Parameter(default='http://doaj.org/csv', significant=False)
