@@ -82,87 +82,7 @@ class DOAJCSV(DOAJTask):
         return luigi.LocalTarget(path=self.path(ext='csv'))
 
 
-class DOAJHarvest(DOAJTask):
-    """
-    Via OAI, https://doaj.org/features. Last harvest (12/2017) yielded only 13K records.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def run(self):
-        shellout("metha-sync http://www.doaj.org/oai")
-        output = shellout(
-            "metha-cat http://www.doaj.org/oai | pigz -c > {output}")
-        luigi.LocalTarget(output).move(path=self.path())
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
-
-
 class DOAJDump(DOAJTask):
-    """
-    Complete DOAJ Elasticsearch dump., refs: #2089.
-
-    XXX: Switch to API (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query)
-
-    curl -X GET --header "Accept: application/json" "https://doaj.org/api/v1/search/articles/*"
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    host = luigi.Parameter(default='doaj.org', significant=False)
-    port = luigi.IntParameter(default=443, significant=False)
-    url_prefix = luigi.Parameter(default='query', significant=False)
-
-    batch_size = luigi.IntParameter(default=200, significant=False)
-    timeout = luigi.IntParameter(default=60, significant=False)
-    max_retries = luigi.IntParameter(default=3, significant=False)
-    sleep = luigi.IntParameter(default=4, significant=False)
-
-    @timed
-    def run(self):
-        """
-        Connect to ES and issue queries. Use exponential backoff to mitigate
-        gateway timeouts. Be light on resources and do not crawl in parallel.
-
-        XXX: This task might stop before completion, investigate.
-        XXX: Completed dump 2018-06-01 is only 495M (about 150k records),
-        expected 10G - https://is.gd/JRRFO1.
-        """
-        max_backoff_retry = 10
-        backoff_interval_s = 0.05
-
-        hosts = [{'host': self.host, 'port': self.port,
-                  'url_prefix': self.url_prefix}]
-        es = elasticsearch.Elasticsearch(
-            hosts, timeout=self.timeout, max_retries=self.max_retries, use_ssl=True)
-        with self.output().open('w') as output:
-            offset, total = 0, 0
-            while offset <= total:
-                for i in range(1, max_backoff_retry + 1):
-                    self.logger.debug(json.dumps(
-                        {'attempt': i, 'offset': offset, 'total': total}))
-
-                    try:
-                        result = es.search(body={'constant_score': {'query': {'match_all': {}}}},
-                                           index=('journal', 'article'),
-                                           size=self.batch_size, from_=offset)
-                    except Exception:
-                        if i == max_backoff_retry:
-                            raise
-                        time.sleep(backoff_interval_s)
-                        backoff_interval_s = 2 * backoff_interval_s
-                        continue
-
-                    for doc in result['hits']['hits']:
-                        output.write("%s\n" % json.dumps(doc))
-                    total = total or result['hits']['total']
-                    offset += self.batch_size
-                    time.sleep(self.sleep)
-                    break
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-class DOAJDumpNext(DOAJTask):
     """
     Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la), which will use
     the API
@@ -187,15 +107,13 @@ class DOAJDumpNext(DOAJTask):
 class DOAJIdentifierBlacklist(DOAJTask):
     """
     Create a blacklist of identifiers.
-
-    XXX: Remove DOAJDump dependency.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     min_title_length = luigi.IntParameter(default=30,
                                           description='Only consider titles with at least this length.')
 
     def requires(self):
-        return DOAJDumpNext(date=self.date)
+        return DOAJDump(date=self.date)
 
     def run(self):
         """
@@ -233,50 +151,13 @@ class DOAJFiltered(DOAJTask):
         """
         Temporarily support both formats. XXX: Switch to doaj-api.
         """
-        dump = DOAJDump(date=self.date)
-        if self.format == "doaj-api":
-            dump = DOAJDumpNext(date=self.date)
-
         return {
-            'dump': dump,
+            'dump': DOAJDump(date=self.date),
             'blacklist': DOAJIdentifierBlacklist(date=self.date),
         }
 
+    @timed
     def run(self):
-        if self.format == "doaj":
-            self.run_doaj()
-        elif self.format == "doaj-api":
-            self.run_doaj_api()
-        else:
-            raise ValueError("format must be: doaj or doaj-api")
-
-    @timed
-    def run_doaj(self):
-        """
-        XXX: Deprecated elasticsearch export. Switch to API harvest soon.
-        """
-        identifier_blacklist = load_set_from_target(
-            self.input().get('blacklist'))
-        excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
-                                      func=lambda line: line.replace("-", ""))
-
-        with self.output().open('w') as output:
-            with self.input().get('dump').open() as handle:
-                for line in handle:
-                    record, skip = json.loads(line), False
-                    if record['_source']['id'] in identifier_blacklist:
-                        continue
-                    for issn in record["_source"]["index"]["issn"]:
-                        issn = issn.replace("-", "").strip()
-                        if issn in excludes:
-                            skip = True
-                            break
-                    if skip:
-                        continue
-                    output.write(line)
-
-    @timed
-    def run_doaj_api(self):
         identifier_blacklist = load_set_from_target(
             self.input().get('blacklist'))
         excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
@@ -395,3 +276,4 @@ class DOAJDOIList(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
