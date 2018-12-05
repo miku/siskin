@@ -320,7 +320,7 @@ class AMSLCollectionsISIL(AMSLTask):
         }
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(description='ISIL, case sensitive')
+    isil = luigi.Parameter(default='DE-15', description='ISIL, case sensitive')
     shard = luigi.Parameter(default='UBL-ai',
                             description='only collect items for this shard')
 
@@ -330,16 +330,22 @@ class AMSLCollectionsISIL(AMSLTask):
     def run(self):
         with self.input().open() as handle:
             doc = json.load(handle)
+
+        unique_shards = set()
+
         scmap = collections.defaultdict(set)
         for item in doc:
+            unique_shards.add(item['shardLabel'])
             if not item['shardLabel'] == self.shard:
                 continue
             if not item['ISIL'] == self.isil:
                 continue
             scmap[item['sourceID']].add(item['megaCollection'].strip())
             if not scmap:
-                raise RuntimeError(
-                    'no collections found for ISIL: %s' % self.isil)
+                raise RuntimeError('no collections found for ISIL: %s' % self.isil)
+
+        if not scmap and self.shard not in unique_shards:
+            self.logger.warn('available shards: %s', list(unique_shards))
 
         with self.output().open('w') as output:
             output.write(json.dumps(scmap, cls=SetEncoder) + "\n")
