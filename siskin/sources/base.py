@@ -30,6 +30,8 @@ BASE, refs #5994.
 * https://en.wikipedia.org/wiki/BASE_(search_engine)
 * http://www.dlib.org/dlib/june04/lossau/06lossau.html
 
+Currently (Dec 2018) BASE is provided via SLUB download.
+
 Config
 ------
 
@@ -59,7 +61,10 @@ class BaseTask(DefaultTask):
     TAG = 'base'
 
     def closest(self):
-        return weekly(self.date)
+        """
+        As indicated by the fixed download URL.
+        """
+        return '2017-08-22'
 
 
 class BaseDownload(BaseTask):
