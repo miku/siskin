@@ -44,38 +44,9 @@ class ArchiveTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class ArchiveMARC(ArchiveTask):
-    """
-    Convert. Hard-coded collections, currently.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        queries = [
-            'collection:prelinger',
-            'collection:classic_cartoons',
-            'collection:feature_films',
-            'collection:more_animation',
-            'collection:vintage_cartoons',
-        ]
-        return [ArchiveSearchMetadata(date=self.date, query=query)
-                for query in queries]
-
-    def run(self):
-        inputs = [target.path for target in self.input()]
-        output = shellout("python {script} {output} {inputs}",
-                          script=self.assets("153/153_marcbinary.py"),
-                          inputs=' '.join(inputs))
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
-
-
 class ArchiveSearch(ArchiveTask):
     """
-    Search archive via the ia tool. Requires Archive.org account:
-
+    Search archive via the ia tool. Requires an archive.org account:
     https://archive.org/account/login.createaccount.php
 
     The command `ia configure` will set you up.
@@ -133,7 +104,34 @@ class ArchiveSearchMetadata(ArchiveTask):
         return luigi.LocalTarget(path=self.path(ext='ldj', digest=True))
 
 
-class ArchiveTelevisionTexts(ArchiveTask, luigi.WrapperTask):
+class ArchiveMARC(ArchiveTask):
+    """
+    Convert. Hard-coded collections, currently.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        queries = [
+            'collection:prelinger',
+            'collection:classic_cartoons',
+            'collection:feature_films',
+            'collection:more_animation',
+            'collection:vintage_cartoons',
+        ]
+        return [ArchiveSearchMetadata(date=self.date, query=query) for query in queries]
+
+    def run(self):
+        inputs = [target.path for target in self.input()]
+        output = shellout("python {script} {output} {inputs}",
+                          script=self.assets("153/153_marcbinary.py"),
+                          inputs=' '.join(inputs))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+
+class ArchiveTelevisionTexts(ArchiveTask):
     """
     Temporary task for harvesting special query from archive, refs #8000.
     """
