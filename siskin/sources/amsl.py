@@ -363,7 +363,7 @@ class AMSLHoldingsFile(AMSLTask):
 
     Output should be in standard KBART format, given the uploaded files in AMSL are KBART.
     """
-    isil = luigi.Parameter(description='ISIL, case sensitive')
+    isil = luigi.Parameter(default='DE-15', description='ISIL, case sensitive')
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
