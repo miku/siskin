@@ -61,13 +61,11 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder, dictcheck
 
-
 class AMSLTask(DefaultTask):
     """
     Base class for AMSL related tasks.
     """
     TAG = 'amsl'
-
 
 class AMSLService(AMSLTask):
     """
@@ -139,7 +137,6 @@ class AMSLService(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext='json'))
 
-
 class AMSLCollections(AMSLTask):
     """
     Report all collections, that appear in AMSL.
@@ -155,7 +152,6 @@ class AMSLCollections(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-
 
 class AMSLCollectionsShardFilter(AMSLTask):
     """
@@ -207,7 +203,6 @@ class AMSLCollectionsShardFilter(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-
 class AMSLCollectionsISILList(AMSLTask):
     """
     A per-shard list of ISILs for which AMSL has some information.
@@ -221,8 +216,8 @@ class AMSLCollectionsISILList(AMSLTask):
         ...
     """
     date = luigi.DateParameter(default=datetime.date.today())
-    shard = luigi.Parameter(
-        default='UBL-ai', description='only collect items for this shard')
+    shard = luigi.Parameter(default='UBL-ai',
+                            description='only collect items for this shard')
 
     def requires(self):
         return AMSLService(date=self.date, name='outboundservices:discovery')
@@ -352,7 +347,6 @@ class AMSLCollectionsISIL(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-
 class AMSLHoldingsFile(AMSLTask):
     """
     Access AMSL files/get?setResource= facilities.
@@ -409,7 +403,6 @@ class AMSLHoldingsFile(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
-
 
 class AMSLOpenAccessISSNList(AMSLTask):
     """
@@ -470,7 +463,6 @@ class AMSLOpenAccessISSNList(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-
 class AMSLGoldListKBART(AMSLTask):
     """
     Convert Bielefeld Gold List to KBART (for manual uploads in AMSL).
@@ -493,7 +485,6 @@ class AMSLGoldListKBART(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
-
 class AMSLFreeContent(AMSLTask):
     """
     Free content. Revelant for OA flags.
@@ -507,7 +498,6 @@ class AMSLFreeContent(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
-
 
 class AMSLOpenAccessKBART(AMSLTask):
     """
@@ -544,7 +534,6 @@ class AMSLOpenAccessKBART(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
-
 
 class AMSLWisoPackages(AMSLTask):
     """
@@ -661,7 +650,6 @@ class AMSLWisoPackages(AMSLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
-
 class AMSLFilterConfigFreeze(AMSLTask):
     """
     Create a frozen file. File will contain the filterconfig plus content of all URLs.
@@ -678,7 +666,6 @@ class AMSLFilterConfigFreeze(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='zip'))
-
 
 class AMSLFilterConfig(AMSLTask):
     """
