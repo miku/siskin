@@ -43,6 +43,8 @@ import os
 import luigi
 
 from gluish.format import TSV
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import Executable
 from siskin.task import DefaultTask
@@ -55,12 +57,15 @@ class CambridgeTask(DefaultTask):
     """
     TAG = '133'
 
+    def closest(self):
+        return monthly(date=self.date)
+
 
 class CambridgeDropbox(CambridgeTask):
     """
     Pull down content from FTP dropbox.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return Executable('rsync', message='https://rsync.samba.org/')
@@ -80,5 +85,3 @@ class CambridgeDropbox(CambridgeTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
-
-
