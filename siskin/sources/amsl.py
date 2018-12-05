@@ -33,6 +33,10 @@ policies and new business models of the publishers, consortial acquisition and
 modern web scale discovery technologies have turned the market place of
 scientific information into a complex and multidimensional construct.
 
+These tasks wrap API responses, allow access to holding files, and create a
+filterconfig which can be use fed into
+[span-tag](https://github.com/miku/span/tree/master/cmd/span-tag).
+
 Config:
 
 [amsl]
@@ -428,6 +432,7 @@ class AMSLOpenAccessISSNList(AMSLTask):
         0001-3765
 
     As of October 2017, this list includes: https://pub.uni-bielefeld.de/download/2913654/2913655.
+    As of December 2018, there are 72692 ISSN listed.
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
@@ -454,9 +459,9 @@ class AMSLOpenAccessISSNList(AMSLTask):
         shellout("cut -f 3 {input} | grep -oE '[0-9]{{4,4}}-[xX0-9]{{4,4}}' >> {output}",
                  input=output, output=stopover)
 
-        # Include OA list, refs #11579.
+        # Include OA list, refs #11579, maybe cache this?
         shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
-                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' >> {output}""",
+                    grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' | tr ',' '\n' >> {output}""",
                  output=stopover, preserve_whitespace=True)
 
         output = shellout("sort -u {input} > {output}", input=stopover)
@@ -467,7 +472,8 @@ class AMSLOpenAccessISSNList(AMSLTask):
 
 class AMSLGoldListKBART(AMSLTask):
     """
-    Convert Bielefeld Gold List to KBART (for manual uploads in AMSL).
+    Convert Bielefeld Gold List to KBART (for manual uploads in AMSL). As of
+    December 2018, there are 36706 ISSN in this list.
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
@@ -476,8 +482,10 @@ class AMSLGoldListKBART(AMSLTask):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout(""" echo "online_identifier" > {output}""", output=stopover)
         # Include OA list, refs #11579.
-        shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
-                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' |
+        shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 |
+                    cut -d, -f1,2 |
+                    tr -d '"' |
+                    grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' |
                     tr ',' '\n' |
                     sort -u |
                     grep -v ^$ >> {output}""",
@@ -494,7 +502,7 @@ class AMSLFreeContent(AMSLTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("curl -s '{base}/inhouseservices/list?do=freeContent' | jq -c . > {output}",
+        output = shellout("curl -s '{base}/inhouseservices/list?do=freeContent' | jq -rc . > {output}",
                           base=self.config.get('amsl', 'base'))
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -505,7 +513,7 @@ class AMSLOpenAccessKBART(AMSLTask):
     """
     Create a KBART file that contains open access and freely available journals only.
 
-    Used in conjunction with https://git.io/vdB29.
+    Used in conjunction with [span-oa-filter](https://git.io/vdB29).
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
@@ -529,7 +537,7 @@ class AMSLOpenAccessKBART(AMSLTask):
 
         # Include OA list, refs #11579.
         shellout("""curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
-                    grep -E '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9xX]' | tr ',' '\n' |
+                    grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' | tr ',' '\n' |
                     awk '{{ print "\t\t"$0 }}' >> {output}""", output=output, preserve_whitespace=True)
 
         luigi.LocalTarget(output).move(self.output().path)
@@ -662,8 +670,7 @@ class AMSLFilterConfigFreeze(AMSLTask):
         return AMSLFilterConfig(date=self.date)
 
     def run(self):
-        output = shellout("span-freeze -o {output} < {input}",
-                          input=self.input().path)
+        output = shellout("span-freeze -o {output} < {input}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -819,9 +826,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    -    -    -     X
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'productISIL'],
-                           absent=['linkToHoldingsFile',
-                                    'linkToContentFile',
-                                    'externalLinkToContentFile']):
+                           absent=['linkToHoldingsFile', 'linkToContentFile', 'externalLinkToContentFile']):
 
                 isilsidcollections[isil][sid].add(mega_collection)
                 self.logger.debug("productISIL given, but ignored: %s, %s, %s", isil, sid, item['productISIL'])
@@ -850,9 +855,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    X    -    -     -
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile'],
-                           absent=['linkToContentFile',
-                                    'externalLinkToContentFile',
-                                    'productISIL']):
+                           absent=['linkToContentFile', 'externalLinkToContentFile', 'productISIL']):
 
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
                     isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(
@@ -865,9 +868,7 @@ class AMSLFilterConfig(AMSLTask):
             # --------------------------------
             # X   X    X    -    -    X     -
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'externalLinkToContentFile'],
-                           absent=['linkToHoldingsFile',
-                                    'linkToContentFile',
-                                    'productISIL']):
+                           absent=['linkToHoldingsFile', 'linkToContentFile', 'productISIL']):
 
                 isilfilters[isil].append({
                     "and": [
@@ -883,9 +884,7 @@ class AMSLFilterConfig(AMSLTask):
                                            'megaCollection',
                                            'ISIL',
                                            'linkToContentFile'],
-                           absent=['linkToHoldingsFile',
-                                    'externalLinkToContentFile',
-                                    'productISIL']):
+                           absent=['linkToHoldingsFile', 'externalLinkToContentFile', 'productISIL']):
 
                 isilfilters[isil].append({
                     "and": [
