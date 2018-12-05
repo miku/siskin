@@ -139,25 +139,3 @@ class ArxivIntermediateSchema(ArxivTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
-
-class ArxivExport(ArxivTask):
-    """
-    Export to various formats
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3', description='export format')
-
-    def requires(self):
-        return ArxivIntermediateSchema(date=self.date)
-
-    def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format, input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        extensions = {
-            'solr5vu3': 'ldj.gz',
-            'formeta': 'form.gz',
-        }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
