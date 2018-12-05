@@ -359,7 +359,7 @@ class AMSLHoldingsFile(AMSLTask):
 
     The output is probably zipped (will be decompressed on the fly).
 
-    One ISIL can have multiple files (they will be combined).
+    One ISIL can have multiple files (they will be concatenated).
 
     Output should be in standard KBART format, given the uploaded files in AMSL are KBART.
     """
@@ -375,8 +375,7 @@ class AMSLHoldingsFile(AMSLTask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
 
-        # The property which contains the URI of the holding file. Might
-        # change.
+        # The property containing the URI of the holding file, maybe.
         urikey = 'DokumentURI'
 
         for holding in holdings:
@@ -388,20 +387,17 @@ class AMSLHoldingsFile(AMSLTask):
 
                 # refs. #7142
                 if 'kbart' not in holding[urikey].lower():
-                    self.logger.debug("skipping non-KBART holding URI: %s",
-                                      holding[urikey])
+                    self.logger.debug("skipping non-KBART holding URI: %s", holding[urikey])
                     continue
 
-                link = "%s%s" % (self.config.get(
-                    'amsl', 'uri-download-prefix'), holding[urikey])
-                downloaded = shellout(
-                    "curl --fail {link} > {output} ", link=link)
+                link = "%s%s" % (self.config.get('amsl', 'uri-download-prefix'), holding[urikey])
+                downloaded = shellout("curl --fail {link} > {output} ", link=link)
                 try:
                     _ = zipfile.ZipFile(downloaded)
                     shellout("unzip -p {input} >> {output}",
                              input=downloaded, output=stopover)
                 except zipfile.BadZipfile:
-                    # at least the file is not a zip.
+                    # Probably not a zip.
                     shellout("cat {input} >> {output}",
                              input=downloaded, output=stopover)
 
