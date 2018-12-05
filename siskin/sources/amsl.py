@@ -25,7 +25,7 @@
 """
 Electronic Resource Management System Based on Linked Data Technologies.
 
-http://amsl.technology
+https://amsl.technology
 
 > Managing electronic resources has become a distinctive and important task for
 libraries in recent years. The diversity of resources, changing licensing
@@ -39,7 +39,7 @@ Config:
 
 base = https://x.y.z
 uri-download-prefix = https://x.y.z/OntoWiki/files/get?setResource=
-write-url = https://x.y.z/OntoWiki/x/y # stamping
+write-url = https://x.y.z/OntoWiki/x/y # For time-stamping.
 
 """
 
@@ -119,15 +119,14 @@ class AMSLService(AMSLTask):
     def run(self):
         parts = self.name.split(':')
         if not len(parts) == 2:
-            raise RuntimeError(
-                'realm:name expected, e.g. outboundservices:discovery')
+            raise RuntimeError('realm:name expected, e.g. outboundservices:discovery')
         realm, name = parts
 
         link = '%s/%s/list?do=%s' % (
             self.config.get('amsl', 'base').rstrip('/'), realm, name)
         output = shellout("""curl --fail "{link}" > {output} """, link=link)
 
-        # If we check here for valid JSON, debugging might be simpler.
+        # Check for valid JSON before, simplifies debugging.
         with open(output) as handle:
             try:
                 _ = json.load(handle)
