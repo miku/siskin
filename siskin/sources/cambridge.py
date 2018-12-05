@@ -33,11 +33,20 @@ Config:
 
 [cambridge]
 
-XXX
+scp-src = user@ftp.online:/home/cambridge
 
 """
 
+import datetime
+import os
+
+import luigi
+
+from gluish.format import TSV
+from gluish.utils import shellout
+from siskin.common import Executable
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 
 
 class CambridgeTask(DefaultTask):
@@ -45,3 +54,31 @@ class CambridgeTask(DefaultTask):
     Base task.
     """
     TAG = '133'
+
+
+class CambridgeDropbox(CambridgeTask):
+    """
+    Pull down content from FTP dropbox.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return Executable('rsync', message='https://rsync.samba.org/')
+
+    def run(self):
+        target = os.path.join(self.taskdir(), 'mirror')
+        shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
+                 rsync_options=self.config.get('cambridge', 'rsync-options', fallback='-avzP'),
+                 src=self.config.get('cambridge', 'scp-src'), target=target)
+
+        if not os.path.exists(self.taskdir()):
+            os.makedirs(self.taskdir())
+
+        with self.output().open('w') as output:
+            for path in iterfiles(target):
+                output.write_tsv(path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+
