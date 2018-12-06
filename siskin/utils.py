@@ -323,7 +323,7 @@ def scrape_html_listing(url, with_head=False):
     if r.status_code >= 400:
         raise RuntimeError("fetch failed with %s: %s", r.status_code, url)
 
-    soup = bs4.BeautifulSoup(r.text)
+    soup = bs4.BeautifulSoup(r.text, features="lxml")
     links = set()
 
     for a in soup.find_all("a"):
