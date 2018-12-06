@@ -43,6 +43,7 @@ install_requires = [
     'astroid>=1.1.1',
     'backoff>=1.3.1',
     'beautifulsoup4',
+    'bs4',
     'colorama>=0.3.3',
     'configparser>=3.5.0',
     'decorator>=3.4.0',
