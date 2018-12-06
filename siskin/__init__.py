@@ -33,9 +33,11 @@ import os
 import sys
 import tempfile
 import warnings
+import logging
 
 from siskin.configuration import Config
 
+logger = logging.getLogger('siskin')
 warnings.filterwarnings("ignore")
 
 # https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning
@@ -50,7 +52,11 @@ __version__ = '0.42.0'
 
 config = Config.instance()
 if sys.version_info.major == 2:
-    tempfile.tempdir = config.get('core', 'tempdir')
+    try:
+        tempfile.tempdir = config.get('core', 'tempdir')
+    except Exception as err:
+        logger.debug('no config found, using default tempdir: %s', err)
+        tempfile.tempdir = tempfile.gettempdir()
 else:
     tempfile.tempdir = config.get(
         'core', 'tempdir', fallback=tempfile.gettempdir())
