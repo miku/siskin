@@ -144,7 +144,7 @@ for oldrecord in reader:
     newrecord.add("970", c="PN")
 
     # 980
-    newrecord.add("980", a=f001, b="14", c="RISM")
+    newrecord.add("980", a=f001, b="14", c="sid-14-col-rism")
 
     outputfile.write(newrecord.as_marc())
 
