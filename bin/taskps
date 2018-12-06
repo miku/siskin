@@ -7,12 +7,13 @@
 #
 #     $ watch taskps localhost:8082
 #
-# ----
+# Access API via curl:
 #
-# curl -s http://localhost:8082/api/task_list -d 'data={"status":"PENDING","upstream_status":"","search":""}' | jq '.'
+#     $ curl -s http://localhost:8082/api/task_list -d 'data={"status":"PENDING","upstream_status":"","search":""}' | jq '.'
 #
-# DONE
-# ----
+# Example output:
+#
+# # DONE
 #
 # * AIFilterConfig(date=2016-03-23)
 # * AIIntermediateSchema(date=2016-03-23)
@@ -29,18 +30,15 @@
 # * JstorIntermediateSchema(date=2016-03-23)
 # * JstorXML(date=2016-03-23)
 #
-# RUNNING
-# -------
+# # RUNNING
 #
 # * AILicensing(date=2016-03-23)
 #
-# PENDING
-# -------
+# # PENDING
 #
 # * AIExport(date=2016-03-23)
 #
-# FAILED
-# ------
+# # FAILED
 #
 # ----------------
 #
@@ -90,9 +88,8 @@ if __name__ == '__main__':
             if len(tasks) == 0:
                 continue
 
-            head = '%s (%s)' % (status, len(tasks))
+            head = '# %s (%s)' % (status, len(tasks))
             print(head)
-            print('-' * len(head))
             print()
             for task in tasks:
                 print('%s\t* %s' % (status[0].lower(), task))
@@ -113,3 +110,4 @@ if __name__ == '__main__':
         sys.stderr.close()
     except:
         pass
+
