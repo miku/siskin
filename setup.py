@@ -74,6 +74,7 @@ install_requires = [
     'pytz>=2014.4',
     'rdflib>=4',
     'requests>=2.5.1',
+    'responses',
     'simplejson>=3.6.0',
     'six>=1.9.0',
     'snakebite>=2.5.1',
