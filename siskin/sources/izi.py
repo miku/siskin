@@ -34,6 +34,7 @@ import luigi
 
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from gluish.format import Gzip
 from siskin.task import DefaultTask
 
 
@@ -52,9 +53,9 @@ class IZIIntermediateSchema(IZITask):
         if not os.path.exists(self.iziFile):
             raise RuntimeError('input file does not exist, see #7755')
 
-        output = shellout("""flux.sh {flux} in={iziFile} > {output}""",
+        output = shellout("""flux.sh {flux} in={iziFile} | pigz -c > {output}""",
                          flux=self.assets("78/78.flux"), iziFile=self.iziFile)
         luigi.LocalTarget(output).move(self.output().path)
     
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
