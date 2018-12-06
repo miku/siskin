@@ -1,4 +1,6 @@
-from siskin.utils import dictcheck, nwise, random_string
+import os
+import tempfile
+from siskin.utils import dictcheck, nwise, random_string, get_task_import_cache, URLCache
 
 def test_dictcheck():
     assert dictcheck({"name": "x"}, contains=["name"]) is True
@@ -21,6 +23,15 @@ def test_random_string():
     assert len(random_string(length=1000)) == 1000
     assert len(random_string(length=-1)) == 0
     assert random_string(length=-100) == ''
-    for char in ' \t\n.:,;#~+-?=[]()/&%$§"!':
+    for char in ' \t\n.:,;#~+-?=[]()/&%$"!':
         assert char not in random_string()
 
+def test_get_task_import_cache():
+    mapping, path = get_task_import_cache()
+    assert os.path.exists(path)
+    assert isinstance(mapping, dict)
+
+def test_get_cache_file(tmpdir):
+    cache = URLCache(directory=str(tmpdir))
+    fn = cache.get_cache_file("http://x.com")
+    assert fn.startswith(str(tmpdir))
