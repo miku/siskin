@@ -24,6 +24,11 @@
 """
 IZI Task #7755, #13652.
 
+Config:
+
+[izi]
+
+input = /path/to/izi.xml
 
 """
 
@@ -47,14 +52,13 @@ class IZIIntermediateSchema(IZITask):
     Convert XML to intermediate schema via metafacture.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    iziFile = luigi.Parameter(default='/tmp/izi.xml', description='path izi datadump', significant=False)
 
     def run(self):
         if not os.path.exists(self.iziFile):
             raise RuntimeError('input file does not exist, see #7755')
 
         output = shellout("""flux.sh {flux} in={iziFile} | pigz -c > {output}""",
-                         flux=self.assets("78/78.flux"), iziFile=self.iziFile)
+                         flux=self.assets("78/78.flux"), iziFile=self.config.get('izi', 'input'))
         luigi.LocalTarget(output).move(self.output().path)
     
     def output(self):
