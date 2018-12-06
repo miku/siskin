@@ -57,9 +57,14 @@ class PerseeCombined(PerseeTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
+        """
+        Explicit from, because earliestDate might be off, refs #11349
+        (#note-65). In doubt, delete the cache via `rm -rf $(metha-sync -dir
+        http://oai.persee.fr/oai)`.
+        """
         output = shellout("""
-            metha-sync http://oai.persee.fr/c/ext/prescript/oai &&
-            metha-cat http://oai.persee.fr/c/ext/prescript/oai | pigz -c > {output}
+            metha-sync -from 2000-01-01 http://oai.persee.fr/oai &&
+            metha-cat http://oai.persee.fr/oai | pigz -c > {output}
         """)
         luigi.LocalTarget(output).move(self.output().path)
 
