@@ -296,11 +296,14 @@ def scrape_html_listing(url, with_head=False):
     Given a URL to a webpage containing a simple file listing, try to return a
     list of links to the files on the page.
 
-        >>> scrape_html_listing("https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/")
-        ['https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/BFieldPictures.doc',
-         'https://www.colorado.edu/physics/phys1120/phys1120_fa09/LectureNotes/BFieldPictures.pdf',
-         ...
-        ]
+    >>> scrape_html_listing("https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/")
+    ['https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-2018.12.01-x86_64.iso',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-2018.12.01-x86_64.iso.sig',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-2018.12.01-x86_64.iso.torr',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-bootstrap-2018.12.01-x86_64.tar.gz',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-bootstrap-2018.12.01-x86_64.tar.gz.sig',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/md5sums.txt',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/sha1sums.txt']
 
     Will fail if the request fails. If parsing fails, return an empty list.
     Optionally, only include links in the list which return something ok on
