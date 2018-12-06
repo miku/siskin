@@ -40,11 +40,11 @@ import re
 import string
 import sys
 import tempfile
-from builtins import map, object, range, zip
 
 import bs4
 import luigi
 import requests
+import six
 from dateutil import relativedelta
 from future import standard_library
 from six.moves.urllib.parse import urlparse
@@ -74,17 +74,7 @@ class SetEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 def date_range(start_date, end_date, increment, period):
-    """
-    Generate `date` objects between `start_date` and `end_date` in `increment`
-    `period` intervals.
-    """
-    result = []
-    nxt = start_date
-    delta = relativedelta.relativedelta(**{period: increment})
-    while nxt <= end_date:
-        result.append(nxt)
-        nxt += delta
-    return result
+    raise NotImplementedError('use: from gluish.utils import date_range, https://git.io/fpDU1')
 
 def iterfiles(directory='.', fun=None):
     """
@@ -206,7 +196,7 @@ def load_set_from_file(filename, func=lambda v: v):
     """
     s = set()
     with open(filename) as handle:
-        for line in map(str.strip, handle):
+        for line in (str.strip(line) for line in handle):
             if not line:
                 continue
             s.add(func(line))
@@ -261,7 +251,7 @@ class URLCache(object):
         Return the cache file path for a URL. This will - as a side effect -
         create the parent directories, if necessary.
         """
-        digest = hashlib.sha1(url).hexdigest()
+        digest = hashlib.sha1(six.b(url)).hexdigest()
         d0, d1, d2 = digest[:2], digest[2:4], digest[4:6]
         path = os.path.join(self.directory, d0, d1, d2)
 
