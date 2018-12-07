@@ -70,7 +70,7 @@ class DefaultTask(BaseTask):
     BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
     stamp = luigi.BoolParameter(default=False,
-                                description="send an updated stamp to AMSL",
+                                description="update processing time of source via AMSL API",
                                 significant=False)
 
     def assets(self, path):
@@ -101,8 +101,6 @@ class DefaultTask(BaseTask):
         try:
             tolist = self.config.get("core", "error-email").split(",")
             subject = "%s %s" % (self, datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
-
-            # XXX: Move into a template.
             message = """
             This is siskin {version} on {host}.
 
@@ -150,28 +148,24 @@ class DefaultTask(BaseTask):
         Note that if a subclass overwrites `on_success` this method is not
         called, so you have to call it manually.
         """
-
         if not self.stamp:
             return
-
         if not hasattr(self, 'TAG'):
-            self.logger.warn("No tag defined, skip stamping.")
+            self.logger.warn("no tag defined, skip stamping")
             return
-
         if not re.match(r"^[\d]+$", self.TAG):
-            self.logger.warn("Non-integer source id: %s, skip stamping.", self.TAG)
+            self.logger.warn("non-integer source id: %s, skip stamping", self.TAG)
             return
 
-        # Otherwise: Parameter 'sid' ... not a positive integer.
-        sid = self.TAG.lstrip("0")
+        sid = self.TAG.lstrip("0") # Otherwise: Parameter 'sid' ... not a positive integer.
 
         try:
             write_url = config.get("amsl", "write-url")
             if write_url is None:
-                self.logger.warn("Missing amsl.write-url configuration, skip stamping.")
+                self.logger.warn("missing amsl.write-url configuration, skip stamping")
                 return
         except Exception as err:
-            self.logger.warn("Could not stamp: %s", err)
+            self.logger.warn("could not stamp: %s", err)
             return
 
         try:
@@ -181,4 +175,5 @@ class DefaultTask(BaseTask):
             self.logger.warn(err)
             return
         else:
-            self.logger.debug("Successfully stamped: %s", sid)
+            self.logger.debug("successfully stamped: %s", sid)
+
