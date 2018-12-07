@@ -55,9 +55,12 @@ class IJOCHarvest(IJOCTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
-        output = shellout(
-            """metha-cat -root Records "{endpoint}" > {output}""", endpoint=self.endpoint)
+        shellout("""METHA_DIR={dir} metha-sync "{endpoint}" """,
+                 dir=self.config.get('core', 'metha-dir'),
+                 endpoint=self.endpoint)
+        output = shellout("""METHA_DIR={dir} metha-cat -root Records "{endpoint}" > {output}""",
+                          dir=self.config.get('core', 'metha-dir'),
+                          endpoint=self.endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
