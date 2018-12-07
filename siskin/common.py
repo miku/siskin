@@ -36,6 +36,7 @@ import tempfile
 
 import luigi
 import requests
+import six
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.utils import shellout
@@ -54,9 +55,9 @@ class CommonTask(DefaultTask):
 
 class FTPMirror(CommonTask):
     """
-    A generic FTP directory sync. Requires lftp (http://lftp.yar.ru/).  The
-    output of this task is a single file, that contains the paths to all the
-    mirrored files.
+    A generic FTP directory sync. Requires lftp (http://lftp.yar.ru/).
+    Note: The output of this task is a single file, that contains the paths to
+    all the mirrored files.
     """
     host = luigi.Parameter()
     username = luigi.Parameter(default='anonymous')
@@ -65,24 +66,25 @@ class FTPMirror(CommonTask):
     base = luigi.Parameter(default='.')
     indicator = luigi.Parameter(default=random_string())
     max_retries = luigi.IntParameter(default=5, significant=False)
-    timeout = luigi.IntParameter(
-        default=10, significant=False, description='timeout in seconds')
-    exclude_glob = luigi.Parameter(
-        default="", significant=False, description='globs to exclude')
+    timeout = luigi.IntParameter(default=10,
+                                 significant=False, description='timeout in seconds')
+    exclude_glob = luigi.Parameter(default="",
+                                   significant=False, description='globs to exclude')
 
     def requires(self):
         return Executable(name='lftp', message='http://lftp.yar.ru/')
 
     def run(self):
-        """ The indicator is always recreated, while the subdir
-        for a given (host, username, base, pattern) is just synced. """
+        """
+        The indicator is always recreated, while the subdir
+        for a given (host, username, base, pattern) is just synced.
+        """
         base = os.path.dirname(self.output().path)
         subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(
             host=self.host, username=self.username, base=self.base,
             pattern=self.pattern).encode('utf-8')).hexdigest()
 
-        # target is the root of the mirror
-        target = os.path.join(base, subdir)
+        target = os.path.join(base, subdir) # target is the root of the mirror
         if not os.path.exists(target):
             os.makedirs(target)
 
@@ -116,7 +118,7 @@ class FTPMirror(CommonTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)
+        return luigi.LocalTarget(path=self.path(digest=True, ext='filelist'), format=TSV)
 
 
 class HTTPDownload(CommonTask):
@@ -129,18 +131,17 @@ class HTTPDownload(CommonTask):
         """
         Returns the name of the output file. This helper relies on network connectivity.
         """
-        r = requests.head(self.url)
+        r = requests.head(self.url, allow_redirects=True)
         if r.status_code != 200:
             raise RuntimeError('%s on %s' % (r.status_code, self.url))
         value = r.headers.get('Last-Modified')
         if value is None:
-            raise RuntimeError(
-                'HTTPDownload relies on HTTP Last-Modified header at the moment')
+            raise RuntimeError('missing Last-Modified header')
         parsed_date = eut.parsedate(value)
         if parsed_date is None:
             raise RuntimeError('could not parse Last-Modifier header')
         last_modified_date = datetime.date(*parsed_date[:3])
-        digest = hashlib.sha1(self.url).hexdigest()
+        digest = hashlib.sha1(six.b(self.url)).hexdigest()
         return '%s-%s.file' % (digest, last_modified_date.isoformat())
 
     def run(self):
@@ -148,8 +149,7 @@ class HTTPDownload(CommonTask):
         We try just once. TODO(miku): Some retry bracket.
         Last-Modified date format: Wed, 25 Jan 2017 14:04:59 GMT
         """
-        output = shellout(
-            """ curl --fail "{url}" > {output} """, input=self.url)
+        output = shellout(""" curl --fail -L "{url}" > {output} """, input=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
