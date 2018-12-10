@@ -57,15 +57,17 @@ from siskin.mail import send_mail
 
 config = Config.instance()
 
-
 class DefaultTask(BaseTask):
     """
     Base task for all siskin tasks.
 
     It sets the base directory, where all task artifacts will be stored. It
-    also provides shortcuts to config, assets and logging objects. A command
-    line parameter named --stamp is used to optionally update timestamps in
-    AMSL electronic resource management system.
+    also provides shortcuts to config, assets and logging objects.
+
+    On failure, an email is sent to configured addresses.
+
+    A command line parameter named --stamp is used to optionally update
+    timestamps in AMSL electronic resource management system.
     """
     BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
@@ -176,4 +178,3 @@ class DefaultTask(BaseTask):
             return
         else:
             self.logger.debug("successfully stamped: %s", sid)
-
