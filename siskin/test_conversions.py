@@ -5,8 +5,7 @@ from siskin.conversions import imslp_xml_to_marc
 
 
 def test_imslp_xml_to_marc():
-    example = """
-    <?xml version="1.0"?>
+    example = """<?xml version="1.0"?>
     <document docID="imslpvalsskramstadhans">
       <localClass localClassName="col">imslp</localClass>
       <localClass localClassName="vifa">vifamusik</localClass>
