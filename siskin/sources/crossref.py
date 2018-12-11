@@ -94,18 +94,13 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     Harvest window with cursors (https://git.io/v1K27).
     """
     begin = luigi.DateParameter(description='start of harvesting window')
-    end = luigi.DateParameter(
-        description='end of harvesting window, inclusive')
-    filter = luigi.Parameter(
-        default='deposit', description='index, deposit, update')
+    end = luigi.DateParameter(description='end of harvesting window, inclusive')
+    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
 
     rows = luigi.IntParameter(default=1000, significant=False)
-    max_retries = luigi.IntParameter(
-        default=10, significant=False, description='HTTP retries')
-    attempts = luigi.IntParameter(
-        default=3, significant=False, description='number of attempts to GET an URL that failed')
-    sleep = luigi.IntParameter(
-        default=1, significant=False, description='sleep between requests')
+    max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
+    attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
+    sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests')
 
     def run(self):
         """
@@ -123,15 +118,12 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
         directed to a special pool of API machines that are reserved for polite
         users. (https://git.io/vFyN5), refs #9059.
         """
-        cache = URLCache(directory=os.path.join(
-            tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=self.max_retries)
         cache.sess.mount('http://', adapter)
 
-        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(
-            self=self)
+        filter = "from-{self.filter}-date:{self.begin},until-{self.filter}-date:{self.end}".format(self=self)
         rows, offset = self.rows, 0
-
         cursor = '*'
 
         with self.output().open('w') as output:
@@ -144,8 +136,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 if self.config.get('crossref', 'mailto', fallback=None):
                     params['mailto'] = self.config.get('crossref', 'mailto')
 
-                url = 'https://api.crossref.org/works?%s' % (
-                    urllib.parse.urlencode(params))
+                url = 'https://api.crossref.org/works?%s' % (urllib.parse.urlencode(params))
 
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
@@ -162,11 +153,10 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
 
                         cache_file = cache.get_cache_file(url)
                         if os.path.exists(cache_file):
-                            self.logger.debug(
-                                'trying to recover by removing cached entry at %s', cache_file)
+                            self.logger.debug('trying to recover by removing cached entry at %s', cache_file)
                             os.remove(cache_file)
                     else:
-                        break  # all fine
+                        break
 
                 count = len(content['message']['items'])
                 self.logger.debug("%s: %s", url, count)
@@ -177,12 +167,11 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 offset += rows
 
                 if not 'next-cursor' in content['message']:
-                    raise RuntimeError(
-                        'expected next-cursor in message, but missing')
+                    raise RuntimeError('missing key: next-cursor')
                 cursor = content['message']['next-cursor']
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
@@ -219,8 +208,8 @@ class CrossrefChunkItems(CrossrefTask):
         return CrossrefHarvestChunkWithCursor(begin=self.begin, end=self.end, filter=self.filter)
 
     def run(self):
-        output = shellout(
-            "jq -c -r '.message.items[]?' {input} | pigz -c > {output}", input=self.input().path)
+        output = shellout("unpigz -c {input} | jq -c -r '.message.items[]?' | pigz -c > {output}",
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
