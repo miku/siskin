@@ -54,12 +54,9 @@ class IZIIntermediateSchema(IZITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        if not os.path.exists(self.iziFile):
-            raise RuntimeError('input file does not exist, see #7755')
-
         output = shellout("""flux.sh {flux} in={iziFile} | pigz -c > {output}""",
                          flux=self.assets("78/78.flux"), iziFile=self.config.get('izi', 'input'))
         luigi.LocalTarget(output).move(self.output().path)
-    
+
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
