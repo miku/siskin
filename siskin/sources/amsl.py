@@ -75,7 +75,7 @@ class AMSLService(AMSLTask):
     """
     Retrieve AMSL API response. Outbound: holdingsfiles, contentfiles, metadata_usage.
 
-    2018-12-12: discovery API deprecated/defunkt, XXX: adjust.
+    2018-12-12: discovery API EOL, XXX: adjust, refs #14415.
 
     Example output (discovery):
 
