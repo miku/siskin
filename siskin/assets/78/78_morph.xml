@@ -115,7 +115,7 @@
         <data source="URL.value"/>
         <data source="ZEITSCHRIFT.value"/>
       </combine>
-      <combine name="finc.format" value="Article">
+      <combine name="finc.format" value="ElectronicArticle">
         <data source="ZEITSCHRIFT.value"/>
         <choose>
           <data source="URL.value">
@@ -141,7 +141,7 @@
           </whitelist>
         </data>
       </combine>
-      <combine name="finc.format" value="Thesis">
+      <combine name="finc.format" value="ElectronicThesis">
         <choose>
           <data source="URL.value">
             <constant value="FOND"/>
@@ -163,7 +163,7 @@
           </whitelist>
         </data>
       </combine>
-      <combine name="finc.format" value="Book">
+      <combine name="finc.format" value="ElectronicBook">
         <choose>
           <data source="URL.value">
             <constant value="FOND"/>
