@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metamorph xmlns="http://www.culturegraph.org/metamorph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1">
   <rules>
-    <data source="NUMMER.value" name="finc.record_id" />
+    <data source="NUMMER.value" name="finc.record_id"/>
     <combine name="finc.id" value="finc-$[sid]-${identifier_key}">
       <data source="NUMMER.value" name="identifier_key"/>
     </combine>
@@ -24,7 +24,7 @@
     </entity>
     <entity name="facet_avail[]" flushWith="record">
       <data source="_id">
-        <constant value="Online" />
+        <constant value="Online"/>
       </data>
     </entity>
     <data source="TITEL.value" name="rft.btitle"/>
@@ -88,7 +88,11 @@
       <data source="ISBN.value"/>
     </entity>
     <entity name="languages[]" flushWith="record">
-      <data source="SPRACHE.value"/>
+      <data source="SPRACHE.value">
+        <split delimiter=";"/>
+        <trim/>
+        <lookup in="language_map"/>
+      </data>
     </entity>
     <choose name="x.date">
       <combine name="x.date" value="${jahr}-01-01T00:00:00Z">
@@ -195,4 +199,20 @@
 			</data>-->
     </entity>
   </rules>
+  <maps>
+    <map xmlns="http://www.culturegraph.org/metamorph" name="language_map">
+      <entry name="deutsch" value="German"/>
+      <entry name="englisch" value="English"/>
+      <entry name="franzoesisch" value="French"/>
+      <entry name="italienisch" value="Italian"/>
+      <entry name="japanisch" value="Japanese"/>
+      <entry name="niederlaendisch" value="Dutch"/>
+      <entry name="norwegisch" value="Norwegian"/>
+      <entry name="portugiesisch" value="Portuguese"/>
+      <entry name="russisch" value="Russian"/>
+      <entry name="schwedisch" value="Swedish"/>
+      <entry name="spanisch" value="Spanish"/>
+      <entry name="tuerkisch" value="Turkish"/>
+    </map>
+  </maps>
 </metamorph>
