@@ -838,11 +838,12 @@ class AIApplyOpenAccessFlag(AITask):
 
         XXX: Testing: Adjust filtered file with data from AMSLFreeContent.
 
-        Exclude 48 explicitlty (span 0.1.225 and later) with -xsid, refs #12738.
+        Exclude 48 explicitlty (span 0.1.225 and later) with -xsid, refs
+        #12738. Mark sids as open access via -oasid (span 0.1.272 and later).
         """
 
         output = shellout("""unpigz -c {input} |
-                             span-oa-filter -xsid 48 -f {kbart} -fc {amslfc} |
+                             span-oa-filter -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path,
