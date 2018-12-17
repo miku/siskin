@@ -51,6 +51,7 @@ from __future__ import print_function
 
 import collections
 import datetime
+import gzip
 import io
 import itertools
 import json
@@ -59,7 +60,7 @@ import tempfile
 import zipfile
 
 import luigi
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 
 from siskin.task import DefaultTask
@@ -125,10 +126,10 @@ class AMSLService(AMSLTask):
 
         link = '%s/%s/list?do=%s' % (
             self.config.get('amsl', 'base').rstrip('/'), realm, name)
-        output = shellout("""curl --fail "{link}" > {output} """, link=link)
+        output = shellout("""curl --fail "{link}" | pigz -c > {output} """, link=link)
 
         # Check for valid JSON before, simplifies debugging.
-        with open(output) as handle:
+        with gzip.open(output, 'rb') as handle:
             try:
                 _ = json.load(handle)
             except ValueError as err:
@@ -138,7 +139,7 @@ class AMSLService(AMSLTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext='json'))
+        return luigi.LocalTarget(path=self.path(digest=True, ext='json.gz'), format=Gzip)
 
 class AMSLCollections(AMSLTask):
     """
@@ -150,7 +151,7 @@ class AMSLCollections(AMSLTask):
         return AMSLService(date=self.date, name='outboundservices:discovery')
 
     def run(self):
-        output = shellout("""jq -rc '.[]|.megaCollection' {input} | sort -u > {output}""", input=self.input().path)
+        output = shellout(""" unpigz -c {input} | jq -rc '.[]|.megaCollection' | sort -u > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
