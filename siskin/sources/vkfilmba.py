@@ -126,12 +126,16 @@ class VKFilmBADump(VKFilmBATask):
     * https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP
 
     XXX: There is a "delete-list" of ID, which should be filtered here.
+
+    XXX: As of 2018-12-17 vkfilmba.baseurl redirects to: curl: (6) Could not
+    resolve host: boromir.barch.ivbb.bund.de
     """
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for fn in self.filenames:
             link = os.path.join(self.config.get("vkfilmba", "baseurl"), fn)
+            self.logger.debug("VKFILMBA: Attempting to download %s", link)
             output = shellout("""wget -O {output} "{link}" """, link=link)
             output = shellout(""" unzip -p "{input}" > "{output}" """,
                               input=output)
