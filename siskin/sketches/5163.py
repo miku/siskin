@@ -42,44 +42,55 @@ pattern = re.compile(r'10[.][0-9a-zA-Z]*/[0-9a-zA-Z]{4,}')
 
 if __name__ == '__main__':
 
-    # counter = collections.Counter()
-    dois = collections.Counter()
+    counter = collections.Counter()
+    resolvable_dois = set()
+
+    # Not all DOI matches are actual DOIs
+    with open("ping.json") as handle:
+        for line in handle:
+            doc = json.loads(line)
+            if not doc["status"] == 200:
+                continue
+            resolvable_dois = doc["link"].replace("http://doi.org/", "")
 
     with gzip.open("dswarm-68-20181008150514_all.ldj.gz", "rb") as handle:
         for line in tqdm.tqdm(handle):
-            matches = pattern.findall(line)
-            for match in matches:
-                candidate = match.strip().strip('"')
-                dois[candidate] += 1
+            candidates = set([match.strip().strip('"') for match in pattern.findall(line)])
+            resolvable = [doi for doi in candidates if doi in resolvable_dois]
+            doc = json.loads(line)
 
-            # doc = json.loads(line)
-            # output = {
-            #     "finc.format": doc.get("format", "ElectronicArticle"),
-            #     "finc.id": doc["id"],
-            #     "finc.mega_collection": doc.get("mega_collection", []),
-            #     "finc.record_id": doc["record_id"],
-            #     "finc.source_id": doc["source_id"],
-            #     "languages": doc.get("language", "eng"),
-            #     "rft.atitle": doc.get("title"),
-            #     "rft.issn": doc.get("issn", []),
-            #     "rft.pub": doc.get("publisher"),
-            #     "rft.place": doc.get("place"),
-            #     "rft.date": '%s-01-01' % doc.get("publishDateSort", "1970"),
-            #     "subjects": doc.get("topic"),
-            #     "version": "0.9",
-            #     "rft.authors": [{"rft.aucorp": v} for v in doc.get("author_corporate2", [])],
-            # }
+            authors = [{"rft.aucorp": v} for v in doc.get("author_corporate2", [])]
+            authors = authors + [{"rft.au": v} for v in doc.get("author", [])]
+            authors = authors + [{"rft.au": v} for v in doc.get("author2", [])]
+
+            output = {
+                "finc.format": doc.get("format", "ElectronicArticle"),
+                "finc.id": doc["id"],
+                "finc.mega_collection": doc.get("mega_collection", []),
+                "finc.record_id": doc["record_id"],
+                "finc.source_id": doc["source_id"],
+                "languages": doc.get("language", ["eng"]),
+                "rft.atitle": doc.get("title", ""),
+                "rft.issn": doc.get("issn", []),
+                "rft.pub": doc.get("publisher", ""),
+                "rft.place": doc.get("place", ""),
+                "rft.date": '%s-01-01' % doc.get("publishDateSort", "1970"),
+                "subjects": doc.get("topic", []),
+                "version": "0.9",
+                "rft.authors": authors,
+            }
+            if resolvable:
+                output["doi"] = resolvable[0]
 
             # Frequency of ISSN.
             # for issn in output["rft.issn"]:
             #     counter[issn] += 1
 
-            # print(json.dumps(output))
+            print(json.dumps(output))
 
     # print(len(counter))
     # print(len(dois))
-
-    print(json.dumps({
-        "dois": [doi for doi, _ in dois.most_common()],
-        "doi_count": len(dois),
-    }))
+    # print(json.dumps({
+    #     "dois": [doi for doi, _ in dois.most_common()],
+    #     "doi_count": len(dois),
+    # }))
