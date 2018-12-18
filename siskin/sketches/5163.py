@@ -6,7 +6,7 @@ Refs 5163. Download link at #note-65. Wget is your friends. 250M zipped, 860000 
 
 Rough steps:
 
-    $ # Find resolvable DOI.
+    # Find resolvable DOI.
     $ python 5163.py > results.json
     $ jq -rc .dois[] results.json | awk '{ print "http://doi.org/"$0 }' | clinker -w 200 > ping.json
     $ jq .status ping.json | sort | uniq -c | sort -nr
@@ -14,16 +14,21 @@ Rough steps:
     132  404
     11   403
 
-    $ # How many would be DE-15-FID?
+    # How many would be DE-15-FID?
     $ python 5163.py > 68.is
     $ span-tag -unfreeze $(taskoutput AMSLFilterConfigFreeze) 68.is > 68.tagged.is
     $ jq -rc '.["x.labels"][]?' 68.tagged.is | wc -l
     463843
 
+    # How many URL?
+    $ jq -rc .url 68.is | grep -c -F '[]'
+    827810
+
 Problems:
 
 * Already in SOLR format. Attachments (78/2.) needs IS (for now).
 * Only about 5% have DOI for deduplication?
+* No URL?
 
 ## How many ISSN?
 
@@ -85,10 +90,13 @@ if __name__ == '__main__':
                 "x.subjects": doc.get("topic", []),
                 "version": "0.9",
                 "rft.authors": authors,
-                "url": doc.get("url", []),
             }
             if resolvable:
                 output["doi"] = resolvable[0]
+
+            output["url"] = doc.get("url", [])
+            if not output["url"] and output.get("doi"):
+                output["url"] = "https://doi.org/{}".format(output["doi"])
 
             # Frequency of ISSN.
             # for issn in output["rft.issn"]:
