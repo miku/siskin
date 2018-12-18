@@ -4,14 +4,21 @@
 """
 Refs 5163. Download link at #note-65. Wget is your friends. 250M zipped, 860000 records.
 
-Usage:
+Rough steps:
 
+    $ # Find resolvable DOI.
     $ python 5163.py > results.json
     $ jq -rc .dois[] results.json | awk '{ print "http://doi.org/"$0 }' | clinker -w 200 > ping.json
     $ jq .status ping.json | sort | uniq -c | sort -nr
     3900 200
     132  404
     11   403
+
+    $ # How many would be DE-15-FID?
+    $ python 5163.py > 68.is
+    $ span-tag -unfreeze $(taskoutput AMSLFilterConfigFreeze) 68.is > 68.tagged.is
+    $ jq -rc '.["x.labels"][]?' 68.tagged.is | wc -l
+    463843
 
 Problems:
 
@@ -24,7 +31,7 @@ About 638 unique ISSN.
 
 ## How many DOI?
 
-XXX.
+About 3900.
 
 """
 
