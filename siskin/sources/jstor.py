@@ -311,37 +311,37 @@ class JstorCollectionMapping(JstorTask):
 
     The KBART fields are:
 
-     0 publication_title                                                                                                                                                                                              │·
-     1 print_identifier                                                                                                                                                                                               │·
-     2 online_identifier                                                                                                                                                                                              │·
-     3 date_first_issue_online                                                                                                                                                                                        │·
-     4 num_first_vol_online                                                                                                                                                                                           │·
-     5 num_first_issue_online                                                                                                                                                                                         │·
-     6 date_last_issue_online                                                                                                                                                                                         │·
-     7 num_last_vol_online                                                                                                                                                                                            │·
-     8 num_last_issue_online                                                                                                                                                                                          │·
-     9 title_url                                                                                                                                                                                                      │·
-    10 first_author                                                                                                                                                                                                   │·
-    11 title_id                                                                                                                                                                                                       │·
-    12 embargo_info                                                                                                                                                                                                   │·
-    13 coverage_depth                                                                                                                                                                                                 │·
-    14 notes                                                                                                                                                                                                          │·
-    15 publisher_name                                                                                                                                                                                                 │·
-    16 publication_type                                                                                                                                                                                               │·
-    17 date_monograph_published_print                                                                                                                                                                                 │·
-    18 date_monograph_published_online                                                                                                                                                                                │·
-    19 monograph_volume                                                                                                                                                                                               │·
-    20 monograph_edition                                                                                                                                                                                              │·
-    21 first_editor                                                                                                                                                                                                   │·
-    22 parent_publication_title_id                                                                                                                                                                                    │·
-    23 preceding_publication_title_id                                                                                                                                                                                 │·
-    24 access_type                                                                                                                                                                                                    │·
-    25 full_coverage                                                                                                                                                                                                  │·
-    26 collection                                                                                                                                                                                                     │·
-    27 discipline                                                                                                                                                                                                     │·
-    28 catalog_identifier_oclc                                                                                                                                                                                        │·
-    29 catalog_identifier_lccn                                                                                                                                                                                        │·
-    30 archive_release_date                                                                                                                                                                                           │·
+     0 publication_title
+     1 print_identifier
+     2 online_identifier
+     3 date_first_issue_online
+     4 num_first_vol_online
+     5 num_first_issue_online
+     6 date_last_issue_online
+     7 num_last_vol_online
+     8 num_last_issue_online
+     9 title_url
+    10 first_author
+    11 title_id
+    12 embargo_info
+    13 coverage_depth
+    14 notes
+    15 publisher_name
+    16 publication_type
+    17 date_monograph_published_print
+    18 date_monograph_published_online
+    19 monograph_volume
+    20 monograph_edition
+    21 first_editor
+    22 parent_publication_title_id
+    23 preceding_publication_title_id
+    24 access_type
+    25 full_coverage
+    26 collection
+    27 discipline
+    28 catalog_identifier_oclc
+    29 catalog_identifier_lccn
+    30 archive_release_date
     31 publication_date
 
     """
