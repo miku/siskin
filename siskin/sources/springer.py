@@ -51,12 +51,12 @@ import re
 
 import luigi
 import six
+
 import ujson as json
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.common import FTPMirror
 from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
@@ -68,7 +68,6 @@ class SpringerTask(DefaultTask):
 
     def closest(self):
         return weekly(date=self.date)
-
 
 class SpringerPaths(SpringerTask):
     """
@@ -95,45 +94,6 @@ class SpringerPaths(SpringerTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
-
-class SpringerDownload(SpringerTask):
-    """
-    Attempt to download file from a configured URL. Preferred up until October 2017.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    @deprecated
-    def run(self):
-        output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
-                          username=self.config.get('springer', 'username'),
-                          password=self.config.get('springer', 'password'),
-                          url=self.config.get('springer', 'url'))
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
-class SpringerIssue11557(SpringerTask):
-    """
-    Via 5994#note-37, finc.mega_collection is now multi-valued, refs #11557.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return SpringerDownload(date=self.date)
-
-    @deprecated
-    def run(self):
-        output = shellout("""
-            jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"]) | .["finc.mega_collection"] = [.["finc.mega_collection"]]' < <(unpigz -c {input}) | pigz -c > {output}
-        """, input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
 class SpringerCleanup(SpringerTask):
     """
     2017-11-28: finc.mega_collection is now multi-valued; AIAccessFacet remains.
@@ -159,41 +119,6 @@ class SpringerCleanup(SpringerTask):
                           jq -c '. + {{"finc.id": .["finc.record_id"], "finc.record_id": .doi, "finc.format": "ElectronicArticle"}}' | pigz -c > {output}
         """, input=realpath)
         luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
-class SpringerCleanFields(SpringerTask):
-    """
-    As per Google Hangout 2017-09-08 we define "exchange-ready" as
-    "no-post-processing-required". Hence this task marked deprecated, use
-    SpringerDownload task instead.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return SpringerDownload(date=self.date)
-
-    @deprecated
-    def run(self):
-        striptags = lambda s: re.sub(r'\$\$[^\$]*\$\$', '', re.sub(r'<[^>]*>', '', s))
-        with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for line in handle:
-                    doc = json.loads(line)
-                    doc['abstract'] = striptags(doc.get('abstract', '').encode('utf-8'))
-                    doc['rft.atitle'] = striptags(doc.get('rft.atitle', '').encode('utf-8'))
-                    doc['x.subjects'] = [striptags(subj.encode('utf-8')) for subj in doc.get('x.subjects', [])]
-
-                    # #5994, #note-37 / https://git.io/v5ZNu requests
-                    # multi-valued mega_collection, rev: https://git.io/v5ZNl.
-                    # Turn value into list, if it is not already.
-                    if isinstance(doc['finc.mega_collection'], six.string_types):
-                        doc['finc.mega_collection'] = [doc['finc.mega_collection']]
-
-                    output.write(json.dumps(doc))
-                    output.write("\n")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
