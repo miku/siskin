@@ -85,6 +85,7 @@ if __name__ == '__main__':
                 "x.subjects": doc.get("topic", []),
                 "version": "0.9",
                 "rft.authors": authors,
+                "url": doc.get("url", []),
             }
             if resolvable:
                 output["doi"] = resolvable[0]
