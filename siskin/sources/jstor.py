@@ -422,7 +422,7 @@ class JstorIntermediateSchema(JstorTask):
         """
         Only use collection names, which we find in AMSL as well. XXX: FIX deviations.
         """
-        output = shellout("""cat {input} | jq -rc '.[] | select(.sourceID == "55") | .megaCollection' > {output} """,
+        output = shellout("""unpigz -c {input} | jq -rc '.[] | select(.sourceID == "55") | .megaCollection' > {output} """,
                           input=self.input().get("amsl").path)
         allowed_collection_names = load_set_from_file(output)
         self.logger.debug("allowing via AMSL: %s", allowed_collection_names)
