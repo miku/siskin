@@ -64,7 +64,7 @@ if __name__ == '__main__':
             authors = authors + [{"rft.au": v} for v in doc.get("author2", [])]
 
             output = {
-                "finc.format": doc.get("format", "ElectronicArticle"),
+                "finc.format": doc.get("format", ["ElectronicArticle"]),
                 "finc.id": doc["id"],
                 "finc.mega_collection": doc.get("mega_collection", []),
                 "finc.record_id": doc["record_id"],
@@ -72,10 +72,10 @@ if __name__ == '__main__':
                 "languages": doc.get("language", ["eng"]),
                 "rft.atitle": doc.get("title", ""),
                 "rft.issn": doc.get("issn", []),
-                "rft.pub": doc.get("publisher", ""),
-                "rft.place": doc.get("place", ""),
+                "rft.pub": doc.get("publisher", []),
+                "rft.place": doc.get("place",[]),
                 "rft.date": '%s-01-01' % doc.get("publishDateSort", "1970"),
-                "subjects": doc.get("topic", []),
+                "x.subjects": doc.get("topic", []),
                 "version": "0.9",
                 "rft.authors": authors,
             }
