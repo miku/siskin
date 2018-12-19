@@ -100,7 +100,9 @@ class DBInetJSON(DBInetTask):
 
 class DBInetIntermediateSchema(DBInetTask):
     """
-    Convert via jq. With --urlcheck, filter out dead links (takes a while).
+    Convert via jq. With --urlcheck, filter out dead links (takes a while). For
+    faster URL checks, try: taskcat DBInetIntermediateSchema | jq -cr .url[] |
+    clinker -w 200, see also: https://git.io/fAC27.
     """
 
     urlcheck = luigi.BoolParameter(default=False, significant=False)
