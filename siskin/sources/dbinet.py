@@ -27,7 +27,9 @@ Datenbank Internetquellen, #5374, #9913, #11005.
 
 Fixed source from the defunct http://www.medien-buehne-film.de/.
 
-About 214M in 163 XML files, no schema, root is called DBClear.
+About 214M in 163 XML files, no schema, root XML element is called DBClear,
+currently the files are named monday.xml.part133, monday.xml.part134, and so
+on.
 
 Configuration
 -------------
@@ -53,7 +55,7 @@ from siskin.task import DefaultTask
 
 class DBInetTask(DefaultTask):
     """
-    Base task, refs #5374, #9913, #11005.
+    Base task, refs #5374, #9913, #11005, #13653.
     """
     TAG = "80"
 
@@ -75,7 +77,7 @@ class DBInetFiles(DBInetTask):
 
 class DBInetJSON(DBInetTask):
     """
-    Combine, prepare.
+    Combine, prepare, requires xlstproc, sed, jq.
     """
 
     def requires(self):
