@@ -23,11 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-arxiv.org
-
-http://arxiv.org/help/oa/index
-
-----
+arxiv.org, https://arxiv.org/help/oa/index
 
 Config:
 
@@ -44,6 +40,8 @@ copy of arXiv metadata. It is intended for interactive queries and search
 overlays and should not be used for full replication. The size of result sets
 is capped at a large but finite number. You should use OAI-PMH instead for your
 purposes.
+
+* https://academia.stackexchange.com/q/38969/6198
 
 """
 
