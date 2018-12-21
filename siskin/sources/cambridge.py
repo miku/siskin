@@ -61,7 +61,7 @@ class CambridgeTask(DefaultTask):
 
 class CambridgeDropbox(CambridgeTask):
     """
-    Pull down content from FTP dropbox.
+    Pull down content from FTP dropbox, in Dec '18 about 10K zips.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
