@@ -41,7 +41,7 @@ import os
 import luigi
 
 from gluish.format import TSV
-from gluish.intervals import monthly
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import Executable
@@ -56,7 +56,7 @@ class CambridgeTask(DefaultTask):
     TAG = '133'
 
     def closest(self):
-        return monthly(date=self.date)
+        return weekly(date=self.date)
 
 
 class CambridgeDropbox(CambridgeTask):
