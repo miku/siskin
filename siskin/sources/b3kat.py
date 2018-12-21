@@ -73,7 +73,7 @@ import os
 import tempfile
 
 import luigi
-from gluish.format import TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -82,11 +82,13 @@ from siskin.task import DefaultTask
 
 
 class B3KatTask(DefaultTask):
-    """ Base task for B3Kat. """
+    """
+    Base task for B3Kat.
+    """
     TAG = 'b3kat'
 
     def closest(self):
-        """ Find date on this site: https://www.bib-bvb.de/web/b3kat/open-data """
+        """ Find exact date on this site: https://www.bib-bvb.de/web/b3kat/open-data """
         return semiyearly(date=self.date)
 
 
