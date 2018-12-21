@@ -3,7 +3,7 @@
 # Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
-#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#                   
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#
 #
 # This file is part of some open source application.
 #
@@ -50,7 +50,9 @@ class COAEBTask(DefaultTask):
 
 
 class COAEBMARC(COAEBTask):
-    """ Convert BinaryMARC to BinaryFincMarc """
+    """
+    Convert BinaryMARC to BinaryFincMarc.
+    """
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
