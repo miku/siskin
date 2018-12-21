@@ -39,7 +39,9 @@ full-text of the research papers making CORE a unique service in the research
 community.
 
 CORE currently contains 83,326,016 open access articles, from over tens of
-thousands journals, collected from over 3,667 repositories around the world. 
+thousands journals, collected from over 3,667 repositories around the world.
+
+* https://core.ac.uk/services#dataset
 
 ----
 
@@ -85,6 +87,7 @@ class CoreDownload(CoreTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="tar.gz"))
 
+
 class CoreDownloadFulltext(CoreTask):
     """
     Metadata and Fulltext. Filenaming inconsistent (tar or tar.gz).
@@ -98,4 +101,3 @@ class CoreDownloadFulltext(CoreTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="tar.gz"))
-
