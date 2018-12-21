@@ -100,6 +100,13 @@ class DawsonIntermediateSchema(DawsonTask):
     """
     Convert to intermediate schema via metafacture. Custom morphs and flux are
     kept in assets/124. Maps are kept in assets/maps.
+
+    Currently broken (MF4), assets/124/124.flux: Caused by:
+        org.culturegraph.mf.metamorph.MetamorphException: Error while building
+        the Metamorph transformation pipeline: Error during DOM creation: Error
+        parsing xml: cvc-complex-type.3.2.2: Attribute 'value' is not allowed
+        to appear in element 'data'.
+
     """
 
     def requires(self):
