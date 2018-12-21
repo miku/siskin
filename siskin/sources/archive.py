@@ -69,8 +69,7 @@ class ArchiveSearch(ArchiveTask):
         """
         The setup of siskin should install this automatically.
         """
-        return Executable(name='ia',
-                          message='https://pypi.python.org/pypi/internetarchive')
+        return Executable(name='ia', message='https://pypi.org/project/internetarchive/')
 
     def run(self):
         output = shellout("ia search '{query}' > {output}", query=self.query)
