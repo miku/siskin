@@ -25,17 +25,16 @@
 """
 https://www.ceeol.com/, refs #9398.
 
-Currently, there are two XML formats used, a custom CEEOL and a slightly
-invalid MARCXML. The last update was manually uploaded to a Server @Telekom.
-
-----
+Currently, there are two XML formats used, a custom CEEOL XML and a slightly
+invalid MARCXML. The last update was manually uploaded to a colorful server
+@Telekom.
 
 Config:
 
 [ceeol]
 
 disk-dir = /path/to/disk
-updates = /path/to/file.xml,/path/to/another.xml,...
+updates = /path/to/file.xml, /path/to/another.xml, ...
 
 """
 
