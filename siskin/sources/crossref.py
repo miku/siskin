@@ -23,6 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
+https://www.crossref.org/
 
 CrossRef is an association of scholarly publishers
 that develops shared infrastructure to support
