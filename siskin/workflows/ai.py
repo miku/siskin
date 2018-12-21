@@ -75,7 +75,6 @@ from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
 from siskin.sources.hhbd import HHBDIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
-from siskin.sources.izi import IZIIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
                                   JstorISSNList)
 from siskin.sources.kielfmf import KielFMFIntermediateSchema
@@ -286,7 +285,6 @@ class AIIntermediateSchema(AITask):
             GenderopenIntermediateSchema(date=self.date, stamp=True),
             GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
             IEEEIntermediateSchema(date=self.date, stamp=True),
-            IZIIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchema(date=self.date, stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
             SpringerIntermediateSchema(stamp=True),
