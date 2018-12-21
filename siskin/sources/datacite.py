@@ -27,14 +27,11 @@ datacite.org
 
 > Locate, identify, and cite research data with the leading global provider of DOIs for research data.
 
-----
-
 Config:
 
 [core]
 
 metha-dir = /path/to/dir
-
 
 """
 
