@@ -74,7 +74,7 @@ class BaseDownload(BaseTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout(""" curl --fail -v -u {username}:{password} "{url}" > {output} """,
+        output = shellout(""" curl --insecure --fail -v -u {username}:{password} "{url}" > {output} """,
                           username=self.config.get('base', 'username'),
                           password=self.config.get('base', 'password'),
                           url=self.config.get('base', 'url'))
