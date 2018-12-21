@@ -57,10 +57,19 @@ class CeeolTask(DefaultTask):
     """
     TAG = '53'
 
+    def updateid(self):
+        """
+        Only use the string of files as hashed identifier. TODO(miku): It would
+        be more robust to use the checksums of all input files.
+        """
+        sha1 = hashlib.sha1()
+        sha1.update(self.config.get("ceeol", "updates"))
+        return sha1.hexdigest()
+
 class CeeolJournalsUpdates(CeeolTask):
     """
     Create an intermediate schema from zero or more update XML (in MARCXML).
-    The output will depend on the input files.
+    The output will depend on the set and order of the input files.
     """
     def run(self):
         paths = [p.strip() for p in self.config.get("ceeol", "updates").split(",")]
@@ -70,18 +79,13 @@ class CeeolJournalsUpdates(CeeolTask):
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        """
-        Only use the string of files as hashed identifier. XXX: It would be
-        more robust to use the checksums of all input files
-        """
-        sha1 = hashlib.sha1()
-        sha1.update(self.config.get("ceeol", "updates"))
-        output = os.path.join(self.taskdir(), sha1.hexdigest()) + ".ndj"
-        return luigi.LocalTarget(path=output)
+        filename = "{}.ndj".format(self.updateid())
+        return luigi.LocalTarget(filename=filename)
 
 class CeeolJournalsIntermediateSchema(CeeolTask):
     """
-    Combine all journals from disk dump and convert them to intermediate schema. Add updates.
+    Combine all journals from disk dump and convert them to intermediate
+    schema. Add updates. The output name of this task depends on the update id.
     """
     def requires(self):
         return CeeolJournalsUpdates()
@@ -95,5 +99,6 @@ class CeeolJournalsIntermediateSchema(CeeolTask):
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+        filename = "{}.ldj.gz".format(self.updateid())
+        return luigi.LocalTarget(path=self.path(filename=filename))
 
