@@ -72,8 +72,7 @@ class DBLPDOIList(DBLPTask):
 
     def run(self):
         output = shellout("""LC_ALL=C grep "doi.org" <(unpigz -c {input}) |
-                             LC_ALL=C sed -e 's@<ee>http://dx.doi.org/@@g' |
-                             LC_ALL=C sed -e 's@</ee>@@g' |
+                             LC_ALL=C sed -e 's@<ee>https://doi.org/@@g;s@</ee>@@g' |
                              LC_ALL=C grep ^10 |
                              LC_ALL=C sort -S50% > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
