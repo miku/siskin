@@ -154,4 +154,4 @@ class B3KatMARCXML(B3KatTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
