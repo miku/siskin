@@ -28,18 +28,18 @@ Helper functions for dealing with OpenURL, refs #5163.
 
 from six.moves.urllib.parse import urlencode
 
-def update_if_key_exists(t, tkey, s, skey, first=True):
+def update_on_value(t, tkey, value, first=True):
     """
     Update dictionary t and set t[tkey] to s[skey] exists and is not None. If
     the value in question is a sequence, first controls, whether only the first
     element should be taken.
     """
-    if s.get(skey) is not None:
-        if first and isinstance(s[skey], (list, tuple)):
-            if len(s[skey]) > 0:
-                t[tkey] = s[skey][0]
+    if value is not None:
+        if first and isinstance(value, (list, tuple)):
+            if len(value) > 0:
+                t[tkey] = value[0]
         else:
-            t[tkey] = s[skey]
+            t[tkey] = value
 
 def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
     """
@@ -60,9 +60,10 @@ def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
         'ctx_enc': 'info:ofi/enc:UTF-8',
         'rfr_id': 'info:sid/{}:generator'.format(rfr_id),
     }
-    update_if_key_exists(params, 'rft.title', doc, 'rft.atitle')
-    update_if_key_exists(params, 'rft.date', doc, 'rft.date')
-    update_if_key_exists(params, 'rft.language', doc, 'languages')
+    update_on_value(params, 'rft.title', doc.get('rft.atitle'))
+    update_on_value(params, 'rft.date', doc.get('rft.date'))
+    update_on_value(params, 'rft.language', doc.get('languages'))
+
     if doc.get('rft.place') is not None:
         params['rft.place'] = ', '.join(doc.get('rft.place'))
 
@@ -77,21 +78,21 @@ def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
         params['rft.btitle'] = params['rft.title']
         del params['rft.title']
 
-        update_if_key_exists(params, 'rft_id', doc, 'finc.record_id')
-        update_if_key_exists(params, 'rft.btitle', doc, 'rft.btitle')
-        update_if_key_exists(params, 'rft.atitle', doc, 'rft.atitle')
-        update_if_key_exists(params, 'rft.edition', doc, 'rft.edition')
-        update_if_key_exists(params, 'rft.isbn', doc, 'rft.isbn')
-        update_if_key_exists(params, 'rft.issn', doc, 'rft.issn')
-        update_if_key_exists(params, 'rft.eissn', doc, 'rft.eissn')
-        update_if_key_exists(params, 'rft.volume', doc, 'rft.volume')
-        update_if_key_exists(params, 'rft.spage', doc, 'rft.spage')
-        update_if_key_exists(params, 'rft.epage', doc, 'rft.epage')
-        update_if_key_exists(params, 'rft.pages', doc, 'rft.pages')
-        update_if_key_exists(params, 'rft.tpages', doc, 'rft.tpages')
-        update_if_key_exists(params, 'rft.issue', doc, 'rft.issue')
-        update_if_key_exists(params, 'bici', doc, 'bici')
-        update_if_key_exists(params, 'rft.series', doc, 'rft.series')
+        update_on_value(params, 'rft_id', doc.get('finc.record_id'))
+        update_on_value(params, 'rft.btitle', doc.get('rft.btitle'))
+        update_on_value(params, 'rft.atitle', doc.get('rft.atitle'))
+        update_on_value(params, 'rft.edition', doc.get('rft.edition'))
+        update_on_value(params, 'rft.isbn', doc.get('rft.isbn'))
+        update_on_value(params, 'rft.issn', doc.get('rft.issn'))
+        update_on_value(params, 'rft.eissn', doc.get('rft.eissn'))
+        update_on_value(params, 'rft.volume', doc.get('rft.volume'))
+        update_on_value(params, 'rft.spage', doc.get('rft.spage'))
+        update_on_value(params, 'rft.epage', doc.get('rft.epage'))
+        update_on_value(params, 'rft.pages', doc.get('rft.pages'))
+        update_on_value(params, 'rft.tpages', doc.get('rft.tpages'))
+        update_on_value(params, 'rft.issue', doc.get('rft.issue'))
+        update_on_value(params, 'bici', doc.get('bici'))
+        update_on_value(params, 'rft.series', doc.get('rft.series'))
 
         authors = doc.get('authors', [])
         if len(authors) > 0:
