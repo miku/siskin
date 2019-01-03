@@ -86,7 +86,7 @@ for oldrecord in records:
     newrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
     # 980
-    collections = ["a", f001, "b", "52", "c", "OECD iLibrary"]
+    collections = ["a", f001, "b", "52", "c", "sid-52-col-oecd"]
     newrecord.add("980", subfields=collections)
   
     outputfile.write(newrecord.as_marc())
