@@ -43,8 +43,8 @@ def update_on_value(t, tkey, value, first=True):
 
 def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
     """
-    Given a intermediate schema document, generate an OpenURL URL to be used
-    with a link resolver.
+    Given a intermediate schema dictionary, generate an OpenURL URL to be used
+    with a (REDI) link resolver.
 
     Roughly like vufind13/trunk/web/RecordDrivers/AIRecord.php #L1032-1336.
     """
@@ -65,13 +65,12 @@ def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
     update_on_value(params, 'rft.language', doc.get('languages'))
 
     if doc.get('rft.place') is not None:
-        params['rft.place'] = ', '.join(doc.get('rft.place'))
+        params['rft.place'] = ', '.join(doc.get('rft.place', []))
 
     genre = doc.get('rft.genre', 'article')
     if genre == 'proceeding':
         genre = 'article'
 
-    # TODO(miku): genre specific handling: book, article, jounral, default
     if genre == 'book':
         params['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:book'
         params['rft.genre'] = 'book'
@@ -97,7 +96,68 @@ def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
         authors = doc.get('authors', [])
         if len(authors) > 0:
             author = authors[0]
-            # TODO(miku): complete author
+            update_on_value(params, 'rft.au', author.get('rft.au'))
+            update_on_value(params, 'rft.aucorp', author.get('rft.aucorp'))
+            update_on_value(params, 'rft.aufirst', author.get('rft.aufirst'))
+            update_on_value(params, 'rft.auinit', author.get('rft.auinit'))
+            update_on_value(params, 'rft.auinit1', author.get('rft.auinit1'))
+            update_on_value(params, 'rft.aulast', author.get('rft.aulast'))
+            update_on_value(params, 'rft.ausuffix', author.get('rft.ausuffix'))
+
+        update_on_value(params, 'rft.genre', doc.get('rft.genre'))
+        if doc.get('doi'):
+            params['rft_id'] = 'info:doi/{}'.format(doc.get('doi'))
+
+        update_on_value(params, 'rft.pub', doc.get('rft.pub'))
+
+    elif genre == 'article':
+        del params['rft.title']
+
+        update_on_value(params, 'rft_id', doc.get('finc.record_id'))
+        update_on_value(params, 'rft.atitle', doc.get('rft.atitle'))
+        update_on_value(params, 'rft.jtitle', doc.get('rft.jtitle'))
+        update_on_value(params, 'rft.stitle', doc.get('rft.stitle'))
+        update_on_value(params, 'rft.date', doc.get('rft.date'))
+        update_on_value(params, 'rft.issn', doc.get('rft.issn'))
+        update_on_value(params, 'rft.eissn', doc.get('rft.eissn'))
+        update_on_value(params, 'rft.ssn', doc.get('rft.ssn'))
+        update_on_value(params, 'rft.volume', doc.get('rft.volume'))
+        update_on_value(params, 'rft.spage', doc.get('rft.spage'))
+        update_on_value(params, 'rft.epage', doc.get('rft.epage'))
+        update_on_value(params, 'rft.pages', doc.get('rft.pages'))
+        update_on_value(params, 'rft.issue', doc.get('rft.issue'))
+        update_on_value(params, 'rft.coden', doc.get('rft.coden'))
+        update_on_value(params, 'rft.artnum', doc.get('rft.artnum'))
+        update_on_value(params, 'sici', doc.get('sici'))
+        update_on_value(params, 'rft.chron', doc.get('rft.chron'))
+        update_on_value(params, 'rft.quarter', doc.get('rft.quarter'))
+        update_on_value(params, 'rft.part', doc.get('rft.part'))
+
+        authors = doc.get('authors', [])
+        if len(authors) > 0:
+            author = authors[0]
+            update_on_value(params, 'rft.au', author.get('rft.au'))
+            update_on_value(params, 'rft.aucorp', author.get('rft.aucorp'))
+            update_on_value(params, 'rft.aufirst', author.get('rft.aufirst'))
+            update_on_value(params, 'rft.auinit', author.get('rft.auinit'))
+            update_on_value(params, 'rft.auinit1', author.get('rft.auinit1'))
+            update_on_value(params, 'rft.aulast', author.get('rft.aulast'))
+            update_on_value(params, 'rft.ausuffix', author.get('rft.ausuffix'))
+
+        update_on_value(params, 'rft.genre', doc.get('rft.genre'))
+        if doc.get('doi'):
+            params['rft_id'] = 'info:doi/{}'.format(doc.get('doi'))
+
+    elif genre == 'journal':
+        update_on_value(params, 'rft.issn', doc.get('rft.issn'))
+    else:
+        params['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:book'
+        authors = doc.get('authors', [])
+        if len(authors) > 0:
+            update_on_value(params, 'rft.creator', doc.get('rft.au'))
+        update_on_value(params, 'rft.pub', doc.get('rft.pub'))
+        update_on_value(params, 'rft.format', doc.get('finc.format'))
+        update_on_value(params, 'rft.language', doc.get('languages'))
 
     return params
 
