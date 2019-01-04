@@ -41,10 +41,10 @@ def update_on_value(t, tkey, value, first=True):
         else:
             t[tkey] = value
 
-def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
+def openurl_parameters_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
     """
-    Given a intermediate schema dictionary, generate an OpenURL URL to be used
-    with a (REDI) link resolver.
+    Given a intermediate schema dictionary, generate OpenURL parameters to be
+    used with a (REDI) link resolver.
 
     Roughly like vufind13/trunk/web/RecordDrivers/AIRecord.php #L1032-1336.
     """
@@ -161,3 +161,7 @@ def openurl_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
 
     return params
 
+def openurl_link_from_intermediateschema(doc, base='http://www.redi-bw.de/links/ubl?rl_site=ubl&',
+                                         rfr_id='www.ub.uni-leipzig.de'):
+    params = openurl_parameters_from_intermediateschema(doc, rfr_id=rfr_id)
+    return '{}{}'.format(base, urlencode(params))

@@ -1,4 +1,4 @@
-from siskin.openurl import openurl_from_intermediateschema
+from siskin.openurl import openurl_parameters_from_intermediateschema
 
 def test_openurl_from_intermediateschema():
     cases = (
@@ -153,6 +153,6 @@ def test_openurl_from_intermediateschema():
     )
 
     for _, doc, want in cases:
-        result = openurl_from_intermediateschema(doc)
+        result = openurl_parameters_from_intermediateschema(doc)
         assert result == want
 
