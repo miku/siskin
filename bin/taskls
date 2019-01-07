@@ -27,7 +27,7 @@ set -o pipefail
 OUTPUT=$(taskoutput "$@")
 
 if [ -n "$OUTPUT" ]; then
-    ls -lah "$OUTPUT"
+	ls -lah "$OUTPUT"
 else
-    exit 1
+	exit 1
 fi

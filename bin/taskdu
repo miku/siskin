@@ -25,9 +25,9 @@
 set -eu
 
 if [ $# -eq 0 ]; then
-    DIR=$(taskhome)
-    du -hs "$DIR"
+	DIR=$(taskhome)
+	du -hs "$DIR"
 else
-    DIR=$(taskdir "$@")
-    du -hs "$DIR"
+	DIR=$(taskdir "$@")
+	du -hs "$DIR"
 fi

@@ -24,13 +24,13 @@
 set -eu
 
 if [ "$#" -eq 0 ]; then
-    tree -ash "$(taskhome)"
+	tree -ash "$(taskhome)"
 else
-    DIR=$(taskdir "$@")
-    if [ "$?" -eq 0 ]; then
-        tree -sh "$DIR"
-    else
-        echo "cannot find directory for task, maybe add missing parameter (dummy value)"
-        exit 1
-    fi
+	DIR=$(taskdir "$@")
+	if [ "$?" -eq 0 ]; then
+		tree -sh "$DIR"
+	else
+		echo "cannot find directory for task, maybe add missing parameter (dummy value)"
+		exit 1
+	fi
 fi

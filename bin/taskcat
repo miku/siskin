@@ -26,33 +26,32 @@ set -eu
 OUTPUT=$(taskoutput "$@")
 
 if [[ ! -f "$OUTPUT" ]]; then
-    read -p "output does not exists, should we try to run this task now [y/N]? " -r
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        taskdo "$@"
-    else
-        exit 1
-    fi
+	read -p "output does not exists, should we try to run this task now [y/N]? " -r
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		taskdo "$@"
+	else
+		exit 1
+	fi
 fi
 
 fastzcat() {
-    if hash unpigz 2>/dev/null; then
-        unpigz -c "$@"
-    else
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            gzcat "$@"
-        else
-            zcat "$@"
-        fi
-    fi
+	if hash unpigz 2>/dev/null; then
+		unpigz -c "$@"
+	else
+		if [[ "$OSTYPE" == "darwin"* ]]; then
+			gzcat "$@"
+		else
+			zcat "$@"
+		fi
+	fi
 }
 
 if [[ "$OUTPUT" == *mrc ]]; then
-    yaz-marcdump "$OUTPUT"
+	yaz-marcdump "$OUTPUT"
 elif [[ "$OUTPUT" == *gz ]]; then
-    fastzcat "$OUTPUT"
+	fastzcat "$OUTPUT"
 elif [[ "$OUTPUT" == *zip ]]; then
-    unzip -l "$OUTPUT"
+	unzip -l "$OUTPUT"
 else
-    cat "$OUTPUT"
+	cat "$OUTPUT"
 fi
