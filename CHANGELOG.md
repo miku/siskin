@@ -1,34 +1,33 @@
-0.10.1 2018-01-16
------------------
+# 0.43.3 2019-01-07
+
+* add openurl helper
+* fix springer id
+
+# 0.10.1 2018-01-16
 
 * adjust link, #12228
 * adjust filter, #12169
 
-0.9.0 2018-01-04
-----------------
+# 0.9.0 2018-01-04
 
 * VKFilmBA, #8695
 
-0.2.0 2017-09-06
-----------------
+# 0.2.0 2017-09-06
 
 * switch to a new versioning scheme, https://git.io/vF0QC
 
-0.1.37 2017-08-03
------------------
+# 0.1.37 2017-08-03
 
 * new tasks, improvements and fixes
 * metafacture / assets
 * towards Python 2/3
 * btag and documentation updates
 
-0.1.12 2017-01-18
------------------
+# 0.1.12 2017-01-18
 
 * new tasks, improvements, fixes, across nrw, ai, crossref, arxiv, amsl
 
-0.1.1 2016-06-16
-----------------
+# 0.1.1 2016-06-16
 
 * add DegruyterExport
 * ai: AIDOIStats leads to MemoryError, TODO: use comm
@@ -56,13 +55,11 @@
 * update license headers
 * update README
 
-0.1.0 2016-06-13
-----------------
+# 0.1.0 2016-06-13
 
 * get rid of non-essential sources, now: 2661 SLOC
 
-0.0.151 2016-04-12
-------------------
+# 0.0.151 2016-04-12
 
 * secure pypi uploads
 * add .editorconfig
@@ -85,8 +82,7 @@
 * 85: intermediate schema combined (for blob)
 * amsl: content file api stub
 
-0.0.150 2016-03-30
-------------------
+# 0.0.150 2016-03-30
 
 * 85: switch to daily, refs. #6975
 * 85: ad-hoc concat
@@ -102,13 +98,11 @@
 * taskdo: catch missing task error
 * add taskpurge command
 
-0.0.149 2016-03-23
-------------------
+# 0.0.149 2016-03-23
 
 * add taskps command
 
-0.0.148 2016-03-22
-------------------
+# 0.0.148 2016-03-22
 
 * crossref: add note on CrossrefChunkItems (HEAD, origin/master, origin/HEAD, master) [Martin Czygan]
 * bin/taskrm: fix [ [Martin Czygan]
@@ -121,8 +115,7 @@
 * update README [Martin Czygan]
 * Makefile: add note on pypi [Martin Czygan]
 
-0.0.147 2016-03-19
-------------------
+# 0.0.147 2016-03-19
 
 * bin/taskdu: fail if we cannot determine dir
 * completion: remove obsolete command
@@ -132,19 +125,16 @@
 * bin/taskdo: friendlier missing parameter error
 * completion: shells are not started in venvs; move tasknames into function
 
-0.0.146 2016-03-19
-------------------
+# 0.0.146 2016-03-19
 
 * crossref: allow misconfiguration of crossref.doi-blacklist
 
-0.0.145 2016-03-19
-------------------
+# 0.0.145 2016-03-19
 
 * crossref: remove direct dependency on DOIBlacklist, allow file to be configured
 * ops: add sample crontab entry
 
-0.0.144 2016-03-18
-------------------
+# 0.0.144 2016-03-18
 
 * install: test/installation for proxied env
 * install: add -i, so possible proxy settings are used
@@ -175,8 +165,7 @@
 * gbi: add GBIDatabaseMap, generate dbmap for span (e.g. like https://git.io/v2ECx)
 * install: add missing filterline
 
-0.0.142 2016-03-08
-------------------
+# 0.0.142 2016-03-08
 
 * remove unused tests
 * install: ubuntu: allow 2G RAM, xml etree gcc was killed with 1G?
@@ -188,8 +177,7 @@
 * crfix: stub, possible mitigation of https://github.com/CrossRef/rest-api-doc/issues/67
 * ai: mark output as gzip
 
-0.0.141 2016-03-04
-------------------
+# 0.0.141 2016-03-04
 
 * ai: fix output name and dummy AIDuplicatesSortbyDOI
 * ai: add DE-Kn38 and use new amsl API
@@ -200,8 +188,7 @@
 * docs: AIExport.png
 * taskdeps-dot: do not visit deps twice
 
-0.0.140 2016-03-02
-------------------
+# 0.0.140 2016-03-02
 
 * crossref: CrossrefCollectionsDifference stub, diffs AMSL and crossref collections
 * install: add link to screencast
@@ -214,8 +201,7 @@
 * amsl: AMSLCollectionsISIL stub
 * utils: SetEncoder
 
-0.0.139 2016-03-02
-------------------
+# 0.0.139 2016-03-02
 
 * ai: filterconf: 50, DE-15 only, w/o holdings
 * ai: filterconf: use one subtree per source (48)
@@ -231,16 +217,14 @@
 * crossref: add begin parameter to AIIntermediateSchema
 * install: install pigz
 
-0.0.138 2016-03-01
-------------------
+# 0.0.138 2016-03-01
 
 * 85: a direct approach to intermediate schema generation
 * ai: fix extension
 * install: skip python 2.7 installation, if already done
 * install: do not overwrite existing config files
 
-0.0.137 2016-02-26
-------------------
+# 0.0.137 2016-02-26
 
 * ai: switch to next pipeline
 * ai: include gbi full texts
@@ -277,8 +261,7 @@
 * move config into etc
 * install: udpate TODOs
 
-0.0.135 2016-02-08
-------------------
+# 0.0.135 2016-02-08
 
 * crossref: plug over to CrossrefUniqItemsRedux
 * crossref: explain, why not all records of the most recent harvest slice are present in the snapshot
@@ -298,8 +281,7 @@
 * amsl: isil can have multiple downloads [Martin Czygan]
 * amsl: api access, AMSLHoldingsFile, AMSLHoldingsISILList, AMSLHoldings [Martin Czygan]
 
-0.0.134 2016-02-04
-------------------
+# 0.0.134 2016-02-04
 
 * ai: basic Coverage report
 * thieme: gzip result
@@ -325,31 +307,26 @@
 * gbi: GBIPackageMap
 * gbi: note where the mappings come from, GBIDumpGroupList
 
-0.0.130 2015-12-04
-------------------
+# 0.0.130 2015-12-04
 
 gbi: do not use extra dir for syncing
 ai: doaj adjust fid, refs. #6524
 
-0.0.129 2015-12-01
-------------------
+# 0.0.129 2015-12-01
 
 * ai: doaj, add DE-540, refs: #5959
 
-0.0.128 2015-11-26
-------------------
+# 0.0.128 2015-11-26
 
 * attach DE-15-FID to doaj, refs #6524, #4983
 * amsl: remove obsolete SPARQL access
 
-0.0.127 2015-11-20
-------------------
+# 0.0.127 2015-11-20
 
 * ai: use ISSN FID 20151005.csv
 * amsl: use curl for AMSLCollections
 
-0.0.126 2015-11-17
-------------------
+# 0.0.126 2015-11-17
 
 This is a canary.
 
@@ -374,13 +351,11 @@ This is a canary.
 * thieme: test case for oaimi (https://github.com/miku/oaimi)
 * crossref: allow sort to use more memory
 
-0.0.125 2015-09-01
-------------------
+# 0.0.125 2015-09-01
 
 * doi: switch to yearly interval
 
-0.0.124 2015-09-01
-------------------
+# 0.0.124 2015-09-01
 
 * ai: break down gbi for intermediate schema
 * amls: stub, stub SPARQL query
@@ -390,30 +365,25 @@ This is a canary.
 * jstor: add DOI list, refs #5824
 * thieme: monthly interval, fixes
 
-0.0.123 2015-08-12
-------------------
+# 0.0.123 2015-08-12
 
 * bugfix: fix missing logdir attribute
 
-0.0.122 2015-08-11
-------------------
+# 0.0.122 2015-08-11
 
 * scripts: fix typo
 
-0.0.121 2015-08-11
-------------------
+# 0.0.121 2015-08-11
 
 * docs: do not use pip cache
 * scripts: taskhome should fail more gracefully
 
-0.0.120 2015-08-11
-------------------
+# 0.0.120 2015-08-11
 
 * setup: at install time urllib3 might not be available
 * ai: detach degruyter from all but DE-15, refs #4731
 
-0.0.119 2015-08-10
-------------------
+# 0.0.119 2015-08-10
 
 * ai: gzip AIIntermediateSchema
 * crossref: parallel extraction messes up order; alternative fix: http://git.io/v3YZG
@@ -422,8 +392,7 @@ This is a canary.
 * docs: update README, Vagrantfile
 * scripts: various fixes in taskdeps-dot, taskdir, taskls, taskoutput, completion
 
-0.0.118 2015-08-02
-------------------
+# 0.0.118 2015-08-02
 
 * ai: add [AIUpdate](http://git.io/vOZFg) wrapper task; include [DOIBlacklist](http://git.io/vOZFa) during [export](http://git.io/vOZFK)
 * crossref: make jq dependency explicit
