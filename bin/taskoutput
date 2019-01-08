@@ -45,7 +45,10 @@ if __name__ == '__main__':
 
     taskname = sys.argv[1]
 
-    # fast access through a bit of caching
+    # Fast access through a bit of caching. Star imports are convenient for
+    # automatically loading tasks from packages, but can be slow. The task
+    # import cache is merely a serialized dictionary, mapping task names to
+    # module names.
     task_import_cache, path = get_task_import_cache()
     if taskname in task_import_cache:
         importlib.import_module(task_import_cache[taskname])
