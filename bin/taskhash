@@ -32,7 +32,7 @@ hashes to stdout.
 ----
 
 Hacky: Calculate checksum of the source code of a Python class and use it to
-name tasks, that may need to be recomputed.
+find tasks, that may need to be recomputed.
 
 Currently, it prints out hash and full taskname.
 

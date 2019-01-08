@@ -7,6 +7,10 @@
 #
 #     $ watch taskps localhost:8082
 #
+# Or just:
+#
+#     $ watch taskps
+#
 # Access API via curl:
 #
 #     $ curl -s http://localhost:8082/api/task_list -d 'data={"status":"PENDING","upstream_status":"","search":""}' | jq '.'
@@ -75,13 +79,13 @@ if __name__ == '__main__':
         print('>> %s, %s' % (addr, datetime.datetime.now()))
         print()
 
-        for status in ['RUNNING', 'FAILED', 'PENDING', 'DONE', 'DISABLED']:
+        for status in ('RUNNING', 'FAILED', 'PENDING', 'DONE', 'DISABLED'):
 
             data = {"status": status, "upstream_status": "", "search": ""}
-            r = requests.get('http://%s/api/task_list' % addr, params={'data': json.dumps(data)})
+            r = requests.get('http://%s/api/task_list' % addr, json={'data': data})
             if r.status_code >= 400:
                 raise RuntimeError('API (%s) returned %s: %s' % (r.url, r.status_code, r.text))
-            response = json.loads(r.text)
+            response = r.json()
 
             tasks = [task for task, _ in sorted(response['response'].items())]
 

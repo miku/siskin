@@ -21,7 +21,7 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
-# report disk usage for a certain task
+# Report disk usage for a certain task.
 set -eu
 
 if [ $# -eq 0 ]; then

@@ -23,7 +23,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-PMMP. Poor man's man page.
+PMMP. Poor man's man page. Better output with: taskdocs | less -R.
 """
 
 from __future__ import print_function
