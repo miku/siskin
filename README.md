@@ -1,5 +1,4 @@
-siskin
-======
+# siskin
 
 Various tasks for heterogeneous metadata handling for Project
 [finc](https://finc.info). Based on [luigi](https://github.com/spotify/luigi)
@@ -9,8 +8,27 @@ from Spotify.
 
 * Overview in a [few markdown slides](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
 
-Install
--------
+Luigi (and other frameworks) allow to divide complex workflows into a set of
+tasks, which form a
+[DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph). The task logic is
+implemented in Python, but it is easy to use external tools, e.g. via
+[ExternalProgram](https://github.com/spotify/luigi/blob/master/luigi/contrib/external_program.py)
+or [shellout](https://github.com/miku/gluish#easy-shell-calls). Luigi is
+workflow glue and scales up (HDFS) and down (local scheduler).
+
+More on Luigi:
+
+* [Luigi docs](https://luigi.readthedocs.io/en/stable/)
+* [Luigi presentation at LPUG 2015](https://github.com/miku/lpug-luigi)
+* [Luigi workshop at PyCon Balkan 2018](https://github.com/miku/batchdata)
+
+More on the project:
+
+* [Blog about index](https://finc.info/de/Archive/268) [de], 2015
+* [Presentation at 4th VuFind Meetup](https://swop.bsz-bw.de/frontdoor/index/index/docId/1104) [de], 2015
+* [Metadaten zwischen Autopsie und Automatisierung](https://www.bibliotheksverband.de/fileadmin/user_upload/Kommissionen/Kom_ErwBest/Tagungen/Erwkomm_Fortbild_Ddorf2018_Wiesenmueller.pdf#page=26) [de], 2018
+
+## Install
 
 ```
 $ pip install -U siskin
@@ -19,7 +37,7 @@ $ pip install -U siskin
 Currently, Python 2 and 3 support is on the way and the installation might be a
 bit flaky.
 
-Run taskchecksetup to see, what needs to be installed.
+Run taskchecksetup to see, what additional tools might need to be installed.
 
 ```shell
 $ taskchecksetup
@@ -41,8 +59,7 @@ ok     xmllint
 ok     yaz-marcdump
 ```
 
-Update
-------
+## Update
 
 For siskin updates a
 
@@ -52,8 +69,7 @@ $ pip install -U siskin
 
 should suffices.
 
-Run
----
+## Run
 
 List tasks:
 
@@ -71,8 +87,21 @@ Remove artefacts of a task:
 
     $ taskrm DOAJDump
 
-Configuration
--------------
+Inspect the source code of a task:
+
+    $ taskinspect AILocalData
+    class AILocalData(AITask):
+        """
+        Extract a CSV about source, id, doi and institutions for deduplication.
+        """
+        date = ClosestDateParameter(default=datetime.date.today())
+        batchsize = luigi.IntParameter(default=25000, significant=False)
+
+        def requires(self):
+            return AILicensing(date=self.date)
+        ...
+
+## Configuration
 
 The siskin package harvests all kinds of data sources, some of which might be
 protected. All credentials and a few other configuration options go into
@@ -112,8 +141,7 @@ ftp-password = d3f
 ...
 ```
 
-Software versioning
--------------------
+## Software versioning
 
 Since siskin works mostly *on data*, software versioning differs a bit, but we
 try to adhere to the following rules:
@@ -128,8 +156,7 @@ try to adhere to the following rules:
 
 These rules apply for version 0.2.0 and later.
 
-Schema changes
---------------
+## Schema changes
 
 To remove all files of a certain format (due to schema changes or such) it helps, if naming is uniform:
 
@@ -141,8 +168,7 @@ $ tasknames | grep IntermediateSchema | xargs -I {} taskrm {}
 Apart from that, all upstream tasks need to be removed manually (consult the
 [map](https://git.io/v5sdS)) as this is not automatic yet.
 
-Task dependencies
------------------
+## Task dependencies
 
 Inspect task dependencies with:
 
@@ -160,8 +186,6 @@ Or visually via [graphviz](https://www.graphviz.org/).
 $ taskdeps-dot JstorIntermediateSchema | dot -Tpng > deps.png
 ```
 
-
-Evolving workflows
-------------------
+## Evolving workflows
 
 ![](http://i.imgur.com/8bFvSvN.gif)
