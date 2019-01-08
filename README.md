@@ -22,7 +22,7 @@ More on Luigi:
 * [Luigi presentation at LPUG 2015](https://github.com/miku/lpug-luigi)
 * [Luigi workshop at PyCon Balkan 2018](https://github.com/miku/batchdata)
 
-More on the project:
+More on project:
 
 * [Blog about index](https://finc.info/de/Archive/268) [de], 2015
 * [Presentation at 4th VuFind Meetup](https://swop.bsz-bw.de/frontdoor/index/index/docId/1104) [de], 2015
@@ -34,10 +34,15 @@ More on the project:
 $ pip install -U siskin
 ```
 
-Currently, Python 2 and 3 support is on the way and the installation might be a
-bit flaky.
+The siskin project includes a [bunch of
+scripts](https://github.com/miku/siskin/tree/master/bin), that allow to create,
+inspect or remove tasks or task artifacts.
 
-Run taskchecksetup to see, what additional tools might need to be installed.
+Python 2 and 3 support is mostly done, rough edges might remain.
+
+Run taskchecksetup to see, what additional tools might need to be installed
+(this is a manually [curated](https://git.io/fhZvG) list, not everything is
+required for every task).
 
 ```shell
 $ taskchecksetup
@@ -89,39 +94,42 @@ Remove artefacts of a task:
 
 Inspect the source code of a task:
 
-    $ taskinspect AILocalData
-    class AILocalData(AITask):
-        """
-        Extract a CSV about source, id, doi and institutions for deduplication.
-        """
-        date = ClosestDateParameter(default=datetime.date.today())
-        batchsize = luigi.IntParameter(default=25000, significant=False)
+```python
+$ taskinspect AILocalData
+class AILocalData(AITask):
+    """
+    Extract a CSV about source, id, doi and institutions for deduplication.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    batchsize = luigi.IntParameter(default=25000, significant=False)
 
-        def requires(self):
-            return AILicensing(date=self.date)
-        ...
+    def requires(self):
+        return AILicensing(date=self.date)
+    ...
+```
 
 ## Configuration
 
 The siskin package harvests all kinds of data sources, some of which might be
-protected. All credentials and a few other configuration options go into
-`siskin.ini`, either below `/etc/siskin/` or `~/.config/siskin/`.
+protected. All credentials and a few other configuration options go into a
+`siskin.ini`, either in `/etc/siskin/` or `~/.config/siskin/`. If both files
+are present, the local options take precedence.
 
 Luigi uses a bit of configuration as well, put it under `/etc/luigi/`.
 
 Completions on task names will save you typing and time, so put
 `siskin_compeletion.sh` under `/etc/bash_completion.d` or somewhere else.
 
-```
-#   $ tree etc
-#   etc
-#   ├── bash_completion.d
-#   │   └── siskin_completion.sh
-#   ├── luigi
-#   │   ├── client.cfg
-#   │   └── logging.ini
-#   └── siskin
-#       └── siskin.ini
+```shell
+$ tree etc
+etc
+├── bash_completion.d
+│   └── siskin_completion.sh
+├── luigi
+│   ├── client.cfg
+│   └── logging.ini
+└── siskin
+    └── siskin.ini
 ```
 
 All configuration values can be inspected quickly with:
@@ -154,7 +162,12 @@ try to adhere to the following rules:
   You will have to recreate a subset of the tasks to see this changes, but no new
   task is introduced. *No pipeline is broken, that wasn't already*.
 
-These rules apply for version 0.2.0 and later.
+These rules apply for version 0.2.0 and later. To see the current version, use:
+
+```shell
+$ taskversion
+0.43.3
+```
 
 ## Schema changes
 
@@ -172,7 +185,7 @@ Apart from that, all upstream tasks need to be removed manually (consult the
 
 Inspect task dependencies with:
 
-```
+```shell
 $ taskdeps JstorIntermediateSchema
   └─ JstorIntermediateSchema(date=2018-05-25)
       └─ AMSLService(date=2018-05-25, name=outboundservices:discovery)
@@ -182,10 +195,16 @@ $ taskdeps JstorIntermediateSchema
 
 Or visually via [graphviz](https://www.graphviz.org/).
 
-```
+```shell
 $ taskdeps-dot JstorIntermediateSchema | dot -Tpng > deps.png
 ```
 
 ## Evolving workflows
 
 ![](http://i.imgur.com/8bFvSvN.gif)
+
+## TODO
+
+* [ ] The naming of the scripts is a bit unfortunate (`taskdo`, `taskcat`,
+  ...). Maybe better `siskin run`, `siskin cat`, `siskin rm` and so on.
+
