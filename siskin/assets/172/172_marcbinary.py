@@ -53,7 +53,8 @@ for line in records[1:]:
 
     # Erscheinungsjahr
     f260c = fields[13]
-    if len(f260c) == 5:
+    f260c = f260c.replace("\n", "")
+    if len(f260c) == 4:
         marcrecord.add("260", c=f260c)
 
     # Reihe
