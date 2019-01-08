@@ -205,6 +205,6 @@ $ taskdeps-dot JstorIntermediateSchema | dot -Tpng > deps.png
 
 ## TODO
 
-* [ ] The naming of the scripts is a bit unfortunate (`taskdo`, `taskcat`,
-  ...). Maybe better `siskin run`, `siskin cat`, `siskin rm` and so on.
-
+* [ ] The naming of the scripts is a bit unfortunate, `taskdo`, `taskcat`,
+  .... Maybe better `siskin run`, `siskin cat`, `siskin rm` and so on.
+* [ ] Investigate [pytest](https://docs.pytest.org/en/latest/) for testing tasks, given inputs.
