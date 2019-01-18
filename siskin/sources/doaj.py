@@ -89,11 +89,13 @@ class DOAJDump(DOAJTask):
     (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query).
     As of Fall 2018 DOAJ works on a few infrastructure issue
     (https://blog.doaj.org/2018/10/01/infrastructure-and-why-sustainable-funding-so-important-to-services-like-doaj/).
+    In the future, a full download should be used to lower the overhead of HTTP
+    and API calls.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     batch_size = luigi.IntParameter(default=100, significant=False, description="probably not more than 100 allowed")
-    sleep = luigi.IntParameter(default=2, significant=False, description="sleep seconds between requests")
+    sleep = luigi.IntParameter(default=4, significant=False, description="sleep seconds between requests")
 
     def run(self):
         output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P -o {output} > /dev/null",
