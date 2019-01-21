@@ -24,6 +24,15 @@
 
 """
 Data sharing with SLUB Dresden.
+
+[slub]
+
+ftp-username = username
+ftp-password = password
+ftp-host = sftp://data.srv.de
+ftp-path = /target_data
+ftp-pattern = *
+
 """
 
 import datetime
