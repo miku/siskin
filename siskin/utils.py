@@ -106,7 +106,7 @@ def nwise(iterable, n=2):
         yield piece
         piece = tuple(itertools.islice(i, n))
 
-def dictcheck(obj, contains=None, absent=None):
+def dictcheck(obj, contains=None, absent=None, ignore=None):
     """
     Check if a dictionary contains values for the keys given in `contains` and at
     the same time it does not contain values for keys, which are given in
@@ -135,14 +135,20 @@ def dictcheck(obj, contains=None, absent=None):
         contains = []
     if absent is None:
         absent = []
+    if ignore is None:
+        ignore = []
 
     for key in contains:
+        if key in ignore:
+            continue
         if key not in obj:
             return False
         if not bool(operator.itemgetter(key)(obj)):
             return False
 
     for key in absent:
+        if key in ignore:
+            continue
         if key not in obj:
             continue
         if bool(operator.itemgetter(key)(obj)):
