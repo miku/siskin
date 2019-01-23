@@ -146,10 +146,23 @@ class AMSLService(AMSLTask):
     """
     Approximation of discovery response until better approach is implemented. Requires span 0.1.273 or later.
     """
+    date = luigi.DateParameter(default=datetime.date.today())
+    name = luigi.Parameter(default='outboundservices:discovery',
+                           description='ignored, kept for compatibility')
+
+    def requires(self):
+        if self.name != 'outboundservices:discovery':
+            return AMSLServiceDeprecated(date=self.date, name=self.name)
+        return []
+
     def run(self):
-        output = shellout("span-amsl -live {live} -staging {staging} | gzip -c > {output}",
-                          live=self.config.get('amsl', 'base'),
-                          staging=self.config.get('amsl', 'staging'))
+        if self.name == 'outboundservices:discovery':
+            output = shellout("span-amsl -live {live} -staging {staging} | gzip -c > {output}",
+                              live=self.config.get('amsl', 'base'),
+                              staging=self.config.get('amsl', 'staging'))
+        else:
+            output = self.input().path
+
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
