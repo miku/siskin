@@ -72,10 +72,11 @@ class AMSLTask(DefaultTask):
     """
     TAG = 'amsl'
 
-class AMSLService(AMSLTask):
+class AMSLServiceDeprecated(AMSLTask):
     """
-    Retrieve AMSL API response. Outbound: holdingsfiles, contentfiles, metadata_usage.
+    Defunkt task via #14415 as of 2018-12-12. Will be remove soon.
 
+    Retrieve AMSL API response. Outbound: holdingsfiles, contentfiles, metadata_usage.
     2018-12-12: discovery API EOL, XXX: adjust, refs #14415.
 
     Example output (discovery):
@@ -140,6 +141,20 @@ class AMSLService(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(digest=True, ext='json.gz'), format=Gzip)
+
+class AMSLService(AMSLTask):
+    """
+    Approximation of discovery response until better approach is implemented. Requires span 0.1.273 or later.
+    """
+    def run(self):
+        output = shellout("span-amsl -live {live} -staging {staging} | gzip -c > {output}",
+                          live=self.config.get('amsl', 'base'),
+                          staging=self.config.get('amsl', 'staging'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True, ext='json.gz'), format=Gzip)
+
 
 class AMSLCollections(AMSLTask):
     """
