@@ -279,7 +279,7 @@ class AIIntermediateSchema(AITask):
             ArxivIntermediateSchema(date=self.date, stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
-            DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-api"),
+            DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj"),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
             GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
