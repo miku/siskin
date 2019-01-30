@@ -642,18 +642,23 @@
         </data>
       </choose>
     </entity>
-    <entity name="980  " flushWith="record">
-      <data source="001" name="a"/>
-      <data source="_id" name="b">
-        <constant value="$[sid]"/>
-      </data>
-      <data source="_id" name="c">
-        <constant value="Filmuniversität Konrad Wolf Potsdam (VK Film)"/>
-      </data>
-      <data source="_id" name="c">
-        <constant value="Verbundkatalog Film" />
+
+    <entity name="912  " flushWith="record">
+      <data source="_id" name="a">
+        <constant value="vkfilm" />
       </data>
     </entity>
+
+    <entity name="980  " flushWith="record">
+      <data source="001" name="a" />
+      <data source="_id" name="b">
+        <constant value="$[sid]" />
+      </data>
+      <data source="_id" name="c">
+        <constant value="sid-127-col-filmunivpotsdam" />
+      </data>
+    </entity>
+
   </rules>
   <maps>
     <filemap name="gesamttitel" files="$[FLUX_DIR]gesamttitel.csv" separator="\t"/>
