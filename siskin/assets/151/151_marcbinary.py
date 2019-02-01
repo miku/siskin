@@ -334,7 +334,7 @@ for record in records:
     f935c = get_field_935c(format=format)
     marcrecord.add("935", a="vkfilm", b=f935b, c=f935c)
 
-    collections = ["a", f001, "b", "151", "c", u"Filmakademie Baden-Württemberg"]
+    collections = ["a", f001, "b", "151", "c", u"sid-151-col-filmakademiebawue"]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
