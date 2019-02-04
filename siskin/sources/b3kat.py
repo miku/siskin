@@ -128,7 +128,6 @@ class B3KatDownload(B3KatTask):
                                   input=downloaded, stopover=stopover)
                 try:
                     os.remove(downloaded)
-                    os.remove(cleaned)
                     os.remove(output)
                 except OSError as err:
                     self.logger.error(err)
