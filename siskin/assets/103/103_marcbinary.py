@@ -536,7 +536,7 @@ for row in rows:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856_u)
 
     #marcrecord.add("935", b=f935_b)
-    marcrecord.add("980", a=f980_a, b=f980_b, c="Margaret Herrick Library")
+    marcrecord.add("980", a=f980_a, b=f980_b, c="sid-103-col-margaret")
     outputfile.write(marcrecord.as_marc())
 
 sqlitecon.commit()
