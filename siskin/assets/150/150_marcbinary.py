@@ -108,7 +108,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", c="hs")
 
     # Kollektion
-    marcrecord.add("980", a=f001, b="150", c="MOnAMi Hochschulschriftenserver Mittweida")
+    marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
 

@@ -158,10 +158,11 @@ for oldrecord in tqdm(reader, total=total):
         for field in oldrecord.get_fields(tag):
             newrecord.add_field(field)
 
-    # 980
-    collections = ["a", f001, "b", "117", "c",
-                   "Universität der Künste Berlin (VK Film)", "c", "Verbundkatalog Film"]
-    newrecord.add("980", subfields=collections)
+    # 912
+    newrecord.add("912", a="vkfilm")
+
+    # 980  
+    newrecord.add("980", a=f001, b="117", c="sid-117-col-udkberlin")
 
     outputfile.write(newrecord.as_marc())
 
