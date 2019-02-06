@@ -62,6 +62,7 @@ from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList,
                                      CrossrefIntermediateSchema,
                                      CrossrefUniqISSNList)
+from siskin.sources.dbinet import DBInetIntermediateSchema
 from siskin.sources.degruyter import (DegruyterDOIList,
                                       DegruyterIntermediateSchema,
                                       DegruyterISSNList)
@@ -294,6 +295,7 @@ class AIIntermediateSchema(AITask):
             SSOARIntermediateSchema(stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
             HHBDIntermediateSchema(date=self.date, stamp=True),
+            DBInetIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed

@@ -47,9 +47,10 @@ import tempfile
 
 import luigi
 import requests
+from luigi.format import Gzip
+
 from gluish.format import TSV
 from gluish.utils import shellout
-
 from siskin.task import DefaultTask
 
 
@@ -114,7 +115,7 @@ class DBInetIntermediateSchema(DBInetTask):
         """
         When URLs are checked, only write records with at least one reachable URL.
         """
-        output = shellout("jq -rc -f {filter} {input} > {output}",
+        output = shellout("jq -rc -f {filter} {input} | pigz -c > {output}",
                           filter=self.assets('80/filter.jq'), input=self.input().path)
 
         if not self.urlcheck:
@@ -151,4 +152,4 @@ class DBInetIntermediateSchema(DBInetTask):
                     output.write("\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
