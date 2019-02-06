@@ -97,7 +97,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	marc_record.add("935", b="cofz")
 
 	# Kollektion
-	marc_record.add("980", a=f001, b="99", c="Media Perspektiven")
+	marc_record.add("980", a=f001, b="99", c="sid-99-col-mediaperspektiven")
 
 
 	outputfile.write(marc_record.as_marc())
