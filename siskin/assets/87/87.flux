@@ -6,7 +6,7 @@
 // override default values if necessary
 default MAP_DIR ="/assets/maps/";
 default sid = "87"; 
-default mega_collection = "International Journal of Communication";
+default mega_collection = "sid-87-col-intjcomm";
 default fileName = in;
 //default fileName = FLUX_DIR + sid + "records.xml";
 //default out = FLUX_DIR + sid + ".json";
