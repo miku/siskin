@@ -110,7 +110,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 	marc_record.add("935", b="cofz")
 
 	# Kollektion
-	marc_record.add("980", a=f001, b="88", c='Zeitschrift "Rundfunk und Geschichte"')
+	marc_record.add("980", a=f001, b="88", c="sid-88-col-rundfunk")
 
 
 	outputfile.write(marc_record.as_marc())
