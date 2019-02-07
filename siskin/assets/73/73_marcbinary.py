@@ -178,7 +178,7 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
     marcrecord.add("935", b="cofz")
 
     # Kollektion
-    marcrecord.add("980", a=f001, b="73", c="MedienwRezensionen")
+    marcrecord.add("980", a=f001, b="73", c="sid-73-col-medienw")
 
     try:
         outputfile.write(marcrecord.as_marc())
