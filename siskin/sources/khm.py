@@ -111,10 +111,11 @@ class KHMLatest(KHMTask):
                 records = sorted(handle.iter_tsv(cols=('path',)), reverse=True,
                                  key=lambda row: os.path.basename(row.path))
                 if len(records) == 0:
-                    raise RuntimeError(
-                        'no files found, cannot determine latest date')
-                groups = re.search(
-                    self.FILEPATTERN, records[0].path).groupdict()
+                    raise RuntimeError('no files found, cannot determine latest date')
+                match = re.search(self.FILEPATTERN, records[0].path)
+                if not match:
+                    raise RuntimeError('unknown file pattern: %s' % records[0].path)
+                groups = match.groupdict()
                 latest_date = groups['date']
                 for record in records:
                     gg = re.search(self.FILEPATTERN, record.path).groupdict()
