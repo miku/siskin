@@ -14,7 +14,7 @@ copytags = ("002", "003", "004", "005", "006", "007", "008", "009", "010", "011"
             "240", "242", "243", "245", "246", "247", "249", "250", "260", "263", "300", "310", "362",
             "490", "500", "501", "502", "504", "505", "510", "515", "516", "538", "546", "547", "550",
             "590", "600", "610", "611", "630", "648", "649", "651", "655", "700", "710", "711", "730",
-            "770", "772", "773", "775", "776", "780", "785", "787", "800", "810", "811", "830", "856",
+            "770", "772", "775", "776", "780", "785", "787", "800", "810", "811", "830", "856",
             "906", "982", "999")
 
 # Default input and output.
@@ -78,11 +78,32 @@ for oldrecord in reader:
     except (AttributeError, TypeError):
         pass
 
+    # übergeordnetes Werk
+    try:
+        f773g = oldrecord["773"]["g"]
+    except:
+        f773g = ""
+    try:
+        f773t = oldrecord["773"]["t"]
+    except:
+        f773t = ""
+    try:
+        f773w = oldrecord["773"]["w"]
+        f773w = "(DE-576)" + f773w
+    except:
+        f773w = ""
+    newrecord.strict = False 
+    newrecord.add("773", g=f773g, t=f773t, w=f773w)
+    newrecord.strict = True
+
     #n Link zum Datensatz
     newrecord.add("856", q="text/html", _3="Link zum Bundesarchiv", u="https://apps.bundesarchiv.de/F?func=find-c&ccl_term=SYS%3D" + f001 + "&local_base=BAB01")
 
-    # 980
-    collections = ["a", f001, "b", "148", "c", "Bundesarchiv (Filmarchiv)", "c", "Verbundkatalog Film"]
+    # gesamte Kollektion Verbundkatalog Film
+    newrecord.add("912", a="vkfilm")
+
+    # Ansigelung für Adlr
+    collections = ["a", f001, "b", "148", "c", "sid-148-col-bundesarchivfilm"]
     newrecord.add("980", subfields=collections)
   
     outputfile.write(newrecord.as_marc())
