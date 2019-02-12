@@ -295,7 +295,7 @@ class AIIntermediateSchema(AITask):
             SSOARIntermediateSchema(stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
             HHBDIntermediateSchema(date=self.date, stamp=True),
-            DBInetIntermediateSchema(date=self.date, stamp=True),
+            DBInetIntermediateSchema(stamp=True),
         ]
 
     @timed
