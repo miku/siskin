@@ -54,7 +54,7 @@ for oldrecord in reader:
     except:
         f020a = ""
 
-    if f020a != "":
+    if f020a:
         f020a = f020a.replace(" ", "-")
         f020a = f020a.replace(".", "-")
         regexp = re.search("([0-9xX-]{10,17})", f020a)
