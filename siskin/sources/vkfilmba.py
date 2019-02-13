@@ -44,47 +44,38 @@ deletions = http://example.com/del.txt
 import datetime
 import hashlib
 import os
+import re
+import shutil
 import tempfile
+import zipfile
 
 import luigi
+import pymarc
 
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 
 
 class VKFilmBATask(DefaultTask):
+    """
+    Bundesarchiv.
+    """
     TAG = '148'
-
-    # As this is a manual process, adjust this list by hand and rerun tasks.
-    filenames = [
-        "adlr.zip",
-        "adlr_171011.zip",
-        "adlr_1712.zip",
-    ]
-
-    def fingerprint(self):
-        """
-        Generate a name based on the inputs, so everytime we adjust the file
-        list, we get another output.
-        """
-        h = hashlib.sha1()
-        h.update("".join(self.filenames).encode("utf-8"))
-        return h.hexdigest()
 
 
 class VKFilmBADownload(VKFilmBATask):
     """
-    Download raw data daily. At least try, since as of 2018-02-15, file seems
-    missing, refs #12460.
+    Download raw data daily. At least try, files may be missing, refs #12460.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
         """
-        XXX: Maybe check, if we already downloaded this.
+        XXX: Maybe ensure zip.
         """
         output = shellout("""curl --fail "{url}" > {output} """,
                           url=self.config.get('vkfilmba', 'data'))
@@ -99,8 +90,8 @@ class VKFilmBADownload(VKFilmBATask):
 
 class VKFilmBADownloadDeletions(VKFilmBATask):
     """
-    Download raw deletions daily. At least try, since as of 2018-02-15, file seems
-    missing, refs #12460.
+    Download raw deletions daily. At least try, files may be missing, refs
+    #12460.
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -118,72 +109,115 @@ class VKFilmBADownloadDeletions(VKFilmBATask):
 
 class VKFilmBADump(VKFilmBATask):
     """
-    Concatenate a list of URLs.
+    Download pre-built initial dump.
 
-    Note: DO NOT DELETE the output of this task. There are copies:
-
-    * https://goo.gl/FvhXnL
     * https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP
-
-    XXX: There is a "delete-list" of ID, which should be filtered here.
-
-    XXX: As of 2018-12-17 vkfilmba.baseurl redirects to: curl: (6) Could not
-    resolve host: boromir.barch.ivbb.bund.de
     """
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for fn in self.filenames:
-            link = os.path.join(self.config.get("vkfilmba", "baseurl"), fn)
-            self.logger.debug("VKFILMBA: Attempting to download %s", link)
-            output = shellout("""wget -O {output} "{link}" """, link=link)
-            output = shellout(""" unzip -p "{input}" > "{output}" """,
-                              input=output)
-            output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" > "{output}"  """,
-                              input=output, ignoremap={5: "Fixme."})
-            shellout("""cat "{input}" >> "{stopover}" """,
-                     input=output, stopover=stopover)
-        luigi.LocalTarget(stopover).move(self.output().path)
+        # XXX(miku): configure out.
+        output = shellout("""curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}""")
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
 
 
-class VKFilmBAConvert(VKFilmBATask):
+
+class VKFilmBAUpdates(VKFilmBATask):
     """
-    Convert download, refs #12460.
+    Iterate over download directory itself and concat items and deletions.
     """
-
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
             'dump': VKFilmBADump(),
-            'download': VKFilmBADownload(),
+            'data': VKFilmBADownload(date=self.date),
+            'deletions': VKFilmBADownloadDeletions(date=self.date),
         }
 
     def run(self):
-        # XXX: workaround; we want a single file for further processing.
-        filenames = [
-            'adlr_1m1',
-            'adlr_1801',
-            'adlr',
-        ]
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        """
+        Iterate over all zipfiles in reverse, convert and concat binary marc
+        into tempfile, then deduplicate.
+        """
 
-        for fn in filenames:
-            output = shellout(""" unzip -p "{input}" {fn} > "{output}" """, input=self.input().get('download').path, fn=fn)
-            output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" > "{output}"  """,
-                              input=output, ignoremap={5: "Fixme."})
-            shellout("""cat "{input}" >> "{stopover}" """,
-                     input=output, stopover=stopover)
+        # Load all deletions.
+        deleted = set()
 
-        # Concatenate, since download was only 150k, while dump was 9M?
-        output = shellout("cat {a} {b} > {output}", a=self.input().get('dump').path, b=stopover)
-        luigi.LocalTarget(output).move(self.output().path)
+        deldir = os.path.dirname(self.input().get('deletions').path)
+        for path in sorted(iterfiles(deldir), reverse=True):
+            with open(path) as handle:
+                for i, line in enumerate(handle, start=1):
+                    line = line.strip()
+                    if len(line) > 20:
+                        self.logger.warn("suspicious id: %s", line)
+                    deleted.add(line)
+
+        # Load updates.
+        pattern = re.compile(r'^date-[0-9]{4,4}-[0-9]{2,2}-[0-9]{2,2}.zip$')
+        datadir = os.path.dirname(self.input().get('data').path)
+
+        # Combine all binary MARC records in this file.
+        _, combined = tempfile.mkstemp(prefix='siskin-')
+
+        for path in sorted(iterfiles(datadir), reverse=True):
+            filename = os.path.basename(path)
+
+            if not pattern.match(filename):
+                self.logger.warn("ignoring invalid filename: %s", path)
+                continue
+            if os.stat(path).st_size < 22:
+                self.logger.warn("ignoring possibly empty zip file: %s", path)
+                continue
+
+            with zipfile.ZipFile(path) as zf:
+                for name in zf.namelist():
+                    with zf.open(name) as handle:
+                        with tempfile.NamedTemporaryFile(delete=False) as dst:
+                            shutil.copyfileobj(handle, dst)
+                        print(dst.name)
+                        shellout("yaz-marcdump -i marcxml -o marc {input} >> {output}",
+                                 input=dst.name, output=combined, ignoremap={5: 'expected error from yaz'})
+                        os.remove(dst.name)
+
+        # Finally, concatenate initial dump.
+        shellout("cat {input} >> {output}", input=self.input().get('dump').path, output=combined)
+
+        # Already seen identifier.
+        seen = set()
+
+        with self.output().open('wb') as output:
+            writer = pymarc.MARCWriter(output)
+
+            # Iterate over MARC records (which are newest to oldest, keep track of seen identifiers).
+            with open(combined) as handle:
+                reader = pymarc.MARCReader(handle, force_utf8=True, to_unicode=True)
+                for record in reader:
+                    field = record["001"]
+                    if not field:
+                        self.logger.debug("missing identifier")
+                        continue
+
+                    id = field.value()
+
+                    if id in seen:
+                        self.logger.debug("skipping duplicate: %s", id)
+                        continue
+                    if id in deleted:
+                        self.logger.debug("skipping deleted: %s", id)
+                        continue
+
+                    self.logger.debug("adding %s", id)
+                    writer.write(record)
+                    seen.add(id)
+
+        self.logger.debug("found %s unique records (deletion list contained %s ids)", len(seen), len(deleted))
+        os.remove(combined)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(filename="%s.mrc" % self.fingerprint()))
+        return luigi.LocalTarget(path=self.path(ext="mrc"))
 
 
 class VKFilmBAMARC(VKFilmBATask):
@@ -194,7 +228,7 @@ class VKFilmBAMARC(VKFilmBATask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return VKFilmBAConvert()  # return VKFilmBADump()
+        return VKFilmBAUpdates()
 
     def run(self):
         output = shellout("python {script} {input} {output}",
