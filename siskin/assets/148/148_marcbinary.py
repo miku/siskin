@@ -33,11 +33,11 @@ for oldrecord in reader:
     newrecord = marcx.Record(force_utf8=True)
 
     # prüfen, ob ID vorhanden ist
-    if not oldrecord["001"]:      
+    if not oldrecord["001"]:
         continue
 
     # prüfen ob Titel vorhanden ist
-    if not (oldrecord["245"] and oldrecord["245"]["a"]):    
+    if not (oldrecord["245"] and oldrecord["245"]["a"]):
         continue
 
     # leader
@@ -50,19 +50,19 @@ for oldrecord in reader:
 
     # ISBN
     try:
-        f020a = oldrecord["020"]["a"]        
+        f020a = oldrecord["020"]["a"]
     except:
         f020a = ""
 
     if f020a != "":
         f020a = f020a.replace(" ", "-")
-        f020a = f020a.replace(".", "-")       
+        f020a = f020a.replace(".", "-")
         regexp = re.search("([0-9xX-]{10,17})", f020a)
-     
+
         if regexp:
             f020a = regexp.group(1)
             f020a = f020a.rstrip("-")
-            newrecord.add("020", a=f020a) 
+            newrecord.add("020", a=f020a)
         else:
             print("Die ISBN %s konnte nicht mittels regulärer Ausdrücke überprüft werden." % f020a)
 
@@ -73,7 +73,7 @@ for oldrecord in reader:
 
     # Schlagwort
     try:
-        f689a = oldrecord["650"]["a"]     
+        f689a = oldrecord["650"]["a"]
         newrecord.add("689", a=f689a)
     except (AttributeError, TypeError):
         pass
@@ -92,7 +92,7 @@ for oldrecord in reader:
         f773w = "(DE-576)" + f773w
     except:
         f773w = ""
-    newrecord.strict = False 
+    newrecord.strict = False
     newrecord.add("773", g=f773g, t=f773t, w=f773w)
     newrecord.strict = True
 
@@ -105,7 +105,7 @@ for oldrecord in reader:
     # Ansigelung für Adlr
     collections = ["a", f001, "b", "148", "c", "sid-148-col-bundesarchivfilm"]
     newrecord.add("980", subfields=collections)
-  
+
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
