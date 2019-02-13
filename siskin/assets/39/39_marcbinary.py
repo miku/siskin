@@ -179,7 +179,7 @@ for i, line in enumerate(inputfile, start=1):
     for subject in f950a:
         marcrecord.add("950", a=subject)
 
-    collections = ["a", f001, "b", "39", "c", u"Persee", "c", u"Persee (adlr)"]
+    collections = ["a", f001, "b", "39", "c", "sid-39-col-persee", "c", "sid-39-col-perseeadlr"]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
