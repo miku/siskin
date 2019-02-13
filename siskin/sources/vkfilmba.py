@@ -110,13 +110,14 @@ class VKFilmBADownloadDeletions(VKFilmBATask):
 
 class VKFilmBADump(VKFilmBATask):
     """
-    Download pre-built initial dump.
+    Download pre-built initial dump,
+    https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP - XXX:
+        configure this out.
 
-    * https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP
+    Only a single fixed item, no date.
     """
 
     def run(self):
-        # XXX(miku): configure out.
         output = shellout("""curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}""")
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -144,7 +145,7 @@ class VKFilmBAUpdates(VKFilmBATask):
         into tempfile, then deduplicate.
         """
 
-        # Load all deletions.
+        # Load all deletions into set.
         deleted = set()
 
         deldir = os.path.dirname(self.input().get('deletions').path)
@@ -178,7 +179,6 @@ class VKFilmBAUpdates(VKFilmBATask):
                     with zf.open(name) as handle:
                         with tempfile.NamedTemporaryFile(delete=False) as dst:
                             shutil.copyfileobj(handle, dst)
-                        print(dst.name)
                         shellout("yaz-marcdump -i marcxml -o marc {input} >> {output}",
                                  input=dst.name, output=combined, ignoremap={5: 'expected error from yaz'})
                         os.remove(dst.name)
