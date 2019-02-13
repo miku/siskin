@@ -23,7 +23,6 @@ clean:
 	rm -rf siskin.egg-info
 	rm -rf build/ dist/
 	find . -name "*.pyc" -exec rm -f {} \;
-	find . -name "__pycache__" -exec rm -rf {} \;
 	find . -name ".DS_Store" -exec rm -f {} \;
 	rm -f siskin.pex
 	rm -f siskin.shiv
