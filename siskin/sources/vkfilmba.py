@@ -64,6 +64,9 @@ class VKFilmBATask(DefaultTask):
     """
     TAG = '148'
 
+    def closest(self):
+        return weekly(date=self.date)
+
 
 class VKFilmBADownload(VKFilmBATask):
     """
@@ -91,7 +94,7 @@ class VKFilmBADownloadDeletions(VKFilmBATask):
     Download raw deletions daily. At least try, files may be missing, refs
     #12460.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         output = shellout("""curl --fail "{url}" > {output} """,
@@ -126,7 +129,7 @@ class VKFilmBAUpdates(VKFilmBATask):
     """
     Iterate over download directory itself and concat items and deletions.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
@@ -222,11 +225,10 @@ class VKFilmBAMARC(VKFilmBATask):
     """
     Run conversion script.
     """
-
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return VKFilmBAUpdates()
+        return VKFilmBAUpdates(date=self.date)
 
     def run(self):
         output = shellout("python {script} {input} {output}",
