@@ -42,7 +42,6 @@ deletions = http://example.com/del.txt
 """
 
 import datetime
-import hashlib
 import os
 import re
 import shutil
@@ -50,12 +49,11 @@ import tempfile
 import zipfile
 
 import luigi
-import pymarc
 
-from gluish.format import TSV
+import pymarc
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
 
