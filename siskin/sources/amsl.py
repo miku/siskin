@@ -754,18 +754,18 @@ class AMSLFilterConfig(AMSLTask):
     holding or content files each with between 10 and 50000 entries referenced
     about 200 times in total: around 20k records/s.
 
-    Case table (Spring 2017):
+    Case table (Feb 2019), X/-/o, yes, no, maybe.
 
-    SID COLL ISIL LTHF LTCF ELTCF PI
-    --------------------------------
-    X   X    X    -    -    -     -
-    X   X    X    X    -    -     -
-    X   X    X    X    X    -     -
-    X   X    X    X    -    X     -
-    X   X    X    X    -    -     X
-    X   X    X    -    X    -     -
-    X   X    X    -    -    X     -
-    X   X    X    -    -    -     X
+    SID COLL ISIL LTHF LTCF ELTCF PI TCID
+    -------------------------------------
+    X   X    X    -    -    -     -   o
+    X   X    X    X    -    -     -   o
+    X   X    X    X    X    -     -   o
+    X   X    X    X    -    X     -   o
+    X   X    X    X    -    -     X   o
+    X   X    X    -    X    -     -   o
+    X   X    X    -    -    X     -   o
+    X   X    X    -    -    -     X   o
 
     ----
 
@@ -798,8 +798,8 @@ class AMSLFilterConfig(AMSLTask):
         isilfilters = collections.defaultdict(list)
 
         for item in doc:
-            isil, sid, mega_collection = operator.itemgetter(
-                'ISIL', 'sourceID', 'megaCollection')(item)
+            isil, sid, mega_collection, technicalCollectionID = operator.itemgetter(
+                'ISIL', 'sourceID', 'megaCollection', 'technicalCollectionID')(item)
 
             if sid == '48':  # Handled elsewhere.
                 continue
@@ -839,9 +839,9 @@ class AMSLFilterConfig(AMSLTask):
                 })
                 continue
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    -    -    -     -
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    -    -    -     -   o
             if dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL'],
                          absent=['linkToHoldingsFile',
                                   'linkToContentFile',
@@ -850,20 +850,24 @@ class AMSLFilterConfig(AMSLTask):
                          ignore=['technicalCollectionID']):
 
                 isilsidcollections[isil][sid].add(mega_collection)
+                if technicalCollectionID:
+                    isilsidcollections[isil][sid].add(technicalCollectionID)
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    -    -    -     X
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    -    -    -     X   o
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'productISIL'],
                            absent=['linkToHoldingsFile', 'linkToContentFile', 'externalLinkToContentFile'],
                            ignore=['technicalCollectionID']):
 
                 isilsidcollections[isil][sid].add(mega_collection)
                 self.logger.debug("productISIL given, but ignored: %s, %s, %s", isil, sid, item['productISIL'])
+                if technicalCollectionID:
+                    isilsidcollections[isil][sid].add(technicalCollectionID)
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    X    -    -     X
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    X    -    -     X   o
             elif dictcheck(item, contains=['sourceID',
                                            'megaCollection',
                                            'ISIL',
@@ -878,13 +882,15 @@ class AMSLFilterConfig(AMSLTask):
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
                     isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(
                         mega_collection)
+                    if technicalCollectionID:
+                        isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(technicalCollectionID)
                 else:
                     self.logger.warning(
                         "evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    X    -    -     -
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    X    -    -     -   o
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'linkToHoldingsFile'],
                            absent=['linkToContentFile', 'externalLinkToContentFile', 'productISIL'],
                            ignore=['technicalCollectionID']):
@@ -892,13 +898,15 @@ class AMSLFilterConfig(AMSLTask):
                 if item.get('evaluateHoldingsFileForLibrary') == "yes":
                     isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(
                         mega_collection)
+                    if technicalCollectionID:
+                        isilsidlinkcollections[isil][sid][item['linkToHoldingsFile']].add(technicalCollectionID)
                 else:
                     self.logger.warning(
                         "evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    -    -    X     -
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    -    -    X     -   o
             elif dictcheck(item, contains=['sourceID', 'megaCollection', 'ISIL', 'externalLinkToContentFile'],
                            absent=['linkToHoldingsFile', 'linkToContentFile', 'productISIL'],
                            ignore=['technicalCollectionID']):
@@ -910,9 +918,9 @@ class AMSLFilterConfig(AMSLTask):
                             "urls": [item["externalLinkToContentFile"]]}},
                     ]})
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    -    X    -     -
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    -    X    -     -   o
             elif dictcheck(item, contains=['sourceID',
                                            'megaCollection',
                                            'ISIL',
@@ -926,9 +934,9 @@ class AMSLFilterConfig(AMSLTask):
                         {"holdings": {"urls": [item["linkToContentFile"]]}},
                     ]})
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    X    -    X     -
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    X    -    X     -   o
             elif dictcheck(item, contains=['sourceID',
                                            'megaCollection',
                                            'ISIL',
@@ -950,9 +958,9 @@ class AMSLFilterConfig(AMSLTask):
                     self.logger.warning(
                         "evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # X   X    X    X    X    -     -
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # X   X    X    X    X    -     -   o
             elif dictcheck(item, contains=['sourceID',
                                            'megaCollection',
                                            'ISIL',
@@ -974,9 +982,9 @@ class AMSLFilterConfig(AMSLTask):
                     self.logger.warning(
                         "evaluateHoldingsFileForLibrary=no plus link: skipping %s", item)
 
-            # SID COLL ISIL LTHF LTCF ELTCF PI
-            # --------------------------------
-            # ?   ?    ?    ?    ?    ?     ?
+            # SID COLL ISIL LTHF LTCF ELTCF PI TCID
+            # -------------------------------------
+            # ?   ?    ?    ?    ?    ?     ?   o
             else:
                 raise RuntimeError(
                     "unhandled combination of sid, collection and other parameters: %s", item)
