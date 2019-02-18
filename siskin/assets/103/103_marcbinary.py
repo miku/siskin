@@ -213,7 +213,7 @@ url = ""
 creator = ""
 coverage = ""
 
-for record in xml["collection"]["Record"]:
+for record in xml["Records"]["Record"]:
 
     if record["header"]["@status"] != "deleted":
 
