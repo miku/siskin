@@ -16,9 +16,9 @@
     "rft.date":
         # if (.name | length) > 0 then A else B end
         (if (.dateissued | length) == 10 then .dateissued elif (.dateissued | length) == 4 then ([.dateissued,"-01-01"]|add) else null end),
-#   "rft.date":             ([.dateissued // "0001","-01-01"]|add),
+#   "rft.date":             ([.dateissued // "","-01-01"]|add),
 #   "x.date":              ([.dateissued,"-01-01T00:00:00Z"]|add),
-#   "x.date":               ([.dateissued // "0001","-01-01T00:00:00Z"]|add),
+#   "x.date":               ([.dateissued // "","-01-01T00:00:00Z"]|add),
     "x.date":
         (if (.dateissued | length) == 10 then ([.dateissued,"T00:00:00Z"]|add) elif (.dateissued | length) == 4 then ([.dateissued,"-01-01T00:00:00Z"]|add) else null end),
 #   "rft.pub":              [(select(.publisher != null)?], ## span error: array into string
