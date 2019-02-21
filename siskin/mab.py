@@ -69,7 +69,16 @@ class MabRecord(object):
         return self.dd.get("@mabVersion")
 
     def feld(self, number, code=None):
+        """
+        Shortcut, since MAB is a German format.
+        """
         return self.field(number, code=code)
+
+    def felder(self, number, code=None):
+        """
+        Shortcut, since MAB is a German format.
+        """
+        return self.fields(number, code=code)
 
     def field(self, number, code=None):
         """
@@ -99,7 +108,8 @@ class MabXMLFile(object):
     """
     def __init__(self, filename):
         """
-        Eagerly load the file and puts content into a defaultdict.
+        Eagerly parse the XML from filename into a xmltodict defaultdict.
+        TODO(miku): Use streaming mode.
         """
         self.filename = filename
         with open(self.filename) as handle:
@@ -108,6 +118,10 @@ class MabXMLFile(object):
             raise ValueError("datei tag not found")
 
     def records(self):
+        """
+        Returns a generator over all mab records (datensatz). TODO(miku): Use
+        iteration protocol.
+        """
         for ds in self.dd["datei"].get("datensatz", []):
             yield MabRecord(ds)
 
