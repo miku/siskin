@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datei xmlns="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd http://www.d-nb.de/standardisierung/formate/mabxml-1.xsd">
+  <datensatz xmlns="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd" typ="h" status="n" mabVersion="M2.0">
+    <feld nr="001" ind=" ">10588382</feld>
+    <feld nr="002" ind="a">20071109</feld>
+    <feld nr="003" ind=" ">20130117</feld>
+    <feld nr="004" ind=" ">20190110</feld>
+    <feld nr="020" ind="b">ITKGDK500160424</feld>
+    <feld nr="030" ind=" ">e|zuxr|zc||37</feld>
+    <feld nr="036" ind="a">XA-DE</feld>
+    <feld nr="037" ind="b">ger</feld>
+    <feld nr="050" ind=" ">a|a|||||||||||</feld>
+    <feld nr="051" ind=" ">m|||||||</feld>
+    <feld nr="070" ind="a">GDK</feld>
+    <feld nr="071" ind=" ">80</feld>
+    <feld nr="081" ind=" ">81878510</feld>
+    <feld nr="082" ind=" ">VIII. 8 K 96</feld>
+    <feld nr="083" ind=" ">Verfügbar</feld>
+    <feld nr="084" ind=" ">Magazin</feld>
+    <feld nr="100" ind="b">Brinkmann, Annette</feld>
+    <feld nr="102" ind="c">(DE-GDK)00525873</feld>
+    <feld nr="104" ind="b">Dohrmann, Ute</feld>
+    <feld nr="106" ind="c">(DE-GDK)00525874</feld>
+    <feld nr="108" ind="b">Lieber, Gabriele</feld>
+    <feld nr="110" ind="c">(DE-GDK)00525875</feld>
+    <feld nr="200" ind="b">Zentrum für Kulturforschung &lt;Bonn&gt;</feld>
+    <feld nr="202" ind="c">(DE-GDK)00148818</feld>
+    <feld nr="331" ind=" ">Kulturelle Bildung im Medienzeitalter</feld>
+    <feld nr="335" ind=" ">Projekte - Praxis - Perspektiven ; Kubim</feld>
+    <feld nr="359" ind=" ">Herausgeber: ZfKf. Red.: Annette Brinkmann, Ute Dohrmann, Gabriele Lieber [Verantw.]</feld>
+    <feld nr="410" ind=" ">Bonn</feld>
+    <feld nr="412" ind=" ">ARCult Media</feld>
+    <feld nr="425" ind=" ">2003</feld>
+    <feld nr="425" ind="a">2003</feld>
+    <feld nr="433" ind=" ">59  Seiten</feld>
+    <feld nr="434" ind=" ">Ill. (z.T. farb.)</feld>
+    <feld nr="540" ind="a">ISBN 3-930395-62-2</feld>
+    <feld nr="540" ind="a">ISBN 978-3-930395-62-0</feld>
+  </datensatz>
+</datei>
