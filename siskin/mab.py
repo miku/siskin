@@ -44,6 +44,8 @@ file sizes of 50M. TODO: For larger files, rewrite this with streaming.
   </datensatz>
 </datei>
 
+More fixtures under fixtures/mab*.xml.
+
 """
 
 import xmltodict
