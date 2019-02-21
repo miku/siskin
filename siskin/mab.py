@@ -93,6 +93,28 @@ class MabRecord(object):
                 else:
                     return f.get("#text")
 
+    def fields(self, number, code=None):
+        """
+        Returns the values of the all fields matching number and possibly
+        subfield or empty list.
+        """
+        result = []
+
+        for f in self.dd.get("feld", []):
+            if f.get("@nr") != number:
+                continue
+            if code:
+                for sf in f.get("uf", []):
+                    if sf.get("@code") != code:
+                        continue
+                    if sf.get("#text"):
+                        result.append(sf.get("#text"))
+            else:
+                if f.get("#text"):
+                    result.append(f.get("#text"))
+
+        return result
+
     def size(self):
         return len([_ for _ in self.dd.get("feld", [])])
 
