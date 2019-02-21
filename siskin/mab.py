@@ -46,6 +46,22 @@ file sizes of 50M. TODO: For larger files, rewrite this with streaming.
 
 More fixtures under fixtures/mab*.xml.
 
+Example usage:
+
+    from siskin.mab import MabXMLFile
+
+    mf = MabXMLFile("fixtures/mab0.xml")
+    for record in mf.records():
+
+        # Return the first value or None.
+        title = record.field("331")
+        if not title:
+            raise ValueError("record has not title")
+
+        # Return multiple values.
+        for isbn in record.fields("540"):
+            print(isbn)
+
 """
 
 import xmltodict
