@@ -152,7 +152,7 @@ for oldrecord in tqdm(reader, total=total):
         if len(f007) < 2:
             f007 = f007 + "u"
         for field in oldrecord.get_fields("856"):
-            if "kostenfrei" in field:  # TODO: check if this string matches on field-object
+            if "kostenfrei" in field.value():
                 newrecord.add("007", data="cr")
             else:
                 newrecord.add("007", data=f007)
