@@ -47,6 +47,9 @@ Example MABXML files: https://git.io/fhFHr.
 
 """
 
+import io
+import os
+import six
 import xmltodict
 
 class MabRecord(object):
@@ -130,28 +133,65 @@ class MabXMLFile(object):
     """
     Encapsulate MAB XML methods.
     """
-    def __init__(self, filename):
+    def __init__(self, data, replace=None, encoding='utf-8'):
         """
-        Eagerly parse the XML from filename into a xmltodict defaultdict.
-        TODO(miku): Use streaming mode.
-        """
-        self.filename = filename
-        with open(self.filename) as handle:
-            handle = handle.read().replace("¬", "")
-            self.dd = xmltodict.parse(handle, force_list=('datensatz', 'feld', 'uf'))
-        if not "datei" in self.dd:
-            raise ValueError("datei tag not found")
+        Eagerly parse the XML from filename, filelike or string into a
+        xmltodict defaultdict. Basic checks for MAB like XML.
 
-    def records(self):
+        TODO(miku): Use streaming mode.
+
+        The replace optional argument should be a list of desired substitutions
+        in the content, e.g.  (("¬", ""),) to be applied before parsing.
         """
-        Returns a generator over all mab records (datensatz). TODO(miku): Use
-        iteration protocol.
+        if isinstance(data, six.string_types):
+            if os.path.exists(data):
+                # Assume it is a file.
+                with io.open(data, encoding=encoding) as handle:
+                    content = handle.read()
+            else:
+                # Assume direct data.
+                content = data
+        else:
+            # Assume something that can be read from.
+            content = data.read()
+
+        if replace:
+            for value, replacement in replace:
+                content = content.replace(value, replacement)
+
+        self.dd = xmltodict.parse(content, force_list=('datensatz', 'feld', 'uf'))
+        if not "datei" in self.dd:
+            raise ValueError("datei tag not found or empty file without fields")
+
+        # It there are no fields, we get an error.
+        if self.dd["datei"] is None:
+            self.records = []
+        else:
+            self.records = self.dd["datei"].get("datensatz", [])
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
         """
-        for ds in self.dd["datei"].get("datensatz", []):
-            yield MabRecord(ds)
+        Temporary attribute for iteration.
+        """
+        if not hasattr(self, "_it"):
+            self._it = iter(self.records)
+        try:
+            return MabRecord(self._it.next())
+        except StopIteration:
+            delattr(self, "_it")
+            raise
+
+    def next(self):
+        """
+        Python 2 compatibility.
+        """
+        return self.__next__()
 
     def __str__(self):
-        return '<MabXMLFile filename={}>'.format(self.filename)
+        return '<MabXMLFile>'
 
     def __repr__(self):
         return self.__str__()
