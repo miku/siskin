@@ -26,27 +26,9 @@
 Slight MABXML abstraction layer, using xmltodict under the hood. Usable up to
 file sizes of 50M. TODO: For larger files, rewrite this with streaming.
 
-<datei xmlns="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd" ... >
-  <datensatz xmlns="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd" typ="u" status="n" mabVersion="M2.0">
-    <feld nr="001" ind=" ">10598985</feld>
-    <feld nr="002" ind="a">20070926</feld>
-    <feld nr="003" ind=" ">20160311</feld>
-    <feld nr="004" ind=" ">20190110</feld>
-    <feld nr="010" ind=" ">10390691</feld>
-    <feld nr="020" ind="b">ITKGDK500164319</feld>
-    <feld nr="030" ind=" ">e|5|xr|zc||||</feld>
-    <feld nr="050" ind=" ">a|a|||||||||||</feld>
-    <feld nr="051" ind=" ">s|||||||</feld>
-    <feld nr="070" ind="a">GDK</feld>
-    <feld nr="071" ind=" ">80</feld>
-    <feld nr="433" ind=" ">[ca. 300  Seiten ]</feld>
-    <feld nr="501" ind=" ">Enthält die Berichte über Aktivitäten im Jahr 2006</feld>
-  </datensatz>
-</datei>
+MAB specification: https://www.dnb.de/DE/Standardisierung/Formate/MAB/mab_node.html
 
-More fixtures under fixtures/mab*.xml.
-
-Example usage:
+Example MABXML files: https://git.io/fhFHr.
 
     from siskin.mab import MabXMLFile
 
