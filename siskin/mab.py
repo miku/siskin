@@ -86,11 +86,11 @@ class MabRecord(object):
     def mabVersion(self):
         return self.dd.get("@mabVersion")
 
-    def feld(self, number, code=None):
+    def feld(self, number, code=None, alt=None):
         """
         Shortcut, since MAB is a German format.
         """
-        return self.field(number, code=code)
+        return self.field(number, code=code, alt=None)
 
     def felder(self, number, code=None):
         """
@@ -98,7 +98,7 @@ class MabRecord(object):
         """
         return self.fields(number, code=code)
 
-    def field(self, number, code=None):
+    def field(self, number, code=None, alt=None):
         """
         Returns the value of the first (only) field matching number or None.
         """
@@ -107,9 +107,10 @@ class MabRecord(object):
                 if code:
                     for sf in f.get("uf", []):
                         if sf.get("@code") == code:
-                            return sf.get("#text")
+                            return sf.get("#text", alt)
                 else:
-                    return f.get("#text")
+                    return f.get("#text", alt)
+        return alt
 
     def fields(self, number, code=None):
         """
