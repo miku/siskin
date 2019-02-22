@@ -101,11 +101,21 @@ for record in records.records():
     marcrecord.add("245", subfields=subfields)
     
     # Erscheinungsvermerk
-    f260a = record.field("410")       
-    f260b = record.field("412")    
-    f260c = record.field("425")
+    f260a = record.field("410", alt="")       
+    f260b = record.field("412", alt="")    
+    f260c = record.field("425", alt="")
+
+    if f260a != "" and f260b != "":
+        del1 = " : "
+    else:
+        del1 = ""
+
+    if (f260a != "" or f260b != "") and f260c != "":
+        del2 = ", "
+    else:
+        del2 = ""
   
-    subfields = ["a", f260a, "b", f260b, "c", f260c]
+    subfields = ["a", f260a + del1, "b", f260b + del2, "c", f260c]
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
