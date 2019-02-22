@@ -153,8 +153,8 @@ class MabXMLFile(object):
         """
         self.filename = filename
         with open(self.filename) as handle:
-            self.dd = xmltodict.parse(
-                handle.read(), force_list=('datensatz', 'feld', 'uf'))
+            handle = handle.read().replace("¬", "")
+            self.dd = xmltodict.parse(handle, force_list=('datensatz', 'feld', 'uf'))
         if not "datei" in self.dd:
             raise ValueError("datei tag not found")
 
