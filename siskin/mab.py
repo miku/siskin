@@ -32,15 +32,16 @@ Example MABXML files: https://git.io/fhFHr.
 
     from siskin.mab import MabXMLFile
 
-    mf = MabXMLFile("fixtures/mab0.xml")
-    for record in mf.records():
+    mabfile = MabXMLFile("fixtures/mab0.xml")
+
+    for record in mabfile:
 
         # Return the first value or None.
         title = record.field("331")
         if not title:
             raise ValueError("record has not title")
 
-        # Return multiple values.
+        # Return multiple values (or empty list).
         for isbn in record.fields("540"):
             print(isbn)
 
