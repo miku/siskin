@@ -18,7 +18,7 @@ outputfilename = "142_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-reader = MabXMLFile(inputfilename)
+reader = MabXMLFile(inputfilename, replace=(("¬", ""),))
 outputfile = open(outputfilename, "wb")
 
 for record in reader:
