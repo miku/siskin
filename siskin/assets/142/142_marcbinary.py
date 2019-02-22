@@ -18,11 +18,11 @@ outputfilename = "142_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-records = MabXMLFile(inputfilename)
+reader = MabXMLFile(inputfilename)
 outputfile = open(outputfilename, "wb")
 
-for record in records.records():
-           
+for record in reader:
+
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
