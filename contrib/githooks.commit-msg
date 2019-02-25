@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+INPUT_FILE=$1
+START_LINE=`head -n1 $INPUT_FILE`
+PATTERN=".*refs #[0-9][0-9]*.*"
+if ! [[ "$START_LINE" =~ $PATTERN ]]; then
+  echo "Bad commit message, it should contain ticket reference, e.g. refs #1234"
+  exit 1
+fi
