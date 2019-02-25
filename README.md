@@ -203,6 +203,12 @@ $ taskdeps-dot JstorIntermediateSchema | dot -Tpng > deps.png
 
 ![](http://i.imgur.com/8bFvSvN.gif)
 
+## Development
+
+* [commit-msg](https://raw.githubusercontent.com/miku/siskin/master/contrib/githooks.commit-msg) git hook for keeping issues and commits in line
+* use [pylint](https://github.com/PyCQA/pylint), currently 9.18/10 with many errors ignored
+* use [pytest](https://docs.pytest.org/), [pytest-cov](https://pypi.org/project/pytest-cov/), coverage at 9%
+
 ## TODO
 
 * [ ] The naming of the scripts is a bit unfortunate, `taskdo`, `taskcat`,
