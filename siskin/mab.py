@@ -179,7 +179,10 @@ class MabXMLFile(object):
         if not hasattr(self, "_it"):
             self._it = iter(self.records)
         try:
-            return MabRecord(self._it.next())
+            # http://diveinto.org/python3/porting-code-to-python-3-with-2to3.html#next
+            if hasattr(self._it, "next"):
+                return MabRecord(self._it.next())
+            return MabRecord(next(self._it))
         except StopIteration:
             delattr(self, "_it")
             raise

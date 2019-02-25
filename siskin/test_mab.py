@@ -79,7 +79,7 @@ def test_from_file():
     """
     Test, whether we can load from a filename.
     """
-    with tempfile.NamedTemporaryFile(delete=False) as f:
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as f:
         f.write(sample_file_two)
 
     mabf = MabXMLFile(f.name)
