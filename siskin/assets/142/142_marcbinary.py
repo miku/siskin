@@ -2,6 +2,10 @@
 # coding: utf-8
 
 
+# SID: 142
+# Ticket: 8392
+
+
 from siskin.mab import MabXMLFile
 
 import io
