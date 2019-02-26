@@ -157,9 +157,8 @@ class AMSLService(AMSLTask):
 
     def run(self):
         if self.name == 'outboundservices:discovery':
-            output = shellout("span-amsl-discovery -live {live} -staging {staging} | gzip -c > {output}",
-                              live=self.config.get('amsl', 'base'),
-                              staging=self.config.get('amsl', 'staging'))
+            output = shellout("span-amsl-discovery -live {live} | gzip -c > {output}",
+                              live=self.config.get('amsl', 'base'))
         else:
             output = self.input().path
 
