@@ -47,6 +47,7 @@ import os
 import tempfile
 
 import luigi
+import pytz
 import requests
 from luigi.format import Gzip
 
@@ -167,9 +168,9 @@ class DBInetIntermediateSchema(DBInetTask):
                                 dropped_records += 1
                                 continue
 
-                        today = datetime.date.today()
+                        today = datetime.datetime.now(pytz.timezone('UTC'))
                         doc["rft.date"] = today.strftime("%Y-%m-%d")
-                        doc["x.date"] = today.strftime("%Y-%m-%d")
+                        doc["x.date"] = today.isoformat()
                         doc["finc.format"] = "ElectronicIntegratingResource"
                         doc["finc.genre"] = "document"
 
