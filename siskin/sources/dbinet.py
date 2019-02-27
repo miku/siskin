@@ -40,6 +40,7 @@ directory = /path/to/dir/containing/raw/files
 
 """
 
+import datetime
 import glob
 import json
 import os
@@ -52,6 +53,7 @@ from luigi.format import Gzip
 from gluish.format import TSV
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.utils import load_set_from_file
 
 
 class DBInetTask(DefaultTask):
@@ -101,12 +103,26 @@ class DBInetJSON(DBInetTask):
 
 class DBInetIntermediateSchema(DBInetTask):
     """
-    Convert via jq. With --urlcheck, filter out dead links (takes a while). For
-    faster URL checks, try: taskcat DBInetIntermediateSchema | jq -cr .url[] |
-    clinker -w 200, see also: https://git.io/fAC27.
+    Convert via jq.
+
+    This tasks can create a list of failed documents, with `--failed errdocs.json` flag.
+
+    To create file containing link check results for failed links, run:
+
+        $ taskrm DBInetIntermediateSchema
+        $ taskdo DBInetIntermediateSchema --failed errdocs.json
+        $ jq -rc '.url[]' errdocs.json | clinker | jq -r 'select(.status != 200) | .link' > urls_to_drop.txt
+
+    Put path to urls_to_drop.txt (one URL per line) into:
+
+        [dbinet]
+
+        exclude-links = urls_to_drop.txt
+
     """
 
     urlcheck = luigi.BoolParameter(default=False, significant=False)
+    failed = luigi.Parameter(default="", description="write failed JSON to this file", significant=False)
 
     def requires(self):
         return DBInetJSON()
@@ -118,38 +134,51 @@ class DBInetIntermediateSchema(DBInetTask):
         output = shellout("jq -rc -f {filter} {input} | pigz -c > {output}",
                           filter=self.assets('80/filter.jq'), input=self.input().path)
 
-        if not self.urlcheck:
-            luigi.LocalTarget(output).move(self.output().path)
-            return
+        # If we have file to a list of links to exclude, then load this list.
+        urls_to_drop = set()
 
-        with luigi.LocalTarget(output).open() as handle:
-            with self.output().open('w') as output:
+        exclude_file = self.config.get("dbinet", "exclude-links")
+        if exclude_file is None or not os.path.exists(exclude_file):
+            self.logger.debug(self.__doc__)
+        else:
+            urls_to_drop = load_set_from_file(exclude_file)
+
+        # Data cleaning.
+        dropped_records = 0
+
+        with luigi.LocalTarget(output, format=Gzip).open() as handle:
+            with luigi.LocalTarget(is_tmp=True, format=Gzip).open('w') as tmp:
                 for i, line in enumerate(handle):
-                    doc = json.loads(line)
-                    okurls = []
-                    for url in doc.get("url"):
-                        try:
-                            # Prevent MissingSchema errors.
-                            if not url.startswith("http"):
-                                url = "http://%s" % url
-
-                            resp = requests.get(url, timeout=20)
-                            self.logger.debug("[%s] #%d %s", resp.status_code, i, url)
-                            if resp.status_code >= 400:
-                                continue
-                            okurls.append(url)
-                        except (requests.exceptions.ConnectionError,
-                                requests.exceptions.ReadTimeout,
-                                requests.exceptions.TooManyRedirects) as err:
-                            self.logger.debug(err)
-                            continue
-
-                    if len(okurls) == 0:
+                    line = line.strip()
+                    if not line:
                         continue
+                    doc = json.loads(line)
+                    if doc.get("rft.date") in (None, "", "null"):
+                        if self.failed:
+                            with open(self.failed, "a") as failed:
+                                failed.write(json.dumps(doc))
+                                failed.write("\n")
 
-                    doc["urls"] = okurls
-                    output.write(json.dumps(doc))
-                    output.write("\n")
+                        # If the link is valid, then add current date and
+                        # change document format.
+                        for url in doc.get("url", []):
+                            if url in urls_to_drop:
+                                self.logger.debug("dropping document, since link is in exclude list: %s", url)
+                                dropped_records += 1
+                                continue
+
+                        today = datetime.date.today()
+                        doc["rft.date"] = today.strftime("%Y-%m-%d")
+                        doc["rft.xdate"] = today.strftime("%Y-%m-%d")
+                        doc["finc.format"] = "ElectronicIntegratingResource"
+
+                    tmp.write(json.dumps(doc))
+
+        luigi.LocalTarget(tmp.path).move(self.output().path)
+        self.logger.debug("dropped %s records during cleaning", dropped_records)
+
+        if self.urlcheck:
+            raise NotImplementedError()
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
