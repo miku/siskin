@@ -171,6 +171,7 @@ class DBInetIntermediateSchema(DBInetTask):
                         doc["rft.date"] = today.strftime("%Y-%m-%d")
                         doc["rft.xdate"] = today.strftime("%Y-%m-%d")
                         doc["finc.format"] = "ElectronicIntegratingResource"
+                        doc["finc.genre"] = "document"
 
                     tmp.write(json.dumps(doc))
                     tmp.write("\n")
