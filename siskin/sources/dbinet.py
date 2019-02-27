@@ -173,6 +173,7 @@ class DBInetIntermediateSchema(DBInetTask):
                         doc["finc.format"] = "ElectronicIntegratingResource"
 
                     tmp.write(json.dumps(doc))
+                    tmp.write("\n")
 
         luigi.LocalTarget(tmp.path).move(self.output().path)
         self.logger.debug("dropped %s records during cleaning", dropped_records)
