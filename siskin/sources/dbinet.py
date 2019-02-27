@@ -169,7 +169,7 @@ class DBInetIntermediateSchema(DBInetTask):
 
                         today = datetime.date.today()
                         doc["rft.date"] = today.strftime("%Y-%m-%d")
-                        doc["rft.xdate"] = today.strftime("%Y-%m-%d")
+                        doc["x.date"] = today.strftime("%Y-%m-%d")
                         doc["finc.format"] = "ElectronicIntegratingResource"
                         doc["finc.genre"] = "document"
 
