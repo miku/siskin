@@ -162,6 +162,7 @@ class DBInetIntermediateSchema(DBInetTask):
                         doc["rft.series"] = ""
 
                     if doc.get("rft.date") in (None, "", "null"):
+                        # This is probably a web site.
                         if self.failed:
                             with open(self.failed, "a") as failed:
                                 failed.write(json.dumps(doc))
@@ -180,6 +181,7 @@ class DBInetIntermediateSchema(DBInetTask):
                         doc["x.date"] = today.isoformat()
                         doc["finc.format"] = "ElectronicIntegratingResource"
                         doc["finc.genre"] = "document"
+                        doc["rft.jtitle"] = ""
 
                     tmp.write(json.dumps(doc))
                     tmp.write("\n")
