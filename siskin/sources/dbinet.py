@@ -154,6 +154,10 @@ class DBInetIntermediateSchema(DBInetTask):
                     if not line:
                         continue
                     doc = json.loads(line)
+
+                    # Mitigate stutter in result list, refs #13653.
+                    doc["rft.series"] = ""
+
                     if doc.get("rft.date") in (None, "", "null"):
                         if self.failed:
                             with open(self.failed, "a") as failed:
