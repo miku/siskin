@@ -122,7 +122,7 @@ for oldrecord in reader:
             if collection in whitelist:
                 f980c = "sid-30-col-ssoaradlr"
                 break      
-    newrecord.add("980", a="finc-30-" + f001, b="30", c=f980c)
+    newrecord.add("980", a=f001, b="30", c=f980c)
  
     outputfile.write(newrecord.as_marc())
 
