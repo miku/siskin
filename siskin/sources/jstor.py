@@ -474,7 +474,7 @@ class JstorIntermediateSchema(JstorTask):
                             names.add(name)
 
                     if len(names) > 0:
-                        # Translate JSTOR names to AMSL.
+                        # Translate JSTOR names to AMSL. TODO(miku): Get rid of special cases here.
                         amsl_names = [jstor_amsl_collection_name_mapping.get(name) for name in names if name in jstor_amsl_collection_name_mapping]
                         # Check validity against AMSL names.
                         clean_names = [name for name in amsl_names if name in allowed_collection_names]
