@@ -181,7 +181,9 @@ class DBInetIntermediateSchema(DBInetTask):
                         doc["x.date"] = today.isoformat()
                         doc["finc.format"] = "ElectronicIntegratingResource"
                         doc["finc.genre"] = "document"
-                        doc["rft.jtitle"] = ""
+
+                    doc["rft.place"] = [v for v in doc["rft.place"] if v]
+                    doc["rft.pub"] = [v for v in doc["rft.pub"] if v]
 
                     tmp.write(json.dumps(doc))
                     tmp.write("\n")
