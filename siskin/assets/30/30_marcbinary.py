@@ -31,7 +31,7 @@ whitelist = set([
     "1080411",
     "1080412",
     "10800",
-    "1080400",   
+    "1080400",
     "10899"
 ])
 
@@ -72,7 +72,7 @@ for oldrecord in reader:
 
     newrecord = marcx.Record()
     newrecord.strict = False
-    
+
     # prüfen, ob Titel vorhanden ist
     if not oldrecord["245"]:
         continue
@@ -80,37 +80,36 @@ for oldrecord in reader:
     # leader
     newrecord.leader = "     " + oldrecord.leader[5:]
 
-    # 001   
-    for identifiers in oldrecord.get_fields("024"):
-        for f001 in identifiers.get_subfields("a"):
-            regexp = re.search("document/(\d+)", f001)
+    # 001
+    for identifiers in oldrecord.get_fields("856"):
+        for f001 in identifiers.get_subfields("u"):
+            regexp = re.search("/document/(\d+)", f001)
             if regexp:
                 f001 = regexp.group(1)
                 newrecord.add("001", data="finc-30-%s" % f001)
                 break
-    else:
-        print("Die ID konnte nicht verarbeitet werden: " + f001)
+        break
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
         for field in oldrecord.get_fields(tag):
             newrecord.add_field(field)
 
-    # Reihen / Kollektion    
+    # Reihen / Kollektion
     for collections in oldrecord.get_fields("084"):
         for collection in collections.get_subfields("a"):
             f490a = collection_map.get(collection, "")
-            newrecord.add("490", a=f490a)   
+            newrecord.add("490", a=f490a)
 
     # 980
     f980c = "sid-30-col-ssoar"
     for collections in oldrecord.get_fields("084"):
-        for collection in collections.get_subfields("a"):          
+        for collection in collections.get_subfields("a"):
             if collection in whitelist:
                 f980c = "sid-30-col-ssoaradlr"
-                break      
-    newrecord.add("980", a="finc-30-" + f001, b="30", c=f980c)
- 
+                break
+    newrecord.add("980", a=f001, b="30", c=f980c)
+
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
