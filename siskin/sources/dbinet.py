@@ -156,7 +156,10 @@ class DBInetIntermediateSchema(DBInetTask):
                     doc = json.loads(line)
 
                     # Mitigate stutter in result list, refs #13653.
-                    doc["rft.series"] = ""
+                    series = doc["rft.series"]
+                    if series:
+                        doc["x.footnotes"] = [doc["rft.series"]]
+                        doc["rft.series"] = ""
 
                     if doc.get("rft.date") in (None, "", "null"):
                         if self.failed:
