@@ -57,19 +57,6 @@ collection_map = {
 }
 
 
-def filter_084a(value):
-    """
-    A filter helper for a single 084a value. Returns True, if the value passes.
-    """
-    if value in whitelist:
-        return True
-    if pattern_ms.match(value):
-        return True
-    if pattern_ap.match(value) and value not in blacklist and not pattern_f2.match(value):
-        return True
-    return False
-
-
 inputfilename = "30_input.xml"
 outputfilename = "30_output.mrc"
 
