@@ -26,6 +26,7 @@ clean:
 	find . -name ".DS_Store" -exec rm -f {} \;
 	rm -f siskin.pex
 	rm -f siskin.shiv
+	rm -f .coverage
 
 docs/catalog/AIUpdate.png: $(PY_FILES)
 	taskdeps-dot AIUpdate | dot -Tpng > $@
