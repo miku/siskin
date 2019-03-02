@@ -55,7 +55,7 @@ for oldrecord in reader:
             newrecord.add_field(field)      
 
     # 980
-    collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee", "c", u"sid-39-col-perseeadlr"]
+    collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee"]
     newrecord.add("980", subfields=collections)
  
     outputfile.write(newrecord.as_marc())
