@@ -35,7 +35,7 @@ reader = pymarc.parse_xml_to_array(inputfile)
 
 for oldrecord in reader:
 
-    newrecord = marcx.Record()
+    newrecord = marcx.Record(force_utf8=True)
     newrecord.strict = False
     
     # prüfen, ob Titel vorhanden ist
