@@ -46,11 +46,12 @@ for oldrecord in reader:
     if not oldrecord["245"]:
         continue
 
-    # leader
+    # Leader
     newrecord.leader = "     " + oldrecord.leader[5:]
 
-    # 001   
+    # Identifikator   
     f001 = oldrecord["001"].data
+    f001 = f001.replace("-", "").replace("_", "")
     newrecord.add("001", data="finc-39-%s" % f001)
     
     # Originalfelder, die ohne Änderung übernommen werden
