@@ -24,14 +24,18 @@ copytags = ["001", "003", "005", "007", "008", "022", "024", "040", "041", "100"
 
 inputfilename = "39_input.xml"
 outputfilename = "39_output.mrc"
+filterfilename = "39_issn_filter"
 
-if len(sys.argv) >= 3:
-    inputfilename, outputfilename = sys.argv[1:3]
+if len(sys.argv) >= 4:
+    inputfilename, outputfilename, filterfilename = sys.argv[1:4]
 
 inputfile = io.open(inputfilename, "rb")
 outputfile = io.open(outputfilename, "wb")
+filterfile = io.open(filterfilename, "r")
 
 reader = pymarc.parse_xml_to_array(inputfile)
+issn_list = filterfile.readlines()
+issn_list = [issn.rstrip("\n") for issn in issn_list]
 
 for oldrecord in reader:
 
@@ -54,11 +58,31 @@ for oldrecord in reader:
         for field in oldrecord.get_fields(tag):
             newrecord.add_field(field)      
 
-    # 980
-    collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee"]
+    # Kollektion und Ansigelung
+    try:
+        f022a = oldrecord["022"]["a"]
+    except:
+        f022a = ""
+
+    try:
+        f760x = oldrecord["760"]["x"]
+    except:
+        f760x = ""
+
+    try:
+         f787x = oldrecord["787"]["x"]
+    except:
+        f787x = ""      
+
+    if f022a in issn_list or f760x in issn_list or f787x in issn_list:
+        collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee", "c", u"sid-39-col-perseeadlr"]
+    else:
+        collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee"]
+
     newrecord.add("980", subfields=collections)
  
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
 outputfile.close()
+filterfile.close()
