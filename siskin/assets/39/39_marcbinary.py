@@ -16,9 +16,9 @@ copytags = ["001", "003", "005", "007", "008", "022", "024", "040", "041", "100"
             "144", "146", "150", "151", "152", "159", "160", "166", "174", "175", "177",
             "178", "179", "180", "181", "182", "183", "184", "185", "186", "187", "189",
             "190", "191", "192", "193", "194", "195", "196", "197", "198", "199", "200",
-            "206", "211", "236", "245", "256", "260", "326", "363", "370", "377", "391",
-            "411", "501", "506", "520", "542", "550", "600", "604", "650", "653", "690",
-            "700", "710", "742", "760", "773", "777", "787", "797", "856", "860", "873",
+            "206", "211", "236", "256", "260", "326", "363", "370", "377", "391", "411",
+            "501", "506", "520", "542", "550", "600", "604", "650", "653", "690", "700",
+            "710", "742", "760", "773", "777", "787", "797", "856", "860", "873",
             "880", "947", "948", "961"]
 
 
@@ -57,7 +57,32 @@ for oldrecord in reader:
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
         for field in oldrecord.get_fields(tag):
-            newrecord.add_field(field)      
+            newrecord.add_field(field)
+
+    # Titel
+    # Wird extra verarbeitet, da Unterfelder teilweise leer sind und dann nicht angelegt werden sollen
+    try:
+        f245a = oldrecord["245"]["a"]
+    except:
+        f245a = ""
+
+    try:
+        f245b = oldrecord["245"]["b"]
+    except:
+        f245b = ""
+
+    try:
+        f245c = oldrecord["245"]["c"]
+    except:
+        f245c = ""
+
+    try:
+        f245h = oldrecord["245"]["h"]
+    except:
+        f245h = ""
+
+    subfields = ["a", f245a, "b", f245b, "c", f245c, "h", f245h]
+    newrecord.add("245", subfields=subfields)     
 
     # Kollektion und Ansigelung
     try:
