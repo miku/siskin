@@ -71,15 +71,23 @@
       <data source="001" name="b">
         <constant value="$[sid]"/>
       </data>
-      <data source="001" name="c">
-        <constant value="sid-56-col-folkwangessen"/>
-      </data>
-      <data source="001" name="c">
-        <constant value="sid-57-col-rshdüsseldorf"/>
-      </data>
-      <data source="001" name="c">
-        <constant value="sid-58-col-hfmtköln"/>
-      </data>
+      <choose>
+          <data source="001" name="c">
+            <constant value="$[sid]" />
+            <equals string="56" />
+            <constant value="sid-56-col-folkwangessen"/>
+          </data>
+          <data source="001" name="c">
+            <constant value="$[sid]" />
+            <equals string="57" />
+            <constant value="sid-57-col-rshdüsseldorf"/>
+          </data>
+          <data source="001" name="c">
+            <constant value="$[sid]" />
+            <equals string="58" />
+            <constant value="sid-58-col-hfmtköln"/>
+          </data>
+        </choose>
     </entity>
     <!-- pass-trough controlfields-->
     <data source="008|007"/>
