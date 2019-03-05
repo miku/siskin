@@ -71,14 +71,8 @@
       <data source="001" name="b">
         <constant value="$[sid]"/>
       </data>
-      <data source="001" name="c">
+      <data source="_id" name="c">
         <constant value="sid-56-col-folkwangessen"/>
-      </data>
-      <data source="001" name="c">
-        <constant value="sid-57-col-rshdüsseldorf"/>
-      </data>
-      <data source="001" name="c">
-        <constant value="sid-58-col-hfmtköln"/>
       </data>
     </entity>
     <!-- pass-trough controlfields-->
