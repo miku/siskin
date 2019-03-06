@@ -11,7 +11,7 @@ import marcx
 import pymarc
 
 
-copytags = ["005", "007", "008", "020", "024", "042", "084", "093", "100",
+copytags = ["005", "007", "008", "020", "024", "041", "042", "084", "093", "100",
             "110", "245", "246", "264", "300", "490", "500", "520", "540",
             "561", "650", "653", "700", "710", "773", "856"]
 
@@ -56,6 +56,19 @@ collection_map = {
     "10899": u"Sonstiges zu Kommunikationswissenschaften"
 }
 
+def cleaned_subfields(field):
+    """
+    Given a pymarc.field.Field, return a list of subfields, without empty values.
+    """
+    cleaned_subfields = []
+    it = iter(field.subfields)
+    for code, value in zip(it, it):
+        if not value:
+            continue
+        cleaned_subfields.append(code)
+        cleaned_subfields.append(value)
+    return cleaned_subfields
+
 
 inputfilename = "30_input.xml"
 outputfilename = "30_output.mrc"
@@ -93,15 +106,9 @@ for oldrecord in reader:
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
         for field in oldrecord.get_fields(tag):
-            newrecord.add_field(field)
-
-    # Sprache
-    # Wird extra verarbeitet, da Unterfelder teilweise leer sind und dann nicht angelegt werden sollen
-    try:
-        f041a = oldrecord["041"]["a"]
-    except:
-        f041a = ""
-    newrecord.add("041", a=f041a)
+            if not field.tag.startswith('00'):
+                field.subfields = cleaned_subfields(field)
+            newrecord.add_field(field)    
 
     # Reihen / Kollektion
     for collections in oldrecord.get_fields("084"):
