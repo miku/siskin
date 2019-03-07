@@ -87,10 +87,14 @@ class DOAJDump(DOAJTask):
     Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la), which will use
     the API
     (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query).
+
     As of Fall 2018 DOAJ works on a few infrastructure issue
     (https://blog.doaj.org/2018/10/01/infrastructure-and-why-sustainable-funding-so-important-to-services-like-doaj/).
+
     In the future, a full download should be used to lower the overhead of HTTP
     and API calls.
+
+    As of Feb 2019, the API is not usable for full downloads any more.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
