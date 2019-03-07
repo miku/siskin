@@ -117,13 +117,13 @@ for oldrecord in reader:
             newrecord.add("490", a=f490a)
 
     # 980
-    f980c = "sid-30-col-ssoar"
+    f980 = ["a", f001, "b", "30", "c", "sid-30-col-ssoar"]
     for collections in oldrecord.get_fields("084"):
         for collection in collections.get_subfields("a"):
             if collection in whitelist:
-                f980c = "sid-30-col-ssoaradlr"
+                f980 = ["a", f001, "b", "30", "c", "sid-30-col-ssoar", "c", "sid-30-col-ssoaradlr"]
                 break
-    newrecord.add("980", a=f001, b="30", c=f980c)
+    newrecord.add("980", subfields=f980)
 
     outputfile.write(newrecord.as_marc())
 
