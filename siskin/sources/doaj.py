@@ -110,6 +110,20 @@ class DOAJDump(DOAJTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
 
+class DOAJHarvest(DOAJTask):
+    """
+    Harvest via OAI endpoint.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("METHA_DIR={dir} metha-sync {endpoint} && METHA_DIR={dir} metha-cat {endpoint} | pigz -c > {output}",
+                          dir=self.config.get('core', 'metha-dir'), endpoint='http://www.doaj.org/oai.article')
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+
 class DOAJIdentifierBlacklist(DOAJTask):
     """
     Create a blacklist of identifiers.
