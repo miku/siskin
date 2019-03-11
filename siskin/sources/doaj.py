@@ -119,6 +119,7 @@ class DOAJHarvest(DOAJTask):
     def run(self):
         output = shellout("METHA_DIR={dir} metha-sync {endpoint} && METHA_DIR={dir} metha-cat {endpoint} | pigz -c > {output}",
                           dir=self.config.get('core', 'metha-dir'), endpoint='http://www.doaj.org/oai.article')
+        self.logger.debug("compressing output (might take a few minutes) ...")
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
