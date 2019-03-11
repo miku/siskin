@@ -35,4 +35,4 @@ if __name__ == '__main__':
     output = StringIO()
     config = Config.instance()
     config.write(output)
-    print(output.getvalue())
+    print(output.getvalue().encode('utf-8'))
