@@ -205,23 +205,31 @@ class DOAJFiltered(DOAJTask):
 
 class DOAJIntermediateSchema(DOAJTask):
     """
-    Convert to intermediate schema via span.
+    Convert to intermediate schema via span; elasticsearch and API are
+    currently defunkt, use OAI (with metha 0.1.37 or higher).
 
-    XXX: Default format is "doaj" for now. As soon as API is functional, switch to doaj-api.
+    TODO(miku): Keep DOAJIdentifierBlacklist updated via DOAJHarvest.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="doaj",
-                             description="kind of source document, doaj or doaj-api")
+    format = luigi.Parameter(default="doaj-oai",
+                             description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
 
     def requires(self):
         return {
             'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
-            'input': DOAJFiltered(date=self.date, format=self.format),
+            'input': DOAJHarvest(date=self.date),
+            'blacklist': DOAJIdentifierBlacklist(date=self.date),
         }
 
     @timed
     def run(self):
-        output = shellout("span-import -i {format} {input} | pigz -c > {output}",
+        output = shellout("""unpigz -c {input} |
+                             span-import -i {format} |
+                             grep -vf {exclude} |
+                             grep -vf {blacklist} |
+                             pigz -c > {output}""",
+                          blacklist=self.input().get('blacklist').path,
+                          exclude=self.assets('028_doaj_filter_issn.tsv'),
                           input=self.input().get('input').path,
                           format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
