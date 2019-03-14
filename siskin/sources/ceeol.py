@@ -72,20 +72,23 @@ class CeeolJournalsUpdates(CeeolTask):
     The output will depend on the set and order of the input files.
     """
     def run(self):
-        paths = [p.strip() for p in self.config.get("ceeol", "updates").split(",")]
+        paths = [p.strip() for p in self.config.get("ceeol", "updates").split(",") if p.strip()]
         _, stopover = tempfile.mkstemp(prefix="siskin-")
+        self.logger.debug("found %d updates", len(paths))
         for p in paths:
             shellout("span-import -i ceeol-marcxml {input} >> {output}", input=p, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         filename = "{}.ndj".format(self.updateid())
-        return luigi.LocalTarget(filename=filename)
+        return luigi.LocalTarget(path=self.path(filename=filename))
 
 class CeeolJournalsIntermediateSchema(CeeolTask):
     """
     Combine all journals from disk dump and convert them to intermediate
     schema. Add updates. The output name of this task depends on the update id.
+
+    This task depends on a fixed subdirectory, e.g. articles or 1Journal-Articles-XML..
     """
     def requires(self):
         return CeeolJournalsUpdates()
@@ -93,7 +96,7 @@ class CeeolJournalsIntermediateSchema(CeeolTask):
     def run(self):
         diskdir = self.config.get('ceeol', 'disk-dir')
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for path in glob.glob(os.path.join(diskdir, '1Journal-Articles-XML', 'articles_*xml')):
+        for path in glob.glob(os.path.join(diskdir, 'articles', 'articles_*xml')):
             shellout("span-import -i ceeol {input} | pigz -c >> {output}", input=path, output=stopover)
         shellout("cat {update} | pigz -c >> {output}", update=self.input().path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
