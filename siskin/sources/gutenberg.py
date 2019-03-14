@@ -54,6 +54,12 @@ class GutenbergTask(DefaultTask):
 class GutenbergDownload(GutenbergTask):
     """
     Download RDF dump.
+
+    TODO(miku): Allow for http_proxy, as still: "Your IP Address in Germany is
+    Blocked from www.gutenberg.org" - A Court in Germany ordered that access to
+    certain items in the Project Gutenberg collection are blocked from Germany.
+    Project Gutenberg believes the Court has no jurisdiction over the matter,
+    but until the issue is resolved, it will comply.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
