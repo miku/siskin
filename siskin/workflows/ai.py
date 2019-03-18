@@ -82,7 +82,6 @@ from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
-from siskin.sources.ssoar import SSOARIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
@@ -292,7 +291,6 @@ class AIIntermediateSchema(AITask):
             KielFMFIntermediateSchema(stamp=True),
             IJOCIntermediateSchema(stamp=True),
             CeeolJournalsIntermediateSchema(stamp=True),
-            SSOARIntermediateSchema(stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
             HHBDIntermediateSchema(date=self.date, stamp=True),
             DBInetIntermediateSchema(stamp=True),
