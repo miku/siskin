@@ -276,7 +276,7 @@ for root, _, files in os.walk(input_directory):
 
         marcrecord.add("970", c="PN")
 
-        marcrecord.add("980", a=f001, b="15", c="Petrucci Musikbibliothek")
+        marcrecord.add("980", a=f001, b="15", c="sid-15-col-imslp")
 
         outputfile.write(marcrecord.as_marc())
 
