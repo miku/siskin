@@ -98,6 +98,7 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
         writer.close()
 
         if stats["failed"] > max_failures:
+            logger.warn("%d records failed, only %d failures allowed", stats["failed"], max_failures)
             raise RuntimeError("more than %d records failed", max_failures)
 
         logger.debug("%d/%d records failed/processed", stats["failed"], stats["processed"])
