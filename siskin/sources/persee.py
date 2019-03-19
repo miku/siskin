@@ -97,6 +97,7 @@ class PerseeMARC(PerseeTask):
                           input=self.input().path,
                           issnfile=issnfile)
         luigi.LocalTarget(output).move(self.output().path)
+        os.remove(issnfile)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
