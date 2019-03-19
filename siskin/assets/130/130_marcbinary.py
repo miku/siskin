@@ -369,7 +369,7 @@ for record in records:
         f866a = f866a.decode('utf-8')
     marcrecord.add("866", a=f866a)
     marcrecord.add("935", b=f935b, c=f935c)
-    marcrecord.add("980", a=f001, b="130", c="VDEH")
+    marcrecord.add("980", a=f001, b="130", c="sid-130-col-vdeh")
 
     outputfile.write(marcrecord.as_marc())
 
