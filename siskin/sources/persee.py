@@ -25,11 +25,20 @@
 
 """
 Persee, refs #3133, #11349.
+
+# Config
+
+[persee]
+
+# one issn per line
+fid-issn-url = http://example.com/fid-issn-list
 """
 
 import datetime
 
 import luigi
+import requests
+
 import marcx
 import pymarc
 import ujson as json
@@ -37,7 +46,6 @@ from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.sources.amsl import AMSLService
 from siskin.task import DefaultTask
 
@@ -82,9 +90,12 @@ class PerseeMARC(PerseeTask):
         return PerseeCombined(date=self.date)
 
     def run(self):
-        output = shellout("""python {script} <(unpigz -c {input}) {output}""",
+        issnfile = shellout(""" curl -sL --fail "{fid_issn_url}" > {output} """,
+                            fid_issn_url=self.config.get('persee', 'fid-issn-url'))
+        output = shellout("""python {script} <(unpigz -c {input}) {output} {issnfile}""",
                           script=self.assets('39/39_marcbinary.py'),
-                          input=self.input().path)
+                          input=self.input().path,
+                          issnfile=issnfile)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -96,5 +107,3 @@ class PerseeMARC(PerseeTask):
         because it might be deleted, when imported.
         """
         self.output().copy(self.path(ext='fincmarc.mrc.import'))
-
-
