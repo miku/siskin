@@ -63,9 +63,9 @@ class PerseeCombined(PerseeTask):
         http://oai.persee.fr/oai)`.
         """
         output = shellout("""
-            metha-sync -format marc -from 2000-01-01 http://oai.persee.fr/oai &&
-            metha-cat http://oai.persee.fr/oai | pigz -c > {output}
-        """)
+            METHA_DIR={metha_dir} metha-sync -format marc -from 2000-01-01 http://oai.persee.fr/oai &&
+            METHA_DIR={metha_dir} metha-cat http://oai.persee.fr/oai | pigz -c > {output}
+        """, metha_dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
