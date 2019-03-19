@@ -84,7 +84,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
             newrecord.add_field(field)   
 
     # 980
-    collections = ["a", f001, "b", "156", "c", "Umweltbibliothek Leipzig"]
+    collections = ["a", f001, "b", "156", "c", "sid-156-col-umweltbibliothek"]
     newrecord.add("980", subfields=collections)
    
     outputfile.write(newrecord.as_marc())
