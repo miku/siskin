@@ -226,7 +226,7 @@ for jsonrecord in jsonrecords:
         marcrecord.add("773", t=f773t, g=f773g)
 
     # Kollektion
-    marcrecord.add("980", a=f001, b="131", c="GDMB")
+    marcrecord.add("980", a=f001, b="131", c="sid-131-col-gdmb")
 
     outputfile.write(marcrecord.as_marc())
 
