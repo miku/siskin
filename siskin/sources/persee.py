@@ -63,7 +63,7 @@ class PerseeCombined(PerseeTask):
         http://oai.persee.fr/oai)`.
         """
         output = shellout("""
-            metha-sync -from 2000-01-01 http://oai.persee.fr/oai &&
+            metha-sync -format marc -from 2000-01-01 http://oai.persee.fr/oai &&
             metha-cat http://oai.persee.fr/oai | pigz -c > {output}
         """)
         luigi.LocalTarget(output).move(self.output().path)
