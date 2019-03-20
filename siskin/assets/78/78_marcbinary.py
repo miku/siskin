@@ -226,8 +226,8 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
                 marcrecord.add("710", a=f710a)
 
     # übergeordnete Ressource
-    f773w = xmlrecord["ZEITSCHRIFT"]
-    marcrecord.add("773", w=f773w)
+    f773g = xmlrecord["ZEITSCHRIFT"]
+    marcrecord.add("773", g=f773g)
 
     f773t = xmlrecord["SAMMELWERK"]
     marcrecord.add("773", t=f773t)
