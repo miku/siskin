@@ -236,6 +236,11 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     f856u = xmlrecord["URL"]
     if f856u:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
+    # Link zum Datensatz
+    f856u = "http://www.izi-datenbank.de/details/" + f001
+    marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
+    
     
     # Medienform
     marcrecord.add("935", b=f935b, c=f935c)
