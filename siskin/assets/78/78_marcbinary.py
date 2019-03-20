@@ -166,7 +166,19 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
             f260c = ""
     if year:
         f260c = year
-    marcrecord.add("260", a=f260a, b=f260b, c=f260c)
+
+    if f260a != "" and f260b != "":
+        del1 = " : "
+    else:
+        del1 = ""
+
+    if (f260a != "" or f260b != "") and f260c != "":
+        del2 = ", "
+    else:
+        del2 = ""
+  
+    subfields = ["a", f260a + del1, "b", f260b + del2, "c", f260c]
+    marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
     f300a = xmlrecord["QUELLE"]
@@ -240,8 +252,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     # Link zum Datensatz
     f856u = "http://www.izi-datenbank.de/details/" + f001
     marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
-    
-    
+
     # Medienform
     marcrecord.add("935", b=f935b, c=f935c)
 
