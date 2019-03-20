@@ -105,15 +105,26 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         marcrecord.add("245", a=f245a)
 
     # Erscheinungsvermerk
-    f260c = xmlrecord["JAHR"]
-    marcrecord.add("260", c=f260c)
+    year = xmlrecord["JAHR"]
+    f260 = xmlrecord["QUELLE"]
+    if f260:
+        match = re.search("(.*?):\s(.*?)\s(\d\d\d\d)[,\.]\s.*", f260)
+        if match:
+            f260a, f260b, f260c = match.groups()
+        else:
+            f260a = ""
+            f260b = ""
+            f260c = ""
+    if year:
+        f260c = year
+    marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
     # Umfangsangabe
     f300a = xmlrecord["QUELLE"]
     if f300a:
-        match = re.search("(.*?):\s(.*?)\s(\d\d\d\d),\s(.*)", f300a) # Quelle matchwn (Seiten vielleicht 773w?)
+        match = re.search(".*\s\d\d\d\d[,\.]\s(.*)", f300a)
         if match:
-            f300a, f300b = match.groups()
+            f300a = match.groups()
             marcrecord.add("300", a=f300a)
 
     # Reihentitel
