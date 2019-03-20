@@ -41,8 +41,57 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
+    # Formaterkennung
+    format = xmlrecord["PUBLIKATIONSTYP"]
+    nummer = xmlrecord["NUMMER"]
+    url = xmlrecord["URL"]
+    isbn = xmlrecord["ISBN"]
+    zeitschrift = xmlrecord["ZEITSCHRIFT"]
+    #beitrag = xmlrecord["SAMMELWERK"]
+    band = xmlrecord["BAND"]
+    quelle = xmlrecord["QUELLE"]
+
+    if quelle:
+        match = re.search(".*\sS\.\s\d+-\d+", quelle)
+        if match:
+            artikel = True
+        else:
+            artikel = False
+
+    if not format:
+        format = ""
+    
+    if ("Bachelorarbeit" in format or "Masterarbeit" in format or "Diplomarbeitarbeit" in format or
+        "Magisterarbeitarbeit" in format or "Dissertation" in format):
+
+        leader = "     nam  22        4500"
+        f935c = "hs"
+
+    elif isbn:
+        leader = "     nam  22        4500"
+        f935c = "lo"
+
+    elif zeitschrift or artikel or "beitrag" in format:
+        leader = "     naa  22        4500"
+        f935c = "text"
+
+    elif quelle:
+        leader = "     nam  22        4500"
+        f935c = "lo"
+
+    else:
+        leader = "     nam  22        4500"
+        f935c = "lo"
+
+    if url:
+        f007 = "cr"
+        f935b = "cofz"
+    else:
+        f007 = "tu"
+        f935b = "druck"
+
     # Leader
-    marcrecord.leader = "     nab  22        4500"
+    marcrecord.leader = leader
 
     # Identifier
     f001 = xmlrecord["NUMMER"]
@@ -51,7 +100,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     marcrecord.add("001", data="finc-78-" + f001)
 
     # 007
-    marcrecord.add("007", data="cr")
+    marcrecord.add("007", data=f007)
 
     # ISBN
     isbns = xmlrecord["ISBN"]
@@ -67,7 +116,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         language = languages[0]
         language = lang_map.get(language, "")
         if language != "":
-            marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
+            marcrecord.add("008", data="130227uu20uuuuuuxx uuu %s  c" % language)
             if len(languages) < 4:
                 subfields = []
                 for f041a in languages:
@@ -154,6 +203,11 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     for f700a in persons[1:]:
         marcrecord.add("700", a=f700a)
 
+    #editors = xmlrecord["HRSG_MITARBEITER"]
+    #editors = editors.split("; ")
+    #for f700a in editors:
+    #    marcrecord.add("700", a=f700a)
+
     # weitere körperschaftliche Urheber
     if corporates:
         for f710a in corporates[1:]:
@@ -183,7 +237,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
     
     # Medienform
-    marcrecord.add("935", b="cofz")
+    marcrecord.add("935", b=f935b, c=f935c)
 
     # Kollektion
     marcrecord.add("980", a=f001, b="78", c="sid-78-col-izi")
