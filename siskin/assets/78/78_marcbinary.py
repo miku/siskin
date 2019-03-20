@@ -234,7 +234,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
 
     # Link zur Ressource
     f856u = xmlrecord["URL"]
-    if f856u != "":
+    if f856u:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
     
     # Medienform
