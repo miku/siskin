@@ -203,10 +203,11 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     for f700a in persons[1:]:
         marcrecord.add("700", a=f700a)
 
-    #editors = xmlrecord["HRSG_MITARBEITER"]
-    #editors = editors.split("; ")
-    #for f700a in editors:
-    #    marcrecord.add("700", a=f700a)
+    editors = xmlrecord["HRSG_MITARBEITER"]
+    if editors:
+        editors = editors.split("; ")
+        for f700a in editors:
+            marcrecord.add("700", a=f700a)
 
     # weitere körperschaftliche Urheber
     if corporates:
