@@ -55,8 +55,7 @@ class IMSLPTask(DefaultTask):
     TAG = "15"
 
     def closest(self):
-        """ XXX: adjust. """
-        return datetime.date(2017, 12, 25)
+        return datetime.date(2018, 4, 25)
 
     def latest_link(self):
         """
@@ -71,6 +70,7 @@ class IMSLPTask(DefaultTask):
         if len(links) == 0:
             raise ValueError("could not find any suitable links: %s", listings_url)
 
+        self.logger.debug("assuming latest link is %s", links[-1])
         return links[-1]
 
 class IMSLPDownloadDeprecated(IMSLPTask):
