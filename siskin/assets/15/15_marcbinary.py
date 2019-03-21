@@ -141,10 +141,6 @@ for root, _, files in os.walk(input_directory):
 
     inputfile.close()
 
-with open("15_fieldmap.json", "w") as output:
-    json.dump(fieldmap, output)
-
-#sys.exit(0)
 
 input_directory = "IMSLP_neu"
 output_filename = "15_output.mrc"
