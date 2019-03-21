@@ -128,7 +128,7 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     def output(self):
         return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
 
-class IMSLPConvert(IMSLPTask):
+class IMSLPConvertNext(IMSLPTask):
     """
     Take a current version of the data plus legacy mapping and convert.
 
@@ -158,22 +158,18 @@ class IMSLPConvert(IMSLPTask):
         dst = os.path.join(self.taskdir(), filename.replace("tar.gz", "fincmarc.mrc"))
         return luigi.LocalTarget(path=dst)
 
-class IMSLPConvertDeprecated(IMSLPTask):
+class IMSLPConvert(IMSLPTask):
     """
     Extract and transform.
 
     TODO, refs #13055 -- see IMSLPDownloadNext and IMSLPConvertNext and IMSLPLegacyMapping.
-
-    File "/usr/lib/python2.7/site-packages/siskin/assets/15/15_marcbinary.py", line 165, in <module>
-        record = record["document"]
-    KeyError: 'document'
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    debug = luigi.BoolParameter(description='do not delete temporary folder')
+    debug = luigi.BoolParameter(description='do not delete temporary folder', significant=False)
 
     def requires(self):
-        return IMSLPDownloadDeprecated(date=self.date)
+        return IMSLPDownload(date=self.date)
 
     @deprecated
     def run(self):
