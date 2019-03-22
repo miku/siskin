@@ -47,16 +47,19 @@ class IZITask(DefaultTask):
     """ Base task for IZI. """
     TAG = '78'
 
-class IZIIntermediateSchema(IZITask):
-    """
-    Convert XML to intermediate schema via metafacture.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
 
+class IZIMARC(IZITask):
+    """
+    Convert to binary MARC.
+    """
     def run(self):
-        output = shellout("""flux.sh {flux} in={iziFile} | pigz -c > {output}""",
-                         flux=self.assets("78/78.flux"), iziFile=self.config.get('izi', 'input'))
+        output = shellout("""python {script} {input} {output}""",
+                         script=self.assets('78/78_marcbinary.py'),
+                        input=self.config.get('izi', 'input'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+
+
+
