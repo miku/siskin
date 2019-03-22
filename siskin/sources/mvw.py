@@ -32,7 +32,7 @@ https://verteiler.mediathekviewweb.de/archiv/.
 
 Daily file file exports, xz.
 
-    $ xz -l 2018-08-28-filme.xz 
+    $ xz -l 2018-08-28-filme.xz
     Strms  Blocks   Compressed Uncompressed  Ratio  Check   Filename
         1       1     23.8 MiB    147.2 MiB  0.162  CRC64   2018-08-28-filme.xz
 
@@ -70,6 +70,23 @@ class MVWTask(DefaultTask):
     TAG = '169'
 
 
+class MVWDownloadSnapshot(MVWTask):
+    """
+    Try to download the current file. This task was added, because the archived
+    files at https://verteiler.mediathekviewweb.de/archiv/ were not updated any
+    more (2019-03-22).
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        url = "https://verteiler.mediathekviewweb.de/Filmliste-akt.xz"
+        output = shellout("""curl -sL --fail "{url}" > {output}""", url=url)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="xz"))
+
+
 class MVWDownload(MVWTask):
     """
     Download file list for a given date.
@@ -100,7 +117,7 @@ class MVWMARC(MVWTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return MVWDownload(date=self.date - datetime.timedelta(1))
+        return MVWDownloadSnapshot(date=self.date)
 
     def run(self):
         output = shellout("python {script} <(xz -dc {input}) {output}",
