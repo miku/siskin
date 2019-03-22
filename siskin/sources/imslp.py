@@ -74,7 +74,11 @@ class IMSLPTask(DefaultTask):
         return links[-1]
 
 class IMSLPDownloadDeprecated(IMSLPTask):
-    """ Download raw data. Should be a single URL pointing to a tar.gz. """
+    """
+    Download raw data. Should be a single URL pointing to a tar.gz.
+
+    Deprecated, will be removed soon.
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -111,7 +115,6 @@ class IMSLPDownload(IMSLPTask):
 
 class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     """
-
     Path to JSON file mapping record id to viaf id and worktitle ("Werktitel").
 
     This is a fixed file.
@@ -132,7 +135,7 @@ class IMSLPConvertNext(IMSLPTask):
     """
     Take a current version of the data plus legacy mapping and convert.
 
-    WIP, refs #12288, refs #13055.
+    WIP, refs #12288, refs #13055. May merge with 15_marcbinary.py.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -171,7 +174,6 @@ class IMSLPConvert(IMSLPTask):
     def requires(self):
         return IMSLPDownload(date=self.date)
 
-    @deprecated
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
         shellout("tar -xzf {archive} -C {tempdir}",
