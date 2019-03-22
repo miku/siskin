@@ -178,8 +178,10 @@ class IMSLPConvert(IMSLPTask):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
         shellout("tar -xzf {archive} -C {tempdir}",
                  archive=self.input().path, tempdir=tempdir)
-        output = shellout("python {script} {tempdir} {output}",
-                          script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
+        output = shellout("python {script} {tempdir} {output} {fieldmap}",
+                          script=self.assets('15/15_marcbinary.py'),
+                          tempdir=tempdir,
+                          fieldmap=self.assets('15/15_fieldmap.json'))
         if not self.debug:
             shutil.rmtree(tempdir)
         else:
