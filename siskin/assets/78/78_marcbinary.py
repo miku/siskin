@@ -15,7 +15,7 @@ import xmltodict
 
 
 lang_map = {"deutsch": "ger",
-            "englisch": "eng",          
+            "englisch": "eng",
             "franzoesisch": "fre",
             "spanisch": "spa",
             "portugiesisch": "por",
@@ -37,7 +37,7 @@ xmlfile = inputfile.read()
 xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
-    
+
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
@@ -60,7 +60,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
 
     if not format:
         format = ""
-    
+
     if ("Bachelorarbeit" in format or "Masterarbeit" in format or "Diplomarbeitarbeit" in format or
         "Magisterarbeitarbeit" in format or "Dissertation" in format):
 
@@ -108,8 +108,8 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         isbns = isbns.split("; ")
         for f020a in isbns:
             marcrecord.add("020", a=f020a)
-    
-    # Sprache   
+
+    # Sprache
     languages = xmlrecord["SPRACHE"]
     if languages:
         languages = languages.split("; ")
@@ -128,7 +128,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
                 marcrecord.add("041", a="mul")
         else:
             print("Die Sprache %s fehlt in der Lang_Map!" % language)
-   
+
     # 1. Urheber
     persons = xmlrecord["AUTOR"]
     if persons:
@@ -176,7 +176,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         del2 = ", "
     else:
         del2 = ""
-  
+
     subfields = ["a", f260a + del1, "b", f260b + del2, "c", f260c]
     marcrecord.add("260", subfields=subfields)
 
@@ -225,7 +225,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     if corporates:
         for f710a in corporates[1:]:
             if f710a:
-                f710a = f710a.replace(" (Hrsg.)", "")       
+                f710a = f710a.replace(" (Hrsg.)", "")
                 marcrecord.add("710", a=f710a)
 
     # körperschaftliche Herausgeber
@@ -260,7 +260,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     marcrecord.add("980", a=f001, b="78", c="sid-78-col-izi")
 
     outputfile.write(marcrecord.as_marc())
-   
+
 
 inputfile.close()
 outputfile.close()
