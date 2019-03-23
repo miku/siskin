@@ -22,7 +22,7 @@ outputfilename = "142_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-reader = MabXMLFile(inputfilename, replace=(("¬", ""),))
+reader = MabXMLFile(inputfilename, replace=((u"¬", ""),))
 outputfile = open(outputfilename, "wb")
 
 for record in reader:
@@ -31,32 +31,35 @@ for record in reader:
     marcrecord.strict = False
 
     # Format   
-    format = record.field("050")
+    format = record.field("433", alt="")
 
-    if format == "a|a|||||||||||":
+    regexp1 = re.search("\d\.?\sS", format)
+
+    if "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or "Zählung" in format or regexp1:
         leader = "     cam  22        4500"
         f935b = "druck"
-        f935c = "lo"   
-    elif format == "||a|||||d|||||":
-        leader = "     naa  22        4500"
-        f935b = "cofz"
+        f935c = "lo"
+    elif "Faltbl" in format:
+        leader = "     cam  22        4500"
+        f935b = "plakat"
         f935c = ""
-    elif format == "||a||yy|d|||||":
+    elif "CD-ROM" in format:
         leader = "     cam  22        4500"
-        f935b = "?"
-        f935c = "?"
-    elif format == "a|b|||||||||||":
+        f935b = "crom"
+        f935c = ""
+    elif "DVD-ROM" in format:
         leader = "     cam  22        4500"
-        f935b = "?"
-        f935c = "?"
-    elif format == "||a||ca|||||||":
+        f935b = "dvdv"
+        f935c = ""
+    elif "Compact Disc" in format or id in cdids:
         leader = "     cam  22        4500"
-        f935b = "?"
-        f935c = "?"
+        f935b = "cdda"
+        f935c = ""
     else:
-        leader = "     naa  22        4500"
-        f935b = "?"
-        f935c = ""
+        print(record.field("433"))
+        print(record.field("050"))
+        print(record.field("540"))
+        break
 
     # Leader
     marcrecord.leader = leader
