@@ -8,7 +8,7 @@ directory, refs #1240.
 
 Usage:
 
-    $ python 15_marcbinary.py [INPUT-DIRECTORY [, OUTPUT-FILE]]
+    $ python 15_marcbinary.py [INPUT-DIRECTORY [, OUTPUT-FILE [, FIELDMAP]]
 
 """
 
@@ -98,53 +98,53 @@ def get_field(tag):
         return ""
 
 
-input_directory = "IMSLP_alt"
+if len(sys.argv) < 4:
+    # Means: no fieldmap file provided.
+    input_directory = "IMSLP_alt"
 
-fieldmap = collections.defaultdict(dict)
+    fieldmap = collections.defaultdict(dict)
 
-for root, _, files in os.walk(input_directory):
-    for filename in files:
-        if not filename.endswith(".xml"):
-            continue
-        filepath = os.path.join(root, filename)
-        inputfile = io.open(filepath, "r", encoding="utf-8")
-       
-        title = False
-        f001 = ""       
-        f1000 = ""
-        f245a = ""
-
-        for line in inputfile:
-       
-            regexp = re.search("<recordId>(.*)<\/recordId>", line)
-            if regexp:
-                f001 = regexp.group(1)
-                fieldmap[f001]["title"] = f245a                
+    for root, _, files in os.walk(input_directory):
+        for filename in files:
+            if not filename.endswith(".xml"):
                 continue
+            filepath = os.path.join(root, filename)
+            inputfile = io.open(filepath, "r", encoding="utf-8")
 
-            # Deutscher Werktitel
-            if title:
-                regexp = re.search(r"<string>(.*)<\/string>", line)
-                if regexp:                    
-                    f245a = regexp.group(1)
-                    f245a = html_unescape(f245a)                 
+            title = False
+            f001 = ""
+            f1000 = ""
+            f245a = ""
 
-            regexp = re.search(r"name=\"worktitle\"", line)
-            title = True if regexp else False            
+            for line in inputfile:
 
-            # VIAF
-            regexp = re.search(r"<viafId>(\d+)</viafId>", line)  # Feld manchmal vorhanden, aber leer
-            if regexp:
-                f1000 = regexp.group(1)
-                f1000 = "(VIAF)" + f1000
-                fieldmap[f001]["viaf"] = f1000
+                regexp = re.search("<recordId>(.*)<\/recordId>", line)
+                if regexp:
+                    f001 = regexp.group(1)
+                    fieldmap[f001]["title"] = f245a
+                    continue
 
-    inputfile.close()
- 
-with open("15_fieldmap.json", "w") as output:
-    json.dump(fieldmap, output)
+                # Deutscher Werktitel
+                if title:
+                    regexp = re.search(r"<string>(.*)<\/string>", line)
+                    if regexp:
+                        f245a = regexp.group(1)
+                        f245a = html_unescape(f245a)
 
-#sys.exit(0)
+                regexp = re.search(r"name=\"worktitle\"", line)
+                title = True if regexp else False
+
+                # VIAF
+                regexp = re.search(r"<viafId>(\d+)</viafId>", line)  # Feld manchmal vorhanden, aber leer
+                if regexp:
+                    f1000 = regexp.group(1)
+                    f1000 = "(VIAF)" + f1000
+                    fieldmap[f001]["viaf"] = f1000
+
+        inputfile.close()
+
+    with open("15_fieldmap.json", "w") as output:
+        json.dump(fieldmap, output)
 
 input_directory = "IMSLP_neu"
 output_filename = "15_output.mrc"
@@ -153,6 +153,9 @@ if len(sys.argv) > 1:
     input_directory = sys.argv[1]
 if len(sys.argv) > 2:
     output_filename = sys.argv[2]
+if len(sys.argv) > 3:
+    with open(sys.argv[3]) as handle:
+        fieldmap = json.load(handle)
 
 outputfile = io.open(output_filename, "wb")
 
@@ -163,11 +166,11 @@ for root, _, files in os.walk(input_directory):
         if not filename.endswith(".xml"):
             continue
         filepath = os.path.join(root, filename)
-        inputfile = io.open(filepath, "r", encoding="utf-8")        
+        inputfile = io.open(filepath, "r", encoding="utf-8")
 
         f650a = []
 
-        record = xmltodict.parse(inputfile.read())               
+        record = xmltodict.parse(inputfile.read())
         record = record["document"]
 
         try:
@@ -178,56 +181,56 @@ for root, _, files in os.walk(input_directory):
 
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
-        
+
         # Leader
         marcrecord.leader = "     ncs  22        450 "
 
         # Identifikator
         f001 = record["identifier"]["#text"]
         marcrecord.add("001", data="finc-15-%s" % f001)
-        
+
         # Format
         marcrecord.add("007", data="cr")
-               
+
         # Sprache
         # besser: aus vifaxml parsen!!
         f041a = get_field("languages")
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
         marcrecord.add("041", a=f041a)
-     
-     
+
+
         # Komponist
         f100a = record["creator"]["mainForm"]
-        f1000 = fieldmap[f001].get("viaf", "")
+        f1000 = fieldmap.get(f001, {}).get("viaf", "")
         marcrecord.add("100", a=f100a, e="cmp", _0=f1000)
 
         # Werktitel
-        f240a = fieldmap[f001].get("title", "")
+        f240a = fieldmap.get(f001, {}).get("title", "")
         marcrecord.add("240", a=f240a)
-    
+
         # Sachtitel
         f245a = record["title"]
         f245a = html_unescape(f245a)
         marcrecord.add("245", a=f245a)
-      
+
         # Alternativtitel
         f246a = get_field("additionalTitle")
         f246a = html_unescape(f246a)
         marcrecord.add("246", a=f246a)
-        
+
         # Erscheinungsjahr
-        # nicht mehr enthalten 
-          
-        # Kompositionsjahr     
+        # nicht mehr enthalten
+
+        # Kompositionsjahr
         year = get_field("date")
         marcrecord.add("260", c=year)
         marcrecord.add("650", y=year)
-        
+
         # Fußnote
         f500a = get_field("abstract")
         marcrecord.add("500", a=f500a)
-    
-        # Stil / Epoche       
+
+        # Stil / Epoche
         try:
             subject = record["subject"]
         except:
@@ -244,7 +247,7 @@ for root, _, files in os.walk(input_directory):
                 epoch = epoch.title()
             f650a.append(epoch)
             f590a = epoch
-      
+
         # Besetzung
         instrumentation = get_field("music_arrangement_of")
         instrumentation = instrumentation.title()
@@ -253,7 +256,7 @@ for root, _, files in os.walk(input_directory):
 
         marcrecord.add("590", subfields=["a", f590a, "b", f590b])
 
-        # Schlagwörter       
+        # Schlagwörter
         subtest = []
         for subject in f650a:
             subject = subject.title()

@@ -55,8 +55,7 @@ class IMSLPTask(DefaultTask):
     TAG = "15"
 
     def closest(self):
-        """ XXX: adjust. """
-        return datetime.date(2017, 12, 25)
+        return datetime.date(2018, 4, 25)
 
     def latest_link(self):
         """
@@ -71,10 +70,15 @@ class IMSLPTask(DefaultTask):
         if len(links) == 0:
             raise ValueError("could not find any suitable links: %s", listings_url)
 
+        self.logger.debug("assuming latest link is %s", links[-1])
         return links[-1]
 
 class IMSLPDownloadDeprecated(IMSLPTask):
-    """ Download raw data. Should be a single URL pointing to a tar.gz. """
+    """
+    Download raw data. Should be a single URL pointing to a tar.gz.
+
+    Deprecated, will be removed soon.
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -111,7 +115,6 @@ class IMSLPDownload(IMSLPTask):
 
 class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     """
-
     Path to JSON file mapping record id to viaf id and worktitle ("Werktitel").
 
     This is a fixed file.
@@ -128,11 +131,11 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     def output(self):
         return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
 
-class IMSLPConvert(IMSLPTask):
+class IMSLPConvertNext(IMSLPTask):
     """
     Take a current version of the data plus legacy mapping and convert.
 
-    WIP, refs #12288, refs #13055.
+    WIP, refs #12288, refs #13055. May merge with 15_marcbinary.py.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -158,30 +161,27 @@ class IMSLPConvert(IMSLPTask):
         dst = os.path.join(self.taskdir(), filename.replace("tar.gz", "fincmarc.mrc"))
         return luigi.LocalTarget(path=dst)
 
-class IMSLPConvertDeprecated(IMSLPTask):
+class IMSLPConvert(IMSLPTask):
     """
     Extract and transform.
 
     TODO, refs #13055 -- see IMSLPDownloadNext and IMSLPConvertNext and IMSLPLegacyMapping.
-
-    File "/usr/lib/python2.7/site-packages/siskin/assets/15/15_marcbinary.py", line 165, in <module>
-        record = record["document"]
-    KeyError: 'document'
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    debug = luigi.BoolParameter(description='do not delete temporary folder')
+    debug = luigi.BoolParameter(description='do not delete temporary folder', significant=False)
 
     def requires(self):
-        return IMSLPDownloadDeprecated(date=self.date)
+        return IMSLPDownload(date=self.date)
 
-    @deprecated
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
         shellout("tar -xzf {archive} -C {tempdir}",
                  archive=self.input().path, tempdir=tempdir)
-        output = shellout("python {script} {tempdir} {output}",
-                          script=self.assets('15/15_marcbinary.py'), tempdir=tempdir)
+        output = shellout("python {script} {tempdir} {output} {fieldmap}",
+                          script=self.assets('15/15_marcbinary.py'),
+                          tempdir=tempdir,
+                          fieldmap=self.assets('15/15_fieldmap.json'))
         if not self.debug:
             shutil.rmtree(tempdir)
         else:
