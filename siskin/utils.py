@@ -372,9 +372,8 @@ def compare_files(a, b):
 def xmlstream(filename, tag):
     """
     Given a path to an XML file and a tag name (without namespace), stream
-    through the XML, and emit the element denoted by tag to the callback for
-    processing, e.g. via xmltodict, more convenient DOM parser or something
-    else.
+    through the XML, and emit the element denoted by tag for processing, e.g.
+    via xmltodict, more convenient DOM parser or something else.
 
         for snippet in xmlstream("sample.xml", "sometag"):
             print(len(snippet))
