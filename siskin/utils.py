@@ -40,16 +40,17 @@ import re
 import string
 import sys
 import tempfile
+import xml.etree.cElementTree as ET
 
-import bs4
-import luigi
 import requests
 import six
-from dateutil import relativedelta
-from future import standard_library
 from six.moves.urllib.parse import urlparse
 
 import backoff
+import bs4
+import luigi
+from dateutil import relativedelta
+from future import standard_library
 from siskin import __version__
 
 # XXX: move to six.
@@ -367,3 +368,25 @@ def compare_files(a, b):
             chkb.update(data)
 
     return chka.hexdigest() == chkb.hexdigest()
+
+def xmlstream(filename, tag):
+    """
+    Given a path to an XML file and a tag name (without namespace), stream
+    through the XML, and emit the element denoted by tag to the callback for
+    processing, e.g. via xmltodict, more convenient DOM parser or something
+    else.
+
+        for snippet in xmlstream("sample.xml", "sometag"):
+            print(len(snippet))
+
+    """
+    def strip_ns(tag):
+        if not '}' in tag:
+            return tag
+        return tag.split('}')[1]
+
+    for event, elem in ET.iterparse(filename, events=('start',)):
+        if not strip_ns(elem.tag) == tag:
+            continue
+
+        yield ET.tostring(elem)
