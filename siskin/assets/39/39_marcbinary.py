@@ -31,7 +31,6 @@ filterfilename = "39_issn_filter"
 if len(sys.argv) >= 4:
     inputfilename, outputfilename, filterfilename = sys.argv[1:4]
 
-inputfile = io.open(inputfilename, "rb")
 outputfile = io.open(outputfilename, "wb")
 filterfile = io.open(filterfilename, "r")
 
@@ -40,7 +39,7 @@ issn_list = [issn.rstrip("\n") for issn in issn_list]
 
 #for oldrecord in reader:
 
-for oldrecord in xmlstream("39_input.xml", "record"):
+for oldrecord in xmlstream(inputfilename, "record"):
     
     oldrecord = BytesIO(oldrecord)
     oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
