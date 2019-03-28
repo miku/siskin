@@ -114,6 +114,5 @@ for oldrecord in xmlstream(inputfilename, "record"):
  
     outputfile.write(newrecord.as_marc())
 
-inputfile.close()
 outputfile.close()
 filterfile.close()
