@@ -385,13 +385,14 @@ def xmlstream(filename, tag):
         return tag.split('}')[1]
 
     # https://stackoverflow.com/a/13261805
-    context = iter(ET.iterparse(filename, events=('end',)))
+    context = iter(ET.iterparse(filename, events=('start', 'end',)))
     _, root = next(context)
 
-    for _, elem in context:
-        if not strip_ns(elem.tag) == tag:
+    for event, elem in context:
+        if not strip_ns(elem.tag) == tag or event == 'start':
             continue
 
         yield ET.tostring(elem)
+        elem.clear()
         root.clear()
 
