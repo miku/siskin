@@ -384,7 +384,7 @@ def xmlstream(filename, tag):
             return tag
         return tag.split('}')[1]
 
-    # https://stackoverflow.com/a/13261805
+    # https://stackoverflow.com/a/13261805, http://effbot.org/elementtree/iterparse.htm
     context = iter(ET.iterparse(filename, events=('start', 'end',)))
     _, root = next(context)
 
