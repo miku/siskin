@@ -393,6 +393,5 @@ def xmlstream(filename, tag):
             continue
 
         yield ET.tostring(elem)
-        elem.clear()
         root.clear()
 
