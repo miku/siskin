@@ -3,12 +3,14 @@
 
 from builtins import *
 
+from io import StringIO, BytesIO
 import io
 import re
 import sys
+import pymarc
 
 import marcx
-import pymarc
+from siskin.utils import xmlstream
 
 
 copytags = ["001", "003", "005", "007", "008", "022", "024", "040", "041", "100", "102",
@@ -29,16 +31,19 @@ filterfilename = "39_issn_filter"
 if len(sys.argv) >= 4:
     inputfilename, outputfilename, filterfilename = sys.argv[1:4]
 
-inputfile = io.open(inputfilename, "rb")
 outputfile = io.open(outputfilename, "wb")
 filterfile = io.open(filterfilename, "r")
 
-reader = pymarc.parse_xml_to_array(inputfile)
 issn_list = filterfile.readlines()
 issn_list = [issn.rstrip("\n") for issn in issn_list]
 
-for oldrecord in reader:
+#for oldrecord in reader:
 
+for oldrecord in xmlstream(inputfilename, "record"):
+    
+    oldrecord = BytesIO(oldrecord)
+    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+    oldrecord = oldrecord[0]
     newrecord = marcx.Record(force_utf8=True)
     newrecord.strict = False
     
@@ -109,6 +114,5 @@ for oldrecord in reader:
  
     outputfile.write(newrecord.as_marc())
 
-inputfile.close()
 outputfile.close()
 filterfile.close()

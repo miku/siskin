@@ -6,7 +6,7 @@ import responses
 import requests
 
 from siskin.utils import (URLCache, dictcheck, get_task_import_cache, nwise,
-                          random_string, scrape_html_listing, SetEncoder)
+                          random_string, scrape_html_listing, SetEncoder, xmlstream)
 
 def test_set_encoder_dumps():
 	assert json.dumps({'x': {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
@@ -101,3 +101,10 @@ def test_scrape_html_listing():
     resp = requests.get('http://fake.com/1')
     assert scrape_html_listing('http://fake.com/1') == expected
 
+def test_xmlstream():
+    with tempfile.NamedTemporaryFile(delete=False) as handle:
+        handle.write("""<a><b>C</b><b>C</b></a>""")
+
+    filename = handle.name
+    assert [v for v in xmlstream(filename, "b")] == ['<b>C</b>', '<b>C</b>']
+    os.remove(filename)
