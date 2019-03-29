@@ -385,7 +385,7 @@ def xmlstream(filename, tag):
         return tag.split('}')[1]
 
     # https://stackoverflow.com/a/13261805
-    context = iter(ET.iterparse(filename, events=('start',)))
+    context = iter(ET.iterparse(filename, events=('end',)))
     _, root = next(context)
 
     for _, elem in context:
@@ -394,3 +394,4 @@ def xmlstream(filename, tag):
 
         yield ET.tostring(elem)
         root.clear()
+
