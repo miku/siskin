@@ -69,7 +69,7 @@ class SSOARMARC(SSOARTask):
     Use RS script for conversion, refs #12686.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='oai_dc')
+    format = luigi.Parameter(default='marcxml')
 
     def requires(self):
         return SSOARHarvest(date=self.date, format=self.format)
