@@ -74,7 +74,6 @@ class SSOARMARC(SSOARTask):
     def requires(self):
         return SSOARHarvest(date=self.date, format=self.format)
 
-    @deprecated
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets('30/30_marcbinary.py'), input=self.input().path)
@@ -93,6 +92,7 @@ class SSOARIntermediateSchema(SSOARTask):
     def requires(self):
         return SSOARHarvest(date=self.date, format='marcxml')
 
+    @deprecated
     def run(self):
         output = shellout("""span-import -i ssoar {input} | pigz -c > {output}""",
                           input=self.input().path)
@@ -112,6 +112,7 @@ class SSOARExport(SSOARTask):
     def requires(self):
         return SSOARIntermediateSchema(date=self.date)
 
+    @deprecated
     def run(self):
         output = shellout("""unpigz -c {input} | span-export -with-fullrecord -o {format} | pigz -c > {output}""",
                           format=self.format, input=self.input().path)
