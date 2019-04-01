@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# TODO(miku): use six.
 from builtins import *
 
 import io
+import logging
 import re
 import sys
 
 import marcx
 import pymarc
-
 
 copytags = ["005", "007", "008", "020", "024", "041", "042", "084", "093", "100",
             "110", "245", "246", "264", "300", "490", "500", "520", "540",
@@ -92,6 +93,9 @@ for oldrecord in reader:
 
     # leader
     newrecord.leader = "     " + oldrecord.leader[5:]
+    if len(newrecord.leader) < 9:
+        logging.debug("too short %s: %s", len(leader), leader)
+        continue
 
     # 001
     for identifiers in oldrecord.get_fields("856"):
@@ -108,7 +112,7 @@ for oldrecord in reader:
         for field in oldrecord.get_fields(tag):
             if not field.tag.startswith('00'):
                 field.subfields = cleaned_subfields(field)
-            newrecord.add_field(field)    
+            newrecord.add_field(field)
 
     # Reihen / Kollektion
     for collections in oldrecord.get_fields("084"):
