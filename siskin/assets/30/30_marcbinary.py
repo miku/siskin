@@ -94,7 +94,7 @@ for oldrecord in reader:
     # leader
     newrecord.leader = "     " + oldrecord.leader[5:]
     if len(newrecord.leader) < 9:
-        logging.debug("too short %s: %s", len(leader), leader)
+        logging.debug("too short %s: %s", len(newrecord.leader), newrecord.leader)
         continue
 
     # 001
