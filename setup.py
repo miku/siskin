@@ -70,7 +70,7 @@ install_requires = [
     'pymarc>=3.0.1',
     'pymysql>=0.7',
     'pyparsing>=2.0.3',
-    'python-dateutil>=2.5',
+    'python-dateutil==2.7.5',
     'pytz>=2014.4',
     'rdflib>=4',
     'requests>=2.5.1',
