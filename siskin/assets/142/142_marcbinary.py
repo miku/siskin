@@ -51,7 +51,7 @@ for record in reader:
         leader = "     cam  22        4500"
         f935b = "dvdv"
         f935c = ""
-    elif "Compact Disc" in format or id in cdids:
+    elif "Compact Disc" in format:
         leader = "     cam  22        4500"
         f935b = "cdda"
         f935c = ""
