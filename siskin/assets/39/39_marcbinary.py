@@ -13,17 +13,6 @@ import marcx
 from siskin.utils import xmlstream
 
 
-copytags = ["003", "005", "007", "008", "022", "024", "040", "041", "100", "102",
-            "108", "110", "112", "115", "120", "123", "124", "130", "137", "139", "140",
-            "144", "146", "150", "151", "152", "159", "160", "166", "174", "175", "177",
-            "178", "179", "180", "181", "182", "183", "184", "185", "186", "187", "189",
-            "190", "191", "192", "193", "194", "195", "196", "197", "198", "199", "200",
-            "206", "211", "236", "256", "260", "326", "363", "370", "377", "391", "411",
-            "501", "506", "520", "542", "550", "600", "604", "650", "653", "690", "700",
-            "710", "742", "760", "773", "777", "787", "797", "856", "860", "873",
-            "880", "947", "948", "961"]
-
-
 inputfilename = "39_input.xml"
 outputfilename = "39_output.mrc"
 filterfilename = "39_issn_filter"
@@ -37,71 +26,41 @@ filterfile = io.open(filterfilename, "r")
 issn_list = filterfile.readlines()
 issn_list = [issn.rstrip("\n") for issn in issn_list]
 
-#for oldrecord in reader:
+for record in xmlstream(inputfilename, "record"):
+    record = BytesIO(record)
+    record = pymarc.marcxml.parse_xml_to_array(record)
+    record = record[0]
+    
+    record = marcx.Record.from_record(record)
+    record.force_utf8 = True
+    record.strict = False
 
-for oldrecord in xmlstream(inputfilename, "record"):
-    
-    oldrecord = BytesIO(oldrecord)
-    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
-    oldrecord = oldrecord[0]
-    newrecord = marcx.Record(force_utf8=True)
-    newrecord.strict = False
-    
     # prüfen, ob Titel vorhanden ist
-    if not oldrecord["245"]:
+    if not record["245"]:
         continue
 
     # Leader
-    newrecord.leader = "     " + oldrecord.leader[5:]
+    record.leader = "     " + record.leader[5:]
 
     # Identifikator   
-    f001 = oldrecord["001"].data
+    f001 = record["001"].data
+    record.remove_fields("001")
     f001 = f001.replace("-", "").replace("_", "")
-    newrecord.add("001", data="finc-39-%s" % f001)
-    
-    # Originalfelder, die ohne Änderung übernommen werden
-    for tag in copytags:
-        for field in oldrecord.get_fields(tag):
-            newrecord.add_field(field)
-
-    # Titel
-    # Wird extra verarbeitet, da Unterfelder teilweise leer sind und dann nicht angelegt werden sollen
-    try:
-        f245a = oldrecord["245"]["a"]
-    except:
-        f245a = ""
-
-    try:
-        f245b = oldrecord["245"]["b"]
-    except:
-        f245b = ""
-
-    try:
-        f245c = oldrecord["245"]["c"]
-    except:
-        f245c = ""
-
-    try:
-        f245h = oldrecord["245"]["h"]
-    except:
-        f245h = ""
-
-    subfields = ["a", f245a, "b", f245b, "c", f245c, "h", f245h]
-    newrecord.add("245", subfields=subfields)     
+    record.add("001", data="finc-39-%s" % f001)
 
     # Kollektion und Ansigelung
     try:
-        f022a = oldrecord["022"]["a"]
+        f022a = record["022"]["a"]
     except:
         f022a = ""
 
     try:
-        f760x = oldrecord["760"]["x"]
+        f760x = record["760"]["x"]
     except:
         f760x = ""
 
     try:
-         f787x = oldrecord["787"]["x"]
+         f787x = record["787"]["x"]
     except:
         f787x = ""      
 
@@ -110,9 +69,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
     else:
         collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee"]
 
-    newrecord.add("980", subfields=collections)
- 
-    outputfile.write(newrecord.as_marc())
+    record.add("980", subfields=collections)
+    outputfile.write(record.as_marc())
 
 outputfile.close()
 filterfile.close()
