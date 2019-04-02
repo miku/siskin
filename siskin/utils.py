@@ -395,3 +395,28 @@ def xmlstream(filename, tag):
         yield ET.tostring(elem)
         root.clear()
 
+def marc_clean_subfields(field, inplace=True):
+    """
+    Given a pymarc.field.Field, return a list of subfields, without empty
+    values or perform modification in place.
+    """
+    cleaned_subfields = []
+    it = iter(field.subfields)
+    for code, value in zip(it, it):
+        if not value:
+            continue
+        cleaned_subfields.append(code)
+        cleaned_subfields.append(value)
+    if inplace:
+        field.subfields = cleaned_subfields
+    else:
+        return cleaned_subfields
+
+def marc_clean_record(record):
+    """
+    Modifies record to get rid of possible edge cases.
+    """
+    for field in record.fields:
+        if field.tag.startswith('00'):
+            continue
+        marc_clean_subfields(field, inplace=True)

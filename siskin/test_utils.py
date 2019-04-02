@@ -2,11 +2,16 @@ import json
 import os
 import tempfile
 
-import responses
 import requests
+import responses
 
-from siskin.utils import (URLCache, dictcheck, get_task_import_cache, nwise,
-                          random_string, scrape_html_listing, SetEncoder, xmlstream)
+import marcx
+import pymarc
+from siskin.utils import (SetEncoder, URLCache, dictcheck,
+                          get_task_import_cache, marc_clean_record,
+                          marc_clean_subfields, nwise, random_string,
+                          scrape_html_listing, xmlstream)
+
 
 def test_set_encoder_dumps():
 	assert json.dumps({'x': {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
@@ -102,9 +107,49 @@ def test_scrape_html_listing():
     assert scrape_html_listing('http://fake.com/1') == expected
 
 def test_xmlstream():
-    with tempfile.NamedTemporaryFile(delete=False) as handle:
+    with tempfile.NamedTemporaryFile('w', delete=False) as handle:
         handle.write("""<a><b>C</b><b>C</b></a>""")
 
     filename = handle.name
-    assert [v for v in xmlstream(filename, "b")] == ['<b>C</b>', '<b>C</b>']
+    assert [v for v in xmlstream(filename, "b")] == [b'<b>C</b>', b'<b>C</b>']
     os.remove(filename)
+
+def test_marc_clean_subfields():
+    record = marcx.Record()
+    record.add("001", data="1234")
+    record.add("245", a="", b="ok")
+
+    assert record.strict == True
+
+    # Behind the scenes, marcx will not add empty subfield values
+    # (https://git.io/fjIWU).
+    assert marc_clean_subfields(record["245"], inplace=False) == ['b', 'ok']
+    assert record["245"].subfields == ['b', 'ok']
+
+    assert marc_clean_subfields(record["245"], inplace=True) is None
+    assert record["245"].subfields == ['b', 'ok']
+
+    # Test pymarc record.
+    record = pymarc.Record()
+    record.add_field(pymarc.Field(tag='001', data='1234'))
+    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'],
+                                  subfields=['a', '', 'b', 'ok']))
+
+    assert len(record.get_fields()) == 2
+
+    assert marc_clean_subfields(record["245"], inplace=False) == ['b', 'ok']
+    assert record["245"].subfields == ['a', '', 'b', 'ok']
+    assert marc_clean_subfields(record["245"], inplace=True) is None
+    assert record["245"].subfields == ['b', 'ok']
+
+def test_marc_clean_record():
+    record = pymarc.Record()
+    record.add_field(pymarc.Field(tag='001', data='1234'))
+    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'],
+                                  subfields=['a', '', 'b', 'ok']))
+
+    assert len(record.get_fields()) == 2
+
+    assert record["245"].subfields == ['a', '', 'b', 'ok']
+    marc_clean_record(record)
+    assert record["245"].subfields == ['b', 'ok']
