@@ -10,7 +10,7 @@ import pymarc
 from siskin.utils import (SetEncoder, URLCache, dictcheck,
                           get_task_import_cache, marc_clean_record,
                           marc_clean_subfields, nwise, random_string,
-                          scrape_html_listing, xmlstream)
+                          scrape_html_listing, xmlstream, marc_build_imprint)
 
 
 def test_set_encoder_dumps():
@@ -153,3 +153,13 @@ def test_marc_clean_record():
     assert record["245"].subfields == ['a', '', 'b', 'ok']
     marc_clean_record(record)
     assert record["245"].subfields == ['b', 'ok']
+
+def test_marc_build_imprint():
+    assert marc_build_imprint() == ['a', '', 'b', '', 'c', '']
+    assert marc_build_imprint(place="A") == ['a', 'A', 'b', '', 'c', '']
+    assert marc_build_imprint(publisher="B") == ['a', '', 'b', 'B', 'c', '']
+    assert marc_build_imprint(year="C") == ['a', '', 'b', '', 'c', 'C']
+    assert marc_build_imprint(place="A", publisher="B") == ['a', 'A : ', 'b', 'B', 'c', '']
+    assert marc_build_imprint(place="A", year="C") == ['a', 'A', 'b', ', ', 'c', 'C']
+    assert marc_build_imprint(publisher="B", year="C") == ['a', '', 'b', 'B, ', 'c', 'C']
+    assert marc_build_imprint(place="A", publisher="B", year="C") == ['a', 'A : ', 'b', 'B, ', 'c', 'C']
