@@ -309,6 +309,19 @@ class JstorCollectionMapping(JstorTask):
         ],
         ...
 
+    There are currently (April 2019) 126 JSTOR collections in the KBART file:
+
+        $ curl -sL "http://www.jstor.org/kbart/collections/all-archive-titles" | \
+                csvcut -t -c 27 | tr ';' '\n' | sed -e 's/^ *//g' | sed -e 's/ *$//g' | \
+                tr -d '"' | sort -u | wc -l
+
+    Versus 28 collection names in AMSL:
+
+        $ taskcat AMSLService | jq -r '.[] | select(.sourceID == "55") | .megaCollection' | sort -u | wc -l
+
+    TODO(miku): Better mapping would match on journal identifier and would use
+    package names from column 27, refs #14841.
+
     The KBART fields are:
 
      0 publication_title
