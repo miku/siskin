@@ -200,7 +200,7 @@ def load_set(obj, func=lambda v: v):
                     continue
                 s.add(func(line))
     elif isinstance(obj, basestring):
-        with open(filename) as handle:
+        with open(obj) as handle:
             for line in (line.strip() for line in handle):
                 if not line:
                     continue
