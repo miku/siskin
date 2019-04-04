@@ -187,34 +187,51 @@ def get_task_import_cache():
 
     return task_import_cache, path
 
-def load_set_from_target(target):
+def load_set(obj, func=lambda v: v):
     """
-    Given a luigi.LocalTarget, load each line of the file into a set.
+    Load a set from a filename, file-like object or a luigi.LocalTarget.
     """
     s = set()
-    with target.open() as handle:
-        for line in handle:
-            s.add(line.strip())
-    return s
 
-def load_set_from_file(filename, func=lambda v: v):
-    """
-    Given a filename, load each non-empty line into a set.
-    """
-    s = set()
-    with open(filename) as handle:
-        for line in (str.strip(line) for line in handle):
+    if isinstance(obj, luigi.LocalTarget):
+        with obj.open() as handle:
+            for line in (line.strip() for line in handle):
+                if not line:
+                    continue
+                s.add(func(line))
+    elif isinstance(obj, basestring):
+        with open(filename) as handle:
+            for line in (line.strip() for line in handle):
+                if not line:
+                    continue
+                s.add(func(line))
+    else:
+        for line in (line.strip() for line in obj):
             if not line:
                 continue
             s.add(func(line))
+
     return s
+
+def load_set_from_target(target, func=lambda v: v):
+    """
+    Deprecated. Use load_set instead. Given a luigi.LocalTarget, load each line
+    of the file into a set.
+    """
+    return load_set(target, func=func)
+
+def load_set_from_file(filename, func=lambda v: v):
+    """
+    Deprecated. Use load_set instead. Given a filename, load each non-empty line into a set.
+    """
+    return load_set(filename, func=func)
 
 class URLCache(object):
     """
-    A simple URL content cache. Stores everything on the filesystem. Content
-    is first written to a temporary file and then renamed. With concurrent
-    requests for the same URL, the last one wins. Raises exception on any HTTP
-    status >= 400. Retries supported.
+    A simple URL content cache. Stores everything on the filesystem. Content is
+    first written to a temporary file and then renamed. With concurrent
+    requests for the same URL, the last one wins (LWW). Raises exception on any
+    HTTP status >= 400. Retries supported.
 
     It is not very efficient, as it creates lots of directories.
     > 396140 directories, 334024 files ... ...
@@ -300,17 +317,17 @@ class URLCache(object):
 
 def scrape_html_listing(url, with_head=False):
     """
-    Given a URL to a webpage containing a simple file listing, try to return a
-    list of links to the files on the page.
+    Given a URL to a webpage containing a simple (Apache) file listing, try to
+    return a list of links to the files on the page.
 
-    >>> scrape_html_listing("https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/")
-    ['https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-2018.12.01-x86_64.iso',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-2018.12.01-x86_64.iso.sig',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-2018.12.01-x86_64.iso.torr',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-bootstrap-2018.12.01-x86_64.tar.gz',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/archlinux-bootstrap-2018.12.01-x86_64.tar.gz.sig',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/md5sums.txt',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2018.12.01/sha1sums.txt']
+    >>> scrape_html_listing("http://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/")
+    ['https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso.sig',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso.torr',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-bootstrap-2019.04.01-x86_64.tar.gz',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-bootstrap-2019.04.01-x86_64.tar.gz.sig',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/md5sums.txt',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/sha1sums.txt']
 
     Will fail if the request fails. If parsing fails, return an empty list.
     Optionally, only include links in the list which return something ok on

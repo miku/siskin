@@ -1,5 +1,6 @@
 import json
 import os
+import io
 import tempfile
 
 import requests
@@ -10,7 +11,7 @@ import pymarc
 from siskin.utils import (SetEncoder, URLCache, dictcheck,
                           get_task_import_cache, marc_clean_record,
                           marc_clean_subfields, nwise, random_string,
-                          scrape_html_listing, xmlstream, marc_build_imprint)
+                          scrape_html_listing, xmlstream, marc_build_imprint, load_set)
 
 
 def test_set_encoder_dumps():
@@ -44,6 +45,19 @@ def test_get_task_import_cache():
     mapping, path = get_task_import_cache()
     assert os.path.exists(path)
     assert isinstance(mapping, dict)
+
+def test_load_set():
+    assert load_set(io.StringIO(u"")) == set()
+    assert load_set(io.StringIO(u"1\n1\n1\n")) == {"1"}
+    assert load_set(io.StringIO(u"1\n    \n2\n")) == {"1", "2"}
+    assert load_set(io.StringIO(u"1\n2\n3\n")) == {"1", "2", "3"}
+    assert load_set(io.StringIO(u"1\n2\n3\n"), func=int) == {1, 2, 3}
+
+    with tempfile.NamedTemporaryFile(delete=False) as tf:
+        tf.write("1\n2\n")
+    with open(tf.name) as handle:
+        assert load_set(handle) == {"1", "2"}
+    os.remove(tf.name)
 
 def test_get_cache_file(tmpdir):
     cache = URLCache(directory=str(tmpdir))
