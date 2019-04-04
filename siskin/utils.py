@@ -414,7 +414,8 @@ def marc_clean_subfields(field, inplace=True):
 
 def marc_clean_record(record):
     """
-    Modifies record to get rid of possible edge cases.
+    Modifies record to get rid of possible edge cases regarding empty subfield
+    values. Works in-place.
     """
     for field in record.fields:
         if field.tag.startswith('00'):
