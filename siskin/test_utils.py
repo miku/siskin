@@ -57,6 +57,7 @@ def test_load_set():
         tf.write("1\n2\n")
     with open(tf.name) as handle:
         assert load_set(handle) == {"1", "2"}
+    assert load_set(tf.name) == {"1", "2"}
     os.remove(tf.name)
 
 def test_get_cache_file(tmpdir):
