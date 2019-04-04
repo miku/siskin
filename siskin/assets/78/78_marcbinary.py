@@ -12,6 +12,7 @@ import re
 
 import marcx
 import xmltodict
+from siskin.utils import marc_build_imprint
 
 
 lang_map = {"deutsch": "ger",
@@ -164,20 +165,11 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
             f260a = ""
             f260b = ""
             f260c = ""
+
     if year:
         f260c = year
-
-    if f260a != "" and f260b != "":
-        del1 = " : "
-    else:
-        del1 = ""
-
-    if (f260a != "" or f260b != "") and f260c != "":
-        del2 = ", "
-    else:
-        del2 = ""
-
-    subfields = ["a", f260a + del1, "b", f260b + del2, "c", f260c]
+    
+    subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
