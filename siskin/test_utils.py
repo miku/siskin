@@ -1,6 +1,6 @@
+import io
 import json
 import os
-import io
 import tempfile
 
 import requests
@@ -9,9 +9,9 @@ import responses
 import marcx
 import pymarc
 from siskin.utils import (SetEncoder, URLCache, dictcheck,
-                          get_task_import_cache, marc_clean_record,
-                          marc_clean_subfields, nwise, random_string,
-                          scrape_html_listing, xmlstream, marc_build_imprint, load_set)
+                          get_task_import_cache, load_set, marc_build_imprint,
+                          marc_clean_record, marc_clean_subfields, nwise,
+                          random_string, scrape_html_listing, xmlstream)
 
 
 def test_set_encoder_dumps():
