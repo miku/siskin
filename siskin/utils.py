@@ -420,3 +420,19 @@ def marc_clean_record(record):
         if field.tag.startswith('00'):
             continue
         marc_clean_subfields(field, inplace=True)
+
+def marc_build_imprint(place="", publisher="", year=""):
+    """
+    Takes place, publisher, year and returns imprint with delimiters as list.
+    """
+    if place != "" and publisher != "":
+        del1 = " : "
+    else:
+        del1 = ""
+
+    if (place != "" or publisher != "") and year != "":
+        del2 = ", "
+    else:
+        del2 = ""
+
+    return ["a", place + del1, "b", publisher + del2, "c", year]
