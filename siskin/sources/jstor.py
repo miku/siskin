@@ -383,7 +383,7 @@ class JstorIntermediateSchema(JstorTask):
     grained names via title lists (https://is.gd/W37Uwg), refs #11467.
 
     @2017-01-23 JSTOR ISSN to Collection mapping: https://git.io/vNwSJ
-    @2017-01-23 AMSL:
+    @2019-04-04 AMSL:
         JSTOR Arts & Sciences I Archive
         JSTOR Arts & Sciences II Archive
         JSTOR Arts & Sciences III Archive
@@ -399,12 +399,19 @@ class JstorIntermediateSchema(JstorTask):
         JSTOR Arts & Sciences XIII Archive
         JSTOR Arts & Sciences XIV Archive
         JSTOR Arts & Sciences XV Archive
+        JSTOR Business & Economics
         JSTOR Business I Archive
         JSTOR Business II Archive
+        JSTOR Business III Archive
+        JSTOR Business IV Archive
         JSTOR Film and Performing Arts
+        JSTOR Iberoamérica
+        JSTOR Ireland
         JSTOR Language & Literature Archive
         JSTOR Life Sciences Archive
+        JSTOR Mathematics & Statistics
         JSTOR Music Archive
+        JSTOR Religion & Theology
 
     XXX: Why is JSTOR (about 500 records) still attached for DE-15, refs #12066.
     """
