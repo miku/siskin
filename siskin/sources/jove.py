@@ -24,17 +24,12 @@
 """
 JOVE refs #11308, #14062.
 
-Example input file in ticket #14062, attachment 6494.
-
-    $ ls ~/.redminesync/14062/6494/
-    'JoVE_MARC_journal 2.mrk'
-
 Config
 ------
 
 [jove]
 
-input = path/to/some.mrk
+url = https://www.jove.com/api/articles/v0/articlefeed.php?marc=1&journal=1
 
 """
 
