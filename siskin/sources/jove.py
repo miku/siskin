@@ -22,7 +22,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-JOVE refs #11308, #14062.
+JOVE refs #11308, #14062, #14962.
 
 Config
 ------
