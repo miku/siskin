@@ -359,8 +359,9 @@ class JstorCollectionMapping(JstorTask):
                     self.logger.warn("short KBART row, skipping: %s", row)
                     continue
 
-                issns, parts = row[1:3], [p.strip()
-                                           for p in row[26].split(";")]
+                issns = row[1:3]
+                parts = [p.strip() for p in row[26].split(";")]
+
                 for issn in [v.strip() for v in issns]:
                     if not issn:
                         continue
