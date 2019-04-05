@@ -6,6 +6,7 @@
 # SID: 70
 # Tickets: #5246, #13232, #14359
 # technicalCollectionID: sid-70-col-aegyptologie
+# Task: egyptology.py
 
 
 import os
