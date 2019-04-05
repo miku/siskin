@@ -185,6 +185,10 @@ for i, record in enumerate(sqlite):
         f300a = f300a + " S."
         marcrecord.add("300", a=f300a)
 
+    # Schriftenreihe
+    f490a = get_field(15)
+    marcrecord.add("490", a=f490a)
+
     # weitere Urheber
     persons = get_field(12)
     if persons:
