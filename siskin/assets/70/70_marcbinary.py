@@ -91,7 +91,6 @@ query = """
     LEFT JOIN
         SeriesTitle ON (SeriesTitle.ID = Reference.SeriesTitleID)
     WHERE
-        ReferenceType != "Contribution" AND
         Title NOT NULL
     GROUP BY
         Reference.ID
