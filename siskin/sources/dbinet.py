@@ -31,6 +31,8 @@ About 214M in 163 XML files, no schema, root XML element is called DBClear,
 currently the files are named monday.xml.part133, monday.xml.part134, and so
 on.
 
+    $ taskcat DBInetIntermediateSchema | jq -r '.url[]' | clinker -w 200 | jq -r 'select(.status != 200) | .link' > exclude.txt
+
 Configuration
 -------------
 
