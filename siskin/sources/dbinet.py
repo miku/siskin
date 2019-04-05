@@ -37,6 +37,7 @@ Configuration
 [dbinet]
 
 directory = /path/to/dir/containing/raw/files
+exclude-links = /path/to/links/to/exclude.txt
 
 """
 
