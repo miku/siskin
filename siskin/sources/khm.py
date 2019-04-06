@@ -32,6 +32,7 @@ Configuration keys:
 [khm]
 
 scp-src = user@ftp.example.com:/home/gbi
+dump = /absolute/path/to/single/xml.file
 
 """
 
@@ -52,6 +53,7 @@ from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+from siskin.decorator import deprecated
 
 
 class KHMTask(DefaultTask):
@@ -90,6 +92,27 @@ class KHMDropbox(KHMTask):
         return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
 
 
+class KHMMARC(KHMTask):
+    """
+    Take as input a configured path to XML, clean up and convert, refs #8391.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return KHMDropbox(date=self.date)
+
+    def run(self):
+        output = shellout("""sed -e 's/'$(echo "\o001")'/ /g' < {input} > {output}""",
+                          input=self.config.get('khm', 'dump'))
+        # TODO(miku): maybe check, if cleanup is still required.
+        output = shellout("python {script} {input} {output}",
+                          script=self.assets("109/109_marcbinary.py"), input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
+
+
 class KHMLatest(KHMTask):
     """
     Write out a file with latest date and path to latest files.
@@ -102,6 +125,7 @@ class KHMLatest(KHMTask):
     def requires(self):
         return KHMDropbox(date=self.date)
 
+    @deprecated
     def run(self):
         """
         Naming schema: aleph.ALL_RECS.20170316.123655.2.tar.gz. aleph.ALL_RECS.YYYYMMDD.HHMMSS.NO.tar.gz
@@ -126,7 +150,7 @@ class KHMLatest(KHMTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
-class KHMMARC(KHMTask):
+class KHMMARCDeprecated(KHMTask):
     """
     Convert tarball to binary MARC. Note: we expect exactly two tarballs, which
     is a bit brittle at the moment.
@@ -136,6 +160,7 @@ class KHMMARC(KHMTask):
     def requires(self):
         return KHMLatest(date=self.date)
 
+    @deprecated
     def run(self):
         tarballs = []
         with self.input().open() as handle:
