@@ -19,14 +19,6 @@ from siskin.utils import marc_build_imprint
 
 
 lang_map = {"de": "ger", "en": "eng", "fr": "fre", "ru": "rus", "it": "ita", "es": "spa", "af": "afr", "cs": "csb", "ar": "ara", "hu": "hung"}
-
-
-def get_field(field):
-    field = record[field]
-    if field:
-        return field
-    else:
-        return ""
     
 
 inputfilename = "70_input.ctv6" 
@@ -101,8 +93,9 @@ sqlite = sqlitecon.cursor()
 sqlite.execute(query)
 
 for i, record in enumerate(sqlite):
-
-    # Volume nur bei Artikeln angeben, sonst identisch mit Erscheinungsjahr
+    
+    # Cleanup None values
+    record = [r if r is not None else '' for r in record]
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
@@ -110,7 +103,7 @@ for i, record in enumerate(sqlite):
     author_doublets = []
 
     # Formatzuweisung
-    format = get_field(9)
+    format = record[9]
     if format == "JournalArticle" or format == "NewspaperArticle":
         leader = "     naa  22        4500"       
         f935c = "text"    
@@ -135,21 +128,21 @@ for i, record in enumerate(sqlite):
     marcrecord.add("007", data=f007)
 
     # ISBN
-    f020a = get_field(3)
+    f020a = record[3]
     if f020a:
         match = re.search("([0-9xX-]{10,17})", f020a)
         if match:
             marcrecord.add("020", a=f020a)
 
     # ISSN
-    f022a = get_field(3)
+    f022a = record[3]
     if f022a:
         match = re.search("([0-9xX-]{9,9})", f022a)
         if match:
             marcrecord.add("022", a=f022a)
 
     # Sprache
-    language = get_field(4)
+    language = record[4]
     f041a = lang_map.get(language, "")
     if f041a != "":
         marcrecord.add("008", data="130227uu20uuuuuuxx uuu %s  c" % f041a)
@@ -158,7 +151,7 @@ for i, record in enumerate(sqlite):
         print("Die Sprache %s fehlt in der Lang_Map!" % language)
 
     # 1. Urheber
-    persons = get_field(12)
+    persons = record[12]
     if persons:
         persons = persons.split(";")
         f100a = persons[0]
@@ -167,19 +160,19 @@ for i, record in enumerate(sqlite):
         author_doublets.append(f100a)
 
     # Titel
-    f245a = get_field(1)
-    f245b = get_field(2)
+    f245a = record[1]
+    f245b = record[2]
     marcrecord.add("245", a=f245a, b=f245b)
 
     # Erscheinungsvermerk
-    f260a = get_field(6)
-    f260b = get_field(7)
-    f260c = get_field(8) 
+    f260a = record[6]
+    f260b = record[7]
+    f260c = record[8]
     subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
-    f300a = get_field(5)
+    f300a = record[5]
     match = re.search("\<c\>(\d+)\</c\>", f300a)
     if match:
         f300a = match.group(1)
@@ -187,11 +180,11 @@ for i, record in enumerate(sqlite):
         marcrecord.add("300", a=f300a)
 
     # Schriftenreihe
-    f490a = get_field(15)
+    f490a = record[15]
     marcrecord.add("490", a=f490a)
 
     # weitere Urheber
-    persons = get_field(12)
+    persons = record[12]
     if persons:
         persons = persons.split(";")
         for person in persons[1:]:
@@ -202,7 +195,7 @@ for i, record in enumerate(sqlite):
             author_doublets.append(f700a)
 
     # Herausgeber
-    editors = get_field(13)
+    editors = record[13]
     if editors:
         editors = editors.split(";")
         editors = set(editors)  # wegen der Dopplungen
@@ -212,10 +205,10 @@ for i, record in enumerate(sqlite):
 
     # Verweis auf Zeitschrift
     if format == "JournalArticle" or format == "NewspaperArticle":
-        f773t = get_field(11)
-        year = get_field(8)
-        volume = get_field(10)
-        pages = get_field(16)
+        f773t = record[11]
+        year = record[8]
+        volume = record[10]
+        pages = record[16]
         match = re.search("\<os\>(\d+-\d+)\</os\>", pages)
         
         if match:
@@ -232,7 +225,7 @@ for i, record in enumerate(sqlite):
         marcrecord.add("773", t=f773t, g=f773g)
 
     # Link zur Bestandsinfo
-    callnumber = get_field(14)
+    callnumber = record[14]
     if not callnumber:
         callnumber = "nicht verfügbar"
     marcrecord.add("856", q="text/html", _3="Link zur Bestandsinformation", u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html", z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
