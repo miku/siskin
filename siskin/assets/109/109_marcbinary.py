@@ -26,6 +26,7 @@ import sys
 import marcx
 import xmltodict
 from siskin.utils import xmlstream
+from siskin.utils import marc_build_imprint
 
 
 formatmap = {
@@ -312,14 +313,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
     f260c = get_datafield("425", "a")
     if isinstance(f260c, list):
         f260c = ""
-    if f260a != "" and f260b != "":
-        f260b = " : " + f260b
-    if f260a != "" and f260b == "" and f260c != "":
-        f260a = f260a + ", "
-    if f260b != "" and f260c != "":
-        f260b = f260b + ", "
-    f260 = ["a", f260a, "b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=f260)
+    subfields = marc_build_imprint(f260a, f260b, f260c)
+    marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
     f300a = get_datafield("433", "a")
