@@ -147,6 +147,8 @@ class DBInetIntermediateSchema(DBInetTask):
         else:
             urls_to_drop = load_set_from_file(exclude_file)
 
+        self.logger.debug("blacklisted %s links", len(urls_to_drop))
+
         # Data cleaning.
         dropped_records = 0
 
@@ -157,6 +159,12 @@ class DBInetIntermediateSchema(DBInetTask):
                     if not line:
                         continue
                     doc = json.loads(line)
+
+                    # Be a bit more aggressive suppressing dead links, refs #14982.
+                    if any(url in urls_to_drop for url in doc.get("url", [])):
+                        self.logger.debug("dropping document, since link is in exclude list: %s", url)
+                        dropped_records += 1
+                        continue
 
                     # Mitigate stutter in result list, refs #13653.
                     series = doc["rft.series"]
