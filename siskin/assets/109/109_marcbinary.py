@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+
 # SID: 109
 # Collection: Kunsthochschule für Medien Köln (VK Film)
 # refs: #8391
+# Task: khm.py
+
 
 """
 Review notes:
@@ -14,6 +17,7 @@ Review notes:
 * format, large if/else
 """
 
+
 from __future__ import print_function
 
 import re
@@ -21,6 +25,9 @@ import sys
 
 import marcx
 import xmltodict
+from siskin.utils import xmlstream
+from siskin.utils import marc_build_imprint
+
 
 formatmap = {
     "Buch":
@@ -109,22 +116,22 @@ def get_datafield(tag, code, all=False):
     """
     Return string value for (tag, code) or list of values if all is True.
     """
-    values = []
-    for field in datafield:
+    values = []  
+    for field in datafield["ns0:record"]["ns0:datafield"]:       
         if field["@tag"] != tag:
             continue
-        if isinstance(field["subfield"], list):
-            for subfield in field["subfield"]:
+        if isinstance(field["ns0:subfield"], list):
+            for subfield in field["ns0:subfield"]:
                 if subfield["@code"] != code:
                     continue
                 if not all:
                     return subfield["#text"]
                 values.append(subfield["#text"])
         else:
-            if field["subfield"]["@code"] == code:
+            if field["ns0:subfield"]["@code"] == code:
                 if not all:
-                    return field["subfield"]["#text"]
-                values.append(field["subfield"]["#text"])
+                    return field["ns0:subfield"]["#text"]
+                values.append(field["ns0:subfield"]["#text"])
     return values
 
 
@@ -168,24 +175,23 @@ outputfilename = "109_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "rb")
-xmlfile = inputfile.read()
-records = xmltodict.parse(xmlfile)
 outputfile = open(outputfilename, "wb")
 
-parent_title = {}
+for oldrecord in xmlstream(inputfilename, "record"):
 
-for record in records:
-    
-    datafield = record["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
+    record = xmltodict.parse(oldrecord)
+
+    parent_title = {}    
+    datafield = record
 
     parent = get_datafield("010", "a")
     if len(parent) > 0:
         parent_title[parent] = ""
 
-for record in records:
+for oldrecord in xmlstream(inputfilename, "record"):
 
-    datafield = record["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
+    record = xmltodict.parse(oldrecord)
+    datafield = record
 
     parent = get_datafield("001", "a")
     title = get_datafield("331", "a")
@@ -193,9 +199,10 @@ for record in records:
     if parent in parent_title and len(title) > 0:
         parent_title[parent] = title
 
-for i, record in enumerate(records):
+for oldrecord in xmlstream(inputfilename, "record"):
 
-    datafield = record["OAI-PMH"]["ListRecords"]["record"]["metadata"]["record"]["datafield"]
+    record = xmltodict.parse(oldrecord)
+    datafield = record
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
@@ -306,14 +313,8 @@ for i, record in enumerate(records):
     f260c = get_datafield("425", "a")
     if isinstance(f260c, list):
         f260c = ""
-    if f260a != "" and f260b != "":
-        f260b = " : " + f260b
-    if f260a != "" and f260b == "" and f260c != "":
-        f260a = f260a + ", "
-    if f260b != "" and f260c != "":
-        f260b = f260b + ", "
-    f260 = ["a", f260a, "b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=f260)
+    subfields = marc_build_imprint(f260a, f260b, f260c)
+    marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
     f300a = get_datafield("433", "a")
@@ -371,7 +372,7 @@ for i, record in enumerate(records):
 
     # Kollektion
     collection = ["a", f001, "b", "109", "c",
-                  u"Kunsthochschule für Medien Köln", "c", "Verbundkatalog Film"]
+                  u"Kunsthochschule für Medien Köln", "c", "sid-109-col-kunsthochschulekoeln"]
     marcrecord.add("980", subfields=collection)
 
     try:
@@ -379,5 +380,4 @@ for i, record in enumerate(records):
     except UnicodeEncodeError as exc:
         print("%s: %s" % (marcrecord["001"], exc), file=sys.stderr)
 
-inputfile.close()
 outputfile.close()
