@@ -55,6 +55,14 @@ for xmlrecord in records["Records"]["Record"]:
     # Zugangsformat
     marcrecord.add("007", data="cr")
 
+    # Sortierjahr
+    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get("cmdp:publicationStmt", "")
+    if imprint:
+        year = imprint["cmdp:date"][0]["#text"]
+        match = re.match("\d\d\d\d", year)
+        if match:
+            marcrecord.add("008", data="0000000%s" % year)
+
     # Sprache
     marcrecord.add("041", a="ger")
 
