@@ -4,7 +4,8 @@
 
 # SID: 109
 # Collection: Kunsthochschule für Medien Köln (VK Film)
-# refs: #8391
+# Ticket: #8391
+# technicalCollectionID: sid-109-col-kunsthochschulekoeln
 # Task: khm.py
 
 
@@ -112,12 +113,12 @@ formatmap = {
 }
 
 
-def get_datafield(tag, code, all=False):
+def get_datafield(record, tag, code, all=False):
     """
-    Return string value for (tag, code) or list of values if all is True.
+    Return string value for (record, tag, code) or list of values if all is True.
     """
     values = []  
-    for field in datafield["ns0:record"]["ns0:datafield"]:       
+    for field in record["ns0:record"]["ns0:datafield"]:       
         if field["@tag"] != tag:
             continue
         if isinstance(field["ns0:subfield"], list):
@@ -182,19 +183,17 @@ for oldrecord in xmlstream(inputfilename, "record"):
     record = xmltodict.parse(oldrecord)
 
     parent_title = {}    
-    datafield = record
-
-    parent = get_datafield("010", "a")
+    
+    parent = get_datafield(record, "010", "a")
     if len(parent) > 0:
         parent_title[parent] = ""
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
     record = xmltodict.parse(oldrecord)
-    datafield = record
-
-    parent = get_datafield("001", "a")
-    title = get_datafield("331", "a")
+  
+    parent = get_datafield(record, "001", "a")
+    title = get_datafield(record, "331", "a")
 
     if parent in parent_title and len(title) > 0:
         parent_title[parent] = title
@@ -202,13 +201,12 @@ for oldrecord in xmlstream(inputfilename, "record"):
 for oldrecord in xmlstream(inputfilename, "record"):
 
     record = xmltodict.parse(oldrecord)
-    datafield = record
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    parent = get_datafield("010", "a")
-    title = get_datafield("331", "a")
+    parent = get_datafield(record, "010", "a")
+    title = get_datafield(record, "331", "a")
 
     if "Brockhaus" in title:
         continue
@@ -227,11 +225,11 @@ for oldrecord in xmlstream(inputfilename, "record"):
         continue
 
     # Format
-    format = get_datafield("433", "a")
+    format = get_datafield(record, "433", "a")
     format = u'%s' % format
-    isbn = get_datafield("540", "a")
+    isbn = get_datafield(record, "540", "a")
     isbn = len(isbn)
-    parent = get_datafield("010", "a")
+    parent = get_datafield(record, "010", "a")
     parent = len(parent)
     regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
     if isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
@@ -262,7 +260,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         continue
 
     # Leader
-    f001 = get_datafield("001", "a")
+    f001 = get_datafield(record, "001", "a")
     if f001 in parent_title:
         leader = get_leader(format="Mehrbänder")
     else:
@@ -281,49 +279,49 @@ for oldrecord in xmlstream(inputfilename, "record"):
     marcrecord.add("008", data=f008)
 
     # ISBN
-    f020a = get_datafield("540", "a")
+    f020a = get_datafield(record, "540", "a")
     marcrecord.add("020", a=f020a)
-    f020a = get_datafield("570", "a")
+    f020a = get_datafield(record, "570", "a")
     marcrecord.add("020", a=f020a)
 
     # Sprache
-    f041a = get_datafield("037", "a")
+    f041a = get_datafield(record, "037", "a")
     marcrecord.add("041", a=f041a)
 
     # 1. Urheber
-    f100a = get_datafield("100", "a")
+    f100a = get_datafield(record, "100", "a")
     f100a = remove_brackets(f100a)
     marcrecord.add("100", a=f100a)
 
     # Haupttitel & Verantwortlichenangabe
     f245a = remove_brackets(f245a)
-    f245c = get_datafield("359", "a")
+    f245c = get_datafield(record, "359", "a")
     f245p = remove_brackets(f245p)
     f245 = ["a", f245a, "c", f245c, "p", f245p]
     marcrecord.add("245", subfields=f245)
 
     # Erscheinungsvermerk
-    f260a = get_datafield("410", "a")
+    f260a = get_datafield(record, "410", "a")
     if isinstance(f260a, list):
         f260a = ""
-    f260b = get_datafield("412", "a")
+    f260b = get_datafield(record, "412", "a")
     if isinstance(f260b, list):
         f260b = ""
     f260b = remove_brackets(f260b)
-    f260c = get_datafield("425", "a")
+    f260c = get_datafield(record, "425", "a")
     if isinstance(f260c, list):
         f260c = ""
     subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
-    f300a = get_datafield("433", "a")
+    f300a = get_datafield(record, "433", "a")
     f300a = remove_brackets(f300a)
-    f300b = get_datafield("434", "a")
+    f300b = get_datafield(record, "434", "a")
     f300 = ["a", f300a, "b", f300b]
     marcrecord.add("300", subfields=f300)
 
-    f490 = get_datafield("451", "a")
+    f490 = get_datafield(record, "451", "a")
     if len(f490) > 0:
         f490 = f490.split(" ; ")
         if len(f490) == 2:
@@ -334,23 +332,23 @@ for oldrecord in xmlstream(inputfilename, "record"):
             f490v = ""
         marcrecord.add("490", a=f490a, v=f490v)
 
-    for f650a in set(get_datafield("710", "a", all=True)):
+    for f650a in set(get_datafield(record, "710", "a", all=True)):
         f650a = remove_brackets(f650a)
         marcrecord.add("650", a=f650a)
 
-    for f650a in set(get_datafield("711", "a", all=True)):
+    for f650a in set(get_datafield(record, "711", "a", all=True)):
         f650a = remove_brackets(f650a)
         marcrecord.add("650", a=f650a)
 
     # weitere Urheber
     for tag in range(101, 200):
-        f700a = get_datafield(str(tag), "a")
+        f700a = get_datafield(record, str(tag), "a")
         f700a = remove_brackets(f700a)
         marcrecord.add("700", a=f700a)
 
     # weitere Körperschaften
     for tag in range(200, 300):
-        f710a = get_datafield(str(tag), "a")
+        f710a = get_datafield(record, str(tag), "a")
         f710a = remove_brackets(f710a)
         marcrecord.add("710", a=f710a)
 
@@ -358,8 +356,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
     marcrecord.add("773", w=f773w)
 
     # Links
-    f856u = get_datafield("655", "u")
-    f8563 = get_datafield("655", "x")
+    f856u = get_datafield(record, "655", "u")
+    f8563 = get_datafield(record, "655", "x")
     if len(f8563) == 0:
         f8563 = u"zusätzliche Informationen"
     if "http" in f856u:
