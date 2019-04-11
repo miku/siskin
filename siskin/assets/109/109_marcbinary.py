@@ -251,9 +251,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
         format = "Objekt"
     elif parent_id in parent_ids and isbn == 0:
         #format = "Zeitschrift"
-        pass
-    else:
         continue
+    else:
+        format = "Buch"
 
     # Leader
     leader = get_leader(format=format)
