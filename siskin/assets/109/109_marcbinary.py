@@ -37,6 +37,11 @@ formatmap = {
         "007": "tu",
         "935b": "druck"
     },
+    "Mehrbänder":
+    {
+        "007": "tu",
+        "935b": "druck"
+    },
     "DVD":
     {
         "leader": "ngm",
@@ -178,61 +183,52 @@ if len(sys.argv) == 3:
 
 outputfile = open(outputfilename, "wb")
 
+parent_ids = []
+parent_titles = {}
+
 for oldrecord in xmlstream(inputfilename, "record"):
 
-    record = xmltodict.parse(oldrecord)
-
-    parent_title = {}    
+    record = xmltodict.parse(oldrecord)    
+    child_id = get_datafield(record, "001", "a")
+    parent_id = get_datafield(record, "010", "a")
     
-    parent = get_datafield(record, "010", "a")
-    if len(parent) > 0:
-        parent_title[parent] = ""
+    if len(parent_id) > 0:
+        parent_title = get_datafield(record, "331", "a")
+        parent_ids.append(parent_id)
+        parent_titles[child_id] = parent_title
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
     record = xmltodict.parse(oldrecord)
-  
-    parent = get_datafield(record, "001", "a")
-    title = get_datafield(record, "331", "a")
-
-    if parent in parent_title and len(title) > 0:
-        parent_title[parent] = title
-
-for oldrecord in xmlstream(inputfilename, "record"):
-
-    record = xmltodict.parse(oldrecord)
-
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    parent = get_datafield(record, "010", "a")
+    id = get_datafield(record, "001", "a")
+    parent_id = get_datafield(record, "010", "a")
     title = get_datafield(record, "331", "a")
 
-    if "Brockhaus" in title:
+    if "Brockhaus" in title or len(title) == 0:
         continue
 
-    if len(title) > 0 and len(parent) > 0 and parent in parent_title:
-        f245a = parent_title[parent]
-        if f245a == "":
-            continue
+    if len(parent_id) > 0:
+        f245a = parent_titles[id]
         f245p = title
-        f773w = "(DE-576)" + parent
-    elif len(title) > 0:
+        f773w = "(DE-576)" + parent_id
+    else:
         f245a = title
         f245p = ""
         f773w = ""
-    else:
-        continue
 
     # Format
     format = get_datafield(record, "433", "a")
     format = u'%s' % format
     isbn = get_datafield(record, "540", "a")
     isbn = len(isbn)
-    parent = get_datafield(record, "010", "a")
-    parent = len(parent)
     regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
-    if isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
+
+    if parent_id in parent_ids:
+        format = "Mehrbänder"
+    elif isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
         format = "Buch"
     elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format
                          or "XV" in format or "X," in format or "Bde." in format or ": graph" in format):
@@ -253,21 +249,18 @@ for oldrecord in xmlstream(inputfilename, "record"):
           or "Teile" in format or "USB" in format or "Schachtel" in format or "Schautafel" in format
           or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
         format = "Objekt"
-    elif parent > 0 and isbn == 0:
+    elif parent_id in parent_ids and isbn == 0:
         #format = "Zeitschrift"
-        continue
+        pass
     else:
         continue
 
     # Leader
-    f001 = get_datafield(record, "001", "a")
-    if f001 in parent_title:
-        leader = get_leader(format="Mehrbänder")
-    else:
-        leader = get_leader(format=format)
+    leader = get_leader(format=format)
     marcrecord.leader = leader
 
     # Identifier
+    f001 = get_datafield(record, "001", "a")
     marcrecord.add("001", data="finc-109-" + f001)
 
     # 007
@@ -353,7 +346,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         marcrecord.add("710", a=f710a)
 
     # übergeordnetes Werk
-    marcrecord.add("773", w=f773w)
+    marcrecord.add("773", w="test")
 
     # Links
     f856u = get_datafield(record, "655", "u")
@@ -377,5 +370,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         outputfile.write(marcrecord.as_marc())
     except UnicodeEncodeError as exc:
         print("%s: %s" % (marcrecord["001"], exc), file=sys.stderr)
+    print(f245)
+    break
 
 outputfile.close()
