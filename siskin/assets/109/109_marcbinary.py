@@ -346,7 +346,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         marcrecord.add("710", a=f710a)
 
     # übergeordnetes Werk
-    marcrecord.add("773", w="test")
+    marcrecord.add("773", w=f773w)
 
     # Links
     f856u = get_datafield(record, "655", "u")
@@ -369,5 +369,5 @@ for oldrecord in xmlstream(inputfilename, "record"):
         outputfile.write(marcrecord.as_marc())
     except UnicodeEncodeError as exc:
         print("%s: %s" % (marcrecord["001"], exc), file=sys.stderr)
-            
+
 outputfile.close()
