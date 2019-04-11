@@ -362,8 +362,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     marcrecord.add("935", b=f935b, c=f935c)
 
     # Kollektion
-    collection = ["a", f001, "b", "109", "c",
-                  u"Kunsthochschule für Medien Köln", "c", "sid-109-col-kunsthochschulekoeln"]
+    collection = ["a", f001, "b", "109", "c", "sid-109-col-kunsthochschulekoeln"]
     marcrecord.add("980", subfields=collection)
 
     try:
