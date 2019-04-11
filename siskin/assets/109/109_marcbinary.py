@@ -369,7 +369,5 @@ for oldrecord in xmlstream(inputfilename, "record"):
         outputfile.write(marcrecord.as_marc())
     except UnicodeEncodeError as exc:
         print("%s: %s" % (marcrecord["001"], exc), file=sys.stderr)
-    print(f245)
-    break
-
+            
 outputfile.close()
