@@ -226,7 +226,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     isbn = len(isbn)
     regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
 
-    if parent_id in parent_ids:
+    if id in parent_ids:
         format = "Mehrbänder"
     elif isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
         format = "Buch"
