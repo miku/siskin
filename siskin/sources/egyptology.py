@@ -30,7 +30,7 @@ Config:
 
 [egyptology]
 
-input = /path/to/egyptology.ctv6
+input = /path/to/70_input.ctv6
 
 """
 
