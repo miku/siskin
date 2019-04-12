@@ -24,15 +24,14 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-Egyptology at Leipzig University, refs #5246.
+Egyptology at Leipzig University, refs #5246, #14359.
 
-This source only contains an ExternalTask, pointing to a file as configured.
-This file has been created from an sqlite3 dump through a couple of steps, some
-of them not documented in siskin/assets/70.
+Config:
 
 [egyptology]
 
-file = /path/to/output.fincmarc.xml
+input = /path/to/egyptology.ctv6
+
 """
 
 import luigi
@@ -45,10 +44,15 @@ class EgyptologyTask(DefaultTask):
     TAG = '70'
 
 
-class EgyptologyFincMARC(EgyptologyTask, luigi.ExternalTask):
+class EgyptologyFincMARC(EgyptologyTask):
     """
-    Point to final result.
+    Convert to binary MARC.
     """
+    def run(self):
+        output = shellout("""python {script} {input} {output}""",
+                         script=self.assets('70/70_marcbinary.py'),
+                        input=self.config.get('egyptology', 'input'))
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.config.get('egyptology', 'file'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
