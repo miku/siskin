@@ -34,8 +34,13 @@ input = /path/to/70_input.ctv6
 
 """
 
+import datetime
+import os
+
 import luigi
 
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
