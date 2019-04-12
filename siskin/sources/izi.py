@@ -22,7 +22,7 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 """
-IZI Task #7755, #13652. TODO(miku): move from main to ai.
+IZI Task #7755, #13652, #14692.
 
 Config:
 
