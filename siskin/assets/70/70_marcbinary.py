@@ -9,6 +9,10 @@
 # Task: egyptology.py
 
 
+from __future__ import print_function
+
+from builtins import *
+
 import os
 import sys
 import re
@@ -28,7 +32,7 @@ if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
 sqlitecon = sqlite3.connect(inputfilename)
-outputfile = open(outputfilename, "wb")
+outputfile = io.open(outputfilename, "wb")
 
 query = """
     SELECT 
@@ -228,7 +232,7 @@ for i, record in enumerate(sqlite):
     callnumber = record[14]
     if not callnumber:
         callnumber = "nicht verfügbar"
-    marcrecord.add("856", q="text/html", _3="Link zur Bestandsinformation", u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html", z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
+    marcrecord.add("856", q="text/html", _3=u"Link zur Bestandsinformation", u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html", z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
 
     # Kollektion    
     collections = ["a", f001, "b", "70", "c", "sid-70-col-aegyptologie"]
