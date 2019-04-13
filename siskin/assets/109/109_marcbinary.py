@@ -142,8 +142,8 @@ def get_datafield(record, tag, code, all=False):
 
 
 def get_leader(format="Buch"):
-    if format == "Mehrbänder":
-        return "00000cam00000000000a4500"
+    if format == u"Mehrbänder":
+       return "     cam  22       a4500"
     return "     %s  22        4500" % formatmap[format]["leader"]
 
 
