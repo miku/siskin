@@ -223,12 +223,11 @@ for oldrecord in xmlstream(inputfilename, "record"):
     format = get_datafield(record, "433", "a")
     format = u'%s' % format
     isbn = get_datafield(record, "540", "a")
-    isbn = len(isbn)
     regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
 
     if id in parent_ids:
         format = "Mehrbänder"
-    elif isbn > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
+    elif len(isbn) > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
         format = "Buch"
     elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format
                          or "XV" in format or "X," in format or "Bde." in format or ": graph" in format):
@@ -249,7 +248,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
           or "Teile" in format or "USB" in format or "Schachtel" in format or "Schautafel" in format
           or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
         format = "Objekt"
-    elif parent_id in parent_ids and isbn == 0:
+    elif id in parent_ids and len(isbn) == 0:
         #format = "Zeitschrift"
         continue
     else:
