@@ -189,13 +189,12 @@ parent_titles = {}
 for oldrecord in xmlstream(inputfilename, "record"):
 
     record = xmltodict.parse(oldrecord)    
-    child_id = get_datafield(record, "001", "a")
     parent_id = get_datafield(record, "010", "a")
     
     if len(parent_id) > 0:
         parent_title = get_datafield(record, "331", "a")
         parent_ids.append(parent_id)
-        parent_titles[child_id] = parent_title
+        parent_titles[parent_id] = parent_title
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
@@ -211,8 +210,10 @@ for oldrecord in xmlstream(inputfilename, "record"):
         continue
 
     if len(parent_id) > 0:
-        f245a = parent_titles[id]
+        f245a = parent_titles[parent_id]
         f245p = title
+        if f245a == f245p:
+            f245p = ""
         f773w = "(DE-576)" + parent_id
     else:
         f245a = title
