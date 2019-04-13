@@ -191,10 +191,17 @@ for oldrecord in xmlstream(inputfilename, "record"):
     record = xmltodict.parse(oldrecord)    
     parent_id = get_datafield(record, "010", "a")
     
-    if len(parent_id) > 0:
-        parent_title = get_datafield(record, "331", "a")
-        parent_ids.append(parent_id)
-        parent_titles[parent_id] = parent_title
+    if len(parent_id) > 0:       
+        parent_ids.append(parent_id)     
+
+for oldrecord in xmlstream(inputfilename, "record"):
+
+    record = xmltodict.parse(oldrecord)    
+    id = get_datafield(record, "001", "a")
+    title = get_datafield(record, "331", "a")
+    
+    if id in parent_ids:
+        parent_titles[id] = title
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
@@ -209,16 +216,16 @@ for oldrecord in xmlstream(inputfilename, "record"):
     if "Brockhaus" in title or len(title) == 0:
         continue
 
+    f245a = title
+    f245p = ""
+    f773w = ""
+
     if len(parent_id) > 0:
-        f245a = parent_titles[parent_id]
-        f245p = title
-        if f245a == f245p:
-            f245p = ""
-        f773w = "(DE-576)" + parent_id
-    else:
-        f245a = title
-        f245p = ""
-        f773w = ""
+        has_parent_title = parent_titles.get(parent_id, None)
+        if has_parent_title:
+            f245a = parent_titles[parent_id]
+            f245p = title
+            f773w = "(DE-576)" + parent_id
 
     # Format
     format = get_datafield(record, "433", "a")
