@@ -11,25 +11,25 @@
 
 from __future__ import print_function
 
-from builtins import *
-
-import os
 import io
-import sys
+import os
 import re
 import sqlite3
+import sys
+from builtins import *
 
 import marcx
 from siskin.utils import marc_build_imprint
 
+# XXX: https://stackoverflow.com/q/3828723
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
 lang_map = {"de": "ger", "en": "eng", "fr": "fre", "ru": "rus", "it": "ita", "es": "spa", "af": "afr", "cs": "csb", "ar": "ara", "hu": "hung"}
-    
 
-inputfilename = "70_input.ctv6" 
+
+inputfilename = "70_input.ctv6"
 outputfilename = "70_output.mrc"
 
 if len(sys.argv) == 3:
@@ -39,10 +39,10 @@ sqlitecon = sqlite3.connect(inputfilename)
 outputfile = io.open(outputfilename, "wb")
 
 query = """
-    SELECT 
+    SELECT
         Reference.ID as id,
         Title as title,
-        Subtitle as subtitle,        
+        Subtitle as subtitle,
         ISBN as isbn,
         LanguageCode as language,
         PageCount as pages,
@@ -97,11 +97,11 @@ query = """
         Reference.ID
     """
 
-sqlite = sqlitecon.cursor()    
+sqlite = sqlitecon.cursor()
 sqlite.execute(query)
 
 for i, record in enumerate(sqlite):
-    
+
     # Cleanup None values
     record = [r if r is not None else '' for r in record]
 
@@ -113,13 +113,13 @@ for i, record in enumerate(sqlite):
     # Formatzuweisung
     format = record[9]
     if format == "JournalArticle" or format == "NewspaperArticle":
-        leader = "     naa  22        4500"       
-        f935c = "text"    
+        leader = "     naa  22        4500"
+        f935c = "text"
     elif format == "Thesis":
-        leader = "     cam  22        4500"      
+        leader = "     cam  22        4500"
         f935c = "hs"
     else:
-        leader = "     cam  22        4500"      
+        leader = "     cam  22        4500"
         f935c = "lo"
 
     f007 = "tu"
@@ -198,7 +198,7 @@ for i, record in enumerate(sqlite):
         for person in persons[1:]:
             f700a = person.strip()
             if f700a in author_doublets:
-                continue            
+                continue
             marcrecord.add("700", a=f700a)
             author_doublets.append(f700a)
 
@@ -208,7 +208,7 @@ for i, record in enumerate(sqlite):
         editors = editors.split(";")
         editors = set(editors)  # wegen der Dopplungen
         for editor in editors:
-            f700a = editor.strip()       
+            f700a = editor.strip()
             marcrecord.add("700", a=f700a)
 
     # Verweis auf Zeitschrift
@@ -218,13 +218,13 @@ for i, record in enumerate(sqlite):
         volume = record[10]
         pages = record[16]
         match = re.search("\<os\>(\d+-\d+)\</os\>", pages)
-        
+
         if match:
             pages = match.group(1)
             pages = ", S. " + pages
         else:
             pages = ""
-        
+
         if f773t and (volume or year or pages):
             f773g = volume + "(" + year + ")" + pages
         else:
@@ -236,13 +236,15 @@ for i, record in enumerate(sqlite):
     callnumber = record[14]
     if not callnumber:
         callnumber = "nicht verfügbar"
-    marcrecord.add("856", q="text/html", _3="Link zur Bestandsinformation", u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html", z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
+    marcrecord.add("856", q="text/html", _3="Link zur Bestandsinformation",
+                   u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html",
+                   z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
 
-    # Kollektion    
+    # Kollektion
     collections = ["a", f001, "b", "70", "c", "sid-70-col-aegyptologie"]
-    marcrecord.add("980", subfields=collections)      
-    
+    marcrecord.add("980", subfields=collections)
+
     outputfile.write(marcrecord.as_marc())
-   
+
 sqlitecon.close()
 outputfile.close()
