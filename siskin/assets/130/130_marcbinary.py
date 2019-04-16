@@ -1,14 +1,27 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+
+# Quelle: VDEH
+# SID: 130
+# Tickets: #9868, #15025
+# technicalCollectionID: sid-130-col-vdeh
+# Task: vdeh.py
+
+
+from __future__ import print_function
+from siskin.mab import MabXMLFile
+from builtins import *
+
 import io
 import sys
 import re
 
-import tqdm
 import marcx
 import requests
+import xmltodict
 import collections
+from siskin.utils import marc_build_imprint
 
 
 formatmap = {
@@ -24,26 +37,6 @@ formatmap = {
     "||||||||g|": u"Datenträger"
 }
 
-
-def get_field(tag):
-    regexp = re.search('<.*?\snr="%s".*>(.*)$' % tag, field)
-    if regexp:
-        _field = regexp.group(1)
-        if isinstance(_field, str):
-            return _field
-        return _field.decode('utf-8')
-    else:
-        return ""
-
-def get_subfield(tag, subfield):
-    regexp = re.search('<feld.*nr="%s".*><uf code="%s">(.*?)<\/uf>' % (tag, subfield), field)
-    if regexp:
-        _field = regexp.group(1)
-        if isinstance(_field, str):
-            return _field
-        return _field.decode('utf-8')
-    else:
-        return ""
 
 def check_swb_isbn(isbn):
     """
@@ -66,216 +59,35 @@ servername = "https://index.ub.uni-leipzig.de/solr/biblio/select"
 if len(sys.argv) == 4:
     inputfilename, outputfilename, servername = sys.argv[1:]
 
+reader = MabXMLFile(inputfilename, replace=((u"¬", ""),))
+outputfile = open(outputfilename, "wb")
+
 hierarchymap = collections.defaultdict(list)
 
-with open(inputfilename, "r") as inputfile:
-
-    records = inputfile.read()
-    records = records.split("</datensatz>")
-
-    for record in records:
+for record in reader:
 
         f010 = ""
         f089 = ""
 
-        record = record.replace("\n", "")
-        pattern = """<feld nr="010" ind=" ">(.*?)</feld>.*?nr="089" ind=" ">(.*?)</feld>"""
-        regexp = re.search(pattern, record)
-        if regexp:
-            f010, f089 = regexp.groups()
+        f010 = record.field("010")
+        f089 = record.field("089")
 
-        if f010 != "" and f089 != "":
+        if f010 and f089:
             f010 = f010.lstrip("0")
             hierarchymap[f010].append(f089)
 
-inputfile = open(inputfilename, "r")
-outputfile = open(outputfilename, "wb")
-
-records = inputfile.read()
-records = records.split("</datensatz>")
-
-for record in records:
-
-    f001 = ""
-    f007 = ""
-    f020a = ""
-    f022a = ""
-    f041a = ""
-    f100a = ""
-    f100e = ""
-    f110a = ""
-    f245a = ""
-    f245b = ""
-    f245c = ""
-    f250a = ""
-    f260a = ""
-    f260b = ""
-    f260c = ""
-    f300a = ""
-    f300b = ""
-    f300c = ""
-    f500a = ""
-    f650a = ""
-    f700e = ""
-    f856u = ""
-    f866a = ""
-    format1 = ""
-    format2 = ""
-    subjects = []
-    persons = []
-    corporates = []
+for record in reader:
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
-    fields = re.split("(</feld>)", record)
+   
+    subjects = []
+    persons = {}
+    corporates = []
 
-    for field in fields:
-
-        field = field.replace("\n", "")
-        field = field.replace("</feld>", "")
-        field = field.replace("      ", "")
-
-        # Identfikator
-        if f001 == "":
-            f001 = get_field("001")
-
-        # ISBN
-        if f020a == "":
-            f020a = get_field("540")
-            if f020a != "":
-                regexp = re.search("\s?([\d-]+)\s?", f020a)
-                if regexp:
-                    f020a = regexp.group(1)
-                else:
-                    print("Die ISBN konnte nicht bereinigt werden: " + f020a)
-
-        # ISSN
-        if f022a == "":
-            f022a = get_field("542")
-            if f022a != "":
-                regexp = re.search("\s?([\d-]+)\s?", f022a)
-                if regexp:
-                    f022a = regexp.group(1)
-                else:
-                    print("Die ISSN konnte nicht bereinigt werden: " + f022a)
-
-        # Sprache
-        if f041a == "":
-            f041a = get_field("037")
-
-        # 1. Urheber
-        if f100a == "":
-            f100a = get_field("100")
-            if f100a != "":
-                regexp = re.search(u".\s¬(\[.*\])", f100a)
-                if regexp:
-                    f100e = regexp.group(1)
-                    f100a = re.sub(u".\s¬\[.*\]¬", "", f100a)
-
-        # 1. Körperschaft
-        if f110a == "":
-            f110a = get_field("200")
-
-        # Haupttitel
-        if f245a == "":
-            f245a = get_field("331")
-
-        # Titelzusatz
-        if f245b == "":
-            f245b = get_field("335")
-
-        # Verantwortlichenangabe
-        if f245c == "":
-            f245c = get_field("359")
-
-        # Ausgabe
-        if f250a == "":
-            f250a = get_field("403")
-
-        # Erscheinungsort
-        if f260a == "":
-            f260a = get_field("410")
-            if f260a == "":
-                f260a = get_subfield("419", "a")
-
-        # Verlag
-        if f260b == "":
-            f260b = get_field("412")
-            if f260b == "":
-                f260b = get_subfield("419", "b")
-            if f260b != "":
-                f260b = " : " + f260b
-
-        # Erscheinungsjahr
-        if f260c == "":
-            f260c = get_field("425")
-            if f260c == "":
-                f260c = get_subfield("419", "c")
-            if f260c != "" and (f260a != "" or f260b != ""):
-                f260c = ", " + f260c
-
-        # Seitenzahl
-        if f300a == "":
-            f300a = get_field("433")
-
-        # Illustrationen
-        if f300b == "":
-            f300b = get_field("434")
-            if f300b != "":
-                f300b = " : " + f300b
-
-        # Format
-        if f300c == "":
-            f300c = get_field("435")
-            if f300c != "":
-                f300c = " ; " + f300c
-
-        # Schlagwörter
-        if f650a == "":
-            f650a = get_field("710")
-            if f650a != "":
-                subjects.append(f650a)
-                f650a = ""
-
-        # weitere Personen
-        regexp = re.search('nr="1\d\d"', field)
-        if regexp:
-            for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
-                f700a = get_field(i)
-                if f700a != "":
-                    regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
-                    if not regexp:
-                        regexp = re.search(".\s¬(\[.*\])", f700a)
-                        if regexp:
-                            f700e = regexp.group(1)
-                            f700a = re.sub(".\s¬\[.*\]¬", "", f700a)
-                        persons.append(f700a)
-                        break
-
-        # weitere Körperschaften
-        regexp = re.search('nr="2\d\d"', field)
-        if regexp:
-            for i in range(201, 299):
-                f710a = get_field(i)
-                if f710a != "":
-                    regexp = re.search("^\d+", f710a)
-                    if not regexp:
-                        corporates.append(f710a)
-                        break
-
-        # Link zum Datensatz
-        if f856u == "":
-            f856u = get_subfield("655", "u")
-
-        #Bestandsnachweis (866a)
-        f866a = f001.lstrip("0")
-        f866a = hierarchymap.get(f866a, "")
-
-        if format1 == "":
-            format1 = get_field("052")
-
-        if format2 == "":
-            format2 = get_field("050")
+    # Formatmapping
+    format1 = record.field("052", alt="")
+    format2 = record.field("050", alt="")
 
     if format1 != "" or format2 != "":
         format = format1 or format2
@@ -319,59 +131,150 @@ for record in records:
         f935b = "soerd"
         f935c = ""
     else:
-        print("Format %s ist nicht in der Mapping-Tabelle enthalten" % format)
         leader = "     nam  22        4500"
         f007 = "tu"
         f008 = ""
         f935b = "druck"
         f935c = ""
 
-    if f020a != "":
+    assert(len(leader) == 24)
+    marcrecord.leader = leader
+
+    # Identfikator
+    f001 = record.field("001", alt="")
+    if f001 == "":
+        continue
+    marcrecord.add("001", data="finc-130-" + f001)
+
+    # Format
+    marcrecord.add("007", data=f007)
+    marcrecord.add("008", data=f008)
+
+    # ISBN
+    f020a = record.field("540", alt="")
+    if f020a:
         x = check_swb_isbn(f020a)
         if x > 3:
             continue
+        marcrecord.add("020", a=f020a)    
 
-    if f022a != "":
+    # ISSN
+    f022a = record.field("542", alt="")
+    if f022a:
         x = check_swb_issn(f022a, f245a)
         if x > 3:
             continue
-
-    if f245a == "" or "Arkady" in f245a: # einzelne Zeitschriftenhefte und die fehlerhaften Arkady-Records werden übersprungen
-        continue
-
-    assert(len(leader) == 24)
-    marcrecord.leader = leader
-    marcrecord.add("001", data="finc-130-" + f001)
-    marcrecord.add("007", data=f007)
-    marcrecord.add("008", data=f008)
-    marcrecord.add("020", a=f020a)
-    marcrecord.add("022", a=f022a)
+        marcrecord.add("022", a=f022a)
+    
+    # Sprache
+    f041a = record.field("037", alt="")
     marcrecord.add("041", a=f041a)
-    marcrecord.add("100", a=f100a, e=f100e)
+
+    # 1. Urheber
+    f100a = record.field("100", alt="")
+    f100e = ""
+    if f100a:
+        regexp = re.search(u".\s¬(\[.*\])", f100a)
+        if regexp:
+            f100e = regexp.group(1)
+            f100a = re.sub(u".\s¬\[.*\]¬", "", f100a)
+        marcrecord.add("100", a=f100a, e=f100e)
+
+    # 1. Körperschaft
+    f110a = record.field("200", alt="")
     marcrecord.add("110", a=f110a)
+
+    # Titel und Verantwortlichenangabe
+    f245a = record.field("331", alt="")
+    f245b = record.field("335", alt="")
+    f245c = record.field("359", alt="")
+    if len(f245a) < 3 or "Arkady" in f245a: # einzelne Zeitschriftenhefte, Titel nur aus Komma und Leerzeichen und die fehlerhaften Arkady-Records werden übersprungen
+        continue
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=titleparts)
+
+    # Ausgabe
+    f250a = record.field("403", alt="")
     marcrecord.add("250", a=f250a)
-    publisher = ["a", f260a, "b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=publisher)
+
+    # Erscheinungsvermerk
+    f260a = record.field("410", alt="")
+    if not f260a:
+        f260a = record.field("419", "a", alt="")
+       
+    f260b = record.field("412", alt="")
+    if not f260b:
+        f260b = record.field("419", "b", alt="")
+      
+    f260c = record.field("425", alt="")
+    if not f260c:
+        f260c = record.field("419", "c", alt="")
+      
+    subfields = marc_build_imprint(f260a, f260b, f260c)
+    marcrecord.add("260", subfields=subfields)
+
+    # Umfang
+    f300a = record.field("433", alt="")
+    f300b = record.field("434", alt="")
+    if f300a and f300b:
+        f300b = " : " + f300b
+    f300c = record.field("435")
+    if (f300a or f300b) and f300c:
+        f300c = " ; " + f300c
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
     marcrecord.add("300", subfields=physicaldescription)
+
+    # Schlagwörter
+    f650a = record.field("710", alt="")
+    subjects.append(f650a)
     for subject in subjects:
         marcrecord.add("650", a=subject)
-    for person in persons:
-        marcrecord.add("700", a=person, e=f700e)
-    for corporate in corporates:
-        marcrecord.add("710", a=corporate)
-    if f856u != "":
+
+    # weitere Personen
+    for i in range(101, 197, 4):
+        f700a = record.field(i, alt="")
+        #regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
+        regexp = re.search(".\s¬(\[.*\])", f700a)
+        if regexp:
+            f700e = regexp.group(1)
+            f700a = re.sub(".\s¬\[.*\]¬", "", f700a)
+        else:
+            f700e = ""
+        persons[f700a] = f700e
+    
+    for f700a, f700e in persons.items():
+        marcrecord.add("700", a=f700a, e=f700e)
+          
+    # weitere Körperschaften
+    for i in range(201, 299, 4):
+        f710a = record.field(i, alt="")
+        #regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
+        regexp = re.search(".\s¬(\[.*\])", f710a)
+        if f710a:
+            corporates.append(f710a)
+
+    for f710a in corporates:
+        marcrecord.add("710", a=f710a)
+
+    # Link zum Datensatz
+    f856u = record.field("655", "u", alt="")
+    if f856u:
         marcrecord.add("856", q="text/html", u=f856u)
+
+    #Bestandsnachweis (866a)
+    f866a = f001.lstrip("0")
+    f866a = hierarchymap.get(f866a, "")    
     f866a = "; ".join(f866a)
     if not isinstance(f866a, str):
         f866a = f866a.decode('utf-8')
     marcrecord.add("866", a=f866a)
+    
+    # SWB-Format
     marcrecord.add("935", b=f935b, c=f935c)
+    
+    # Kollektion
     marcrecord.add("980", a=f001, b="130", c="sid-130-col-vdeh")
 
     outputfile.write(marcrecord.as_marc())
 
-inputfile.close()
 outputfile.close()
