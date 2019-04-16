@@ -153,18 +153,24 @@ for record in reader:
     # ISBN
     f020a = record.field("540", alt="")
     if f020a:
-        x = check_swb_isbn(f020a)
-        if x > 3:
-            continue
-        marcrecord.add("020", a=f020a)    
+        match = re.search("([0-9xX-]{10,17})", f020a)
+        if match:
+            f020a = match.group(1)
+            x = check_swb_isbn(f020a)
+            if x > 3:
+                continue
+            marcrecord.add("020", a=f020a)    
 
     # ISSN
     f022a = record.field("542", alt="")
     if f022a:
-        x = check_swb_issn(f022a, f245a)
-        if x > 3:
-            continue
-        marcrecord.add("022", a=f022a)
+        match = re.search("([0-9xX-]{9,9})", f022a)
+        if match:
+            f022a = match.group(1)
+            x = check_swb_issn(f022a, f245a)
+            if x > 3:
+                continue
+            marcrecord.add("022", a=f022a)
     
     # Sprache
     f041a = record.field("037", alt="")
