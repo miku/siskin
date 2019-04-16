@@ -181,10 +181,10 @@ for record in reader:
     f100a = record.field("100", alt="")
     f100e = ""
     if f100a:
-        regexp = re.search(u".\s¬(\[.*\])", f100a)
+        regexp = re.search(u".\s(\[.*\])", f100a)
         if regexp:
             f100e = regexp.group(1)
-            f100a = re.sub(u".\s¬\[.*\]¬", "", f100a)
+            f100a = re.sub(u".\s\[.*\]", "", f100a)
         marcrecord.add("100", a=f100a, e=f100e)
 
     # 1. Körperschaft
