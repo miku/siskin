@@ -174,6 +174,7 @@ for record in reader:
     
     # Sprache
     f041a = record.field("037", alt="")
+    f041a = re.split("(\w\w\w)", f041a) # to handle uncommon language codes like "gerengfre"
     marcrecord.add("041", a=f041a)
 
     # 1. Urheber
