@@ -196,9 +196,8 @@ for record in reader:
     f245a = record.field("331", alt="")
     f245b = record.field("335", alt="")
     f245c = record.field("359", alt="")
-    if len(
-            f245a
-    ) < 3 or "Arkady" in f245a:  # einzelne Zeitschriftenhefte, Titel nur aus Komma und Leerzeichen und die fehlerhaften Arkady-Records werden übersprungen
+    if len(f245a) < 3 or "Arkady" in f245a:
+        # einzelne Zeitschriftenhefte, Titel nur aus Komma und Leerzeichen und die fehlerhaften Arkady-Records werden übersprungen
         continue
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=titleparts)
