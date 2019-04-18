@@ -8,6 +8,9 @@ import sys
 import pymarc
 import marcx
 
+from siskin.utils import marc_clean_record
+
+
 copytags = ("003", "084", "100", "245", "260", "300", "490", "553", "653", "773")
 
 inputfilename = "173_input.mrc" 
@@ -49,6 +52,7 @@ for oldrecord in reader:
     collections = ["a", f001, "b", "173", "c", "sid-173-col-buchwesen"]
     newrecord.add("980", subfields=collections)
   
+    marc_clean_record(newrecord)
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
