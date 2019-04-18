@@ -232,6 +232,9 @@ for i, record in enumerate(sqlite):
 
         marcrecord.add("773", t=f773t, g=f773g)
 
+    # SWB-Format
+    marcrecord.add("935", b=f930b, c=f930c)
+
     # Link zur Bestandsinfo
     callnumber = record[14]
     if not callnumber:
