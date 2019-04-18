@@ -232,10 +232,9 @@ for record in reader:
     marcrecord.add("300", subfields=physicaldescription)
 
     # Schlagwörter
-    f650a = record.field("710", alt="")
-    subjects.append(f650a)
-    for subject in subjects:
-        marcrecord.add("650", a=subject)
+    subjects = record.fields("710")
+    for f650a in subjects:
+        marcrecord.add("650", a=f650a)
 
     # weitere Personen
     for i in range(101, 197):
