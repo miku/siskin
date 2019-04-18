@@ -28,18 +28,18 @@ Helper functions for dealing with OpenURL, refs #5163.
 from six.moves.urllib.parse import urlencode
 
 
-def update_on_value(t, tkey, value, first=True):
+def update_on_value(tdict, tkey, value, first=True):
     """
-    Update dictionary t and set t[tkey] to s[skey] exists and is not None. If
-    the value in question is a sequence, first controls, whether only the first
-    element should be taken.
+    Update target dictionary and set tdict[tkey] to value, if value exists and
+    is not None. If the value in question is a sequence, first controls,
+    whether only the first element should be used as value.
     """
     if value is not None:
         if first and isinstance(value, (list, tuple)):
             if len(value) > 0:
-                t[tkey] = value[0]
+                tdict[tkey] = value[0]
         else:
-            t[tkey] = value
+            tdict[tkey] = value
 
 
 def openurl_parameters_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
