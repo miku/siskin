@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Cambridge Open Access eBooks, refs #13120.
 
@@ -62,4 +61,3 @@ class COAEBMARC(COAEBTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
-

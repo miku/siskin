@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Medienwissenschaft, Rezensionen, Reviews. Archiv, Marburg, refs #5486, #11005.
 
@@ -75,7 +74,9 @@ class MarburgCombine(MarburgTask):
     def run(self):
         endpoint = "http://archiv.ub.uni-marburg.de/ubfind/OAI/Server"
         shellout("metha-sync -set {set} -format {format} {endpoint}",
-                 set=self.set, format=self.format, endpoint=endpoint)
+                 set=self.set,
+                 format=self.format,
+                 endpoint=endpoint)
         output = shellout("metha-cat -set {set} -format {format} {endpoint} > {output}",
                           set=self.set,
                           format=self.format,
@@ -99,7 +100,8 @@ class MarburgMARC(MarburgTask):
 
     def run(self):
         output = shellout("python {script} {input} {output}",
-                          script=self.assets("73/73_marcbinary.py"), input=self.input().path)
+                          script=self.assets("73/73_marcbinary.py"),
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

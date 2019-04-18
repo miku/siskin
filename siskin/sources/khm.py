@@ -20,7 +20,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 KHM Koeln, refs #9269, #8391.
 
@@ -77,9 +76,9 @@ class KHMDropbox(KHMTask):
     def run(self):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
-                 rsync_options=self.config.get('khm', 'rsync-options',
-                                               fallback='-avzP'),
-                 src=self.config.get('khm', 'scp-src'), target=target)
+                 rsync_options=self.config.get('khm', 'rsync-options', fallback='-avzP'),
+                 src=self.config.get('khm', 'scp-src'),
+                 target=target)
 
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
@@ -105,8 +104,7 @@ class KHMMARC(KHMTask):
         output = shellout("""sed -e 's/'$(echo "\o001")'/ /g' < {input} > {output}""",
                           input=self.config.get('khm', 'dump'))
         # TODO(miku): maybe check, if cleanup is still required.
-        output = shellout("python {script} {input} {output}",
-                          script=self.assets("109/109_marcbinary.py"), input=output)
+        output = shellout("python {script} {input} {output}", script=self.assets("109/109_marcbinary.py"), input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -132,7 +130,8 @@ class KHMLatest(KHMTask):
         """
         with self.input().open() as handle:
             with self.output().open('w') as output:
-                records = sorted(handle.iter_tsv(cols=('path',)), reverse=True,
+                records = sorted(handle.iter_tsv(cols=('path', )),
+                                 reverse=True,
                                  key=lambda row: os.path.basename(row.path))
                 if len(records) == 0:
                     raise RuntimeError('no files found, cannot determine latest date')
@@ -172,7 +171,8 @@ class KHMMARCDeprecated(KHMTask):
 
         output = shellout("python {script} {t1} {t2} {output}",
                           script=self.assets("109/109_marcbinary.py"),
-                          t1=tarballs[0], t2=tarballs[1])
+                          t1=tarballs[0],
+                          t2=tarballs[1])
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

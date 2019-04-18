@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Lynda, refs #11477.
 
@@ -44,6 +43,7 @@ from siskin.common import FTPMirror
 from siskin.decorator import deprecated
 from siskin.task import DefaultTask
 
+
 class LyndaTask(DefaultTask):
     """
     Base class for lynda.com courses.
@@ -53,14 +53,14 @@ class LyndaTask(DefaultTask):
     def closest(self):
         return monthly(date=self.date)
 
+
 class LyndaPaths(LyndaTask):
     """
     Mirror SLUB FTP.
     """
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False,
-                                 description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('lynda', 'ftp-host'),
@@ -77,6 +77,7 @@ class LyndaPaths(LyndaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class LyndaIntermediateSchema(LyndaTask):
     """
     XXX: Workaround SOLR, refs #11477.
@@ -88,7 +89,7 @@ class LyndaIntermediateSchema(LyndaTask):
 
     def run(self):
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
+            for row in handle.iter_tsv(cols=('path', )):
                 if row.path.endswith("latest"):
                     output = shellout(""" gunzip -c {input} |
                                       jq -rc '.fullrecord' |
@@ -103,6 +104,7 @@ class LyndaIntermediateSchema(LyndaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
 
+
 class LyndaDownloadDeprecated(LyndaTask):
     """
     Download list.
@@ -110,8 +112,7 @@ class LyndaDownloadDeprecated(LyndaTask):
     Deprecated: Use SLUB processed version via FTP download.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    language = luigi.Parameter(default="en",
-                               description="available languages: de, en")
+    language = luigi.Parameter(default="en", description="available languages: de, en")
 
     @deprecated
     def run(self):
@@ -122,6 +123,7 @@ class LyndaDownloadDeprecated(LyndaTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='zip'))
 
+
 class LyndaIntermediateSchemaDeprecated(LyndaTask):
     """
     Intermediate schema conversion.
@@ -129,8 +131,7 @@ class LyndaIntermediateSchemaDeprecated(LyndaTask):
     Deprecated: Use SLUB processed version via FTP download.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    language = luigi.Parameter(default="en",
-                               description="available languages: de, en")
+    language = luigi.Parameter(default="en", description="available languages: de, en")
 
     def requires(self):
         return LyndaDownloadDeprecated(language=self.language, date=self.date)
@@ -140,8 +141,7 @@ class LyndaIntermediateSchemaDeprecated(LyndaTask):
         """
         It's a Zip with a single file.
         """
-        output = shellout("""unzip -p {input} | dos2unix > {output}""",
-                          input=self.input().path)
+        output = shellout("""unzip -p {input} | dos2unix > {output}""", input=self.input().path)
 
         language_map = {'en': 'eng', 'de': 'deu'}
         collection_map = {'en': 'English', 'de': 'Deutsch'}
@@ -157,8 +157,7 @@ class LyndaIntermediateSchemaDeprecated(LyndaTask):
                     # Thumbnail', 'Status', 'Retire Date', 'Library']
 
                     # 02/13/2015
-                    date = datetime.datetime.strptime(
-                        row['Release Date'], '%m/%d/%Y')
+                    date = datetime.datetime.strptime(row['Release Date'], '%m/%d/%Y')
 
                     categories = set([row['Category'], row['Categories']])
                     parts = [s.strip() for s in row['Course Title'].split(':')]
@@ -185,7 +184,9 @@ class LyndaIntermediateSchemaDeprecated(LyndaTask):
                         'rft.subtitle': subtitle,
                         'rft.abstract': row['Description'],
                         'rft.url': [row['Course URL']],
-                        'rft.author': [{'rft.au': row['Author']}],
+                        'rft.author': [{
+                            'rft.au': row['Author']
+                        }],
                     }
                     output.write(json.dumps(doc))
                     output.write("\n")

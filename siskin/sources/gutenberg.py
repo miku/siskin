@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Gutenberg
 ---------
@@ -82,7 +81,8 @@ class GutenbergMARC(GutenbergTask):
 
     def run(self):
         output = shellout("unzip -p {input} | tar -xO | python {script} - > {output}",
-                          input=self.input().path, script=self.assets('1/1_marcbinary.py'))
+                          input=self.input().path,
+                          script=self.assets('1/1_marcbinary.py'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

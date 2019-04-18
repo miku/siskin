@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 PQDT, http://pqdtopen.proquest.com.
 
@@ -67,9 +66,13 @@ class PQDTCombine(PQDTTask):
     def run(self):
         url = self.config.get('pqdt', 'oai')
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
+                 prefix=self.prefix,
+                 url=url,
+                 dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
+                          prefix=self.prefix,
+                          url=url,
+                          dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -88,7 +91,9 @@ class PQDTIntermediateSchema(PQDTTask):
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("34/flux.flux"), mapdir=mapdir, input=self.input().path)
+                          flux=self.assets("34/flux.flux"),
+                          mapdir=mapdir,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -110,7 +115,8 @@ class PQDTExport(PQDTTask):
 
     def run(self):
         output = shellout(""" span-tag -c {config} {input} > {output} """,
-                          config=self.input().get('config').path, input=self.input().get('file').path)
+                          config=self.input().get('config').path,
+                          input=self.input().get('file').path)
         output = shellout(""" span-export -o {format} {input} > {output} """, input=output, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 

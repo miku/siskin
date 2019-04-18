@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 VKFilm Bundesarchiv, #8695.
 
@@ -78,8 +77,7 @@ class VKFilmBADownload(VKFilmBATask):
         """
         XXX: Maybe ensure zip.
         """
-        output = shellout("""curl --fail "{url}" > {output} """,
-                          url=self.config.get('vkfilmba', 'data'))
+        output = shellout("""curl --fail "{url}" > {output} """, url=self.config.get('vkfilmba', 'data'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -97,8 +95,7 @@ class VKFilmBADownloadDeletions(VKFilmBATask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail "{url}" > {output} """,
-                          url=self.config.get('vkfilmba', 'deletions'))
+        output = shellout("""curl --fail "{url}" > {output} """, url=self.config.get('vkfilmba', 'deletions'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -118,12 +115,13 @@ class VKFilmBADump(VKFilmBATask):
     """
 
     def run(self):
-        output = shellout("""curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}""")
+        output = shellout(
+            """curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}"""
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
-
 
 
 class VKFilmBAUpdates(VKFilmBATask):
@@ -180,7 +178,9 @@ class VKFilmBAUpdates(VKFilmBATask):
                         with tempfile.NamedTemporaryFile(delete=False) as dst:
                             shutil.copyfileobj(handle, dst)
                         shellout("yaz-marcdump -i marcxml -o marc {input} >> {output}",
-                                 input=dst.name, output=combined, ignoremap={5: 'expected error from yaz'})
+                                 input=dst.name,
+                                 output=combined,
+                                 ignoremap={5: 'expected error from yaz'})
                         os.remove(dst.name)
 
         # Finally, concatenate initial dump.

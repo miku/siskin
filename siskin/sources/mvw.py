@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Refs #13842.
 
@@ -63,6 +62,7 @@ def yesterday():
     """
     return datetime.date.today() - datetime.timedelta(1)
 
+
 class MVWTask(DefaultTask):
     """
     Media view web.
@@ -94,8 +94,8 @@ class MVWDownload(MVWTask):
     date = luigi.DateParameter(default=yesterday())
 
     def run(self):
-        url = "%s/%04d/%02d/%s-filme.xz" % (self.config.get("mediathekviewweb", "archive"),
-                                        self.date.year, self.date.month, self.date)
+        url = "%s/%04d/%02d/%s-filme.xz" % (self.config.get("mediathekviewweb",
+                                                            "archive"), self.date.year, self.date.month, self.date)
         output = shellout("""curl --fail "{url}" > {output}""", url=url)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -127,4 +127,3 @@ class MVWMARC(MVWTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
-

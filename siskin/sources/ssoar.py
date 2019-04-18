@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 SSOAR workflow with OAI harvest and metafacture.
 """
@@ -57,7 +56,8 @@ class SSOARHarvest(SSOARTask):
     def run(self):
         shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
         output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""",
-                          endpoint=self.endpoint, format=self.format)
+                          endpoint=self.endpoint,
+                          format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -76,7 +76,8 @@ class SSOARMARC(SSOARTask):
 
     def run(self):
         output = shellout("""python {script} {input} {output}""",
-                          script=self.assets('30/30_marcbinary.py'), input=self.input().path)
+                          script=self.assets('30/30_marcbinary.py'),
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -94,8 +95,7 @@ class SSOARIntermediateSchema(SSOARTask):
 
     @deprecated
     def run(self):
-        output = shellout("""span-import -i ssoar {input} | pigz -c > {output}""",
-                          input=self.input().path)
+        output = shellout("""span-import -i ssoar {input} | pigz -c > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -115,7 +115,8 @@ class SSOARExport(SSOARTask):
     @deprecated
     def run(self):
         output = shellout("""unpigz -c {input} | span-export -with-fullrecord -o {format} | pigz -c > {output}""",
-                          format=self.format, input=self.input().path)
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

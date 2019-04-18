@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 """
 Dummy module for testing out tasks.
 """
@@ -37,8 +36,7 @@ class DummyFail(DummyTask):
     """
 
     def run(self):
-        raise RuntimeError('This error occured at %s' %
-                           datetime.datetime.now())
+        raise RuntimeError('This error occured at %s' % datetime.datetime.now())
 
     def complete(self):
         return False

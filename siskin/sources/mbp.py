@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Medienwissenschaft Berichte und Papiere, refs #11424, #11498.
 

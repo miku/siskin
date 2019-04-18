@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Filmmusikforschung (FMF), refs #7967.
 
@@ -64,7 +63,9 @@ class KielFMFIntermediateSchema(KielFMFTask):
         # output.
         output = shellout("""
             flux.sh {flux} inputfile={input} | pigz -c > {output}
-        """, flux=self.assets('101/101_flux.flux'), input=input)
+        """,
+                          flux=self.assets('101/101_flux.flux'),
+                          input=input)
 
         # This moves the output of the above shell command into the desired task
         # output path.

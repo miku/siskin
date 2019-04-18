@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 VKFilm (BW), #8700, about 40000 records, Alephino.
 

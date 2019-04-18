@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Cambridge University Press Journals
 
@@ -72,7 +71,8 @@ class CambridgeDropbox(CambridgeTask):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
                  rsync_options=self.config.get('cambridge', 'rsync-options', fallback='-avzP'),
-                 src=self.config.get('cambridge', 'scp-src'), target=target)
+                 src=self.config.get('cambridge', 'scp-src'),
+                 target=target)
 
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())

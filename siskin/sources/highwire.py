@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Highwire, containing data from (approximate counts):
 
@@ -71,9 +70,13 @@ class HighwireCombine(HighwireTask):
 
     def run(self):
         shellout("METHA_DIR={dir} metha-sync -ignore-http-errors -format {prefix} {url}",
-                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                 prefix=self.prefix,
+                 url=self.url,
+                 dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                          prefix=self.prefix,
+                          url=self.url,
+                          dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -93,7 +96,8 @@ class HighwireIntermediateSchema(HighwireTask):
 
     def run(self):
         output = shellout("unpigz -c {input} | span-import -i highwire | pigz -c > {output}",
-                          input=self.input().path, pipefail=False)
+                          input=self.input().path,
+                          pipefail=False)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -111,7 +115,9 @@ class HighwireExport(HighwireTask):
         return HighwireIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 DawsonEra, #9773, SID124.
 
@@ -55,8 +54,7 @@ class DawsonDownload(DawsonTask):
     """
 
     def run(self):
-        output = shellout("curl --fail -sL {url} > {output}",
-                          url=self.config.get('dawson', 'download-url'))
+        output = shellout("curl --fail -sL {url} > {output}", url=self.config.get('dawson', 'download-url'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -89,7 +87,8 @@ class DawsonFixAndCombine(DawsonTask):
             tr -d '\032\033' >> {output} &&
 
             echo '</collection>' >> {output}""",
-                          input=self.input().path, preserve_whitespace=True)
+                          input=self.input().path,
+                          preserve_whitespace=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -115,7 +114,9 @@ class DawsonIntermediateSchema(DawsonTask):
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-                          flux=self.assets("124/124.flux"), mapdir=mapdir, input=self.input().path)
+                          flux=self.assets("124/124.flux"),
+                          mapdir=mapdir,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -137,7 +138,8 @@ class DawsonExport(DawsonTask):
             cat {input} |
             span-tag -c '{{"DE-82": {{"any": {{}}}}}}' |
             span-export -o {format} > {output}""",
-                          format=self.format, input=self.input().path)
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Datenbank Internetquellen, #5374, #9913, #11005.
 
@@ -93,11 +92,14 @@ class DBInetJSON(DBInetTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
-                shellout("""python {xmltojson} <(xsltproc {xsl} <(sed -e 's/&#.;//g' -e 's/&#..;//g' {input})) /dev/stdout |
+            for row in handle.iter_tsv(cols=('path', )):
+                shellout(
+                    """python {xmltojson} <(xsltproc {xsl} <(sed -e 's/&#.;//g' -e 's/&#..;//g' {input})) /dev/stdout |
                             jq -cr ".list[][]" >> {output} """,
-                         xmltojson=self.assets('80/xmltojson.py'),
-                         xsl=self.assets('80/convert.xsl'), input=row.path, output=stopover)
+                    xmltojson=self.assets('80/xmltojson.py'),
+                    xsl=self.assets('80/convert.xsl'),
+                    input=row.path,
+                    output=stopover)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
@@ -136,7 +138,8 @@ class DBInetIntermediateSchema(DBInetTask):
         When URLs are checked, only write records with at least one reachable URL.
         """
         output = shellout("jq -rc -f {filter} {input} | pigz -c > {output}",
-                          filter=self.assets('80/filter.jq'), input=self.input().path)
+                          filter=self.assets('80/filter.jq'),
+                          input=self.input().path)
 
         # If we have file to a list of links to exclude, then load this list.
         urls_to_drop = set()

@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 IMSLP, refs #1240, #13055.
 
@@ -50,6 +49,7 @@ from siskin.task import DefaultTask
 from siskin.utils import scrape_html_listing
 from siskin.conversions import imslp_tarball_to_marc
 
+
 class IMSLPTask(DefaultTask):
     """ Base task for IMSLP. """
     TAG = "15"
@@ -62,8 +62,7 @@ class IMSLPTask(DefaultTask):
         Find the lastest link on the listing.
         """
         listings_url = self.config.get("imslp", "listings-url")
-        links = sorted([link for link in scrape_html_listing(listings_url)
-                        if "imslpOut_" in link])
+        links = sorted([link for link in scrape_html_listing(listings_url) if "imslpOut_" in link])
 
         self.logger.debug("found %s links on IMSLP download site", len(links))
 
@@ -72,6 +71,7 @@ class IMSLPTask(DefaultTask):
 
         self.logger.debug("assuming latest link is %s", links[-1])
         return links[-1]
+
 
 class IMSLPDownloadDeprecated(IMSLPTask):
     """
@@ -84,12 +84,12 @@ class IMSLPDownloadDeprecated(IMSLPTask):
 
     @deprecated
     def run(self):
-        output = shellout("""wget -O {output} {url}""",
-                          url=self.config.get('imslp', 'url'))
+        output = shellout("""wget -O {output} {url}""", url=self.config.get('imslp', 'url'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tar.gz'))
+
 
 class IMSLPDownload(IMSLPTask):
     """
@@ -113,6 +113,7 @@ class IMSLPDownload(IMSLPTask):
         dst = os.path.join(self.taskdir(), filename)
         return luigi.LocalTarget(path=dst)
 
+
 class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
     """
     Path to JSON file mapping record id to viaf id and worktitle ("Werktitel").
@@ -130,6 +131,7 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
+
 
 class IMSLPConvertNext(IMSLPTask):
     """
@@ -152,14 +154,14 @@ class IMSLPConvertNext(IMSLPTask):
         with self.input().get("legacy-mapping").open() as handle:
             mapping = json.load(handle)
 
-        output = imslp_tarball_to_marc(self.input().get("data").path,
-                                       legacy_mapping=mapping)
+        output = imslp_tarball_to_marc(self.input().get("data").path, legacy_mapping=mapping)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         filename = os.path.basename(self.latest_link())
         dst = os.path.join(self.taskdir(), filename.replace("tar.gz", "fincmarc.mrc"))
         return luigi.LocalTarget(path=dst)
+
 
 class IMSLPConvert(IMSLPTask):
     """
@@ -176,8 +178,7 @@ class IMSLPConvert(IMSLPTask):
 
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
-        shellout("tar -xzf {archive} -C {tempdir}",
-                 archive=self.input().path, tempdir=tempdir)
+        shellout("tar -xzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
         output = shellout("python {script} {tempdir} {output} {fieldmap}",
                           script=self.assets('15/15_marcbinary.py'),
                           tempdir=tempdir,

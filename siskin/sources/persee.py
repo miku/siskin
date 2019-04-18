@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Persee, refs #3133, #11349.
 
@@ -73,7 +72,8 @@ class PerseeCombined(PerseeTask):
         output = shellout("""
             METHA_DIR={metha_dir} metha-sync -format marc -from 2000-01-01 http://oai.persee.fr/oai &&
             METHA_DIR={metha_dir} metha-cat -format marc http://oai.persee.fr/oai | pigz -c > {output}
-        """, metha_dir=self.config.get('core', 'metha-dir'))
+        """,
+                          metha_dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

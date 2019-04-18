@@ -3,7 +3,7 @@
 # Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
-#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#                   
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#
 #
 # This file is part of some open source application.
 #
@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 SpoWi Diplomarbeiten, refs #13065.
 

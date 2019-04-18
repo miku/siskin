@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 VDEH, refs #9868.
 
@@ -61,6 +60,7 @@ class VDEHTask(DefaultTask):
     def closest(self):
         return weekly(date=self.date)
 
+
 class VDEHXML(VDEHTask):
     """
     Convert binary MAB to MABxml.
@@ -77,6 +77,7 @@ class VDEHXML(VDEHTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml"))
+
 
 class VDEHRemoveIllegalChars(VDEHTask):
     """
@@ -97,6 +98,7 @@ class VDEHRemoveIllegalChars(VDEHTask):
 
     Anecdata: The stripped file is 57740 bytes smaller.
     """
+
     def requires(self):
         return VDEHXML()
 
@@ -106,6 +108,7 @@ class VDEHRemoveIllegalChars(VDEHTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
 
 class VDEHMARC(VDEHTask):
     """ Convert MABxml to BinaryMarc """

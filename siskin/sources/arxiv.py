@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 arxiv.org, https://arxiv.org/help/oa/index
 
@@ -79,9 +78,13 @@ class ArxivCombine(ArxivTask):
 
     def run(self):
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                 prefix=self.prefix,
+                 url=self.url,
+                 dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                          prefix=self.prefix,
+                          url=self.url,
+                          dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -130,10 +133,12 @@ class ArxivIntermediateSchema(ArxivTask):
         With 3.1.1 -Xmx512m seemed to be enough. Also: java -Xmx1G -XX:+PrintFlagsFinal -Xmx2G 2> /dev/null | grep MaxHeapSize.
         """
         mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""FLUX_JAVA_OPTIONS="-Xmx2048m" flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("arxiv/arxiv.flux"), mapdir=mapdir, input=self.input().path)
+        output = shellout(
+            """FLUX_JAVA_OPTIONS="-Xmx2048m" flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
+            flux=self.assets("arxiv/arxiv.flux"),
+            mapdir=mapdir,
+            input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
-

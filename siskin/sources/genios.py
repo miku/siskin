@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Genios
 ------
@@ -171,7 +170,8 @@ class GeniosDropbox(GeniosTask):
         target = os.path.join(self.taskdir(), 'mirror')
         shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
                  rsync_options=self.config.get('gbi', 'rsync-options', fallback='-avzP'),
-                 src=self.config.get('gbi', 'scp-src'), target=target)
+                 src=self.config.get('gbi', 'scp-src'),
+                 target=target)
 
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
@@ -189,6 +189,7 @@ class GeniosIssue10707Download(GeniosTask):
     Download kbart filter, specific to DE-15, refs #10707. Assume URL in config
     does not change. If it does, reconfigure and rerun the task.
     """
+
     def run(self):
         output = shellout("curl --fail {url} > {output}", url=self.config.get('genios', 'issue-10707-kbart-url'))
         luigi.LocalTarget(output).move(self.output().path)
@@ -239,20 +240,19 @@ class GeniosReloadDates(GeniosTask):
         """
         Reload files are marked with date (years + month).
         """
-        pattern = re.compile(
-            '.*konsortium_sachsen_('
-            'literaturnachweise_psychologie|'
-            'literaturnachweise_recht|'
-            'literaturnachweise_sozialwissenschaften|'
-            'literaturnachweise_technik|'
-            'literaturnachweise_wirtschaftswissenschaften|'
-            'fachzeitschriften|ebooks)_'
-            '([A-Z]*)_reload_(20[0-9][0-9])([01][0-9]).*')
+        pattern = re.compile('.*konsortium_sachsen_('
+                             'literaturnachweise_psychologie|'
+                             'literaturnachweise_recht|'
+                             'literaturnachweise_sozialwissenschaften|'
+                             'literaturnachweise_technik|'
+                             'literaturnachweise_wirtschaftswissenschaften|'
+                             'fachzeitschriften|ebooks)_'
+                             '([A-Z]*)_reload_(20[0-9][0-9])([01][0-9]).*')
 
         rows = []
 
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
+            for row in handle.iter_tsv(cols=('path', )):
                 # If the file is too small to be zipfile, skip.
                 stinfo = os.stat(row.path)
                 if stinfo.st_size < 22:
@@ -304,8 +304,7 @@ class GeniosDatabases(GeniosTask):
     ABIL
     ...
     """
-    kind = luigi.Parameter(default='fachzeitschriften',
-                           description='or: ebooks, literaturnachweise_...')
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -313,8 +312,7 @@ class GeniosDatabases(GeniosTask):
 
     def run(self):
         if self.kind not in GeniosTask.allowed_kinds:
-            raise RuntimeError('only these --kind parameters are allowed: %s' %
-                               ', '.join(GeniosTask.allowed_kinds))
+            raise RuntimeError('only these --kind parameters are allowed: %s' % ', '.join(GeniosTask.allowed_kinds))
 
         dbs = set()
         with self.input().open() as handle:
@@ -346,8 +344,7 @@ class GeniosLatest(GeniosTask):
         ...
 
     """
-    kind = luigi.Parameter(default='fachzeitschriften',
-                           description='or: ebooks, literaturnachweise_...')
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -367,8 +364,7 @@ class GeniosLatest(GeniosTask):
         """
 
         if self.kind not in GeniosTask.allowed_kinds:
-            raise RuntimeError('only these --kind parameters are allowed: %s' %
-                               ', '.join(GeniosTask.allowed_kinds))
+            raise RuntimeError('only these --kind parameters are allowed: %s' % ', '.join(GeniosTask.allowed_kinds))
 
         filemap = {}
 
@@ -381,8 +377,7 @@ class GeniosLatest(GeniosTask):
                 filemap[row.db] = row.path
 
         if not filemap:
-            raise RuntimeError(
-                'could not file a single file for the specified kind: %s' % self.kind)
+            raise RuntimeError('could not file a single file for the specified kind: %s' % self.kind)
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for _, path in filemap.items():
@@ -391,7 +386,10 @@ class GeniosLatest(GeniosTask):
                         LC_ALL=C grep -v "^<\!DOCTYPE GENIOS PUBLIC" |
                         LC_ALL=C sed -e 's@<?xml version="1.0" encoding="ISO-8859-1" ?>@@g' |
                         LC_ALL=C sed -e 's@</Document>@<X-Package>{package}</X-Package></Document>@' |
-                        pigz -c >> {output}""", input=path, output=stopover, package=self.kind)
+                        pigz -c >> {output}""",
+                     input=path,
+                     output=stopover,
+                     package=self.kind)
 
         luigi.LocalTarget(stopover).move(self.output().path)
 
@@ -407,8 +405,7 @@ class GeniosIntermediateSchema(GeniosTask):
     Related: "Neue Quellen bzw. Austausch", Mon, Dec 5, 2016 at 12:23 PM, ba54ea7d396a41a2a1281f51bba5d33f
     See also: #9534.
     """
-    kind = luigi.Parameter(default='fachzeitschriften',
-                           description='or: ebooks, literaturnachweise_...')
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: ebooks, literaturnachweise_...')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -436,23 +433,17 @@ class GeniosCombinedIntermediateSchema(GeniosTask):
         """
         return [
             GeniosIntermediateSchema(date=self.date, kind='fachzeitschriften'),
-            GeniosIntermediateSchema(
-                date=self.date, kind='literaturnachweise_psychologie'),
-            GeniosIntermediateSchema(
-                date=self.date, kind='literaturnachweise_recht'),
-            GeniosIntermediateSchema(
-                date=self.date, kind='literaturnachweise_sozialwissenschaften'),
-            GeniosIntermediateSchema(
-                date=self.date, kind='literaturnachweise_technik'),
-            GeniosIntermediateSchema(
-                date=self.date, kind='literaturnachweise_wirtschaftswissenschaften'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_psychologie'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_recht'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_sozialwissenschaften'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_technik'),
+            GeniosIntermediateSchema(date=self.date, kind='literaturnachweise_wirtschaftswissenschaften'),
         ]
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}",
-                     input=target.path, output=stopover)
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -474,9 +465,11 @@ class GeniosCombinedExport(GeniosTask):
 
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('file').path)
-        output = shellout(
-            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+                          config=self.input().get('config').path,
+                          input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format,
+                          input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -501,8 +494,12 @@ class GeniosISSNList(GeniosTask):
 
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
-        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
+                 input=self.input().get('input').path,
+                 output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
+                 input=self.input().get('input').path,
+                 output=output)
         output = shellout("""LC_ALL=C sort -S35% -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Peek [94].
 
@@ -43,11 +42,13 @@ from gluish.parameter import ClosestDateParameter
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
 
+
 class DDNLTask(DefaultTask):
     """
     Base NL via DD.
     """
     TAG = 'nl'
+
 
 class DDNLPaths(DDNLTask):
     """
@@ -56,8 +57,7 @@ class DDNLPaths(DDNLTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('ddnl', 'ftp-host'),

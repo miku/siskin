@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Pubmed PMC FTP.
 """
@@ -55,8 +54,7 @@ class PubmedMetadataPaths(PubmedTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host='ftp.ncbi.nlm.nih.gov',
@@ -87,5 +85,3 @@ class PubmedJournalList(PubmedTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
-
-

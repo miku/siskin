@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Example workflow with OAI harvest and metafacture.
 """
@@ -48,14 +47,12 @@ class MHLibraryHarvest(MHLibraryTask):
     """
     Harvest.
     """
-    endpoint = luigi.Parameter(
-        default='http://cdm15759.contentdm.oclc.org/oai/oai.php', significant=False)
+    endpoint = luigi.Parameter(default='http://cdm15759.contentdm.oclc.org/oai/oai.php', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         shellout("""metha-sync "{endpoint}" """, endpoint=self.endpoint)
-        output = shellout(
-            """metha-cat -root collection "{endpoint}" > {output}""", endpoint=self.endpoint)
+        output = shellout("""metha-cat -root collection "{endpoint}" > {output}""", endpoint=self.endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

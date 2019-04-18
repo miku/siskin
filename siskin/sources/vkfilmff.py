@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 VKFilm, #8571. Hebis FTP.
 
@@ -65,9 +64,7 @@ class VKFilmFFPaths(VKFilmFFTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20,
-                                 significant=False,
-                                 description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('vkfilmff', 'ftp-host'),
@@ -97,14 +94,15 @@ class VKFilmFFFincMarc(VKFilmFFTask):
     def run(self):
         with self.input().open() as handle:
             filename = 'film_theater_marc_%s.xml.gz' % (self.closest().strftime("%Y%m%d"))
-            for row in handle.iter_tsv(cols=('path',)):
+            for row in handle.iter_tsv(cols=('path', )):
 
                 if not row.path.endswith(filename):
                     continue
                 output = shellout("unpigz -c {file} | sed $'s/\u0098//g;s/\u009C//g' > {output}", file=row.path)
                 output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
                 output = shellout("flux.sh {flux} inputfile={input} outputfile=stdout > {output}",
-                                  flux=self.assets("119/119.flux"), input=output)
+                                  flux=self.assets("119/119.flux"),
+                                  input=output)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:

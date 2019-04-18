@@ -3,7 +3,7 @@
 # Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
-#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#                   
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>#
 #
 # This file is part of some open source application.
 #
@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Umweltbibliothek Leipzig, refs #11786.
 
@@ -46,18 +45,19 @@ class UMBITask(DefaultTask):
     """
     TAG = '156'
 
+
 class UMBIXML(UMBITask):
     """
     Convert binary MARC to XML, refs #11786#note-16.
     """
 
     def run(self):
-        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}",
-                          input=self.config.get("umbi", "input"))
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}", input=self.config.get("umbi", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml"))
+
 
 class UMBIMARC(UMBITask):
     """ Convert MARCxml to BinaryMarc """

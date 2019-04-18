@@ -22,7 +22,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 Wiso aux tasks.
 
@@ -75,11 +74,13 @@ class Wiso2018Files(WisoTask):
     def run(self):
         with self.input().open() as handle:
             _, combined = tempfile.mkstemp(prefix='siskin-')
-            for row in handle.iter_tsv(cols=('path',)):
+            for row in handle.iter_tsv(cols=('path', )):
                 # Read CSV file and prepend the basename of the file to the line.
                 filename = os.path.basename(row.path)
                 shellout(""" awk '{{print "{filename};"$0}}' < {input} >> {output}""",
-                         filename=filename, input=row.path, output=combined)
+                         filename=filename,
+                         input=row.path,
+                         output=combined)
 
         luigi.LocalTarget(combined).move(self.output().path)
 

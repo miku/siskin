@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Egyptology at Leipzig University, refs #5246, #14359.
 
@@ -53,10 +52,11 @@ class EgyptologyFincMARC(EgyptologyTask):
     """
     Convert to binary MARC.
     """
+
     def run(self):
         output = shellout("""python {script} {input} {output}""",
-                         script=self.assets('70/70_marcbinary.py'),
-                        input=self.config.get('egyptology', 'input'))
+                          script=self.assets('70/70_marcbinary.py'),
+                          input=self.config.get('egyptology', 'input'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

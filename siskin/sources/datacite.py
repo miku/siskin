@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 datacite.org
 
@@ -50,8 +49,10 @@ class DataciteTask(DefaultTask):
     """
     Base task.
     """
+
     def closest(self):
         return monthly(date=self.date)
+
 
 class DataciteCombine(DataciteTask):
     """
@@ -66,13 +67,18 @@ class DataciteCombine(DataciteTask):
 
     def run(self):
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                 prefix=self.prefix,
+                 url=self.url,
+                 dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                          prefix=self.prefix,
+                          url=self.url,
+                          dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+
 
 class DataciteIntermediateSchema(DataciteTask):
     """
@@ -86,11 +92,14 @@ class DataciteIntermediateSchema(DataciteTask):
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("datacite/flux.flux"), mapdir=mapdir, input=self.input().path)
+                          flux=self.assets("datacite/flux.flux"),
+                          mapdir=mapdir,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+
 
 class DataciteExport(DataciteTask):
     """
@@ -103,7 +112,9 @@ class DataciteExport(DataciteTask):
         return DataciteIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

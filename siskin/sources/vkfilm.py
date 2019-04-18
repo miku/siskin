@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 VKFilm (Postdam), #8575, about 120000 records.
 
@@ -67,10 +66,8 @@ class VKFilmMarc(VKFilmTask):
 
     def run(self):
         # XXX: Does this really work?
-        output = shellout("""iconv -f utf-8 -t utf-8 -c {input} > {output}""",
-                          input=self.input().path)
-        output = shellout("""flux.sh {flux} in={input} > {output}""",
-                          flux=self.assets("127/127.flux"), input=output)
+        output = shellout("""iconv -f utf-8 -t utf-8 -c {input} > {output}""", input=self.input().path)
+        output = shellout("""flux.sh {flux} in={input} > {output}""", flux=self.assets("127/127.flux"), input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

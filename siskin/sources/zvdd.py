@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 ZVDD, refs #6610.
 """
@@ -83,7 +82,8 @@ class ZVDDHarvest(ZVDDTask):
                 number of parallel connections (default 16)
         """
         output = shellout("""oaicrawl -w 12 -retry 5 -e 15s -f {prefix} -b -verbose "{url}" | pigz -c > {output}""",
-                          prefix=self.prefix, url=self.url)
+                          prefix=self.prefix,
+                          url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -100,8 +100,7 @@ class ZVDDIntermediateSchema(ZVDDTask):
         return ZVDDHarvest(date=self.date)
 
     def run(self):
-        output = shellout("unpigz -c {input} | span-import -i zvdd-mets | pigz -c > {output}",
-                          input=self.input().path)
+        output = shellout("unpigz -c {input} | span-import -i zvdd-mets | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

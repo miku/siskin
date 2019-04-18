@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Directory of Open Access Journals.
 
@@ -74,8 +73,7 @@ class DOAJCSV(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout('wget --retry-connrefused {url} -O {output}',
-                          url=self.url)
+        output = shellout('wget --retry-connrefused {url} -O {output}', url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -103,12 +101,14 @@ class DOAJDump(DOAJTask):
 
     def run(self):
         output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P -o {output} > /dev/null",
-                          sleep=self.sleep, size=self.batch_size)
+                          sleep=self.sleep,
+                          size=self.batch_size)
         output = shellout("jq -rc '.results[]' < {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj'))
+
 
 class DOAJHarvest(DOAJTask):
     """
@@ -117,21 +117,23 @@ class DOAJHarvest(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("METHA_DIR={dir} metha-sync {endpoint} && METHA_DIR={dir} metha-cat {endpoint} | pigz -c > {output}",
-                          dir=self.config.get('core', 'metha-dir'), endpoint='http://www.doaj.org/oai.article')
+        output = shellout(
+            "METHA_DIR={dir} metha-sync {endpoint} && METHA_DIR={dir} metha-cat {endpoint} | pigz -c > {output}",
+            dir=self.config.get('core', 'metha-dir'),
+            endpoint='http://www.doaj.org/oai.article')
         self.logger.debug("compressing output (might take a few minutes) ...")
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
+
 class DOAJIdentifierBlacklist(DOAJTask):
     """
     Create a blacklist of identifiers.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    min_title_length = luigi.IntParameter(default=30,
-                                          description='Only consider titles with at least this length.')
+    min_title_length = luigi.IntParameter(default=30, description='Only consider titles with at least this length.')
 
     def requires(self):
         return DOAJDump(date=self.date)
@@ -144,7 +146,8 @@ class DOAJIdentifierBlacklist(DOAJTask):
                                 .["bibjson"]["title"],
                                 .["last_updated"],
                                 .["id"]
-                            ]' {input} | sort -S35% > {output}""", input=self.input().path)
+                            ]' {input} | sort -S35% > {output}""",
+                          input=self.input().path)
 
         with open(output) as handle:
             docs = (json.loads(s) for s in handle)
@@ -179,10 +182,8 @@ class DOAJFiltered(DOAJTask):
 
     @timed
     def run(self):
-        identifier_blacklist = load_set_from_target(
-            self.input().get('blacklist'))
-        excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'),
-                                      func=lambda line: line.replace("-", ""))
+        identifier_blacklist = load_set_from_target(self.input().get('blacklist'))
+        excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'), func=lambda line: line.replace("-", ""))
 
         with self.output().open('w') as output:
             with self.input().get('dump').open() as handle:
@@ -250,7 +251,8 @@ class DOAJExport(DOAJTask):
 
     def run(self):
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format, input=self.input().path)
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -268,16 +270,20 @@ class DOAJISSNList(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': DOAJIntermediateSchema(date=self.date),
-                'jq': Executable(name='jq', message='http://git.io/NYpfTw')}
+        return {
+            'input': DOAJIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='http://git.io/NYpfTw')
+        }
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path, output=stopover)
+                 input=self.input().get('input').path,
+                 output=stopover)
         shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path, output=stopover)
+                 input=self.input().get('input').path,
+                 output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -299,10 +305,10 @@ class DOAJDOIList(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
-                          input=self.input().get('input').path)
+        output = shellout(
+            """jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
+            input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-

@@ -20,7 +20,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 IZI Task #7755, #13652, #14692.
 
@@ -52,14 +51,12 @@ class IZIMARC(IZITask):
     """
     Convert to binary MARC.
     """
+
     def run(self):
         output = shellout("""python {script} {input} {output}""",
-                         script=self.assets('78/78_marcbinary.py'),
-                        input=self.config.get('izi', 'input'))
+                          script=self.assets('78/78_marcbinary.py'),
+                          input=self.config.get('izi', 'input'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
-
-
-

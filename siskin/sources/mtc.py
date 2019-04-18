@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Music Treasures Consortium Online, refs #5798.
 """
@@ -65,8 +64,7 @@ class MTCHarvest(MTCTask):
                 r = requests.get(url, headers=headers)
                 if r.status_code >= 500:
                     if retry_count == 0:
-                        raise RuntimeError("failed after %s attempts with %s: %s",
-                                           self.max_retries, r.status_code, url)
+                        raise RuntimeError("failed after %s attempts with %s: %s", self.max_retries, r.status_code, url)
                     else:
                         self.logger.debug("retrying %s, got %s", url, r.status_code)
                         retry_count -= 1

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 ZDB, for matching short titles of journals.
 
@@ -84,12 +83,11 @@ class ZDBShortTitleMap(ZDBTask):
         yIDo9IGpzb24uTmV3RW5jb2Rlcihvcy5TdGRvdXQpLkVuY29kZShzbSk7IGVyciAhPSBuaWwgewog@@@ICBsb2cuRm
         F0YWwoZXJyKQog@@IH0K@IH0K
         """
-        source = self.run.__doc__.replace(
-            "\n", "").replace(" ", "").replace("@", "ICAg")
-        tempcode = shellout("""echo '{code}' | base64 -d > {output}.go """,
-                            code=source, preserve_whitespace=True)
+        source = self.run.__doc__.replace("\n", "").replace(" ", "").replace("@", "ICAg")
+        tempcode = shellout("""echo '{code}' | base64 -d > {output}.go """, code=source, preserve_whitespace=True)
         output = shellout(""" unpigz -c {input} | go run {code}.go > {output} """,
-                          code=tempcode, input=self.input().path)
+                          code=tempcode,
+                          input=self.input().path)
         os.remove(tempcode)
         luigi.LocalTarget(output).move(self.output().path)
 

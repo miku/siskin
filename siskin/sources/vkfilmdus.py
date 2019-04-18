@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 VKFilm Duesseldorf, #8392, MAB shipments.
 
@@ -75,8 +74,7 @@ class VKFilmDusConvert(VKFilmDusTask):
         """
         Extract zip on the fly, convert with Mab2Mabxml.jar.
         """
-        mabfile = shellout("unzip -p {input} > {output}",
-                          input=self.config.get('vkfilmdus', 'input'), encoding='utf-8')
+        mabfile = shellout("unzip -p {input} > {output}", input=self.config.get('vkfilmdus', 'input'), encoding='utf-8')
         output = shellout("java -jar {jarfile} -encin ISO-8859-1 -i {input} -o {output}",
                           jarfile=self.config.get("vkfilmdus", "Mab2Mabxml.jar"),
                           input=mabfile)
@@ -85,4 +83,3 @@ class VKFilmDusConvert(VKFilmDusTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
-

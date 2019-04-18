@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Geoscan, refs #9871.
 
@@ -56,8 +55,7 @@ class GeoscanMARC(GeoscanTask):
     Geoscan RSS to MARC. Currently, only the current feed is converted.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    link = luigi.Parameter(default="http://geoscan.nrcan.gc.ca/rss/newpub_e.rss",
-                           significant=False)
+    link = luigi.Parameter(default="http://geoscan.nrcan.gc.ca/rss/newpub_e.rss", significant=False)
 
     def run(self):
         output = shellout("""python {script} <(curl --fail -sL {link}) {output}""",

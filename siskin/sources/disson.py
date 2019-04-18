@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Disson, Dissertations Online, refs #3422.
 """
@@ -85,9 +84,13 @@ class DissonHarvest(DissonTask):
     def run(self):
         endpoint = "http://services.dnb.de/oai/repository"
         shellout("metha-sync -daily -format {format} -set {set} {endpoint}",
-                 format=self.format, set=self.set, endpoint=endpoint)
+                 format=self.format,
+                 set=self.set,
+                 endpoint=endpoint)
         output = shellout("""metha-cat -format {format} -set {set} {endpoint} |
-                             pigz -c > {output}""", format=self.format, set=self.set,
+                             pigz -c > {output}""",
+                          format=self.format,
+                          set=self.set,
                           endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -105,8 +108,7 @@ class DissonMARC(DissonTask):
         return DissonHarvest(date=self.date)
 
     def run(self):
-        output = shellout("yaz-marcdump -i marcxml -o marc <(unpigz -c {input}) > {output}",
-                          input=self.input().path)
+        output = shellout("yaz-marcdump -i marcxml -o marc <(unpigz -c {input}) > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -123,8 +125,7 @@ class DissonIntermediateSchema(DissonTask):
         return DissonHarvest(date=self.date)
 
     def run(self):
-        output = shellout("span-import -i disson <(unpigz -c {input}) | pigz -c > {output}",
-                          input=self.input().path)
+        output = shellout("span-import -i disson <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

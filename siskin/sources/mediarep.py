@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 mediarep.org, refs #14064.
 """
@@ -53,8 +52,7 @@ class MediarepMARC(MediarepTask):
     Harvest and convert to MARC.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    url = luigi.Parameter(default="https://mediarep.org/oai/request",
-                          significant=False)
+    url = luigi.Parameter(default="https://mediarep.org/oai/request", significant=False)
     prefix = luigi.Parameter(default="oai_dc", significant=False)
 
     def requires(self):
@@ -62,9 +60,16 @@ class MediarepMARC(MediarepTask):
 
     def run(self):
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
-        data = shellout("""METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} > {output}""", dir=self.config.get('core', 'metha-dir'), prefix=self.prefix, url=self.url)
-        output = shellout("""python {script} {input} {output}""", script=self.assets('170/170_marcbinary.py'), input=data)
+                 prefix=self.prefix,
+                 url=self.url,
+                 dir=self.config.get('core', 'metha-dir'))
+        data = shellout("""METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} > {output}""",
+                        dir=self.config.get('core', 'metha-dir'),
+                        prefix=self.prefix,
+                        url=self.url)
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets('170/170_marcbinary.py'),
+                          input=data)
         luigi.LocalTarget(output).move(self.output().path)
 
         os.remove(data)
@@ -72,13 +77,13 @@ class MediarepMARC(MediarepTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="fincmarc.mrc"))
 
+
 class MediarepIntermediateSchema(MediarepTask):
     """
     Single file dump.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    url = luigi.Parameter(default="https://mediarep.org/oai/request",
-                          significant=False)
+    url = luigi.Parameter(default="https://mediarep.org/oai/request", significant=False)
     prefix = luigi.Parameter(default="dim", significant=False)
 
     def requires(self):
@@ -89,10 +94,14 @@ class MediarepIntermediateSchema(MediarepTask):
 
     def run(self):
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                 prefix=self.prefix,
+                 url=self.url,
+                 dir=self.config.get('core', 'metha-dir'))
         output = shellout("""METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} |
                              span-import -i mediarep-dim | pigz -c > {output}""",
-                          prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
+                          prefix=self.prefix,
+                          url=self.url,
+                          dir=self.config.get('core', 'metha-dir'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

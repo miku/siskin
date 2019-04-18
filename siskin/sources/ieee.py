@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 IEEE. (http://www.ieee.org/documents/xmldoc_ver5.5.pdf)
 
@@ -73,8 +72,7 @@ class IEEEPaths(IEEETask):
         password = self.config.get('ieee', 'ftp-password')
         base = self.config.get('ieee', 'ftp-path')
         pattern = self.config.get('ieee', 'ftp-pattern')
-        return FTPMirror(host=host, username=username, password=password,
-                         base=base, pattern=pattern)
+        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
 
     @timed
     def run(self):
@@ -95,7 +93,8 @@ class IEEEUpdatesIntermediateSchema(IEEETask):
         return IEEEPaths(date=self.date)
 
     def run(self):
-        output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}", input=self.input().path)
+        output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}",
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -124,8 +123,9 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     """
 
     def run(self):
-        output = shellout("""tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",
-                          input=self.config.get('ieee', 'backlog-archive'))
+        output = shellout(
+            """tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",
+            input=self.config.get('ieee', 'backlog-archive'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -164,7 +164,9 @@ class IEEESolrExport(IEEETask):
         """
         TODO: get ISIL attachments from AMSL.
         """
-        output = shellout("""span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(unpigz -c {input}) | span-export | pigz -c > {output}""", input=self.input().path)
+        output = shellout(
+            """span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(unpigz -c {input}) | span-export | pigz -c > {output}""",
+            input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -176,14 +178,17 @@ class IEEEDOIList(IEEETask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': IEEEIntermediateSchema(date=self.date),
-                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+        return {
+            'input': IEEEIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
+        }
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """,
-                 input=self.input().get('input').path, output=stopover)
+                 input=self.input().get('input').path,
+                 output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 

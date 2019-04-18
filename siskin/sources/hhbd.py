@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Heidelberger historische Bestände digital, #5964.
 """
@@ -51,14 +50,11 @@ class HHBDCombine(HHBDTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default='oai_dc')
-    url = luigi.Parameter(default='http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi',
-                          significant=False)
+    url = luigi.Parameter(default='http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi', significant=False)
 
     def run(self):
-        shellout(
-            "metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
-        output = shellout(
-            "metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
+        shellout("metha-sync -format {format} http://digi.ub.uni-heidelberg.de/cgi-bin/digioai.cgi", format=self.format)
+        output = shellout("metha-cat -format {format} -root Records {url} > {output}", format=self.format, url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -75,8 +71,7 @@ class HHBDIntermediateSchema(HHBDTask):
         return HHBDCombine(date=self.date, format='oai_dc')
 
     def run(self):
-        output = shellout(
-            "span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
+        output = shellout("span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -98,7 +93,9 @@ class HHBDExport(HHBDTask):
         output = shellout("""
 	    unpigz -c {input} | span-tag -c '{{"DE-540": {{"any": {{}}}}}}' |
             span-export -with-fullrecord -o {format} > {output}
-        """, format=self.format, input=self.input().path)
+        """,
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -19,7 +19,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Priem, Jason and Piwowar, Heather. (2018) The Unpaywall Dataset. DOI:
 https://doi.org/10.6084/m9.figshare.6020078

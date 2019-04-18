@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 B3Kat, #8697.
 
@@ -122,10 +121,11 @@ class B3KatDownload(B3KatTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
-            for i, row in enumerate(handle.iter_tsv(cols=('url',)), start=1):
+            for i, row in enumerate(handle.iter_tsv(cols=('url', )), start=1):
                 downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
                 output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""",
-                                  input=downloaded, stopover=stopover)
+                                  input=downloaded,
+                                  stopover=stopover)
                 try:
                     os.remove(downloaded)
                     os.remove(output)
@@ -148,8 +148,7 @@ class B3KatMARCXML(B3KatTask):
         return B3KatDownload(date=self.date)
 
     def run(self):
-        output = shellout("yaz-marcdump -i marc -o marcxml {input} | pigz -c > {output}",
-                          input=self.input().path)
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

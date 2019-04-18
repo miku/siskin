@@ -20,7 +20,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 NRW music tasks. Deprecated, refs #9014.
 
@@ -106,7 +105,9 @@ class NRWTransformation(NRWTask):
 
     def run(self):
         output = shellout("""flux.sh {flux} in={input} sid={sid} > {output}""",
-                          flux=self.assets("56_57_58/nrw_music.flux"), input=self.input().path, sid=self.sid)
+                          flux=self.assets("56_57_58/nrw_music.flux"),
+                          input=self.input().path,
+                          sid=self.sid)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

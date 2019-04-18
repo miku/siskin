@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Springer (testing).
 
@@ -69,6 +68,7 @@ class SpringerTask(DefaultTask):
     def closest(self):
         return weekly(date=self.date)
 
+
 class SpringerPaths(SpringerTask):
     """
     Mirror SLUB FTP. Preferred as of November 2017.
@@ -76,8 +76,7 @@ class SpringerPaths(SpringerTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('springer', 'ftp-host'),
@@ -94,6 +93,7 @@ class SpringerPaths(SpringerTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
 class SpringerCleanup(SpringerTask):
     """
     2017-11-28: finc.mega_collection is now multi-valued; AIAccessFacet remains.
@@ -107,7 +107,7 @@ class SpringerCleanup(SpringerTask):
     def run(self):
         realpath = None
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path',)):
+            for row in handle.iter_tsv(cols=('path', )):
                 if not row.path.endswith("total_tpu.ldj.gz"):
                     continue
                 realpath = row.path
@@ -117,7 +117,8 @@ class SpringerCleanup(SpringerTask):
         output = shellout("""
             unpigz -c {input} | jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"])' |
             jq -c '. + {{ "finc.record_id": .doi, "finc.format": "ElectronicArticle", "url": ["https://doi.org/" + .doi] }}' | pigz -c > {output}
-        """, input=realpath)
+        """,
+                          input=realpath)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

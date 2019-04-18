@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 VKFilmBerlin, UdK Berlin, #8697.
 
@@ -61,8 +60,7 @@ class VKFilmBerlinRawMARC(VKFilmBerlinTask):
         """
         XXX: Nichtsortierzeichen? XXX: cache the number of records, somewhere.
         """
-        output = shellout(
-            "marccount {input} > {output}", input=self.input().path)
+        output = shellout("marccount {input} > {output}", input=self.input().path)
         record_count = int(open(output).read().strip())
         output = shellout("python {script} {input} {output} {record_count}",
                           script=self.assets("117/117_marcbinary.py"),
@@ -87,13 +85,10 @@ class VKFilmBerlinMARC(VKFilmBerlinTask):
         """
         XXX: Nichtsortierzeichen? XXX: cache the number of records, somewhere.
         """
-        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}",
-                          input=self.input().path)
-        output = shellout("sed 's/\xc2\x98\|\xc2\x9c//g' < {input} > {output}",
-                          input=output)
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}", input=self.input().path)
+        output = shellout("sed 's/\xc2\x98\|\xc2\x9c//g' < {input} > {output}", input=output)
         # MARCXML should be fine as well.
-        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}",
-                          input=output)
+        output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

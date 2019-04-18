@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Elsevier jounrals. Refs. #6975.
 
@@ -70,8 +69,7 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
         directory = self.config.get('elsevierjournals', 'backlog-dir')
         _, output = tempfile.mkstemp(prefix='siskin-')
         for path in sorted(iterfiles(directory, fun=lambda p: p.endswith('.tar'))):
-            shellout(
-                "span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
+            shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -84,17 +82,13 @@ class ElsevierJournalsPaths(ElsevierJournalsTask):
     """
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('elsevierjournals', 'ftp-host'),
-                         username=self.config.get(
-                             'elsevierjournals', 'ftp-username'),
-                         password=self.config.get(
-                             'elsevierjournals', 'ftp-password'),
-                         pattern=self.config.get(
-                             'elsevierjournals', 'ftp-pattern'),
+                         username=self.config.get('elsevierjournals', 'ftp-username'),
+                         password=self.config.get('elsevierjournals', 'ftp-password'),
+                         pattern=self.config.get('elsevierjournals', 'ftp-pattern'),
                          max_retries=self.max_retries,
                          timeout=self.timeout)
 
@@ -119,11 +113,10 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         with self.input().open() as handle:
-            for row in sorted(handle.iter_tsv(cols=('path',))):
+            for row in sorted(handle.iter_tsv(cols=('path', ))):
                 if not str(row.path).endswith('.tar'):
                     continue
-                shellout(
-                    "span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
+                shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -135,15 +128,13 @@ class ElsevierJournalsIntermediateSchema(ElsevierJournalsTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [ElsevierJournalsBacklogIntermediateSchema(),
-                ElsevierJournalsUpdatesIntermediateSchema(date=self.date)]
+        return [ElsevierJournalsBacklogIntermediateSchema(), ElsevierJournalsUpdatesIntermediateSchema(date=self.date)]
 
     @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}",
-                     input=target.path, output=output)
+            shellout("cat {input} >> {output}", input=target.path, output=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -165,9 +156,11 @@ class ElsevierJournalsExport(ElsevierJournalsTask):
 
     def run(self):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('file').path)
-        output = shellout(
-            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+                          config=self.input().get('config').path,
+                          input=self.input().get('file').path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+                          format=self.format,
+                          input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -185,21 +178,22 @@ class ElsevierJournalsDOIList(ElsevierJournalsTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': ElsevierJournalsIntermediateSchema(date=self.date),
-                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+        return {
+            'input': ElsevierJournalsIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
+        }
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         # process substitution sometimes results in a broken pipe, so extract
         # beforehand
-        output = shellout(
-            "unpigz -c {input} > {output}", input=self.input().get('input').path)
+        output = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
         shellout("""jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
-                 input=output, output=stopover)
+                 input=output,
+                 output=stopover)
         os.remove(output)
-        output = shellout(
-            """sort -S50% -u {input} > {output} """, input=stopover)
+        output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -213,16 +207,20 @@ class ElsevierJournalsISSNList(ElsevierJournalsTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': ElsevierJournalsIntermediateSchema(date=self.date),
-                'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+        return {
+            'input': ElsevierJournalsIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
+        }
 
     @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path, output=output)
+                 input=self.input().get('input').path,
+                 output=output)
         shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path, output=output)
+                 input=self.input().get('input').path,
+                 output=output)
         output = shellout("""sort -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Hochschule Mittweida, Collection Medien, refs #11832.
 """
@@ -51,10 +50,8 @@ class HSMWHarvest(HSMWTask):
 
     def run(self):
         endpoint, set = "https://monami.hs-mittweida.de/oai", "institutes:medien"
-        shellout("""metha-sync -set {set} {endpoint}""",
-                 set=set, endpoint=endpoint)
-        output = shellout("""metha-cat -set "institutes:medien" {endpoint} | pigz -c > {output} """,
-                          endpoint=endpoint)
+        shellout("""metha-sync -set {set} {endpoint}""", set=set, endpoint=endpoint)
+        output = shellout("""metha-cat -set "institutes:medien" {endpoint} | pigz -c > {output} """, endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

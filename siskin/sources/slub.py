@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Data sharing with SLUB Dresden.
 
@@ -57,6 +56,7 @@ class SLUBTask(DefaultTask):
     def closest(self):
         return weekly(date=self.date)
 
+
 class SLUBPaths(SLUBTask):
     """
     Mirror SLUB via FTP.
@@ -69,8 +69,7 @@ class SLUBPaths(SLUBTask):
         password = self.config.get('slub', 'ftp-password')
         base = self.config.get('slub', 'ftp-path')
         pattern = self.config.get('slub', 'ftp-pattern')
-        return FTPMirror(host=host, username=username, password=password,
-                         base=base, pattern=pattern)
+        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
 
     @timed
     def run(self):

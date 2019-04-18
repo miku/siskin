@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 https://www.ceeol.com/, refs #9398.
 
@@ -66,11 +65,13 @@ class CeeolTask(DefaultTask):
         sha1.update(self.config.get("ceeol", "updates"))
         return sha1.hexdigest()
 
+
 class CeeolJournalsUpdates(CeeolTask):
     """
     Create an intermediate schema from zero or more update XML (in MARCXML).
     The output will depend on the set and order of the input files.
     """
+
     def run(self):
         paths = [p.strip() for p in self.config.get("ceeol", "updates").split(",") if p.strip()]
         _, stopover = tempfile.mkstemp(prefix="siskin-")
@@ -83,6 +84,7 @@ class CeeolJournalsUpdates(CeeolTask):
         filename = "{}.ndj".format(self.updateid())
         return luigi.LocalTarget(path=self.path(filename=filename))
 
+
 class CeeolJournalsIntermediateSchema(CeeolTask):
     """
     Combine all journals from disk dump and convert them to intermediate
@@ -90,6 +92,7 @@ class CeeolJournalsIntermediateSchema(CeeolTask):
 
     This task depends on a fixed subdirectory, e.g. articles or 1Journal-Articles-XML..
     """
+
     def requires(self):
         return CeeolJournalsUpdates()
 
@@ -104,4 +107,3 @@ class CeeolJournalsIntermediateSchema(CeeolTask):
     def output(self):
         filename = "{}.ldj.gz".format(self.updateid())
         return luigi.LocalTarget(path=self.path(filename=filename))
-

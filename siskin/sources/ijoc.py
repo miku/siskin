@@ -31,8 +31,6 @@ from gluish.utils import shellout
 
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
-
-
 """
 IJOC, refs #7138, #11005.
 """
@@ -50,8 +48,7 @@ class IJOCHarvest(IJOCTask):
     """
     Harvest.
     """
-    endpoint = luigi.Parameter(
-        default='http://ijoc.org/index.php/ijoc/oai', significant=False)
+    endpoint = luigi.Parameter(default='http://ijoc.org/index.php/ijoc/oai', significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -80,7 +77,9 @@ class IJOCIntermediateSchema(IJOCTask):
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
         output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("87/87.flux"), mapdir=mapdir, input=self.input().path)
+                          flux=self.assets("87/87.flux"),
+                          mapdir=mapdir,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -97,15 +96,14 @@ class IJOCFincSolr(IJOCTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'config': AMSLFilterConfig(date=self.date),
-            'file': IJOCIntermediateSchema(date=self.date)
-        }
+        return {'config': AMSLFilterConfig(date=self.date), 'file': IJOCIntermediateSchema(date=self.date)}
 
     def run(self):
-        output = shellout("""span-tag -c {config} <(unpigz -c {input}) | span-export -o {format} -with-fullrecord > {output}""",
-                          config=self.input().get('config').path, input=self.input().get('file').path,
-                          format=self.format)
+        output = shellout(
+            """span-tag -c {config} <(unpigz -c {input}) | span-export -o {format} -with-fullrecord > {output}""",
+            config=self.input().get('config').path,
+            input=self.input().get('file').path,
+            format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
