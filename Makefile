@@ -21,7 +21,7 @@ upload:
 
 clean:
 	rm -rf siskin.egg-info
-	rm -rf build/ dist/ .tox/
+	rm -rf build/ dist/ .tox/ .pytest_cache/
 	find . -name "*.pyc" -exec rm -f {} \;
 	find . -name ".DS_Store" -exec rm -f {} \;
 	rm -f siskin.pex
