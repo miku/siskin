@@ -181,9 +181,9 @@ for record in reader:
     f100a = record.field("100", alt="")
     f100e = ""
     if f100a:
-        regexp = re.search(u".\s(\[.*\])", f100a)
-        if regexp:
-            f100e = regexp.group(1)
+        match = re.search(u".\s(\[.*\])", f100a)
+        if match:
+            f100e = match.group(1)
             f100a = re.sub(u".\s\[.*\]", "", f100a)
         marcrecord.add("100", a=f100a, e=f100e)
 
@@ -238,26 +238,26 @@ for record in reader:
         marcrecord.add("650", a=subject)
 
     # weitere Personen
-    for i in range(101, 197, 4):
-        f700a = record.field(i, alt="")
-        #regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
-        regexp = re.search(".\s¬(\[.*\])", f700a)
-        if regexp:
-            f700e = regexp.group(1)
-            f700a = re.sub(".\s¬\[.*\]¬", "", f700a)
-        else:
-            f700e = ""
-        persons[f700a] = f700e
+    for i in range(101, 197):
+        f700a = record.field(str(i), alt="")
+        match = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
+        if not match:
+            match = re.search(".\s(\[.*\])", f700a)
+            if match:
+                f700e = match.group(1)
+                f700a = re.sub(".\s\[.*\]", "", f700a)
+            else:
+                f700e = ""
+            persons[f700a] = f700e
     
     for f700a, f700e in persons.items():
         marcrecord.add("700", a=f700a, e=f700e)
           
     # weitere Körperschaften
-    for i in range(201, 299, 4):
+    for i in range(201, 299):
         f710a = record.field(i, alt="")
-        #regexp = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
-        regexp = re.search(".\s¬(\[.*\])", f710a)
-        if f710a:
+        match = re.search("^\d+", f710a) # die Felder, die nur Körperschafts-IDs enthalten, werden übersprungen
+        if not match:
             corporates.append(f710a)
 
     for f710a in corporates:
