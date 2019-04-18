@@ -55,29 +55,21 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLHoldingsFile,
-                                 AMSLOpenAccessKBART, AMSLService, AMSLFreeContent)
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService,
+                                 AMSLFreeContent)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
-from siskin.sources.crossref import (CrossrefDOIList,
-                                     CrossrefIntermediateSchema,
-                                     CrossrefUniqISSNList)
+from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.dbinet import DBInetIntermediateSchema
-from siskin.sources.degruyter import (DegruyterDOIList,
-                                      DegruyterIntermediateSchema,
-                                      DegruyterISSNList)
-from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
-                                 DOAJISSNList)
-from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
-                                             ElsevierJournalsISSNList)
+from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
+from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
+from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema, ElsevierJournalsISSNList)
 from siskin.sources.genderopen import GenderopenIntermediateSchema
-from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
-                                   GeniosISSNList)
+from siskin.sources.genios import (GeniosCombinedIntermediateSchema, GeniosISSNList)
 from siskin.sources.hhbd import HHBDIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
-from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
-                                  JstorISSNList)
+from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.pqdt import PQDTIntermediateSchema
@@ -116,15 +108,15 @@ class AIDOIRedirectTable(AITask):
     """
     Generate a redirect table. Takes days. Make sure doi.org is in your hosts file so DNS is not stressed.
     """
-    hurrly_workers = luigi.IntParameter(
-        default=4, description='number of workers for hurrly')
+    hurrly_workers = luigi.IntParameter(default=4, description='number of workers for hurrly')
 
     def requires(self):
         return AIDOIList()
 
     def run(self):
         output = shellout("hurrly -w {w} <(sort -S30% -u {input}) > {output}",
-                          w=self.hurrly_workers, input=self.input().path)
+                          w=self.hurrly_workers,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -151,8 +143,7 @@ class AIDOIStats(AITask):
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2),
-                                 len(s1.intersection(s2)))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -176,8 +167,7 @@ class AIISSNStats(AITask):
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2),
-                                 len(s1.intersection(s2)))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -228,8 +218,7 @@ class AIISSNList(AITask):
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
         for _, target in list(self.input().items()):
-            shellout("cat {input} | grep -v null >> {output}",
-                     input=target.path, output=output)
+            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -259,10 +248,8 @@ class AIQuality(AITask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout(""" echo "S:{input}" >> {output} """,
-                     input=target.path, output=stopover)
-            shellout("span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}",
-                     input=target.path, output=stopover)
+            shellout(""" echo "S:{input}" >> {output} """, input=target.path, output=stopover)
+            shellout("span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -308,8 +295,7 @@ class AIIntermediateSchema(AITask):
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for target in self.input():
-            shellout("cat {input} >> {output}",
-                     input=target.path, output=stopover)
+            shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -327,8 +313,7 @@ class AICheckStats(AITask):
 
     @timed
     def run(self):
-        output = shellout(
-            "span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout("span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -346,8 +331,8 @@ class AIErrorDistribution(AITask):
 
     @timed
     def run(self):
-        output = shellout(
-            "unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path)
+        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}",
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -366,8 +351,7 @@ class AIRedact(AITask):
     @timed
     def run(self):
         """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
-        output = shellout(
-            "span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -392,11 +376,9 @@ class AIBlobDB(AITask):
         Extract intermediate schema file temporarily.
         """
         tempdir = tempfile.mkdtemp(prefix="siskin-")
-        extracted = shellout(
-            "unpigz -c {input} > {output}", input=self.input().path)
+        extracted = shellout("unpigz -c {input} > {output}", input=self.input().path)
 
-        shellout("microblob -db {tempdir} -file {input} -key finc.id",
-                 tempdir=tempdir, input=extracted)
+        shellout("microblob -db {tempdir} -file {input} -key finc.id", tempdir=tempdir, input=extracted)
         os.remove(extracted)
         os.makedirs(os.path.dirname(self.output().path))
         shutil.move(tempdir, self.output().path)
@@ -438,7 +420,8 @@ class AILicensing(AITask):
         span v0.1.204 or later.
         """
         output = shellout("span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path, input=self.input().get('is').path)
+                          config=self.input().get('config').path,
+                          input=self.input().get('is').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -459,8 +442,10 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
-                          size=self.batchsize, input=self.input().path)
+        output = shellout(
+            """unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
+            size=self.batchsize,
+            input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -479,7 +464,8 @@ class AIInstitutionChanges(AITask):
 
     def run(self):
         output = shellout(
-            """groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}""", input=self.input().path)
+            """groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}""",
+            input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -503,9 +489,10 @@ class AIIntermediateSchemaDeduplicated(AITask):
         Update intermediate schema labels from file. We cut out the ID and the
         ISIL list from the changes.
         """
-        output = shellout("unpigz -c {input} | span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
-                          input=self.input().get('file').path,
-                          file=self.input().get('changes').path)
+        output = shellout(
+            "unpigz -c {input} | span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
+            input=self.input().get('file').path,
+            file=self.input().get('changes').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -526,7 +513,8 @@ class AIExport(AITask):
 
     def run(self):
         output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format, input=self.input().path)
+                          format=self.format,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -581,8 +569,7 @@ class AICollectionsAndSerialNumbers(AITask):
                     self.logger.debug("%s %s", i, len(g))
 
                 doc = json.loads(line)
-                issns = list(itertools.chain(
-                    doc.get('rft.issn', []), doc.get('rft.eissn', [])))
+                issns = list(itertools.chain(doc.get('rft.issn', []), doc.get('rft.eissn', [])))
                 colls = doc.get('finc.mega_collection', [])
 
                 for issn in issns:
@@ -648,8 +635,7 @@ class AICoverageISSN(AITask):
                 if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[2]):
                     issns['file'].add(fields[2])
 
-        sources = ['crossref', 'jstor', 'degruyter',
-                   'doaj', 'gbi', 'elsevierjournals', 'thieme']
+        sources = ['crossref', 'jstor', 'degruyter', 'doaj', 'gbi', 'elsevierjournals', 'thieme']
 
         for source in sources:
             with self.input().get(source).open() as handle:
@@ -694,8 +680,7 @@ class AIISSNCoverageCatalogMatches(AITask):
         if not self.isil == 'DE-15':
             raise RuntimeError('not implemented except for DE-15')
 
-        cache = URLCache(directory=os.path.join(
-            tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         cache.sess.mount('http://', adapter)
 
@@ -707,8 +692,7 @@ class AIISSNCoverageCatalogMatches(AITask):
                         self.logger.info('fetch #%05d: %s' % (i, link))
                         body = cache.get(link)
                         if 'Keine Ergebnisse!' in body:
-                            output.write_tsv(
-                                row.issn, 'ERR_NOT_IN_CATALOG', link)
+                            output.write_tsv(row.issn, 'ERR_NOT_IN_CATALOG', link)
                         else:
                             soup = BeautifulSoup(body)
                             rs = soup.findAll("div", {"class": "floatleft"})
@@ -716,15 +700,12 @@ class AIISSNCoverageCatalogMatches(AITask):
                                 output.write_tsv(row.issn, 'ERR_LAYOUT', link)
                                 continue
                             first = rs[0]
-                            match = re.search(
-                                r'Treffer([0-9]+)-([0-9]+)von([0-9]+)', first.text)
+                            match = re.search(r'Treffer([0-9]+)-([0-9]+)von([0-9]+)', first.text)
                             if match:
                                 total = match.group(3)
-                                output.write_tsv(
-                                    row.issn, 'FOUND_RESULTS_%s' % total, link)
+                                output.write_tsv(row.issn, 'FOUND_RESULTS_%s' % total, link)
                             else:
-                                output.write_tsv(
-                                    row.issn, 'ERR_NO_MATCH', link)
+                                output.write_tsv(row.issn, 'ERR_NO_MATCH', link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -741,8 +722,7 @@ class AIISSNCoverageSolrMatches(AITask):
         if self.isil != 'DE-15':
             raise RuntimeError('not implemented except for DE-15')
 
-        cache = URLCache(directory=os.path.join(
-            tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         cache.sess.mount('http://', adapter)
 
@@ -759,14 +739,11 @@ class AIISSNCoverageSolrMatches(AITask):
             with self.output().open('w') as output:
                 for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
                     if row.status == 'NOT_FOUND':
-                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (
-                            finc, self.isil, row.issn)
+                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (finc, self.isil, row.issn)
                         self.logger.info('fetch #%05d: %s', i, link)
-                        output.write_tsv('finc', row.issn,
-                                         numFound(link), link)
+                        output.write_tsv('finc', row.issn, numFound(link), link)
                     else:
-                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (
-                            ai, self.isil, row.issn)
+                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (ai, self.isil, row.issn)
                         self.logger.info('fetch #%05d: %s', i, link)
                         output.write_tsv('ai', row.issn, numFound(link), link)
 
@@ -811,4 +788,3 @@ class AIApplyOpenAccessFlag(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-

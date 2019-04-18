@@ -156,8 +156,7 @@ class Issue7049ExportExcel(AdhocTask):
         keys = doc.keys()
 
         worksheet.write(0, 0, "#7049")
-        worksheet.write(
-            1, 0, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        worksheet.write(1, 0, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
         for i, key in enumerate(keys, start=3):
             worksheet.write(i, 1, key)
@@ -195,24 +194,20 @@ class K10Matches(AdhocTask):
 
                     results = {}
 
-                    results['ai'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" %
-                                                 (self.ai, issn))
+                    results['ai'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.ai, issn))
                     if results['ai'].status_code != 200:
-                        raise RuntimeError(
-                            "ai reponded with %s" % rr.status_code)
+                        raise RuntimeError("ai reponded with %s" % rr.status_code)
 
-                    results['finc'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" %
-                                                   (self.finc, issn))
+                    results['finc'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.finc, issn))
                     if results['finc'].status_code != 200:
-                        raise RuntimeError(
-                            "finc reponded with %s" % rr.status_code)
+                        raise RuntimeError("finc reponded with %s" % rr.status_code)
 
-                    output.write_tsv(issn, count,
-                                     str(results['ai'].json().get(
-                                         "response").get("numFound")),
-                                     str(results['finc'].json().get(
-                                         "response").get("numFound")),
-                                     )
+                    output.write_tsv(
+                        issn,
+                        count,
+                        str(results['ai'].json().get("response").get("numFound")),
+                        str(results['finc'].json().get("response").get("numFound")),
+                    )
 
                 except Exception as exc:
                     self.logger.debug(exc)
