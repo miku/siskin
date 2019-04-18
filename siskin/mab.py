@@ -21,9 +21,11 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
 Slight MABXML abstraction layer, using xmltodict under the hood. Usable up to
-file sizes of 50M. TODO: For larger files, rewrite this with streaming.
+file sizes of 50M. TODO: For larger files, rewrite this with streaming. MAB is
+being phased out since 2013.
 
 MAB specification: https://www.dnb.de/DE/Standardisierung/Formate/MAB/mab_node.html
 
