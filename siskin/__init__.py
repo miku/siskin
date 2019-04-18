@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Define version, disable some warnings and ensure temporary and log directories
 are there and writeable.
@@ -58,5 +57,4 @@ if sys.version_info.major == 2:
         logger.debug('no config found, using default tempdir: %s', err)
         tempfile.tempdir = tempfile.gettempdir()
 else:
-    tempfile.tempdir = config.get(
-        'core', 'tempdir', fallback=tempfile.gettempdir())
+    tempfile.tempdir = config.get('core', 'tempdir', fallback=tempfile.gettempdir())

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Module exists, so we do not have to do star (*) imports in utils.py.
 """
@@ -39,7 +38,6 @@ def _write_task_import_cache(path):
     Write dictionary of task name module name mappings to given path.
     """
     with open(path, 'w') as output:
-        task_import_cache = dict([(name, Register.get_task_cls(name).__module__)
-                                  for name in Register.task_names() if name[0].isupper()])
+        task_import_cache = dict([(name, Register.get_task_cls(name).__module__) for name in Register.task_names()
+                                  if name[0].isupper()])
         json.dump(task_import_cache, output)
-

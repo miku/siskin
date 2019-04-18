@@ -8,20 +8,18 @@ import responses
 
 import marcx
 import pymarc
-from siskin.utils import (SetEncoder, URLCache, dictcheck,
-                          get_task_import_cache, load_set, marc_build_imprint,
-                          marc_clean_record, marc_clean_subfields, nwise,
-                          random_string, scrape_html_listing, xmlstream)
+from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, marc_build_imprint,
+                          marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
 
 
 def test_set_encoder_dumps():
-	assert json.dumps({'x': {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
+    assert json.dumps({'x': {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
+
 
 def test_dictcheck():
     assert dictcheck({"name": "x"}, contains=["name"]) is True
     assert dictcheck({"name": "x"}, contains=["name"], absent=["somekey"]) is True
-    assert dictcheck({"name": "x", "somekey": 123},
-                     contains=["name"], absent=["somekey"]) is False
+    assert dictcheck({"name": "x", "somekey": 123}, contains=["name"], absent=["somekey"]) is False
     assert dictcheck({"somekey": None}, absent=["somekey"]) is True
     assert dictcheck({}, absent=["somekey"]) is True
 
@@ -29,9 +27,10 @@ def test_dictcheck():
 def test_nwise():
     assert list(nwise(range(4))) == [(0, 1), (2, 3)]
     assert list(nwise(range(4), n=2)) == [(0, 1), (2, 3)]
-    assert list(nwise(range(4), n=3)) == [(0, 1, 2), (3,)]
+    assert list(nwise(range(4), n=3)) == [(0, 1, 2), (3, )]
     assert list(nwise(range(4), n=10)) == [(0, 1, 2, 3)]
     assert list(nwise([], n=10)) == []
+
 
 def test_random_string():
     assert len(random_string()) == 16
@@ -41,10 +40,12 @@ def test_random_string():
     for char in ' \t\n.:,;#~+-?=[]()/&%$"!':
         assert char not in random_string()
 
+
 def test_get_task_import_cache():
     mapping, path = get_task_import_cache()
     assert os.path.exists(path)
     assert isinstance(mapping, dict)
+
 
 def test_load_set():
     assert load_set(io.StringIO(u"")) == set()
@@ -60,15 +61,16 @@ def test_load_set():
     assert load_set(tf.name) == {"1", "2"}
     os.remove(tf.name)
 
+
 def test_get_cache_file(tmpdir):
     cache = URLCache(directory=str(tmpdir))
     fn = cache.get_cache_file("http://x.com")
     assert fn.startswith(str(tmpdir))
 
+
 @responses.activate
 def test_scrape_html_listing():
-    responses.add(responses.GET, 'http://fake.com/1',
-                  body='<html></html>', status=200)
+    responses.add(responses.GET, 'http://fake.com/1', body='<html></html>', status=200)
     resp = requests.get('http://fake.com/1')
     assert scrape_html_listing('http://fake.com/1') == []
 
@@ -116,10 +118,10 @@ def test_scrape_html_listing():
         'http://fake.com/sha1sums.txt',
     ]
 
-    responses.add(responses.GET, 'http://fake.com/1',
-                  body=body, status=200)
+    responses.add(responses.GET, 'http://fake.com/1', body=body, status=200)
     resp = requests.get('http://fake.com/1')
     assert scrape_html_listing('http://fake.com/1') == expected
+
 
 def test_xmlstream():
     with tempfile.NamedTemporaryFile('w', delete=False) as handle:
@@ -128,6 +130,7 @@ def test_xmlstream():
     filename = handle.name
     assert [v for v in xmlstream(filename, "b")] == [b'<b>C</b>', b'<b>C</b>']
     os.remove(filename)
+
 
 def test_marc_clean_subfields():
     record = marcx.Record()
@@ -147,8 +150,7 @@ def test_marc_clean_subfields():
     # Test pymarc record.
     record = pymarc.Record()
     record.add_field(pymarc.Field(tag='001', data='1234'))
-    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'],
-                                  subfields=['a', '', 'b', 'ok']))
+    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'], subfields=['a', '', 'b', 'ok']))
 
     assert len(record.get_fields()) == 2
 
@@ -157,17 +159,18 @@ def test_marc_clean_subfields():
     assert marc_clean_subfields(record["245"], inplace=True) is None
     assert record["245"].subfields == ['b', 'ok']
 
+
 def test_marc_clean_record():
     record = pymarc.Record()
     record.add_field(pymarc.Field(tag='001', data='1234'))
-    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'],
-                                  subfields=['a', '', 'b', 'ok']))
+    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'], subfields=['a', '', 'b', 'ok']))
 
     assert len(record.get_fields()) == 2
 
     assert record["245"].subfields == ['a', '', 'b', 'ok']
     marc_clean_record(record)
     assert record["245"].subfields == ['b', 'ok']
+
 
 def test_marc_build_imprint():
     assert marc_build_imprint() == ['a', '', 'b', '', 'c', '']

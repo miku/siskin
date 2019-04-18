@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Decorators used in siskin.
 """
@@ -42,7 +41,8 @@ def deprecated(func):
     def new_func(*args, **kwargs):
         warnings.simplefilter('always', DeprecationWarning)  # turn off filter
         warnings.warn("call to deprecated function {}.".format(func.__name__),
-                      category=DeprecationWarning, stacklevel=2)
+                      category=DeprecationWarning,
+                      stacklevel=2)
         warnings.simplefilter('default', DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
 

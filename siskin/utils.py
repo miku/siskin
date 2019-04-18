@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Various utilities.
 """
@@ -58,6 +57,7 @@ standard_library.install_aliases()
 
 logger = logging.getLogger('siskin')
 
+
 class SetEncoder(json.JSONEncoder):
     """
     Helper to encode python sets into JSON lists.
@@ -66,6 +66,7 @@ class SetEncoder(json.JSONEncoder):
 
         json.dumps({"things": set([1, 2, 3], cls=SetEncoder)}
     """
+
     def default(self, obj):
         """
         Decorate call to standard implementation.
@@ -74,8 +75,10 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
 
+
 def date_range(start_date, end_date, increment, period):
     raise NotImplementedError('use: from gluish.utils import date_range, https://git.io/fpDU1')
+
 
 def iterfiles(directory='.', fun=None):
     """
@@ -90,12 +93,14 @@ def iterfiles(directory='.', fun=None):
             if fun(path):
                 yield path
 
+
 def random_string(length=16):
     """
     Return a random string(upper and lowercase letters) of length `length`,
     defaults to 16.
     """
     return ''.join(random.choice(string.ascii_letters) for _ in range(length))
+
 
 def nwise(iterable, n=2):
     """
@@ -106,6 +111,7 @@ def nwise(iterable, n=2):
     while piece:
         yield piece
         piece = tuple(itertools.islice(i, n))
+
 
 def dictcheck(obj, contains=None, absent=None, ignore=None):
     """
@@ -157,6 +163,7 @@ def dictcheck(obj, contains=None, absent=None, ignore=None):
 
     return True
 
+
 def get_task_import_cache():
     """
     Load or create `taskname: modulename` mappings. Return a tuple containing
@@ -170,8 +177,7 @@ def get_task_import_cache():
     It is save to remove the file returned by `taskimportcache` at any time.
     """
     task_import_cache = None
-    path = os.path.join(tempfile.gettempdir(),
-                        'siskin_task_import_cache_%s' % __version__)
+    path = os.path.join(tempfile.gettempdir(), 'siskin_task_import_cache_%s' % __version__)
     if not os.path.exists(path):
         logger.debug("creating task import cache at %s", path)
         from siskin.cacheutils import _write_task_import_cache
@@ -181,11 +187,11 @@ def get_task_import_cache():
         try:
             task_import_cache = json.load(handle)
         except Exception as err:
-            print("failed to load task import cache, remove %s, then try again" %
-                  path, file=sys.stderr)
+            print("failed to load task import cache, remove %s, then try again" % path, file=sys.stderr)
             sys.exit(1)
 
     return task_import_cache, path
+
 
 def load_set(obj, func=lambda v: v):
     """
@@ -213,6 +219,7 @@ def load_set(obj, func=lambda v: v):
 
     return s
 
+
 def load_set_from_target(target, func=lambda v: v):
     """
     Deprecated. Use load_set instead. Given a luigi.LocalTarget, load each line
@@ -220,11 +227,13 @@ def load_set_from_target(target, func=lambda v: v):
     """
     return load_set(target, func=func)
 
+
 def load_set_from_file(filename, func=lambda v: v):
     """
     Deprecated. Use load_set instead. Given a filename, load each non-empty line into a set.
     """
     return load_set(filename, func=func)
+
 
 class URLCache(object):
     """
@@ -315,6 +324,7 @@ class URLCache(object):
         with open(self.get_cache_file(url)) as handle:
             return handle.read()
 
+
 def scrape_html_listing(url, with_head=False):
     """
     Given a URL to a webpage containing a simple (Apache) file listing, try to
@@ -364,6 +374,7 @@ def scrape_html_listing(url, with_head=False):
 
     return sorted(links)
 
+
 def compare_files(a, b):
     """
     Compare two paths by checksum. Returns True, if files are byte-identical.
@@ -386,6 +397,7 @@ def compare_files(a, b):
 
     return chka.hexdigest() == chkb.hexdigest()
 
+
 def xmlstream(filename, tag):
     """
     Given a path to an XML file and a tag name (without namespace), stream
@@ -396,13 +408,17 @@ def xmlstream(filename, tag):
             print(len(snippet))
 
     """
+
     def strip_ns(tag):
         if not '}' in tag:
             return tag
         return tag.split('}')[1]
 
     # https://stackoverflow.com/a/13261805, http://effbot.org/elementtree/iterparse.htm
-    context = iter(ET.iterparse(filename, events=('start', 'end',)))
+    context = iter(ET.iterparse(filename, events=(
+        'start',
+        'end',
+    )))
     _, root = next(context)
 
     for event, elem in context:
@@ -411,6 +427,7 @@ def xmlstream(filename, tag):
 
         yield ET.tostring(elem)
         root.clear()
+
 
 def marc_clean_subfields(field, inplace=True):
     """
@@ -429,6 +446,7 @@ def marc_clean_subfields(field, inplace=True):
     else:
         return cleaned_subfields
 
+
 def marc_clean_record(record):
     """
     Modifies record to get rid of possible edge cases regarding empty subfield
@@ -438,6 +456,7 @@ def marc_clean_record(record):
         if field.tag.startswith('00'):
             continue
         marc_clean_subfields(field, inplace=True)
+
 
 def marc_build_imprint(place="", publisher="", year=""):
     """

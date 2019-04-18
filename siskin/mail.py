@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Helper for sending mail.
 """
@@ -36,6 +35,7 @@ config = Config.instance()
 logger = logging.getLogger("siskin")
 
 DEFAULT_SUBJECT_PREFIX = "[siskin at %s]" % (socket.gethostname())
+
 
 def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None):
     """
@@ -64,4 +64,3 @@ def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None):
     server.quit()
 
     logger.debug("sent mail (%d) to %s -- %s", len(message), ", ".join(tolist), subject)
-

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Define a siskin wide task with artifacts under core.home directory.
 
@@ -56,6 +55,7 @@ from siskin.configuration import Config
 from siskin.mail import send_mail
 
 config = Config.instance()
+
 
 class DefaultTask(BaseTask):
     """
@@ -159,7 +159,7 @@ class DefaultTask(BaseTask):
             self.logger.warn("non-integer source id: %s, skip stamping", self.TAG)
             return
 
-        sid = self.TAG.lstrip("0") # Otherwise: Parameter 'sid' ... not a positive integer.
+        sid = self.TAG.lstrip("0")  # Otherwise: Parameter 'sid' ... not a positive integer.
 
         try:
             write_url = config.get("amsl", "write-url")
@@ -172,7 +172,8 @@ class DefaultTask(BaseTask):
 
         try:
             shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """,
-                     write_url=write_url, sid=sid)
+                     write_url=write_url,
+                     sid=sid)
         except RuntimeError as err:
             self.logger.warn(err)
             return

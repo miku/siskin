@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Slight MABXML abstraction layer, using xmltodict under the hood. Usable up to
 file sizes of 50M. TODO: For larger files, rewrite this with streaming.
@@ -52,10 +51,12 @@ import os
 import six
 import xmltodict
 
+
 class MabRecord(object):
     """
     A single MAB record.
     """
+
     def __init__(self, dd):
         """
         Initialize with the default dictionary created by xmltodict for a
@@ -129,10 +130,12 @@ class MabRecord(object):
     def __repr__(self):
         return self.__str__()
 
+
 class MabXMLFile(object):
     """
     Encapsulate MAB XML methods.
     """
+
     def __init__(self, data, replace=None, encoding='utf-8'):
         """
         Eagerly parse the XML from filename, filelike or string into a

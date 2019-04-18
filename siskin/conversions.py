@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 A new module for conversions. Complement assets.
 """
@@ -39,10 +38,7 @@ import xmltodict
 import marcx
 import pymarc
 
-html_escape_table = {
-    '"': "&quot;",
-    "'": "&apos;"
-}
+html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
 
 marburg_language_mapping = {
@@ -52,11 +48,13 @@ marburg_language_mapping = {
 
 logger = logging.getLogger('siskin')
 
+
 def html_escape(text):
     """
     Escape HTML, see also: https://wiki.python.org/moin/EscapingHtml
     """
     return escape(text, html_escape_table)
+
 
 def html_unescape(text):
     """
@@ -64,8 +62,8 @@ def html_unescape(text):
     """
     return unescape(text, html_unescape_table)
 
-def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
-                          max_failures=30):
+
+def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None, max_failures=30):
     """
     Convert an IMSLP tarball to MARC binary output file without extracting it.
     If outputfile is not given, write to a temporary location.
@@ -105,6 +103,7 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None,
 
     return outputfile
 
+
 def imslp_xml_to_marc(s, legacy_mapping=None):
     """
     Convert a string containing a single IMSLP XML record to a pymarc MARC record.
@@ -141,8 +140,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
                 record.add("041", a=l)
 
     creator = doc["creator"]["mainForm"]
-    record.add("100", a=creator, e="cmp",
-               _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
+    record.add("100", a=creator, e="cmp", _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
 
     record.add("240", a=legacy_mapping.get(identifier, {}).get("title", ""))
 
@@ -167,8 +165,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
         else:
             raise ValueError("cannot handle %d subjects", len(doc["subject"]))
 
-        record.add("590", a=for689[0].title(),
-                   b=doc.get("music_arrangement_of", "").title())
+        record.add("590", a=for689[0].title(), b=doc.get("music_arrangement_of", "").title())
 
         for689.append(doc.get("music_arrangement_of", ""))
 
@@ -176,11 +173,11 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
             record.add("689", a=subject.title())
 
     record.add("700", a=doc.get("contributor", {}).get("mainForm", ""), e="ctb")
-    record.add("856", q="text/html", _3="Petrucci Musikbibliothek",
-               u=doc["url"]["#text"])
+    record.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=doc["url"]["#text"])
     record.add("970", c="PN")
     record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
     return record
+
 
 def marburg_to_marc(s):
     """
@@ -215,6 +212,7 @@ def marburg_to_marc(s):
         title = item["dcite:title"]
 
     # WIP.
+
 
 # Facet fields values from author2_role field across all sources.
 # TODO: fill out empty strings, maybe add https://git.io/fNLwY, too.
@@ -659,4 +657,3 @@ author_role_mapping = {
     "wpr": "wpr",
     "wst": "wst",
 }
-

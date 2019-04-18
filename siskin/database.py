@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Helper for databases.
 """
@@ -56,8 +55,7 @@ class sqlitedb(object):
         self.detect_types = detect_types
 
     def __enter__(self):
-        self.conn = sqlite3.connect(
-            self.path, timeout=self.timeout, detect_types=self.detect_types)
+        self.conn = sqlite3.connect(self.path, timeout=self.timeout, detect_types=self.detect_types)
         self.conn.text_factory = str
         self.cursor = self.conn.cursor()
         return self.cursor
@@ -89,12 +87,13 @@ class mysqldb(object):
 
     def __enter__(self):
         if self.stream:
-            self.conn = pymysql.connect(host=self.hostname, user=self.username,
-                                        passwd=self.password, db=self.database,
+            self.conn = pymysql.connect(host=self.hostname,
+                                        user=self.username,
+                                        passwd=self.password,
+                                        db=self.database,
                                         cursorclass=SSCursor)
         else:
-            self.conn = pymysql.connect(host=self.hostname, user=self.username,
-                                        passwd=self.password, db=self.database)
+            self.conn = pymysql.connect(host=self.hostname, user=self.username, passwd=self.password, db=self.database)
 
         self.cursor = self.conn.cursor()
         return self.cursor

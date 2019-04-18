@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Entry points should replace scripts in the future.
 """
@@ -37,6 +36,7 @@ from siskin.sources import *
 from siskin.workflows import *
 from siskin import __version__
 
+
 def main():
     print("siskin %s\n\n" % __version__)
     task_names = Register.task_names()
@@ -48,4 +48,3 @@ def main():
         klass = Register.get_task_cls(name)
         doc = klass.__doc__ or yellow("@TODO: docs")
         print('{0} {1}\n'.format(green(name), doc))
-

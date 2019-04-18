@@ -21,12 +21,12 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Helper functions for dealing with OpenURL, refs #5163.
 """
 
 from six.moves.urllib.parse import urlencode
+
 
 def update_on_value(t, tkey, value, first=True):
     """
@@ -40,6 +40,7 @@ def update_on_value(t, tkey, value, first=True):
                 t[tkey] = value[0]
         else:
             t[tkey] = value
+
 
 def openurl_parameters_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.de'):
     """
@@ -161,7 +162,9 @@ def openurl_parameters_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.d
 
     return params
 
-def openurl_link_from_intermediateschema(doc, base='http://www.redi-bw.de/links/ubl?rl_site=ubl&',
+
+def openurl_link_from_intermediateschema(doc,
+                                         base='http://www.redi-bw.de/links/ubl?rl_site=ubl&',
                                          rfr_id='www.ub.uni-leipzig.de'):
     params = openurl_parameters_from_intermediateschema(doc, rfr_id=rfr_id)
     return '{}{}'.format(base, urlencode(params))

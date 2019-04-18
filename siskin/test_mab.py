@@ -1,5 +1,4 @@
 # coding: utf-8
-
 """
 A few tests for the mab module, refs #8392.
 """
@@ -67,6 +66,7 @@ sample_file_two = """<?xml version="1.0" encoding="UTF-8"?>
 </datei>
 """
 
+
 def test_from_filelike():
     """
     Test, whether we can load from a filelike object.
@@ -74,6 +74,7 @@ def test_from_filelike():
     filelike = StringIO(sample_file_two)
     mabf = MabXMLFile(filelike)
     assert len([_ for _ in mabf]) == 2
+
 
 def test_from_file():
     """
@@ -104,25 +105,23 @@ def test_invalid_input():
         with pytest.raises(ValueError):
             MabXMLFile(s)
 
+
 def test_valid_empty_file():
     """
     Ok, but empty.
     """
-    inputs = (
-        """<?xml version="1.0" encoding="UTF-8"?>
+    inputs = ("""<?xml version="1.0" encoding="UTF-8"?>
         <datei></datei>
-        """,
-        """<?xml version="1.0" encoding="UTF-8"?>
+        """, """<?xml version="1.0" encoding="UTF-8"?>
         <datei xmlns="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd http://www.d-nb.de/standardisierung/formate/mabxml-1.xsd"></datei>
-        """,
-        """<?xml version="1.0" encoding="UTF-8"?>
+        """, """<?xml version="1.0" encoding="UTF-8"?>
         <datei xmlns="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ddb.de/professionell/mabxml/mabxml-1.xsd http://www.d-nb.de/standardisierung/formate/mabxml-1.xsd">
         <a></a>
         </datei>
-        """
-    )
+        """)
     for s in inputs:
         assert MabXMLFile(s) is not None
+
 
 def test_record_iteration():
     """
@@ -136,6 +135,7 @@ def test_record_iteration():
         mabf = MabXMLFile(s)
         assert len([_ for _ in mabf]) == count
 
+
 def test_record_field():
     """
     Access to first value in fields.
@@ -147,6 +147,7 @@ def test_record_field():
     assert record.field("060") is None
     assert record.field("710") == "hochfester Stahl"
 
+
 def test_record_fields():
     """
     Access to multiple values.
@@ -155,6 +156,7 @@ def test_record_fields():
     record = mabf.next()
     assert len(record.fields("710")) == 3
     assert len(record.fields("999")) == 0
+
 
 def test_record_subfield():
     """

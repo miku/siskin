@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Provides a basic benchmark decorator. Usage:
 
@@ -95,6 +94,7 @@ def timed(method):
     """
     A @timed decorator.
     """
+
     @functools.wraps(method)
     def _timed(*args, **kwargs):
         """
@@ -113,4 +113,5 @@ def timed(method):
         else:
             logger.debug(red(msg))
         return result
+
     return _timed

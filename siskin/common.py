@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Common tasks.
 """
@@ -66,10 +65,8 @@ class FTPMirror(CommonTask):
     base = luigi.Parameter(default='.')
     indicator = luigi.Parameter(default=random_string())
     max_retries = luigi.IntParameter(default=5, significant=False)
-    timeout = luigi.IntParameter(default=10,
-                                 significant=False, description='timeout in seconds')
-    exclude_glob = luigi.Parameter(default="",
-                                   significant=False, description='globs to exclude')
+    timeout = luigi.IntParameter(default=10, significant=False, description='timeout in seconds')
+    exclude_glob = luigi.Parameter(default="", significant=False, description='globs to exclude')
 
     def requires(self):
         return Executable(name='lftp', message='http://lftp.yar.ru/')
@@ -81,10 +78,9 @@ class FTPMirror(CommonTask):
         """
         base = os.path.dirname(self.output().path)
         subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(
-            host=self.host, username=self.username, base=self.base,
-            pattern=self.pattern).encode('utf-8')).hexdigest()
+            host=self.host, username=self.username, base=self.base, pattern=self.pattern).encode('utf-8')).hexdigest()
 
-        target = os.path.join(base, subdir) # target is the root of the mirror
+        target = os.path.join(base, subdir)  # target is the root of the mirror
         if not os.path.exists(target):
             os.makedirs(target)
 
@@ -103,7 +99,9 @@ class FTPMirror(CommonTask):
 
         mirror --verbose=0 --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
 
-        shellout(command, host=self.host, username=pipes.quote(self.username),
+        shellout(command,
+                 host=self.host,
+                 username=pipes.quote(self.username),
                  password=pipes.quote(self.password),
                  pattern=pipes.quote(self.pattern),
                  target=pipes.quote(target),
@@ -171,12 +169,13 @@ class RedmineDownload(CommonTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...",
-                         self.issue, self.config.get('redmine', 'baseurl'), self.issue)
-        url = "%s/issues/%s.json?include=attachments" % (
-            self.config.get('redmine', 'baseurl'), self.issue)
+        self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...", self.issue,
+                         self.config.get('redmine', 'baseurl'), self.issue)
+        url = "%s/issues/%s.json?include=attachments" % (self.config.get('redmine', 'baseurl'), self.issue)
         output = shellout(""" curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
-                          apikey=self.config.get("redmine", "apikey"), url=url, issue=self.issue)
+                          apikey=self.config.get("redmine", "apikey"),
+                          url=url,
+                          issue=self.issue)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -202,11 +201,10 @@ class RedmineDownloadAttachments(CommonTask):
             doc = json.load(handle)
         tempdir = tempfile.mkdtemp(prefix='tmp-siskin-')
         for attachment in doc['issue']['attachments']:
-            target = os.path.join(
-                tempdir, os.path.basename(attachment["content_url"]))
+            target = os.path.join(tempdir, os.path.basename(attachment["content_url"]))
             shellout("""curl -vL --fail -H "X-Redmine-API-Key:{apikey}" -o {target} "{url}" """,
-                     url=attachment["content_url"], apikey=self.config.get(
-                         "redmine", "apikey"),
+                     url=attachment["content_url"],
+                     apikey=self.config.get("redmine", "apikey"),
                      target=target)
 
         with self.output().open('w') as output:
