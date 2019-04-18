@@ -6,70 +6,62 @@ import re
 import sys
 
 import xmltodict
+
 import marcx
 
-
 formatmaps = {
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     },
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     },
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     },
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     },
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     },
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     },
-    '':
-    {    
+    '': {
         'leader': '',
         '007': '',
         '008': '',
-        '935b' : '',
-        '935c' : ''
+        '935b': '',
+        '935c': ''
     }
 }
 
-
-inputfilename = "170_input.xml" 
+inputfilename = "170_input.xml"
 outputfilename = "170_output.mrc"
 
 if len(sys.argv) == 3:
@@ -82,10 +74,10 @@ xmlfile = inputfile.read()
 xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
-    
+
     if not xmlrecord["metadata"]["oai_dc:dc"].get("dc:title"):
-        continue       
-    
+        continue
+
     marcrecord = marcx.Record(force_utf8=True)
 
     # Leader
@@ -94,7 +86,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         marcrecord.leader = "     nab  22        4500"
     else:
         marcrecord.leader = "     cam  22        4500"
-    
+
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
     regexp = re.match("oai:mediarep.org:doc/(\d+)", f001)
@@ -109,7 +101,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # ISBN
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
-        identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]   
+        identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
         if isinstance(identifiers, list):
             for identifier in identifiers:
                 if re.search("([0-9xX-]{10,17})", identifier):
@@ -118,7 +110,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # ISSN
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
-        identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]   
+        identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
         if isinstance(identifiers, list):
             for identifier in identifiers:
                 identifier = identifier.replace("issn:", "")
@@ -135,7 +127,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Fachgebiet
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
-        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
+        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
         if isinstance(subjects, list):
             for subject in subjects:
                 if re.search("\d\d\d", subject):
@@ -153,8 +145,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         else:
             marcrecord.add("100", a=creator)
 
-    # Titel   
-    f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]   
+    # Titel
+    f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
     marcrecord.add("245", a=f245)
 
     # Erscheinungsvermerk
@@ -169,16 +161,16 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f260c = ""
 
     publisher = ["b", f260b, "c", f260c]
-    marcrecord.add("260", subfields=publisher)    
+    marcrecord.add("260", subfields=publisher)
 
     # Beschreibung
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:description"):
         f520a = xmlrecord["metadata"]["oai_dc:dc"]["dc:description"]
         marcrecord.add("520", a=f520a)
 
-    # Schlagwörter   
+    # Schlagwörter
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
-        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]   
+        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
         if isinstance(subjects, list):
             for subject in subjects:
                 if not re.search("\d\d\d", subject):
@@ -211,25 +203,22 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         else:
             marcrecord.add("773", a=f773a[0])
 
-
-    # Link zu Datensatz und Ressource  
+    # Link zu Datensatz und Ressource
     urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
     for f856u in urls:
         if "https://mediarep.org" in f856u:
             marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
         elif "doi.org" in f856u:
             marcrecord.add("856", q="text/html", _3="Zitierlink (DOI)", u=f856u)
-            
+
     # Medientyp
     marcrecord.add("935", b="cofz")
-   
-    # Kollektion   
+
+    # Kollektion
     collection = ["a", f001, "b", "170", "c", "sid-170-col-mediarep"]
     marcrecord.add("980", subfields=collection)
 
-    
     outputfile.write(marcrecord.as_marc())
-
 
 inputfile.close()
 outputfile.close()

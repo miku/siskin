@@ -41,8 +41,8 @@ from __future__ import print_function
 import datetime
 import importlib
 import os
-import sys
 import re
+import sys
 
 from luigi.cmdline_parser import CmdlineParser
 from luigi.parameter import MissingParameterException
@@ -93,4 +93,3 @@ if __name__ == '__main__':
     except TaskClassNotFoundException as err:
         print(err, file=sys.stderr)
         sys.exit(1)
-

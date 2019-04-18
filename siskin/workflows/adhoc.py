@@ -29,24 +29,24 @@
 
 import datetime
 import json
-import requests
 import tempfile
 
 import luigi
+import requests
+import xlsxwriter
 
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
-from siskin.sources.amsl import AMSLService, AMSLCollections
-from siskin.sources.crossref import CrossrefExport, CrossrefCollections, CrossrefCollectionsDifference, CrossrefCollectionsCount
+from siskin.sources.amsl import AMSLCollections, AMSLService
+from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount, CrossrefCollectionsDifference,
+                                     CrossrefExport)
 from siskin.sources.degruyter import DegruyterExport
 from siskin.sources.doaj import DOAJExport
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
 from siskin.sources.highwire import HighwireExport
 from siskin.sources.jstor import JstorExport
 from siskin.task import DefaultTask
-from siskin.utils import load_set_from_target, SetEncoder
-
-import xlsxwriter
+from siskin.utils import SetEncoder, load_set_from_target
 
 
 class AdhocTask(DefaultTask):

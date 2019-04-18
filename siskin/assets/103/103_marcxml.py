@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 # pylint: disable=C0103
-
 """
 Note: This is WIP. Currently Python 2 only.
 
@@ -208,7 +207,8 @@ for i, record in enumerate(xml["collection"]["Record"]):
 
         if matches == 0:
 
-            values = (identifier, title, description, subject, type, format, relation, publisher, date, source, language, rights, url, creator, coverage)
+            values = (identifier, title, description, subject, type, format, relation, publisher, date, source,
+                      language, rights, url, creator, coverage)
 
             query = """
                 INSERT INTO
@@ -557,14 +557,16 @@ for row in rows:
         f041 = language.replace("German", "ger")
         f041 = language.replace("French", "fre")
         f041 = language.replace("Italian", "ita")
-        f041 = "\t\t<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(f041) + "</subfield>\n\t\t</datafield>\n"
+        f041 = "\t\t<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(
+            f041) + "</subfield>\n\t\t</datafield>\n"
     else:
         f041 = ""
 
     if creator != "":
         creator = creator.split(" ; ")
         f100 = creator[0]
-        f100 = "\t\t<datafield tag=\"100\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(f100) + "</subfield>\n\t\t</datafield>\n"
+        f100 = "\t\t<datafield tag=\"100\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(
+            f100) + "</subfield>\n\t\t</datafield>\n"
         if len(creator) > 1:
             f700 = []
             for creator_part in creator[1:]:
@@ -579,7 +581,8 @@ for row in rows:
         f700 = ""
 
     if title != "":
-        f245 = "\t\t<datafield tag=\"245\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + unicode(title) + "</subfield>\n\t\t</datafield>\n"
+        f245 = "\t\t<datafield tag=\"245\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + unicode(
+            title) + "</subfield>\n\t\t</datafield>\n"
     else:
         f245 = ""
 
@@ -616,24 +619,30 @@ for row in rows:
         date = ""
 
     if place != "" or publisher != "" or date != "":
-        f260 = "\t\t<datafield tag=\"260\" ind1=\" \" ind2=\" \">" + unicode(place) + unicode(publisher) + unicode(date) + "\n\t\t</datafield>\n"
+        f260 = "\t\t<datafield tag=\"260\" ind1=\" \" ind2=\" \">" + unicode(place) + unicode(publisher) + unicode(
+            date) + "\n\t\t</datafield>\n"
     else:
         f260 = ""
 
     if source != "":
-        f490 = "\t\t<datafield tag=\"490\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(source) + "</subfield>\n\t\t</datafield>\n"
+        f490 = "\t\t<datafield tag=\"490\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(
+            source) + "</subfield>\n\t\t</datafield>\n"
     else:
         f490 = ""
 
     if rights != "" and coverage != "":
         f500 = []
-        f500.append("\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(rights) + "</subfield>\n\t\t</datafield>\n")
-        f500.append("\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(coverage) + "</subfield>\n\t\t</datafield>\n")
+        f500.append("\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(rights) +
+                    "</subfield>\n\t\t</datafield>\n")
+        f500.append("\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(coverage) +
+                    "</subfield>\n\t\t</datafield>\n")
         f500 = "".join(f500)
     elif rights != "":
-        f500 = "\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(rights) + "</subfield>\n\t\t</datafield>\n"
+        f500 = "\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(
+            rights) + "</subfield>\n\t\t</datafield>\n"
     elif coverage != "":
-        f500 = "\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(coverage) + "</subfield>\n\t\t</datafield>\n"
+        f500 = "\t\t<datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(
+            coverage) + "</subfield>\n\t\t</datafield>\n"
     else:
         f500 = ""
 
@@ -670,14 +679,15 @@ for row in rows:
                         unicode(subject_part) + "</subfield>\n\t\t</datafield>\n")
 
         format = format.title()
-        f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(format) + "</subfield>\n\t\t</datafield>\n")
+        f689.append("\t\t<datafield tag=\"689\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"a\">" + str(format) +
+                    "</subfield>\n\t\t</datafield>\n")
         f689 = "".join(f689)
 
     else:
         f689 = ""
 
     # if relation != "":
-     #   outputfile.write(u"\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Reihe</subfield>\n\t\t\t<subfield code=\"u\">" + str(relation) + "</subfield>\n\t\t</datafield>\n")
+    #   outputfile.write(u"\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Link zur Reihe</subfield>\n\t\t\t<subfield code=\"u\">" + str(relation) + "</subfield>\n\t\t</datafield>\n")
 
     if url != "":
         url = url.split("||")
@@ -692,8 +702,10 @@ for row in rows:
             f856 = []
             i = 1
             for url_part in url:
-                f856.append("\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Picture " +
-                            str(i) + "</subfield>\n\t\t\t<subfield code=\"u\">" + str(url_part) + "</subfield>\n\t\t</datafield>\n")
+                f856.append(
+                    "\t\t<datafield tag=\"856\" ind1=\" \" ind2=\" \">\n\t\t\t<subfield code=\"q\">text/html</subfield>\n\t\t\t<subfield code=\"3\">Picture "
+                    + str(i) + "</subfield>\n\t\t\t<subfield code=\"u\">" + str(url_part) +
+                    "</subfield>\n\t\t</datafield>\n")
                 i = i + 1
             f856 = "".join(f856)
     else:

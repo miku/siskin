@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from builtins import *
-
-from io import StringIO, BytesIO
 import io
 import re
 import sys
-import pymarc
+from builtins import *
+from io import BytesIO, StringIO
 
 import marcx
+import pymarc
 from siskin.utils import xmlstream
-
 
 inputfilename = "39_input.xml"
 outputfilename = "39_output.mrc"
@@ -30,7 +28,7 @@ for record in xmlstream(inputfilename, "record"):
     record = BytesIO(record)
     record = pymarc.marcxml.parse_xml_to_array(record)
     record = record[0]
-    
+
     record = marcx.Record.from_record(record)
     record.force_utf8 = True
     record.strict = False
@@ -42,7 +40,7 @@ for record in xmlstream(inputfilename, "record"):
     # Leader
     record.leader = "     " + record.leader[5:]
 
-    # Identifikator   
+    # Identifikator
     f001 = record["001"].data
     record.remove_fields("001")
     f001 = f001.replace("-", "").replace("_", "")
@@ -60,9 +58,9 @@ for record in xmlstream(inputfilename, "record"):
         f760x = ""
 
     try:
-         f787x = record["787"]["x"]
+        f787x = record["787"]["x"]
     except:
-        f787x = ""      
+        f787x = ""
 
     if f022a in issn_list or f760x in issn_list or f787x in issn_list:
         collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee", "c", u"sid-39-col-perseeadlr"]

@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import io
+import re
+import sys
 # https://stackoverflow.com/a/40846742/89391
 import warnings
+
+import pandas
+
+import marcx
+import pymarc
+
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
-import re
-import io
-import sys
-
-import marcx
-import pandas
-import pymarc
-
-inputfilename = "160_input.csv" 
+inputfilename = "160_input.csv"
 outputfilename = "160_output.mrc"
 
 if len(sys.argv) == 3:
@@ -28,15 +29,15 @@ for csv_record in csv_records.iterrows():
 
     csv_record = csv_record[1]
     marc_record = marcx.Record(force_utf8=True)
-    
+
     marc_record.leader = "     nam  22        4500"
 
     f001 = "finc-160-" + str(csv_record["001"])
     marc_record.add("001", data=f001)
-    
+
     marc_record.add("007", data="tu")
     marc_record.add("041", a=csv_record["041a"])
-    marc_record.add("084", a="ZX 3900", _2="rvk")    
+    marc_record.add("084", a="ZX 3900", _2="rvk")
     marc_record.add("100", a=csv_record["100a"])
     marc_record.add("245", a=csv_record["245a"])
 
@@ -46,7 +47,7 @@ for csv_record in csv_records.iterrows():
     marc_record.add("300", a=csv_record["300a"])
     marc_record.add("500", a=u"Signatur: " + csv_record["Signatur\ngesamt"])
     marc_record.add("502", a=csv_record["502a"])
-    
+
     # weitere Urheber
     for field in csv_record.keys():
         if not field.startswith("700a"):
@@ -61,7 +62,6 @@ for csv_record in csv_records.iterrows():
     # Kollektion
     marc_record.add("980", a=str(csv_record["001"]), b="160", c="sid-160-col-diplspowi")
 
-
     writer.write(marc_record)
-    
+
 writer.close()

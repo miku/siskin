@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
 from __future__ import print_function
 
+import io
+import re
+import sys
 from builtins import *
 
-import io
-import sys
-import re
+import xmltodict
 
 import marcx
-import xmltodict
 from siskin.utils import marc_build_imprint
 
-
-lang_map = {"deutsch": "ger",
-            "englisch": "eng",
-            "franzoesisch": "fre",
-            "spanisch": "spa",
-            "portugiesisch": "por",
-            "italienisch": "ita",
-            "tuerkisch": "tur",
-            "schwedisch": "swe"}
-
+lang_map = {
+    "deutsch": "ger",
+    "englisch": "eng",
+    "franzoesisch": "fre",
+    "spanisch": "spa",
+    "portugiesisch": "por",
+    "italienisch": "ita",
+    "tuerkisch": "tur",
+    "schwedisch": "swe"
+}
 
 # Default input and output.
 inputfilename = "78_input.xml"
@@ -62,8 +61,8 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     if not format:
         format = ""
 
-    if ("Bachelorarbeit" in format or "Masterarbeit" in format or "Diplomarbeitarbeit" in format or
-        "Magisterarbeitarbeit" in format or "Dissertation" in format):
+    if ("Bachelorarbeit" in format or "Masterarbeit" in format or "Diplomarbeitarbeit" in format
+            or "Magisterarbeitarbeit" in format or "Dissertation" in format):
 
         leader = "     nam  22        4500"
         f935c = "hs"
@@ -168,7 +167,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
 
     if year:
         f260c = year
-    
+
     subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
@@ -252,7 +251,6 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     marcrecord.add("980", a=f001, b="78", c="sid-78-col-izi")
 
     outputfile.write(marcrecord.as_marc())
-
 
 inputfile.close()
 outputfile.close()

@@ -4,15 +4,13 @@
 import re
 import sys
 
-import pymarc
 import marcx
-
+import pymarc
 from siskin.utils import marc_clean_record
-
 
 copytags = ("003", "084", "100", "245", "260", "300", "490", "553", "653", "773")
 
-inputfilename = "173_input.mrc" 
+inputfilename = "173_input.mrc"
 outputfilename = "173_output.mrc"
 
 if len(sys.argv) == 3:
@@ -63,7 +61,7 @@ for oldrecord in reader:
         sys.exit("Die ID konnte nicht verarbeitet werden: " + f001)
     f001 = f001.replace(":", "")
     newrecord.add("001", data="finc-173-%s" % f001)
-   
+
     # Zugangsformat
     newrecord.add("007", data="tu")
 
@@ -78,10 +76,10 @@ for oldrecord in reader:
     # SWB-Format
     newrecord.add("935", b=f935b, c=f935c)
 
-	# 980
+    # 980
     collections = ["a", f001, "b", "173", "c", "sid-173-col-buchwesen"]
     newrecord.add("980", subfields=collections)
-  
+
     marc_clean_record(newrecord)
     outputfile.write(newrecord.as_marc())
 

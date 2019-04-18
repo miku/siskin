@@ -46,13 +46,13 @@ import urllib
 from xml.dom.minidom import parseString
 
 import luigi
-import tqdm
 import requests
+import tqdm
 import xmltodict
+
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-
 from siskin.task import DefaultTask
 
 

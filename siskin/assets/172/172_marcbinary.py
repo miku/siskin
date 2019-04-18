@@ -4,10 +4,9 @@
 # SID 172
 # https://projekte.ub.uni-leipzig.de/issues/14442
 
-
 import sys
-import marcx
 
+import marcx
 
 # Default input and output
 inputfilename = "172_input.tsv"

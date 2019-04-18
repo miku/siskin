@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 """
 Notes:
 
@@ -9,26 +8,22 @@ Notes:
 
 from __future__ import print_function
 
-try:
-      basestring
-except NameError:
-      basestring = str
-
+import base64
+import io
+import re
+import sys
 from builtins import *
 
-import io
-import sys
-import re
-import base64
-
-import marcx
 import xmltodict
 
-lang_map = {
-    "": "ger",
-    "de": "ger",
-    "deu": "ger"
-}
+import marcx
+
+try:
+    basestring
+except NameError:
+    basestring = str
+
+lang_map = {"": "ger", "de": "ger", "deu": "ger"}
 
 # Default input and output.
 inputfilename = "73_input_datacite.xml"
@@ -61,7 +56,9 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
 
     # ISSN
     try:
-        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:relatedIdentifiers", {}).get("dcite:relatedIdentifier", [])
+        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource",
+                                                        {}).get("dcite:relatedIdentifiers",
+                                                                {}).get("dcite:relatedIdentifier", [])
         for identifier in identifiers:
             if identifier["@relatedIdentifierType"] == "ISSN":
                 f022a = identifier["#text"]
@@ -85,7 +82,8 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
 
     # 1. Urheber
     try:
-        f100a = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:creators", {}).get("dcite:creator", "")
+        f100a = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:creators",
+                                                                            {}).get("dcite:creator", "")
     except Exception as exc:
         f100a = ""
         print('[100] %s' % type(f100a))
@@ -101,7 +99,7 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
     try:
         f245 = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:titles", {}).get("dcite:title", "")
 
-        if "MEDIENwissenschaft: Rezensionen | Reviews" in f245: # überspringt Gesamtaufnahmen der Zeitschriftehefte
+        if "MEDIENwissenschaft: Rezensionen | Reviews" in f245:  # überspringt Gesamtaufnahmen der Zeitschriftehefte
             continue
 
         if not isinstance(f245, basestring):
@@ -120,9 +118,7 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
                 f245b += titlepart + " : "
         else:
             f245b = ""
-        marcrecord.add("245",
-                       a=f245a,
-                       b=f245b.rstrip(" : "))
+        marcrecord.add("245", a=f245a, b=f245b.rstrip(" : "))
     except Exception as exc:
         print("[245] %s: %s" % (f245, exc), file=sys.stderr)
         continue
@@ -164,7 +160,9 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
 
     # Link zur Ressource
     try:
-        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:relatedIdentifiers", {}).get("dcite:relatedIdentifier", [])
+        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource",
+                                                        {}).get("dcite:relatedIdentifiers",
+                                                                {}).get("dcite:relatedIdentifier", [])
         for identifier in identifiers:
             if identifier["@relatedIdentifierType"] == "URL":
                 f856u = identifier["#text"]

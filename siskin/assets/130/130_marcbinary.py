@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-
 # Quelle: VDEH
 # SID: 130
 # Tickets: #9868, #15025
 # technicalCollectionID: sid-130-col-vdeh
 # Task: vdeh.py
 
-
 from __future__ import print_function
-from siskin.mab import MabXMLFile
+
+import collections
+import io
+import re
+import sys
 from builtins import *
 
-import io
-import sys
-import re
-
-import marcx
 import requests
 import xmltodict
-import collections
-from siskin.utils import marc_build_imprint
 
+import marcx
+from siskin.mab import MabXMLFile
+from siskin.utils import marc_build_imprint
 
 formatmap = {
     "p||||||z|||||||": u"Zeitschrift",
@@ -45,12 +43,15 @@ def check_swb_isbn(isbn):
     req = requests.get("%s?q=source_id:0+institution:DE-105+isbn:%s&wt=csv&fl=id" % (servername, isbn))
     return len(req.text)
 
+
 def check_swb_issn(issn, title):
     """
     The length of the response can indicate, whether records exist.
     """
-    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' % (servername, issn, title))
+    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' %
+                       (servername, issn, title))
     return len(req.text)
+
 
 inputfilename = "130_input.xml"
 outputfilename = "130_output.mrc"
@@ -59,28 +60,28 @@ servername = "https://index.ub.uni-leipzig.de/solr/biblio/select"
 if len(sys.argv) == 4:
     inputfilename, outputfilename, servername = sys.argv[1:]
 
-reader = MabXMLFile(inputfilename, replace=((u"¬", ""),))
+reader = MabXMLFile(inputfilename, replace=((u"¬", ""), ))
 outputfile = open(outputfilename, "wb")
 
 hierarchymap = collections.defaultdict(list)
 
 for record in reader:
 
-        f010 = ""
-        f089 = ""
+    f010 = ""
+    f089 = ""
 
-        f010 = record.field("010")
-        f089 = record.field("089")
+    f010 = record.field("010")
+    f089 = record.field("089")
 
-        if f010 and f089:
-            f010 = f010.lstrip("0")
-            hierarchymap[f010].append(f089)
+    if f010 and f089:
+        f010 = f010.lstrip("0")
+        hierarchymap[f010].append(f089)
 
 for record in reader:
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
-   
+
     subjects = []
     persons = {}
     corporates = []
@@ -137,7 +138,7 @@ for record in reader:
         f935b = "druck"
         f935c = ""
 
-    assert(len(leader) == 24)
+    assert (len(leader) == 24)
     marcrecord.leader = leader
 
     # Identfikator
@@ -159,7 +160,7 @@ for record in reader:
             x = check_swb_isbn(f020a)
             if x > 3:
                 continue
-            marcrecord.add("020", a=f020a)    
+            marcrecord.add("020", a=f020a)
 
     # ISSN
     f022a = record.field("542", alt="")
@@ -171,10 +172,10 @@ for record in reader:
             if x > 3:
                 continue
             marcrecord.add("022", a=f022a)
-    
+
     # Sprache
     f041a = record.field("037", alt="")
-    f041a = re.split("(\w\w\w)", f041a) # to handle uncommon language codes like "gerengfre"
+    f041a = re.split("(\w\w\w)", f041a)  # to handle uncommon language codes like "gerengfre"
     marcrecord.add("041", a=f041a)
 
     # 1. Urheber
@@ -195,7 +196,9 @@ for record in reader:
     f245a = record.field("331", alt="")
     f245b = record.field("335", alt="")
     f245c = record.field("359", alt="")
-    if len(f245a) < 3 or "Arkady" in f245a: # einzelne Zeitschriftenhefte, Titel nur aus Komma und Leerzeichen und die fehlerhaften Arkady-Records werden übersprungen
+    if len(
+            f245a
+    ) < 3 or "Arkady" in f245a:  # einzelne Zeitschriftenhefte, Titel nur aus Komma und Leerzeichen und die fehlerhaften Arkady-Records werden übersprungen
         continue
     titleparts = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=titleparts)
@@ -208,15 +211,15 @@ for record in reader:
     f260a = record.field("410", alt="")
     if not f260a:
         f260a = record.field("419", "a", alt="")
-       
+
     f260b = record.field("412", alt="")
     if not f260b:
         f260b = record.field("419", "b", alt="")
-      
+
     f260c = record.field("425", alt="")
     if not f260c:
         f260c = record.field("419", "c", alt="")
-      
+
     subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
@@ -239,7 +242,7 @@ for record in reader:
     # weitere Personen
     for i in range(101, 197):
         f700a = record.field(str(i), alt="")
-        match = re.search("^\d+", f700a) # die Felder, die nur Personen-IDs enthalten, werden übersprungen
+        match = re.search("^\d+", f700a)  # die Felder, die nur Personen-IDs enthalten, werden übersprungen
         if not match:
             match = re.search(".\s(\[.*\])", f700a)
             if match:
@@ -248,14 +251,14 @@ for record in reader:
             else:
                 f700e = ""
             persons[f700a] = f700e
-    
+
     for f700a, f700e in persons.items():
         marcrecord.add("700", a=f700a, e=f700e)
-          
+
     # weitere Körperschaften
     for i in range(201, 299):
         f710a = record.field(i, alt="")
-        match = re.search("^\d+", f710a) # die Felder, die nur Körperschafts-IDs enthalten, werden übersprungen
+        match = re.search("^\d+", f710a)  # die Felder, die nur Körperschafts-IDs enthalten, werden übersprungen
         if not match:
             corporates.append(f710a)
 
@@ -269,15 +272,15 @@ for record in reader:
 
     #Bestandsnachweis (866a)
     f866a = f001.lstrip("0")
-    f866a = hierarchymap.get(f866a, "")    
+    f866a = hierarchymap.get(f866a, "")
     f866a = "; ".join(f866a)
     if not isinstance(f866a, str):
         f866a = f866a.decode('utf-8')
     marcrecord.add("866", a=f866a)
-    
+
     # SWB-Format
     marcrecord.add("935", b=f935b, c=f935c)
-    
+
     # Kollektion
     marcrecord.add("980", a=f001, b="130", c="sid-130-col-vdeh")
 

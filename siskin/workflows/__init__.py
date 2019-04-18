@@ -21,13 +21,12 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Support for importing all workflows at once.
 """
 
-import os
 import glob
+import os
 
 modules = glob.glob("%s/*.py" % (os.path.dirname(__file__)))
 __all__ = [os.path.basename(f)[:-3] for f in modules]

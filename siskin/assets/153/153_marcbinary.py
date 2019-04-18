@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 """
 Archive.org to MARC. Allows variable number of inputs.
 
@@ -28,33 +27,33 @@ import os
 import re
 import sys
 
-import marcx
 import xmltodict
 
+import marcx
 
 colormap = {
-   u"black and white": u"Schwarzweiß",
-   u"black & white": u"Schwarzweiß",
-   u"B&W": u"Schwarzweiß",
-   u"color": u"Farbe",
-   u"b&w": u"Schwarzweiß",
-   u"Color": u"Farbe",
-   u"Mix": u"Schwarzweiß / Farbe",
-   u"B&W (tinded)": u"Schwarzweiß (koloriert)",
-   u"b/w": u"Schwarzweiß",
-   u"c": u"Farbe",
-   u"tinted": u"Schwarzweiß (koloriert)",
-   u"bw": u"Schwarzweiß",
-   u"C": u"Farbe",
-   u"B&W/C": u"Schwarzweiß / Farbe",
-   u"tinted B&W": u"Schwarzweiß (koloriert)",
-   u"B&W (tinted)": u"Schwarzweiß (koloriert)",
-   u"sepia": u"Farbe",
-   u"B/W": u"Farbe",
-   u"color/B&W": u"Schwarzweiß / Farbe",
-   u"b&w/color": u"Schwarzweiß / Farbe",
-   u"Black and White": u"Schwarzweiß",
-   u"B&w": u"Schwarzweiß"
+    u"black and white": u"Schwarzweiß",
+    u"black & white": u"Schwarzweiß",
+    u"B&W": u"Schwarzweiß",
+    u"color": u"Farbe",
+    u"b&w": u"Schwarzweiß",
+    u"Color": u"Farbe",
+    u"Mix": u"Schwarzweiß / Farbe",
+    u"B&W (tinded)": u"Schwarzweiß (koloriert)",
+    u"b/w": u"Schwarzweiß",
+    u"c": u"Farbe",
+    u"tinted": u"Schwarzweiß (koloriert)",
+    u"bw": u"Schwarzweiß",
+    u"C": u"Farbe",
+    u"B&W/C": u"Schwarzweiß / Farbe",
+    u"tinted B&W": u"Schwarzweiß (koloriert)",
+    u"B&W (tinted)": u"Schwarzweiß (koloriert)",
+    u"sepia": u"Farbe",
+    u"B/W": u"Farbe",
+    u"color/B&W": u"Schwarzweiß / Farbe",
+    u"b&w/color": u"Schwarzweiß / Farbe",
+    u"Black and White": u"Schwarzweiß",
+    u"B&w": u"Schwarzweiß"
 }
 
 soundmap = {
@@ -77,6 +76,7 @@ def get_field(tag):
         return jsonrecord[tag]
     except:
         return ""
+
 
 def remove_tags(field):
     if isinstance(field, str):
@@ -242,7 +242,6 @@ for filepath in input_filenames:
                             marcrecord.add("650", a=subject)
                     else:
                         marcrecord.add("650", a=subject)
-
 
         # hebt die Erlaubnis für leere Felder wieder auf
         marcrecord.strict = True

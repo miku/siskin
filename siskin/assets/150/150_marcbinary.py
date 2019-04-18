@@ -6,6 +6,7 @@ import re
 import sys
 
 import xmltodict
+
 import marcx
 
 inputfilename = "150_input.xml"
@@ -111,7 +112,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
-
 
 inputfile.close()
 outputfile.close()

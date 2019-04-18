@@ -31,10 +31,10 @@ import json
 import re
 
 import luigi
-import pymarc
-import marcx
 import tqdm
 
+import marcx
+import pymarc
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

@@ -4,10 +4,11 @@
 Lookup a list of DOI, refs #11958 (#note-9).
 """
 
-import urllib
-import requests
 import json
 import sys
+import urllib
+
+import requests
 
 solr = "http://localhost:8983/solr/biblio"
 

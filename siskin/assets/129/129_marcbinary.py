@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-
 # SID: 129
 # Collection: geoscan
 # refs: #9871
@@ -9,23 +8,18 @@
 from __future__ import print_function
 
 import io
+import json
 import re
 import sys
-import json
+
+import feedparser
 import marcx
 import pymarc
-import feedparser
+
+langmap = {"English": "eng", "French": "fre", "Russian": "rus", "Greek": "gre"}
 
 
-langmap = {
-    "English": "eng",
-    "French": "fre",
-    "Russian": "rus",
-    "Greek": "gre"
-}
-
-
-def get_field(tag):  
+def get_field(tag):
     try:
         return record[tag]
     except:
@@ -52,7 +46,7 @@ for record in records.entries:
     # Identifikator
     f001 = get_field("guid")
     marcrecord.add("001", data="finc-129-" + f001)
-    
+
     # Format
     marcrecord.add("007", data="cr")
 
@@ -66,8 +60,8 @@ for record in records.entries:
             if f041a != "":
                 lang.append("a")
                 lang.append(f041a)
-                marcrecord.add("041", subfields=lang)                
-            else:                
+                marcrecord.add("041", subfields=lang)
+            else:
                 print(u"Die folgende Sprache fehlt in der Langmap: %s" % language, file=sys.stderr)
     else:
         f041a = langmap.get(languages, "")
@@ -80,8 +74,8 @@ for record in records.entries:
         f100a = f100a[0]
     marcrecord.add("100", a=f100a)
 
-    # Haupttitel    
-    f245a = get_field("title")    
+    # Haupttitel
+    f245a = get_field("title")
     marcrecord.add("245", a=f245a)
 
     # Verlag
@@ -97,7 +91,8 @@ for record in records.entries:
         f260c = ", " + f260c
         f300a = ""
     else:
-        print(u"Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description, file=sys.stderr)
+        print(u"Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description,
+              file=sys.stderr)
         f260c = ""
         f300a = ""
         link = ""
@@ -126,7 +121,7 @@ for record in records.entries:
             marcrecord.add("650", a=subject)
     else:
         marcrecord.add("650", a=subject)
-    
+
     subject = get_field("geoscan_area")
     if ";" in subject:
         subjects = subject.split("; ")

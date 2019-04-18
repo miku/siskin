@@ -27,10 +27,10 @@ Helper for databases.
 
 import logging
 import sqlite3
-import six.moves.urllib.parse
 from builtins import object
 
 import pymysql
+import six.moves.urllib.parse
 from future import standard_library
 from pymysql.cursors import SSCursor
 

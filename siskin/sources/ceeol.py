@@ -40,13 +40,13 @@ updates = /path/to/file.xml, /path/to/another.xml, ...
 from __future__ import print_function
 
 import glob
-import os
 import hashlib
+import os
 import tempfile
 
 import luigi
-from gluish.utils import shellout
 
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 

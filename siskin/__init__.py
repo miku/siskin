@@ -28,11 +28,11 @@ are there and writeable.
 
 from __future__ import print_function
 
+import logging
 import os
 import sys
 import tempfile
 import warnings
-import logging
 
 from siskin.configuration import Config
 

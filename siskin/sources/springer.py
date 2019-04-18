@@ -50,8 +50,8 @@ import re
 
 import luigi
 import six
-
 import ujson as json
+
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

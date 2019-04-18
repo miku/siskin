@@ -41,15 +41,15 @@ import sys
 import tempfile
 import xml.etree.cElementTree as ET
 
-import requests
-import six
-from six.moves.urllib.parse import urlparse
-
 import backoff
 import bs4
 import luigi
+import requests
+import six
 from dateutil import relativedelta
 from future import standard_library
+from six.moves.urllib.parse import urlparse
+
 from siskin import __version__
 
 # XXX: move to six.

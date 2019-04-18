@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-
 # SID: 142
 # Ticket: 8392
-
-
-from siskin.mab import MabXMLFile
 
 import io
 import re
 import sys
 
 import xmltodict
+
 import marcx
+from siskin.mab import MabXMLFile
 
-
-inputfilename = "142_input.xml" 
+inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
 
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-reader = MabXMLFile(inputfilename, replace=((u"¬", ""),))
+reader = MabXMLFile(inputfilename, replace=((u"¬", ""), ))
 outputfile = open(outputfilename, "wb")
 
 for record in reader:
@@ -30,7 +27,7 @@ for record in reader:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    # Format   
+    # Format
     format = record.field("433", alt="")
 
     regexp1 = re.search("\d\.?\sS", format)
@@ -63,7 +60,7 @@ for record in reader:
 
     # Leader
     marcrecord.leader = leader
-      
+
     # Identifier
     f001 = record.field("001")
     f001 = "finc-142-" + f001
@@ -83,7 +80,7 @@ for record in reader:
     for f022a in issns:
         f022a = f022a.replace("ISSN ", "")
         marcrecord.add("022", a=f022a)
-    
+
     # Sprache
     f041a = record.field("037")
     if f041a:
@@ -101,15 +98,15 @@ for record in reader:
     f245a = record.field("331")
     if not f245a:
         continue
-    
+
     f245b = record.field("335")
     f245c = record.field("359")
     subfields = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=subfields)
-    
+
     # Erscheinungsvermerk
-    f260a = record.field("410", alt="")       
-    f260b = record.field("412", alt="")    
+    f260a = record.field("410", alt="")
+    f260b = record.field("412", alt="")
     f260c = record.field("425", alt="")
 
     if f260a != "" and f260b != "":
@@ -121,7 +118,7 @@ for record in reader:
         del2 = ", "
     else:
         del2 = ""
-  
+
     subfields = ["a", f260a + del1, "b", f260b + del2, "c", f260c]
     marcrecord.add("260", subfields=subfields)
 
@@ -130,45 +127,40 @@ for record in reader:
     f300b = record.field("434")
     subfields = ["a", f300a, "b", f300b]
     marcrecord.add("300", subfields=subfields)
-    
+
     # Reihe
- 
 
     # Abstract
-   
 
     # Schlagwörter
-    
 
     # weitere geistige Schöpfer
     for i in range(104, 199, 4):
-        tag = str(i)   
+        tag = str(i)
         f700a = record.field(tag)
         marcrecord.add("700", a=f700a)
 
     # weitere Körperschaften
     for i in range(204, 299, 4):
-        tag = str(i)   
+        tag = str(i)
         f710a = record.field(tag)
         marcrecord.add("710", a=f710a)
-    
+
     # übergeordnetes Werk
-   
-      
+
     # Link zu Datensatz und Ressource
 
     # Kollektion
-    marcrecord.add("912", a="vkfilm")    
-        
+    marcrecord.add("912", a="vkfilm")
+
     # Medientyp
     marcrecord.add("935", b=f935b, c=f935c)
-  
-    # Kollektion    
+
+    # Kollektion
     f001 = record.field("001")
     collections = ["a", f001, "b", "142", "c", "sid-142-col-gesamtkatduesseldorf"]
     marcrecord.add("980", subfields=collections)
-      
-    
+
     outputfile.write(marcrecord.as_marc())
 
 outputfile.close()

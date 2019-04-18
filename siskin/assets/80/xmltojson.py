@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 # pylint: disable=C0103
-
 """
 Convert XML to JSON, standalone script.
 """

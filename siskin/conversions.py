@@ -28,11 +28,11 @@ A new module for conversions. Complement assets.
 import base64
 import collections
 import logging
-import six
 import tarfile
 import tempfile
 from xml.sax.saxutils import escape, unescape
 
+import six
 import xmltodict
 
 import marcx

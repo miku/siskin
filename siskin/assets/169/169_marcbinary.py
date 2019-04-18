@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # coding: utf-8
-
 """
 Mediaview, "Diary of a madman" (https://git.io/fATFM, https://git.io/fATNI).
 Usage:
@@ -34,19 +33,20 @@ Updates (diff) contain a few more fields.
 
 from __future__ import print_function
 
+import base64
 import collections
+import datetime
+import hashlib
+import json
 import re
 import sys
-import json
-import marcx
-import base64
-import hashlib
-import datetime
+
 import tqdm
 
-channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA",
-            "MDR", "NDR", "ORF", "PHOENIX", "RBB", "SR", "SRF", "SRF.Podcast",
-            "SWR", "WDR", "ZDF", "ZDF-tivi", "3sat")
+import marcx
+
+channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB", "SR",
+            "SRF", "SRF.Podcast", "SWR", "WDR", "ZDF", "ZDF-tivi", "3sat")
 
 records = collections.defaultdict(dict)
 seen = set()
@@ -119,7 +119,8 @@ for line in lines:
         hash.update(fields.encode("utf-8").strip())
         hash_record = hash.hexdigest()
 
-        f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record["timestamp"]
+        f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record[
+            "hr_duration"] + record["size"] + record["timestamp"]
         f001 = f001.encode("utf-8")
         f001 = base64.urlsafe_b64encode(f001)
         f001 = f001.decode("utf-8").rstrip("=")
@@ -186,7 +187,7 @@ for record in tqdm.tqdm(records.values(), total=len(records)):
             label = ""
         else:
             label = "Video " + str(i) + ":\n"
-        marcrecord.add("520", a=label+f520a)
+        marcrecord.add("520", a=label + f520a)
 
     for i, url in enumerate(record.get("website", []), start=1):
         if len(record["website"]) == 1:

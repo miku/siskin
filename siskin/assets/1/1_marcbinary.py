@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 """
 Custom conversion for Gutenberg RDF, refs. #10875.
 
@@ -28,7 +27,6 @@ outputfile = sys.stdout
 
 if "-" not in sys.argv[1:]:
     outputfile = open("1_output.mrc", "wb")
-
 
 langmap = {
     "da": "dan",
@@ -130,7 +128,8 @@ for line in inputfile:
         record.append(line)
 
     if line.startswith("</rdf:RDF>"):
-        record = xmltodict.parse('\n'.join(record), force_list=("dcterms:hasFormat", "dcterms:subject", "dcterms:creator"))
+        record = xmltodict.parse('\n'.join(record),
+                                 force_list=("dcterms:hasFormat", "dcterms:subject", "dcterms:creator"))
 
         for file in record["rdf:RDF"]["pgterms:ebook"].get("dcterms:hasFormat", []):
             files.append(file.get("pgterms:file", {}).get("@rdf:about", ""))

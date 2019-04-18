@@ -48,9 +48,9 @@ import traceback
 
 import luigi
 
-from siskin import __version__
 from gluish.task import BaseTask
 from gluish.utils import shellout
+from siskin import __version__
 from siskin.configuration import Config
 from siskin.mail import send_mail
 

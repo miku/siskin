@@ -45,9 +45,9 @@ import luigi
 import rdflib
 import requests
 import ujson as json
-
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
+
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
@@ -55,8 +55,8 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService,
-                                 AMSLFreeContent)
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART,
+                                 AMSLService)
 from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)

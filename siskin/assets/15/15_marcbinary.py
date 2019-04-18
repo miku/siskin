@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 # pylint: disable=C0103,C0301
-
 """
 Custom conversion for IMSLP XML. Usually a set of files within a given
 directory, refs #1240.
@@ -14,16 +13,17 @@ Usage:
 
 from __future__ import print_function
 
+import collections
 import io
+import json
 import os
 import re
 import sys
-import json
 from xml.sax.saxutils import escape, unescape
 
-import marcx
 import xmltodict
-import collections
+
+import marcx
 
 langmap = {
     "Ancient Greek": "grc",
@@ -75,10 +75,7 @@ langmap = {
     "Yiddish": "yid",
 }
 
-html_escape_table = {
-    '"': "&quot;",
-    "'": "&apos;"
-}
+html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
 
 
@@ -90,6 +87,7 @@ def html_escape(text):
 def html_unescape(text):
     """ Unescape HTML, see also: https://wiki.python.org/moin/EscapingHtml"""
     return unescape(text, html_unescape_table)
+
 
 def get_field(tag):
     try:
@@ -198,7 +196,6 @@ for root, _, files in os.walk(input_directory):
         marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % f041a)
         marcrecord.add("041", a=f041a)
 
-
         # Komponist
         f100a = record["creator"]["mainForm"]
         f1000 = fieldmap.get(f001, {}).get("viaf", "")
@@ -240,7 +237,7 @@ for root, _, files in os.walk(input_directory):
                 # [OrderedDict([('mainForm', 'Piano piece')]), OrderedDict([('mainForm', 'Romantic')])]
                 style = subject[0]["mainForm"]
                 style = style.title()
-                epoch = subject[1]["mainForm"] # Martin fragen, wegen "TypeError: string indices must be integers"
+                epoch = subject[1]["mainForm"]  # Martin fragen, wegen "TypeError: string indices must be integers"
                 epoch = epoch.title()
             else:
                 epoch = record["subject"]["mainForm"]
@@ -284,6 +281,5 @@ for root, _, files in os.walk(input_directory):
         outputfile.write(marcrecord.as_marc())
 
         inputfile.close()
-
 
 outputfile.close()

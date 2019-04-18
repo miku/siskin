@@ -35,8 +35,8 @@ import time
 
 import luigi
 import requests
-from gluish.utils import shellout
 
+from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 

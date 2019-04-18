@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 """
 Refs 5163. Download link at #note-65. Wget is your friends. 250M zipped, 860000 records.
 
@@ -47,7 +46,6 @@ import re
 import requests
 import six
 import tqdm
-
 import ujson as json
 
 pattern = re.compile(r'10[.][0-9a-zA-Z]*/[0-9a-zA-Z]{4,}')
@@ -85,7 +83,7 @@ if __name__ == '__main__':
                 "rft.atitle": doc.get("title", ""),
                 "rft.issn": doc.get("issn", []),
                 "rft.pub": doc.get("publisher", []),
-                "rft.place": doc.get("place",[]),
+                "rft.place": doc.get("place", []),
                 "rft.date": '%s-01-01' % doc.get("publishDateSort", "1970"),
                 "x.subjects": doc.get("topic", []),
                 "version": "0.9",

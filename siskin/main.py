@@ -31,10 +31,10 @@ import sys
 
 from luigi.task import Register
 
+from siskin import __version__
 from siskin.benchmark import green, yellow
 from siskin.sources import *
 from siskin.workflows import *
-from siskin import __version__
 
 
 def main():

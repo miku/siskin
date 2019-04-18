@@ -36,9 +36,9 @@ import os
 
 import luigi
 
+from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from gluish.format import Gzip
 from siskin.task import DefaultTask
 
 

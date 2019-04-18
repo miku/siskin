@@ -2,15 +2,16 @@
 # coding: utf-8
 
 from __future__ import print_function
+
 import collections
 import fileinput
 import json
 import re
 import sys
-import tqdm
 
 import pandas as pd
 import requests
+import tqdm
 from six.moves import urllib
 
 
@@ -35,7 +36,6 @@ names = {}
 
 # Count various things.
 counters = collections.defaultdict(collections.Counter)
-
 
 for line in tqdm.tqdm(fileinput.input(), total=941528):
     doc = json.loads(line)
@@ -73,9 +73,7 @@ for line in tqdm.tqdm(fileinput.input(), total=941528):
             resp = search(query)
             counters["fid"][issn] = resp["response"]["numFound"]
 
-data = [(names[k], k, v,
-         counters["ai"][k],
-         counters["fid"][k],
+data = [(names[k], k, v, counters["ai"][k], counters["fid"][k],
          '%0.2f%%' % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])))
         for k, v in counters["c"].most_common()]
 

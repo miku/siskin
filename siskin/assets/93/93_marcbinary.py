@@ -17,9 +17,9 @@ def get_field(field):
 
     regexp = re.search(pattern, line)
     if regexp:
-       value = regexp.group(1)
-       value = html.unescape(value)
-       return value
+        value = regexp.group(1)
+        value = html.unescape(value)
+        return value
 
 
 inputfile = io.open("93_input.xml", "r", encoding="utf-8")
@@ -57,7 +57,7 @@ for i, line in enumerate(inputfile, start=0):
     elif "</oai_dc:dc>" in line:
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
-        marcrecord.leader =  "       b  22        450 "
+        marcrecord.leader = "       b  22        450 "
         marcrecord.add("001", data="finc-93-%s" % f001)
         marcrecord.add("007", data="tu")
         marcrecord.add("100", a=f100a)

@@ -2,23 +2,25 @@
 # coding: utf-8
 
 from __future__ import print_function
+
 import collections
-import json
 import io
+import json
 import re
 import sys
-import tqdm
 
 import pandas as pd
 import requests
+import tqdm
 from six.moves import urllib
 
 if len(sys.argv) != 3:
-    raise("Es muss eine Inputdatei und eine URL angegeben werden!") 
+    raise ("Es muss eine Inputdatei und eine URL angegeben werden!")
 
 inputfilename, base_url = sys.argv[1:]
 
 inputfile = io.open(inputfilename, "r")
+
 
 def search(query, base_url):
     """
@@ -42,7 +44,6 @@ names = {}
 # Count various things.
 counters = collections.defaultdict(collections.Counter)
 
-
 for line in inputfile:
 
     doc = json.loads(line)
@@ -58,7 +59,7 @@ for line in inputfile:
             issn = issn[:4] + "-" + issn[4:]
 
         match = re.search(r'([0-9]{4,4}-[0-9X]{4,4})', issn)
-        if not match:         
+        if not match:
             raise ValueError('failed to parse ISSN: %s', issn)
         issn = match.group(1)
 
@@ -83,9 +84,7 @@ for line in inputfile:
             resp = search(query, base_url)
             counters["fid"][issn] = resp["response"]["numFound"]
 
-data = [(names[issn], issn, freq,
-         counters["ai"][issn],
-         counters["fid"][issn],
+data = [(names[issn], issn, freq, counters["ai"][issn], counters["fid"][issn],
          '%0.2f%%' % (100 * float(counters["fid"][issn]) / max(0.01, counters["ai"][issn])))
         for issn, freq in counters["c"].most_common()]
 

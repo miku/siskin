@@ -2,73 +2,63 @@
 # coding: utf-8
 
 import io
-import sys
 import re
+import sys
 
 from six.moves import html_parser
+
 import marcx
 
-
 formatmap = {
-    "Buch":
-    {
+    "Buch": {
         "leader": "cam",
         "007": "tu",
         "935b": "druck"
     },
-    "DVD":
-    {
+    "DVD": {
         "leader": "ngm",
         "007": "vd",
         "935b": "dvdv",
         "935c": "vide"
     },
-    "Blu-ray":
-    {
+    "Blu-ray": {
         "leader": "ngm",
         "007": "vd",
         "935b": "bray",
         "935c": "vide"
     },
-    "Videodatei":
-    {
+    "Videodatei": {
         "leader": "cam",
         "007": "cr",
         "935b": "cofz",
         "935c": "vide"
     },
-    "CD":
-    {
+    "CD": {
         "leader": "  m",
         "007": "c",
         "935b": "cdda"
     },
-    "Videokassette":
-    {
+    "Videokassette": {
         "leader": "cgm",
         "007": "vf",
         "935b": "vika",
         "935c": "vide"
     },
-    "Noten":
-    {
+    "Noten": {
         "leader": "nom",
         "007": "zm",
         "935c": "muno"
     },
-    "Loseblattsammlung":
-    {
+    "Loseblattsammlung": {
         "leader": "nai",
         "007": "td",
     },
-    "Film":
-    {
+    "Film": {
         "leader": "cam",
         "007": "mu",
         "935b": "sobildtt"
     },
-    "Aufsatz":
-    {
+    "Aufsatz": {
         "leader": "naa",
         "007": "tu"
     },
@@ -285,7 +275,9 @@ for record in records:
         # weitere Personen
         regexp = re.search('tag="1\d\d"', field)
         if regexp:
-            for i in range(101, 197):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
+            for i in range(
+                    101, 197
+            ):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
                 f700a = get_subfield(i, "a")
                 if f700a != "":
                     f700.append("a")

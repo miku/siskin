@@ -39,6 +39,7 @@ import sys
 
 import luigi
 from luigi.format import Gzip
+
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 

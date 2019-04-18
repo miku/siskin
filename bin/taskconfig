@@ -24,12 +24,13 @@
 
 from __future__ import print_function
 
+from siskin.configuration import Config
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 
-from siskin.configuration import Config
 
 if __name__ == '__main__':
     output = StringIO()

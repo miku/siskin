@@ -58,9 +58,9 @@ from builtins import range
 import elasticsearch
 import luigi
 import requests
+import ujson as json
 from future import standard_library
 
-import ujson as json
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly

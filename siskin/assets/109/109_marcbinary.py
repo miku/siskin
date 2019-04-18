@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-
 # SID: 109
 # Collection: Kunsthochschule für Medien Köln (VK Film)
 # Ticket: #8391
 # technicalCollectionID: sid-109-col-kunsthochschulekoeln
 # Task: khm.py
-
-
 """
 Review notes:
 
@@ -18,100 +15,84 @@ Review notes:
 * format, large if/else
 """
 
-
 from __future__ import print_function
 
 import re
 import sys
 
-import marcx
 import xmltodict
-from siskin.utils import xmlstream
-from siskin.utils import marc_build_imprint
 
+import marcx
+from siskin.utils import marc_build_imprint, xmlstream
 
 formatmap = {
-    "Buch":
-    {
+    "Buch": {
         "leader": "cam",
         "007": "tu",
         "935b": "druck"
     },
-    "Mehrbänder":
-    {
+    "Mehrbänder": {
         "007": "tu",
         "935b": "druck"
     },
-    "DVD":
-    {
+    "DVD": {
         "leader": "ngm",
         "007": "vd",
         "935b": "dvdv",
         "935c": "vide"
     },
-    "Blu-ray":
-    {
+    "Blu-ray": {
         "leader": "ngm",
         "007": "vd",
         "935b": "bray",
         "935c": "vide"
     },
-    "Videodatei":
-    {
+    "Videodatei": {
         "leader": "cam",
         "007": "cr",
         "935b": "cofz",
         "935c": "vide"
     },
-    "CD":
-    {
+    "CD": {
         "leader": "  m",
         "007": "c",
         "935b": "cdda"
     },
-    "Videokassette":
-    {
+    "Videokassette": {
         "leader": "cgm",
         "007": "vf",
         "935b": "vika",
         "935c": "vide"
     },
-    "Noten":
-    {
+    "Noten": {
         "leader": "nom",
         "007": "zm",
         "935c": "muno"
     },
-    "Loseblattsammlung":
-    {
+    "Loseblattsammlung": {
         "leader": "nai",
         "007": "td",
     },
-    "Film":
-    {
+    "Film": {
         "leader": "cam",
         "007": "mu",
         "935b": "sobildtt"
     },
-    "Aufsatz":
-    {
+    "Aufsatz": {
         "leader": "naa",
         "007": "tu"
     },
-    "Objekt":
-    {
+    "Objekt": {
         "leader": "crm",
         "007": "zz",
         "935b": "gegenst"
     },
-    "Zeitschrift":
-    {
+    "Zeitschrift": {
         "leader": "nas",
         "007": "tu",
         "008": "                     p"
     },
-    "Sonstiges":
-    {
+    "Sonstiges": {
         "leader": "npa",
         "007": "tu"
     }
@@ -122,8 +103,8 @@ def get_datafield(record, tag, code, all=False):
     """
     Return string value for (record, tag, code) or list of values if all is True.
     """
-    values = []  
-    for field in record["ns0:record"]["ns0:datafield"]:       
+    values = []
+    for field in record["ns0:record"]["ns0:datafield"]:
         if field["@tag"] != tag:
             continue
         if isinstance(field["ns0:subfield"], list):
@@ -143,7 +124,7 @@ def get_datafield(record, tag, code, all=False):
 
 def get_leader(format="Buch"):
     if format == u"Mehrbänder":
-       return "     cam  22       a4500"
+        return "     cam  22       a4500"
     return "     %s  22        4500" % formatmap[format]["leader"]
 
 
@@ -188,18 +169,18 @@ parent_titles = {}
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
-    record = xmltodict.parse(oldrecord)    
+    record = xmltodict.parse(oldrecord)
     parent_id = get_datafield(record, "010", "a")
-    
-    if len(parent_id) > 0:       
-        parent_ids.append(parent_id)     
+
+    if len(parent_id) > 0:
+        parent_ids.append(parent_id)
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
-    record = xmltodict.parse(oldrecord)    
+    record = xmltodict.parse(oldrecord)
     id = get_datafield(record, "001", "a")
     title = get_datafield(record, "331", "a")
-    
+
     if id in parent_ids:
         parent_titles[id] = title
 
@@ -237,8 +218,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
         format = "Mehrbänder"
     elif len(isbn) > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
         format = "Buch"
-    elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format
-                         or "XV" in format or "X," in format or "Bde." in format or ": graph" in format):
+    elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
+          or "X," in format or "Bde." in format or ": graph" in format):
         format = "Buch"
     elif "CD" in format:
         format = "CD"

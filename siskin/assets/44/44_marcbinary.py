@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-
 # Quelle: Deutsches Textarchiv
 # SID: 44
 # Tickets: #14972
 # technicalCollectionID: sid-44-col-textarchiv
 # Task: TODO
 
-
-import os
-import io
-import sys
-import re
 import base64
+import io
+import os
+import re
+import sys
+
+import xmltodict
 
 import marcx
-import xmltodict
 from siskin.utils import marc_build_imprint
-
 
 inputfilename = "44_input.xml"
 outputfilename = "44_output.mrc"
@@ -31,7 +29,9 @@ outputfile = io.open(outputfilename, "wb")
 
 inputfile = open(inputfilename, "rb")
 xmlfile = inputfile.read()
-records = xmltodict.parse(xmlfile, force_list=("cmdp:title", "cmdp:author", "cmdp:editor", "cmdp:pubPlace", "cmdp:publisher", "cmdp:date"))
+records = xmltodict.parse(xmlfile,
+                          force_list=("cmdp:title", "cmdp:author", "cmdp:editor", "cmdp:pubPlace", "cmdp:publisher",
+                                      "cmdp:date"))
 outputfile = open(outputfilename, "wb")
 
 for xmlrecord in records["Records"]["Record"]:
@@ -56,7 +56,8 @@ for xmlrecord in records["Records"]["Record"]:
     marcrecord.add("007", data="cr")
 
     # Sortierjahr
-    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get("cmdp:publicationStmt", "")
+    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"][
+        "cmdp:biblFull"].get("cmdp:publicationStmt", "")
     if imprint:
         year = imprint["cmdp:date"][0]["#text"]
         match = re.match("\d\d\d\d", year)
@@ -67,9 +68,10 @@ for xmlrecord in records["Records"]["Record"]:
     marcrecord.add("041", a="ger")
 
     # 1. Urheber
-    authors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"].get("cmdp:author", "")
+    authors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"][
+        "cmdp:titleStmt"].get("cmdp:author", "")
     if authors:
-        surname = authors[0]["cmdp:persName"].get("cmdp:surname", "")      
+        surname = authors[0]["cmdp:persName"].get("cmdp:surname", "")
         forename = authors[0]["cmdp:persName"].get("cmdp:forename", "")
         rolename = authors[0]["cmdp:persName"].get("cmdp:roleName", "")
         if rolename and forename:
@@ -84,7 +86,8 @@ for xmlrecord in records["Records"]["Record"]:
         marcrecord.add("100", a=f100a, e="verfasserin", _4="aut")
 
     # Titlel
-    titles = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"]["cmdp:title"]
+    titles = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"][
+        "cmdp:title"]
     f245a = titles[0]["#text"]
     f245b = ""
     f245n = ""
@@ -92,18 +95,20 @@ for xmlrecord in records["Records"]["Record"]:
         for title in titles:
             if "#text" in title:
                 f245b = title["#text"]
-            if "@n" in title:            
+            if "@n" in title:
                 f245n = title["@n"]
     marcrecord.add("245", a=f245a, b=f245b, n=f245n)
 
     # Ausgabe
-    edition = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"].get("cmdp:editionStmt", "")
+    edition = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"].get(
+        "cmdp:editionStmt", "")
     if edition:
         f250a = edition["cmdp:edition"]
         marcrecord.add("250", a=f250a)
 
     # Erscheinungsvermerk
-    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get("cmdp:publicationStmt", "")
+    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"][
+        "cmdp:biblFull"].get("cmdp:publicationStmt", "")
     if imprint:
         f260a = ""
         f260b = ""
@@ -114,26 +119,29 @@ for xmlrecord in records["Records"]["Record"]:
         publisher = imprint.get("cmdp:publisher")
         if publisher:
             f260b = publisher[0]["cmdp:name"]
-            if not f260b: # sometimes exists but None
+            if not f260b:  # sometimes exists but None
                 f260b = ""
-        f260c = imprint["cmdp:date"][0]["#text"]       
+        f260c = imprint["cmdp:date"][0]["#text"]
         subfields = marc_build_imprint(f260a, f260b, f260c)
         marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
-    pages = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get("cmdp:extent", "")
+    pages = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"][
+        "cmdp:biblFull"].get("cmdp:extent", "")
     if pages:
         f300a = pages["cmdp:measure"]["#text"]
         marcrecord.add("300", a=f300a)
 
     # Inhaltsbeschreibung
-    abstract = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:profileDesc"].get("cmdp:abstract", "")
+    abstract = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:profileDesc"].get(
+        "cmdp:abstract", "")
     if abstract:
         f520a = abstract["cmdp:p"]
         marcrecord.add("520", a=f520a)
 
     # Schlagwörter
-    subjects = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:profileDesc"].get("cmdp:textClass", "")
+    subjects = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:profileDesc"].get(
+        "cmdp:textClass", "")
     if subjects:
         for subject in subjects["cmdp:classCode"]:
             subject = subject["#text"]
@@ -144,10 +152,11 @@ for xmlrecord in records["Records"]["Record"]:
                     marcrecord.add("650", a=f650a)
 
     # Weitere Urheber
-    authors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"].get("cmdp:author", "")
+    authors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"][
+        "cmdp:titleStmt"].get("cmdp:author", "")
     if authors:
         for author in authors[1:]:
-            surname = author["cmdp:persName"].get("cmdp:surname", "")      
+            surname = author["cmdp:persName"].get("cmdp:surname", "")
             forename = author["cmdp:persName"].get("cmdp:forename", "")
             rolename = author["cmdp:persName"].get("cmdp:roleName", "")
             if rolename and forename:
@@ -162,11 +171,12 @@ for xmlrecord in records["Records"]["Record"]:
             marcrecord.add("700", a=f700a, e="verfasserin", _4="aut")
 
     # Herausgeber
-    editors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"].get("cmdp:editor", "")
+    editors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"][
+        "cmdp:titleStmt"].get("cmdp:editor", "")
     if authors:
         for author in authors[1:]:
-            surname = author["cmdp:persName"].get("cmdp:surname", "")      
-            forename = author["cmdp:persName"].get("cmdp:forename", "")          
+            surname = author["cmdp:persName"].get("cmdp:surname", "")
+            forename = author["cmdp:persName"].get("cmdp:forename", "")
             if surname and forename:
                 f700a = surname + ", " + forename
             elif surname and surname != "N. N.":
@@ -192,7 +202,7 @@ for xmlrecord in records["Records"]["Record"]:
     # Kollektion
     collections = ["a", f001, "b", "44", "c", "sid-44-col-textarchiv"]
     marcrecord.add("980", subfields=collections)
-       
+
     outputfile.write(marcrecord.as_marc())
 
 outputfile.close()

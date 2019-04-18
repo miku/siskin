@@ -34,13 +34,15 @@ apikey = d24411122381317432647264876234
 
 """
 
-import luigi
 import datetime
-import tempfile
 import os
+import tempfile
+
+import luigi
+
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 from siskin.common import RedmineDownloadAttachments
+from siskin.task import DefaultTask
 
 
 class WisoTask(DefaultTask):

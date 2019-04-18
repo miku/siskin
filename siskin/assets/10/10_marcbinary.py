@@ -2,9 +2,9 @@
 # coding: utf-8
 
 import io
+import json
 import re
 import sys
-import json
 
 import marcx
 
@@ -35,10 +35,10 @@ for line in inputfile:
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
 
-        format = get_field("original_format")       
+        format = get_field("original_format")
         if "notated music" in format:
             leader = "     com  22        4500"
-            f935c = "muno"        
+            f935c = "muno"
         elif "web page" in format:
             leader = "     nmi  22        4500"
             f935c = "website"
@@ -54,7 +54,7 @@ for line in inputfile:
         else:
             leader = "     cam  22        4500"
             f935c = "text"
-        
+
         # Leader
         marcrecord.leader = leader
 
@@ -91,7 +91,7 @@ for line in inputfile:
         for subject in subjects:
             subject = subject.title()
             marcrecord.add("650", a=subject)
-       
+
         # weitere Urheber
         persons = get_field("contributor")
         if persons != "":
@@ -100,7 +100,7 @@ for line in inputfile:
                 marcrecord.add("700", a=person)
 
         #n Link zum Datensatz
-        f856u = get_field("url")       
+        f856u = get_field("url")
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
         # Format

@@ -13,8 +13,9 @@ import sys
 import tempfile
 from builtins import bytes
 
-import marcx
 import xmltodict
+
+import marcx
 
 
 def clear_format(format):
@@ -23,139 +24,113 @@ def clear_format(format):
     format = format.strip()
     format = format.rstrip(";")
     format = format.lower()
-    format = format.split("; ") # manchmal sind mehrere Formate angegeben
-    format = format[0] # nur das zuerst angegebene Format wird genommen
+    format = format.split("; ")  # manchmal sind mehrere Formate angegeben
+    format = format[0]  # nur das zuerst angegebene Format wird genommen
     return format
+
 
 def get_leader(format='photograph'):
     return "     %s  22        4500" % formatmaps[format]["leader"]
+
 
 def get_field_008(format='photograph', f041_a="   ", f260_c="20uu"):
     if "008" not in formatmaps[format]:
         return "130227u%suuuuxx uuup%s  c" % (f260_c, f041_a)
     return "130227%s%suuuuxx uuup%s  c" % (formatmaps[format]["008"], f260_c, f041_a)
 
+
 def get_field_935b(format='photograph'):
     if "935b" not in formatmaps[format]:
         return ""
     return formatmaps[format]["935b"]
 
-langmap = {
-    "English": "eng",
-    "German": "ger",
-    "French": "fre",
-    "Italian": "ita",
-    "Russian": "rus",
-    "Spanish": "spa"
-    }
+
+langmap = {"English": "eng", "German": "ger", "French": "fre", "Italian": "ita", "Russian": "rus", "Spanish": "spa"}
 
 formatmaps = {
-    'periodical':
-    {
+    'periodical': {
         '008': 'n',
         'leader': 'nas',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
-    'ephemera':
-    {
+    'ephemera': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'magazine cover':
-    {
+    'magazine cover': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'photograph':
-    {
+    'photograph': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'postcard':
-    {
+    'postcard': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'clipping':
-    {
+    'clipping': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'flier (printed matter)':
-    {
+    'flier (printed matter)': {
         'leader': 'nam'
     },
-    'storyboard':
-    {
+    'storyboard': {
         'leader': 'nam'
     },
-    'sheet music':
-    {
+    'sheet music': {
         'leader': 'ncs'
     },
-    'correspondence':
-    {
+    'correspondence': {
         'leader': 'nam'
     },
-    'pamphlet':
-    {
+    'pamphlet': {
         'leader': 'nam'
     },
-    'correspondence document':
-    {
+    'correspondence document': {
         '007': 'kf',
         'leader': 'nam'
     },
-    'lobby card':
-    {
+    'lobby card': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'photomechanical print':
-    {
+    'photomechanical print': {
         'leader': 'nam'
     },
-    'cigarette cards':
-    {
+    'cigarette cards': {
         'leader': 'nam'
     },
-    'souvenir handkerchief box':
-    {
+    'souvenir handkerchief box': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'scrapbook':
-    {
+    'scrapbook': {
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
-    'slides (photographs)':
-    {
+    'slides (photographs)': {
         'leader': 'ckm',
-        '935b' : 'foto'
+        '935b': 'foto'
     },
-    'program (document)':
-    {
+    'program (document)': {
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
-    'pressbook':
-    {
+    'pressbook': {
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
-    'autograph album':
-    {
+    'autograph album': {
         'leader': 'ntm',
-        '935b' : 'handschr'
+        '935b': 'handschr'
     },
-    'monograph':
-    {
+    'monograph': {
         'leader': 'nam',
-        '935b' : 'cofz'
+        '935b': 'cofz'
     },
-    'drawing':
-    {
+    'drawing': {
         'leader': 'nam'
     },
 }
@@ -299,7 +274,8 @@ for record in xml["Records"]["Record"]:
 
         if matches == 0:
 
-            values = (identifier, title, description, subject, type, format, relation, publisher, date, source, language, rights, url, creator, coverage)
+            values = (identifier, title, description, subject, type, format, relation, publisher, date, source,
+                      language, rights, url, creator, coverage)
 
             query = """
                 INSERT INTO
@@ -388,11 +364,11 @@ for row in rows:
     leader = get_leader(format=format)
 
     if language != "":
-        language = language.rstrip(";") # manchmal endet die Sprache auf ";"
-        language = language.replace(" ", "") # manchmal gibt es Leerzeichen mittendrin oder am Ende
-        language = language.split(";") # manchmal sind mehrere Sprache angegeben
+        language = language.rstrip(";")  # manchmal endet die Sprache auf ";"
+        language = language.replace(" ", "")  # manchmal gibt es Leerzeichen mittendrin oder am Ende
+        language = language.split(";")  # manchmal sind mehrere Sprache angegeben
         if isinstance(language, list):
-            language = language[0] # nur die zuerst angegebene Sprache wird berücksichtig
+            language = language[0]  # nur die zuerst angegebene Sprache wird berücksichtig
 
         f041_a = langmap.get(language, "")
 
