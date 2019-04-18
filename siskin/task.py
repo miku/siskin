@@ -34,7 +34,7 @@ home = /path/to/dir
 
 [amsl]
 
-write-url = https://live.abc.xyz/w/i/write
+write-url = https://live.abc.technology/w/i/write
 
 """
 
