@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # SID: 142
-# Ticket: 8392
+# Ticket: #8392
 
 import io
 import re
@@ -53,10 +53,11 @@ for record in reader:
         f935b = "cdda"
         f935c = ""
     else:
-        print(record.field("433"))
-        print(record.field("050"))
-        print(record.field("540"))
-        break
+        print("050 ", record.field("050"))
+        print("433 ", record.field("433"))
+        print("540 ", record.field("540"))
+        print("\n")
+        #break
 
     # Leader
     marcrecord.leader = leader
