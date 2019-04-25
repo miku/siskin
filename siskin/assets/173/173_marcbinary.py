@@ -8,7 +8,13 @@ import marcx
 import pymarc
 from siskin.utils import marc_clean_record
 
-copytags = ("003", "084", "100", "245", "260", "300", "490", "553", "653", "773")
+
+def get_field(record, field, subfield):
+    try:
+        return record[field][subfield]
+    except:
+        return ""
+
 
 inputfilename = "173_input.mrc"
 outputfilename = "173_output.mrc"
@@ -21,13 +27,14 @@ outputfile = open(outputfilename, "wb")
 
 reader = pymarc.MARCReader(inputfile, force_utf8=True)
 
-for oldrecord in reader:
+for record in reader:
 
-    newrecord = marcx.Record(force_utf8=True)
-    newrecord.strict = False
+    record = marcx.Record.from_record(record)
+    record.force_utf8 = True
+    record.strict = False
 
     try:
-        parent_type = oldrecord["773"]["7"]
+        parent_type = record["773"]["7"]
     except:
         parent_type = ""
 
@@ -36,52 +43,64 @@ for oldrecord in reader:
         f935b = "druck"
         f935c = ""
         f008 = ""
-        leader = "     " + oldrecord.leader[5:]
-        newrecord.leader = leader
+        leader = "     " + record.leader[5:]
+        record.leader = leader
     elif parent_type == "nnas":
         f935b = "druck"
         f935c = "text"
         f008 = "                     p"
-        leader = oldrecord.leader[8:]
+        leader = record.leader[8:]
         leader = "     nab" + leader
-        newrecord.leader = leader
+        record.leader = leader
     else:
         f935b = "druck"
         f935c = ""
         f008 = ""
-        leader = "     " + oldrecord.leader[5:]
-        newrecord.leader = leader
+        leader = "     " + record.leader[5:]
+        record.leader = leader
 
     # Identifikator
-    f001 = oldrecord["001"].data
+    f001 = record["001"].data
     regexp = re.search("edoc/(.*)", f001)
     if regexp:
         f001 = regexp.group(1)
     else:
         sys.exit("Die ID konnte nicht verarbeitet werden: " + f001)
     f001 = f001.replace(":", "")
-    newrecord.add("001", data="finc-173-%s" % f001)
+    record.remove_fields("001")
+    record.add("001", data="finc-173-%s" % f001)
 
     # Zugangsformat
-    newrecord.add("007", data="tu")
+    record.add("007", data="tu")
 
     # Periodizität
-    newrecord.add("008", data=f008)
+    record.add("008", data=f008)
 
-    # Originalfelder, die ohne Änderung übernommen werden
-    for tag in copytags:
-        for field in oldrecord.get_fields(tag):
-            newrecord.add_field(field)
+    # Titel
+    f245a = get_field(record, "245", "a")
+    if f245a:
+        f245a = re.sub("\s?~?\\\dagger\s?", "", f245a)
+        record.remove_fields("245")
+        record.add("245", a=f245a)
+    else:
+        continue
+
+    # Anmerkung
+    f553a = get_field(record, "553", "a")
+    if f553a:
+        f553a = re.sub("\s?~?\\\dagger", "", f553a)
+        record.remove_fields("553")
+        record.add("553", a=f553a)
 
     # SWB-Format
-    newrecord.add("935", b=f935b, c=f935c)
+    record.add("935", b=f935b, c=f935c)
 
-    # 980
+    # Ansigelung und Kollektion
     collections = ["a", f001, "b", "173", "c", "sid-173-col-buchwesen"]
-    newrecord.add("980", subfields=collections)
+    record.add("980", subfields=collections)
 
-    marc_clean_record(newrecord)
-    outputfile.write(newrecord.as_marc())
+    marc_clean_record(record)
+    outputfile.write(record.as_marc())
 
 inputfile.close()
 outputfile.close()
