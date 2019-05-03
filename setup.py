@@ -123,6 +123,7 @@ setup(name='siskin',
           'siskin': [
               'assets/*',
               'assets/arxiv/*',
+              'assets/amsl/*',
               'assets/datacite/*',
               'assets/js/*',
               'assets/mail/*',
