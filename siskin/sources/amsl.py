@@ -787,6 +787,10 @@ class AMSLFilterConfig(AMSLTask):
     X   X    X    -    -    X     -   o
     X   X    X    -    -    -     X   o
 
+    For a transition period, we extend the collection list from AMSL with
+    canoncical names via DOI prefix, see #13587. The mapping is fixed and need
+    to be updated manually.
+
     ----
 
     [1] https://git.io/vQohE
