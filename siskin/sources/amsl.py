@@ -798,6 +798,23 @@ class AMSLFilterConfig(AMSLTask):
 
     date = luigi.DateParameter(default=datetime.date.today())
 
+    def extend_collections(self, colls):
+        """
+        Given a list of collection names, extend the list by adding the canonicals names as well, refs #13587.
+        """
+        if not hasattr(self, '_name_to_canonical'):
+            with open(self.assets("amsl/13587.json")) as handle:
+                self._name_to_canonical = json.load(handle)
+
+        result = set()
+        for c in colls:
+            result.add(c)
+            if c in self._name_to_canonical:
+                result.add(self._name_to_canonical[c])
+
+        self.logger.debug("extended collection list from %d to %d items (%d mappings)" % (len(colls), len(result), len(self._name_to_canonical)))
+        return list(result)
+
     def requires(self):
         return {
             'amsl': AMSLService(date=self.date),
@@ -1031,7 +1048,7 @@ class AMSLFilterConfig(AMSLTask):
                         "source": [sid]
                     },
                     {
-                        "collection": sorted(colls)
+                        "collection": sorted(self.extend_collections(colls))
                     },
                 ]})
 
@@ -1045,7 +1062,7 @@ class AMSLFilterConfig(AMSLTask):
                                 "source": [sid]
                             },
                             {
-                                "collection": sorted(colls)
+                                "collection": sorted(self.extend_collections(colls))
                             },
                             {
                                 "holdings": {
