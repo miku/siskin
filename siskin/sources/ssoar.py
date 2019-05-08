@@ -78,9 +78,11 @@ class SSOARMARC(SSOARTask):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets('30/30_marcbinary.py'),
                           input=self.input().path)
+        output = shellout("""yaz-marcdump -o marcxml {input} > {output}""",
+                          input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.xml'))
 
 
