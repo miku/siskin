@@ -81,7 +81,7 @@ install_requires = [
     'tornado<5,>=4.0',
     'tqdm>=4',
     'ujson>=1.35',
-    'urllib3>=1.10',
+    'urllib3>=1.10,<1.25',
     'xlrd>=1.0.0',
     'XlsxWriter>=1.0.2',
     'xmltodict==0.11.0',
