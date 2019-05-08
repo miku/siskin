@@ -505,3 +505,25 @@ class GeniosISSNList(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class GeniosDOIList(GeniosTask):
+    """
+    A list of Genios DOI.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'input': GeniosCombinedIntermediateSchema(date=self.date),
+            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
+        }
+
+    def run(self):
+        output = shellout("""jq -c -r '.["doi"]' <(unpigz -c {input}) | sort -S35% -u >> {output} """,
+                          input=self.input().get('input').path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
