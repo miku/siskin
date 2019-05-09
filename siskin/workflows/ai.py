@@ -87,23 +87,6 @@ class AITask(DefaultTask):
         return weekly(self.date)
 
 
-class AIDOIList(AITask):
-    """
-    Raw kist of DOI for ai.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return AIIntermediateSchema(date=self.date)
-
-    def run(self):
-        output = shellout("unpigz -c {input} | jq -rc .doi | grep -v '^null$' > {output}", input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
 class AIDOIRedirectTable(AITask):
     """
     Generate a redirect table. Takes days. Make sure doi.org is in your hosts file so DNS is not stressed.
@@ -788,3 +771,23 @@ class AIApplyOpenAccessFlag(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+
+class AIDOIList(AITask):
+    """
+    List of DOI for a given ISIL,
+
+    taskcat AILicensing | jq -r 'select(.["x.labels"][]? | contains ("DE-15")) | .doi?' > xxxx
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    isil = luigi.Parameter(default='DE-15')
+
+    def requires(self):
+        return AILicensing(date=self.date)
+
+    def run(self):
+        output = shellout(""" unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{ isil }")) | .doi?' > {output} """,
+                          isil=self.isil)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv'))
