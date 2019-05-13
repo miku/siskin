@@ -34,6 +34,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         continue
 
     marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
 
     # Leader
     marcrecord.leader = "     cam  22        4500"
@@ -41,9 +42,14 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
     regexp = re.match("oai:opus.bsz-bw.de-hsmw:(\d+)", f001)
+    regexp2 = re.match("oai:monami.hs-mittweida.de:(\d+)", f001)
     if regexp:
         f001 = regexp.group(1)
-        marcrecord.add("001", data="finc-150-" + f001)
+    elif regexp2:
+        f001 = regexp2.group(1)
+    else:
+        sys.exit("Keine ID vorhanden!" + f001)
+    marcrecord.add("001", data="finc-150-" + f001)
 
     # 007
     marcrecord.add("007", data="cr")
@@ -59,7 +65,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     try:
         f100a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
     except:
-        continue
+        f100a = ""
     marcrecord.add("100", a=f100a)
 
     # Titel
@@ -101,8 +107,14 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Link zu Datensatz und Ressource
     # Eventuell überprüfen, ob Reihenfolge der Links stimmt "files"
     f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
+    filecheck = str(f856u)
+    if ".pdf" not in filecheck and ".PDF" not in filecheck:
+        continue
     marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])
-    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[3])
+    if len(f856u) == 2:
+        marcrecord.add("856", q="text/pdf", _3="Link zur Ressource", u=f856u[1])
+    else:
+        marcrecord.add("856", q="text/pdf", _3="Link zur Ressource", u=f856u[2])
 
     # Medientyp
     marcrecord.add("935", b="cofz")
