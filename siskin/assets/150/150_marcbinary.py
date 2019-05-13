@@ -59,7 +59,13 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if language == "deu":
         language = "ger"
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-    marcrecord.add("041", a=language)
+    
+    # DDC
+    setspecs = xmlrecord["header"]["setSpec"]
+    for setspec in setspecs:
+        if "ddc:" in setspec:
+            f082a = setspec.replace("ddc:", "")
+            marcrecord.add("082", a=f082a)
 
     # Verfasser
     try:
@@ -120,7 +126,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", b="cofz")
     marcrecord.add("935", c="hs")
 
-    # Kollektion
+    # Profilierung
     marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
