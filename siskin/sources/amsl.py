@@ -1105,3 +1105,15 @@ class AMSLFilterConfig(AMSLTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
+
+
+class AMSLCollectionList(AMSLTask):
+    """
+    TODO: implement.
+
+    Find all collection names used in AMSL and their canonical name, via
+    members API, prefix and names.
+    """
+
+    def run(self):
+        raise NotImplementedError()
