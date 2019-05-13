@@ -9,6 +9,23 @@ import xmltodict
 
 import marcx
 
+
+def ddcmatch(value):
+    """
+    Returns true, if given value matches profile.
+    """
+    if value in ("003.3", "004.5", "004.616", "004.62", "004.65", "004.652", "004.66", "004.67", "004.678", "004.6782",
+                 "004.9", "005.019", "069.0288", "091", "092", "093", "095", "302.2244", "302.231", "306.42", "306.488",
+                 "346.0482", "352.744", "353.73", "381.4537132", "658.4038", "676", "741.64", "801.3", "809.9339"):
+        return True
+    for prefix in ("002", "003.5", "004.09", "005.7", "005.8", "006.3", "006.4", "006.6", "006.8", "020", "021", "022",
+                   "023", "025", "026", "027", "028", "069.1", "069.2", "069.5", "069.6", "070.5", "090", "094", "302.232",
+                   "381.45002", "686.1", "686.2", "686.3", "745.67", "760"):
+        if value.startswith(prefix):
+            return True
+    return False
+
+
 inputfilename = "150_input.xml"
 outputfilename = "150_output.mrc"
 
@@ -127,7 +144,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", c="hs")
 
     # Profilierung
-    marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+    ddc = ddcmatch(f082a)
+    if ddc:
+        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monamiddc")
+    else:
+        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
 
