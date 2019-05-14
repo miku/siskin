@@ -124,7 +124,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 marcrecord.add("689", a=subject)
 
     # Link zu Datensatz und Ressource
-    # Eventuell überprüfen, ob Reihenfolge der Links stimmt "files"
     urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
     for url in urls:
         if "docId/" in url:
