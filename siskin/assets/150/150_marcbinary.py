@@ -125,15 +125,12 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
 
     # Link zu Datensatz und Ressource
     # Eventuell überprüfen, ob Reihenfolge der Links stimmt "files"
-    f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
-    filecheck = str(f856u)
-    if ".pdf" not in filecheck and ".PDF" not in filecheck:
-        continue
-    marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])
-    if len(f856u) == 2:
-        marcrecord.add("856", q="text/pdf", _3="Link zur Ressource", u=f856u[1])
-    else:
-        marcrecord.add("856", q="text/pdf", _3="Link zur Ressource", u=f856u[2])
+    urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
+    for url in urls:
+        if "docId/" in url:
+            marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=url)
+        elif ".pdf" in url or ".PDF" in url:
+            marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=url)
 
     # Medientyp
     marcrecord.add("935", b="cofz")
