@@ -77,8 +77,27 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     setspecs = xmlrecord["header"]["setSpec"]
     for setspec in setspecs:
         if "ddc:" in setspec:
-            f082a = setspec.replace("ddc:", "")
-            marcrecord.add("082", a=f082a)
+            ddc1 = setspec.replace("ddc:", "")
+            break
+    else:
+        ddc1 = ""        
+    
+    try:
+        subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
+    except:
+        subjects = []
+    for subject in subjects:
+        if "ddc" in subject:
+            ddc2 = subject.replace("ddc:", "")
+            break
+    else:
+        ddc2 = ""
+    
+    if len(ddc1) > len(ddc2):
+        f082a = ddc1
+    else:
+        f082a = ddc2
+    marcrecord.add("082", a=f082a)
 
     # Verfasser
     try:
@@ -137,10 +156,10 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Profilierung
     ddc = ddcmatch(f082a)
     if ddc:
-        #marcrecord.add("650", a="mitdcc")
+        marcrecord.add("650", a="mitdcc")
         marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
     else:
-        #marcrecord.add("650", a="ohnedcc")
+        marcrecord.add("650", a="ohnedcc")
         marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
