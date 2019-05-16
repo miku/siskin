@@ -32,7 +32,7 @@ inputfile = open(inputfilename, "rb")
 outputfile = open(outputfilename, "wb")
 
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile)
+xmlrecords = xmltodict.parse(xmlfile, force_list="dc:subject")
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
@@ -112,16 +112,15 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     try:
         f689a = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
     except:
-        f689a = ""
-    if isinstance(f689a, list):
-        for subject in f689a:
-            if "ddc" not in subject:
+        f689a = []
+    for subject in f689a:
+        if "ddc" not in subject:
+            if " , " not in subject:                    
                 marcrecord.add("689", a=subject)
-    else:
-        f689a = f689a.split(" , ")
-        if len(f689a) > 1:
-            for subject in f689a:
-                marcrecord.add("689", a=subject)
+            else:
+                subjects = subject.split(" , ")
+                for subject in subjects:
+                    marcrecord.add("689", a=subject)
 
     # Link zu Datensatz und Ressource
     urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
@@ -138,10 +137,10 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Profilierung
     ddc = ddcmatch(f082a)
     if ddc:
-        marcrecord.add("650", a="mitdcc")
+        #marcrecord.add("650", a="mitdcc")
         marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
     else:
-        marcrecord.add("650", a="ohnedcc")
+        #marcrecord.add("650", a="ohnedcc")
         marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
