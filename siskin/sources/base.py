@@ -36,48 +36,55 @@ Config
 
 [base]
 
-username = nana
-password = s3cret
-url = http://export.com/intermediate.file.gz
-
+ftp-host = sftp://example.com
+ftp-base = /target_data/xyz
+ftp-username= admin
+ftp-password= s3cr3t
+ftp-pattern = *
 """
 
 import datetime
 
 import luigi
 
-from gluish.format import Gzip
+from gluish.format import Gzip, TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.common import FTPMirror
 
 
 class BaseTask(DefaultTask):
     """
-    Various tasks around base.
+    Various tasks around base, refs #14947.
     """
-    TAG = 'base'
+    TAG = '126'
 
     def closest(self):
-        """
-        As indicated by the fixed download URL.
-        """
-        return '2017-08-22'
+        return weekly(date=self.date)
 
 
-class BaseDownload(BaseTask):
+class BasePaths(BaseTask):
     """
-    Attempt to download file from a configured URL.
+    Mirror SLUB FTP for base.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=10, significant=False)
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+
+    def requires(self):
+        return FTPMirror(host=self.config.get('base', 'ftp-host'),
+                         base=self.config.get('base', 'ftp-base'),
+                         username=self.config.get('base', 'ftp-username'),
+                         password=self.config.get('base', 'ftp-password'),
+                         pattern=self.config.get('base', 'ftp-pattern'),
+                         max_retries=self.max_retries,
+                         timeout=self.timeout)
 
     def run(self):
-        output = shellout(""" curl --insecure --fail -v -u {username}:{password} "{url}" > {output} """,
-                          username=self.config.get('base', 'username'),
-                          password=self.config.get('base', 'password'),
-                          url=self.config.get('base', 'url'))
-        luigi.LocalTarget(output).move(self.output().path)
+        self.input().move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
