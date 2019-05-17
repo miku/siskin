@@ -10,18 +10,6 @@ import xmltodict
 import marcx
 
 
-def ddcmatch(value):
-    """
-    Returns true, if given value matches profile.
-    """
-    if value in ("091", "092", "093", "095"):
-        return True
-    for prefix in ("002", "020", "021", "022", "023", "025", "026", "027", "028", "070", "090", "094", "760"):
-        if value.startswith(prefix):
-            return True
-    return False
-
-
 inputfilename = "150_input.xml"
 outputfilename = "150_output.mrc"
 
@@ -154,13 +142,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", c="hs")
 
     # Profilierung
-    ddc = ddcmatch(f082a)
-    if ddc:
-        marcrecord.add("650", a="mitdcc")
-        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
-    else:
-        marcrecord.add("650", a="ohnedcc")
-        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+    marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
 
     outputfile.write(marcrecord.as_marc())
 
