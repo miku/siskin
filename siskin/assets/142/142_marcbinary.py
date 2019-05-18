@@ -3,6 +3,9 @@
 
 # SID: 142
 # Ticket: #8392
+# TechnicalCollectionID: sid-142-col-gesamtkatduesseldorf
+# Task: 
+
 
 import io
 import re
@@ -12,6 +15,8 @@ import xmltodict
 
 import marcx
 from siskin.mab import MabXMLFile
+from siskin.utils import marc_build_imprint
+
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -109,18 +114,7 @@ for record in reader:
     f260a = record.field("410", alt="")
     f260b = record.field("412", alt="")
     f260c = record.field("425", alt="")
-
-    if f260a != "" and f260b != "":
-        del1 = " : "
-    else:
-        del1 = ""
-
-    if (f260a != "" or f260b != "") and f260c != "":
-        del2 = ", "
-    else:
-        del2 = ""
-
-    subfields = ["a", f260a + del1, "b", f260b + del2, "c", f260c]
+    subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
@@ -157,7 +151,7 @@ for record in reader:
     # Medientyp
     marcrecord.add("935", b=f935b, c=f935c)
 
-    # Kollektion
+    # Ansigelung
     f001 = record.field("001")
     collections = ["a", f001, "b", "142", "c", "sid-142-col-gesamtkatduesseldorf"]
     marcrecord.add("980", subfields=collections)
