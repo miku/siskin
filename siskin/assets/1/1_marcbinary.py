@@ -317,7 +317,7 @@ for line in inputfile:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
         # Medienform
-        marcrecord.add("935", b="cofz", b="sott")
+        marcrecord.add("935", b=["cofz", "sott"])
 
         # Ansigelung
         marcrecord.add("980", a=f001, b="1", c="Project Gutenberg")
