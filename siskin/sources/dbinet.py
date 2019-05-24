@@ -162,6 +162,8 @@ class DBInetIntermediateSchema(DBInetTask):
                     if not line:
                         continue
                     doc = json.loads(line)
+                    # refs. #15262, https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes
+                    doc['languages'] = ['und']
 
                     # Be a bit more aggressive suppressing dead links, refs #14982.
                     if any(url in urls_to_drop for url in doc.get("url", [])):
