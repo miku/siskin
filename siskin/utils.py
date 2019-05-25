@@ -49,6 +49,8 @@ import six
 from dateutil import relativedelta
 from future import standard_library
 from six.moves.urllib.parse import urlparse
+from six import string_types
+
 
 from siskin import __version__
 
@@ -205,7 +207,7 @@ def load_set(obj, func=lambda v: v):
                 if not line:
                     continue
                 s.add(func(line))
-    elif isinstance(obj, basestring):
+    elif isinstance(obj, string_types):
         with open(obj) as handle:
             for line in (line.strip() for line in handle):
                 if not line:

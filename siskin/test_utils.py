@@ -11,7 +11,6 @@ import pymarc
 from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, marc_build_imprint,
                           marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
 
-
 def test_set_encoder_dumps():
     assert json.dumps({'x': {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
 
@@ -55,7 +54,7 @@ def test_load_set():
     assert load_set(io.StringIO(u"1\n2\n3\n"), func=int) == {1, 2, 3}
 
     with tempfile.NamedTemporaryFile(delete=False) as tf:
-        tf.write("1\n2\n")
+        tf.write(b"1\n2\n")
     with open(tf.name) as handle:
         assert load_set(handle) == {"1", "2"}
     assert load_set(tf.name) == {"1", "2"}
