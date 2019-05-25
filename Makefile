@@ -10,13 +10,12 @@ dist:
 	python setup.py sdist
 
 # Upload requires https://github.com/pypa/twine.
-upload:
+upload: dist
 	# https://pypi.org/account/register/
 	# $ cat ~/.pypirc
 	# [pypi]
 	# username:abc
 	# password:secret
-	python setup.py sdist
 	twine upload dist/*
 
 clean:
