@@ -47,12 +47,12 @@ import datetime
 
 import luigi
 
-from gluish.format import Gzip, TSV
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 from siskin.common import FTPMirror
+from siskin.task import DefaultTask
 
 
 class BaseTask(DefaultTask):
@@ -87,4 +87,3 @@ class BasePaths(BaseTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-

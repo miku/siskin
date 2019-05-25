@@ -526,4 +526,3 @@ class GeniosDOIList(GeniosTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
-

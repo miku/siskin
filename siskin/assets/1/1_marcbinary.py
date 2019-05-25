@@ -17,8 +17,9 @@ import json
 import re
 import sys
 
-import marcx
 import xmltodict
+
+import marcx
 
 inputfile = fileinput.input()
 

@@ -38,10 +38,10 @@ import os
 
 import luigi
 import requests
+import ujson as json
 
 import marcx
 import pymarc
-import ujson as json
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

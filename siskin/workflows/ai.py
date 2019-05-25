@@ -772,6 +772,7 @@ class AIApplyOpenAccessFlag(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+
 class AIDOIList(AITask):
     """
     List of DOI for a given ISIL,
@@ -785,8 +786,10 @@ class AIDOIList(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-        output = shellout(""" unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output} """,
-                          input=self.input().path, isil=self.isil)
+        output = shellout(
+            """ unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output} """,
+            input=self.input().path,
+            isil=self.isil)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -175,7 +175,8 @@ for record in reader:
 
     # Sprache
     languages = record.field("037", alt="")
-    f041a = [languages[i:i+3] for i in range(0, len(languages), 3)] # to handle uncommon language codes like "gerengfre"
+    f041a = [languages[i:i + 3]
+             for i in range(0, len(languages), 3)]  # to handle uncommon language codes like "gerengfre"
     marcrecord.add("041", a=f041a)
 
     # 1. Urheber

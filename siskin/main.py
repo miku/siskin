@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Entry points should replace scripts in the future. Currently we use a mix of
 bash and Python for executables and console_scripts - with bash not being cross
@@ -54,4 +53,3 @@ def main():
         klass = Register.get_task_cls(name)
         doc = klass.__doc__ or yellow("@TODO: docs")
         print('{0} {1}\n'.format(green(name), doc))
-

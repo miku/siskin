@@ -4,8 +4,7 @@
 # SID: 142
 # Ticket: #8392
 # TechnicalCollectionID: sid-142-col-gesamtkatduesseldorf
-# Task: 
-
+# Task:
 
 import io
 import re
@@ -16,7 +15,6 @@ import xmltodict
 import marcx
 from siskin.mab import MabXMLFile
 from siskin.utils import marc_build_imprint
-
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"

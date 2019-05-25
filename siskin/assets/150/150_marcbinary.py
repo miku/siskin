@@ -9,7 +9,6 @@ import xmltodict
 
 import marcx
 
-
 inputfilename = "150_input.xml"
 outputfilename = "150_output.mrc"
 
@@ -60,7 +59,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if language == "deu":
         language = "ger"
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-    
+
     # DDC
     setspecs = xmlrecord["header"]["setSpec"]
     for setspec in setspecs:
@@ -68,8 +67,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             ddc1 = setspec.replace("ddc:", "")
             break
     else:
-        ddc1 = ""        
-    
+        ddc1 = ""
+
     try:
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
     except:
@@ -80,7 +79,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             break
     else:
         ddc2 = ""
-    
+
     if len(ddc1) > len(ddc2):
         f082a = ddc1
     else:
@@ -122,7 +121,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f689a = []
     for subject in f689a:
         if "ddc" not in subject:
-            if " , " not in subject:                    
+            if " , " not in subject:
                 marcrecord.add("689", a=subject)
             else:
                 subjects = subject.split(" , ")

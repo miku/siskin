@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Slight MABXML abstraction layer, using xmltodict under the hood. Usable up to
 file sizes of 50M. TODO: For larger files, rewrite this with streaming. MAB is

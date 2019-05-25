@@ -812,7 +812,8 @@ class AMSLFilterConfig(AMSLTask):
             if c in self._name_to_canonical:
                 result.add(self._name_to_canonical[c])
 
-        self.logger.debug("extended collection list from %d to %d items (%d mappings)" % (len(colls), len(result), len(self._name_to_canonical)))
+        self.logger.debug("extended collection list from %d to %d items (%d mappings)" %
+                          (len(colls), len(result), len(self._name_to_canonical)))
         return list(result)
 
     def requires(self):
@@ -1043,21 +1044,22 @@ class AMSLFilterConfig(AMSLTask):
         # A second pass.
         for isil, blob in list(isilsidcollections.items()):
             for sid, colls in list(blob.items()):
-                isilfilters[isil].append({"and": [
-                    {
-                        "source": [sid]
-                    },
-                    {
-                        "collection": sorted(self.extend_collections(colls))
-                    },
-                ]})
+                isilfilters[isil].append(
+                    {"and": [
+                        {
+                            "source": [sid]
+                        },
+                        {
+                            "collection": sorted(self.extend_collections(colls))
+                        },
+                    ]})
 
         # A second pass.
         for isil, blob in list(isilsidlinkcollections.items()):
             for sid, spec in list(blob.items()):
                 for link, colls in list(spec.items()):
-                    isilfilters[isil].append(
-                        {"and": [
+                    isilfilters[isil].append({
+                        "and": [
                             {
                                 "source": [sid]
                             },
@@ -1069,7 +1071,8 @@ class AMSLFilterConfig(AMSLTask):
                                     "urls": [link]
                                 }
                             },
-                        ]})
+                        ]
+                    })
 
         # Final assembly.
         filterconfig = collections.defaultdict(dict)
