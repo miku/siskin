@@ -54,7 +54,7 @@ class SSOARHarvest(SSOARTask):
     endpoint = luigi.Parameter(default='http://www.ssoar.info/OAIHandler/request', significant=False)
 
     def run(self):
-        shellout("""metha-sync -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
+        shellout("""metha-sync -rm -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
         output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""",
                           endpoint=self.endpoint,
                           format=self.format)
