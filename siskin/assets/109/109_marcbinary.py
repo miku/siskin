@@ -236,7 +236,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
     elif ("Plakat" in format or "Kassette" in format or "Box" in format or "Karton" in format or "Postkarten" in format
           or "Teile" in format or "USB" in format or "Schachtel" in format or "Schautafel" in format
           or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
-        format = "Objekt"    
+        format = "Objekt"
+    elif id in parent_ids and len(isbn) == 0:  # Zeitschrift 
+        continue
     else:
         format = "Buch"
 
