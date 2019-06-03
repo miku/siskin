@@ -31,7 +31,7 @@ formatmap = {
         "007": "tu",
         "935b": "druck"
     },
-    "Mehrbänder": {
+    u"Mehrbänder": {
         "007": "tu",
         "935b": "druck"
     },
@@ -215,7 +215,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     regexp = re.search("S\.\s\d+\s?-\s?\d+", format)
 
     if id in parent_ids:
-        format = "Mehrbänder"
+        format = u"Mehrbänder"
     elif len(isbn) > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
         format = "Buch"
     elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
