@@ -61,25 +61,6 @@ class DOAJTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class DOAJCSV(DOAJTask):
-    """
-    CSV dump, updated every 30 minutes. Winter 2018: 12313x58.
-    """
-    date = luigi.DateParameter(default=datetime.date.today())
-    url = luigi.Parameter(default='http://doaj.org/csv', significant=False)
-
-    def requires(self):
-        return Executable(name='wget', message='http://www.gnu.org/software/wget/')
-
-    @timed
-    def run(self):
-        output = shellout('wget --retry-connrefused {url} -O {output}', url=self.url)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='csv'))
-
-
 class DOAJDump(DOAJTask):
     """
     Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la), which will use
