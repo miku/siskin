@@ -24,7 +24,7 @@ def ddcmatch(value):
     return False
 
 
-inputfilename = "150_input_alt.xml"
+inputfilename = "150_input.xml"
 outputfilename = "150_output.mrc"
 isil = "FID-MEDIEN-DE-15"
 
