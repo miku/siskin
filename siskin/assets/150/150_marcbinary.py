@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+# SID: 150
+# Ticket: #11832, #15175
+# TechnicalCollectionID: sid-150-col-monami
+# Task: HSMW
+
 import io
 import re
 import sys
@@ -9,11 +14,22 @@ import xmltodict
 
 import marcx
 
-inputfilename = "150_input.xml"
-outputfilename = "150_output.mrc"
 
-if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:3]
+def ddcmatch(value):
+    """
+    Returns true, if given value matches profile.
+    """
+    if value in ("004.21", "004.65", "005.8", "005.84", "006.31", "006.37", "006.42", "006.69", "006.696", "006.8", "025.58", "070.17", "070.5", "070.5722", "302.23", "346.0482", "760", "658.4038", "686", "741"):
+        return True
+    return False
+
+
+inputfilename = "150_input_alt.xml"
+outputfilename = "150_output.mrc"
+isil = "FID-MEDIEN-DE-15"
+
+if len(sys.argv) == 4:
+    inputfilename, outputfilename, isil = sys.argv[1:4]
 
 inputfile = open(inputfilename, "rb")
 outputfile = open(outputfilename, "wb")
@@ -59,7 +75,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if language == "deu":
         language = "ger"
     marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-
+    
     # DDC
     setspecs = xmlrecord["header"]["setSpec"]
     for setspec in setspecs:
@@ -67,8 +83,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             ddc1 = setspec.replace("ddc:", "")
             break
     else:
-        ddc1 = ""
-
+        ddc1 = ""        
+    
     try:
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
     except:
@@ -79,7 +95,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             break
     else:
         ddc2 = ""
-
+    
     if len(ddc1) > len(ddc2):
         f082a = ddc1
     else:
@@ -121,7 +137,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f689a = []
     for subject in f689a:
         if "ddc" not in subject:
-            if " , " not in subject:
+            if " , " not in subject:                    
                 marcrecord.add("689", a=subject)
             else:
                 subjects = subject.split(" , ")
@@ -141,8 +157,17 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("935", c="hs")
 
     # Profilierung
-    marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
-
+    if isil == "FID-MEDIEN-DE-15":
+        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+    else:
+        ddc = ddcmatch(f082a)   
+        if ddc:
+            marcrecord.add("650", a="mitddc")
+            marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+        else:
+            marcrecord.add("650", a="ohneddc")
+            marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+    
     outputfile.write(marcrecord.as_marc())
 
 inputfile.close()

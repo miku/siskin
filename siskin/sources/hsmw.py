@@ -69,7 +69,7 @@ class HSMWMARC(HSMWTask):
         return HSMWHarvest(date=self.date)
 
     def run(self):
-        output = shellout("python {script} <(unpigz -c {input}) {output}",
+        output = shellout("python {script} <(unpigz -c {input}) {output} FID-MEDIEN-DE-15",
                           script=self.assets("150/150_marcbinary.py"),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
