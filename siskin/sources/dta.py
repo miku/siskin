@@ -53,7 +53,7 @@ class DTAHarvest(DTATask):
 
     def run(self):
         shellout("""metha-sync -rm -format cmdi -set dta https://clarin.bbaw.de/oai-dta/""")
-        output = shellout("""metha-cat -format cmdi https://clarin.bbaw.de/oai-dta/ > {output}""")                        
+        output = shellout("""metha-cat -format cmdi -set dta https://clarin.bbaw.de/oai-dta/ > {output}""")
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
