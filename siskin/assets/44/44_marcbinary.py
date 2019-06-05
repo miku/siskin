@@ -47,7 +47,7 @@ for xmlrecord in records["Records"]["Record"]:
 
     # Identifikator
     id = xmlrecord["header"]["identifier"]
-    id = bytes(id, "utf-8")
+    id = bytes(id)
     id = base64.b64encode(id)
     f001 = id.decode("utf-8").rstrip("=")
     marcrecord.add("001", data="finc-44-" + f001)
