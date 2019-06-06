@@ -114,7 +114,7 @@ There are a couple of prerequisites:
 
 * [ ] siskin is [installed](https://github.com/miku/siskin/#install)
 * [ ] most additional tools are installed (or: output of the `taskchecksetup` is mostly green)
-* [ ] credentials are configured in */etc/siskin/siskin.ini* or *~/.config/siskin/siskin.ini*
+* [ ] credentials are [configured](https://github.com/miku/siskin/#configuration) in */etc/siskin/siskin.ini* or *~/.config/siskin/siskin.ini*
 * [ ] some static data (that cannot be accessed over the net) is put into place (and configured in *siskin.ini*)
 * [ ] sufficient disk space is available
 
