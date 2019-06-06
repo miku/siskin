@@ -442,6 +442,8 @@ for row in rows:
         description = description.split("||")
         f520_a = []
         for description_part in description:
+            if len(description_part) > 8000:
+                description_part = description_part[:8000]
             f520_a.append(description_part)
     else:
         f520_a = ""

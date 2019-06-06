@@ -1,9 +1,9 @@
 # coding: utf-8
-# pylint: disable=C0301,E1101
 
-# Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -21,8 +21,10 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
-Hochschule Mittweida, Collection Medien, refs #11832.
+DTA, refs #14972
+
 """
 
 import datetime
@@ -35,42 +37,41 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class HSMWTask(DefaultTask):
-    """ Base task for source. """
-    TAG = '150'
+class DTATask(DefaultTask):
+    """ Base task for DTA """
+    TAG = '44'
 
     def closest(self):
         return monthly(date=self.date)
 
 
-class HSMWHarvest(HSMWTask):
+class DTAHarvest(DTATask):
     """
-    Harvest specific set.
+    Harvest from default https://clarin.bbaw.de/oai-dta/?verb=ListRecords&set=dta&metadataPrefix=cmdi endpoint.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        endpoint, set = "https://monami.hs-mittweida.de/oai", "institutes:medien"
-        shellout("""metha-sync -set {set} {endpoint}""", set=set, endpoint=endpoint)
-        output = shellout("""metha-cat -set "institutes:medien" {endpoint} | pigz -c > {output} """, endpoint=endpoint)
+        shellout("""metha-sync -rm -format cmdi -set dta https://clarin.bbaw.de/oai-dta/""")
+        output = shellout("""metha-cat -format cmdi -set dta https://clarin.bbaw.de/oai-dta/ > {output}""")
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
-class HSMWMARC(HSMWTask):
+class DTAMARC(DTATask):
     """
-    Importable MARC.
+    Use RS script for conversion, refs #14972.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return HSMWHarvest(date=self.date)
+        return DTAHarvest(date=self.date)
 
     def run(self):
-        output = shellout("python {script} <(unpigz -c {input}) {output} FID-MEDIEN-DE-15",
-                          script=self.assets("150/150_marcbinary.py"),
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets('44/44_marcbinary.py'),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 

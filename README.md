@@ -108,6 +108,48 @@ class AILocalData(AITask):
     ...
 ```
 
+## Create an aggregated file for finc
+
+There are a couple of prerequisites:
+
+* [ ] siskin is [installed](https://github.com/miku/siskin/#install)
+* [ ] most additional tools are installed (or: output of the `taskchecksetup` is mostly green)
+* [ ] credentials are [configured](https://github.com/miku/siskin/#configuration) in */etc/siskin/siskin.ini* or *~/.config/siskin/siskin.ini*
+* [ ] some static data (that cannot be accessed over the net) is put into place (and configured in *siskin.ini*)
+* [ ] sufficient disk space is available
+
+The update process itself consists of various updates:
+
+* all data sources (crossref, doaj, ...) are updated, as needed (e.g. FTP is synced, OAI is harvested, API, ...)
+* the licensing data is fetched from [AMSL](https://amsl.technology)
+
+This dependency graph of these operations can become complex:
+
+![](docs/catalog/AIUpdate.png)
+
+However, if everything is put into place, a single command will suffice:
+
+```shell
+$ taskdo AIUpdate --workers 4
+```
+
+This can be a long running (hours, days) command, depending on the state of the already cached data.
+
+Note: Currently a jour fixe (the 15th of a month) is used as default for the
+licensing information (another task, called *AMSLFilterConfigFreeze* should be
+run daily for this to work). The jour fixe can be overriden with the *current* information, by passing a parameter to the *AILicensing* task:
+
+```
+$ taskdo AIUpdate --workers 4 --AILicensing-override
+```
+
+Once the task is completed, the output of the two tasks:
+
+* AIExport (solr)
+* AIRedact (blob, currently [microblob](https://github.com/miku/microblob))
+
+can be put into their respective data stores (e.g. via [solrbulk](https://github.com/miku/solrbulk)).
+
 ## Configuration
 
 The siskin package harvests all kinds of data sources, some of which might be
