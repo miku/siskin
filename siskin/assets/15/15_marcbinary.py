@@ -181,7 +181,7 @@ for root, _, files in os.walk(input_directory):
         marcrecord.strict = False
 
         # Leader
-        marcrecord.leader = "     ncs  22        450 "
+        marcrecord.leader = "     ncs  22        4500"
 
         # Identifikator
         f001 = record["identifier"]["#text"]
@@ -225,6 +225,8 @@ for root, _, files in os.walk(input_directory):
 
         # Fußnote
         f500a = get_field("abstract")
+        if len(f500a) > 8000:
+            f500a = f500a[:8000]
         marcrecord.add("500", a=f500a)
 
         # Stil / Epoche
