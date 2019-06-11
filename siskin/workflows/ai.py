@@ -58,6 +58,7 @@ from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART,
                                  AMSLService)
 from siskin.sources.arxiv import ArxivIntermediateSchema
+from siskin.sources.base import BasePaths
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.dbinet import DBInetIntermediateSchema
@@ -484,7 +485,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
 class AIExport(AITask):
     """
-    Export to various formats
+    Export to various formats. Include SOLR-ready (isil'd) BASE file as well.
 
     XXX: #11467, crossref vs JSTOR.
     """
@@ -492,13 +493,33 @@ class AIExport(AITask):
     format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
-        return AIIntermediateSchemaDeduplicated(date=self.date)
+        return {
+            'ai': AIIntermediateSchemaDeduplicated(date=self.date),
+            'base': BasePaths(date=self.date),
+        }
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
-                          input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
+        _, tmp = tempfile.mkstemp(prefix='siskin-')
+
+        if self.format == 'solr5vu3':
+            with self.input().get('base').open() as handle:
+                for line in handle:
+                    line = line.strip()
+                    if line.endswith('/latest'):
+                        # e.g. /tmp/common/FTPMirror/c51e3436eaa06588a2e46e71bb551e3c4f5b2772/latest
+                        shellout("""cp "{input}" "{output}" """, input=line, output=tmp)
+                        break
+                else:
+                    raise RuntimeError('cannot find latest file for base')
+        else:
+            self.logger.debug('ignoring base, since format is: %s', self.format)
+
+        shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}",
+                 format=self.format,
+                 input=self.input().get('ai').path,
+                 output=tmp)
+
+        luigi.LocalTarget(tmp).move(self.output().path)
 
     def output(self):
         extensions = {
