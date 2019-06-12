@@ -43,6 +43,9 @@ style:
 docs/catalog/AIUpdate.png: $(PY_FILES)
 	taskdeps-dot AIUpdate | dot -Tpng > $@
 
+docs/sids.tsv:
+	curl -v "https://projekte.ub.uni-leipzig.de/projects/metadaten-quellen/wiki/SIDs.xml?key=$$REDMINE_API_KEY" | xmlcutty -path /wiki_page/text | sed -e 's/|/\t/g; s/^[ \t]*//' | cut -f1-3 | tail -n +4 > $@
+
 # Experimental: build a single file executable for `taskdo` command.
 siskin.pex:
 	pex -v -r <(pip freeze) --disable-cache -c taskdo -o $@
