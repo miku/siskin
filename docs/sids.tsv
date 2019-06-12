@@ -1,179 +1,179 @@
-0	UBL-main	"BSZ (SWB)"
-1	UBL-main	"Project Gutenberg"
-2	UBL-main	"BSZ Löschdaten"
-3	UBL-main	"Nielsen Book Data (UBL Profil)"
-4	UBL-main	"Schweitzer EBL (UBL Profil)"
-5	UBL-main	"Naxos Music Library"
-6	UBL-main	"Music Online Reference, MOR (Nationallizenz)"
-7	UBL-main	"Periodicals Archive Online, PAO (Nationallizenz) [obsolet!]"
-8	UBL-main	"Lizenzfreie elektronische Ressourcen, LFER (BSZ/SWB)"
-9	UBL-main	"Early Music Online"
-10	UBL-main	"Music Treasures Consortium"
-11	UBL-main	"Bibliographie des Musikschrifttums online (BMS online)"
-12	UBL-main	"B3Kat"
-13	UBL-main	"Diss Online"
-14	UBL-main	"Répertoire International des Sources Musicale (RISM)"
-15	UBL-main	"imslp.org (Petrucci)"
-16	UBL-main	"Elsevier E-Book Metadaten (UBL Profil)"
-17	UBL-main	"Nationallizenzen (eBooks / Monographien)"
-18	UBL-main	"Oxford Scholarship Online"
-19	UBL-main	"Kubon &amp; Sagner Digital"
-20	UBL-main	"Bibliothèque nationale de France (BnF): Gallica (Musik)"
-21	UBL-main	"GBVcentral Dumps Musik"
-22	UBL-main	"Qucosa"
-23	UBL-main	"Hochschulschriften HSZIGR Hochschule Zittau/Görlitz"
-24	UBL-main	"Ebrary (TUF Profil)"
-25	UBL-main	"SWB-Verbunddatenbank als Linked Open Data"
-26	UBL-main	"DOAB Directory of Open Access Books"
-27	UBL-main	"Munzinger"
-28	UBL-ai	"DOAJ Directory of Open Access Journals"
-29	UBL-main	"Handwörterbuch der musikalischen Terminologie (vifa)"
-30	UBL-main	"SSOAR Social Science Open Access Repository"
-31	UBL-main	"Opera in Video (OPIV)"
-32	UBL-main	"Test Pilsen"
-33	UBL-main	"Test Liberec"
-34	UBL-ai	"PQDT Open"
-35	UBL-main	"Hathi Trust"
-36	UBL-main	"HistBest System am URZ Leipzig"
-37	UBL-main	"Solr-Fusion statisches Mapping source_id für GBV"
-38	UBL-main	"Solr-Fusion statisches Mapping source_id für DBOD"
-39	UBL-main	"Persee.fr"
-40	UBL-main	"Dance in Video (DAIV)"
-41	UBL-main	"Classical Music in Video (CMIV)"
-42	UBL-main	"Classical Scores Library II (CSL2)"
-43	UBL-main	"TUF Digitale Bibliothek (Anreicherung SWB-Daten)"
-44	UBL-main	"Deutsches Textarchiv (DTA)"
-45	UBL-main	"Solr-Fusion statisches Mapping DBOD No. 2"
-46	UBL-main	"De Gruyter PDA eBooks (HTW Dresden Profil)"
-47	UBL-main	"Vahlen 2014"
-48	UBL-ai	"GBI Genios Wiso"
-49	UBL-ai	"Crossref"
-50	UBL-ai	"DeGruyter SSH"
-51	UBL-main	"VUB PDA print dt (UBL Profil)"
-52	UBL-main	"OECD iLibrary"
-53	UBL-ai	"CEEOL Central and Eastern European Online Library"
-54	UBL-main	"World Bank eLibrary"
-55	UBL-ai	"JSTOR"
-56	UBL-main	"Folkwang Universität der Künste Essen, Lokalsystem"
-57	UBL-main	"Robert Schumann Hochschule RSH Düsseldorf, Lokalsystem"
-58	UBL-main	"Hochschule für Musik und Tanz HfMT Köln, Lokalsystem"
-59	UBL-main	"MyiLibrary PDA (UBL Profil)"
-60	UBL-ai	"Thieme"
-61	UBL-main	"IMF International Monetary Fund"
-62	UBL-main	"Juris"
-63	UBL-main	"De Gruyter eBooks EBS (Sachsen Profil)"
-64	SLUB-dbod	"Databases on Demand (DBoD)"
-65	SLUB-dswarm	"GBV Central (sonstige Inhalte)"
-66	SLUB-dswarm	"HeidICON"
-67	SLUB-dswarm	"SLUB/Deutsche Fotothek"
-68	SLUB-dswarm	"OLC Online Contents (aus GBV Central)"
-69	SLUB-dswarm	"Wiley ebooks (SLUB Profil)"
-70	UBL-main	"Institut Ägyptologie (UBL)"
-71	UBL-main	"OstDok (Virtuelle Fachbibliothek Osteuropa)"
-72	UBL-main	"Morgan &amp; Claypool eBooks"
-73	UBL-main	"MedienwRezensionen"
-74	UBL-main	"Taylor &amp; Francis eBooks EBA (UBL Profil)"
-75	UBL-main	"ProQuest Film-Datenbanken"
-76	UBL-main	"PDA eBooks EBL Schweitzer (FID Profil)"
-77	UBL-main	"Portraitstichsammlung UB Leipzig"
-78	UBL-main	"IZI Datenbank"
-79	UBL-main	"EBL PDA (Berufsakademien Sachsen Profil)"
-80	UBL-main	"Datenbank Internetquellen"
-81		"Digitale Sammlungen der ULB Düsseldorf"
-82	UBL-main	"Jahresbibliografie Massenkommunikation"
-83	SLUB-dswarm	"SLUB/Mediathek"
-84	UBL-main	"OCLC WorldShare Collection Manager"
-85	UBL-ai	"Elsevier Journals (Sachsen Profil)"
-86	UBL-main	"Cambridge University Press eBooks (UBL Profil)"
-87	UBL-ai	"International Journal of Communication"
-88	UBL-main	"Zeitschrift \"Rundfunk und Geschichte\""
-89	UBL-ai	"IEEE Xplore Library"
-92	SLUB-dbod	"DBIS"
-93	UBL-main	"ZVDD"
-94	UBL-main	"Nationallizenzen Zeitschriften (aus GBV Central)"
-95	UBL-main	"Alexander Street Academic Video Online"
-96	UBL-main	"Thieme eBooks Tiermedizin VetCenter"
-97	SLUB-dswarm	"Schweitzer EBL (SLUB Profil)"
-98	SLUB-dswarm	"GNM - Germanisches Nationalmuseum Nürnberg"
-99	UBL-main	"Media Perspektiven"
-100	UBL-main	"Medienwissenschaft \"Berichte und Papiere\""
-101	UBL-ai	"Kieler Beiträge zur Filmmusikforschung"
-102	UBL-ai	"Daphne Objektdatenbank SKD"
-103	UBL-main	"Margaret Herrick Library"
-104	SLUB-dswarm	"WTI"
-105	SLUB-dswarm	"Springer Journals"
-105	UBL-ai	"Springer Journals"
-106	UBL-main	"Primary Sources for Slavic Studies"
-107	UBL-ai	"Heidelberger historische Bestände digital"
-108	UBL-main	"De Gruyter eBooks Open Access"
-109	UBL-main	"Kunsthochschule für Medien Köln (VK Film)"
-110	UBL-ai	"Sowiport (GESIS)"
-111	SLUB-dswarm	"Volltexte \"Illustrierte Presse\""
-112	UBL-dnb	"Deutsche Nationalbibliothek Leipzig"
-113	UBL-main	"Loeb Classical Library"
-114	UBL-main	"Ebook Central - SUB Collection \"The Arts\""
-115	SLUB-dswarm	"Heidelberger Bibliographien"
-116	UBL-main	"Deutsches Filminstitut Frankfurt (VK Film)"
-117	UBL-main	"Universität der Künste Berlin (VK Film)"
-118	UBL-main	"Zentrum für Kunst und Medien Karlsruhe (VK Film)"
-119	UBL-main	"Universitätsbibliothek Frankfurt am Main (VK Film)"
-120	UBL-main	"Cambridge University Press eBooks (Sachsen)"
-121	UBL-ai	"Arxiv"
-122	UBL-main	"Springer eBooks"
-123	UBL-ai	"OpenAIRE"
-124	UBL-main	"DawsonEra PDA (Profil RWTH Aachen)"
-125	UBL-main	"Universitätsbibliothek Siegen (VK Film)"
-126	SLUB-dswarm	"BASE Bielefeld Academic Search Engine"
-127	UBL-main	"Filmuniversität Konrad Wolf Potsdam (VK Film)"
-128	UBL-main	"McGraw-Hill Access Engineering (RWTH Aachen Profil)"
-129	UBL-main	"GEOSCAN Database"
-130	UBL-main	"Stahlinstitut VDEh - Fachbibliothek"
-131	UBL-main	"GDMB"
-132	UBL-ai	"Römpp (Thieme)"
-133	UBL-ai	"Cambridge University Press Journals"
-134	UBL-main	"Feministische Bibliothek MONAliesA"
-135	UBL-main	"Elsevier EBS (Profil RWTH Aachen)"
-136	UBL-main	"Leipziger Städtische Bibliotheken"
-137	SLUB-dswarm	"Bundeskunsthalle Bonn"
-138	UBL-ai	"Europeana"
-139	UBL-ai	"Deutsche Digitale Bibliothek (DDB)"
-140	SLUB-dswarm	"Kalliope-Verbund"
-141	SLUB-dswarm	"Lynda.com (video2brain)"
-142	UBL-main	"Gesamtkatalog der Düsseldorfer Kulturinstitute (VK Film)"
-143	UBL-main	"JOVE Journal of Visualized Experiments"
-144	UBL-main	"Taylor and Francis EBS (UBC, HSZG)"
-145	SLUB-dswarm	"TIB AV-Portal"
-146	UBL-main	"Produktionsarchivdaten Fernsehen von ARD und ZDF"
-147	UBL-main	"Nationallizenz Palgrave Economics &amp; Finance 2000-2013"
-148	UBL-main	"Bundesarchiv (Filmarchiv)"
-149	SLUB-dswarm	"Wiley Journals (Sachsen)"
-150	UBL-main	"MOnAMi Hochschulschriftenserver Mittweida"
-151	UBL-main	"Filmakademie Baden-Württemberg"
-152	SLUB-dswarm	"United Nations iLibrary"
-153	UBL-main	"Internet Archive (archive.org)"
-154	UBL-main	"CAMECO Catholic Media Council"
-155	UBL-main	"Deutsche Kinemathek (VK Film)"
-156	UBL-main	"Umweltbibliothek Leipzig"
-157	UBL-main	"Hanser EBS eBooks (Berufsakademien Sachsen Profil)"
-158	UBL-ai	"Olms Online"
-159	UBL-main	"Buchhandschriften der UB Leipzig"
-160	UBL-main	"Diplomarbeiten der Sportwissenschaftlichen Fakultät der Universität Leipzig"
-161	UBL-main	"Cambridge eBooks Open Access"
-162	UBL-ai	"Gender Open Repositorium"
-163	UBL-main	"Nachlässe der UB Leipzig"
-164	UBL-main	"Japanische Videospielsammlung (UBL)"
-165	UBL-main	"Tectum eBooks (HfMT Köln)"
-166	SLUB-dswarm	"Kunsthistorisches Institut Florenz"
-167	SLUB-dswarm	"Bildarchiv Foto Marburg"
-168	SLUB-dswarm	"Bibliotheca Hertziana – Max–Planck–Institut für Kunstgeschichte"
-169	UBL-main	"MediathekView"
-170	UBL-main	"media/rep/ - Repositorium für die Medienwissenschaft"
-171	UBL-main	"PressReader (via Digento)"
-172	UBL-main	"OER aus OPAL (UB Freiberg)"
-173	UBL-ai	"Wolfenbütteler Bibliographie zur Geschichte des Buchwesens"
-174		"Zenodo"
-175	UBL-main	"Libris-Katalog der schwedischen Nationalbibliothek"
-176	UBL-main	"Fennica-Katalog der finnischen Nationalbibliothek"
-177	UBL-ai	"DataCite"
-200	UBL-main	"finc TEST"
-201	SLUB-dswarm	"Perinorm"
+0	UBL-main	BSZ (SWB)
+1	UBL-main	Project Gutenberg
+2	UBL-main	BSZ Löschdaten
+3	UBL-main	Nielsen Book Data (UBL Profil)
+4	UBL-main	Schweitzer EBL (UBL Profil)
+5	UBL-main	Naxos Music Library
+6	UBL-main	Music Online Reference, MOR (Nationallizenz)
+7	UBL-main	Periodicals Archive Online, PAO (Nationallizenz) [obsolet!]
+8	UBL-main	Lizenzfreie elektronische Ressourcen, LFER (BSZ/SWB)
+9	UBL-main	Early Music Online
+10	UBL-main	Music Treasures Consortium
+11	UBL-main	Bibliographie des Musikschrifttums online (BMS online)
+12	UBL-main	B3Kat
+13	UBL-main	Diss Online
+14	UBL-main	Répertoire International des Sources Musicale (RISM)
+15	UBL-main	imslp.org (Petrucci)
+16	UBL-main	Elsevier E-Book Metadaten (UBL Profil)
+17	UBL-main	Nationallizenzen (eBooks / Monographien)
+18	UBL-main	Oxford Scholarship Online
+19	UBL-main	Kubon &amp; Sagner Digital
+20	UBL-main	Bibliothèque nationale de France (BnF): Gallica (Musik)
+21	UBL-main	GBVcentral Dumps Musik
+22	UBL-main	Qucosa
+23	UBL-main	Hochschulschriften HSZIGR Hochschule Zittau/Görlitz
+24	UBL-main	Ebrary (TUF Profil)
+25	UBL-main	SWB-Verbunddatenbank als Linked Open Data
+26	UBL-main	DOAB Directory of Open Access Books
+27	UBL-main	Munzinger
+28	UBL-ai	DOAJ Directory of Open Access Journals
+29	UBL-main	Handwörterbuch der musikalischen Terminologie (vifa)
+30	UBL-main	SSOAR Social Science Open Access Repository
+31	UBL-main	Opera in Video (OPIV)
+32	UBL-main	Test Pilsen
+33	UBL-main	Test Liberec
+34	UBL-ai	PQDT Open
+35	UBL-main	Hathi Trust
+36	UBL-main	HistBest System am URZ Leipzig
+37	UBL-main	Solr-Fusion statisches Mapping source_id für GBV
+38	UBL-main	Solr-Fusion statisches Mapping source_id für DBOD
+39	UBL-main	Persee.fr
+40	UBL-main	Dance in Video (DAIV)
+41	UBL-main	Classical Music in Video (CMIV)
+42	UBL-main	Classical Scores Library II (CSL2)
+43	UBL-main	TUF Digitale Bibliothek (Anreicherung SWB-Daten)
+44	UBL-main	Deutsches Textarchiv (DTA)
+45	UBL-main	Solr-Fusion statisches Mapping DBOD No. 2
+46	UBL-main	De Gruyter PDA eBooks (HTW Dresden Profil)
+47	UBL-main	Vahlen 2014
+48	UBL-ai	GBI Genios Wiso
+49	UBL-ai	Crossref
+50	UBL-ai	DeGruyter SSH
+51	UBL-main	VUB PDA print dt (UBL Profil)
+52	UBL-main	OECD iLibrary
+53	UBL-ai	CEEOL Central and Eastern European Online Library
+54	UBL-main	World Bank eLibrary
+55	UBL-ai	JSTOR
+56	UBL-main	Folkwang Universität der Künste Essen, Lokalsystem
+57	UBL-main	Robert Schumann Hochschule RSH Düsseldorf, Lokalsystem
+58	UBL-main	Hochschule für Musik und Tanz HfMT Köln, Lokalsystem
+59	UBL-main	MyiLibrary PDA (UBL Profil)
+60	UBL-ai	Thieme
+61	UBL-main	IMF International Monetary Fund
+62	UBL-main	Juris
+63	UBL-main	De Gruyter eBooks EBS (Sachsen Profil)
+64	SLUB-dbod	Databases on Demand (DBoD)
+65	SLUB-dswarm	GBV Central (sonstige Inhalte)
+66	SLUB-dswarm	HeidICON
+67	SLUB-dswarm	SLUB/Deutsche Fotothek
+68	SLUB-dswarm	OLC Online Contents (aus GBV Central)
+69	SLUB-dswarm	Wiley ebooks (SLUB Profil)
+70	UBL-main	Institut Ägyptologie (UBL)
+71	UBL-main	OstDok (Virtuelle Fachbibliothek Osteuropa)
+72	UBL-main	Morgan &amp; Claypool eBooks
+73	UBL-main	MedienwRezensionen
+74	UBL-main	Taylor &amp; Francis eBooks EBA (UBL Profil)
+75	UBL-main	ProQuest Film-Datenbanken
+76	UBL-main	PDA eBooks EBL Schweitzer (FID Profil)
+77	UBL-main	Portraitstichsammlung UB Leipzig
+78	UBL-main	IZI Datenbank
+79	UBL-main	EBL PDA (Berufsakademien Sachsen Profil)
+80	UBL-main	Datenbank Internetquellen
+81		Digitale Sammlungen der ULB Düsseldorf
+82	UBL-main	Jahresbibliografie Massenkommunikation
+83	SLUB-dswarm	SLUB/Mediathek
+84	UBL-main	OCLC WorldShare Collection Manager
+85	UBL-ai	Elsevier Journals (Sachsen Profil)
+86	UBL-main	Cambridge University Press eBooks (UBL Profil)
+87	UBL-ai	International Journal of Communication
+88	UBL-main	Zeitschrift Rundfunk und Geschichte
+89	UBL-ai	IEEE Xplore Library
+92	SLUB-dbod	DBIS
+93	UBL-main	ZVDD
+94	UBL-main	Nationallizenzen Zeitschriften (aus GBV Central)
+95	UBL-main	Alexander Street Academic Video Online
+96	UBL-main	Thieme eBooks Tiermedizin VetCenter
+97	SLUB-dswarm	Schweitzer EBL (SLUB Profil)
+98	SLUB-dswarm	GNM - Germanisches Nationalmuseum Nürnberg
+99	UBL-main	Media Perspektiven
+100	UBL-main	Medienwissenschaft Berichte und Papiere
+101	UBL-ai	Kieler Beiträge zur Filmmusikforschung
+102	UBL-ai	Daphne Objektdatenbank SKD
+103	UBL-main	Margaret Herrick Library
+104	SLUB-dswarm	WTI
+105	SLUB-dswarm	Springer Journals
+105	UBL-ai	Springer Journals
+106	UBL-main	Primary Sources for Slavic Studies
+107	UBL-ai	Heidelberger historische Bestände digital
+108	UBL-main	De Gruyter eBooks Open Access
+109	UBL-main	Kunsthochschule für Medien Köln (VK Film)
+110	UBL-ai	Sowiport (GESIS)
+111	SLUB-dswarm	Volltexte Illustrierte Presse
+112	UBL-dnb	Deutsche Nationalbibliothek Leipzig
+113	UBL-main	Loeb Classical Library
+114	UBL-main	Ebook Central - SUB Collection The Arts
+115	SLUB-dswarm	Heidelberger Bibliographien
+116	UBL-main	Deutsches Filminstitut Frankfurt (VK Film)
+117	UBL-main	Universität der Künste Berlin (VK Film)
+118	UBL-main	Zentrum für Kunst und Medien Karlsruhe (VK Film)
+119	UBL-main	Universitätsbibliothek Frankfurt am Main (VK Film)
+120	UBL-main	Cambridge University Press eBooks (Sachsen)
+121	UBL-ai	Arxiv
+122	UBL-main	Springer eBooks
+123	UBL-ai	OpenAIRE
+124	UBL-main	DawsonEra PDA (Profil RWTH Aachen)
+125	UBL-main	Universitätsbibliothek Siegen (VK Film)
+126	SLUB-dswarm	BASE Bielefeld Academic Search Engine
+127	UBL-main	Filmuniversität Konrad Wolf Potsdam (VK Film)
+128	UBL-main	McGraw-Hill Access Engineering (RWTH Aachen Profil)
+129	UBL-main	GEOSCAN Database
+130	UBL-main	Stahlinstitut VDEh - Fachbibliothek
+131	UBL-main	GDMB
+132	UBL-ai	Römpp (Thieme)
+133	UBL-ai	Cambridge University Press Journals
+134	UBL-main	Feministische Bibliothek MONAliesA
+135	UBL-main	Elsevier EBS (Profil RWTH Aachen)
+136	UBL-main	Leipziger Städtische Bibliotheken
+137	SLUB-dswarm	Bundeskunsthalle Bonn
+138	UBL-ai	Europeana
+139	UBL-ai	Deutsche Digitale Bibliothek (DDB)
+140	SLUB-dswarm	Kalliope-Verbund
+141	SLUB-dswarm	Lynda.com (video2brain)
+142	UBL-main	Gesamtkatalog der Düsseldorfer Kulturinstitute (VK Film)
+143	UBL-main	JOVE Journal of Visualized Experiments
+144	UBL-main	Taylor and Francis EBS (UBC, HSZG)
+145	SLUB-dswarm	TIB AV-Portal
+146	UBL-main	Produktionsarchivdaten Fernsehen von ARD und ZDF
+147	UBL-main	Nationallizenz Palgrave Economics &amp; Finance 2000-2013
+148	UBL-main	Bundesarchiv (Filmarchiv)
+149	SLUB-dswarm	Wiley Journals (Sachsen)
+150	UBL-main	MOnAMi Hochschulschriftenserver Mittweida
+151	UBL-main	Filmakademie Baden-Württemberg
+152	SLUB-dswarm	United Nations iLibrary
+153	UBL-main	Internet Archive (archive.org)
+154	UBL-main	CAMECO Catholic Media Council
+155	UBL-main	Deutsche Kinemathek (VK Film)
+156	UBL-main	Umweltbibliothek Leipzig
+157	UBL-main	Hanser EBS eBooks (Berufsakademien Sachsen Profil)
+158	UBL-ai	Olms Online
+159	UBL-main	Buchhandschriften der UB Leipzig
+160	UBL-main	Diplomarbeiten der Sportwissenschaftlichen Fakultät der Universität Leipzig
+161	UBL-main	Cambridge eBooks Open Access
+162	UBL-ai	Gender Open Repositorium
+163	UBL-main	Nachlässe der UB Leipzig
+164	UBL-main	Japanische Videospielsammlung (UBL)
+165	UBL-main	Tectum eBooks (HfMT Köln)
+166	SLUB-dswarm	Kunsthistorisches Institut Florenz
+167	SLUB-dswarm	Bildarchiv Foto Marburg
+168	SLUB-dswarm	Bibliotheca Hertziana – Max–Planck–Institut für Kunstgeschichte
+169	UBL-main	MediathekView
+170	UBL-main	media/rep/ - Repositorium für die Medienwissenschaft
+171	UBL-main	PressReader (via Digento)
+172	UBL-main	OER aus OPAL (UB Freiberg)
+173	UBL-ai	Wolfenbütteler Bibliographie zur Geschichte des Buchwesens
+174		Zenodo
+175	UBL-main	Libris-Katalog der schwedischen Nationalbibliothek
+176	UBL-main	Fennica-Katalog der finnischen Nationalbibliothek
+177	UBL-ai	DataCite
+200	UBL-main	finc TEST
+201	SLUB-dswarm	Perinorm
