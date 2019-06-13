@@ -35,18 +35,51 @@ for csv_record in csv_records.iterrows():
     f001 = "finc-160-" + str(csv_record["001"])
     marc_record.add("001", data=f001)
 
+    # Zugangsformat
     marc_record.add("007", data="tu")
+    
+    # Sprache
     marc_record.add("041", a=csv_record["041a"])
+    
+    # Notation
     marc_record.add("084", a="ZX 3900", _2="rvk")
+   
+    # 1. Urheber
     marc_record.add("100", a=csv_record["100a"])
+    
+    # Titel
     marc_record.add("245", a=csv_record["245a"])
 
-    publisher = ["b", u"Universität Leipzig, Sportwissenschaftliche Fakultät, ", "c", csv_record["260c"]]
+    # Erscheinungsvermerk
+    publisher = csv_record["502a"]
+    match1 = re.search("(.*?),\s(.*?),\s(.*?),\s([\[\d].*)", publisher)
+    match2 = re.search("(.*?),\s(.*?),\s(.*?),\s(.*?),\s([\[\d].*)", publisher)
+    if match1:
+        f260a = match1.group(1)
+        f260b = match1.group(2)
+    elif match2:
+        f260a = match2.group(1)
+        f260b1 = match2.group(2)
+        f260b2 = match2.group(3)
+        f260b = f260b1 + ", " + f260b2
+    else:
+        f260a = ""
+        f260b = ""
+    publisher = ["a", f260a, "b", f260b, "c", csv_record["260c"]]
     marc_record.add("260", subfields=publisher)
 
+    # Umfang
     marc_record.add("300", a=csv_record["300a"])
+    
+    # Fußnote
     marc_record.add("500", a=u"Signatur: " + csv_record["Signatur\ngesamt"])
-    marc_record.add("502", a=csv_record["502a"])
+
+    # Hochschulvermerk
+    university = csv_record["502a"]
+    match1 = re.search("(.*?),\s(.*?),\s(.*?),\s([\[\d].*)", university)
+    match2 = re.search("(.*?),\s(.*?),\s(.*?),\s(.*?),\s([\[\d].*)", university)
+    if match1 or match2:
+        marc_record.add("502", a=university)
 
     # weitere Urheber
     for field in csv_record.keys():
