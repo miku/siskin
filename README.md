@@ -264,6 +264,37 @@ Other tools:
 * use [pytest](https://docs.pytest.org/), [pytest-cov](https://pypi.org/project/pytest-cov/), coverage at 9%
 * use [tox](https://tox.readthedocs.io/) for testing siskin Python 2 and 3 compatibility
 
+## Deployment
+
+A distribution can be created via Makefile.
+
+```
+$ make dist
+$ tree dist/
+dist/
+└── siskin-0.62.0.tar.gz
+```
+
+The tarball can be installed via [pip](https://pypi.org/project/pip/):
+
+```
+$ pip install siskin-0.62.0.tar.gz
+```
+
+If access to PyPI is possible, one can upload the tarball there with:
+
+```
+$ make upload
+```
+
+Which in turn allows to install siskin via:
+
+```
+$ pip install -U siskin
+```
+
+on the target machine.
+
 ## TODO
 
 * [ ] The naming of the scripts is a bit unfortunate, `taskdo`, `taskcat`,
