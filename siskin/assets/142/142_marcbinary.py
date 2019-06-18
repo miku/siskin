@@ -122,8 +122,10 @@ for record in reader:
     marcrecord.add("300", subfields=subfields)
 
     # Reihe
-
-
+    f490a = record.field("451")
+    marcrecord.add("490", a=f490a)
+    f490a = record.field("461")
+    marcrecord.add("490", a=f490a)
 
     # weitere geistige Schöpfer
     for i in range(104, 199, 4):
