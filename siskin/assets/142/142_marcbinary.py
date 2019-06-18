@@ -123,9 +123,7 @@ for record in reader:
 
     # Reihe
 
-    # Abstract
 
-    # Schlagwörter
 
     # weitere geistige Schöpfer
     for i in range(104, 199, 4):
@@ -141,7 +139,16 @@ for record in reader:
 
     # übergeordnetes Werk
 
+
     # Link zu Datensatz und Ressource
+    f655z = record.field("655", "z")
+    f6553 = record.field("655", "3")
+    f856u = record.field("655", "u")
+    if f655z:
+        f856q = f655z
+    else:
+        f856q = f6553
+    marcrecord.add("856", q=f856q, u=f856u)
 
     # Kollektion
     marcrecord.add("912", a="vkfilm")
