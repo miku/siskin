@@ -78,31 +78,37 @@ for record in reader:
         format = "Loose-leaf"
     elif "Faltbl" in format or "Leporello" in format or "Postkarte" in format:
         format = "Object"
-    elif "DVD-Video" in format:
+    elif "DVD-Video" in format or "1 DVD" in format or "DVDs" in format:
         format = "DVD-Video"
+    elif "Audio-DVD" in format:
+        format = "DVD-Audio"
     elif "Blu-ray" in format or "Blu-Ray" in format or "Bluray" in format:
         format = "Blu-Ray-Disc"
-    elif "Videokassette" in format:
+    elif "Videokassette" in format or "Videokasette" in format or "Video-Kassette" in format or "VHS" in format:
         format = "Video-Cassette"
-    elif "Audiokassette" in format:
+    elif "Audiokassette" in format or " MC" in format or "1 Kassette" in format:
         format = "Audio-Cassette"
-    elif "CD-ROM" in format:
+    elif "-ROM" in format or "-Rom" in format:
         format = "CD-ROM"
     elif "DVD-ROM" in format:
         format = "DVD-ROM"
-    elif "Mikrofilm" in format:
+    elif "Mikrofilm" in format or "Mikrofiche" in format or "Microfiche" in format:
         format = "Microform"
-    elif "getr. gez." in format:
+    elif "etr. gez." in format:
         format = "Newspaper"
-    elif "Audio-CD" in format or "Compact Disc" in format or "Compact Disk" in format or "Compakt Disk" in format or "Compact-Disk" in format or "CDs" in format or format == "1 CD":
+    elif "Karte" in format:
+        format = "Map"
+    elif "CD " in format or " CD" in format or "-CD" in format or "Compact" in format or "Compakt" in format or "Cds" in format:
         format = "CD-Audio"
+    elif "Diskette" in format:
+        format = "Floppy-Disk"
     else:
         format = "Unknown"
-        print("331 ", record.field("331"))
-        print("050 ", record.field("050"))
+        #print("331 ", record.field("331"))
+        #print("050 ", record.field("050"))
         print("433 ", record.field("433"))
-        print("540 ", record.field("540"))
-        print("\n")
+        #print("540 ", record.field("540"))
+        #print("\n")
 
     # Leader
     leader = formats[format]["Leader"]
