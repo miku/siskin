@@ -14,7 +14,6 @@ import xmltodict
 
 import marcx
 from siskin.mab import MabXMLFile
-from siskin.utils import marc_build_imprint
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -146,7 +145,7 @@ for record in reader:
     f260a = record.field("410", alt="")
     f260b = record.field("412", alt="")
     f260c = record.field("425", alt="")
-    subfields = marc_build_imprint(f260a, f260b, f260c)
+    subfields = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
