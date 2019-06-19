@@ -62,6 +62,9 @@ for record in reader:
             f245p = title
             f773w = "(DE-576)" + parent_id
 
+    if not f245a:
+        continue
+
     # Format
     format = record.field("433", alt="")
     regexp1 = re.search("\d\.?\sS", format)
@@ -91,7 +94,7 @@ for record in reader:
         f935b = "cdda"
         f935c = ""
     else:
-        leader = "     nac  22        4500"
+        leader = "     xxx  22        4500"
         f935b = ""
         f935c = ""
         print("050 ", record.field("050"))
