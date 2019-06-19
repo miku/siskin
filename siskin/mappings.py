@@ -1,9 +1,10 @@
 # coding: utf-8
 # pylint: disable=C0103,W0232,C0301,W0703
 
-# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
-#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#					Martin Czygan, <martin.czygan@uni-leipzig.de>
+#					Robert Schenk, <robert.schenk@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -21,8 +22,21 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
-Static mappings for reuse.
+Static mappings for reuse
 """
 
-formats = {}
+from collections import defaultdict
+
+
+formats = defaultdict(dict)
+
+formats[""]["Leader"] = ""
+formats[""]["007"] = ""
+formats[""]["008"] = ""
+formats[""]["336b"] = ""
+formats[""]["338b"] = ""
+formats[""]["655a"] = ""
+formats[""]["6552"] = ""
+formats[""]["935c"] = ""
