@@ -25,17 +25,53 @@ if len(sys.argv) == 3:
 reader = MabXMLFile(inputfilename, replace=((u"¬", ""), ))
 outputfile = open(outputfilename, "wb")
 
+parent_ids = []
+parent_titles = {}
+
+for record in reader:
+   
+    parent_id = record.field("010", alt="")
+
+    if len(parent_id) > 0:
+        parent_ids.append(parent_id)
+
+for record in reader:
+
+    id = record.field("001")
+    title = record.field("331")
+
+    if id in parent_ids:
+        parent_titles[id] = title
+
 for record in reader:
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
+    parent_id = record.field("010", alt="")
+    id = record.field("001")
+    title = record.field("331")
+
+    f245a = title
+    f245p = ""
+    f773w = ""
+
+    if len(parent_id) > 0:
+        has_parent_title = parent_titles.get(parent_id, None)
+        if has_parent_title:
+            f245a = parent_titles[parent_id]
+            f245p = title
+            f773w = "(DE-576)" + parent_id
+
     # Format
     format = record.field("433", alt="")
-
     regexp1 = re.search("\d\.?\sS", format)
 
-    if "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or "Zählung" in format or regexp1:
+    if id in parent_ids:
+        leader = "     cam  22       a4500"
+        f935b = ""
+        f935c = ""
+    elif "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or "Zählung" in format or regexp1:
         leader = "     cam  22        4500"
         f935b = "druck"
         f935c = "lo"
@@ -98,15 +134,11 @@ for record in reader:
     f110a = record.field("200")
     marcrecord.add("110", a=f110a)
 
-    # Haupttitel
-    f245a = record.field("331")
-    if not f245a:
-        continue
-
+    # Haupttitel & Verantwortlichenangabe
     f245b = record.field("335")
     f245c = record.field("359")
-    subfields = ["a", f245a, "b", f245b, "c", f245c]
-    marcrecord.add("245", subfields=subfields)
+    f245 = ["a", f245a, "b", f245b, "c", f245c, "p", f245p]
+    marcrecord.add("245", subfields=f245)
 
     # Erscheinungsvermerk
     f260a = record.field("410", alt="")
@@ -140,7 +172,7 @@ for record in reader:
         marcrecord.add("710", a=f710a)
 
     # übergeordnetes Werk
-
+    marcrecord.add("773", w=f773w)
 
     # Link zu Datensatz und Ressource
     f655z = record.field("655", "z")
