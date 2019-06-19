@@ -14,6 +14,7 @@ import xmltodict
 
 import marcx
 from siskin.mab import MabXMLFile
+from siskin.mappings import formats
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -70,48 +71,55 @@ for record in reader:
     regexp1 = re.search("\d\.?\sS", format)
 
     if id in parent_ids:
-        leader = "     cam  22       a4500"
-        f935b = ""
-        f935c = ""
+        format = "Multipart"
     elif "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or "Zählung" in format or regexp1:
-        leader = "     cam  22        4500"
-        f935b = "druck"
-        f935c = "lo"
-    elif "Faltbl" in format:
-        leader = "     cam  22        4500"
-        f935b = "plakat"
-        f935c = ""
+        format = "Book"
+    elif "Loseblatt" in format:
+        format = "Loose-leaf"
+    elif "Faltbl" in format or "Leporello" in format or "Postkarte" in format:
+        format = "Object"
+    elif "DVD-Video" in format:
+        format = "DVD-Video"
+    elif "Blu-ray" in format or "Blu-Ray" in format or "Bluray" in format:
+        format = "Blu-Ray-Disc"
+    elif "Videokassette" in format:
+        format = "Video-Cassette"
+    elif "Audiokassette" in format:
+        format = "Audio-Cassette"
     elif "CD-ROM" in format:
-        leader = "     cam  22        4500"
-        f935b = "crom"
-        f935c = ""
+        format = "CD-ROM"
     elif "DVD-ROM" in format:
-        leader = "     cam  22        4500"
-        f935b = "dvdv"
-        f935c = ""
-    elif "Compact Disc" in format:
-        leader = "     cam  22        4500"
-        f935b = "cdda"
-        f935c = ""
+        format = "DVD-ROM"
+    elif "Mikrofilm" in format:
+        format = "Microform"
+    elif "getr. gez." in format:
+        format = "Newspaper"
+    elif "Audio-CD" in format or "Compact Disc" in format or "Compact Disk" in format or "Compakt Disk" in format or "Compact-Disk" in format or "CDs" in format or format == "1 CD":
+        format = "CD-Audio"
     else:
-        leader = "     xxx  22        4500"
-        f935b = ""
-        f935c = ""
+        format = "Unknown"
+        print("331 ", record.field("331"))
         print("050 ", record.field("050"))
         print("433 ", record.field("433"))
         print("540 ", record.field("540"))
         print("\n")
 
     # Leader
+    leader = formats[format]["Leader"]
     marcrecord.leader = leader
 
-    # Identifier
+    # Identifikator
     f001 = record.field("001")
     f001 = "finc-142-" + f001
     marcrecord.add("001", data=f001)
 
-    # 007
-    marcrecord.add("007", data="tu")
+    # Zugangsart
+    f007 = formats[format]["p007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodizität
+    f008 = formats[format]["008"]
+    marcrecord.add("008", data=f008)
 
     # ISBN
     isbns = record.fields("540")
@@ -157,11 +165,24 @@ for record in reader:
     subfields = ["a", f300a, "b", f300b]
     marcrecord.add("300", subfields=subfields)
 
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
     # Reihe
     f490a = record.field("451")
     marcrecord.add("490", a=f490a)
     f490a = record.field("461")
     marcrecord.add("490", a=f490a)
+
+    # GND-Inhalts- und Datenträgertyp
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("338", a=f655a, _2=f6552)
 
     # weitere geistige Schöpfer
     for i in range(104, 199, 4):
@@ -191,8 +212,9 @@ for record in reader:
     # Kollektion
     marcrecord.add("912", a="vkfilm")
 
-    # Medientyp
-    marcrecord.add("935", b=f935b, c=f935c)
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
 
     # Ansigelung
     f001 = record.field("001")
