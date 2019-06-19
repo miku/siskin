@@ -119,7 +119,7 @@ formats["Microform"]["336b"] = "txt"
 formats["Microform"]["338b"] = "hj"
 formats["Microform"]["655a"] = ""
 formats["Microform"]["6552"] = ""
-formats["Microform"]["935c"] = "muno"
+formats["Microform"]["935c"] = ""
 
 formats["Map"]["Leader"] = "     cem  22        4500"
 formats["Map"]["p007"] = "au"
