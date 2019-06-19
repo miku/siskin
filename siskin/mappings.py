@@ -129,7 +129,7 @@ formats["Map"]["336b"] = "sti"
 formats["Map"]["338b"] = "nc"
 formats["Map"]["655a"] = "Atlas"
 formats["Map"]["6552"] = "gnd-content"
-formats["Map"]["935c"] = "muno"
+formats["Map"]["935c"] = ""
 
 formats["Book"]["Leader"] = "     cam  22        4500"
 formats["Book"]["p007"] = "tu"
