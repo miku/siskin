@@ -92,11 +92,13 @@ for record in reader:
         f935b = "cdda"
         f935c = ""
     else:
+        leader = "     nac  22        4500"
+        f935b = ""
+        f935c = ""
         print("050 ", record.field("050"))
         print("433 ", record.field("433"))
         print("540 ", record.field("540"))
         print("\n")
-        #break
 
     # Leader
     marcrecord.leader = leader
