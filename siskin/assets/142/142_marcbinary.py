@@ -104,11 +104,6 @@ for record in reader:
         format = "Floppy-Disk"
     else:
         format = "Unknown"
-        #print("331 ", record.field("331"))
-        #print("050 ", record.field("050"))
-        print("433 ", record.field("433"))
-        #print("540 ", record.field("540"))
-        #print("\n")
 
     # Leader
     leader = formats[format]["Leader"]
