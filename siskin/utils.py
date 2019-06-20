@@ -475,3 +475,19 @@ def marc_build_imprint(place="", publisher="", year=""):
         del2 = ""
 
     return ["a", place + del1, "b", publisher + del2, "c", year]
+
+
+def marc_build_field_008(year="", periodicity="", language=""):
+    """
+    Takes year of publication, periodicity and language und returns entire field.
+    """
+    if len(year) != 4:
+        year = "    "
+
+    if len(periodicity) != 1:
+        periodicity = " "
+
+    if len(language) != 3:
+        language = "   "
+
+    return "       " + year + "          " + periodicity + "             " + language + "  "
