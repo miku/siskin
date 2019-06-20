@@ -502,7 +502,9 @@ def check_isbn(isbn=""):
     isbn = isbn.replace(".", "-")
     match = re.search("([0-9xX-]{10,17})", isbn)
     if match:
-        return match.group(1)
+        isbn = match.group(1)
+        if len(isbn) == 10 or len(isbn) == 13 or len(isbn) == 17:
+            return isbn
     return ""
 
 
