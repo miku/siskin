@@ -504,3 +504,16 @@ def check_isbn(isbn=""):
     if match:
         return match.group(1)
     return ""
+
+
+def check_issn(issn=""):
+    """
+    Check and clean ISSN.
+    """
+    issn = issn.strip()
+    issn = issn.replace(" ", "-")
+    issn = issn.replace(".", "-")
+    match = re.search("([0-9xX-]{9,9})", issn)
+    if match:
+        return match.group(1)
+    return ""
