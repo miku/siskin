@@ -135,7 +135,7 @@ for record in reader:
     # ISSN
     issns = record.fields("542")
     for issn in issns:
-        f022a = check_isbn(issn)
+        f022a = check_issn(issn)
         marcrecord.add("022", a=f022a)
 
     # Sprache
