@@ -15,7 +15,7 @@ import xmltodict
 import marcx
 from siskin.mab import MabXMLFile
 from siskin.mappings import formats
-from siskin.utils import marc_build_field_008, check_isbn
+from siskin.utils import marc_build_field_008, check_isbn, check_issn
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -134,8 +134,8 @@ for record in reader:
 
     # ISSN
     issns = record.fields("542")
-    for f022a in issns:
-        f022a = f022a.replace("ISSN ", "")
+    for issn in issns:
+        f022a = check_isbn(issn)
         marcrecord.add("022", a=f022a)
 
     # Sprache
