@@ -15,6 +15,7 @@ import xmltodict
 import marcx
 from siskin.mab import MabXMLFile
 from siskin.mappings import formats
+from siskin.utils import marc_build_field_008
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -119,7 +120,10 @@ for record in reader:
     marcrecord.add("007", data=f007)
 
     # Periodizität
-    f008 = formats[format]["008"]
+    year = record.field("425", alt="")
+    periodicity = formats[format]["008"]
+    language = record.field("037", alt="")
+    f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
     # ISBN
