@@ -497,7 +497,7 @@ def check_isbn(isbn=""):
     """
     Check and clean ISBN.
     """
-    match = re.search("(\d.*)", isbn)
+    match = re.search("\W(\d.*)", isbn)
     if match:
         isbn = match.group(1)
         isbn = isbn.replace(" ", "-")
