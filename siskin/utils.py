@@ -491,3 +491,16 @@ def marc_build_field_008(year="", periodicity="", language=""):
         language = "   "
 
     return "       " + year + "          " + periodicity + "             " + language + "  "
+
+
+def check_isbn(isbn=""):
+    """
+    Check and clean ISBN.
+    """
+    isbn = isbn.strip()
+    isbn = isbn.replace(" ", "-")
+    isbn = isbn.replace(".", "-")
+    match = re.search("([0-9xX-]{10,17})", isbn)
+    if match:
+        return match.group(1)
+    return ""
