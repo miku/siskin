@@ -497,14 +497,16 @@ def check_isbn(isbn=""):
     """
     Check and clean ISBN.
     """
-    isbn = isbn.strip()
-    isbn = isbn.replace(" ", "-")
-    isbn = isbn.replace(".", "-")
-    match = re.search("([0-9xX-]{10,17})", isbn)
+    match = re.search("(\d.*)", isbn)
     if match:
         isbn = match.group(1)
-        if len(isbn) == 10 or len(isbn) == 13 or len(isbn) == 17:
-            return isbn
+        isbn = isbn.replace(" ", "-")
+        isbn = isbn.replace(".", "-")
+        match = re.search("([0-9xX-]{10,17})", isbn)
+        if match:
+            isbn = match.group(1)
+            if len(isbn) == 10 or len(isbn) == 13 or len(isbn) == 17:
+                return isbn
     return ""
 
 
