@@ -511,6 +511,10 @@ def check_issn(issn=""):
     Check and clean ISSN.
     """
     issn = issn.strip()
+    if len(issn) == 8:
+        issn1 = issn[:4]
+        issn2 = issn[4:]
+        issn = issn1 + "-" + issn2
     issn = issn.replace(" ", "-")
     issn = issn.replace(".", "-")
     match = re.search("([0-9xX-]{9,9})", issn)
