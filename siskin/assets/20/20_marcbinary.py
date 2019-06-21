@@ -38,14 +38,14 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
+    status = oldrecord["Record"]["header"]["@status"]
     setspec = oldrecord["Record"]["header"]["setSpec"]
+    title = oldrecord.get("dc:title", "")
 
-    if setspec in setlist:
-        i += 1
-    else:
+    if setspec not in setlist or not title or status == "deleted":
         continue
-
-    oldrecord = oldrecord["Record"]["metadata"]["ns0:dc"]
+    else:
+        i += 1
 
     title = oldrecord.get("dc:title", "")
     if not title:
