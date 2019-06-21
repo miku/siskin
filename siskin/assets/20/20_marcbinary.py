@@ -40,11 +40,12 @@ for oldrecord in xmlstream(inputfilename, "Record"):
 
     status = oldrecord["Record"]["header"]["@status"]
     setspec = oldrecord["Record"]["header"]["setSpec"]
-    oldrecord = oldrecord["Record"]["metadata"]["ns0:dc"]
-    title = oldrecord.get("dc:title", "")
+    metadata = oldrecord["Record"]["metadata"].get("ns0:dc", "")
 
-    if setspec not in setlist or not title or status == "deleted":
+    if setspec not in setlist or not metadata or status == "deleted":
         continue
+
+    oldrecord = oldrecord["Record"]["metadata"]["ns0:dc"]
 
     # Formatmapping
     if setspec == "gallica:typedoc:partitions":
