@@ -29,10 +29,10 @@ if len(sys.argv) == 3:
 outputfile = open(outputfilename, "wb")
 i = 1
 for oldrecord in xmlstream(inputfilename, "Record"):
-
-    if i == 1000:
-        #break
-        pass
+    i += 1
+    if i == 8000:
+        break
+        #pass
     
     oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation"))
     marcrecord = marcx.Record(force_utf8=True)
@@ -40,15 +40,10 @@ for oldrecord in xmlstream(inputfilename, "Record"):
 
     status = oldrecord["Record"]["header"]["@status"]
     setspec = oldrecord["Record"]["header"]["setSpec"]
+    oldrecord = oldrecord["Record"]["metadata"]["ns0:dc"]
     title = oldrecord.get("dc:title", "")
 
     if setspec not in setlist or not title or status == "deleted":
-        continue
-    else:
-        i += 1
-
-    title = oldrecord.get("dc:title", "")
-    if not title:
         continue
 
     # Formatmapping
