@@ -208,9 +208,9 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         if match:
             f700a, f700d, f700e = match.groups()
         else:
-            f100a = creator
-            f100d = ""
-            f100e = ""
+            f700a = creator
+            f700d = ""
+            f700e = ""
         marcrecord.add("700", a=f700a, d=f700d, e=f700e)
 
     # Link zu Datensatz und Ressource
