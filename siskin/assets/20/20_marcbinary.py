@@ -112,25 +112,48 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             f100e = ""
         marcrecord.add("100", a=f100a, d=f100d, e=f100e)
    
-    # Haupttitel
+    # Haupttitel, Titelzusatz und Verantwortliche
     titles = oldrecord["dc:title"]
     if len(titles) == 1:
         f245 = titles[0]
     else:
-        f245 = titles[0]["#text"]
-    f245 = f245.split(" : ")
-    if len(f245) == 2:
-        f245a = f245[0]
-        f245b = f245[1]
-    else:
-        f245a = f245[0]
+        print(titles)
+        if "#text" in titles[0] and "@xml:lang" in titles[0]:    #[OrderedDict([('@xml:lang', '')]), OrderedDict([('@xml:lang', ''), ('#text', 'Andante')])]
+            f245 = titles[0]["#text"]
+        elif "@xml:lang" in titles[0] and not "#text" in titles[0]:
+            f245 = titles[1]["#text"]
+        else:
+            f245 = titles[0]
+    match1 = re.search("(.*?)\s:\s(.*)\s\/\s(.*)", f245)
+    match2 = re.search("(.*)\s:\s(.*)", f245)
+    match3 = re.search("(.*)\s\/\s(.*)", f245)
+    if match1:
+        f245a = match1.group(1)
+        f245b = match1.group(2)
+        f245c = match1.group(3)
+    elif match2:
+        f245a = match2.group(1)
+        f245b = match2.group(2)
+        f245c = ""
+    elif match3:
+        f245a = match3.group(1)
         f245b = ""
-    marcrecord.add("245", a=f245a, b=f245b)
+        f245c = match3.group(2)
+    else:
+        f245a = f245
+        f245b = ""
+        f245c = ""
+    subfields = ["a", f245a, "b", f245b, "c", f245c]
+    marcrecord.add("245", subfields=subfields)
   
     # Alternativtitel
     if len(titles) == 2:
-        f246a = titles[0]["#text"]
-        marcrecord.add("246", a=f246a)
+        if "@xml:lang" in titles[1]:
+            f246a = titles[1]["#text"]
+        else:
+            f246a = titles[1]
+        if 246a != f245:
+            marcrecord.add("246", a=f246a)
 
     # Erscheinungsvermerk
     f260a = ""
