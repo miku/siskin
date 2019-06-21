@@ -31,7 +31,8 @@ i = 1
 for oldrecord in xmlstream(inputfilename, "Record"):
 
     if i == 1000:
-        break
+        #break
+        pass
     
     oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject"))
     marcrecord = marcx.Record(force_utf8=True)
@@ -87,11 +88,9 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     numbers = oldrecord["dc:identifier"]
     for number in numbers:
         if "ISBN" in number:
-            print(number)
             f020a = check_isbn(number)
             marcrecord.add("020", a=f020a)
         if "ISSN" in number:
-            print(number)
             f022a = check_issn(number)
             marcrecord.add("022", a=f022a)
    
