@@ -34,13 +34,13 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         break
         #pass
     
-    oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation"))
+    oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
     status = oldrecord["Record"]["header"]["@status"]
     setspec = oldrecord["Record"]["header"]["setSpec"]
-    metadata = oldrecord["Record"]["metadata"].get("ns0:dc", "")
+    metadata = oldrecord["Record"]["metadata"]
 
     if setspec not in setlist or not metadata or status == "deleted":
         continue
@@ -183,10 +183,11 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     marcrecord.add("500", a=f500a)
 
     # Inhaltsbeschreibung
-    f520a = oldrecord.get("dc:description", "")
-    if len(f520a) > 8000:
-        f520a = f520a[:8000]
-    marcrecord.add("520", a=f520a)
+    descriptions = oldrecord.get("dc:description", "")
+    for f520a in descriptions:
+        if len(f520a) > 8000:
+            f520a = f520a[:8000]
+        marcrecord.add("520", a=f520a)
 
     # Schlagwort
     subjects = oldrecord.get("dc:subject", "")
