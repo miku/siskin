@@ -34,7 +34,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         #break
         pass
     
-    oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject"))
+    oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation"))
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
@@ -117,7 +117,6 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     if len(titles) == 1:
         f245 = titles[0]
     else:
-        print(titles)
         if "#text" in titles[0] and "@xml:lang" in titles[0]:    #[OrderedDict([('@xml:lang', '')]), OrderedDict([('@xml:lang', ''), ('#text', 'Andante')])]
             f245 = titles[0]["#text"]
         elif "@xml:lang" in titles[0] and not "#text" in titles[0]:
@@ -152,7 +151,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             f246a = titles[1]["#text"]
         else:
             f246a = titles[1]
-        if 246a != f245:
+        if f246a != f245:
             marcrecord.add("246", a=f246a)
 
     # Erscheinungsvermerk
@@ -215,9 +214,14 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         marcrecord.add("700", a=f700a, d=f700d, e=f700e)
 
     # Link zu Datensatz und Ressource
-    f856u = oldrecord["dc:relation"]
-    f8563 = "Link zum Datensatz"
-    marcrecord.add("856", q="text/html", _3=f8563, u=f856u)
+    f856u = oldrecord["dc:relation"][0]
+    match = re.search("(http.*catalogue.*)", f856u)  # Notice du catalogue : http://catalogue.bnf.fr/ark:/12148/cb42874085r
+    if match:
+        f856u = match.group(1)
+        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
+    
+    f856u = oldrecord["dc:identifier"][0]
+    marcrecord.add("856", q="image/jpeg", _3="Link zum Digitalisat", u=f856u)
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
