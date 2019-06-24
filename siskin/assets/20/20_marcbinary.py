@@ -50,6 +50,8 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     # Formatmapping
     if setspec == "gallica:typedoc:partitions":
         format = "Score"
+    else:
+        format = "E-Book"
 
     # Leader
     leader = formats[format]["Leader"]
@@ -99,9 +101,9 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     # DDC-Notation
     if setspec == "gallica:theme:0:00":
         marcrecord.add("080", a="000")
-    if setspec == "gallica:theme:0:01":
+    elif setspec == "gallica:theme:0:01":
         marcrecord.add("080", a="010")
-    if setspec == "gallica:theme:0:02":
+    elif setspec == "gallica:theme:0:02":
         marcrecord.add("080", a="020")
 
     # 1. Schöpfer
