@@ -34,7 +34,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         break
         #pass
     
-    oldrecord = xmltodict.parse(oldrecord, force_list=("setSpec", "dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
+    oldrecord = xmltodict.parse(oldrecord, force_list=("setSpec", "dc:identifier", "dc:language", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
@@ -75,7 +75,8 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     # Periodizität
     year = oldrecord.get("dc:date", "")
     periodicity = formats[format]["008"]
-    language = oldrecord.get("dc:language", "")
+    language = oldrecord.get("dc:language", [""])
+    language = language[0]
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
@@ -90,7 +91,8 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             marcrecord.add("022", a=f022a)
    
     # Sprache
-    f041a = oldrecord.get("dc:language", "ger")
+    f041a = oldrecord.get("dc:language", [""])
+    f041a = f041a[0]
     if f041a and len(f041a) != 3:
         sys.exit("Die Sprache ist nicht MARC-konform: " + f041a)
     marcrecord.add("041", a=f041a)
