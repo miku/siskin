@@ -51,7 +51,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     if setspec == "gallica:typedoc:partitions":
         format = "Score"
     else:
-        format = "E-Book"
+        format = "Book"
 
     # Leader
     leader = formats[format]["Leader"]
@@ -69,10 +69,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     marcrecord.add("001", data=f001)
 
     # Zugangsart
-    if setspec == "gallica:typedoc:partitions":
-        f007 = formats[format]["e007"]
-    else:
-        f007 = formats[format]["p007"]
+    f007 = formats[format]["e007"]
     marcrecord.add("007", data=f007)
 
     # Periodizität
