@@ -18,7 +18,7 @@ import marcx
 from siskin.mappings import formats
 from siskin.utils import xmlstream, marc_build_field_008, check_isbn, check_issn
 
-setlist = ["gallica:typedoc:partitions"]
+setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:01", "gallica:theme:0:02"]
 
 inputfilename = "20_input.xml"
 outputfilename = "20_output.mrc"
