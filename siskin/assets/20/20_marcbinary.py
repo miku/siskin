@@ -96,6 +96,14 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         sys.exit("Die Sprache ist nicht MARC-konform: " + f041a)
     marcrecord.add("041", a=f041a)
 
+    # DDC-Notation
+    if setspec == "gallica:theme:0:00":
+        marcrecord.add("080", a="000")
+    if setspec == "gallica:theme:0:01":
+        marcrecord.add("080", a="010")
+    if setspec == "gallica:theme:0:02":
+        marcrecord.add("080", a="020")
+
     # 1. Schöpfer
     creators = oldrecord.get("dc:creator", "")
     if creators:
