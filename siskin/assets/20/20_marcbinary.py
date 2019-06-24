@@ -34,12 +34,12 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         break
         #pass
     
-    oldrecord = xmltodict.parse(oldrecord, force_list=("dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
+    oldrecord = xmltodict.parse(oldrecord, force_list=("setSpec", "dc:identifier", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
     status = oldrecord["Record"]["header"]["@status"]
-    setspec = oldrecord["Record"]["header"]["setSpec"]
+    setspec = oldrecord["Record"]["header"]["setSpec"][0]
     metadata = oldrecord["Record"]["metadata"]
 
     if setspec not in setlist or not metadata or status == "deleted":
