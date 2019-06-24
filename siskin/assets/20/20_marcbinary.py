@@ -99,11 +99,13 @@ for oldrecord in xmlstream(inputfilename, "Record"):
 
     # DDC-Notation
     if setspec == "gallica:theme:0:00":
-        marcrecord.add("080", a="000")
+        marcrecord.add("082", a="000")
     elif setspec == "gallica:theme:0:01":
-        marcrecord.add("080", a="010")
+        marcrecord.add("082", a="010")
     elif setspec == "gallica:theme:0:02":
-        marcrecord.add("080", a="020")
+        marcrecord.add("082", a="020")
+    elif setspec == "gallica:typedoc:partitions":
+        marcrecord.add("082", a="780")
 
     # 1. Schöpfer
     creators = oldrecord.get("dc:creator", "")
