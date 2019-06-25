@@ -73,7 +73,7 @@ for record in reader:
 
     if id in parent_ids:
         format = "Multipart"
-    elif "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or "Zählung" in format or regexp1:
+    elif "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or u"Zählung" in format or regexp1:
         format = "Book"
     elif "Loseblatt" in format:
         format = "Loose-leaf"
