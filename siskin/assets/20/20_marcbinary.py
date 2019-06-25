@@ -177,7 +177,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
-    f300a = oldrecord["dc:format"]
+    f300a = oldrecord.get("dc:format", "")
     marcrecord.add("300", a=f300a)
 
     # RDA-Inhaltstyp
