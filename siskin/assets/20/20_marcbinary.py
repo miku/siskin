@@ -188,9 +188,12 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     f338b = formats[format]["338b"]
     marcrecord.add("338", b=f338b)
 
-    # Rechtshinweis
-    f500a = oldrecord["dc:rights"]
-    f500a = f500a[1]["#text"].title()
+    # Rechtehinweis
+    f500a = oldrecord.get("dc:rights", [""])
+    if len(f500a) == 2:
+        f500a = f500a[1]["#text"].title()
+    else:
+        f500a = f500a[0].title()
     marcrecord.add("500", a=f500a)
 
     # Inhaltsbeschreibung
