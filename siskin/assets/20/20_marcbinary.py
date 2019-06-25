@@ -197,11 +197,12 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     marcrecord.add("500", a=f500a)
 
     # Inhaltsbeschreibung
-    descriptions = oldrecord.get("dc:description", "")
+    descriptions = oldrecord.get("dc:description", [""])
     for f520a in descriptions:
-        if len(f520a) > 8000:
-            f520a = f520a[:8000]
-        marcrecord.add("520", a=f520a)
+        if f520a:   # sometimes None
+            if len(f520a) > 8000:
+                f520a = f520a[:8000]
+            marcrecord.add("520", a=f520a)
 
     # Schlagwort
     subjects = oldrecord.get("dc:subject", "")
