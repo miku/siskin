@@ -23,23 +23,28 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
+
+
 """
-VKFilm Duesseldorf, #8392, MAB shipments.
+Source: Gesamtkatalog der Düsseldorfer Kulturinstitute (VKFilm)
+SID: 142
+Ticket: #8392
+Metadata: local file
+Updates: manually
 
-External Java app required (https://sourceforge.net/projects/dnb-conv-tools/):
-
-    $ sha1sum Mab2Mabxml-1.9.9.jar
-    b37c4663fe6e4dcc55e71253266516e417ec9c44  Mab2Mabxml-1.9.9.jar
-
-Config
-------
+Config:
 
 [vkfilmdus]
 
 input = /path/to/file.zip
 Mab2Mabxml.jar = /path/to/local/copy.jar
 
+External Java app required (https://sourceforge.net/projects/dnb-conv-tools/):
+$ sha1sum Mab2Mabxml-1.9.9.jar
+b37c4663fe6e4dcc55e71253266516e417ec9c44  Mab2Mabxml-1.9.9.jar
+
 """
+
 
 import datetime
 import os
@@ -83,3 +88,22 @@ class VKFilmDusConvert(VKFilmDusTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml'))
+
+
+class VKFilmDusMARC(VKFilmDusTask):
+    """
+    Custom convert to MARC.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return VKFilmDusConvert(date=self.date)
+
+    def run(self):
+        output = shellout("python {script} {input} {output}",
+                          script=self.assets("142/142_marcbinary.py"),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+        def output(self):
+            return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
