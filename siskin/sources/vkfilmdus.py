@@ -102,7 +102,7 @@ class VKFilmDusMARC(VKFilmDusTask):
     def run(self):
         output = shellout("python {script} {input} {output}",
                           script=self.assets("142/142_marcbinary.py"),
-                          input=self.input().path)
+                          input=self.config.get("vkfilmdus", "Mab2Mabxml.jar")
         luigi.LocalTarget(output).move(self.output().path)
 
         def output(self):
