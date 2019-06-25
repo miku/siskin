@@ -242,7 +242,15 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     marcrecord.add("935", c=f935c)
 
     # Ansigelung
-    collections = ["a", f980a, "b", "20", "c", "sid-142-col-gallica"]
+    if setspec == "gallica:theme:0:00":
+        f980c = "000"
+    elif setspec == "gallica:theme:0:01":
+        f980c = "010"
+    elif setspec == "gallica:theme:0:02":
+        f980c = "020"
+    else:
+        f980c = "htm"
+    collections = ["a", f980a, "b", "20", "c", f980c]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
