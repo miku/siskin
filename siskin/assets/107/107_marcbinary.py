@@ -12,6 +12,16 @@ from siskin.mappings import formats
 from siskin.utils import marc_build_field_008, check_isbn, check_issn
 
 
+def get_field(name):
+
+    field = xmlrecord["metadata"]["oai_dc:dc"].get(name, None)
+    if not field:
+        return ""
+    if isinstance(field, list):
+        print("Das Feld %s liegt teilweise als Liste vor: " % name)
+    return field
+
+
 inputfilename = "107_input.xml"
 outputfilename = "107_output.mrc"
 
@@ -26,7 +36,7 @@ xmlrecords = xmltodict.parse(xmlfile)
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
-    if not xmlrecord["metadata"]["oai_dc:dc"].get("dc:title"):
+    if not get_field("dc:title"):
         continue
 
     marcrecord = marcx.Record(force_utf8=True)
@@ -65,30 +75,28 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("007", data=f007)
 
     # Periodizität
-    year = xmlrecord["metadata"]["oai_dc:dc"].get("dc:date", "")
+    year = get_field("dc:date")
     periodicity = formats[format]["008"]
-    language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
+    language = get_field("dc:language")
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
     # Sprache
-    language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
+    language = get_field("dc:language")
     marcrecord.add("041", a=language)
 
     # Verfasser
-    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:creator"):
-        f100a = xmlrecord["metadata"]["oai_dc:dc"]["dc:creator"]
-        marcrecord.add("100", a=f100a)
+    f100a = get_field("dc:creator")
+    marcrecord.add("100", a=f100a)
 
     # Titel
-    f245 = xmlrecord["metadata"]["oai_dc:dc"]["dc:title"]
+    f245 = get_field("dc:title")
     marcrecord.add("245", a=f245)
 
     # Erscheinungsvermerk
-    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:date"):
-        f260c = xmlrecord["metadata"]["oai_dc:dc"]["dc:date"]
-        publisher = ["b", "Hochschule Mittweida,", "c", f260c]
-        marcrecord.add("260", subfields=publisher)
+    f260c = get_field("dc:date")
+    publisher = ["b", "Hochschule Mittweida,", "c", f260c]
+    marcrecord.add("260", subfields=publisher)
 
     # RDA-Inhaltstyp
     f336b = formats[format]["336b"]
@@ -99,26 +107,25 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("338", b=f338b)
 
     # Schlagwörter
-    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
-        f689a = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
-        if isinstance(f689a, list):
+    f689a = get_field("dc:subject")
+    if isinstance(f689a, list):
+        for subject in f689a:
+            if ";" not in subject:
+                marcrecord.add("689", a=subject)
+    else:
+        f689a = f689a.split(" , ")
+        if len(f689a) > 1:
             for subject in f689a:
                 if ";" not in subject:
                     marcrecord.add("689", a=subject)
-        else:
-            f689a = f689a.split(" , ")
-            if len(f689a) > 1:
-                for subject in f689a:
-                    if ";" not in subject:
-                        marcrecord.add("689", a=subject)
 
     # Link zu Datensatz und Ressource
-    f856u = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
+    f856u = get_field("dc:identifier")
     if len(f856u) == 2:
         marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[1])
     else:
-        print("Die URLs weichen vom üblichen Schema ab: " + f001)
+        print("Die URLs weichen vom üblichen Schema ab: " + f856u)
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
