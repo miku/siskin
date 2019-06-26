@@ -479,16 +479,27 @@ def marc_build_imprint(place="", publisher="", year=""):
 
 def marc_build_field_008(year="", periodicity="", language=""):
     """
-    Takes year of publication, periodicity and language und returns entire field.
+    Takes year of publication, periodicity and language and returns entire field.
     """
-    if len(year) != 4:
-        year = "    "
-
+    if isinstance(year, str):
+        match = re.search("(\d\d\d\d)", year)
+        if match:
+            year = match.group(1)
+        else:
+            year = ""
+    else:
+        year = ""
+    
     if len(periodicity) != 1:
         periodicity = " "
 
-    if len(language) != 3:
-        language = "   "
+    if isinstance(language, str):
+        if len(language) != 3:
+            language = "   "
+        else:
+            language = ""
+    else:
+        language = ""
 
     return "       " + year + "          " + periodicity + "             " + language + "  "
 
