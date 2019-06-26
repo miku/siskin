@@ -14,10 +14,11 @@ from siskin.utils import marc_build_field_008, check_isbn, check_issn
 
 def get_field(name):
 
+    multivalued_fields = ["dc:identifier", "dc:subject", "dc:language"]
     field = xmlrecord["metadata"]["oai_dc:dc"].get(name, None)
     if not field:
         return ""
-    if isinstance(field, list):
+    if isinstance(field, list) and name not in multivalued_fields:
         print("Das Feld %s liegt teilweise als Liste vor: " % name)
     return field
 
@@ -32,7 +33,7 @@ inputfile = open(inputfilename, "rb")
 outputfile = open(outputfilename, "wb")
 
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile)
+xmlrecords = xmltodict.parse(xmlfile, force_list="dc:identifier")
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
@@ -62,7 +63,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.leader = "     cam  22        4500"
 
     # Identifier
-    f001 = xmlrecord["header"]["identifier"]
+    f001 = xmlrecord["header"]["identifier"][0]
     regexp = re.match("oai:digi.ub.uni-heidelberg.de:(\d+)", f001)
     if regexp:
         f001 = regexp.group(1)
@@ -120,12 +121,12 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                     marcrecord.add("689", a=subject)
 
     # Link zu Datensatz und Ressource
-    f856u = get_field("dc:identifier")
-    if len(f856u) == 2:
-        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u[0])
-        marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u[1])
-    else:
-        print("Die URLs weichen vom üblichen Schema ab: " + f856u)
+    urls = get_field("dc:identifier")
+    for url in urls:
+        if "http" in url:
+            marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=url)
+        if "urn:" in url:
+            marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=url)
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
