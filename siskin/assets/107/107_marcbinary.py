@@ -8,19 +8,9 @@ import sys
 import xmltodict
 
 import marcx
+from siskin.mappings import formats
+from siskin.utils import marc_build_field_008, check_isbn, check_issn
 
-#Article</dc:type>
-#Charter</dc:type>
-#Fragment</dc:type>
-#Letter</dc:type>
-#Manuscript</dc:type>
-#Map</dc:type>
-#Monograph</dc:type>
-#Multivolume_work</dc:
-#Periodical</dc:type>
-#Series</dc:type>
-#Text</dc:type>
-#Volume</dc:type>
 
 inputfilename = "107_input.xml"
 outputfilename = "107_output.mrc"
@@ -40,6 +30,23 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         continue
 
     marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    # Formatzuordnung
+    #Article</dc:type>
+    #Charter</dc:type>
+    #Fragment</dc:type>
+    #Letter</dc:type>
+    #Manuscript</dc:type>
+    #Map</dc:type>
+    #Monograph</dc:type>
+    #Multivolume_work</dc:
+    #Periodical</dc:type>
+    #Series</dc:type>
+    #Text</dc:type>
+    #Volume</dc:type>
+    format = "Book"
+
 
     # Leader
     marcrecord.leader = "     cam  22        4500"
@@ -51,14 +58,21 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f001 = regexp.group(1)
         marcrecord.add("001", data="finc-107-" + f001)
     else:
-        print("Der Identifier konnte nicht zerlegt werden: " + f001)
+        sys.exit("Der Identifier konnte nicht zerlegt werden: " + f001)
 
-    # 007
-    marcrecord.add("007", data="cr")
+    # Zugangsart
+    f007 = formats[format]["e007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodizität
+    year = xmlrecord["metadata"]["oai_dc:dc"].get("dc:date", "")
+    periodicity = formats[format]["008"]
+    language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
 
     # Sprache
     language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
-    marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
     marcrecord.add("041", a=language)
 
     # Verfasser
@@ -75,6 +89,14 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f260c = xmlrecord["metadata"]["oai_dc:dc"]["dc:date"]
         publisher = ["b", "Hochschule Mittweida,", "c", f260c]
         marcrecord.add("260", subfields=publisher)
+
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
 
     # Schlagwörter
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:subject"):
@@ -98,11 +120,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     else:
         print("Die URLs weichen vom üblichen Schema ab: " + f001)
 
-    # Medientyp
-    marcrecord.add("935", b="cofz")
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
 
-    # Kollektion
-    # noch Reihenfolge herstellen
+    # Ansigelung und Kollektion
     marcrecord.add("980", a=f001, b="107", c="sid-107-col-heidelberg")
 
     outputfile.write(marcrecord.as_marc())
