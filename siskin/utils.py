@@ -486,9 +486,9 @@ def marc_build_field_008(year="", periodicity="", language=""):
         if match:
             year = match.group(1)
         else:
-            year = ""
+            year = "    "
     else:
-        year = ""
+        year = "    "
     
     if len(periodicity) != 1:
         periodicity = " "
@@ -496,8 +496,6 @@ def marc_build_field_008(year="", periodicity="", language=""):
     if isinstance(language, str):
         if len(language) != 3:
             language = "   "
-        else:
-            language = ""
     else:
         language = ""
 
