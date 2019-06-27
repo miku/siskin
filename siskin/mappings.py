@@ -30,6 +30,7 @@ Static mappings for reuse
 from collections import defaultdict
 
 formats = defaultdict(dict)
+languages = {}
 
 formats["Unknown"]["Leader"] = "     xxx  22        4500"
 formats["Unknown"]["p007"] = "tu"
@@ -340,3 +341,19 @@ formats["Object"]["338b"] = "nr"
 formats["Object"]["655a"] = ""
 formats["Object"]["6552"] = ""
 formats["Object"]["935c"] = "gegenst"
+
+
+languages["English"] = "eng"
+languages["French"] = "fre"
+languages["German"] = "ger"
+languages["Greek"] = "gre"
+languages["Italian"] = "ita"
+languages["Russian"] = "rus"
+languages["Spanish"] = "spa"
+
+languages["de"] = "ger"
+languages["en"] = "eng"
+languages["fr"] = "fre"
+languages["it"] = "ita"
+languages["ru"] = "rus"
+languages["sp"] = "spa"
