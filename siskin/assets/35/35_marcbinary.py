@@ -17,6 +17,7 @@ import pymarc
 import marcx
 from io import StringIO, BytesIO
 from siskin.mappings import formats
+from siskin.utils import marc_clean_record
 
 
 setlist = ["hathitrust:pd"]
@@ -81,6 +82,7 @@ for line in (line.strip() for line in inputfile if line.strip()):
     collections = ["a", f001, "b", "35", "c", u"sid-35-col-hathi"]
     marcrecord.add("980", subfields=collections)
 
+    marc_clean_record(marcrecord)
     outputfile.write(marcrecord.as_marc())
    
 outputfile.close()
