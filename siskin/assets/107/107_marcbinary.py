@@ -56,11 +56,24 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     #Series</dc:type>
     #Text</dc:type>
     #Volume</dc:type>
-    format = "Book"
-
+    format = get_field("dc:type")
+    
+    if format == "Article":
+        format = "Article"
+    elif format == "Manuscript":
+        format = "Manuscript"
+    elif format == "Periodical":
+        format = "Journal"
+    elif format == "Multivolume_work":
+        format = "Multipart"
+    elif format == "Map":
+        format = "Map"
+    else:
+        format = "Book"
 
     # Leader
-    marcrecord.leader = "     cam  22        4500"
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
 
     # Identifier
     f001 = xmlrecord["header"]["identifier"][0]
