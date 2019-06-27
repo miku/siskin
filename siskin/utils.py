@@ -51,8 +51,9 @@ from future import standard_library
 from six.moves.urllib.parse import urlparse
 from six import string_types
 
-
 from siskin import __version__
+from siskin.mappings import languages
+
 
 # XXX: move to six.
 standard_library.install_aliases()
@@ -493,11 +494,22 @@ def marc_build_field_008(year="", periodicity="", language=""):
     if len(periodicity) != 1:
         periodicity = " "
 
-    if isinstance(language, str):
-        if len(language) != 3:
+    if isinstance(language, list):
+        if len(language) == 0:
             language = "   "
+        elif len(language) > 0 and len(language) < 3:
+            language = language[0]
+        else:
+            language = "mul"
+
+    if language and isinstance(language, str):
+        if len(language) != 3:
+            lang = language.lower()
+            language = languages.get(lang, "   ")
+            if language == "   ":
+                print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % lang)
     else:
-        language = ""
+        language = "   "
 
     return "       " + year + "          " + periodicity + "             " + language + "  "
 
