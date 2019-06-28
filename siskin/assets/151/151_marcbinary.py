@@ -5,9 +5,11 @@ import io
 import re
 import sys
 
-from six.moves import html_parser
-
 import marcx
+
+from six.moves import html_parser
+from siskin.mappings import roles
+
 
 formatmap = {
     "Buch": {
@@ -216,13 +218,18 @@ for record in records:
             if f100a != "":
                 f100.append("a")
                 f100.append(f100a)
-                f100e = get_subfield("100", "b")
-                if f100e != "":
-                    f100e = f100e.split("]")
-                    for role in f100e[:-1]:  # Slice :-1 damit das letzte ] ausgelassen wird
-                        role = role + "]"
-                        f100.append("e")
-                        f100.append(role)
+                role = get_subfield("100", "b")
+                if role != "":
+                    match = re.search("\[(.*?)\]", role)
+                    if match:
+                        role = match.group(1)
+                        role = role.lower()
+                        role = role.replace(".", "")
+                        f1004 = roles.get(role, "")
+                        if not f1004:
+                            print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % role)
+                        f100.append("4")
+                        f100.append(f1004)
 
         # Haupttitel
         if f245a == "":
@@ -282,13 +289,18 @@ for record in records:
                 if f700a != "":
                     f700.append("a")
                     f700.append(f700a)
-                    f700e = get_subfield(i, "b")
-                    if f700e != "":
-                        f700e = f700e.split("]")
-                        for role in f700e[:-1]:  # Slice :-1 damit das letzte ] ausgelassen wird
-                            role = role + "]"
-                            f700.append("e")
-                            f700.append(role)
+                    role = get_subfield(i, "b")
+                    if role != "":
+                        match = re.search("\[(.*?)\]", role)
+                        if match:
+                            role = match.group(1)
+                            role = role.lower()
+                            role = role.replace(".", "")
+                            f7004 = roles.get(role, "")
+                            if not f7004:
+                                print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % role)
+                            f700.append("4")
+                            f700.append(f7004)
                     persons.append(f700)
                     f700 = []
                     break
