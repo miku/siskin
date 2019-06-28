@@ -15,7 +15,7 @@ import sys
 import xmltodict
 
 import marcx
-from siskin.mappings import formats
+from siskin.mappings import formats, roles
 from siskin.utils import xmlstream, marc_build_field_008, check_isbn, check_issn
 
 setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:01", "gallica:theme:0:02"]
@@ -113,11 +113,15 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         match = re.search("(.*?)\s\(([0-9\.-]{9,9})\)\.\s(.*)", creators[0])
         if match:
             f100a, f100d, f100e = match.groups()
+            f100e = f100e.lower()
+            f1004 = roles.get(f100e, "")
+            if not f1004:
+                print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % f100e)
         else:
             f100a = creators[0]
             f100d = ""
-            f100e = ""
-        marcrecord.add("100", a=f100a, d=f100d, e=f100e)
+            f1004 = ""
+        marcrecord.add("100", a=f100a, d=f100d, _4=f1004)
    
     # Haupttitel, Titelzusatz und Verantwortliche
     titles = oldrecord["dc:title"]
@@ -221,11 +225,15 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         match = re.search("(.*?)\s\(([0-9\.-]{9,9})\)\.\s(.*)", creator)
         if match:
             f700a, f700d, f700e = match.groups()
+            f700e = f700e.lower()
+            f7004 = roles.get(f700e, "")
+            if not f7004:
+                print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % f700e)
         else:
             f700a = creator
             f700d = ""
-            f700e = ""
-        marcrecord.add("700", a=f700a, d=f700d, e=f700e)
+            f7004 = ""
+        marcrecord.add("700", a=f700a, d=f700d, _4=f7004)
 
     # Link zu Datensatz und Ressource
     f856u = oldrecord["dc:relation"][0]
