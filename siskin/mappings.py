@@ -31,6 +31,12 @@ from collections import defaultdict
 
 formats = defaultdict(dict)
 languages = {}
+roles = {}
+
+
+#################################################################################
+# Formate
+#################################################################################
 
 formats["Unknown"]["Leader"] = "     xxx  22        4500"
 formats["Unknown"]["p007"] = "tu"
@@ -342,6 +348,9 @@ formats["Object"]["655a"] = ""
 formats["Object"]["6552"] = ""
 formats["Object"]["935c"] = "gegenst"
 
+#################################################################################
+# Sprachen
+#################################################################################
 
 languages["english"] = "eng"
 languages["french"] = "fre"
@@ -374,3 +383,11 @@ languages["sa"] = "san"
 languages["sp"] = "spa"
 languages["ur"] = "urd"
 languages["yi"] = "yid"
+
+#################################################################################
+# Personenrollen
+#################################################################################
+
+roles["author"] = "aut"
+roles["composer"] = "cmp"
+roles["editor"] = "edt"
