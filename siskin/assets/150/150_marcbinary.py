@@ -163,10 +163,10 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     ddc = ddcmatch(f082a)
     if ddc:
         marcrecord.add("650", a="mitddc")
-        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+        f980c = ["sid-150-col-monami", "sid-150-col-monamibuch"]
     else:
-        marcrecord.add("650", a="ohneddc")
-        marcrecord.add("980", a=f001, b="150", c="sid-150-col-monami")
+        f980c = ["sid-150-col-monami"]
+    marcrecord.add("980", a=f001, b="150", c=f980c)
     
     outputfile.write(marcrecord.as_marc())
 
