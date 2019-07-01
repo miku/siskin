@@ -27,12 +27,8 @@ if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
 outputfile = open(outputfilename, "wb")
-i = 1
+
 for oldrecord in xmlstream(inputfilename, "Record"):
-    i += 1
-    if i == 8000:
-        break
-        #pass
     
     oldrecord = xmltodict.parse(oldrecord, force_list=("setSpec", "dc:identifier", "dc:language", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
     marcrecord = marcx.Record(force_utf8=True)
@@ -114,7 +110,8 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             f100e = f100e.lower()
             f1004 = roles.get(f100e, "")
             if not f1004:
-                print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % f100e)
+                #print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % f100e)
+                pass
         else:
             f100a = creators[0]
             f100d = ""
@@ -226,7 +223,8 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             f700e = f700e.lower()
             f7004 = roles.get(f700e, "")
             if not f7004:
-                print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % f700e)
+                #print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % f700e)
+                pass
         else:
             f700a = creator
             f700d = ""
