@@ -6,7 +6,6 @@
 # TechnicalCollectionID: sid-20-col-gallica, sid-20-col-gallicabuch
 # Task: gallica
 
-
 from __future__ import print_function
 
 import re
@@ -16,7 +15,7 @@ import xmltodict
 
 import marcx
 from siskin.mappings import formats, roles
-from siskin.utils import xmlstream, marc_build_field_008, check_isbn, check_issn
+from siskin.utils import (check_isbn, check_issn, marc_build_field_008, xmlstream)
 
 setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:02"]
 
@@ -29,8 +28,10 @@ if len(sys.argv) == 3:
 outputfile = open(outputfilename, "wb")
 
 for oldrecord in xmlstream(inputfilename, "Record"):
-    
-    oldrecord = xmltodict.parse(oldrecord, force_list=("setSpec", "dc:identifier", "dc:language", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
+
+    oldrecord = xmltodict.parse(oldrecord,
+                                force_list=("setSpec", "dc:identifier", "dc:language", "dc:creator", "dc:title",
+                                            "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
@@ -85,7 +86,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         if "ISSN" in number:
             f022a = check_issn(number)
             marcrecord.add("022", a=f022a)
-   
+
     # Sprache
     f041a = oldrecord.get("dc:language", [""])
     f041a = f041a[0]
@@ -117,13 +118,14 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             f100d = ""
             f1004 = ""
         marcrecord.add("100", a=f100a, d=f100d, _4=f1004)
-   
+
     # Haupttitel, Titelzusatz und Verantwortliche
     titles = oldrecord["dc:title"]
     if len(titles) == 1:
         f245 = titles[0]
     else:
-        if "#text" in titles[0] and "@xml:lang" in titles[0]:    #[OrderedDict([('@xml:lang', '')]), OrderedDict([('@xml:lang', ''), ('#text', 'Andante')])]
+        if "#text" in titles[0] and "@xml:lang" in titles[0]:
+            # [OrderedDict([('@xml:lang', '')]), OrderedDict([('@xml:lang', ''), ('#text', 'Andante')])]
             f245 = titles[0]["#text"]
         elif "@xml:lang" in titles[0] and not "#text" in titles[0]:
             f245 = titles[1]["#text"]
@@ -150,7 +152,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         f245c = ""
     subfields = ["a", f245a, "b", f245b, "c", f245c]
     marcrecord.add("245", subfields=subfields)
-  
+
     # Alternativtitel
     if len(titles) == 2:
         if "@xml:lang" in titles[1]:
@@ -171,7 +173,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         else:
             f260a = publisher
             f260b = ""
-        f260c = oldrecord.get("dc:date", "") 
+        f260c = oldrecord.get("dc:date", "")
         subfields = ["a", f260a, "b", f260b, "c", f260c]
         marcrecord.add("260", subfields=subfields)
 
@@ -198,7 +200,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     # Inhaltsbeschreibung
     descriptions = oldrecord.get("dc:description", [""])
     for f520a in descriptions:
-        if f520a:   # sometimes None
+        if f520a:  # sometimes None
             if len(f520a) > 8000:
                 f520a = f520a[:8000]
             marcrecord.add("520", a=f520a)
@@ -233,11 +235,13 @@ for oldrecord in xmlstream(inputfilename, "Record"):
 
     # Link zu Datensatz und Ressource
     f856u = oldrecord["dc:relation"][0]
-    match = re.search("(http.*catalogue.*)", f856u)  # Notice du catalogue : http://catalogue.bnf.fr/ark:/12148/cb42874085r
+
+    match = re.search("(http.*catalogue.*)", f856u)
     if match:
+        # Notice du catalogue : http://catalogue.bnf.fr/ark:/12148/cb42874085r
         f856u = match.group(1)
         marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
-    
+
     f856u = oldrecord["dc:identifier"][0]
     marcrecord.add("856", q="image/jpeg", _3="Link zum Digitalisat", u=f856u)
 

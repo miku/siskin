@@ -48,12 +48,11 @@ import requests
 import six
 from dateutil import relativedelta
 from future import standard_library
-from six.moves.urllib.parse import urlparse
 from six import string_types
+from six.moves.urllib.parse import urlparse
 
 from siskin import __version__
 from siskin.mappings import languages
-
 
 # XXX: move to six.
 standard_library.install_aliases()
@@ -490,7 +489,7 @@ def marc_build_field_008(year="", periodicity="", language=""):
             year = "    "
     else:
         year = "    "
-    
+
     if len(periodicity) != 1:
         periodicity = " "
 
@@ -527,7 +526,7 @@ def check_isbn(isbn=""):
     match4 = re.search("(\d[0-9xX]{12,12})", isbn)
 
     if match1:
-         return match1.group(1)
+        return match1.group(1)
     elif match2:
         return match2.group(1)
     elif match3:

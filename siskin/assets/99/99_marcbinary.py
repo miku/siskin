@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import io
+import sys
+
 import xlrd
 
 import marcx
-import sys
-import io
 
 # Default input and output.
 inputfilename, outputfilename = "99_input.xlsx", "99_output.mrc"

@@ -23,8 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
-
 """
 Source: Gesamtkatalog der Düsseldorfer Kulturinstitute (VKFilm)
 SID: 142
@@ -44,7 +42,6 @@ $ sha1sum Mab2Mabxml-1.9.9.jar
 b37c4663fe6e4dcc55e71253266516e417ec9c44  Mab2Mabxml-1.9.9.jar
 
 """
-
 
 import datetime
 import os

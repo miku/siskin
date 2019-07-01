@@ -15,7 +15,7 @@ import xmltodict
 import marcx
 from siskin.mab import MabXMLFile
 from siskin.mappings import formats
-from siskin.utils import marc_build_field_008, check_isbn, check_issn
+from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -30,7 +30,7 @@ parent_ids = []
 parent_titles = {}
 
 for record in reader:
-   
+
     parent_id = record.field("010", alt="")
 
     if len(parent_id) > 0:

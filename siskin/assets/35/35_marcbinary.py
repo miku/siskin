@@ -6,19 +6,16 @@
 # TechnicalCollectionID: sid-35-col-hathi
 # Task: TODO
 
-
 from __future__ import print_function
 
 import re
 import sys
-
-import pymarc
+from io import BytesIO, StringIO
 
 import marcx
-from io import StringIO, BytesIO
+import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record
-
 
 setlist = ["hathitrust:pd"]
 
@@ -54,7 +51,7 @@ for line in (line.strip() for line in inputfile if line.strip()):
     # Leader
     marcrecord.leader = "     " + marcrecord.leader[5:]
 
-    # Identifikator   
+    # Identifikator
     f001 = marcrecord["856"]["u"]
     match = re.search(".*\/(.*)", f001)
     if match:
@@ -73,7 +70,7 @@ for line in (line.strip() for line in inputfile if line.strip()):
         f050a = marcrecord["050"]["a"]
     except:
         continue
-    
+
     if f050a:
         match = re.search("^M[LT][0-9]+.*$", f050a)
     if not match:
@@ -84,5 +81,5 @@ for line in (line.strip() for line in inputfile if line.strip()):
 
     marc_clean_record(marcrecord)
     outputfile.write(marcrecord.as_marc())
-   
+
 outputfile.close()

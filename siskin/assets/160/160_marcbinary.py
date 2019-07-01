@@ -37,16 +37,16 @@ for csv_record in csv_records.iterrows():
 
     # Zugangsformat
     marc_record.add("007", data="tu")
-    
+
     # Sprache
     marc_record.add("041", a=csv_record["041a"])
-    
+
     # Notation
     marc_record.add("084", a="ZX 3900", _2="rvk")
-   
+
     # 1. Urheber
     marc_record.add("100", a=csv_record["100a"])
-    
+
     # Titel
     marc_record.add("245", a=csv_record["245a"])
 
@@ -70,7 +70,7 @@ for csv_record in csv_records.iterrows():
 
     # Umfang
     marc_record.add("300", a=csv_record["300a"])
-    
+
     # Fußnote
     marc_record.add("500", a=u"Signatur: " + csv_record["Signatur\ngesamt"])
 

@@ -9,7 +9,7 @@ import xmltodict
 
 import marcx
 from siskin.mappings import formats
-from siskin.utils import marc_build_field_008, check_isbn, check_issn
+from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
 
 def get_field(name):
@@ -57,7 +57,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     #Text</dc:type>
     #Volume</dc:type>
     format = get_field("dc:type")
-    
+
     if format == "Article":
         format = "Article"
     elif format == "Manuscript":
