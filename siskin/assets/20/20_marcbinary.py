@@ -3,8 +3,8 @@
 
 # SID: 20
 # Ticket: #14793
-# TechnicalCollectionID: sid-142-col-???
-# Task: TODO
+# TechnicalCollectionID: sid-20-col-gallica, sid-20-col-gallicabuch
+# Task: gallica
 
 
 from __future__ import print_function
