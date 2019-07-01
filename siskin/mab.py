@@ -149,7 +149,7 @@ class MabXMLFile(object):
         in the content, e.g.  (("¬", ""),) to be applied before parsing.
         """
         if replace and len(replace) == 2:
-            replace = (replace,)
+            replace = (replace, )
         if isinstance(data, six.string_types):
             if os.path.exists(data):
                 # Assume it is a file.

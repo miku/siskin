@@ -509,9 +509,9 @@ def marc_build_field_008(year="", periodicity="", language=""):
                 print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % lang, file=sys.stderr)
     else:
         language = "   "
-    
+
     return 7 * ' ' + year + 10 * ' ' + periodicity + 13 * ' ' + language + 2 * ' '
-    
+
 
 def check_isbn(isbn=""):
     """
