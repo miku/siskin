@@ -481,7 +481,7 @@ def marc_build_field_008(year="", periodicity="", language=""):
     """
     Takes year of publication, periodicity and language and returns entire field.
     """
-    if isinstance(year, str):
+    if isinstance(year, six.string_types):
         match = re.search("(\d\d\d\d)", year)
         if match:
             year = match.group(1)
@@ -501,7 +501,7 @@ def marc_build_field_008(year="", periodicity="", language=""):
         else:
             language = "mul"
 
-    if language and isinstance(language, str):
+    if language and isinstance(language, six.string_types):
         if len(language) != 3:
             lang = language.lower()
             language = languages.get(lang, "   ")
