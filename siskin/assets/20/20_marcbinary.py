@@ -18,7 +18,7 @@ import marcx
 from siskin.mappings import formats, roles
 from siskin.utils import xmlstream, marc_build_field_008, check_isbn, check_issn
 
-setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:01", "gallica:theme:0:02"]
+setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:02"]
 
 inputfilename = "20_input.xml"
 outputfilename = "20_output.mrc"
@@ -251,13 +251,11 @@ for oldrecord in xmlstream(inputfilename, "Record"):
 
     # Ansigelung
     if setspec == "gallica:theme:0:00":
-        f980c = "000"
-    elif setspec == "gallica:theme:0:01":
-        f980c = "010"
+        f980c = "sid-20-col-gallicabuch"
     elif setspec == "gallica:theme:0:02":
-        f980c = "020"
+        f980c = "sid-20-col-gallicabuch"
     else:
-        f980c = "htm"
+        f980c = "sid-20-col-gallica"
     collections = ["a", f980a, "b", "20", "c", f980c]
     marcrecord.add("980", subfields=collections)
 
