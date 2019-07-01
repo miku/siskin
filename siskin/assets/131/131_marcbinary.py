@@ -18,7 +18,7 @@ formatmap = {
     "Seminarvortrag": "Buch",
     "Tagungsband": "Buch",
     "Verzeichnis": "Buch",
-    "Wörterbuch": "Buch",
+    u"Wörterbuch": "Buch",
     "Bericht": "Buch",
     "Tagungsbericht": "Buch",
     "Diplomarbeit": "Hochschulschrift",
