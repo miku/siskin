@@ -506,12 +506,12 @@ def marc_build_field_008(year="", periodicity="", language=""):
             lang = language.lower()
             language = languages.get(lang, "   ")
             if language == "   ":
-                print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % lang)
+                print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % lang, file=sys.stderr)
     else:
         language = "   "
-
-    return "       " + year + "          " + periodicity + "             " + language + "  "
-
+    
+    return 7 * ' ' + year + 10 * ' ' + periodicity + 13 * ' ' + language + 2 * ' '
+    
 
 def check_isbn(isbn=""):
     """
