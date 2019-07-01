@@ -23,7 +23,7 @@ outputfilename = "142_output.mrc"
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-reader = MabXMLFile(inputfilename, replace=((u"¬", ""), ))
+reader = MabXMLFile(inputfilename, replace=(u"¬", ""))
 outputfile = open(outputfilename, "wb")
 
 parent_ids = []
