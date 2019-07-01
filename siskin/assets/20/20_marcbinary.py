@@ -100,8 +100,6 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     # DDC-Notation
     if setspec == "gallica:theme:0:00":
         marcrecord.add("082", a="000")
-    elif setspec == "gallica:theme:0:01":
-        marcrecord.add("082", a="010")
     elif setspec == "gallica:theme:0:02":
         marcrecord.add("082", a="020")
     elif setspec == "gallica:typedoc:partitions":
