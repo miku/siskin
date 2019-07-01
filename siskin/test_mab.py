@@ -167,3 +167,20 @@ def test_record_subfield():
     assert record.field("419") is None
     assert record.field("419", code="c") == "2016"
     assert record.field("419", "c") == "2016"
+
+
+def test_replace():
+    mabf = MabXMLFile(sample_file_two, replace=(('2016', '2017'),))
+    record = mabf.next()
+    assert record.field("419") is None
+    assert record.field("419", code="c") == "2017"
+    assert record.field("419", "c") == "2017"
+
+
+def test_replace_shortcut():
+    mabf = MabXMLFile(sample_file_two, replace=('2016', '2017'))
+    record = mabf.next()
+    assert record.field("419") is None
+    assert record.field("419", code="c") == "2017"
+    assert record.field("419", "c") == "2017"
+
