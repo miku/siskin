@@ -59,7 +59,10 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     match = re.search("gallica.bnf.fr/ark:/\d+/(.*)", id)
     if match:
         f001 = match.group(1)
+        f001 = f001.rstrip("/date")
         f980a = match.group(1)
+        f980a = f980a.rstrip("/date")
+
     else:
         sys.exit("Die ID konnte nicht ermittelt werden: " + f001)
     f001 = "finc-20-" + f001
