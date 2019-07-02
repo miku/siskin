@@ -200,7 +200,6 @@ class DOAJIntermediateSchema(DOAJTask):
         return {
             'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
             'input': DOAJHarvest(date=self.date),
-            'blacklist': DOAJIdentifierBlacklist(date=self.date),
         }
 
     @timed
@@ -208,9 +207,7 @@ class DOAJIntermediateSchema(DOAJTask):
         output = shellout("""unpigz -c {input} |
                              span-import -i {format} |
                              grep -vf {exclude} |
-                             grep -vf {blacklist} |
                              pigz -c > {output}""",
-                          blacklist=self.input().get('blacklist').path,
                           exclude=self.assets('028_doaj_filter_issn.tsv'),
                           input=self.input().get('input').path,
                           format=self.format)
