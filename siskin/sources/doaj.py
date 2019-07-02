@@ -35,6 +35,7 @@ import itertools
 import operator
 import tempfile
 import time
+import os
 from builtins import map, range
 
 import elasticsearch
@@ -245,3 +246,36 @@ class DOAJDOIList(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+class DOAJDownloadDump(DOAJTask):
+    """
+    Download complete set.
+
+    > You can access full data-dumps of the entire DOAJ public metadata below.
+    Data dumps are generated weekly. The following files provide you complete
+    sets of articles and journals as JSON, in the form that they would also be
+    retrieved via the API.
+
+    Data comes in batches of 100k records.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+    kind = luigi.Parameter(default='article', description='article or journal')
+
+    def run(self):
+        dumps = {
+            'article': 'https://doaj.org/public-data-dump/article',
+            'journal': 'https://doaj.org/public-data-dump/journal',
+        }
+        if self.kind not in dumps:
+            raise ValueError('kind must be: article or journal')
+
+        original = shellout(""" wget -O {output} {link} """, link=dumps[self.kind])
+
+        # The data comes in batches, each batch is a list of dicts, [{}, {},
+        # ...], so we want to flatten all batches into a single json lines file first.
+        output = shellout(""" tar -xOzf {input} | jq -rc '.[]' | pigz -c > {output} """, input=original)
+        luigi.LocalTarget(output).move(self.output().path)
+        os.remove(original)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='gz'), format=Gzip)
