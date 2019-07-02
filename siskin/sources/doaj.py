@@ -61,36 +61,6 @@ class DOAJTask(DefaultTask):
         return monthly(date=self.date)
 
 
-class DOAJDump(DOAJTask):
-    """
-    Simplify DOAJ harvest, via doajfetch (https://git.io/fQ2la), which will use
-    the API
-    (https://doaj.org/api/v1/docs#!/Search/get_api_v1_search_articles_search_query).
-
-    As of Fall 2018 DOAJ works on a few infrastructure issue
-    (https://blog.doaj.org/2018/10/01/infrastructure-and-why-sustainable-funding-so-important-to-services-like-doaj/).
-
-    In the future, a full download should be used to lower the overhead of HTTP
-    and API calls.
-
-    As of Feb 2019, the API is not usable for full downloads any more.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    batch_size = luigi.IntParameter(default=100, significant=False, description="probably not more than 100 allowed")
-    sleep = luigi.IntParameter(default=4, significant=False, description="sleep seconds between requests")
-
-    def run(self):
-        output = shellout("doajfetch -verbose -sleep {sleep}s -size {size} -P -o {output} > /dev/null",
-                          sleep=self.sleep,
-                          size=self.batch_size)
-        output = shellout("jq -rc '.results[]' < {input} > {output}", input=output)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-
 class DOAJHarvest(DOAJTask):
     """
     Harvest via OAI endpoint.
@@ -109,88 +79,12 @@ class DOAJHarvest(DOAJTask):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
 
-class DOAJIdentifierBlacklist(DOAJTask):
-    """
-    Create a blacklist of identifiers.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    min_title_length = luigi.IntParameter(default=30, description='Only consider titles with at least this length.')
-
-    def requires(self):
-        return DOAJDump(date=self.date)
-
-    def run(self):
-        """
-        Output a list of identifiers of documents, which have the same title. Use the newest.
-        """
-        output = shellout("""jq -rc '[
-                                .["bibjson"]["title"],
-                                .["last_updated"],
-                                .["id"]
-                            ]' {input} | sort -S35% > {output}""",
-                          input=self.input().path)
-
-        with open(output) as handle:
-            docs = (json.loads(s) for s in handle)
-
-            with self.output().open('w') as output:
-                for title, grouper in itertools.groupby(docs, key=operator.itemgetter(0)):
-                    group = list(grouper)
-                    if not title or len(title) < self.min_title_length or len(group) < 2:
-                        continue
-                    for dropable in map(operator.itemgetter(2), group[0:len(group) - 1]):
-                        output.write_tsv(dropable)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class DOAJFiltered(DOAJTask):
-    """
-    Filter DOAJ by ISSN in assets. Slow.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="doaj", description="kind of source document, doaj or doaj-api")
-
-    def requires(self):
-        """
-        Temporarily support both formats. XXX: Switch to doaj-api.
-        """
-        return {
-            'dump': DOAJDump(date=self.date),
-            'blacklist': DOAJIdentifierBlacklist(date=self.date),
-        }
-
-    @timed
-    def run(self):
-        identifier_blacklist = load_set_from_target(self.input().get('blacklist'))
-        excludes = load_set_from_file(self.assets('028_doaj_filter.tsv'), func=lambda line: line.replace("-", ""))
-
-        with self.output().open('w') as output:
-            with self.input().get('dump').open() as handle:
-                for line in handle:
-                    record, skip = json.loads(line), False
-                    if record['id'] in identifier_blacklist:
-                        continue
-                    for issn in record["bibjson"]["journal"]["issns"]:
-                        issn = issn.replace("-", "").strip()
-                        if issn in excludes:
-                            skip = True
-                            break
-                    if skip:
-                        continue
-                    output.write(line)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
-
-
-class DOAJIntermediateSchema(DOAJTask):
+class DOAJIntermediateSchemaDirty(DOAJTask):
     """
     Convert to intermediate schema via span; elasticsearch and API are
     currently defunkt, use OAI (with metha 0.1.37 or higher).
 
-    TODO(miku): Keep DOAJIdentifierBlacklist updated via DOAJHarvest.
+    Dirty version, contains dups (like https://is.gd/AJ0qKc).
 
     Example duplicates:
 
@@ -237,28 +131,67 @@ class DOAJIntermediateSchema(DOAJTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 
-class DOAJExport(DOAJTask):
+class DOAJTable(DOAJTask):
     """
-    Export to various formats
+    Emit a DOAJ data table: id, date, title - for rough deduplication by title (see DOAJWhitelist).
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
         return DOAJIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
+        output = shellout("""unpigz -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """,
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        extensions = {
-            'solr5vu3': 'ldj.gz',
-            'formeta': 'form.gz',
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class DOAJWhitelist(DOAJTask):
+    """
+    Create a list of suppressable DOAJ ids.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DOAJTable(date=self.date)
+
+    def run(self):
+        # Sort by title, then date, the find the newest date and filter the id.
+        output = shellout(""" sort -S30% -t $'\t' -k3,3 -k2,2 < {input} |
+                          tac |
+                          sort -S30% -t $'\t' -k3,3 -u |
+                          cut -f1 | grep -v '^$' > {output} """,
+                          input=self.input().path, preserve_whitespace=True)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class DOAJIntermediateSchema(DOAJTask):
+    """
+    Respect whitelist.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'data': DOAJIntermediateSchemaDirty(date=self.date),
+            'whitelist': DOAJWhitelist(date=self.date),
         }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+
+    @timed
+    def run(self):
+        output = shellout("""unpigz -c {input} | LC_ALL=C grep -Ff {whitelist} | pigz -c > {output}""",
+                          whitelist=self.input().get('whitelist').path,
+                          input=self.input().get('data').path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
 
 
 class DOAJISSNList(DOAJTask):
