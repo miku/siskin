@@ -68,6 +68,8 @@ for record in xmlstream(inputfilename, "record"):
         collections = ["a", f001, "b", "39", "c", u"sid-39-col-persee"]
 
     record.add("980", subfields=collections)
+
+    marc_clean_record(marcrecord)
     outputfile.write(record.as_marc())
 
 outputfile.close()
