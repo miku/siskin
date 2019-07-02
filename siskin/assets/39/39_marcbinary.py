@@ -7,6 +7,7 @@ import sys
 from builtins import *
 from io import BytesIO, StringIO
 
+import logging
 import marcx
 import pymarc
 from siskin.utils import xmlstream, marc_clean_record
@@ -52,15 +53,18 @@ for record in xmlstream(inputfilename, "record"):
     except:
         f022a = ""
 
-    try:
-        f520a = record["520"]["a"]
-    except:
-        f520a = ""
+    descriptions = list(record.itervalues('520.a'))
+    record.remove_fields("520")
 
-    if len(f520a) > 8000:
-        f520a = f520a[:8000]
-        record.remove_fields("520")
-        record.add("520", a=f520a)
+    # Ugly, but helps to emit valid binary MARC.
+    descriptions = [d[:8000] for d in descriptions]
+    total = sum((len(s) for s in descriptions))
+    if total > 9000:
+        logging.warn('%s: sum of descriptions exceeds (%d) limit, keeping 1 of %d fields',
+                     f001, total, len(descriptions))
+        descriptions = descriptions[:1]
+    for description in descriptions:
+        record.add("520", a=description)
 
     try:
         f760x = record["760"]["x"]
