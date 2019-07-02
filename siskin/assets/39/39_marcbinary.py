@@ -9,7 +9,7 @@ from io import BytesIO, StringIO
 
 import marcx
 import pymarc
-from siskin.utils import xmlstream
+from siskin.utils import xmlstream, marc_clean_record
 
 inputfilename = "39_input.xml"
 outputfilename = "39_output.mrc"
@@ -69,7 +69,7 @@ for record in xmlstream(inputfilename, "record"):
 
     record.add("980", subfields=collections)
 
-    marc_clean_record(marcrecord)
+    marc_clean_record(record)
     outputfile.write(record.as_marc())
 
 outputfile.close()
