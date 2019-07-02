@@ -206,6 +206,11 @@ class DOAJIntermediateSchema(DOAJTask):
     2011-01-01T00:00:00Z    fb7aa986929e4644b6125214bade736f        A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS
     2011-11-01T00:00:00Z    fb7aa986929e4644b6125214bade736f        A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS
 
+    Another example (DOAJ internal search seems to return both: https://is.gd/AJ0qKc):
+
+    2006-09-01T00:00:00Z    e211856315f442869421032269b461d6        11 de setembro de 2001: algumas das consequências após 5 anos.
+    2010-12-01T00:00:00Z    d8e93099d0934e6eb3f4f66e8e522a9c        11 de setembro de 2001: algumas das consequências após 5 anos.
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="doaj-oai",
