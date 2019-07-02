@@ -22,7 +22,7 @@ More on Luigi:
 * [Luigi presentation at LPUG 2015](https://github.com/miku/lpug-luigi)
 * [Luigi workshop at PyCon Balkan 2018](https://github.com/miku/batchdata)
 
-More on project:
+More about the project:
 
 * [Blog about index](https://finc.info/de/Archive/268) [de], 2015
 * [Presentation at 4th VuFind Meetup](https://swop.bsz-bw.de/frontdoor/index/index/docId/1104) [de], 2015
