@@ -41,7 +41,6 @@ from siskin.sources.amsl import AMSLCollections, AMSLService
 from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount, CrossrefCollectionsDifference,
                                      CrossrefExport)
 from siskin.sources.degruyter import DegruyterExport
-from siskin.sources.doaj import DOAJExport
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
 from siskin.sources.highwire import HighwireExport
 from siskin.sources.jstor import JstorExport
@@ -54,30 +53,6 @@ class AdhocTask(DefaultTask):
     Base task for throwaway tasks.
     """
     TAG = "adhoc"
-
-
-class AdhocFormetaSamples(AdhocTask):
-    """
-    Formeta test samples.
-    """
-
-    def requires(self):
-        return [
-            CrossrefExport(format='formeta'),
-            DegruyterExport(format='formeta'),
-            DOAJExport(format='formeta'),
-            ElsevierJournalsExport(format='formeta'),
-            HighwireExport(format='formeta'),
-            JstorExport(format='formeta'),
-        ]
-
-    def run(self):
-        with self.output().open('w') as output:
-            for target in self.input():
-                output.write_tsv(target.path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class OADOIDatasetStatusByDOI(AdhocTask):
