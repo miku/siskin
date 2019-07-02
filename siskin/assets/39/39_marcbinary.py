@@ -53,6 +53,16 @@ for record in xmlstream(inputfilename, "record"):
         f022a = ""
 
     try:
+        f520a = record["520"]["a"]
+    except:
+        f520a = ""
+
+    if len(f520a) > 8000:
+        f520a = f520a[:8000]
+        record.remove_fields("520")
+        record.add("520", a=f520a)
+
+    try:
         f760x = record["760"]["x"]
     except:
         f760x = ""
