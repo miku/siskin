@@ -217,7 +217,7 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     # GND-Inhalts- und Datenträgertyp
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
-    marcrecord.add("338", a=f655a, _2=f6552)
+    marcrecord.add("655", a=f655a, _2=f6552)
 
     # weitere geistige Schöpfer
     creators = oldrecord.get("dc:creator", "")
