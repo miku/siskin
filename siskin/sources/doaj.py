@@ -176,10 +176,12 @@ class DOAJIntermediateSchema(DOAJTask):
     Respect whitelist.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="doaj-oai",
+                             description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
 
     def requires(self):
         return {
-            'data': DOAJIntermediateSchemaDirty(date=self.date),
+            'data': DOAJIntermediateSchemaDirty(date=self.date, format=self.format),
             'whitelist': DOAJWhitelist(date=self.date),
         }
 
