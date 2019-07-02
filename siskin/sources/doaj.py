@@ -191,6 +191,21 @@ class DOAJIntermediateSchema(DOAJTask):
     currently defunkt, use OAI (with metha 0.1.37 or higher).
 
     TODO(miku): Keep DOAJIdentifierBlacklist updated via DOAJHarvest.
+
+    Example duplicates:
+
+    * https://doaj.org/article/697e7128445f406fa108acf55a3d0b52
+    * https://doaj.org/article/fb7aa986929e4644b6125214bade736f
+
+    Example seems to differ only in abstract formatting (https://i.imgur.com/ILxmRVC.png), with
+    fb7aa986929e4644b6125214bade736f probably being correct (also the newest
+    record).
+
+    2011-01-01T00:00:00Z    5a29b0fd51bf458eaa173f5c40f3d21c        A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS
+    2011-01-01T00:00:00Z    697e7128445f406fa108acf55a3d0b52        A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS
+    2011-01-01T00:00:00Z    fb7aa986929e4644b6125214bade736f        A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS
+    2011-11-01T00:00:00Z    fb7aa986929e4644b6125214bade736f        A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="doaj-oai",
