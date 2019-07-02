@@ -24,6 +24,8 @@
 
 set -eu
 
+
+# XXX: $@ eats options
 for name in "$@"; do
     OUTPUT=$(taskoutput "$name")
 
