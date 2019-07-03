@@ -327,6 +327,9 @@ password = helloadmin
 * prefer [io.open](https://docs.python.org/3/library/io.html#io.open) to raw open, e.g. Python 2 builtin has no keyword `encoding`
 * string literals should be written with the `u` prefix (obsolete in Python 3, but required in Python 2)
 
+### Debugging
+
+* prefer logging over print statements
 
 ### Open for discussion
 
