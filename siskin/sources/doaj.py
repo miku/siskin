@@ -33,9 +33,9 @@ http://doaj.org
 import datetime
 import itertools
 import operator
+import os
 import tempfile
 import time
-import os
 from builtins import map, range
 
 import elasticsearch
@@ -142,8 +142,9 @@ class DOAJTable(DOAJTask):
         return DOAJIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("""unpigz -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """,
-                          input=self.input().path)
+        output = shellout(
+            """unpigz -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """,
+            input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -165,7 +166,8 @@ class DOAJWhitelist(DOAJTask):
                           tac |
                           sort -S30% -t $'\t' -k3,3 -u |
                           cut -f1 | grep -v '^$' > {output} """,
-                          input=self.input().path, preserve_whitespace=True)
+                          input=self.input().path,
+                          preserve_whitespace=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -246,6 +248,7 @@ class DOAJDOIList(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
 
 class DOAJDownloadDump(DOAJTask):
     """
