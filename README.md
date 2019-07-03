@@ -284,7 +284,7 @@ Other tools:
 
 ## Naming conventions
 
-Some conventions are forced by tools (e.g. imports, yapf), but the following
+Some conventions are enforced by tools (e.g. imports, yapf), but the following
 may be considered as well.
 
 ### Task names and filenames
