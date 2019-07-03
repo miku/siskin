@@ -28,6 +28,22 @@ More about the project:
 * [Presentation at 4th VuFind Meetup](https://swop.bsz-bw.de/frontdoor/index/index/docId/1104) [de], 2015
 * [Metadaten zwischen Autopsie und Automatisierung](https://www.bibliotheksverband.de/fileadmin/user_upload/Kommissionen/Kom_ErwBest/Tagungen/Erwkomm_Fortbild_Ddorf2018_Wiesenmueller.pdf#page=26) [de], 2018
 
+* [Install](#install)
+* [Update](#update)
+* [Run](#run)
+* [Create an aggregated file for finc](#create-an-aggregated-file-for-finc)
+* [Configuration](#configuration)
+* [Software versioning](#software-versioning)
+* [Schema changes](#schema-changes)
+* [Task dependencies](#task-dependencies)
+* [Evolving workflows](#evolving-workflows)
+* [Development](#development)
+* [Naming conventions](#naming-conventions)
+* [Deployment](#deployment)
+* [TODO](#todo)
+
+----
+
 ## Install
 
 ```
