@@ -264,6 +264,74 @@ Other tools:
 * use [pytest](https://docs.pytest.org/), [pytest-cov](https://pypi.org/project/pytest-cov/), coverage at 9%
 * use [tox](https://tox.readthedocs.io/) for testing siskin Python 2 and 3 compatibility
 
+## Naming conventions
+
+Some conventions are forced by tools (e.g. imports, yapf), but the following
+may be considered as well.
+
+### Task names and filenames
+
+* task class names that produce MARC21 should have suffix MARC, e.g. ArchiveMARC
+* task class names that produce intermediate schema files should have suffix IntermediateSchema, e.g. ArchiveIntermediateSchema
+* task for a single source should share a prefix, e.g. ArchiveMARC, ArchiveISSNList
+* source prefix names should follow the source names (e.g. site of publisher), in German: *vorlagegetreu*, e.g. DOAJHarvest, GallicaMARC
+* potentially long source names can be shortened, e.g. Umweltbibliothek can become UmBi... in umbi.py
+* it is recommended that the source file name follows the source name, e.g. DOAJ tasks live in doaj.py
+
+### Module docstrings for tasks (and scripts)
+
+Rough examples:
+
+```
+# coding: utf-8
+# pylint: ...
+#
+# Copyright 2019 ... GPL-3.0+ snippet
+# ...
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Gallica
+SID: 20
+Ticket: #14793
+Origin: OAI
+Updates: monthly
+
+Config:
+
+[vkfilm]
+input = /path/to/file
+password = helloadmin
+
+"""
+
+```
+
+### Quoting style
+
+* use double quotes, if possible
+
+### Executable
+
+* if a module can be used as standalone script, then it should include the following line as first line:
+
+```
+#!/usr/bin/env python
+```
+
+### Python 2/3 considerations
+
+* use [six](https://six.readthedocs.io/), if necessary
+* use `__future__` imports if necessary
+* prefer [io.open](https://docs.python.org/3/library/io.html#io.open) to raw open, e.g. Python 2 builtin has no keyword `encoding`
+* string literals should be written with the `u` prefix (obsolete in Python 3, but required in Python 2)
+
+
+### Open for discussion
+
+* one suffix for data acquisition tasks, e.g. Harvest, Get, Fetch, Download, ...
+
 ## Deployment
 
 A distribution can be created via Makefile.
