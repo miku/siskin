@@ -1,6 +1,6 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
-
+#
 # Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
@@ -22,16 +22,14 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
+
 Source: Gallica (Bibliothèque nationale de France, BnF)
 SID: 20
 Ticket: #14793
-Metadata: OAI harvest
-Updates: monthly [?]
-
-Config
-
-[gallica]
+Origin: OAI
+Updates: monthly
 
 """
 
@@ -45,9 +43,9 @@ from gluish.utils import shellout
 from siskin.task import DefaultTask
 
 
-class GALLICATask(DefaultTask):
+class GallicaTask(DefaultTask):
     """
-    Base task for GALLICA.
+    Base task for Gallica.
     """
     TAG = '20'
 
@@ -55,7 +53,7 @@ class GALLICATask(DefaultTask):
         return monthly(date=self.date)
 
 
-class GALLICAHarvest(GALLICATask):
+class GallicaHarvest(GallicaTask):
     """
     Harvest from default http://oai.bnf.fr/oai2/OAIHandler OAI endpoint.
     """
@@ -74,7 +72,7 @@ class GALLICAHarvest(GALLICATask):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
-class GALLICAMARC(GALLICATask):
+class GallicaMARC(GallicaTask):
     """
     Custom convert to MARC.
     """
@@ -82,7 +80,7 @@ class GALLICAMARC(GALLICATask):
     format = luigi.Parameter(default='oai_dc')
 
     def requires(self):
-        return GALLICAHarvest(date=self.date, format=self.format)
+        return GallicaHarvest(date=self.date, format=self.format)
 
     def run(self):
         output = shellout("python {script} {input} {output}",
