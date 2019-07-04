@@ -4,7 +4,7 @@ Various tasks for heterogeneous metadata handling for Project
 [finc](https://finc.info). Based on [luigi](https://github.com/spotify/luigi)
 from Spotify.
 
-[![pypi version](https://badge.fury.io/py/siskin.png)](https://pypi.python.org/pypi/siskin)
+[![pypi version](https://badge.fury.io/py/siskin.png)](https://pypi.python.org/pypi/siskin) [![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499)
 
 * Overview in a [few markdown slides](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
 
@@ -43,10 +43,6 @@ Contents.
 * [Naming conventions](#naming-conventions)
 * [Deployment](#deployment)
 * [TODO](#todo)
-
-Since July 2019, we are citable.
-
-[![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499)
 
 ----
 
