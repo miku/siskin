@@ -1,8 +1,8 @@
 # siskin
 
 Various tasks for heterogeneous metadata handling for Project
-[finc](https://finc.info). Based on [luigi](https://github.com/spotify/luigi)
-from Spotify.
+[finc](https://finc.info) at [Leipzig University Library](https://www.ub.uni-leipzig.de). Based on
+[luigi](https://github.com/spotify/luigi) from Spotify.
 
 [![pypi version](https://badge.fury.io/py/siskin.png)](https://pypi.python.org/pypi/siskin) [![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499)
 
