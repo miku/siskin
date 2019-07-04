@@ -25,7 +25,7 @@
 set -eu
 
 if [ "$#" -eq 0 ]; then
-    echo "usage: taskrm TASKNAME [--op1 abc, --op2, ...] [TASKNAME, TASKNAME, ...]"
+    >&2 echo "usage: taskrm TASKNAME [--op1 abc, --op2, ...] [TASKNAME, TASKNAME, ...]"
     exit 0
 fi
 
@@ -34,7 +34,7 @@ case $2 in
     # We have some flag, so args contain task name and args.
     OUTPUT=$(taskoutput "$@")
     if [ "$?" -ne 0 ]; then
-        printf "cannot determine task output [%d]\n" $?
+        >&2 printf "cannot determine task output [%d]\n" $?
         exit 1
     else
         if [ -f "$OUTPUT" ]; then
@@ -50,7 +50,7 @@ case $2 in
     for name in "$@"; do
         OUTPUT=$(taskoutput "$name")
         if [ "$?" -ne 0 ]; then
-            printf "cannot determine task output [%d]\n" $?
+            >&2 printf "cannot determine task output [%d]\n" $?
             exit 1
         else
             rm -vf "$OUTPUT"
