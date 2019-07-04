@@ -24,15 +24,37 @@
 
 set -eu
 
+if [ "$#" -eq 0 ]; then
+    echo "usage: taskrm TASKNAME [--op1 abc, --op2, ...] [TASKNAME, TASKNAME, ...]"
+    exit 0
+fi
 
-# XXX: $@ eats options
-for name in "$@"; do
-    OUTPUT=$(taskoutput "$name")
-
+case $2 in
+*--*)
+    # We have some flag, so args contain task name and args.
+    OUTPUT=$(taskoutput "$@")
     if [ "$?" -ne 0 ]; then
         printf "cannot determine task output [%d]\n" $?
         exit 1
     else
-        rm -vf "$OUTPUT"
+        if [ -f "$OUTPUT" ]; then
+            rm -vf "$OUTPUT"
+        else
+            >&2 echo "[ok] nothing to remove"
+        fi
+        exit 0
     fi
-done
+    ;;
+*)
+    # Otherwise only tasknames, remove them one by one.
+    for name in "$@"; do
+        OUTPUT=$(taskoutput "$name")
+        if [ "$?" -ne 0 ]; then
+            printf "cannot determine task output [%d]\n" $?
+            exit 1
+        else
+            rm -vf "$OUTPUT"
+        fi
+    done
+    ;;
+esac
