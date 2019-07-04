@@ -44,6 +44,10 @@ Contents.
 * [Deployment](#deployment)
 * [TODO](#todo)
 
+Since July 2019, we are citable.
+
+[![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499)
+
 ----
 
 ## Install
