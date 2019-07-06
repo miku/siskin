@@ -16,6 +16,24 @@ def get_field(record, field, subfield):
         return ""
 
 
+def get_inds_for_field_245(title):
+    """
+    Checks if the title starts with an article and returns the appropriate indicator.
+    """
+    if title.startswith("Eine"):
+        return " 5"
+    elif title.startswith("Ein"):
+        return " 4"
+    elif title.startswith("Der"):
+        return " 4"
+    elif title.startswith("Die"):
+        return " 4"
+    elif title.startswith("Das"):
+        return " 4"
+    else:
+        return "  "
+
+
 inputfilename = "173_input.mrc"
 outputfilename = "173_output.mrc"
 
@@ -79,9 +97,10 @@ for record in reader:
     # Titel
     f245a = get_field(record, "245", "a")
     if f245a:
-        f245a = re.sub("\s?~?\\\dagger\s?", "", f245a)
         record.remove_fields("245")
-        record.add("245", a=f245a)
+        f245a = re.sub("\s?~?\\\dagger\s?", "", f245a)
+        inds = get_inds_for_field_245(f245a)
+        record.add("245", a=f245a, indicators=inds)
     else:
         continue
 
