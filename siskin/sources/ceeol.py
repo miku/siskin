@@ -94,7 +94,7 @@ class CeeolJournalsUpdates(CeeolTask):
             for p in paths:
                 self.logger.debug("converting: %s", p)
                 for doc in convert_ceeol_to_intermediate_schema(p):
-                    output.write(json.dump(doc) + "\n")
+                    output.write(json.dumps(doc) + "\n")
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
