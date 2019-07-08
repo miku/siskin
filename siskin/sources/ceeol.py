@@ -34,6 +34,7 @@ Config:
 
 disk-dir = /path/to/disk
 updates = /path/to/file.xml, /path/to/another.xml, ...
+updates-marc = /path/to/file.xml, /path/to/file.xml
 
 """
 
