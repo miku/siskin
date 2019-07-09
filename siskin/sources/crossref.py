@@ -597,3 +597,36 @@ class CrossrefDOIBlacklist(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
+
+class CrossrefMembers(CrossrefTask):
+    """
+    Fetch members information via API.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("span-crossref-members > {output}")
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
+
+class CrossrefPrefixList(CrossrefTask):
+    """
+    DOI prefix and canonical name, refs #13587.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefMembers(date=self.date)
+
+    def run(self):
+        output = shellout("jq -rc '.message.items[0].prefix[] < {input} | [.value, .name] | @tsv' > {output}",
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path())
+
