@@ -56,6 +56,8 @@ import luigi
 
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from gluish.parameter import ClosestDateParameter
+from gluish.intervals import weekly
 
 
 def yesterday():
@@ -71,6 +73,9 @@ class MVWTask(DefaultTask):
     """
     TAG = '169'
 
+    def closest(self):
+        return weekly(date=self.date)
+
 
 class MVWDownloadSnapshot(MVWTask):
     """
@@ -78,7 +83,7 @@ class MVWDownloadSnapshot(MVWTask):
     files at https://verteiler.mediathekviewweb.de/archiv/ were not updated any
     more (2019-03-22).
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         url = "https://verteiler.mediathekviewweb.de/Filmliste-akt.xz"
@@ -93,7 +98,7 @@ class MVWDownload(MVWTask):
     """
     Download file list for a given date.
     """
-    date = luigi.DateParameter(default=yesterday())
+    date = ClosestDateParameter(default=yesterday())
 
     def run(self):
         url = "%s/%04d/%02d/%s-filme.xz" % (self.config.get("mediathekviewweb",
@@ -116,7 +121,7 @@ class MVWMARC(MVWTask):
                 └─ MVWDownload(date=2018-08-28)
 
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return MVWDownloadSnapshot(date=self.date)
