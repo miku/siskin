@@ -623,7 +623,7 @@ class CrossrefPrefixList(CrossrefTask):
         return CrossrefMembers(date=self.date)
 
     def run(self):
-        output = shellout("jq -rc '.message.items[0].prefix[] < {input} | [.value, .name] | @tsv' > {output}",
+        output = shellout("jq -rc '.message.items[0].prefix[] | [.value, .name] | @tsv' < {input} > {output}",
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
