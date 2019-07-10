@@ -663,7 +663,6 @@ class CrossrefPrefixMapping(CrossrefTask):
 
         result = set()
 
-        self.logger.debug("output at %s", output.name)
         with self.input().get('data').open() as handle:
             for i, line in enumerate(handle):
                 if i % 1000000 == 0:
@@ -687,6 +686,7 @@ class CrossrefPrefixMapping(CrossrefTask):
                     result.add(entry) # Unique.
 
         with self.output().open('w') as output:
+            self.logger.debug("output at %s", output.name)
             for row in sorted(result):
                 output.write_tsv(*row)
 
