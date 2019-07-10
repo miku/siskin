@@ -624,8 +624,9 @@ class CrossrefPrefixList(CrossrefTask):
 
     def run(self):
         """ XXX: multiple prefixes per name """
-        output = shellout("jq -rc '.message.items[0].prefix[] | [.value, .name] | @tsv' < {input} > {output}",
-                          input=self.input().path)
+        output = shellout("""jq -rc '.message.items[] |
+                          {{"prefix": .prefixes[], "name": .["primary-name"]}} |
+                          [.prefix, .name] | @tsv' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
