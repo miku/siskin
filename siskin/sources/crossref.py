@@ -278,7 +278,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
 class CrossrefExport(CrossrefTask):
@@ -629,4 +629,54 @@ class CrossrefPrefixList(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
+
+
+class CrossrefPrefixMapping(CrossrefTask):
+    """
+    Map existing collection name to new name.
+
+    Current format: PREFIX CANONICAL-NAME CURRENT-AMSL-MEGACOLLECTION
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'data': CrossrefIntermediateSchema(date=self.date),
+            'list': CrossrefPrefixList(date=self.date),
+        }
+
+    def run(self):
+        namemap = {}
+
+        with self.input().get('list').open() as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                if '\t' not in line:
+                    self.logger.warn("invalid prefix list row: %s", line)
+                    continue
+                prefix, name = line.split('\t', 1)
+                namemap[prefix.strip()] = name.strip()
+
+        self.logger.debug("found %d mappings from prefix to name", len(namemap))
+
+        with self.output().open('w') as output:
+            self.logger.debug("output at %s", output.name)
+            with self.input().get('data').open() as handle:
+                for line in handle:
+                    doc = json.loads(line)
+                    prefix, _ = doc.get("doi").split("/", 1)
+                    for mega_collection in doc.get("finc.mega_collection", []):
+                        name = namemap.get(prefix)
+                        if name is None:
+                            # Cache canonical names, if we missed it.
+                            resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
+                            namemap[prefix] = resp["message"]["primary-name"]
+                            name = namemap.get(prefix, "UNDEFINED")
+                            self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
+                        output.write_tsv(prefix, unicode(name), unicode(mega_collection))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
