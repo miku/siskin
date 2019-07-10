@@ -663,28 +663,28 @@ class CrossrefPrefixMapping(CrossrefTask):
 
         result = set()
 
-            self.logger.debug("output at %s", output.name)
-            with self.input().get('data').open() as handle:
-                for i, line in enumerate(handle):
-                    if i % 1000000 == 0:
-                        self.logger.debug("[...] at %d", i)
+        self.logger.debug("output at %s", output.name)
+        with self.input().get('data').open() as handle:
+            for i, line in enumerate(handle):
+                if i % 1000000 == 0:
+                    self.logger.debug("[...] at %d", i)
 
-                    doc = json.loads(line)
-                    prefix, _ = doc.get("doi").split("/", 1)
+                doc = json.loads(line)
+                prefix, _ = doc.get("doi").split("/", 1)
 
-                    # Most records will have a single collection name.
-                    for mega_collection in doc.get("finc.mega_collection", []):
-                        name = namemap.get(prefix)
+                # Most records will have a single collection name.
+                for mega_collection in doc.get("finc.mega_collection", []):
+                    name = namemap.get(prefix)
 
-                        if name is None:
-                            # Cache canonical names, if we missed it.
-                            resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
-                            namemap[prefix] = resp["message"]["primary-name"]
-                            name = namemap.get(prefix, "UNDEFINED")
-                            self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
+                    if name is None:
+                        # Cache canonical names, if we missed it.
+                        resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
+                        namemap[prefix] = resp["message"]["primary-name"]
+                        name = namemap.get(prefix, "UNDEFINED")
+                        self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
 
-                        entry = (prefix, unicode(name), unicode(mega_collection))
-                        result.add(entry) # Unique.
+                    entry = (prefix, unicode(name), unicode(mega_collection))
+                    result.add(entry) # Unique.
 
         with self.output().open('w') as output:
             for row in sorted(result):
