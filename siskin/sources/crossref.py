@@ -661,21 +661,34 @@ class CrossrefPrefixMapping(CrossrefTask):
 
         self.logger.debug("found %d mappings from prefix to name", len(namemap))
 
-        with self.output().open('w') as output:
+        result = set()
+
             self.logger.debug("output at %s", output.name)
             with self.input().get('data').open() as handle:
-                for line in handle:
+                for i, line in enumerate(handle):
+                    if i % 1000000 == 0:
+                        self.logger.debug("[...] at %d", i)
+
                     doc = json.loads(line)
                     prefix, _ = doc.get("doi").split("/", 1)
+
+                    # Most records will have a single collection name.
                     for mega_collection in doc.get("finc.mega_collection", []):
                         name = namemap.get(prefix)
+
                         if name is None:
                             # Cache canonical names, if we missed it.
                             resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
                             namemap[prefix] = resp["message"]["primary-name"]
                             name = namemap.get(prefix, "UNDEFINED")
                             self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
-                        output.write_tsv(prefix, unicode(name), unicode(mega_collection))
+
+                        entry = (prefix, unicode(name), unicode(mega_collection))
+                        result.add(entry) # Unique.
+
+        with self.output().open('w') as output:
+            for row in sorted(result):
+                output.write_tsv(*row)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
