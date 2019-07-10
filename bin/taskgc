@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # coding: utf-8
 
 # Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -21,7 +21,13 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+#
+# Status: WIP
 
 set -eu
+set -o pipefail
 
-echo "TODO: remove obsolete task outputs"
+find $(taskhome) \
+    -not -path "*FTPMirror*" \
+    -not -path "*RedmineDownload*" \
+    -and -type f # XXX: filter the out deletable files or vv.
