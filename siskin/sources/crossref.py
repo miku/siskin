@@ -669,7 +669,6 @@ class CrossrefPrefixMapping(CrossrefTask):
             for i, line in enumerate(handle):
                 if i % 1000000 == 0:
                     self.logger.debug("[...] at %d", i)
-
                 doc = json.loads(line)
                 doi = doc.get("doi")
                 if not doi:
@@ -688,7 +687,7 @@ class CrossrefPrefixMapping(CrossrefTask):
                         name = namemap.get(prefix, "UNDEFINED")
                         self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
 
-                    entry = (prefix, name, mega_collection)
+                    entry = (unicode(v) for v in (prefix, name, mega_collection))
                     result.add(entry) # Unique.
 
         with self.output().open('w') as output:
