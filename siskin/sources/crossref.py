@@ -671,7 +671,11 @@ class CrossrefPrefixMapping(CrossrefTask):
                     self.logger.debug("[...] at %d", i)
 
                 doc = json.loads(line)
-                prefix, _ = doc.get("doi").split("/", 1)
+                doi = doc.get("doi")
+                if not doi:
+                    self.logger.warn("document without doi: %s", line)
+                    continue
+                prefix, _ = doi.split("/", 1)
 
                 # Most records will have a single collection name.
                 for mega_collection in doc.get("finc.mega_collection", []):
@@ -680,11 +684,11 @@ class CrossrefPrefixMapping(CrossrefTask):
                     if name is None:
                         # Cache canonical names, if we missed it.
                         resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
-                        namemap[prefix] = resp["message"]["primary-name"]
+                        namemap[prefix] = resp["message"]["primary-name"].decode('utf-8')
                         name = namemap.get(prefix, "UNDEFINED")
                         self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
 
-                    entry = (prefix, unicode(name), unicode(mega_collection))
+                    entry = (prefix, name, mega_collection)
                     result.add(entry) # Unique.
 
         with self.output().open('w') as output:
