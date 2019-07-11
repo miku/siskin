@@ -699,3 +699,24 @@ class CrossrefPrefixMapping(CrossrefTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
+
+class CrossrefPrefixMappingDiff(CrossrefTask):
+    """
+    Only emit rows, where canonical and current name differ.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefPrefixMapping(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            with self.output().open('w') as output:
+                for line in handle:
+                    doi, name, current = line.strip().split('\t')
+                    if u'{} (CrossRef)'.format(name) == current:
+                        continue
+                    output.write(line)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
