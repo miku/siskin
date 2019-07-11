@@ -669,7 +669,7 @@ class CrossrefPrefixMapping(CrossrefTask):
             for i, line in enumerate(handle):
                 if i % 1000000 == 0:
                     self.logger.debug("[...] at %d", i)
-                doc = json.loads(line)
+                doc = json.loads(line.decode('utf-8').strip())
                 doi = doc.get("doi")
                 if not doi:
                     self.logger.warn("document without doi: %s", line)
@@ -683,11 +683,12 @@ class CrossrefPrefixMapping(CrossrefTask):
                     if name is None:
                         # Cache canonical names, if we missed it.
                         resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
-                        namemap[prefix] = resp["message"]["primary-name"].decode('utf-8')
+                        namemap[prefix] = resp["message"]["primary-name"]
                         name = namemap.get(prefix, "UNDEFINED")
                         self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
 
-                    entry = (unicode(v) for v in (prefix, name, mega_collection))
+                    name = name.decode('utf-8')
+                    entry = tuple(v for v in (prefix, name, mega_collection))
                     result.add(entry) # Unique.
 
         with self.output().open('w') as output:
