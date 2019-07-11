@@ -27,6 +27,9 @@
 set -eu
 set -o pipefail
 
+# Remove all leftover temp files.
+find $(taskhome) -regex ".*-luigi-tmp-[0-9]+$" -exec rm -v {} \;
+
 find $(taskhome) \
     -not -path "*FTPMirror*" \
     -not -path "*RedmineDownload*" \
