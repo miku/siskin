@@ -756,7 +756,7 @@ class AMSLFilterConfig(AMSLTask):
     AMSL API might not specify everything we need to know, so this task shall
     be the only place, where workarounds happen.
 
-    Whil span-tag is fast, it is not fast enough to iterate over a disjuction
+    While span-tag is fast, it is not fast enough to iterate over a disjuction
     of 60K items for each of the 100M documents fast enough, which - if we
     could - would simplify the implementation of this task.
 
