@@ -771,9 +771,17 @@ class CrossrefPrefix13587(CrossrefTask):
 
     def run(self):
         seen = load_set_from_target(self.input().get('seen'))
+        written = set()
         with self.input().get('mapping').open() as handle:
-            for row in handle.iter_tsv(cols=('prefix', 'name', 'current')):
-                print(row)
+            with self.output().open('w') as output:
+                for row in handle.iter_tsv(cols=('prefix', 'name', 'current')):
+                    if row.prefix not in seen:
+                        self.logger.debug("not seen: %s", row.prefix)
+                        continue
+                    cut = row[:2]
+                    if tuple(cut) not in written:
+                        output.write_tsv(*cut)
+                        written.add(tuple(cut))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
