@@ -71,7 +71,7 @@ from siskin.benchmark import timed
 from siskin.mail import send_mail
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
-from siskin.utils import URLCache
+from siskin.utils import URLCache, load_set_from_target
 
 standard_library.install_aliases()
 
@@ -717,6 +717,63 @@ class CrossrefPrefixMappingDiff(CrossrefTask):
                     if u'{} (CrossRef)'.format(name) == current:
                         continue
                     output.write(line)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class CrossrefDataPrefixList(CrossrefTask):
+    """
+    List of prefixes actually occuring in the data.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return CrossrefIntermediateSchema(date=self.date)
+
+    def run(self):
+        seen = set()
+
+        with self.input().open() as handle:
+            for i, line in enumerate(handle):
+                if i % 1000000 == 0:
+                    self.logger.debug("[...] at %d", i)
+                line = line.strip()
+                if not line:
+                    continue
+                doc = json.loads(line)
+                doi = doc.get("doi")
+                if not doi:
+                    self.logger.warn("document without doi: %s", line)
+                    continue
+                prefix, _ = doi.split("/", 1)
+                seen.add(prefix)
+
+        with self.output().open('w') as output:
+            for value in sorted(seen):
+                output.write_tsv(value)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class CrossrefPrefix13587(CrossrefTask):
+    """
+    Refs #13587, note #32.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'seen': CrossrefDataPrefixList(date=self.date),
+            'mapping': CrossrefPrefixMapping(date=self.date),
+        }
+
+    def run(self):
+        seen = load_set_from_target(self.input().get('seen'))
+        with self.input().get('mapping').open() as handle:
+            for row in handle.iter_tsv(cols=('prefix', 'name', 'current')):
+                print(row)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
