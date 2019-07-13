@@ -36,20 +36,43 @@ import io
 import os
 import re
 import sys
+import tempfile
 import time
 
 import requests
 import argparse
 import sqlite3
 import smtplib
+import urllib
 
 from sqlite3 import Error
 
 
+# The current database schema.
+create_schema = """
+    CREATE TABLE
+        source
+            (source INT PRIMARY KEY NOT NULL);
+
+    CREATE TABLE
+        institution
+            (institution VARCHAR(30) PRIMARY KEY NOT NULL);
+
+    CREATE TABLE
+        sourcebyinstitution
+            (sourcebyinstitution VARCHAR(30) PRIMARY KEY NOT NULL);
+
+    CREATE TABLE
+        history
+            (date DEFAULT CURRENT_TIMESTAMP,
+            sourcebyinstitution VARCHAR(30) NOT NULL,
+            titles INT NOT NULL);
+"""
+
 receiverlist = ["robert.schenk@uni-leipzig.de"]
 
 
-def send_message(name, password, message, receiverlist):
+def send_message(message):
     """
     Print a message for user.
     """
@@ -57,9 +80,9 @@ def send_message(name, password, message, receiverlist):
     server.connect("server1.rz.uni-leipzig.de", 465)
     server.starttls()
     server.login(name, password)
-    receiver = receiverlist[0]
-    message = "Subject: SolrCheckup Warning!\n" + message
-    server.sendmail("schenk@ub.uni-leipzig.de", receiver, message)
+    message = "Subject: SolrCheckup Warnung!\n" + message
+    server.sendmail("schenk@ub.uni-leipzig.de", receiverlist, message)
+    server.quit()
 
 
 def create_connection_and_set_cursor(database):
@@ -72,37 +95,48 @@ def create_connection_and_set_cursor(database):
         print(e)
         sys.exit("No database connection could be established.")
     cursor = conn.cursor()
-    return [conn, cursor]
+    return (conn, cursor)
 
 
-def get_all_current_sources(conn, sqlite, finc, ai):
+def get_solr_result(index, params):
     """
-    Get all current sources from Solr.
-    """
-    current_sources = []
-
-    # check finc main index
-    resp = requests.get("http://" + finc + "/solr/biblio/select?q=!source_id%3Aerror&rows=0&fl=source_id&wt=json&indent=true&facet=true&facet.field=source_id&facet.mincount=1")
-    resp = resp.json()  
-    finc_sources = resp["facet_counts"]["facet_fields"]["source_id"]
-    for finc_source in finc_sources[::2]:
-        finc_source = int(finc_source)
-        current_sources.append(finc_source)
-
-     # check ai index
-    resp = requests.get("http://" + ai + "/solr/biblio/select?q=!source_id%3Aerror&rows=0&fl=source_id&wt=json&indent=true&facet=true&facet.field=source_id&facet.mincount=1")
-    resp = resp.json()  
-    ai_sources = resp["facet_counts"]["facet_fields"]["source_id"]
-    for ai_source in ai_sources[::2]:
-        ai_source = int(ai_source)
-        if ai_source in current_sources:
-            message = "source %s is both in the finc main and in the ai index." % ai_source
-            send_message(name, password, message, receiverlist)
-            continue
-        current_sources.append(ai_source)
+    Takes a Solr index and a dict of parameters and returns a result object.
+    Index should be hostport or ip:port, like 10.1.1.1:8085.
+    """            
+    params = urllib.parse.urlencode(params)
+    result = requests.get("http://%s/solr/biblio/select?%s" % (index, params))
+    return result.json()
     
-    return current_sources
 
+def get_all_current_sources(finc, ai):
+    """
+    Get all current sources from Solr in both finc main index and ai.
+    """
+    params = {
+        "facet": "true",
+        "facet.field": "source_id",
+        "facet.mincount": 3, # because of these cases ["", 2, "\" \"", 1]
+        "q": "!source_id:error",
+        "rows": 0,
+        "wt": "json",
+    }    
+    
+    result = get_solr_result(finc, params)
+    finc_sources = result["facet_counts"]["facet_fields"]["source_id"]
+    finc_sources = set([int(sid) for sid in finc_sources[::2]])
+    
+    result = get_solr_result(ai, params)
+    ai_sources = result["facet_counts"]["facet_fields"]["source_id"]
+    ai_sources = set([int(sid) for sid in ai_sources[::2]])
+
+    shared = finc_sources.intersection(ai_sources)
+    if len(shared) > 0:
+        ssid = [str(sid) for sid in shared]
+        message = "Die folgenden Quellen befinden sich sowohl im finc-main-Index als auch im AI: {}".format(", ".join(ssid))
+        send_message(message)
+
+    return finc_sources.union(ai_sources)
+    
 
 def get_all_old_sources(conn, sqlite):
     """
@@ -131,7 +165,7 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
     """
     Update the source table.
     """    
-    current_sources = get_all_current_sources(conn, sqlite, finc, ai)
+    current_sources = get_all_current_sources(finc, ai)
     old_sources = get_all_old_sources(conn, sqlite)
 
     # Check if the source table is allready filled and this is not the first checkup
@@ -142,8 +176,8 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
 
     for old_source in old_sources:
         if source_table_is_filled and old_source not in current_sources:
-            message = "The source %s is no longer in Solr.\nPlease delete it from the source table if this change is permanent." % old_source
-            send_message(name, password, message, receiverlist)
+            message = "Die SID %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die SID aus der Datenbank loeschen." % old_source
+            send_message(message)
 
     for current_source in current_sources:
         if current_source not in old_sources:
@@ -153,23 +187,30 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
             conn.commit()
 
 
-def get_all_current_institutions(conn, sqlite, finc, ai):
+def get_all_current_institutions(finc, ai):
     """
     Get all current institutions from Solr.
     """
     current_institutions = []
-
+    
+    params = {
+        "facet": "true",
+        "facet.field": "institution",
+        "facet.mincount": 3, # because of these cases ["", 2, "\" \"", 1]
+        "q": "!source_id:error",
+        "rows": 0,
+        "wt": "json",
+    }
+    
     # check finc main index
-    resp = requests.get("http://" + finc + "/solr/biblio/select?q=!source_id%3Aerror&rows=0&fl=institution&wt=json&indent=true&facet=true&facet.field=institution&facet.mincount=1")
-    resp = resp.json()  
-    institutions = resp["facet_counts"]["facet_fields"]["institution"]
+    result = get_solr_result(finc, params)  
+    institutions = result["facet_counts"]["facet_fields"]["institution"]
     for institution in institutions[::2]:
         current_institutions.append(institution)
 
-     # check ai index
-    resp = requests.get("http://" + finc + "/solr/biblio/select?q=!source_id%3Aerror&rows=0&fl=institution&wt=json&indent=true&facet=true&facet.field=institution&facet.mincount=1")
-    resp = resp.json()  
-    institutions = resp["facet_counts"]["facet_fields"]["institution"]
+    # check ai
+    result = get_solr_result(ai, params)  
+    institutions = result["facet_counts"]["facet_fields"]["institution"]
     for institution in institutions[::2]:        
         if institution in current_institutions:
             continue
@@ -250,21 +291,20 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
     """
     Update the institution table.
     """
-    current_institutions = get_all_current_institutions(conn, sqlite, finc, ai)
+    current_institutions = get_all_current_institutions(finc, ai)
     old_institutions = get_all_old_institutions(conn, sqlite)
 
     # Check if the institution table is allready filled and this is not the first checkup
-    if len(old_institutions) > 5:
-        institution_table_is_filled = True
-    else:
-        institution_table_is_filled = False
+    institution_table_is_filled = len(old_institutions) > 5
 
     for old_institution in old_institutions:
         if institution_table_is_filled and old_institution not in current_institutions:
-            message = "The institution %s is no longer in Solr.\nPlease delete it from the institution table if this change is permanent." % old_institution
-            send_message(name, password, message, receiverlist)
+            message = "Die ISIL %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die Institution aus der Datenbank loeschen." % old_institution
+            send_message(message)
 
     for current_institution in current_institutions:
+        if current_institution == " " or '"' in current_institution:
+                continue
         if current_institution not in old_institutions:
             print("The institution %s is new in Solr." % current_institution)
             sql = "INSERT INTO institution (institution) VALUES ('%s')" % current_institution
@@ -276,8 +316,8 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
     """
     Get all current sources and title numbers from Solr and log them into database.
     """
-    current_sources = get_all_current_sources(conn, sqlite, finc, ai)
-    current_institutions = get_all_current_institutions(conn, sqlite, finc, ai)
+    current_sources = get_all_current_sources(finc, ai)
+    current_institutions = get_all_current_institutions(finc, ai)
     old_sourcebyinstitutions = get_all_old_sourcebyinstitutions(conn, sqlite)
     current_sourcebyinstitutions = []
 
@@ -285,45 +325,54 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
         
         for institution in current_institutions:
 
-            # check finc main
-            sourcebyinstitution = str(source) + " - " + institution
+            if not institution or institution == " " or '"' in institution:
+                continue
+            
+            sourcebyinstitution = "SID " + str(source) + " (" + institution + ")"
             current_sourcebyinstitutions.append(sourcebyinstitution)
-            resp = requests.get("http://" + finc + '/solr/biblio/select?q=source_id%3A' + str(source) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
-            resp = resp.json()  
-            number = resp["response"]["numFound"]
+
+            params = {
+                "q": 'source_id:%s AND institution:"%s"' % (source, institution),
+                "rows": 0,
+                "wt": "json"
+            }
+
+            # check finc main            
+            result = get_solr_result(finc, params)
+            number = result["response"]["numFound"]
             if number != 0:
                 sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
                 sqlite.execute(sql)
                 conn.commit()
             else:
                 # check ai
-                resp = requests.get("http://" + ai + '/solr/biblio/select?q=source_id%3A' + str(source) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
-                resp = resp.json()
-                number = resp["response"]["numFound"]
+                result = get_solr_result(ai, params)
+                number = result["response"]["numFound"]
                 if number != 0:
+                    # TODO: escape via sqlite
                     sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
                     sqlite.execute(sql)
                     conn.commit()
 
             if sourcebyinstitution not in old_sourcebyinstitutions:
                 print("The %s is now connected to SID %s." % (institution, source))
-                sql = 'INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ("%s")' % sourcebyinstitution
+                sql = "INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ('%s')" % sourcebyinstitution
                 sqlite.execute(sql)
                 conn.commit()
 
             if number != 0:
                 old_sourcebyinstitution_number = get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution)
                 if number < old_sourcebyinstitution_number:
-                    message = "The number of titles has decreased in SID %s." % sourcebyinstitution
-                    send_message(name, password, message, receiverlist)
+                    message = "Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import verringert." % (sourcebyinstitution)
+                    send_message(message)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
 
     for old_sourcebyinstitution in old_sourcebyinstitutions:
-        if old_sourcebyinstitution not in curent_sourcebyinstitutions:
-            message = "The %s is no longer connected to SID %s." % (institution, source)
-            send_message(name, password, message, receiverlist)
+        if old_sourcebyinstitution not in current_sourcebyinstitutions:
+            message = "Die %s ist nicht laenger für die SID %s angesigelt." % (institution, source)
+            send_message(message)
 
 # Parse keyword arguments
 parser = argparse.ArgumentParser()
@@ -369,7 +418,7 @@ args = parser.parse_args()
 # Set default path if no database was specified
 database = args.database
 if not database:
-    database = "/tmp/solrcheckup.sqlite"
+    database = os.path.join(tempfile.gettempdir(), "solrcheckup.sqlite")
 
 # Exit when using yaml template without private token
 yaml = args.yaml
@@ -389,45 +438,8 @@ password = args.password
 
 # Check if database already exists, otherwise create new one
 if not os.path.isfile(database):
-
     conn, sqlite = create_connection_and_set_cursor(database)
-
-    sql = """
-            CREATE TABLE
-                source
-                    (source INT PRIMARY KEY NOT NULL,
-                    collection VARCHAR(30),
-                    mega_collection VARCHAR(50))
-        """
-
-    sqlite.execute(sql)
-
-    sql = """
-            CREATE TABLE
-                institution
-                    (institution VARCHAR(30) PRIMARY KEY NOT NULL)                   
-        """
-
-    sqlite.execute(sql)
-
-    sql = """
-            CREATE TABLE
-                sourcebyinstitution
-                    (sourcebyinstitution VARCHAR(30) PRIMARY KEY NOT NULL)
-        """
-
-    sqlite.execute(sql)
-
-    sql = """
-            CREATE TABLE
-                history
-                    (date DEFAULT CURRENT_TIMESTAMP,
-                    sourcebyinstitution VARCHAR(30) NOT NULL,
-                    titles INT NOT NULL)
-        """
-
-    sqlite.execute(sql)
-
+    sqlite.executescript(create_schema)
 else:
     conn, sqlite = create_connection_and_set_cursor(database)
 
@@ -439,6 +451,5 @@ update_institutions(conn, sqlite, finc, k10plus, ai)
 
 # 3. Step: Get the number of titles for each SID and log them to database
 update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai)
-
 
 sqlite.close()
