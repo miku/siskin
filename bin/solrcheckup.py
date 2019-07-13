@@ -3,8 +3,8 @@
 #
 # Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
-#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -69,19 +69,24 @@ create_schema = """
             titles INT NOT NULL);
 """
 
-receiverlist = ["robert.schenk@uni-leipzig.de"]
+# XXX: Encapsulate this better, to get rid of globals.
+smtp_server = "mail.example.com"
+smtp_port = 465
+smtp_sender = "noreply@example.com"
+smtp_name = "username"
+smtp_password = "password"
+recipients = "a@example.com,b@example.com"
 
 
 def send_message(message):
     """
-    Print a message for user.
+    Send e-mail to preconfigured recipients.
     """
-    server = smtplib.SMTP("server1.rz.uni-leipzig.de", 25)
-    server.connect("server1.rz.uni-leipzig.de", 465)
+    server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()
-    server.login(name, password)
+    server.login(smtp_name, smtp_password)
     message = "Subject: SolrCheckup Warnung!\n" + message
-    server.sendmail("schenk@ub.uni-leipzig.de", receiverlist, message)
+    server.sendmail(smtp_sender, recipients, message)
     server.quit()
 
 
@@ -102,11 +107,11 @@ def get_solr_result(index, params):
     """
     Takes a Solr index and a dict of parameters and returns a result object.
     Index should be hostport or ip:port, like 10.1.1.1:8085.
-    """            
+    """
     params = urllib.parse.urlencode(params)
     result = requests.get("http://%s/solr/biblio/select?%s" % (index, params))
     return result.json()
-    
+
 
 def get_all_current_sources(finc, ai):
     """
@@ -119,12 +124,12 @@ def get_all_current_sources(finc, ai):
         "q": "!source_id:error",
         "rows": 0,
         "wt": "json",
-    }    
-    
+    }
+
     result = get_solr_result(finc, params)
     finc_sources = result["facet_counts"]["facet_fields"]["source_id"]
     finc_sources = set([int(sid) for sid in finc_sources[::2]])
-    
+
     result = get_solr_result(ai, params)
     ai_sources = result["facet_counts"]["facet_fields"]["source_id"]
     ai_sources = set([int(sid) for sid in ai_sources[::2]])
@@ -136,7 +141,7 @@ def get_all_current_sources(finc, ai):
         send_message(message)
 
     return finc_sources.union(ai_sources)
-    
+
 
 def get_all_old_sources(conn, sqlite):
     """
@@ -144,7 +149,7 @@ def get_all_old_sources(conn, sqlite):
     """
     query = """
         SELECT
-            source        
+            source
         FROM
             source
         GROUP BY
@@ -164,7 +169,7 @@ def get_all_old_sources(conn, sqlite):
 def update_sources(conn, sqlite, finc, k10plus, ai):
     """
     Update the source table.
-    """    
+    """
     current_sources = get_all_current_sources(finc, ai)
     old_sources = get_all_old_sources(conn, sqlite)
 
@@ -192,7 +197,7 @@ def get_all_current_institutions(finc, ai):
     Get all current institutions from Solr.
     """
     current_institutions = []
-    
+
     params = {
         "facet": "true",
         "facet.field": "institution",
@@ -201,21 +206,21 @@ def get_all_current_institutions(finc, ai):
         "rows": 0,
         "wt": "json",
     }
-    
+
     # check finc main index
-    result = get_solr_result(finc, params)  
+    result = get_solr_result(finc, params)
     institutions = result["facet_counts"]["facet_fields"]["institution"]
     for institution in institutions[::2]:
         current_institutions.append(institution)
 
     # check ai
-    result = get_solr_result(ai, params)  
+    result = get_solr_result(ai, params)
     institutions = result["facet_counts"]["facet_fields"]["institution"]
-    for institution in institutions[::2]:        
+    for institution in institutions[::2]:
         if institution in current_institutions:
             continue
         current_institutions.append(institution)
-    
+
     return current_institutions
 
 
@@ -225,7 +230,7 @@ def get_all_old_institutions(conn, sqlite):
     """
     query = """
         SELECT
-            institution      
+            institution
         FROM
             institution
         GROUP BY
@@ -238,7 +243,7 @@ def get_all_old_institutions(conn, sqlite):
     for record in sqlite:
         old_institution = record[0]
         old_institutions.append(old_institution)
-    
+
     return old_institutions
 
 
@@ -322,12 +327,12 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
     current_sourcebyinstitutions = []
 
     for source in current_sources:
-        
+
         for institution in current_institutions:
 
             if not institution or institution == " " or '"' in institution:
                 continue
-            
+
             sourcebyinstitution = "SID " + str(source) + " (" + institution + ")"
             current_sourcebyinstitutions.append(sourcebyinstitution)
 
@@ -337,7 +342,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
                 "wt": "json"
             }
 
-            # check finc main            
+            # check finc main
             result = get_solr_result(finc, params)
             number = result["response"]["numFound"]
             if number != 0:
@@ -404,16 +409,43 @@ parser.add_argument("-a",
                     dest="ai",
                     help="url of the ai index",
                     metavar="ai")
-parser.add_argument("-n",
-                    dest="name",
+parser.add_argument("-n", "--smtp-name",
+                    dest="smtp_name",
                     help="the login name fpr the email account",
-                    metavar="name")
-parser.add_argument("-p",
-                    dest="password",
+                    metavar="smtp-name")
+parser.add_argument("-p", "--smtp-password",
+                    dest="smtp_password",
                     help="the password of the email account",
                     metavar="password")
+parser.add_argument("--smtp-server",
+                    dest="smtp_server",
+                    help="SMTP server",
+                    metavar="smtp_server")
+parser.add_argument("--smtp-port",
+                    dest="smtp_port",
+                    help="SMTP port",
+                    metavar="smtp_port",
+                    default=465)
+parser.add_argument("--smtp-sender",
+                    dest="smtp_sender",
+                    help="SMTP from address",
+                    metavar="smtp_sender",
+                    default="noreply@example.com")
+parser.add_argument("--recipients",
+                    dest="recipients",
+                    help="recipients for alert messages, comma separated",
+                    metavar="recipients")
 
 args = parser.parse_args()
+
+# XXX: Reduce use of globals.
+smtp_server = args.smtp_server
+smtp_port = args.smtp_port
+smtp_server = args.smtp_server
+smtp_name = args.name
+smtp_password = args.password
+recipients = recipients
+
 
 # Set default path if no database was specified
 database = args.database
@@ -424,7 +456,7 @@ if not database:
 yaml = args.yaml
 token = args.token
 if yaml and not token:
-    sys.exit("Keyword argument for private token needed when using yaml template.") 
+    sys.exit("Keyword argument for private token needed when using yaml template.")
 
 # Ensure that all three indicies are specified
 finc = args.finc
@@ -433,8 +465,6 @@ ai = args.ai
 if not finc or not k10plus or not ai:
     sys.exit("Three keyword arguments needed for finc, k10plus and ai index.")
 
-name = args.name
-password = args.password
 
 # Check if database already exists, otherwise create new one
 if not os.path.isfile(database):
@@ -446,7 +476,7 @@ else:
 # 1. Step: Update the source table
 update_sources(conn, sqlite, finc, k10plus, ai)
 
-# 2. Step: Update the institution table 
+# 2. Step: Update the institution table
 update_institutions(conn, sqlite, finc, k10plus, ai)
 
 # 3. Step: Get the number of titles for each SID and log them to database
