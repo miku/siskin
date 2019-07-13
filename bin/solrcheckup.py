@@ -209,7 +209,7 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
             conn.commit()
 
 
-def update_history(conn, sqlite, finc, k10plus, ai):
+def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
     """
     Get all current sources and title numbers from Solr and log them into database.
     """
@@ -346,7 +346,7 @@ update_sources(conn, sqlite, finc, k10plus, ai)
 update_institutions(conn, sqlite, finc, k10plus, ai)
 
 # 3. Step: Get the number of titles for each SID and log them to database
-update_history(conn, sqlite, finc, k10plus, ai)
+update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai)
 
 
 sqlite.close()
