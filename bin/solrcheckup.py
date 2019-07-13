@@ -45,6 +45,14 @@ import sqlite3
 from sqlite3 import Error
 
 
+def send_message(message):
+    """
+    Print a message for user.
+    TODO: Send E-Mail to all users in a specific list.
+    """
+    print(message)
+
+
 def create_connection_and_set_cursor(database):
     """
     Creates a database connection to a SQLite database and returns a cursor
@@ -162,7 +170,7 @@ def get_all_current_institutions(conn, sqlite, finc, ai):
 
 def get_all_old_institutions(conn, sqlite):
     """
-    Get all old institutions from the Database.
+    Get all old institutions from the SQLite database.
     """
     query = """
         SELECT
@@ -181,6 +189,29 @@ def get_all_old_institutions(conn, sqlite):
         old_institutions.append(old_institution)
     
     return old_institutions
+
+
+def get_all_old_sourcebyinstitutions(conn, sqlite):
+    """
+    Get all old sourcebyinstitution from the SQLite database.
+    """
+    query = """
+        SELECT
+            sourcebyinstitution
+        FROM
+            sourcebyinstitution
+        GROUP BY
+            sourcebyinstitution
+    """
+
+    sqlite.execute(query)
+    old_sourcebyinstitutions = []
+
+    for record in sqlite:
+        old_sourcebyinstitution = record[0]
+        old_sourcebyinstitutions.append(old_sourcebyinstitution)
+
+    return old_sourcebyinstitutions
 
 
 def update_institutions(conn, sqlite, finc, k10plus, ai):
@@ -215,7 +246,8 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
     """
     current_sources = get_all_current_sources(conn, sqlite, finc, ai)
     current_institutions = get_all_current_institutions(conn, sqlite, finc, ai)
-    current_sourcebyinstitution = get_all_current_institutions(conn, sqlite, finc, ai)
+    old_sourcebyinstitutions = get_all_old_sourcebyinstitutions(conn, sqlite)
+    current_sourcebyinstitutions = []
 
     for source in current_sources:
         
@@ -223,11 +255,12 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
 
             # check finc main
             sourcebyinstitution = str(source) + " - " + institution
+            current_sourcebyinstitutions.append(sourcebyinstitution)
             resp = requests.get("http://" + finc + '/solr/biblio/select?q=source_id%3A' + str(source) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
             resp = resp.json()  
             number = resp["response"]["numFound"]
             if number != 0:
-                sql = 'INSERT INTO log (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
+                sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
                 sqlite.execute(sql)
                 conn.commit()
             else:
@@ -236,12 +269,22 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
                 resp = resp.json()
                 number = resp["response"]["numFound"]
                 if number != 0:
-                    sql = 'INSERT INTO log (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
+                    sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
                     sqlite.execute(sql)
                     conn.commit()
 
+            if sourcebyinstitution not in old_sourcebyinstitutions:
+                send_message("The %s is now connected to SID %s." % (institution, source))
+                sql = 'INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ("%s")' % sourcebyinstitution
+                sqlite.execute(sql)
+                conn.commit()
+
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
+
+    for old_sourcebyinstitution in old_sourcebyinstitutions:
+        if old_sourcebyinstitution not in curent_sourcebyinstitutions:
+            send_message("The %s is no longer connected to SID %s." % (institution, source))
 
 
 # Parse keyword arguments
