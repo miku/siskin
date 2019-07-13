@@ -214,6 +214,29 @@ def get_all_old_sourcebyinstitutions(conn, sqlite):
     return old_sourcebyinstitutions
 
 
+def get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution):
+    """
+    Get all the old sourcebyinstitution number from the SQLite database.
+    """
+    query = """
+        SELECT
+            titles
+        FROM
+            history
+        WHERE
+            sourcebyinstitution = "%s"
+        ORDER BY
+            titles DESC
+        LIMIT 1
+    """ % sourcebyinstitution
+
+    sqlite.execute(query)
+    for record in sqlite:
+        old_sourcebyinstitution_number = record[0]
+        print(sourcebyinstitution + ": " + str(old_sourcebyinstitution_number))
+        return old_sourcebyinstitution_number
+
+
 def update_institutions(conn, sqlite, finc, k10plus, ai):
     """
     Update the institution table.
@@ -278,6 +301,11 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
                 sql = 'INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ("%s")' % sourcebyinstitution
                 sqlite.execute(sql)
                 conn.commit()
+
+            if number != 0:
+                old_sourcebyinstitution_number = get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution)
+                if number < old_sourcebyinstitution_number:
+                    send_message("The number of titles has decreased in SID %s." % sourcebyinstitution)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
