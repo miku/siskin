@@ -62,28 +62,28 @@ def get_all_current_sources(conn, sqlite, finc, ai):
     """
     Get all current sources from Solr.
     """
-    current_sids = []
+    current_sources = []
 
     # check finc main index
     resp = requests.get("http://" + finc + "/solr/biblio/select?q=!source_id%3Aerror&rows=0&fl=source_id&wt=json&indent=true&facet=true&facet.field=source_id&facet.mincount=1")
     resp = resp.json()  
-    finc_sids = resp["facet_counts"]["facet_fields"]["source_id"]
-    for finc_sid in finc_sids[::2]:
-        finc_sid = int(finc_sid)
-        current_sids.append(finc_sid)
+    finc_sources = resp["facet_counts"]["facet_fields"]["source_id"]
+    for finc_source in finc_sources[::2]:
+        finc_source = int(finc_source)
+        current_sources.append(finc_source)
 
      # check ai index
     resp = requests.get("http://" + ai + "/solr/biblio/select?q=!source_id%3Aerror&rows=0&fl=source_id&wt=json&indent=true&facet=true&facet.field=source_id&facet.mincount=1")
     resp = resp.json()  
-    ai_sids = resp["facet_counts"]["facet_fields"]["source_id"]
-    for ai_sid in ai_sids[::2]:
-        ai_sid = int(ai_sid)
-        if ai_sid in current_sids:
-            print("SID %s is both in the finc main and in the ai index." % ai_sid)
+    ai_sources = resp["facet_counts"]["facet_fields"]["source_id"]
+    for ai_source in ai_sources[::2]:
+        ai_source = int(ai_source)
+        if ai_source in current_sources:
+            print("source %s is both in the finc main and in the ai index." % ai_source)
             continue
-        current_sids.append(ai_sid)
+        current_sources.append(ai_source)
     
-    return current_sids
+    return current_sources
 
 
 def get_all_old_sources(conn, sqlite):
@@ -100,37 +100,37 @@ def get_all_old_sources(conn, sqlite):
     """
 
     sqlite.execute(query)
-    old_sids = []
+    old_sources = []
 
     for record in sqlite:
-        old_sid = record[0]
-        old_sids.append(old_sid)
+        old_source = record[0]
+        old_sources.append(old_source)
 
-    return old_sids
+    return old_sources
 
 
 def update_sources(conn, sqlite, finc, k10plus, ai):
     """
     Update the source table.
     """    
-    current_sids = get_all_current_sources(conn, sqlite, finc, ai)
-    old_sids = get_all_old_sources(conn, sqlite)
+    current_sources = get_all_current_sources(conn, sqlite, finc, ai)
+    old_sources = get_all_old_sources(conn, sqlite)
 
     # Check if the source table is allready filled and this is not the first checkup
-    if len(old_sids) > 100:
+    if len(old_sources) > 100:
         source_table_is_filled = True
     else:
         source_table_is_filled = False
 
-    for old_sid in old_sids:
-        if source_table_is_filled and old_sid not in current_sids:
-            print("The SID %s is no longer in Solr." % old_sid)
+    for old_source in old_sources:
+        if source_table_is_filled and old_source not in current_sources:
+            print("The source %s is no longer in Solr." % old_source)
             print("Please delete it from the source table if this change is permanent.")
 
-    for current_sid in current_sids:
-        if current_sid not in old_sids:
-            print("The SID %s is new in Solr." % current_sid)
-            sql = "INSERT INTO source (source) VALUES (%s)" % current_sid
+    for current_source in current_sources:
+        if current_source not in old_sources:
+            print("The source %s is new in Solr." % current_source)
+            sql = "INSERT INTO source (source) VALUES (%s)" % current_source
             sqlite.execute(sql)
             conn.commit()
 
@@ -213,16 +213,17 @@ def update_history(conn, sqlite, finc, k10plus, ai):
     """
     Get all current sources and title numbers from Solr and log them into database.
     """
-    current_sids = get_all_current_sources(conn, sqlite, finc, ai)
+    current_sources = get_all_current_sources(conn, sqlite, finc, ai)
     current_institutions = get_all_current_institutions(conn, sqlite, finc, ai)
+    current_sourcebyinstitution = get_all_current_institutions(conn, sqlite, finc, ai)
 
-    for sid in current_sids:
+    for source in current_sources:
         
         for institution in current_institutions:
 
             # check finc main
-            sourcebyinstitution = str(sid) + " - " + institution
-            resp = requests.get("http://" + finc + '/solr/biblio/select?q=source_id%3A' + str(sid) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
+            sourcebyinstitution = str(source) + " - " + institution
+            resp = requests.get("http://" + finc + '/solr/biblio/select?q=source_id%3A' + str(source) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
             resp = resp.json()  
             number = resp["response"]["numFound"]
             if number != 0:
@@ -231,7 +232,7 @@ def update_history(conn, sqlite, finc, k10plus, ai):
                 conn.commit()
             else:
                 # check ai
-                resp = requests.get("http://" + ai + '/solr/biblio/select?q=source_id%3A' + str(sid) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
+                resp = requests.get("http://" + ai + '/solr/biblio/select?q=source_id%3A' + str(source) + '+AND+institution%3A"' + institution + '"&rows=0&wt=json&indent=true')
                 resp = resp.json()
                 number = resp["response"]["numFound"]
                 if number != 0:
@@ -313,6 +314,14 @@ if not os.path.isfile(database):
             CREATE TABLE
                 institution
                     (institution VARCHAR(30) PRIMARY KEY NOT NULL)                   
+        """
+
+    sqlite.execute(sql)
+
+    sql = """
+            CREATE TABLE
+                sourcebyinstitution
+                    (sourcebyinstitution VARCHAR(30) PRIMARY KEY NOT NULL)
         """
 
     sqlite.execute(sql)
