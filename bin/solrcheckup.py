@@ -41,16 +41,25 @@ import time
 import requests
 import argparse
 import sqlite3
+import smtplib
 
 from sqlite3 import Error
 
 
-def send_message(message):
+receiverlist = ["robert.schenk@uni-leipzig.de"]
+
+
+def send_message(name, password, message, receiverlist):
     """
     Print a message for user.
-    TODO: Send E-Mail to all users in a specific list.
     """
-    print(message)
+    server = smtplib.SMTP("server1.rz.uni-leipzig.de", 25)
+    server.connect("server1.rz.uni-leipzig.de", 465)
+    server.starttls()
+    server.login(name, password)
+    receiver = receiverlist[0]
+    message = "Subject: SolrCheckup Warning!\n" + message
+    server.sendmail("schenk@ub.uni-leipzig.de", receiver, message)
 
 
 def create_connection_and_set_cursor(database):
@@ -87,7 +96,8 @@ def get_all_current_sources(conn, sqlite, finc, ai):
     for ai_source in ai_sources[::2]:
         ai_source = int(ai_source)
         if ai_source in current_sources:
-            print("source %s is both in the finc main and in the ai index." % ai_source)
+            message = "source %s is both in the finc main and in the ai index." % ai_source
+            send_message(name, password, message, receiverlist)
             continue
         current_sources.append(ai_source)
     
@@ -132,8 +142,8 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
 
     for old_source in old_sources:
         if source_table_is_filled and old_source not in current_sources:
-            print("The source %s is no longer in Solr." % old_source)
-            print("Please delete it from the source table if this change is permanent.")
+            message = "The source %s is no longer in Solr.\nPlease delete it from the source table if this change is permanent." % old_source
+            send_message(name, password, message, receiverlist)
 
     for current_source in current_sources:
         if current_source not in old_sources:
@@ -233,7 +243,6 @@ def get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution):
     sqlite.execute(query)
     for record in sqlite:
         old_sourcebyinstitution_number = record[0]
-        print(sourcebyinstitution + ": " + str(old_sourcebyinstitution_number))
         return old_sourcebyinstitution_number
 
 
@@ -252,8 +261,8 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
 
     for old_institution in old_institutions:
         if institution_table_is_filled and old_institution not in current_institutions:
-            print("The institution %s is no longer in Solr." % old_institution)
-            print("Please delete it from the institution table if this change is permanent.")
+            message = "The institution %s is no longer in Solr.\nPlease delete it from the institution table if this change is permanent." % old_institution
+            send_message(name, password, message, receiverlist)
 
     for current_institution in current_institutions:
         if current_institution not in old_institutions:
@@ -297,7 +306,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
                     conn.commit()
 
             if sourcebyinstitution not in old_sourcebyinstitutions:
-                send_message("The %s is now connected to SID %s." % (institution, source))
+                print("The %s is now connected to SID %s." % (institution, source))
                 sql = 'INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ("%s")' % sourcebyinstitution
                 sqlite.execute(sql)
                 conn.commit()
@@ -305,15 +314,16 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
             if number != 0:
                 old_sourcebyinstitution_number = get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution)
                 if number < old_sourcebyinstitution_number:
-                    send_message("The number of titles has decreased in SID %s." % sourcebyinstitution)
+                    message = "The number of titles has decreased in SID %s." % sourcebyinstitution
+                    send_message(name, password, message, receiverlist)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
 
     for old_sourcebyinstitution in old_sourcebyinstitutions:
         if old_sourcebyinstitution not in curent_sourcebyinstitutions:
-            send_message("The %s is no longer connected to SID %s." % (institution, source))
-
+            message = "The %s is no longer connected to SID %s." % (institution, source)
+            send_message(name, password, message, receiverlist)
 
 # Parse keyword arguments
 parser = argparse.ArgumentParser()
@@ -345,6 +355,14 @@ parser.add_argument("-a",
                     dest="ai",
                     help="url of the ai index",
                     metavar="ai")
+parser.add_argument("-n",
+                    dest="name",
+                    help="the login name fpr the email account",
+                    metavar="name")
+parser.add_argument("-p",
+                    dest="password",
+                    help="the password of the email account",
+                    metavar="password")
 
 args = parser.parse_args()
 
@@ -365,6 +383,9 @@ k10plus = args.k10plus
 ai = args.ai
 if not finc or not k10plus or not ai:
     sys.exit("Three keyword arguments needed for finc, k10plus and ai index.")
+
+name = args.name
+password = args.password
 
 # Check if database already exists, otherwise create new one
 if not os.path.isfile(database):
