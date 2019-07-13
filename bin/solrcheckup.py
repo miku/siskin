@@ -328,7 +328,7 @@ if not os.path.isfile(database):
 
     sql = """
             CREATE TABLE
-                log
+                history
                     (date DEFAULT CURRENT_TIMESTAMP,
                     sourcebyinstitution VARCHAR(30) NOT NULL,
                     titles INT NOT NULL)
