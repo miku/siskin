@@ -107,7 +107,7 @@ for line in inputfile:
         marcrecord.add("935", b="cofz", c=f935c)
 
         # Kollektion
-        marcrecord.add("980", a=f001, b="10", c="Music Treasures Consortium")
+        marcrecord.add("980", a=f001, b="10", c="sid-10-col-musictreasures")
 
         outputfile.write(marcrecord.as_marc())
 
