@@ -416,7 +416,7 @@ parser.add_argument("-n", "--smtp-name",
 parser.add_argument("-p", "--smtp-password",
                     dest="smtp_password",
                     help="the password of the email account",
-                    metavar="password")
+                    metavar="smtp_password")
 parser.add_argument("--smtp-server",
                     dest="smtp_server",
                     help="SMTP server",
@@ -442,8 +442,8 @@ args = parser.parse_args()
 smtp_server = args.smtp_server
 smtp_port = args.smtp_port
 smtp_server = args.smtp_server
-smtp_name = args.name
-smtp_password = args.password
+smtp_name = args.smtp_name
+smtp_password = args.smtp_password
 recipients = recipients
 
 
