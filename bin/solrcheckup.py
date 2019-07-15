@@ -443,6 +443,7 @@ parser.add_argument("--smtp-sender",
 parser.add_argument("--recipients",
                     dest="recipients",
                     help="recipients for alert messages, comma separated",
+                    default="",
                     metavar="recipients")
 
 args = parser.parse_args()
