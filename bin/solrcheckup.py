@@ -45,6 +45,8 @@ from sqlite3 import Error
 
 import requests
 
+logging.basicConfig(level=logging.DEBUG)
+
 # The current database schema.
 create_schema = """
     CREATE TABLE
