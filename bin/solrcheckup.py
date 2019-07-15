@@ -407,7 +407,8 @@ parser.add_argument("-t",
 parser.add_argument("-f",
                     dest="finc",
                     help="url of the finc main index",
-                    metavar="finc")
+                    metavar="finc",
+                    required=True)
 parser.add_argument("-k",
                     dest="k10plus",
                     help="url of the k10plus index",
@@ -415,7 +416,8 @@ parser.add_argument("-k",
 parser.add_argument("-a",
                     dest="ai",
                     help="url of the ai index",
-                    metavar="ai")
+                    metavar="ai",
+                    required=True)
 parser.add_argument("-n", "--smtp-name",
                     dest="smtp_name",
                     help="the login name fpr the email account",
@@ -470,8 +472,6 @@ if yaml and not token:
 finc = args.finc
 k10plus = args.k10plus
 ai = args.ai
-if not finc or not k10plus or not ai:
-    sys.exit("Three keyword arguments needed for finc, k10plus and ai index.")
 
 
 # Check if database already exists, otherwise create new one
