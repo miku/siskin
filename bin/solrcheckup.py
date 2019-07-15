@@ -457,7 +457,7 @@ smtp_server = args.smtp_server
 smtp_sender = args.smtp_sender
 smtp_name = args.smtp_name
 smtp_password = args.smtp_password
-recipients = [addr.strip() for addr in args.recipients.split(",")]
+recipients = [addr.strip() for addr in args.recipients.split(",") if addr.strip()]
 
 database = args.database
 
