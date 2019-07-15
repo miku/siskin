@@ -92,7 +92,7 @@ def send_message(message):
         logging.warn("no recipients set, not sending any message")
         return
 
-    send_mail(sender=smpt_sender,
+    send_mail(sender=smtp_sender,
               tolist=recipients,
               subject="SolrCheckup Warnung!",
               message=message)
