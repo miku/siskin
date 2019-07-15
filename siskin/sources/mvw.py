@@ -54,10 +54,10 @@ import datetime
 
 import luigi
 
+from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
-from gluish.parameter import ClosestDateParameter
-from gluish.intervals import weekly
 
 
 def yesterday():

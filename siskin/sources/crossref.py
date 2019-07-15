@@ -626,7 +626,8 @@ class CrossrefPrefixList(CrossrefTask):
         """ XXX: multiple prefixes per name """
         output = shellout("""jq -rc '.message.items[] |
                           {{"prefix": .prefixes[], "name": .["primary-name"]}} |
-                          [.prefix, .name] | @tsv' < {input} > {output}""", input=self.input().path)
+                          [.prefix, .name] | @tsv' < {input} > {output}""",
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -685,11 +686,12 @@ class CrossrefPrefixMapping(CrossrefTask):
                         resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
                         namemap[prefix] = resp["message"]["primary-name"]
                         name = namemap.get(prefix, "UNDEFINED")
-                        self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix, namemap[prefix])
+                        self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix,
+                                          namemap[prefix])
 
                     name = name.decode('utf-8')
                     entry = tuple(v for v in (prefix, name, mega_collection))
-                    result.add(entry) # Unique.
+                    result.add(entry)  # Unique.
 
         with self.output().open('w') as output:
             self.logger.debug("output at %s", output.name)

@@ -32,21 +32,19 @@ Ticket: #15656
 
 from __future__ import print_function
 
+import argparse
 import io
 import os
 import re
+import smtplib
+import sqlite3
 import sys
 import tempfile
 import time
-
-import requests
-import argparse
-import sqlite3
-import smtplib
 import urllib
-
 from sqlite3 import Error
 
+import requests
 
 # The current database schema.
 create_schema = """
