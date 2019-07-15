@@ -41,7 +41,7 @@ import sqlite3
 import sys
 import tempfile
 import time
-import urllib
+from six.moves.urllib.parse import urlencode
 from sqlite3 import Error
 
 import requests
@@ -106,7 +106,7 @@ def get_solr_result(index, params):
     Takes a Solr index and a dict of parameters and returns a result object.
     Index should be hostport or ip:port, like 10.1.1.1:8085.
     """
-    params = urllib.parse.urlencode(params)
+    params = urlencode(params)
     result = requests.get("http://%s/solr/biblio/select?%s" % (index, params))
     return result.json()
 
