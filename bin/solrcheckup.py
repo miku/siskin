@@ -395,6 +395,7 @@ parser.add_argument("-v",
 parser.add_argument("-d",
                     dest="database",
                     help="path to database",
+                    default=os.path.join(tempfile.gettempdir(), "solrcheckup.sqlite"),
                     metavar="database")
 parser.add_argument("-y",
                     dest="yaml",
@@ -457,11 +458,7 @@ smtp_name = args.smtp_name
 smtp_password = args.smtp_password
 recipients = [addr.strip() for addr in args.recipients.split(",")]
 
-
-# Set default path if no database was specified
 database = args.database
-if not database:
-    database = os.path.join(tempfile.gettempdir(), "solrcheckup.sqlite")
 
 # Exit when using yaml template without private token
 yaml = args.yaml
