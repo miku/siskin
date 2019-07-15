@@ -90,6 +90,7 @@ def send_message(message):
     """
     if not recipients:
         logging.warn("no recipients set, not sending any message")
+        return
 
     send_mail(sender=smpt_sender,
               tolist=recipients,
