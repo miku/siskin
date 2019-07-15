@@ -442,9 +442,10 @@ args = parser.parse_args()
 smtp_server = args.smtp_server
 smtp_port = args.smtp_port
 smtp_server = args.smtp_server
+smtp_sender = args.smtp_sender
 smtp_name = args.smtp_name
 smtp_password = args.smtp_password
-recipients = recipients
+recipients = args.recipients
 
 
 # Set default path if no database was specified
