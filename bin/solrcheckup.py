@@ -387,7 +387,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
             send_message(message)
 
 # Parse keyword arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-v",
                     action="version",
                     help="show version",
