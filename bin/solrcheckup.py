@@ -30,10 +30,9 @@ Ticket: #15656
 
 """
 
-from __future__ import print_function
-
 import argparse
 import io
+import logging
 import os
 import re
 import smtplib
@@ -80,6 +79,8 @@ def send_message(message):
     """
     Send e-mail to preconfigured recipients.
     """
+    if not recipients:
+        logging.warn("no recipients set, not sending any message")
     server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()
     server.login(smtp_name, smtp_password)
@@ -95,7 +96,7 @@ def create_connection_and_set_cursor(database):
     try:
         conn = sqlite3.connect(database)
     except Error as e:
-        print(e)
+        logging.error(e)
         sys.exit("No database connection could be established.")
     cursor = conn.cursor()
     return (conn, cursor)
@@ -184,7 +185,7 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
 
     for current_source in current_sources:
         if current_source not in old_sources:
-            print("The source %s is new in Solr." % current_source)
+            logging.info("The source %s is new in Solr.", current_source)
             sql = "INSERT INTO source (source) VALUES (%s)" % current_source
             sqlite.execute(sql)
             conn.commit()
@@ -309,7 +310,7 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
         if current_institution == " " or '"' in current_institution:
                 continue
         if current_institution not in old_institutions:
-            print("The institution %s is new in Solr." % current_institution)
+            logging.info("The institution %s is new in Solr.", current_institution)
             sql = "INSERT INTO institution (institution) VALUES ('%s')" % current_institution
             sqlite.execute(sql)
             conn.commit()
@@ -358,7 +359,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
                     conn.commit()
 
             if sourcebyinstitution not in old_sourcebyinstitutions:
-                print("The %s is now connected to SID %s." % (institution, source))
+                logging.info("The %s is now connected to SID %s.", institution, source)
                 sql = "INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ('%s')" % sourcebyinstitution
                 sqlite.execute(sql)
                 conn.commit()
