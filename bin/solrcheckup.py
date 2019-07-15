@@ -25,9 +25,14 @@
 
 """
 
-Automated content verification of all sources in the live solr
+Automated content verification of all sources in the (live) solr
 Ticket: #15656
 
+Usage:
+
+    $ solrcheckup.py -d my.db -f 1.2.3.4:8080 -a solr.index.xyz --smtp-sender "beep@friendlyalarms.com"
+
+This script should run fine in cron.
 """
 
 import argparse
