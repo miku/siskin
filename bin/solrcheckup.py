@@ -47,6 +47,7 @@ import tempfile
 import time
 from six.moves.urllib.parse import urlencode
 from sqlite3 import Error
+from siskin.mail import send_mail
 
 import requests
 
@@ -74,11 +75,12 @@ create_schema = """
 """
 
 # XXX: Encapsulate this better, to get rid of globals.
-smtp_server = "mail.example.com"
-smtp_port = 465
+smtp_server = "mail.example.com" # XXX: use generic config for this
+smtp_port = 465 # XXX: use generic config for this
+smtp_name = "username" # XXX: unused?
+smtp_password = "password" # XXX: unused?
+
 smtp_sender = "noreply@example.com"
-smtp_name = "username"
-smtp_password = "password"
 recipients = ["a@example.com", "b@example.com"]
 
 
@@ -88,12 +90,11 @@ def send_message(message):
     """
     if not recipients:
         logging.warn("no recipients set, not sending any message")
-    server = smtplib.SMTP(smtp_server, smtp_port)
-    server.starttls()
-    server.login(smtp_name, smtp_password)
-    message = "Subject: SolrCheckup Warnung!\n" + message
-    server.sendmail(smtp_sender, recipients, message)
-    server.quit()
+
+    send_mail(sender=smpt_sender,
+              tolist=recipients,
+              subject="SolrCheckup Warnung!",
+              message=message)
 
 
 def create_connection_and_set_cursor(database):
