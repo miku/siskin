@@ -16,7 +16,10 @@ upload: dist
 	# [pypi]
 	# username:abc
 	# password:secret
-	twine upload dist/*
+	#
+	# For internal repositories, name them in ~/.pypirc, then run: make upload
+	# TWINE_OPTS="-r internal" to upload to hosted pypi repository.
+	twine upload $(TWINE_OPTS) dist/*
 
 clean:
 	rm -rf siskin.egg-info
