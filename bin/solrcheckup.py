@@ -182,10 +182,7 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
     old_sources = get_all_old_sources(conn, sqlite)
 
     # Check if the source table is allready filled and this is not the first checkup
-    if len(old_sources) > 100:
-        source_table_is_filled = True
-    else:
-        source_table_is_filled = False
+    source_table_is_filled = len(old_sources) > 100
 
     for old_source in old_sources:
         if source_table_is_filled and old_source not in current_sources:
