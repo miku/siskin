@@ -201,7 +201,7 @@ def get_all_current_institutions(finc, ai):
     """
     Get all current institutions from Solr.
     """
-    current_institutions = []
+    current_institutions = set()
 
     params = {
         "facet": "true",
@@ -212,19 +212,11 @@ def get_all_current_institutions(finc, ai):
         "wt": "json",
     }
 
-    # check finc main index
-    result = get_solr_result(finc, params)
-    institutions = result["facet_counts"]["facet_fields"]["institution"]
-    for institution in institutions[::2]:
-        current_institutions.append(institution)
-
-    # check ai
-    result = get_solr_result(ai, params)
-    institutions = result["facet_counts"]["facet_fields"]["institution"]
-    for institution in institutions[::2]:
-        if institution in current_institutions:
-            continue
-        current_institutions.append(institution)
+    for index in (finc, ai):
+        result = get_solr_result(index, params)
+        institutions = result["facet_counts"]["facet_fields"]["institution"]
+        for institution in institutions[::2]:
+            current_institutions.add(institution)
 
     return current_institutions
 
