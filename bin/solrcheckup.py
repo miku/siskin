@@ -80,7 +80,6 @@ smtp_port = 465 # XXX: use generic config for this
 smtp_name = "username" # XXX: unused?
 smtp_password = "password" # XXX: unused?
 
-smtp_sender = "noreply@example.com"
 recipients = ["a@example.com", "b@example.com"]
 
 
@@ -440,8 +439,7 @@ parser.add_argument("--smtp-port",
 parser.add_argument("--smtp-sender",
                     dest="smtp_sender",
                     help="SMTP from address",
-                    metavar="smtp_sender",
-                    default="noreply@example.com")
+                    metavar="smtp_sender")
 parser.add_argument("--recipients",
                     dest="recipients",
                     help="recipients for alert messages, comma separated",
