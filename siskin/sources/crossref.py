@@ -689,7 +689,10 @@ class CrossrefPrefixMapping(CrossrefTask):
                         self.logger.debug("namemap now contains %d entries, added %s, %s", len(namemap), prefix,
                                           namemap[prefix])
 
-                    name = name.decode('utf-8')
+                    try:
+                        name = name.decode('utf-8')
+                    except AttributeError as err:
+                        pass # XXX: python 2/3 compat
                     entry = tuple(v for v in (prefix, name, mega_collection))
                     result.add(entry)  # Unique.
 
