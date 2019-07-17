@@ -105,12 +105,9 @@ if __name__ == '__main__':
             raise
 
     # http://stackoverflow.com/a/8690674/89391, http://bugs.python.org/issue11380
-    try:
-        sys.stdout.close()
-    except:
-        pass
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.close()
+        except:
+            pass
 
-    try:
-        sys.stderr.close()
-    except:
-        pass
