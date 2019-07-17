@@ -72,6 +72,7 @@ from siskin.mail import send_mail
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
+from six import string_types
 
 standard_library.install_aliases()
 
@@ -718,9 +719,13 @@ class CrossrefPrefixMappingDiff(CrossrefTask):
         with self.input().open() as handle:
             with self.output().open('w') as output:
                 for line in handle:
+                    if not isinstance(line, string_types):
+                        line = line.decode('utf-8')
                     doi, name, current = line.strip().split('\t')
                     if u'{} (CrossRef)'.format(name) == current:
                         continue
+                    if isinstance(line, string_types):
+                        line = line.encode('utf-8')
                     output.write(line)
 
     def output(self):
