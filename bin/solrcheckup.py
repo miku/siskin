@@ -122,9 +122,9 @@ def get_solr_result(index, params):
     return result.json()
 
 
-def get_all_current_sources(finc, ai):
+def get_all_current_sources(k10plus, ai):
     """
-    Get all current sources from Solr in both finc main index and ai.
+    Get all current sources from Solr in both k10plus main index and ai.
     """
     params = {
         "facet": "true",
@@ -135,21 +135,21 @@ def get_all_current_sources(finc, ai):
         "wt": "json",
     }
 
-    result = get_solr_result(finc, params)
-    finc_sources = result["facet_counts"]["facet_fields"]["source_id"]
-    finc_sources = set([int(sid) for sid in finc_sources[::2]])
+    result = get_solr_result(k10plus, params)
+    k10plus_sources = result["facet_counts"]["facet_fields"]["source_id"]
+    k10plus_sources = set([int(sid) for sid in k10plus_sources[::2]])
 
     result = get_solr_result(ai, params)
     ai_sources = result["facet_counts"]["facet_fields"]["source_id"]
     ai_sources = set([int(sid) for sid in ai_sources[::2]])
 
-    shared = finc_sources.intersection(ai_sources)
+    shared = k10plus_sources.intersection(ai_sources)
     if len(shared) > 0:
         ssid = [str(sid) for sid in shared]
-        message = "Die folgenden Quellen befinden sich sowohl im finc-main-Index als auch im AI: {}".format(", ".join(ssid))
+        message = "Die folgenden Quellen befinden sich sowohl im K10plus als auch im AI: {}".format(", ".join(ssid))
         send_message(message)
 
-    return finc_sources.union(ai_sources)
+    return k10plus_sources.union(ai_sources)
 
 
 def get_all_old_sources(conn, sqlite):
@@ -175,11 +175,11 @@ def get_all_old_sources(conn, sqlite):
     return old_sources
 
 
-def update_sources(conn, sqlite, finc, k10plus, ai):
+def update_sources(conn, sqlite, k10plus, ai):
     """
     Update the source table.
     """
-    current_sources = get_all_current_sources(finc, ai)
+    current_sources = get_all_current_sources(k10plus, ai)
     old_sources = get_all_old_sources(conn, sqlite)
 
     # Check if the source table is allready filled and this is not the first checkup
@@ -202,7 +202,7 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
             conn.commit()
 
 
-def get_all_current_institutions(finc, ai):
+def get_all_current_institutions(k10plus, ai):
     """
     Get all current institutions from Solr.
     """
@@ -217,7 +217,7 @@ def get_all_current_institutions(finc, ai):
         "wt": "json",
     }
 
-    for index in (finc, ai):
+    for index in (k10plus, ai):
         result = get_solr_result(index, params)
         institutions = result["facet_counts"]["facet_fields"]["institution"]
         for institution in institutions[::2]:
@@ -294,11 +294,11 @@ def get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution):
         return old_sourcebyinstitution_number
 
 
-def update_institutions(conn, sqlite, finc, k10plus, ai):
+def update_institutions(conn, sqlite, k10plus, ai):
     """
     Update the institution table.
     """
-    current_institutions = get_all_current_institutions(finc, ai)
+    current_institutions = get_all_current_institutions(k10plus, ai)
     old_institutions = get_all_old_institutions(conn, sqlite)
 
     # Check if the institution table is allready filled and this is not the first checkup
@@ -323,12 +323,12 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
             conn.commit()
 
 
-def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
+def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
     """
     Get all current sources and title numbers from Solr and log them into database.
     """
-    current_sources = get_all_current_sources(finc, ai)
-    current_institutions = get_all_current_institutions(finc, ai)
+    current_sources = get_all_current_sources(k10plus, ai)
+    current_institutions = get_all_current_institutions(k10plus, ai)
     old_sourcebyinstitutions = get_all_old_sourcebyinstitutions(conn, sqlite)
     current_sourcebyinstitutions = []
 
@@ -348,8 +348,8 @@ def update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai):
                 "wt": "json"
             }
 
-            # check finc main
-            result = get_solr_result(finc, params)
+            # check k10plus
+            result = get_solr_result(k10plus, params)
             number = result["response"]["numFound"]
             if number != 0:
                 sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
@@ -404,11 +404,6 @@ parser.add_argument("-t",
                     dest="token",
                     help="private token for GitLab",
                     metavar="token")
-parser.add_argument("-f",
-                    dest="finc",
-                    help="url of the finc main index",
-                    metavar="finc",
-                    required=True)
 parser.add_argument("-k",
                     dest="k10plus",
                     help="url of the k10plus index",
@@ -466,10 +461,8 @@ if yaml and not token:
     sys.exit("Keyword argument for private token needed when using yaml template.")
 
 # Ensure that all three indicies are specified
-finc = args.finc
 k10plus = args.k10plus
 ai = args.ai
-
 
 # Check if database already exists, otherwise create new one
 if not os.path.isfile(database):
@@ -479,12 +472,12 @@ else:
     conn, sqlite = create_connection_and_set_cursor(database)
 
 # 1. Step: Update the source table
-update_sources(conn, sqlite, finc, k10plus, ai)
+update_sources(conn, sqlite, k10plus, ai)
 
 # 2. Step: Update the institution table
-update_institutions(conn, sqlite, finc, k10plus, ai)
+update_institutions(conn, sqlite, k10plus, ai)
 
 # 3. Step: Get the number of titles for each SID and log them to database
-update_history_and_sourcebyinstitution(conn, sqlite, finc, k10plus, ai)
+update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
 
 sqlite.close()
