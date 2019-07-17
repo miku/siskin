@@ -191,7 +191,11 @@ def update_sources(conn, sqlite, finc, k10plus, ai):
 
     for current_source in current_sources:
         if current_source not in old_sources:
-            logging.info("The source %s is new in Solr.", current_source)
+            message = "The source %s is new in Solr." % current_source
+            if source_table_is_filled:
+                send_message(message)
+            else:
+                logging.info(message)
             sql = "INSERT INTO source (source) VALUES (%s)" % current_source
             sqlite.execute(sql)
             conn.commit()
@@ -297,7 +301,7 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
     old_institutions = get_all_old_institutions(conn, sqlite)
 
     # Check if the institution table is allready filled and this is not the first checkup
-    institution_table_is_filled = len(old_institutions) > 5
+    institution_table_is_filled = len(old_institutions) > 10
 
     for old_institution in old_institutions:
         if institution_table_is_filled and old_institution not in current_institutions:
@@ -308,7 +312,11 @@ def update_institutions(conn, sqlite, finc, k10plus, ai):
         if current_institution == " " or '"' in current_institution:
                 continue
         if current_institution not in old_institutions:
-            logging.info("The institution %s is new in Solr.", current_institution)
+            message = "The institution %s is new in Solr." % current_institution
+            if institution_table_is_filled:
+                send_message(message)
+            else:
+                logging.info(message)
             sql = "INSERT INTO institution (institution) VALUES ('%s')" % current_institution
             sqlite.execute(sql)
             conn.commit()
