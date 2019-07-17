@@ -77,8 +77,8 @@ create_schema = """
 # XXX: Encapsulate this better, to get rid of globals.
 smtp_server = "mail.example.com" # XXX: use generic config for this
 smtp_port = 465 # XXX: use generic config for this
-smtp_name = "username" # XXX: unused?
-smtp_password = "password" # XXX: unused?
+smtp_name = ""
+smtp_password = ""
 
 smtp_sender = "noreply@example.com"
 recipients = ["a@example.com", "b@example.com"]
@@ -97,6 +97,7 @@ def send_message(message):
               subject="SolrCheckup Warnung!",
               message=message,
               smtp=smtp_server,
+              smtp_port=smtp_port,
               username=smtp_name,
               password=smtp_password)
 
