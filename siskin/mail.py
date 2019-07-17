@@ -51,6 +51,8 @@ def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None, s
         subject = "[automessage]"
     if smtp is None:
         smtp = config.get("core", "smtp")
+    if smtp_port is None:
+        smtp = config.get("core", "smtp-port")
     if sender is None:
         sender = config.get("core", "default-sender")
 
