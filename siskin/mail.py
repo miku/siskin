@@ -37,7 +37,7 @@ logger = logging.getLogger("siskin")
 DEFAULT_SUBJECT_PREFIX = "[siskin at %s]" % (socket.gethostname())
 
 
-def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None, smtp_port=25, username=None, password=None):
+def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None, smtp_port=25, username=None, password=None, starttls=True):
     """
     Send out an email. Configure `smtp`, `default-sender` in `core` config
     section. A subject prefix is always prepended. The `tolist` parameter can
@@ -63,8 +63,9 @@ def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None, s
         tolist = [tolist]
 
     server = smtplib.SMTP(host=smtp, port=smtp_port)
-    if username and password:
+    if starttls:
         server.starttls()
+    if username and password:
         server.login(username, password)
     msg = 'Subject: {} {}\n\n{}'.format(DEFAULT_SUBJECT_PREFIX, subject, message)
     server.sendmail(sender, tolist, msg)
