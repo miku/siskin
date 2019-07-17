@@ -62,6 +62,7 @@ def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None, s
 
     server = smtplib.SMTP(host=smtp, port=smtp_port)
     if username and password:
+        server.starttls()
         server.login(username, password)
     msg = 'Subject: {} {}\n\n{}'.format(DEFAULT_SUBJECT_PREFIX, subject, message)
     server.sendmail(sender, tolist, msg)
