@@ -67,6 +67,8 @@ def send_mail(sender=None, tolist=None, subject=None, message=None, smtp=None, s
         server.starttls()
     if username and password:
         server.login(username, password)
+    else:
+        logger.debug("no username and password given, proceeding without login")
     msg = 'Subject: {} {}\n\n{}'.format(DEFAULT_SUBJECT_PREFIX, subject, message)
     server.sendmail(sender, tolist, msg)
     server.quit()
