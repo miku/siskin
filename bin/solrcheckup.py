@@ -96,7 +96,9 @@ def send_message(message):
               tolist=recipients,
               subject="SolrCheckup Warnung!",
               message=message,
-              smtp=smtp_server)
+              smtp=smtp_server,
+              username=smtp_name,
+              password=smtp_password)
 
 
 def create_connection_and_set_cursor(database):
