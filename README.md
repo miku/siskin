@@ -58,7 +58,7 @@ inspect or remove tasks or task artifacts.
 
 Python 2 and 3 support is mostly done, rough edges might remain.
 
-Run taskchecksetup to see, what additional tools might need to be installed
+Run `taskchecksetup` to see, what additional tools might need to be installed
 (this is a manually [curated](https://git.io/fhZvG) list, not everything is
 required for every task).
 
