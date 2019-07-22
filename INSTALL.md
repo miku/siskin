@@ -1,7 +1,7 @@
 # Installation
 
 * [For users](#installation-for-users)
-* For developers and data engineers
+* [For developers](#installation-for-developers)
 
 # Installation for users
 
