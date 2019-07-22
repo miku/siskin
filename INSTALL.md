@@ -63,8 +63,12 @@ ok      yaz-marcdump
 ```
 
 In the left column you will see either an `ok` or an `xx`, where `ok` means
-that the required program was found in your path. If the program was not found
-in the PATH, a link should be visible to the programs homepage. Please install these program manually, if necessary.
+that the required program was found in your
+[PATH](https://superuser.com/questions/284342/what-are-path-and-other-environment-variables-and-how-can-i-set-or-use-them).
+If the program was not found in the
+[PATH](https://superuser.com/questions/284342/what-are-path-and-other-environment-variables-and-how-can-i-set-or-use-them),
+a link should be visible to the programs homepage. Please install these program
+manually, if necessary.
 
 Note that not all tasks require all external program. In fact, you ran try to
 run any task just now. If an external program is missing, there will be an
