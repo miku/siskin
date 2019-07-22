@@ -76,7 +76,7 @@ error, which will include name (or hints) to the missing program.
 
 ### Configuration
 
-Siskin is based on luigi. Luigi has two configuration files:
+Siskin is based on luigi. Luigi typically uses [two configuration files](https://luigi.readthedocs.io/en/stable/configuration.html):
 
 * `/etc/luigi/client.conf`
 * `/etc/luigi/logging.conf`
