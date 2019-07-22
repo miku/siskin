@@ -6,16 +6,21 @@
 # Installation for users
 
 * Goal: You want to execute tasks on a computer. You do not want to develop.
-* Assumption: Familiarity with the command line.
+* Prerequisites: Familiarity with the command line.
 
 ## Create a virtual environment (optional)
 
-Depending on your systems and personal preferences, you can set up a [virtual
+Depending on your preference and setup, you can use a [virtual
 environment](https://docs.python.org/3/tutorial/venv.html) for this project.
+Additional tools like
+[virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) can
+simplify the handling of environments. [Conda](https://conda.io) comes with support for
+[environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
+built in.
 
 ## Install the siskin package
 
-The `siskin` project is distributed as a Python package. The current release
+The *siskin* project is distributed as a Python package. The current release
 should be available on [PyPI](https://pypi.org/project/siskin/) or on your
 local Package repository (e.g. Nexus, artifactory, ...).
 
