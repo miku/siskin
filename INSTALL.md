@@ -393,3 +393,68 @@ There are various typical tasks you might want to do:
 
 Each of these tasks will require you to look at different files.
 
+## Creating a source distribution
+
+To create a [source distribution](https://packaging.python.org/glossary/#term-source-distribution-or-sdist) run:
+
+```
+$ python setup.py sdist
+```
+
+Or, as a shortcut:
+
+```
+$ make dist
+```
+
+This will create a tarball under the dist directory:
+
+```
+$ tree dist
+dist
+└── siskin-0.67.1.tar.gz
+
+0 directories, 1 file
+```
+
+## Uploading a source distribution to a package repository
+
+First, install [twine](https://pypi.org/project/twine/), for secure uploads.
+
+```
+$ pip install twine
+```
+
+To upload a source distribution PyPI (requires configured account), run:
+
+```
+$ make upload
+```
+
+To upload to a local python package index, configure your `~/.pypirc` file
+accordingly. Here is an example configuration, using a package repository
+called *internal*:
+
+```
+[distutils]
+index-servers =
+    internal
+    pypi
+
+[internal]
+repository: https://example.com/nexus/repository/pypi-hosted/
+username: user1234
+password: pass1234
+```
+
+To upload to the internal repository, you can pass an argument to the Makefile:
+
+```
+$ make upload TWINE_OPTS='-r internal'
+```
+
+## More information
+
+For additional information regarding development and deployment, please have a
+look at the [README.md](README.md).
+
