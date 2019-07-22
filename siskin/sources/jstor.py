@@ -39,6 +39,7 @@ import pipes
 import tempfile
 
 import luigi
+import six
 import ujson as json
 
 from gluish.format import TSV, Gzip
@@ -259,10 +260,13 @@ class JstorXML(JstorTask):
 
                 self.logger.debug("for archive %s extract via: %s", archive, memberfile)
 
+                if not isinstance(archive, six.string_types):
+                    archive = archive.decode(encoding='utf-8')
+
                 # The unzippa will not exhaust ARG_MAX.
                 shellout("""unzippa -v -m {memberfile} {archive} |
                             sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
-                         archive=archive.decode(encoding='utf-8'),
+                         archive=archive,
                          memberfile=memberfile,
                          output=stopover)
 

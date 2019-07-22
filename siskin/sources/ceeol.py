@@ -68,8 +68,8 @@ class CeeolTask(DefaultTask):
         be more robust to use the checksums of all input files.
         """
         sha1 = hashlib.sha1()
-        sha1.update(self.config.get("ceeol", "updates"))
-        sha1.update(self.config.get("ceeol", "updates-marc"))
+        sha1.update(self.config.get("ceeol", "updates").encode('utf-8'))
+        sha1.update(self.config.get("ceeol", "updates-marc").encode('utf-8'))
         return sha1.hexdigest()
 
 
