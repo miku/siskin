@@ -181,7 +181,7 @@ for root, _, files in os.walk(input_directory):
         marcrecord.strict = False
 
         # Leader
-        marcrecord.leader = "     ncs  22        4500"
+        marcrecord.leader = "     cam  22        4500"
 
         # Identifikator
         f001 = record["identifier"]["#text"]
