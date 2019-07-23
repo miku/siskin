@@ -527,8 +527,10 @@ class JstorIntermediateSchema(JstorTask):
                         self.logger.warn("JSTOR record without issn or issn mapping: %s", doc.get("finc.id"))
                         counter["err.name"] += 1
 
-                    json.dump(doc, output)
-                    output.write("\n")
+                    line = json.dumps(doc)
+                    if isinstance(line, six.string_types):
+                        line = line.encode('utf-8')
+                    output.write(line)
 
         self.logger.debug(counter)
 
