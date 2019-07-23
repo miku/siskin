@@ -273,7 +273,7 @@ class AIIntermediateSchema(AITask):
         Check, if all files are gzipped before we concatenate.
         """
         for target in self.input():
-            with open(target.path) as f:
+            with open(target.path, "rb") as f:
                 if binascii.hexlify(f.read(2)) != b'1f8b':
                     raise RuntimeError('AIIntermediateSchema requires gzipped inputs, failed: %s' % target.path)
 
