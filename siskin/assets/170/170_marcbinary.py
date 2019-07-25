@@ -61,6 +61,22 @@ formatmaps = {
     }
 }
 
+def delistify(value, first=True, concat=None):
+    """
+    Returns a string value. If value is a list, choose a strategy to create a
+    single value.
+    """
+    if isinstance(value, (list, tuple)):
+        if len(value) > 0:
+            if first:
+                return value[0]
+            if concat is not None:
+                return concat.join(value)
+        else:
+            return ''
+    return value
+
+
 inputfilename = "170_input.xml"
 outputfilename = "170_output.mrc"
 
@@ -160,7 +176,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     else:
         f260c = ""
 
-    publisher = ["b", f260b, "c", f260c]
+    publisher = ["b", delistify(f260b), "c", delistify(f260c)]
     marcrecord.add("260", subfields=publisher)
 
     # Beschreibung
@@ -187,21 +203,22 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
                 marcrecord.add("700", a=creator)
 
     # Zeitschrift
-    sources = xmlrecord["metadata"]["oai_dc:dc"]["dc:source"]
-    if isinstance(sources, list):
-        for source in sources:
-            if ":" in source:
-                f773a = source.split("In: ")
-                if len(f773a) == 2:
-                    marcrecord.add("773", a=f773a[1])
-                else:
-                    marcrecord.add("773", a=f773a[0])
-    else:
-        f773a = sources.split("In: ")
-        if len(f773a) == 2:
-            marcrecord.add("773", a=f773a[1])
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:source"):
+        sources = xmlrecord["metadata"]["oai_dc:dc"]["dc:source"]
+        if isinstance(sources, list):
+            for source in sources:
+                if ":" in source:
+                    f773a = source.split("In: ")
+                    if len(f773a) == 2:
+                        marcrecord.add("773", a=f773a[1])
+                    else:
+                        marcrecord.add("773", a=f773a[0])
         else:
-            marcrecord.add("773", a=f773a[0])
+            f773a = sources.split("In: ")
+            if len(f773a) == 2:
+                marcrecord.add("773", a=f773a[1])
+            else:
+                marcrecord.add("773", a=f773a[0])
 
     # Link zu Datensatz und Ressource
     urls = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
