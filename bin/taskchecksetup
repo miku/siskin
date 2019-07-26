@@ -74,7 +74,7 @@ if __name__ == '__main__':
         ('groupcover', 'http://github.com/miku/groupcover/releases'),
         ('hurrly', 'http://github.com/miku/hurrly/releases'),
         ('jq', 'https://stedolan.github.io/jq/'),
-        ('marctexttoxml', 'https://github.com/miku/marc21/tree/master/cmd/marctexttoxml'),
+        ('marctexttoxml', 'https://github.com/miku/marc21/releases'),
         ('metha-sync', 'http://github.com/miku/metha/releases'),
         ('microblob', 'http://github.com/miku/microblob/releases'),
         ('oaicrawl', 'https://github.com/miku/oaicrawl'),
