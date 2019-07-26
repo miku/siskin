@@ -38,7 +38,7 @@ import os
 
 import luigi
 import requests
-import ujson as json
+import json
 
 import marcx
 import pymarc

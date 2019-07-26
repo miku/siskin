@@ -40,7 +40,7 @@ import tempfile
 
 import luigi
 import six
-import ujson as json
+import json
 
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
@@ -396,7 +396,6 @@ class JstorCollectionMapping(JstorTask):
                         names[issn].add(name)
 
         with self.output().open('w') as output:
-            import json  # ujson does not support cls keyword
             json.dump(names, output, cls=SetEncoder)
 
     def output(self):

@@ -50,7 +50,7 @@ import re
 
 import luigi
 import six
-import ujson as json
+import json
 
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
