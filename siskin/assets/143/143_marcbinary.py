@@ -42,7 +42,7 @@ for oldrecord in oldrecords:
     newrecord.add("001", data="finc-143-%s" % f001)
 
     # 007
-    newrecord.add("007", data="vu")
+    newrecord.add("007", data="cr")
 
     # 008
     f008 = oldrecord["008"].data
