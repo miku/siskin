@@ -79,6 +79,18 @@ Note that not all tasks require all external program. In fact, you ran try to
 run any task just now. If an external program is missing, there will be an
 error, which will include name (or hints) to the missing program.
 
+### Metafacture
+
+The siskin project currently uses Metafacture 4.0.0, which can be downloaded
+from
+[https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0](https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0).
+Unarchive the distribution and symlink the flux.sh into your path.
+
+```
+~/bin/flux-4.0.0.sh -> ~/opt/metafacture-runner-4.0.0/flux.sh
+~/bin/flux.sh -> flux-4.0.0.sh*
+```
+
 ## Configuration
 
 Siskin is based on luigi. Luigi typically uses [two configuration files](https://luigi.readthedocs.io/en/stable/configuration.html):
