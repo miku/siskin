@@ -58,7 +58,7 @@ from builtins import range
 import elasticsearch
 import luigi
 import requests
-import ujson as json
+import json
 from future import standard_library
 
 from gluish.common import Executable

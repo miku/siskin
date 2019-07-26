@@ -44,7 +44,7 @@ import urllib
 import luigi
 import rdflib
 import requests
-import ujson as json
+import json
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 

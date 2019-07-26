@@ -40,7 +40,7 @@ from builtins import map, range
 
 import elasticsearch
 import luigi
-import ujson as json
+import json
 
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
