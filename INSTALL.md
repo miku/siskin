@@ -315,7 +315,7 @@ have to remove the data artifacts and configuration files yourself.
 You can clone the `siskin` repository from a local git server or via:
 
 ```shell
-$ git clone https://github.com/miku/siskin.git # or https://github.com/miku/siskin.git
+$ git clone git@github.com:miku/siskin.git # or https://github.com/miku/siskin.git
 ```
 
 ## Setup a virtualenv (optional, recommended)
