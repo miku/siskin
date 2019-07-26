@@ -38,7 +38,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-
+# XXX: Break this up into production and development dependencies.
 install_requires = [
     'astroid>=1.1.1',
     'backoff>=1.3.1',
@@ -66,7 +66,6 @@ install_requires = [
     'protobuf>=2.6.1',
     'pygments>=2',
     'pyisbn>=1.0.0',
-    'pylint>=1.2.1',
     'pymarc>=3.0.1',
     'pymysql>=0.7',
     'pyparsing>=2.0.3',
