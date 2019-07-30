@@ -5,9 +5,9 @@ stages:
   - deploy
 
 before_script:
-   - pip install twine
-   - pip install pytest
-   - python setup.py sdist
+   - pip install pytest twine
+   - python setup.py install # for tests
+   - python setup.py sdist   # for packaging
 
 tests:
   stage: test
