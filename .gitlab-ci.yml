@@ -6,7 +6,7 @@ stages:
 
 before_script:
    - pip install pytest twine
-   - python setup.py install # for tests
+   - python setup.py install --index-url $PYPI_PROXY_URL # for tests, use nexus proxy for installing packages
    - python setup.py sdist   # for packaging
 
 tests:
