@@ -1,11 +1,18 @@
 image: python:3.6-alpine
 
 stages:
+  - static-analysis
   - deploy
 
 before_script:
    - pip install twine
+   - pip install flake8
    - python setup.py sdist
+
+flake8:
+  stage: static-analysis
+  script:
+  - flake8 --max-line-length=120 siskin
 
 deploy_production:
   stage: deploy
