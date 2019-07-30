@@ -1,0 +1,18 @@
+image: python:3.6-alpine
+
+stages:
+  - deploy
+
+before_script:
+   - pip install twine
+   - python setup.py sdist
+
+deploy_production:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $NEXUS_USERNAME
+    TWINE_PASSWORD: $NEXUS_PASSWORD
+  script:
+    - twine upload --repository-url $NEXUS_REPOSITORY_URL dist/*
+  only:
+    - tags
