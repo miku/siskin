@@ -14,9 +14,8 @@ Goals:
 import tempfile
 
 import luigi
-from luigi.format import Gzip
-
 from gluish.utils import shellout
+from luigi.format import Gzip
 from s04 import CrossrefIntermediateSchema, DOAJIntermediateSchema
 from s05 import ArxivIntermediateSchema
 

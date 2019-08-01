@@ -41,18 +41,18 @@ import sys
 import tempfile
 import xml.etree.cElementTree as ET
 
-import backoff
 import bs4
-import luigi
 import requests
 import six
 from dateutil import relativedelta
 from future import standard_library
 from six import string_types
-from six.moves.urllib.parse import urlparse
 
+import backoff
+import luigi
 from siskin import __version__
 from siskin.mappings import languages
+from six.moves.urllib.parse import urlparse
 
 # XXX: move to six.
 standard_library.install_aliases()
@@ -68,7 +68,6 @@ class SetEncoder(json.JSONEncoder):
 
         json.dumps({"things": set([1, 2, 3], cls=SetEncoder)}
     """
-
     def default(self, obj):
         """
         Decorate call to standard implementation.
@@ -267,7 +266,6 @@ class URLCache(object):
 
     >>> page = cache.get("https://www.google.com", force=True)
     """
-
     def __init__(self, directory=None, max_tries=12):
         """
         If `directory` is not explictly given, all files will be stored under
@@ -307,7 +305,6 @@ class URLCache(object):
         """
         Return URL, either from cache or the web.
         """
-
         @backoff.on_exception(backoff.expo, RuntimeError, max_tries=self.max_tries)
         def fetch(url):
             """
@@ -410,7 +407,6 @@ def xmlstream(filename, tag):
             print(len(snippet))
 
     """
-
     def strip_ns(tag):
         if not '}' in tag:
             return tag

@@ -29,7 +29,6 @@ import datetime
 import os
 
 import luigi
-
 from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

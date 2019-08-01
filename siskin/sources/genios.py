@@ -86,7 +86,6 @@ import tempfile
 import zipfile
 
 import luigi
-
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
@@ -189,7 +188,6 @@ class GeniosIssue10707Download(GeniosTask):
     Download kbart filter, specific to DE-15, refs #10707. Assume URL in config
     does not change. If it does, reconfigure and rerun the task.
     """
-
     def run(self):
         output = shellout("curl --fail {url} > {output}", url=self.config.get('genios', 'issue-10707-kbart-url'))
         luigi.LocalTarget(output).move(self.output().path)

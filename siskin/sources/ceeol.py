@@ -49,7 +49,6 @@ import sys
 import tempfile
 
 import luigi
-
 import marcx
 import pymarc
 from gluish.utils import shellout
@@ -78,7 +77,6 @@ class CeeolJournalsUpdates(CeeolTask):
     Create an intermediate schema from zero or more update XML (in MARCXML).
     The output will depend on the set and order of the input files.
     """
-
     def run(self):
         paths = [p.strip() for p in self.config.get("ceeol", "updates").split(",") if p.strip()]
         _, stopover = tempfile.mkstemp(prefix="siskin-")
@@ -109,7 +107,6 @@ class CeeolJournalsIntermediateSchema(CeeolTask):
 
     This task depends on a fixed subdirectory, e.g. articles or 1Journal-Articles-XML..
     """
-
     def requires(self):
         return CeeolJournalsUpdates()
 

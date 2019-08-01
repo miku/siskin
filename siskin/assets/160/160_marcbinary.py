@@ -7,9 +7,8 @@ import sys
 # https://stackoverflow.com/a/40846742/89391
 import warnings
 
-import pandas
-
 import marcx
+import pandas
 import pymarc
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")

@@ -37,7 +37,6 @@ import datetime
 import os
 
 import luigi
-
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
@@ -52,7 +51,6 @@ class EgyptologyFincMARC(EgyptologyTask):
     """
     Convert to binary MARC.
     """
-
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets('70/70_marcbinary.py'),

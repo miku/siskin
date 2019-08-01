@@ -44,7 +44,6 @@ import datetime
 import tempfile
 
 import luigi
-
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
@@ -105,7 +104,6 @@ class IEEEBacklogPaths(IEEETask):
     """
     List files in the backlog. Just a `tar -tf` of the compressed dump.
     """
-
     def run(self):
         output = shellout('tar -tf {input} > {output}', input=self.config.get('ieee', 'backlog-archive'))
         luigi.LocalTarget(output).move(self.output().path)
@@ -121,7 +119,6 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     <strike>Strangely,</strike> this yields an occasional tar "Cannot write: Broken pipe".
     // XML syntax error on line 402780414: invalid character entity &10 (no semicolon)
     """
-
     def run(self):
         output = shellout(
             """tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",

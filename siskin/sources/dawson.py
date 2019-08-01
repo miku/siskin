@@ -36,7 +36,6 @@ download-url = http://exa.com/store/123
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -52,7 +51,6 @@ class DawsonDownload(DawsonTask):
     """
     Download.
     """
-
     def run(self):
         output = shellout("curl --fail -sL {url} > {output}", url=self.config.get('dawson', 'download-url'))
         luigi.LocalTarget(output).move(self.output().path)
@@ -69,7 +67,6 @@ class DawsonFixAndCombine(DawsonTask):
     org.xml.sax.SAXParseException; lineNumber: 540690; columnNumber: 68; An invalid
     XML character (Unicode: 0x1a) was found in the element content of the document.
     """
-
     def requires(self):
         return DawsonDownload()
 
@@ -107,7 +104,6 @@ class DawsonIntermediateSchema(DawsonTask):
         to appear in element 'data'.
 
     """
-
     def requires(self):
         return DawsonFixAndCombine()
 

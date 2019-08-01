@@ -29,9 +29,10 @@ import logging
 import sqlite3
 from builtins import object
 
+from future import standard_library
+
 import pymysql
 import six.moves.urllib.parse
-from future import standard_library
 from pymysql.cursors import SSCursor
 
 # XXX: move to six.
@@ -46,7 +47,6 @@ class sqlitedb(object):
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
-
     def __init__(self, path, timeout=5.0, detect_types=0):
         self.path = path
         self.conn = None
@@ -73,7 +73,6 @@ class mysqldb(object):
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
-
     def __init__(self, url, stream=False, commit_on_exit=False):
         result = urllib.parse.urlparse(url, scheme='mysql')
         self.hostname = result.hostname

@@ -32,7 +32,6 @@ input = /path/to/csv (ask RS)
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -46,7 +45,6 @@ class SPOWITask(DefaultTask):
 
 class SPOWIMARC(SPOWITask):
     """ Convert CSV to BinaryMarc """
-
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("160/160_marcbinary.py"),

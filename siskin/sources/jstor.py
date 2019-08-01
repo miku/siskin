@@ -34,14 +34,14 @@ ftp-pattern = *
 import collections
 import datetime
 import itertools
+import json
 import os
 import pipes
 import tempfile
 
-import luigi
 import six
-import json
 
+import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

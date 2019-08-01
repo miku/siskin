@@ -33,6 +33,7 @@ import binascii
 import collections
 import datetime
 import itertools
+import json
 import multiprocessing
 import os
 import re
@@ -41,13 +42,12 @@ import string
 import tempfile
 import urllib
 
-import luigi
-import rdflib
 import requests
-import json
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 
+import luigi
+import rdflib
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly

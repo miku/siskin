@@ -34,7 +34,6 @@ input = /path/to/excel.file.xls
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -46,14 +45,12 @@ class RUGTask(DefaultTask):
 
 class RUGSpreadsheet(RUGTask, luigi.ExternalTask):
     """ It starts with Excel. """
-
     def output(self):
         return luigi.LocalTarget(path=self.config.get('rug', 'input'))
 
 
 class RUGMARC(RUGTask):
     """ Convert Excel to BinaryMarc """
-
     def requires(self):
         return RUGSpreadsheet()
 

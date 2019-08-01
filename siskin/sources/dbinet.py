@@ -48,13 +48,13 @@ import json
 import os
 import tempfile
 
-import luigi
 import pytz
 import requests
-from luigi.format import Gzip
 
+import luigi
 from gluish.format import TSV
 from gluish.utils import shellout
+from luigi.format import Gzip
 from siskin.task import DefaultTask
 from siskin.utils import load_set_from_file
 
@@ -70,7 +70,6 @@ class DBInetFiles(DBInetTask):
     """
     A list of raw files.
     """
-
     def run(self):
         directory = self.config.get('dbinet', 'directory')
         with self.output().open('w') as output:
@@ -85,7 +84,6 @@ class DBInetJSON(DBInetTask):
     """
     Combine, prepare, requires xlstproc, sed, jq.
     """
-
     def requires(self):
         return DBInetFiles()
 

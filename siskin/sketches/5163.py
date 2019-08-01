@@ -41,12 +41,13 @@ About 3900.
 
 import collections
 import gzip
+import json
 import re
 
 import requests
 import six
+
 import tqdm
-import json
 
 pattern = re.compile(r'10[.][0-9a-zA-Z]*/[0-9a-zA-Z]{4,}')
 

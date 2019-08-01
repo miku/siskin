@@ -37,7 +37,6 @@ file = /path/to/file
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -50,7 +49,6 @@ class VKFilmFile(VKFilmTask, luigi.ExternalTask):
     """
     Manually downloaded MAB dump, #8575#note-7.
     """
-
     def output(self):
         return luigi.LocalTarget(path=self.config.get('vkfilm', 'file'))
 
@@ -60,7 +58,6 @@ class VKFilmMarc(VKFilmTask):
     Convert to some MARC XML via metafacture. Custom morphs and flux are
     kept in assets/127.
     """
-
     def requires(self):
         return VKFilmFile()
 

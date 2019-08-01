@@ -47,7 +47,6 @@ import tempfile
 import traceback
 
 import luigi
-
 from gluish.task import BaseTask
 from gluish.utils import shellout
 from siskin import __version__

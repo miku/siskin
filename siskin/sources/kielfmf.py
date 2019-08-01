@@ -35,9 +35,8 @@ input = /path/to/xml (ask RS)
 """
 
 import luigi
-from luigi.format import Gzip
-
 from gluish.utils import shellout
+from luigi.format import Gzip
 from siskin.task import DefaultTask
 
 
@@ -52,7 +51,6 @@ class KielFMFIntermediateSchema(KielFMFTask):
     """
     Create intermediate schema.
     """
-
     def run(self):
         # We need an XML file. Uee a config entry to point to that file.
         input = self.config.get('kielfmf', 'input')

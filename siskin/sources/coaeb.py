@@ -36,7 +36,6 @@ input = /path/to/mrc (ask RS)
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -52,7 +51,6 @@ class COAEBMARC(COAEBTask):
     """
     Convert BinaryMARC to BinaryFincMarc.
     """
-
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("161/161_marcbinary.py"),

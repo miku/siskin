@@ -37,9 +37,9 @@ url58 = url_58
 import datetime
 import email.utils as eut
 
-import luigi
 import requests
 
+import luigi
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask

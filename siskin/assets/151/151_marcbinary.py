@@ -5,10 +5,9 @@ import io
 import re
 import sys
 
-from six.moves import html_parser
-
 import marcx
 from siskin.mappings import roles
+from six.moves import html_parser
 
 formatmap = {
     "Buch": {

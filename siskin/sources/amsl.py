@@ -59,7 +59,6 @@ import tempfile
 import zipfile
 
 import luigi
-
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.task import DefaultTask
@@ -830,8 +829,8 @@ class AMSLFilterConfig(AMSLTask):
         isilsidcollections = collections.defaultdict(lambda: collections.defaultdict(set))
 
         # Case: ISIL, SID, collection, link.
-        isilsidlinkcollections = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.
-                                                                                         defaultdict(set)))
+        isilsidlinkcollections = collections.defaultdict(
+            lambda: collections.defaultdict(lambda: collections.defaultdict(set)))
 
         # Ready-made filters per ISIL. Some filters can be added on-the-fly
         # because there aren't many occurences.
@@ -1117,6 +1116,5 @@ class AMSLCollectionList(AMSLTask):
     Find all collection names used in AMSL and their canonical name, via
     members API, prefix and names.
     """
-
     def run(self):
         raise NotImplementedError()

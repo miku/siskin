@@ -58,7 +58,6 @@ class MabRecord(object):
     """
     A single MAB record.
     """
-
     def __init__(self, dd):
         """
         Initialize with the default dictionary created by xmltodict for a
@@ -137,7 +136,6 @@ class MabXMLFile(object):
     """
     Encapsulate MAB XML methods.
     """
-
     def __init__(self, data, replace=None, encoding='utf-8'):
         """
         Eagerly parse the XML from filename, filelike or string into a

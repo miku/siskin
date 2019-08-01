@@ -45,11 +45,12 @@ import sqlite3
 import sys
 import tempfile
 import time
-from six.moves.urllib.parse import urlencode
 from sqlite3 import Error
-from siskin.mail import send_mail
 
 import requests
+
+from siskin.mail import send_mail
+from six.moves.urllib.parse import urlencode
 
 logging.basicConfig(level=logging.DEBUG)
 

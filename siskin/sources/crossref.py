@@ -46,6 +46,7 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 import datetime
 import io
 import itertools
+import json
 import os
 import socket
 import tempfile
@@ -55,12 +56,12 @@ import urllib.parse
 import urllib.request
 from builtins import range
 
+import requests
+from future import standard_library
+from six import string_types
+
 import elasticsearch
 import luigi
-import requests
-import json
-from future import standard_library
-
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
@@ -72,7 +73,6 @@ from siskin.mail import send_mail
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
-from six import string_types
 
 standard_library.install_aliases()
 
@@ -556,7 +556,6 @@ class CrossrefDOIHarvest(CrossrefTask):
     $ nslookup doi.org
 
     """
-
     def requires(self):
         """
         If we have more DOI sources, we could add them as requirements here.
@@ -585,7 +584,6 @@ class CrossrefDOIBlacklist(CrossrefTask):
 
     The output of this task should be used as doi-blacklist in config.
     """
-
     def requires(self):
         return CrossrefDOIHarvest()
 
@@ -696,7 +694,7 @@ class CrossrefPrefixMapping(CrossrefTask):
                     try:
                         name = name.decode('utf-8')
                     except AttributeError as err:
-                        pass # XXX: python 2/3 compat
+                        pass  # XXX: python 2/3 compat
                     entry = tuple(v for v in (prefix, name, mega_collection))
                     result.add(entry)  # Unique.
 

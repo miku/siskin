@@ -34,7 +34,6 @@ input = /path/to/excel.file.xls
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -46,14 +45,12 @@ class MBPTask(DefaultTask):
 
 class MBPSpreadsheet(MBPTask, luigi.ExternalTask):
     """ It starts with Excel. """
-
     def output(self):
         return luigi.LocalTarget(path=self.config.get('mbp', 'input'))
 
 
 class MBPMARC(MBPTask):
     """ Convert Excel to BinaryMarc """
-
     def requires(self):
         return MBPSpreadsheet()
 

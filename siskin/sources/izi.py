@@ -35,7 +35,6 @@ import datetime
 import os
 
 import luigi
-
 from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -51,7 +50,6 @@ class IZIMARC(IZITask):
     """
     Convert to binary MARC.
     """
-
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets('78/78_marcbinary.py'),

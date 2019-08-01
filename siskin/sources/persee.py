@@ -34,12 +34,12 @@ fid-issn-url = http://example.com/fid-issn-list
 """
 
 import datetime
+import json
 import os
 
-import luigi
 import requests
-import json
 
+import luigi
 import marcx
 import pymarc
 from gluish.format import TSV

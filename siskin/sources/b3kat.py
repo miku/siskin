@@ -72,7 +72,6 @@ import os
 import tempfile
 
 import luigi
-
 from gluish.format import TSV, Gzip
 from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter

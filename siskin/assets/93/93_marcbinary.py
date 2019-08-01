@@ -2,11 +2,12 @@
 # coding: "utf-8"
 
 import base64
-import html
 import io
 import os
 import re
 import sys
+
+import html
 
 import marcx
 

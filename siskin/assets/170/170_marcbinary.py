@@ -61,6 +61,7 @@ formatmaps = {
     }
 }
 
+
 def delistify(value, first=True, concat=None):
     """
     Returns a string value. If value is a list, choose a strategy to create a

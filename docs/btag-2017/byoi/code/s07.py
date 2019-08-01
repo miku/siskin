@@ -19,7 +19,6 @@ import json
 
 import luigi
 from luigi.format import Gzip
-
 from s06 import IntermediateSchema
 
 

@@ -28,7 +28,6 @@ Module exists, so we do not have to do star (*) imports in utils.py.
 import json
 
 from luigi.task import Register
-
 from siskin.sources import *
 from siskin.workflows import *
 

@@ -33,9 +33,9 @@ import json
 import sys
 import time
 
-import luigi
 import requests
 
+import luigi
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -89,7 +89,6 @@ class MTCMARC(MTCTask):
     """
     Convert custom JSON.
     """
-
     def requires(self):
         return MTCHarvest()
 

@@ -34,7 +34,6 @@ import datetime
 import json
 
 import luigi
-
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

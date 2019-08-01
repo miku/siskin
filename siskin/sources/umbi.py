@@ -34,7 +34,6 @@ input = /path/to/xml (ask RS)
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -50,7 +49,6 @@ class UMBIXML(UMBITask):
     """
     Convert binary MARC to XML, refs #11786#note-16.
     """
-
     def run(self):
         output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}", input=self.config.get("umbi", "input"))
         luigi.LocalTarget(output).move(self.output().path)
@@ -61,7 +59,6 @@ class UMBIXML(UMBITask):
 
 class UMBIMARC(UMBITask):
     """ Convert MARCxml to BinaryMarc """
-
     def requires(self):
         return UMBIXML()
 

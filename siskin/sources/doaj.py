@@ -32,6 +32,7 @@ http://doaj.org
 
 import datetime
 import itertools
+import json
 import operator
 import os
 import tempfile
@@ -40,8 +41,6 @@ from builtins import map, range
 
 import elasticsearch
 import luigi
-import json
-
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly

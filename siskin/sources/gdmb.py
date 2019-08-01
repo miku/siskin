@@ -34,7 +34,6 @@ input = /path/to/json (ask RS)
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -48,7 +47,6 @@ class GDMBTask(DefaultTask):
 
 class GDMBMARC(GDMBTask):
     """ Convert JSON to BinaryFincMarc """
-
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("131/131_marcbinary.py"),

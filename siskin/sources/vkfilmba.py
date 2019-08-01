@@ -48,7 +48,6 @@ import tempfile
 import zipfile
 
 import luigi
-
 import pymarc
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -113,7 +112,6 @@ class VKFilmBADump(VKFilmBATask):
 
     Only a single fixed item, no date.
     """
-
     def run(self):
         output = shellout(
             """curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}"""

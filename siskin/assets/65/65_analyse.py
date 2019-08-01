@@ -9,8 +9,9 @@ import json
 import re
 import sys
 
-import pandas as pd
 import requests
+
+import pandas as pd
 import tqdm
 from six.moves import urllib
 

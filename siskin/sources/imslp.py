@@ -41,7 +41,6 @@ import shutil
 import tempfile
 
 import luigi
-
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.conversions import imslp_tarball_to_marc
@@ -128,7 +127,6 @@ class IMSLPLegacyMapping(IMSLPTask, luigi.ExternalTask):
             ...
         }
     """
-
     def output(self):
         return luigi.LocalTarget(path=self.config.get('imslp', 'legacy-mapping'))
 

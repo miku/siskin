@@ -44,7 +44,6 @@ index-url = http://localhost:8983/solr/biblio/select
 import datetime
 
 import luigi
-
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -68,7 +67,6 @@ class VDEHXML(VDEHTask):
     Requires Mab2Mabxml, downloadable from
     https://sourceforge.net/projects/dnb-conv-tools/.
     """
-
     def run(self):
         output = shellout("java -jar {jarfile} -i {input} -o {output}",
                           jarfile=self.config.get("vdeh", "Mab2Mabxml.jar"),
@@ -98,7 +96,6 @@ class VDEHRemoveIllegalChars(VDEHTask):
 
     Anecdata: The stripped file is 57740 bytes smaller.
     """
-
     def requires(self):
         return VDEHXML()
 
