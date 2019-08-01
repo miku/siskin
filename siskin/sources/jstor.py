@@ -532,6 +532,7 @@ class JstorIntermediateSchema(JstorTask):
                     if isinstance(line, six.string_types):
                         line = line.encode('utf-8')
                     output.write(line)
+                    output.write(b"\n")
 
         self.logger.debug(counter)
 
