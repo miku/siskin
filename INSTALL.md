@@ -5,8 +5,8 @@
 
 # Installation for users
 
-* Goal: You want to execute tasks on a computer. You do not want to develop.
-* Prerequisites: Familiarity with the command line.
+* Goal: You want to execute tasks on Linux or MacOS. You do not want to develop.
+* Prerequisites: Familiarity with the command line and basic Python tooling.
 
 ## Create a virtual environment (optional)
 
@@ -72,19 +72,19 @@ that the required program was found in your
 [PATH](https://superuser.com/questions/284342/what-are-path-and-other-environment-variables-and-how-can-i-set-or-use-them).
 If the program was not found in the
 [PATH](https://superuser.com/questions/284342/what-are-path-and-other-environment-variables-and-how-can-i-set-or-use-them),
-a link should be visible to the programs homepage. Please install these program
+a link should be visible to the programs' homepage. Please install these program
 manually, if necessary.
 
-Note that not all tasks require all external program. In fact, you ran try to
-run any task just now. If an external program is missing, there will be an
-error, which will include name (or hints) to the missing program.
+Note that not all tasks require external programs. In fact, you can try to run
+any task just now. If an external program is missing, there will be an error,
+which will include the name of the missing program.
 
 ### Metafacture
 
 The siskin project currently uses Metafacture 4.0.0, which can be downloaded
 from
 [https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0](https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0).
-Unarchive the distribution and symlink the flux.sh into your path.
+Unarchive the distribution and symlink the `flux.sh` into your path.
 
 ```
 ~/bin/flux-4.0.0.sh -> ~/opt/metafacture-runner-4.0.0/flux.sh
@@ -93,7 +93,9 @@ Unarchive the distribution and symlink the flux.sh into your path.
 
 ## Configuration
 
-Siskin is based on luigi. Luigi typically uses [two configuration files](https://luigi.readthedocs.io/en/stable/configuration.html):
+Siskin is based on [luigi](https://github.com/spotify/luigi). Luigi typically
+uses [two configuration
+files](https://luigi.readthedocs.io/en/stable/configuration.html):
 
 * `/etc/luigi/client.conf`
 * `/etc/luigi/logging.conf`

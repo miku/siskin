@@ -21,6 +21,7 @@ More on Luigi:
 * [Luigi docs](https://luigi.readthedocs.io/en/stable/)
 * [Luigi presentation at LPUG 2015](https://github.com/miku/lpug-luigi)
 * [Luigi workshop at PyCon Balkan 2018](https://github.com/miku/batchdata)
+* [Data pipelines, Luigi, Airflow: everything you need to know](https://towardsdatascience.com/data-pipelines-luigi-airflow-everything-you-need-to-know-18dc741449b7)
 
 More about the project:
 
