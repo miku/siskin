@@ -167,7 +167,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                     break
 
                 body = body + '\n'
-                if isinstance(archive, six.string_types):
+                if isinstance(body, string_types):
                     body = body.encode('utf-8')
                 output.write(body)
                 offset += rows
