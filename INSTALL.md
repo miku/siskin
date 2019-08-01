@@ -208,7 +208,7 @@ optionally some task parameters need to be given:
 $ taskdo DBInetIntermediateSchema --local-scheduler
 ```
 
-Example for a task with a parameter (here: isil):
+Example for a task with a parameter (here: [ISIL](https://de.wikipedia.org/wiki/Bibliothekssigel#ISIL)):
 
 ```
 $ taskdo AMSLHoldingsFile --isil DE-14 --local-scheduler
