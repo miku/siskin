@@ -166,7 +166,10 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 if count == 0:
                     break
 
-                output.write(body + '\n')
+                body = body + '\n'
+                if isinstance(archive, six.string_types):
+                    body = body.encode('utf-8')
+                output.write(body)
                 offset += rows
 
                 if not 'next-cursor' in content['message']:
