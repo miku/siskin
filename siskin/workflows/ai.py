@@ -783,7 +783,7 @@ class AIApplyOpenAccessFlag(AITask):
         """
 
         output = shellout("""unpigz -c {input} |
-                             span-oa-filter -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
+                             span-oa-filter -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
                              pigz -c > {output}""",
                           input=self.input().get('file').path,
                           kbart=self.input().get('kbart').path,
