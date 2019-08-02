@@ -221,8 +221,8 @@ def update_sources(conn, sqlite, k10plus, ai):
                 send_message(message)
             else:
                 logging.info(message)
-            sql = "INSERT INTO source (source) VALUES (%s)" % current_source
-            sqlite.execute(sql)
+            sql = "INSERT INTO source (source) VALUES (?)"
+            sqlite.execute(sql, (current_source,))
             conn.commit()
 
 
@@ -306,13 +306,13 @@ def get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution):
         FROM
             history
         WHERE
-            sourcebyinstitution = "%s"
+            sourcebyinstitution = ?
         ORDER BY
             titles DESC
         LIMIT 1
-    """ % sourcebyinstitution
+    """
 
-    sqlite.execute(query)
+    sqlite.execute(query, (sourcebyinstitution,))
     for record in sqlite:
         old_sourcebyinstitution_number = record[0]
         return old_sourcebyinstitution_number
@@ -342,8 +342,8 @@ def update_institutions(conn, sqlite, k10plus, ai):
                 send_message(message)
             else:
                 logging.info(message)
-            sql = "INSERT INTO institution (institution) VALUES ('%s')" % current_institution
-            sqlite.execute(sql)
+            sql = "INSERT INTO institution (institution) VALUES (?)"
+            sqlite.execute(sql, (current_institution,))
             conn.commit()
 
 
@@ -376,8 +376,8 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
             result = get_solr_result(k10plus, params)
             number = result["response"]["numFound"]
             if number != 0:
-                sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
-                sqlite.execute(sql)
+                sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES (?, ?)'
+                sqlite.execute(sql, (sourcebyinstitution, number))
                 conn.commit()
             else:
                 # check ai
@@ -385,14 +385,14 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
                 number = result["response"]["numFound"]
                 if number != 0:
                     # TODO: escape via sqlite
-                    sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES ("%s", %s)' % (sourcebyinstitution, number)
-                    sqlite.execute(sql)
+                    sql = 'INSERT INTO history (sourcebyinstitution, titles) VALUES (?, ?)'
+                    sqlite.execute(sql, (sourcebyinstitution, number))
                     conn.commit()
 
             if sourcebyinstitution not in old_sourcebyinstitutions:
                 logging.info("The %s is now connected to SID %s.", institution, source)
-                sql = "INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES ('%s')" % sourcebyinstitution
-                sqlite.execute(sql)
+                sql = "INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES (?)"
+                sqlite.execute(sql, (sourcebyinstitution))
                 conn.commit()
 
             if number != 0:
