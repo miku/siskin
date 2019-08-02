@@ -30,7 +30,7 @@ Ticket: #15656
 
 Usage:
 
-    $ solrcheckup.py -d my.db -f 1.2.3.4:8080 -a solr.index.xyz --smtp-sender "beep@friendlyalarms.com"
+    $ solrcheckup.py -d my.db -k 1.2.3.4:8080 -a solr.index.xyz --smtp-sender "beep@friendlyalarms.com"
 
 This script should run fine in cron.
 """
