@@ -138,7 +138,7 @@ class DOAJTable(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return DOAJIntermediateSchema(date=self.date)
+        return DOAJIntermediateSchemaDirty(date=self.date)
 
     def run(self):
         output = shellout(
