@@ -188,15 +188,8 @@ def get_all_old_sources(conn, sqlite):
         GROUP BY
             source
     """
-
     sqlite.execute(query)
-    old_sources = []
-
-    for record in sqlite:
-        old_source = record[0]
-        old_sources.append(old_source)
-
-    return old_sources
+    return [r[0] for r in sqlite]
 
 
 def update_sources(conn, sqlite, k10plus, ai):
