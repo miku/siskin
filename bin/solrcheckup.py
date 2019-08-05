@@ -314,7 +314,7 @@ def update_institutions(conn, sqlite, k10plus, ai):
 
     for current_institution in current_institutions:
         if current_institution == " " or '"' in current_institution:
-                continue
+            continue
         if current_institution not in old_institutions:
             message = "The institution %s is new in Solr." % current_institution
             if institution_table_is_filled:
