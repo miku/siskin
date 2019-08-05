@@ -255,15 +255,8 @@ def get_all_old_institutions(conn, sqlite):
         GROUP BY
             institution
     """
-
     sqlite.execute(query)
-    old_institutions = []
-
-    for record in sqlite:
-        old_institution = record[0]
-        old_institutions.append(old_institution)
-
-    return old_institutions
+    return [r[0] for r in sqlite]
 
 
 def get_all_old_sourcebyinstitutions(conn, sqlite):
@@ -278,15 +271,8 @@ def get_all_old_sourcebyinstitutions(conn, sqlite):
         GROUP BY
             sourcebyinstitution
     """
-
     sqlite.execute(query)
-    old_sourcebyinstitutions = []
-
-    for record in sqlite:
-        old_sourcebyinstitution = record[0]
-        old_sourcebyinstitutions.append(old_sourcebyinstitution)
-
-    return old_sourcebyinstitutions
+    return [r[0] for r in sqlite]
 
 
 def get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution):
