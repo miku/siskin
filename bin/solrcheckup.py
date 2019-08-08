@@ -171,7 +171,7 @@ def get_all_current_sources(k10plus, ai):
     if len(shared) > 0:
         ssid = [str(sid) for sid in shared]
         message = "Die folgenden Quellen befinden sich sowohl im K10plus als auch im AI: {}".format(", ".join(ssid))
-        send_message(message)
+        messages.append(message)
 
     return k10plus_sources.union(ai_sources)
 
@@ -205,13 +205,13 @@ def update_sources(conn, sqlite, k10plus, ai):
     for old_source in old_sources:
         if source_table_is_filled and old_source not in current_sources:
             message = "Die SID %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die SID aus der Datenbank loeschen." % old_source
-            send_message(message)
+            messages.append(message)
 
     for current_source in current_sources:
         if current_source not in old_sources:
             message = "The source %s is new in Solr." % current_source
             if source_table_is_filled:
-                send_message(message)
+                messages.append(message)
             else:
                 logging.info(message)
             sql = "INSERT INTO source (source) VALUES (?)"
@@ -310,7 +310,7 @@ def update_institutions(conn, sqlite, k10plus, ai):
     for old_institution in old_institutions:
         if institution_table_is_filled and old_institution not in current_institutions:
             message = "Die ISIL %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die Institution aus der Datenbank loeschen." % old_institution
-            send_message(message)
+            messages.append(message)
 
     for current_institution in current_institutions:
         if current_institution == " " or '"' in current_institution:
@@ -318,7 +318,7 @@ def update_institutions(conn, sqlite, k10plus, ai):
         if current_institution not in old_institutions:
             message = "The institution %s is new in Solr." % current_institution
             if institution_table_is_filled:
-                send_message(message)
+                messages.append(message)
             else:
                 logging.info(message)
             sql = "INSERT INTO institution (institution) VALUES (?)"
@@ -371,14 +371,14 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
             if sourcebyinstitution not in old_sourcebyinstitutions:
                 logging.info("The %s is now connected to SID %s.", institution, source)
                 sql = "INSERT INTO sourcebyinstitution (sourcebyinstitution) VALUES (?)"
-                sqlite.execute(sql, (sourcebyinstitution))
+                sqlite.execute(sql, (sourcebyinstitution,))
                 conn.commit()
 
             if number != 0:
                 old_sourcebyinstitution_number = get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution)
                 if number < old_sourcebyinstitution_number:
                     message = "Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import verringert." % (sourcebyinstitution)
-                    send_message(message)
+                    messages.append(message)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
@@ -386,7 +386,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
     for old_sourcebyinstitution in old_sourcebyinstitutions:
         if old_sourcebyinstitution not in current_sourcebyinstitutions:
             message = "Die %s ist nicht laenger für die SID %s angesigelt." % (institution, source)
-            send_message(message)
+            messages.append(message)
 
 # Parse keyword arguments
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -474,6 +474,10 @@ if not os.path.isfile(database):
 else:
     conn, sqlite = create_connection_and_set_cursor(database)
 
+
+# Collects messages for email report
+messages = []
+
 # 1. Step: Update the source table
 update_sources(conn, sqlite, k10plus, ai)
 
@@ -482,5 +486,9 @@ update_institutions(conn, sqlite, k10plus, ai)
 
 # 3. Step: Get the number of titles for each SID and log them to database
 update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
+
+# 4. Step: Send report
+message = "\n".join(messages)
+send_message(message)
 
 sqlite.close()
