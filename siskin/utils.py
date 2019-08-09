@@ -66,7 +66,7 @@ class SetEncoder(json.JSONEncoder):
 
     So you can write something like this:
 
-        json.dumps({"things": set([1, 2, 3], cls=SetEncoder)}
+        json.dumps({"things": set([1, 2, 3])}, cls=SetEncoder)
     """
     def default(self, obj):
         """
@@ -240,7 +240,7 @@ class URLCache(object):
     """
     A simple URL content cache. Stores everything on the filesystem. Content is
     first written to a temporary file and then renamed. With concurrent
-    requests for the same URL, the last one wins (LWW). Raises exception on any
+    requests for the same URL, the last one wins (LOW). Raises exception on any
     HTTP status >= 400. Retries supported.
 
     It is not very efficient, as it creates lots of directories.
@@ -329,14 +329,14 @@ def scrape_html_listing(url, with_head=False):
     Given a URL to a webpage containing a simple (Apache) file listing, try to
     return a list of links to the files on the page.
 
-    >>> scrape_html_listing("http://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/")
-    ['https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso.sig',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.04.01-x86_64.iso.torr',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-bootstrap-2019.04.01-x86_64.tar.gz',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-bootstrap-2019.04.01-x86_64.tar.gz.sig',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/md5sums.txt',
-     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/sha1sums.txt']
+    >>> scrape_html_listing("http://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.08.01/")
+    ['https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.08.01-x86_64.iso',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.08.01-x86_64.iso.sig',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.08.01-x86_64.iso.torr',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-bootstrap-2019.08.01-x86_64.tar.gz',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-bootstrap-2019.08.01-x86_64.tar.gz.sig',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.08.01/md5sums.txt',
+     'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.08.01/sha1sums.txt']
 
     Will fail if the request fails. If parsing fails, return an empty list.
     Optionally, only include links in the list which return something ok on
@@ -376,7 +376,8 @@ def scrape_html_listing(url, with_head=False):
 
 def compare_files(a, b):
     """
-    Compare two paths by checksum. Returns True, if files are byte-identical.
+    Compare two paths by sha1 checksum. Returns True, if files are
+    byte-identical.
     """
     with open(a) as fa:
         chka = hashlib.sha1()
