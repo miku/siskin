@@ -89,25 +89,6 @@ class AITask(DefaultTask):
         return weekly(self.date)
 
 
-class AIDOIRedirectTable(AITask):
-    """
-    Generate a redirect table. Takes days. Make sure doi.org is in your hosts file so DNS is not stressed.
-    """
-    hurrly_workers = luigi.IntParameter(default=4, description='number of workers for hurrly')
-
-    def requires(self):
-        return AIDOIList()
-
-    def run(self):
-        output = shellout("hurrly -w {w} <(sort -S30% -u {input}) > {output}",
-                          w=self.hurrly_workers,
-                          input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
 class AIDOIStats(AITask):
     """
     DOI overlaps.
