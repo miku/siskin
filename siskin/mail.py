@@ -56,7 +56,7 @@ def send_mail(sender=None,
     XXX: ATM no FROM: line, maybe add that.
     """
     if subject is None:
-        subject = "[automessage]"
+        subject = u"[automessage]"
     if smtp is None:
         smtp = config.get("core", "smtp")
     if smtp_port is None:
@@ -77,7 +77,7 @@ def send_mail(sender=None,
         server.login(username, password)
     else:
         logger.debug("no username and password given, proceeding without login")
-    msg = 'Subject: {} {}\n\n{}'.format(DEFAULT_SUBJECT_PREFIX, subject, message)
+    msg = u'Subject: {} {}\n\n{}'.format(DEFAULT_SUBJECT_PREFIX, subject, message)
     server.sendmail(sender, tolist, msg)
     server.quit()
 
