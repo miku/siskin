@@ -91,7 +91,7 @@ class AITask(DefaultTask):
 
 class AIDOIStats(AITask):
     """
-    DOI overlaps.
+    DOI overlaps between various sources.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -116,7 +116,9 @@ class AIDOIStats(AITask):
 
 
 class AIISSNStats(AITask):
-    """ Match ISSN lists. """
+    """
+    Match ISSN lists. Note: This should be OLAP, not batch.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -140,7 +142,9 @@ class AIISSNStats(AITask):
 
 
 class AIISSNOverlaps(AITask):
-    """ Match ISSN lists. """
+    """
+    Match ISSN lists. Note: This should be OLAP, not batch.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
