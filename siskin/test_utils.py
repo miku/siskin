@@ -9,7 +9,7 @@ import marcx
 import pymarc
 import responses
 from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, marc_build_imprint,
-                          marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
+                          marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream, marc_build_field_008)
 
 
 def test_set_encoder_dumps():
@@ -181,3 +181,16 @@ def test_marc_build_imprint():
     assert marc_build_imprint(place="A", year="C") == ['a', 'A', 'b', ', ', 'c', 'C']
     assert marc_build_imprint(publisher="B", year="C") == ['a', '', 'b', 'B, ', 'c', 'C']
     assert marc_build_imprint(place="A", publisher="B", year="C") == ['a', 'A : ', 'b', 'B, ', 'c', 'C']
+
+def test_marc_build_field_008():
+    assert marc_build_field_008() == " " * 40
+    assert marc_build_field_008(year="2000") == "       2000                             "
+    assert marc_build_field_008(year="2000", language="ger") == "       2000                        ger  "
+    assert marc_build_field_008(year="2000", periodicity="1",
+                                language="ger") == "       2000          1             ger  "
+    assert marc_build_field_008(year="2000", periodicity="1",
+                                language=["ger", "fre"]) == "       2000          1             ger  "
+    assert marc_build_field_008(year="2000", periodicity="1",
+                                language=["ger", "fre", "day"]) == "       2000          1             mul  "
+    assert marc_build_field_008(year="20XX", periodicity="1",
+                                language=["ger", "fre", "day"]) == "                     1             mul  "
