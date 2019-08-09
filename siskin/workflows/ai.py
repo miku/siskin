@@ -227,7 +227,13 @@ class AIQuality(AITask):
 
 
 class AIIntermediateSchema(AITask):
-    """ Create an intermediate schema record from all AI sources. """
+    """
+    Create an intermediate schema record from all AI sources. Everything that
+    is put here, will pass along the ISIL attachment and deduplication
+    pipeline.
+
+    All inputs must be gzipped, output will be gzipped.
+    """
 
     date = ClosestDateParameter(default=datetime.date.today())
 
