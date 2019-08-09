@@ -170,7 +170,7 @@ def get_all_current_sources(k10plus, ai):
     shared = k10plus_sources.intersection(ai_sources)
     if len(shared) > 0:
         ssid = [str(sid) for sid in shared]
-        message = "Die folgenden Quellen befinden sich sowohl im K10plus als auch im AI: {}".format(", ".join(ssid))
+        message = u"Die folgenden Quellen befinden sich sowohl im K10plus als auch im AI: {}".format(", ".join(ssid))
         messages.append(message)
 
     return k10plus_sources.union(ai_sources)
@@ -204,12 +204,12 @@ def update_sources(conn, sqlite, k10plus, ai):
 
     for old_source in old_sources:
         if source_table_is_filled and old_source not in current_sources:
-            message = "Die SID %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die SID aus der Datenbank loeschen." % old_source
+            message = u"Die SID %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die SID aus der Datenbank loeschen." % old_source
             messages.append(message)
 
     for current_source in current_sources:
         if current_source not in old_sources:
-            message = "The source %s is new in Solr." % current_source
+            message = u"The source %s is new in Solr." % current_source
             if source_table_is_filled:
                 messages.append(message)
             else:
@@ -309,14 +309,14 @@ def update_institutions(conn, sqlite, k10plus, ai):
 
     for old_institution in old_institutions:
         if institution_table_is_filled and old_institution not in current_institutions:
-            message = "Die ISIL %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die Institution aus der Datenbank loeschen." % old_institution
+            message = u"Die ISIL %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die Institution aus der Datenbank loeschen." % old_institution
             messages.append(message)
 
     for current_institution in current_institutions:
         if current_institution == " " or '"' in current_institution:
             continue
         if current_institution not in old_institutions:
-            message = "The institution %s is new in Solr." % current_institution
+            message = u"The institution %s is new in Solr." % current_institution
             if institution_table_is_filled:
                 messages.append(message)
             else:
@@ -377,7 +377,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
             if number != 0:
                 old_sourcebyinstitution_number = get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution)
                 if number < old_sourcebyinstitution_number:
-                    message = "Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import verringert." % (sourcebyinstitution)
+                    message = u"Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import verringert." % (sourcebyinstitution)
                     messages.append(message)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
@@ -385,7 +385,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
 
     for old_sourcebyinstitution in old_sourcebyinstitutions:
         if old_sourcebyinstitution not in current_sourcebyinstitutions:
-            message = "Die %s ist nicht laenger für die SID %s angesigelt." % (institution, source)
+            message = u"Die %s ist nicht laenger für die SID %s angesigelt." % (institution, source)
             messages.append(message)
 
 # Parse keyword arguments
@@ -488,7 +488,7 @@ update_institutions(conn, sqlite, k10plus, ai)
 update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
 
 # 4. Step: Send report
-message = "\n".join(messages)
+message = u"\n".join(messages)
 send_message(message)
 
 sqlite.close()
