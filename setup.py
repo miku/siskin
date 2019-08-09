@@ -40,7 +40,7 @@ except ImportError:
 
 # XXX: Break this up into production and development dependencies.
 install_requires = [
-    'astroid>=1.1.1',
+    'astroid>=1.1.1,<2',
     'backoff>=1.3.1',
     'beautifulsoup4',
     'bs4',
@@ -59,7 +59,8 @@ install_requires = [
     'lxml>=3.4.2',
     'marcx>=0.2.9',
     'nose>=1.3.3',
-    'pandas>=0.20.0',
+    'numpy<1.17',
+    'pandas>=0.20.0,<0.24',
     'parso>=0.2.0',
     'ply>=3.4',
     'prettytable>=0.7.2',
