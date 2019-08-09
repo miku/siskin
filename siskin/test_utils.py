@@ -9,7 +9,7 @@ import marcx
 import pymarc
 import responses
 from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, marc_build_imprint,
-                          marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream, marc_build_field_008)
+                          marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream, marc_build_field_008, check_isbn)
 
 
 def test_set_encoder_dumps():
@@ -194,3 +194,19 @@ def test_marc_build_field_008():
                                 language=["ger", "fre", "day"]) == "       2000          1             mul  "
     assert marc_build_field_008(year="20XX", periodicity="1",
                                 language=["ger", "fre", "day"]) == "                     1             mul  "
+
+def test_check_isbn():
+    assert check_isbn() == ""
+    assert check_isbn("1") == ""
+    assert check_isbn("123") == ""
+    assert check_isbn("12345678") == ""
+    assert check_isbn("1234567890") == "1234567890"
+    assert check_isbn("1XXXXXXXX") == ""
+    assert check_isbn("XXXXXXXXXX") == ""
+    assert check_isbn("1XXXXXXXXXXX") == "1XXXXXXXXX"
+    assert check_isbn("1XXXXXXXXXXXxxxx") == "1XXXXXXXXXXXx"
+    assert check_isbn("978-123456789") == "978-123456789"
+    assert check_isbn("123-123123123") == "123-123123123"
+    assert check_isbn("1xxxxXXXXxxxxXXXX1111XXXX") == "1xxxxXXXXxxxxXXXX"
+    assert check_isbn("9780201038019 is an valid isbn") == "9780201038019"
+
