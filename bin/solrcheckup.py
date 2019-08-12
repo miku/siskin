@@ -385,7 +385,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
 
     for old_sourcebyinstitution in old_sourcebyinstitutions:
         if old_sourcebyinstitution not in current_sourcebyinstitutions:
-            message = u"Die %s ist nicht laenger für die SID %s angesigelt." % (institution, source)
+            message = u"Die %s ist nicht laenger fuer die SID %s angesigelt." % (institution, source)
             messages.append(message)
 
 # Parse keyword arguments
