@@ -94,4 +94,3 @@ class KXPSRU(KXPTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="mrc"))
-
