@@ -77,25 +77,3 @@ class HHBDIntermediateSchema(HHBDTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class HHBDExport(HHBDTask):
-    """
-    Export and hard-wire label, DE-540.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3')
-
-    def requires(self):
-        return HHBDIntermediateSchema(date=self.date)
-
-    def run(self):
-        """ Tag by hand since not yet in AMSL. """
-        output = shellout("""
-	    unpigz -c {input} | span-tag -c '{{"DE-540": {{"any": {{}}}}}}' |
-            span-export -with-fullrecord -o {format} > {output}
-        """,
-                          format=self.format,
-                          input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
