@@ -60,6 +60,24 @@ class HHBDCombine(HHBDTask):
         return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
+class HHBDMARC(HHBDTask):
+    """
+    Script.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return HHBDCombine(date=self.date, format='oai_dc')
+
+    def run(self):
+        output = shellout("python {script} {input} {output}",
+                          script=self.assets('107/107_marcbinary.py'),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'), format=Gzip)
+
 class HHBDIntermediateSchema(HHBDTask):
     """
     Convert to intermediate schema via metafacture.
