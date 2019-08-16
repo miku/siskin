@@ -106,7 +106,7 @@ formats["Thesis"]["655a"] = "Hochschulschrift"
 formats["Thesis"]["6552"] = "gnd-content"
 formats["Thesis"]["935c"] = ""
 
-formats["Score"]["Leader"] = "     cam  22        4500"
+formats["Score"]["Leader"] = "     ccm  22        4500"
 formats["Score"]["p007"] = "tu"
 formats["Score"]["e007"] = "cr"
 formats["Score"]["008"] = ""
