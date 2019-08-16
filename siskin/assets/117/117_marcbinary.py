@@ -119,11 +119,16 @@ for oldrecord in tqdm(reader, total=total):
         f007 = oldrecord["007"].data
         if len(f007) < 2:
             f007 = f007 + "u"
-        for field in oldrecord.get_fields("856"):
-            if "kostenfrei" in field.value():
-                newrecord.add("007", data="cr")
-            else:
-                newrecord.add("007", data=f007)
+    else:
+        f007 = ""
+
+    for field in oldrecord.get_fields("856"):
+        if "kostenfrei" in field.value() or "Volltext" in field.value():
+            newrecord.add("007", data="cr")
+        elif f007:
+            newrecord.add("007", data=f007)
+        else:
+            newrecord.add("007", data="tu")
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
