@@ -20,6 +20,7 @@ import os
 import re
 import sys
 from xml.sax.saxutils import escape, unescape
+from siskin.mappings import formats
 
 import xmltodict
 
@@ -180,15 +181,19 @@ for root, _, files in os.walk(input_directory):
         marcrecord = marcx.Record(force_utf8=True)
         marcrecord.strict = False
 
+        format = "Score"
+
         # Leader
-        marcrecord.leader = "     ccm  22        4500"
+        leader = formats[format]["Leader"]
+        marcrecord.leader = leader
 
         # Identifikator
         f001 = record["identifier"]["#text"]
         marcrecord.add("001", data="finc-15-%s" % f001)
 
-        # Format
-        marcrecord.add("007", data="cr")
+        # Zugangsart
+        f007 = formats[format]["e007"]
+        marcrecord.add("007", data=f007)
 
         # Sprache
         # besser: aus vifaxml parsen!!
@@ -214,6 +219,14 @@ for root, _, files in os.walk(input_directory):
         f246a = get_field("additionalTitle")
         f246a = html_unescape(f246a)
         marcrecord.add("246", a=f246a)
+
+        # RDA-Inhaltstyp
+        f336b = formats[format]["336b"]
+        marcrecord.add("336", b=f336b)
+
+        # RDA-Datenträgertyp
+        f338b = formats[format]["338b"]
+        marcrecord.add("338", b=f338b)
 
         # Erscheinungsjahr
         # nicht mehr enthalten
@@ -252,8 +265,12 @@ for root, _, files in os.walk(input_directory):
         instrumentation = instrumentation.title()
         f650a.append(instrumentation)
         f590b = instrumentation
-
         marcrecord.add("590", subfields=["a", f590a, "b", f590b])
+
+        # GND-Inhalts- und Datenträgertyp
+        f655a = formats[format]["655a"]
+        f6552 = formats[format]["6552"]
+        marcrecord.add("338", a=f655a, _2=f6552)
 
         # Schlagwörter
         subtest = []
@@ -274,7 +291,9 @@ for root, _, files in os.walk(input_directory):
         f856u = record["url"]["#text"]
         marcrecord.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=f856u)
 
-        marcrecord.add("935", b="cofz", c="muno")
+        # SWB-Inhaltstyp
+        f935c = formats[format]["935c"]
+        marcrecord.add("935", c=f935c)
 
         marcrecord.add("970", c="PN")
 
