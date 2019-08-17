@@ -120,7 +120,7 @@ for oldrecord in tqdm(reader, total=total):
         f007 = oldrecord["007"].data
         if len(f007) < 2:
             f007 = f007 + "u"
-    
+
     for field in oldrecord.get_fields("856"):
         if "kostenfrei" in field.value() or "Volltext" in field.value():
             f007 = "cr"
