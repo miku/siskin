@@ -20,11 +20,11 @@ import os
 import re
 import sys
 from xml.sax.saxutils import escape, unescape
-from siskin.mappings import formats
 
 import xmltodict
 
 import marcx
+from siskin.mappings import formats
 
 langmap = {
     "Ancient Greek": "grc",

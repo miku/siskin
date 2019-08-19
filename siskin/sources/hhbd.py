@@ -93,5 +93,3 @@ class HHBDIntermediateSchema(HHBDTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
