@@ -59,12 +59,10 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     # Haupttitel
     f245a = csv_record[1]
-    f245a = f245a
     marc_record.add("245", a=f245a)
 
     # Verlag, Erscheinungsjahr
     f260b = csv_record[3]
-    f260b = f260b
     f260b = f260b.lstrip("Frankfurt: ")
     f260c = csv_record[8]
     f260c = f260c.rstrip(".0")
@@ -87,7 +85,6 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     # Quelle
     f773t = csv_record[2]
-    f773t = f773t
     issue = csv_record[6]
     issue = issue.rstrip(".0")
     volume = csv_record[7]
