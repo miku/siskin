@@ -21,7 +21,7 @@ sheet = workbook.sheet_by_name("Tabelle3") # 08/2019
 
 for i, row in enumerate(range(sheet.nrows), start=0):
 
-    csv_record = sheet.row_values(row)
+    csv_record = [u"{}".format(v) for v in sheet.row_values(row)]
     marc_record = marcx.Record(force_utf8=True)
 
     if csv_record[0] == "authors":
@@ -39,7 +39,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     #008
     f260c = csv_record[8]
-    f260c = str(f260c).rstrip(".0")
+    f260c = f260c.rstrip(".0")
     if len(f260c) == 4:
         marc_record.add("008", data=u"130227u%suuuuuxx uuup     c" % f260c)
     else:
@@ -59,22 +59,22 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     # Haupttitel
     f245a = csv_record[1]
-    f245a = str(f245a)
+    f245a = f245a
     marc_record.add("245", a=f245a)
 
     # Verlag, Erscheinungsjahr
     f260b = csv_record[3]
-    f260b = str(f260b)
+    f260b = f260b
     f260b = f260b.lstrip("Frankfurt: ")
     f260c = csv_record[8]
-    f260c = str(f260c).rstrip(".0")
+    f260c = f260c.rstrip(".0")
     publisher = ["a", "Frankfurt : ", "b", f260b + ", ", "c", f260c]
     marc_record.add("260", subfields=publisher)
 
     # Seitenzahl
     f300a = csv_record[11]
     if f300a != "":
-        f300a = str(f300a).rstrip(".0")
+        f300a = f300a.rstrip(".0")
         f300a = f300a + " S."
         marc_record.add("300", a=f300a)
 
@@ -87,15 +87,15 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     # Quelle
     f773t = csv_record[2]
-    f773t = str(f773t)
+    f773t = f773t
     issue = csv_record[6]
-    issue = str(issue).rstrip(".0")
+    issue = issue.rstrip(".0")
     volume = csv_record[7]
-    volume = str(volume).rstrip(".0")
+    volume = volume.rstrip(".0")
     year = csv_record[8]
-    year = str(year).rstrip(".0")
+    year = year.rstrip(".0")
     pages = csv_record[12]
-    pagess = str(pages).rstrip(".0")
+    pagess = pages.rstrip(".0")
     f773g = "%s(%s)%s, S. %s" % (volume, year, issue, pages)
     marc_record.add("773", g=f773g, t=f773t)
 
