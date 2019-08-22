@@ -134,7 +134,7 @@ class LissaIntermediateSchema(LissaTask):
 
             # Try date_published, then date_created, then fail.
             for key in ("date_published", "date_created"):
-                if not key in source:
+                if key not in source or not source[key]:
                     continue
                 doc.update({
                     "x.date": source[key][:19] + "Z",
