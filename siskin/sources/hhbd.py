@@ -78,6 +78,7 @@ class HHBDMARC(HHBDTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'), format=Gzip)
 
+
 class HHBDIntermediateSchema(HHBDTask):
     """
     Convert to intermediate schema via metafacture.

@@ -70,8 +70,7 @@ class LissaFetch(LissaTask):
     def run(self):
         es = "https://share.osf.io/api/v2/search/creativeworks"
         query = "sources:%22LIS%20Scholarship%20Archive%22"
-        output = shellout("""curl -s --fail "{es}/_search?from=0&size=1000&q={query}" > {output}""",
-                         query=query, es=es)
+        output = shellout("""curl -s --fail "{es}/_search?from=0&size=1000&q={query}" > {output}""", query=query, es=es)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -104,7 +103,9 @@ class LissaIntermediateSchema(LissaTask):
                 "rft.atitle": source["title"],
                 "rft.genre": "article",
                 "rft.pub": source.get("publishers", []),
-                "rft.authors": [{"rft.au": name} for name in source["contributors"]],
+                "rft.authors": [{
+                    "rft.au": name
+                } for name in source["contributors"]],
                 "url": [link for link in source["identifiers"] if link.startswith("http")],
                 "abstract": source.get("description", ""),
             }

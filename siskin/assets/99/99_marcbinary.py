@@ -17,7 +17,7 @@ if len(sys.argv) == 3:
 outputfile = io.open(outputfilename, "wb")
 
 workbook = xlrd.open_workbook(inputfilename)
-sheet = workbook.sheet_by_name("Tabelle3") # 08/2019
+sheet = workbook.sheet_by_name("Tabelle3")  # 08/2019
 
 for i, row in enumerate(range(sheet.nrows), start=0):
 
