@@ -133,19 +133,15 @@ class LissaIntermediateSchema(LissaTask):
             doc.update({"x.subjects": list(unique_subjects)})
 
             # Try date_published, then date_created, then fail.
-            if source["date_published"]:
-                doc.update({
-                    "x.date": source["date_published"][:19] + "Z",
-                    "rft.date": source["date_published"][:10],
-                })
-            else:
-                if source["date_created"]:
+            for key in ("date_published", "date_created"):
+                if source[key]:
                     doc.update({
-                        "x.date": source["date_created"][:19] + "Z",
-                        "rft.date": source["date_created"][:10],
+                        "x.date": source[key][:19] + "Z",
+                        "rft.date": source[key][:10],
                     })
-                else:
-                    raise ValueError("missing date_published entry", hit)
+                    break
+            else:
+                raise ValueError("did not find any date field in document", hit)
 
             converted.append(doc)
 
