@@ -134,12 +134,13 @@ class LissaIntermediateSchema(LissaTask):
 
             # Try date_published, then date_created, then fail.
             for key in ("date_published", "date_created"):
-                if source[key]:
-                    doc.update({
-                        "x.date": source[key][:19] + "Z",
-                        "rft.date": source[key][:10],
-                    })
-                    break
+                if not key in source:
+                    continue
+                doc.update({
+                    "x.date": source[key][:19] + "Z",
+                    "rft.date": source[key][:10],
+                })
+                break
             else:
                 raise ValueError("did not find any date field in document", hit)
 
