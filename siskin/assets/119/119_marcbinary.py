@@ -72,6 +72,8 @@ for record in reader:
         type = ""
         url = ""
     if url and type == "doi" or type == "urn":
+        if url.startswith("10."):
+            url = "doi.org/" + url
         record.remove_fields("856")
         record.add("856", q="text/html", _3="Link zur Ressource", u=url)
 
