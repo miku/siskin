@@ -103,7 +103,7 @@ class VKFilmFFFincMarc(VKFilmFFTask):
                 output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
                 output = shellout("python {script} {input} {output}",
                                   script=self.assets("119/119_marcbinary.py"),
-                                  input=self.input().path)
+                                  input=output)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:
