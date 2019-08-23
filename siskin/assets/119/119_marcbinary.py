@@ -65,7 +65,7 @@ def check_fulltext(record):
         return True
     else:
         return False
- 
+
 
 inputfilename = "119_input.mrc"
 outputfilename = "119_output.mrc"
@@ -87,9 +87,8 @@ for record in reader:
     # Identifikator
     try:
         f001 = record["001"].data
-    except:
-        print("geht nicht")
-        f001 = "x"
+    except AttributeError:
+        continue
     record.remove_fields("001")
     record.add("001", data="finc-119-" + f001)
 
