@@ -65,14 +65,15 @@ for record in reader:
     record.add("001", data="finc-119-" + f001)
 
     # URL
-    f007 = record["007"].data
     try:
-        f856u = record["856"]["u"]
+        type = record["024"]["2"]
+        url = record["024"]["a"]
     except:
-        f856u = ""
-    if f856u and f007 == "cr":
+        type = ""
+        url = ""
+    if url and type == "doi" or type == "urn":
         record.remove_fields("856")
-        record.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+        record.add("856", q="text/html", _3="Link zur Ressource", u=url)
 
     # Ansigelung
     collections = ["a", f001, "b", "119", "c", "sid-119-col-ubfrankfurt"]
