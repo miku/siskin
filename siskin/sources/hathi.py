@@ -55,7 +55,7 @@ class HathiCombine(HathiTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="https://quod.lib.umich.edu/cgi/o/oai/oai", significant=False)
-    prefix = luigi.Parameter(default="oai_dc", significant=False)
+    prefix = luigi.Parameter(default="marc21")
 
     def requires(self):
         return Executable(name='metha-sync', message='https://github.com/miku/metha')
@@ -81,7 +81,7 @@ class HathiMARC(HathiTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return HathiCombine(date=self.date)
+        return HathiCombine(date=self.date, prefix="marc21")
 
     def run(self):
         output = shellout(""" python {script} <(unpigz -c "{input}") {output} """,
