@@ -1,7 +1,7 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
-
-# Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
+#
+# Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Robert Schenk, <robert.schenk@uni-leipzig.de>
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
@@ -24,12 +24,14 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
 """
-VKFilm, #8571. Hebis FTP.
 
-TODO: Unify VK* tasks.
+Source: Universitätsbibliothek Frankfurt am Main (VK Film)
+SID: 119
+Ticket: #8571, #14654, #15877
+Origin: FTP
+Updates: manually
 
-Config
-------
+Config:
 
 [vkfilmff]
 
@@ -38,6 +40,7 @@ ftp-username = username
 ftp-password = password
 ftp-path = /
 ftp-pattern = *
+
 """
 
 import datetime
@@ -82,8 +85,7 @@ class VKFilmFFPaths(VKFilmFFTask):
 
 class VKFilmFFFincMarc(VKFilmFFTask):
     """
-    Find MARC XML, uncompress, clean, remove "Nichtsortierzeichen" on the fly,
-    convert via flux (refs #8571).
+    Find MARC XML, uncompress, clean, remove "Nichtsortierzeichen" on the fly, convert via Python.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -99,9 +101,9 @@ class VKFilmFFFincMarc(VKFilmFFTask):
                     continue
                 output = shellout("unpigz -c {file} | sed $'s/\u0098//g;s/\u009C//g' > {output}", file=row.path)
                 output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
-                output = shellout("flux.sh {flux} inputfile={input} outputfile=stdout > {output}",
-                                  flux=self.assets("119/119.flux"),
-                                  input=output)
+                output = shellout("python {script} {input} {output}",
+                                  script=self.assets("119/119_marcbinary.py"),
+                                  input=self.input().path)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:
