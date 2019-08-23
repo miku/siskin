@@ -110,4 +110,4 @@ class VKFilmFFFincMarc(VKFilmFFTask):
                 raise RuntimeError('not found: %s' % filename)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
