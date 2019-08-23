@@ -75,6 +75,10 @@ for record in reader:
         record.remove_fields("856")
         record.add("856", q="text/html", _3="Link zur Ressource", u=url)
 
+    # Kollektion
+    record.remove_fields("912")
+    record.add("912", a="vkfilm")
+
     # Ansigelung
     collections = ["a", f001, "b", "119", "c", "sid-119-col-ubfrankfurt"]
     record.add("980", subfields=collections)
