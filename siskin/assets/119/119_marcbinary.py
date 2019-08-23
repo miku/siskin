@@ -38,6 +38,35 @@ import marcx
 import pymarc
 from siskin.utils import marc_clean_record
 
+
+def check_fulltext(record):
+    """
+    Checks several fields and returns True, if there is probably a link to fulltext.
+    """
+    try:
+        type = record["024"]["2"]
+    except:
+        type = ""
+
+    try:
+        urls = record.get_fields("856")
+    except:
+        urls = ""
+
+    for url in urls:
+        description = url.get_subfields("3")
+        if not description or "kostenfrei" in description or "Digitalisierung" in description or "zugänglich" in description:
+            has_fulltext_url = True
+            break
+    else:
+        has_fulltext_url = False
+
+    if (urls and has_fulltext_url) or (urls and (format == "doi" or format == "urn")):
+        return True
+    else:
+        return False
+ 
+
 inputfilename = "119_input.mrc"
 outputfilename = "119_output.mrc"
 
@@ -64,18 +93,22 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="finc-119-" + f001)
 
-    # URL
+    # Zugangsfacette
+    has_fulltext = check_fulltext(record)
     try:
-        type = record["024"]["2"]
-        url = record["024"]["a"]
+        f007 = record["007"].data
     except:
-        type = ""
-        url = ""
-    if url and type == "doi" or type == "urn":
-        if url.startswith("10."):
-            url = "doi.org/" + url
-        record.remove_fields("856")
-        record.add("856", q="text/html", _3="Link zur Ressource", u=url)
+        f007 = ""
+
+    if f007 and not has_fulltext:
+        if f007.startswith("cr"):
+            record.remove_fields("007")
+            record.add("007", data="tu")
+    elif has_fulltext:
+        record.remove_fields("007")
+        record.add("007", data="cr")
+    elif not f007:
+        record.add("007", data="tu")
 
     # Kollektion
     record.remove_fields("912")
