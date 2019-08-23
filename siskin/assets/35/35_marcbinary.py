@@ -4,7 +4,7 @@
 # SID: 35
 # Ticket: #14511, #15487
 # TechnicalCollectionID: sid-35-col-hathi
-# Task: TODO
+# Task: HathiMARC
 
 from __future__ import print_function
 
