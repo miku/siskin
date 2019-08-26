@@ -99,7 +99,7 @@ class VKFilmFFFincMarc(VKFilmFFTask):
 
                 if not row.path.endswith(filename):
                     continue
-                output = shellout("unpigz -c {file} | sed $'s/\u0098//g;s/\u009C//g' > {output}", file=row.path)
+                output = shellout("unpigz -c {file} | sed 's/\xC2\x98//g;s/\xC2\x9C//g' > {output}", file=row.path)
                 output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
                 output = shellout("python {script} {input} {output}",
                                   script=self.assets("119/119_marcbinary.py"),
