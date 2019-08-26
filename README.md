@@ -98,9 +98,15 @@ List tasks:
 
     $ tasknames
 
+A task is an encapsulation of a processing step and can be in theory, anything;
+Typical tasks are: fetching data from FTP, OAI endpoint or an HTTP API, format
+conversions, filters or reports. Many tasks are parameterized by date (with the
+default often being *today*), which allows siskin to keep track, whether an artifact
+is update-to-date or not.
+
 Run simple task:
 
-    $ taskdo DOAJDump
+    $ taskdo DOAJHarvest
 
 Documentation:
 
@@ -108,7 +114,7 @@ Documentation:
 
 Remove artefacts of a task:
 
-    $ taskrm DOAJDump
+    $ taskrm DOAJHarvest
 
 Inspect the source code of a task:
 
