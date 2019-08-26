@@ -83,7 +83,7 @@ class VKFilmFFPaths(VKFilmFFTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
-class VKFilmFFFincMarc(VKFilmFFTask):
+class VKFilmFFMARC(VKFilmFFTask):
     """
     Find MARC XML, uncompress, clean, remove "Nichtsortierzeichen" on the fly, convert via Python.
     """
