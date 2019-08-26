@@ -70,10 +70,8 @@ ok     curl
 ok     filterline
 ok     flux.sh
 ok     groupcover
-ok     hurrly
 ok     jq
 ok     metha-sync
-ok     microblob
 ok     pigz
 ok     solrbulk
 ok     span-import
