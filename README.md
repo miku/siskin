@@ -89,7 +89,8 @@ For siskin updates a
 $ pip install -U siskin
 ```
 
-should suffices.
+should suffices. If newer versions of external program are required, than
+please update those manually (e.g. via your OS' package manager).
 
 ## Run
 
