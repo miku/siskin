@@ -217,6 +217,7 @@ setup(name='siskin',
           'License :: GPLv3',
           'Operating System :: MacOS :: MacOS X',
           'Operating System :: POSIX',
+          'Programming Language :: Python :: 3',
           'Programming Language :: Python',
           'Topic :: Text Processing',
       ])
