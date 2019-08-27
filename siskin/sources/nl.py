@@ -65,7 +65,7 @@ class NLFetch(NLTask):
 
     def run(self):
         """
-        cf. https://github.com/stedolan/jq/issues/787
+        cf. https://github.com/stedolan/jq/issues/787, "Warning: replace is deprecated and will be removed in a future version."
         """
         output = shellout("""solrdump -verbose -server {server} -q "{query}" -fl fullrecord | \
                           jq -j '.fullrecord' | \
