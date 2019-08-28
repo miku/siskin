@@ -66,10 +66,13 @@ class NLFetch(NLTask):
     def run(self):
         """
         cf. https://github.com/stedolan/jq/issues/787, "Warning: replace is deprecated and will be removed in a future version."
+
+        There's jq -j, but replace cannot run on a single 1GB line.
         """
         output = shellout("""solrdump -verbose -server {server} -q "{query}" -fl fullrecord | \
-                          jq -j '.fullrecord' | \
-                          replace '#29;' $(printf "\x1D") '#30;' $(printf "\x1E") '#31;' $(printf "\x1F") > {output}""",
+                          jq -r '.fullrecord' | \
+                          replace '#29;' $(printf "\\x1D") '#30;' $(printf "\\x1E") '#31;' $(printf "\\x1F") | \
+                          sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' > {output}""",
                           server=self.config.get('nl', 'solr'),
                           query=self.query)
         luigi.LocalTarget(output).move(self.output().path)
