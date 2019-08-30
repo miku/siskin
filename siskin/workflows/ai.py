@@ -499,7 +499,8 @@ class AIExport(AITask):
                     line = line.strip()
                     if not isinstance(line, six.string_types):
                         line = line.decode('utf-8')
-                    if line.endswith('/latest'):
+                    if line.endswith('finc/latest'):
+                        self.logger.debug("found latest finc export: %s", line)
                         # e.g. /tmp/common/FTPMirror/c51e3436eaa06588a2e46e71bb551e3c4f5b2772/latest
                         shellout("""cp "{input}" "{output}" """, input=line, output=tmp)
                         break
