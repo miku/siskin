@@ -71,10 +71,10 @@ class DOAJHarvest(DOAJTask):
         output = shellout("""metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
             dir=self.config.get('core', 'metha-dir'),
             endpoint='http://www.doaj.org/oai.article')
-        luigi.LocalTarget(output).move(self.output().path, format=Gzip)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
 
 
 class DOAJIntermediateSchemaDirty(DOAJTask):
