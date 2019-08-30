@@ -103,6 +103,10 @@ class DOAJIntermediateSchemaDirty(DOAJTask):
     2006-09-01T00:00:00Z    e211856315f442869421032269b461d6        11 de setembro de 2001: algumas das consequências após 5 anos.
     2010-12-01T00:00:00Z    d8e93099d0934e6eb3f4f66e8e522a9c        11 de setembro de 2001: algumas das consequências após 5 anos.
 
+    The duplicates appear in the data dumps as well (08/2019):
+
+    $ taskcat DOAJDownloadDump | grep "A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS"
+
     """
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="doaj-oai",
@@ -257,6 +261,10 @@ class DOAJDownloadDump(DOAJTask):
     retrieved via the API.
 
     Data comes in batches of 100k records.
+
+    The duplicates appear in the data dumps as well (08/2019):
+
+    $ taskcat DOAJDownloadDump | grep "A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS"
     """
     date = ClosestDateParameter(default=datetime.date.today())
     kind = luigi.Parameter(default='article', description='article or journal')
