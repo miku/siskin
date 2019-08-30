@@ -150,7 +150,7 @@ class DOAJTable(DOAJTask):
 
 class DOAJWhitelist(DOAJTask):
     """
-    Create a list of suppressable DOAJ ids.
+    Create a list of ok DOAJ ids.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
