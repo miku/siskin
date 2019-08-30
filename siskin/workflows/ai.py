@@ -500,9 +500,15 @@ class AIExport(AITask):
                     if not isinstance(line, six.string_types):
                         line = line.decode('utf-8')
                     if line.endswith('finc/latest'):
-                        self.logger.debug("found latest finc export: %s", line)
-                        # e.g. /tmp/common/FTPMirror/c51e3436eaa06588a2e46e71bb551e3c4f5b2772/latest
-                        shellout("""cp "{input}" "{output}" """, input=line, output=tmp)
+                        realpath = os.path.realpath(line)
+                        if realpath.endswith("tar.gz"):
+                            shellout(""" tar -xOzf "{input}" | pigz -c > {output}""", input=realpath, output=tmp)
+                            self.logger.debug("assuming tarball of ldj files in: %s", realpath)
+                        elif realpath.endswith("gz"):
+                            self.logger.debug("found gzip base: %s", realpath)
+                            shellout("""cp "{input}" "{output}" """, input=line, output=tmp)
+                        else:
+                            raise RuntimeError('neither tarball nor gzipped: %s', realpath)
                         break
                 else:
                     raise RuntimeError('cannot find latest file for base')
