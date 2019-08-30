@@ -71,8 +71,7 @@ class DOAJHarvest(DOAJTask):
         output = shellout("""metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
             dir=self.config.get('core', 'metha-dir'),
             endpoint='http://www.doaj.org/oai.article')
-        self.logger.debug("compressing output (might take a few minutes) ...")
-        luigi.LocalTarget(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path, format=Gzip)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
