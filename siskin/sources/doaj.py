@@ -68,8 +68,7 @@ class DOAJHarvest(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout(
-            "METHA_DIR={dir} metha-sync {endpoint} && METHA_DIR={dir} metha-cat {endpoint} | pigz -c > {output}",
+        output = shellout("""metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
             dir=self.config.get('core', 'metha-dir'),
             endpoint='http://www.doaj.org/oai.article')
         self.logger.debug("compressing output (might take a few minutes) ...")
