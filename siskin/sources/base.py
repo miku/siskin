@@ -47,8 +47,6 @@ import datetime
 
 import luigi
 from gluish.format import TSV, Gzip
-from gluish.intervals import weekly
-from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
@@ -60,15 +58,12 @@ class BaseTask(DefaultTask):
     """
     TAG = '126'
 
-    def closest(self):
-        return weekly(date=self.date)
-
 
 class BasePaths(BaseTask):
     """
     Mirror SLUB FTP for base.
     """
-    date = ClosestDateParameter(default=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
     timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
