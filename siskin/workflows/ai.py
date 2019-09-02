@@ -500,6 +500,7 @@ class AIExport(AITask):
                     if not isinstance(line, six.string_types):
                         line = line.decode('utf-8')
                     if line.endswith('finc/latest'):
+                        # XXX: This should probably live in base.py.
                         realpath = os.path.realpath(line)
                         if realpath.endswith("tar.gz"):
                             shellout(""" tar -xOzf "{input}" | pigz -c > {output}""", input=realpath, output=tmp)
