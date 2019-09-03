@@ -39,7 +39,7 @@ from siskin.mappings import formats
 from siskin.utils import marc_clean_record, check_isbn, check_issn
 
 copytags = ("100", "105", "120", "130", "150", "174", "200", "245", "246", "250", "260", "300",
-            "335", "338", "351", "361", "400", "500", "520", "650", "689", "700", "710", "800")
+            "335", "351", "361", "400", "500", "520", "650", "689", "700", "710", "800")
 
 inputfilename = "156_input.xml"
 outputfilename = "156_output.mrc"
