@@ -36,7 +36,7 @@ import sys
 import marcx
 import pymarc
 from siskin.mappings import formats
-from siskin.utils import check_isbn, check_issn
+from siskin.utils import marc_clean_record, check_isbn, check_issn
 
 copytags = ("100", "105", "120", "130", "150", "174", "200", "245", "246", "250", "260", "300", "335", "336", "337",
             "338", "351", "361", "400", "500", "520", "650", "689", "700", "710", "800")
@@ -101,6 +101,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
     collections = ["a", f001, "b", "156", "c", "sid-156-col-umweltbibliothek"]
     newrecord.add("980", subfields=collections)
 
+    marc_clean_record(newrecord)
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
