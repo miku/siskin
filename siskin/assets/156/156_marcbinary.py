@@ -38,8 +38,8 @@ import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, check_isbn, check_issn
 
-copytags = ("100", "105", "120", "130", "150", "174", "200", "245", "246", "250", "260", "300", "335", "336", "337",
-            "338", "351", "361", "400", "500", "520", "650", "689", "700", "710", "800")
+copytags = ("100", "105", "120", "130", "150", "174", "200", "245", "246", "250", "260", "300",
+            "335", "338", "351", "361", "400", "500", "520", "650", "689", "700", "710", "800")
 
 inputfilename = "156_input.xml"
 outputfilename = "156_output.mrc"
@@ -65,7 +65,7 @@ for i, oldrecord in enumerate(oldrecords, start=1):
     format = "Book"
 
     # leader
-    leader = "     " + oldrecord.leader[5:]
+    leader = formats[format]["Leader"]
     newrecord.leader = leader
 
     # Identifikator
@@ -91,6 +91,14 @@ for i, oldrecord in enumerate(oldrecords, start=1):
         issn = ""
     f022a = check_issn(issn)
     newrecord.add("022", a=f022a)
+
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    newrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    newrecord.add("338", b=f338b)
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
