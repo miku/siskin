@@ -71,10 +71,10 @@ class NLFetch(NLTask):
         """
         output = shellout("""solrdump -verbose -server {server} -q "{query}" -fl fullrecord | \
                           jq -r '.fullrecord' | \
-                          replace '#29;' $(printf "\\x1D") '#30;' $(printf "\\x1E") '#31;' $(printf "\\x1F") | \
-                          sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' > {output}""",
+                          replace '#29;' $(printf "\\x1D") '#30;' $(printf "\\x1E") '#31;' $(printf "\\x1F") > {output} """,
                           server=self.config.get('nl', 'solr'),
                           query=self.query)
+        output = shellout("sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
