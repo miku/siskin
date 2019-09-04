@@ -59,7 +59,7 @@ from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART,
                                  AMSLService)
 from siskin.sources.arxiv import ArxivIntermediateSchema
-from siskin.sources.base import BasePaths
+from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.dbinet import DBInetIntermediateSchema
@@ -487,34 +487,16 @@ class AIExport(AITask):
     def requires(self):
         return {
             'ai': AIIntermediateSchemaDeduplicated(date=self.date),
-            'base': BasePaths(date=self.date),
+            'base': BaseSingleFile(date=self.date),
         }
 
     def run(self):
         _, tmp = tempfile.mkstemp(prefix='siskin-')
 
         if self.format == 'solr5vu3':
-            with self.input().get('base').open() as handle:
-                for line in handle:
-                    line = line.strip()
-                    if not isinstance(line, six.string_types):
-                        line = line.decode('utf-8')
-                    if line.endswith('finc/latest'):
-                        # XXX: This should probably live in base.py.
-                        realpath = os.path.realpath(line)
-                        if realpath.endswith("tar.gz"):
-                            shellout(""" tar -xOzf "{input}" | pigz -c > {output}""", input=realpath, output=tmp)
-                            self.logger.debug("assuming tarball of ldj files in: %s", realpath)
-                        elif realpath.endswith("gz"):
-                            self.logger.debug("found gzip base: %s", realpath)
-                            shellout("""cp "{input}" "{output}" """, input=line, output=tmp)
-                        else:
-                            raise RuntimeError('neither tarball nor gzipped: %s', realpath)
-                        break
-                else:
-                    raise RuntimeError('cannot find latest file for base')
+            shellout("""cp "{input}" "{output}" """, input=self.input["base"].path, output=tmp)
         else:
-            self.logger.debug('ignoring base, since format is: %s', self.format)
+            self.logger.debug('ignoring [126] BASE, since format is: %s', self.format)
 
         shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}",
                  format=self.format,

@@ -44,6 +44,7 @@ ftp-pattern = *
 """
 
 import datetime
+import os
 
 import luigi
 from gluish.format import TSV, Gzip
@@ -65,7 +66,8 @@ class BasePaths(BaseTask):
     """
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False,
+                                 description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('base', 'ftp-host'),
@@ -81,3 +83,41 @@ class BasePaths(BaseTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class BaseSingleFile(BaseTask):
+    """
+    Create a single compressed file of tarball.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return BasePaths(date=self.date)
+
+    def run(self):
+        with self.input().open() as handle:
+            paths = [p.strip().decode('utf-8') for p in handle.readlines()]
+
+        for path in paths:
+            if not path.endswith("finc/latest"):
+                continue
+
+            realpath = os.path.realpath(path)
+            self.logger.debug("found: %s", realpath)
+
+            if realpath.endswith("tar.gz"):
+                output = shellout(""" tar -xOzf "{input}" | pigz -c > {output}""", input=realpath)
+                luigi.LocalTarget(output).move(self.output().path)
+                break
+            elif realpath.endswith("gz"):
+                output = shellout("""cp "{input}" "{output}" """, input=realpath)
+                luigi.LocalTarget(output).move(self.output().path)
+                break
+            else:
+                raise RuntimeError('neither tarball nor gz: %s', realpath)
+        else:
+            raise RuntimeError('no finc/latest in %s', paths)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
+
