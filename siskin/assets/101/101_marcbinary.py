@@ -138,7 +138,7 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
     f773t = xmlrecord["rft_x0023_jtitle"]
     pages = xmlrecord["rft_x0023_pages"]
     issue = xmlrecord["rft_x0023_issue"]
-    f773g = "Heft: " + issue + " , Seiten: " + pages 
+    f773g = "Heft: " + issue + ", Seiten: " + pages 
     marcrecord.add("773", t=f773t, g=f773g)
 
     # Link
