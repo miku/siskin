@@ -38,8 +38,8 @@ import marcx
 import base64
 import xmltodict
 
-from siskin.utils import check_issn
 from siskin.mappings import formats
+from siskin.utils import check_issn, marc_build_field_008
 
 
 inputfilename = "101_input.xml"
@@ -101,10 +101,20 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
         f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
 
+    # Feld 008
+    year = xmlrecord["rft_x0023_date"]
+    periodicity = formats[format]["008"]
+    language = "ger"
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+
     # ISSN
     issn = xmlrecord["rft_x0023_issn"]
     f022a = check_issn(issn)
     marcrecord.add("022", a=f022a)
+
+    # Sprache
+    marcrecord.add("041", a="ger")
 
     # 1. Urheber
     authors = xmlrecord.get("authors", "")
