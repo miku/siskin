@@ -21,8 +21,11 @@ def get_inds_for_field_245(title):
     Checks if the title starts with an article and returns the appropriate
     indicator. XXX: https://is.gd/el0fng
     """
-    if title.startswith("Eine "):
-        return " 5"
+    
+    if title.startswith("A "):
+        return " 2"
+    elif title.startswith("Un "):
+        return " 3"
     elif title.startswith("Ein "):
         return " 4"
     elif title.startswith("Der "):
@@ -31,6 +34,14 @@ def get_inds_for_field_245(title):
         return " 4"
     elif title.startswith("Das "):
         return " 4"
+    elif title.startswith("The "):
+        return " 4"
+    elif title.startswith("Une "):
+        return " 4"
+    elif title.startswith("Una "):
+        return " 4"
+    elif title.startswith("Eine "):
+        return " 5"
     else:
         return "  "
 
