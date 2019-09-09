@@ -36,46 +36,46 @@ import sys
 
 import marcx
 import base64
-import xmltodict
+import xlrd
 
 from siskin.mappings import formats
 from siskin.utils import check_issn, marc_build_field_008
 
 
-inputfilename = "101_input.xml"
+inputfilename = "101_input.xlsx"
 outputfilename = "101_output.mrc"
 
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "rb")
 outputfile = open(outputfilename, "wb")
 
-xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile)
+workbook = xlrd.open_workbook(inputfilename)
+sheet = workbook.sheet_by_name("Tabelle1")
 
 format = "Article"
 access = "electronic"
 
 """
-<Tabelle1>
-<authors>Derlin, Katharina; Niemeier, Patrick</authors>
-<rft_x0023_atitle>Rock zwischen Calypso und Twist: Musiker im Rock‘n‘Roll Film, 1956-1963</rft_x0023_atitle>
-<rft_x0023_jtitle>Kieler Beiträge zur Filmmusikforschung</rft_x0023_jtitle>
-<rft_x0023_pub>Kiel: Kieler Gesellschaft für Filmmusikforschung</rft_x0023_pub>
-<rft_x0023_genre>article</rft_x0023_genre>
-<rft_x0023_issn>1866-4768</rft_x0023_issn>
-<rft_x0023_issue>1</rft_x0023_issue>
-<rft_x0023_date>2008</rft_x0023_date>
-<rft_x0023_spage>26</rft_x0023_spage>
-<rft_x0023_epage>37</rft_x0023_epage>
-<rft_x0023_tpages>12</rft_x0023_tpages>
-<rft_x0023_pages>26-37</rft_x0023_pages>
-<url>http://www.filmmusik.uni-kiel.de/kielerbeitraege/musikimhindifilmTieber.pdf</url>
-</Tabelle1>
+authors = 0
+rft_atitle = 1
+rft_jtitle = 2 
+rft_pub = 3
+rft_genre = 4 
+rft_issn = 5
+rft_issue = 6
+rft_volume = 7
+rft_date = 8
+rft_spage = 9
+rft_epage = 10
+rft_tpages = 11
+rft_pages = 12
+url = 13
 """
 
-for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
+for row in range(sheet.nrows):
+
+    csvrecord = sheet.row_values(row)
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
@@ -86,7 +86,7 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
 
     # Identifikator
     try:
-        url = xmlrecord["url"]
+        url = csvrecord[13]
     except:
        continue
     url = bytes(url, "utf-8")
@@ -102,14 +102,15 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
     marcrecord.add("007", data=f007)
 
     # Feld 008
-    year = xmlrecord["rft_x0023_date"]
+    year = csvrecord[8]
     periodicity = formats[format]["008"]
     language = "ger"
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
     # ISSN
-    issn = xmlrecord["rft_x0023_issn"]
+    issn = csvrecord[5]
+    issn = str(issn)
     f022a = check_issn(issn)
     marcrecord.add("022", a=f022a)
 
@@ -117,14 +118,14 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
     marcrecord.add("041", a="ger")
 
     # 1. Urheber
-    authors = xmlrecord.get("authors", "")
+    authors = csvrecord[0]
     if authors:
         authors = authors.split("; ")
         f100a = authors[0]
         marcrecord.add("100", a=f100a)
 
     # Titel
-    f245 = xmlrecord["rft_x0023_atitle"]
+    f245 = csvrecord[1]
     if ": " in f245:
         f245 = f245.split(": ")
         f245a = f245[0]
@@ -135,7 +136,7 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
     marcrecord.add("245", a=f245a, b=f245b)
 
     # Erscheinungsvermerk
-    subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", xmlrecord["rft_x0023_date"])
+    subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", str(csvrecord[8]).rstrip(".0"))
     marcrecord.add("260", subfields=subfields)
 
     # weitere Urheber
@@ -145,20 +146,19 @@ for xmlrecord in xmlrecords["dataroot"]["Tabelle1"]:
                 marcrecord.add("700", a=f700a)
 
     # Verweis auf Elternelement
-    f773t = xmlrecord["rft_x0023_jtitle"]
-    pages = xmlrecord["rft_x0023_pages"]
-    issue = xmlrecord["rft_x0023_issue"]
+    f773t = csvrecord[2]
+    pages = str(csvrecord[12])
+    issue = str(csvrecord[6]).rstrip(".0")
     f773g = "Heft: " + issue + ", Seiten: " + pages 
     marcrecord.add("773", t=f773t, g=f773g)
 
     # Link
-    f856u = xmlrecord["url"]
+    f856u = csvrecord[13]
     marcrecord.add("856", q="text/pdf", _3="Link zur Ressource", u=f856u)
 
     # Ansigelung
     collections = ["a", f001, "b", "101", "c", "sid-101-col-kielfilm"]
     marcrecord.add("980", subfields=collections)
-
     outputfile.write(marcrecord.as_marc())
 
 outputfile.close()
