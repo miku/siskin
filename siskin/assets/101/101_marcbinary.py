@@ -139,6 +139,17 @@ for row in range(sheet.nrows):
     subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", str(csvrecord[8]).rstrip(".0"))
     marcrecord.add("260", subfields=subfields)
 
+    # Umfang
+    pages = str(csvrecord[12])
+    extent = pages.split("-")
+    if len(extent) == 2:
+        start = int(extent[0])
+        end = int(extent[1])
+        f300a = str(end - start + 1) + " Seiten"
+    else:
+        f300a = ""
+    marcrecord.add("300", a=f300a)
+
     # weitere Urheber
     if authors:
         if len(authors) > 1:
