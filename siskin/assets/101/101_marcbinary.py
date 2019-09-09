@@ -147,9 +147,10 @@ for row in range(sheet.nrows):
 
     # Verweis auf Elternelement
     f773t = csvrecord[2]
+    year = str(csvrecord[8]).rstrip(".0")
     pages = str(csvrecord[12])
     issue = str(csvrecord[6]).rstrip(".0")
-    f773g = "Heft: " + issue + ", Seiten: " + pages 
+    f773g = "(" + year + "), Heft: " + issue + ", S. " + pages 
     marcrecord.add("773", t=f773t, g=f773g)
 
     # Link
