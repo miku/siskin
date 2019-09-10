@@ -103,6 +103,8 @@ for row in range(1, sheet.nrows):
 
     # Feld 008
     year = csvrecord[8]
+    year = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
+    print(year)
     periodicity = formats[format]["008"]
     language = "ger"
     f008 = marc_build_field_008(year, periodicity, language)
