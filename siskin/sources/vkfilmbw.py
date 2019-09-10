@@ -114,7 +114,7 @@ class VKFilmBWDownload(VKFilmBWTask):
                 document.tagName = 'record'
                 document.removeAttribute('base')
                 document.removeAttribute('idn')
-                output.write(document.toxml("utf-8"))
+                output.write(document.toxml())
 
             output.write(u"</collection>")
 
