@@ -104,7 +104,6 @@ for row in range(1, sheet.nrows):
     # Feld 008
     year = csvrecord[8]
     year = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
-    print(year)
     periodicity = formats[format]["008"]
     language = "ger"
     f008 = marc_build_field_008(year, periodicity, language)
@@ -138,7 +137,9 @@ for row in range(1, sheet.nrows):
     marcrecord.add("245", a=f245a, b=f245b)
 
     # Erscheinungsvermerk
-    subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", str(csvrecord[8]).rstrip(".0"))
+    year = csvrecord[8]
+    f260c = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
+    subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", f260c)
     marcrecord.add("260", subfields=subfields)
 
     # Umfang
