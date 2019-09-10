@@ -126,13 +126,16 @@ for row in range(1, sheet.nrows):
         marcrecord.add("100", a=f100a)
 
     # Titel
-    f245 = csvrecord[1]
-    if ": " in f245:
-        f245 = f245.split(": ")
-        f245a = f245[0]
-        f245b = f245[1]
+    title = csvrecord[1]
+    if ": " in title:
+        titles = title.split(": ")
+        f245a = titles[0]
+        f245b = ""
+        for title in titles[1:]:
+            f245b = f245b + title + " : "
+        f245b = f245b.rstrip(" : ")
     else:
-        f245a = f245
+        f245a = title
         f245b = ""
     marcrecord.add("245", a=f245a, b=f245b)
 
