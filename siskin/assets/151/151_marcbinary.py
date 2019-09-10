@@ -270,6 +270,9 @@ for record in records:
 
     # 1. creator
     marcrecord.add("100", subfields=f100)
+
+    # title
+    marcrecord.add("245", a=f245a)
     
     # imprint
     publisher = ["a", f260a, "b", f260b, "c", f260c]
