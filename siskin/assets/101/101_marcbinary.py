@@ -133,10 +133,12 @@ for row in range(1, sheet.nrows):
         f245b = ""
         for title in titles[1:]:
             f245b = f245b + title + " : "
-        f245b = f245b.rstrip(" : ")
     else:
         f245a = title
         f245b = ""
+    f245a = f245a.strip()
+    f245b = f245b.rstrip(" :")
+    f245b = f245b.strip()
     marcrecord.add("245", a=f245a, b=f245b)
 
     # Erscheinungsvermerk
