@@ -73,7 +73,7 @@ rft_pages = 12
 url = 13
 """
 
-for row in range(sheet.nrows):
+for row in range(1, sheet.nrows):
 
     csvrecord = sheet.row_values(row)
 
@@ -103,6 +103,7 @@ for row in range(sheet.nrows):
 
     # Feld 008
     year = csvrecord[8]
+    year = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
     periodicity = formats[format]["008"]
     language = "ger"
     f008 = marc_build_field_008(year, periodicity, language)
@@ -125,18 +126,25 @@ for row in range(sheet.nrows):
         marcrecord.add("100", a=f100a)
 
     # Titel
-    f245 = csvrecord[1]
-    if ": " in f245:
-        f245 = f245.split(": ")
-        f245a = f245[0]
-        f245b = f245[1]
-    else:
-        f245a = f245
+    title = csvrecord[1]
+    if ": " in title:
+        titles = title.split(": ")
+        f245a = titles[0]
         f245b = ""
+        for title in titles[1:]:
+            f245b = f245b + title + " : "
+    else:
+        f245a = title
+        f245b = ""
+    f245a = f245a.strip()
+    f245b = f245b.rstrip(" :")
+    f245b = f245b.strip()
     marcrecord.add("245", a=f245a, b=f245b)
 
     # Erscheinungsvermerk
-    subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", str(csvrecord[8]).rstrip(".0"))
+    year = csvrecord[8]
+    f260c = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
+    subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", f260c)
     marcrecord.add("260", subfields=subfields)
 
     # Umfang
