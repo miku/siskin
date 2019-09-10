@@ -73,7 +73,7 @@ rft_pages = 12
 url = 13
 """
 
-for row in range(sheet.nrows):
+for row in range(1, sheet.nrows):
 
     csvrecord = sheet.row_values(row)
 
