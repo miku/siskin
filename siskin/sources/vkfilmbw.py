@@ -42,7 +42,7 @@ from __future__ import print_function
 
 import datetime
 import io
-import urllib
+from urllib.parse import urlencode
 from xml.dom.minidom import parseString
 
 import requests
@@ -82,7 +82,7 @@ class VKFilmBWDownload(VKFilmBWTask):
             'usr': self.config.get('vkfilmbw', 'username'),
             'pwd': self.config.get('vkfilmbw', 'password'),
         }
-        url = "%s?%s" % (baseurl, urllib.urlencode(query))
+        url = "%s?%s" % (baseurl, urlencode(query))
 
         r = requests.get(url)
         if r.status_code != 200:
@@ -103,7 +103,7 @@ class VKFilmBWDownload(VKFilmBWTask):
                     'usr': self.config.get('vkfilmbw', 'username'),
                     'pwd': self.config.get('vkfilmbw', 'password'),
                 }
-                url = "%s?%s" % (baseurl, urllib.urlencode(query))
+                url = "%s?%s" % (baseurl, urlencode(query))
                 resp = requests.get(url)
                 if resp.status_code != 200:
                     print('failed with HTTP %s: %s' % (resp.status_code, url))
