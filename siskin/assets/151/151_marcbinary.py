@@ -1,73 +1,51 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 # coding: utf-8
+#
+# Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Filmakademie Baden-Württemberg (VK Film)
+SID: 151
+Ticket: #8700, #15871, #16012
+
+"""
 
 import io
 import re
 import sys
 
 import marcx
-from siskin.mappings import roles
+
+from siskin.mappings import formats, roles
+from siskin.utils import check_isbn, marc_build_field_008
 from six.moves import html_parser
 
-formatmap = {
-    "Buch": {
-        "leader": "cam",
-        "007": "tu",
-        "935b": "druck"
-    },
-    "DVD": {
-        "leader": "ngm",
-        "007": "vd",
-        "935b": "dvdv",
-        "935c": "vide"
-    },
-    "Blu-ray": {
-        "leader": "ngm",
-        "007": "vd",
-        "935b": "bray",
-        "935c": "vide"
-    },
-    "Videodatei": {
-        "leader": "cam",
-        "007": "cr",
-        "935b": "cofz",
-        "935c": "vide"
-    },
-    "CD": {
-        "leader": "  m",
-        "007": "c",
-        "935b": "cdda"
-    },
-    "Videokassette": {
-        "leader": "cgm",
-        "007": "vf",
-        "935b": "vika",
-        "935c": "vide"
-    },
-    "Noten": {
-        "leader": "nom",
-        "007": "zm",
-        "935c": "muno"
-    },
-    "Loseblattsammlung": {
-        "leader": "nai",
-        "007": "td",
-    },
-    "Film": {
-        "leader": "cam",
-        "007": "mu",
-        "935b": "sobildtt"
-    },
-    "Aufsatz": {
-        "leader": "naa",
-        "007": "tu"
-    },
-}
 
 parser = html_parser.HTMLParser()
 
 
-def get_field(tag):
+def get_field(field, tag):
     regexp = re.search('<.*? tag="%s">(.*)$' % tag, field)
     if regexp:
         _field = regexp.group(1)
@@ -77,7 +55,7 @@ def get_field(tag):
         return ""
 
 
-def get_subfield(tag, subfield):
+def get_subfield(field, tag, subfield):
     regexp = re.search('^<datafield.*tag="%s".*><subfield code="%s">(.*?)<\/subfield>' % (tag, subfield), field)
     if regexp:
         _field = regexp.group(1)
@@ -87,29 +65,7 @@ def get_subfield(tag, subfield):
         return ""
 
 
-def get_leader(format="Buch"):
-    return "     %s  22        4500" % formatmap[format]["leader"]
-
-
-def get_field_007(format="Buch"):
-    if "007" not in formatmap[format]:
-        return ""
-    return formatmap[format]["007"]
-
-
-def get_field_935b(format="Buch"):
-    if "935b" not in formatmap[format]:
-        return ""
-    return formatmap[format]["935b"]
-
-
-def get_field_935c(format="Buch"):
-    if "935c" not in formatmap[format]:
-        return ""
-    return formatmap[format]["935c"]
-
-
-# Default input and output.
+# default input and output
 inputfilename = "151_input.xml"
 outputfilename = "151_output.mrc"
 
@@ -125,6 +81,7 @@ records = records.split("</record>")
 for record in records:
 
     format = ""
+    form = ""
     f001 = ""
     f020a = ""
     f100a = ""
@@ -134,6 +91,8 @@ for record in records:
     f260b = ""
     f260c = ""
     f300a = ""
+    f300b = ""
+    f300c = ""
     f650a = ""
     f700a = ""
     f700e = ""
@@ -153,18 +112,11 @@ for record in records:
         field = field.replace("</datafield>", "")
         field = field.replace("</controlfield>", "")
 
-        # Identfikator
-        if f001 == "":
-            f001 = get_field("001")
+        form = get_field(field, "433")
 
-        # ISBN
-        if f020a == "":
-            f020a = get_subfield("540", "a")
-
-        # Format
-        if format == "":
-            form = get_field("433")
-
+        # format recognition
+        if form and not format:
+            
             regexp1 = re.search("\d\]?\sS\.", form)
             regexp2 = re.search("\d\]?\sSeit", form)
             regexp3 = re.search("\d\]?\sBl", form)
@@ -186,37 +138,38 @@ for record in records:
             regexp19 = re.search("S\.\s\d+\s?-\s?\d+", form)
 
             if regexp1 or regexp2 or regexp3 or regexp4 or regexp5 or regexp6:
-                format = "Buch"
+                format = "Book"
             elif regexp7:
-                format = "DVD"
+                format = "DVD-Video"
             elif regexp8:
-                format = "Blu-ray"
+                format = "Blu-Ray-Disc"
             elif regexp9 or regexp10 or regexp11:
-                format = "Videodatei"
+                format = "CD-Video"
             elif regexp12:
-                format = "CD"
+                format = "CD-Audio"
             elif regexp13 or regexp14:
-                format = "Videokassette"
+                format = "Video-Cassette"
             elif regexp15:
-                format = "Noten"
+                format = "Score"
             elif regexp16:
-                format = "Loseblattsammlung"
+                format = "Loose-leaf"
             elif regexp17 or regexp18:
-                format = "Film"
+                format = "CD-Video"
             elif regexp19:
-                format = "Aufsatz"
-            else:
-                if form != "":
-                    format = "Buch"
-                    print("Format nicht erkannt: %s (Default = Buch)" % form)
+                format = "Article"                
 
-        # 1. Urheber
+        if f001 == "":
+            f001 = get_field(field, "001")            
+
+        if f020a == "":
+            f020a = get_subfield(field, "540", "a")
+        
         if f100a == "":
-            f100a = get_subfield("100", "a")
+            f100a = get_subfield(field, "100", "a")
             if f100a != "":
                 f100.append("a")
                 f100.append(f100a)
-                role = get_subfield("100", "b")
+                role = get_subfield(field, "100", "b")
                 if role != "":
                     match = re.search("\[(.*?)\]", role)
                     if match:
@@ -225,29 +178,24 @@ for record in records:
                         role = role.replace(".", "")
                         f1004 = roles.get(role, "")
                         if not f1004:
-                            print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % role)
+                            print("Missing role: %s." % role)
                         f100.append("4")
                         f100.append(f1004)
-
-        # Haupttitel
+       
         if f245a == "":
-            f245a = get_field("331")
-
-        # Erscheinungsort
+            f245a = get_field(field, "331")
+         
         if f260a == "":
-            f260a = get_field("410")
+            f260a = get_field(field, "410")
 
-        # Verlag
         if f260b == "":
-            f260b = get_field("412")
+            f260b = get_field(field, "412")
 
-        # Erscheinungsjahr
         if f260c == "":
-            f260c = get_field("425")
+            f260c = get_field(field, "425")
 
-        # physische Beschreibung
         if f300a == "":
-            f300 = get_field("433")
+            f300 = get_field(field, "433")
             # 335 S. : zahlr. Ill. ; 32 cm
             regexp1 = re.search("(.*)\s?:\s(.*);\s(.*)", f300)
             # 289 S.: Zahlr. Ill.
@@ -257,37 +205,25 @@ for record in records:
 
             if regexp1:
                 f300a, f300b, f300c = regexp1.groups()
-                f300a = f300a + " : "
-                f300b = f300b + " ; "
             elif regexp2:
                 f300a, f300b = regexp2.groups()
-                f300a = f300a + " : "
-                f300c = ""
             elif regexp3:
                 f300a, f300c = regexp3.groups()
-                f300a + " ; "
-                f300b = ""
             else:
                 f300a = f300
-                f300b = ""
-                f300c = ""
 
-        # Schlagwörter
-        f650a = get_subfield("710", "a")
+        f650a = get_subfield(field, "710", "a")
         if f650a != "":
             subjects.append(f650a)
 
-        # weitere Personen
-        regexp = re.search('tag="1\d\d"', field)
+        regexp = re.search('tag="1\d\d"', field) # checks if there is a person field
         if regexp:
-            for i in range(
-                    101, 197
-            ):  # überprüfen, ob ein Personenfeld vorliegt, damit die Schleife für die Personenfelder nicht bei jedem Feld durchlaufen wird
-                f700a = get_subfield(i, "a")
+            for i in range(101, 197):  
+                f700a = get_subfield(field, i, "a")
                 if f700a != "":
                     f700.append("a")
                     f700.append(f700a)
-                    role = get_subfield(i, "b")
+                    role = get_subfield(field, i, "b")
                     if role != "":
                         match = re.search("\[(.*?)\]", role)
                         if match:
@@ -296,46 +232,77 @@ for record in records:
                             role = role.replace(".", "")
                             f7004 = roles.get(role, "")
                             if not f7004:
-                                print("Die Rollenbezeichnung '%s' fehlt in der Mapping-Tabelle." % role)
+                                print("Missing role: %s." % role)
                             f700.append("4")
                             f700.append(f7004)
                     persons.append(f700)
                     f700 = []
                     break
 
-    if format == "":
-        format = "Buch"
+    if not f001:
+        continue
 
-    leader = get_leader(format=format)
+    if not format:
+        format = "Book"
+        # print("Missing format: %s (Default = Book)" % form)
+
+    # leader
+    leader = formats[format]["Leader"]     
     marcrecord.leader = leader
 
+    # identifier
     marcrecord.add("001", data="finc-151-" + f001)
-
-    f007 = get_field_007(format=format)
+    
+    # access
+    f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
 
+    # year, periodicity, language
+    year = f260c
+    periodicity = formats[format]["008"]
+    language = ""
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+    
+    # ISBN
+    f020a = check_isbn(f020a)
     marcrecord.add("020", a=f020a)
 
+    # 1. creator
     marcrecord.add("100", subfields=f100)
-
-    marcrecord.add("245", a=f245a)
-
-    publisher = ["a", "Hamburg : ", "b", f260b + ", ", "c", f260c]
+    
+    # imprint
+    publisher = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
+    # physical description
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
     marcrecord.add("300", subfields=physicaldescription)
 
+    # RDA content
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA carrier
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # subjects
     for f650a in subjects:
         marcrecord.add("650", a=f650a)
 
+    # addional creator
     for f700 in persons:
         marcrecord.add("700", subfields=f700)
 
-    f935b = get_field_935b(format=format)
-    f935c = get_field_935c(format=format)
-    marcrecord.add("935", a="vkfilm", b=f935b, c=f935c)
+    # collection
+    marcrecord.add("912", a="vkfilm")
 
+    # SWB content
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Ansigelung 
     collections = ["a", f001, "b", "151", "c", "sid-151-col-filmakademiebawue"]
     marcrecord.add("980", subfields=collections)
 
