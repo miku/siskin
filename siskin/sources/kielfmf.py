@@ -1,9 +1,10 @@
 # coding: utf-8
+# pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
 #
-# Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
-#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
 #
 # This file is part of some open source application.
 #
@@ -21,53 +22,47 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
-Filmmusikforschung (FMF), refs #7967.
 
-Note: These tasks are based on an XML version of the original XLSX, you need to
-configure that.
+Source: Kieler Beiträge zur Filmmusikforschung
+SID: 101
+Ticket: #7967, #9371, #10831, #12048, #12967, #14649, #15882
+Origin: local
+Updates: manually
 
-Configuration:
+Config:
 
 [kielfmf]
 
-input = /path/to/xml (ask RS)
+input = /path/to/xlsx (ask RS)
+
 """
 
 import luigi
 from gluish.utils import shellout
-from luigi.format import Gzip
 from siskin.task import DefaultTask
 
 
 class KielFMFTask(DefaultTask):
     """
-    This task inherits functionality from `siskin.task.DefaultTask`.
+    Inherits functionality from `siskin.task.DefaultTask`.
     """
     TAG = '101'
 
 
-class KielFMFIntermediateSchema(KielFMFTask):
+class KielFMFMARC(KielFMFTask):
     """
-    Create intermediate schema.
+    Converts xlsx to BinaryMarc.
     """
+    def requires(self):
+        return KielFMFTask()
+
     def run(self):
-        # We need an XML file. Uee a config entry to point to that file.
-        input = self.config.get('kielfmf', 'input')
-
-        # shellout run shell command and allows placeholders. The {output}
-        # placeholder is a bit special. If it is not set explicitly, it will
-        # point to a temporary file. The return value of shellout is the value of
-        # output.
-        output = shellout("""
-            flux.sh {flux} inputfile={input} | pigz -c > {output}
-        """,
-                          flux=self.assets('101/101_flux.flux'),
-                          input=input)
-
-        # This moves the output of the above shell command into the desired task
-        # output path.
+        output = shellout("""python {script} {input} {output}""",
+                          script=self.assets("101/101_marcbinary.py"),
+                          input=self.config.get("kielfmf", "input"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
