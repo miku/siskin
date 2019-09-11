@@ -76,7 +76,7 @@ class HHBDMARC(HHBDTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'), format=Gzip)
 
 
 class HHBDIntermediateSchema(HHBDTask):
