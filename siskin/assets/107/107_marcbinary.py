@@ -1,5 +1,34 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding: utf-8
+#
+# Copyright 2019 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+"""
+
+Source: Heidelberger historische Bestände
+SID: 107
+Ticket: #5964, #15376
+
+"""
 
 import io
 import re
@@ -13,7 +42,9 @@ from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
 
 def get_field(name):
-
+    """
+    Takes field number und gets value.
+    """
     multivalued_fields = ["dc:identifier", "dc:subject", "dc:language"]
     field = xmlrecord["metadata"]["oai_dc:dc"].get(name, None)
     if not field:
@@ -56,6 +87,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     #Series</dc:type>
     #Text</dc:type>
     #Volume</dc:type>
+    
     format = get_field("dc:type")
 
     if format == "Article":
@@ -136,10 +168,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # Link zu Datensatz und Ressource
     urls = get_field("dc:identifier")
     for url in urls:
-        if "http" in url:
-            marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=url)
         if "urn:" in url:
             marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=url)
+            break
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
