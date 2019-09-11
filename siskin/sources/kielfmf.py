@@ -55,9 +55,6 @@ class KielFMFMARC(KielFMFTask):
     """
     Converts xlsx to BinaryMarc.
     """
-    def requires(self):
-        return KielFMFTask()
-
     def run(self):
         output = shellout("""python {script} {input} {output}""",
                           script=self.assets("101/101_marcbinary.py"),
