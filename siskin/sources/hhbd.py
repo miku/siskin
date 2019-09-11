@@ -77,20 +77,3 @@ class HHBDMARC(HHBDTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'), format=Gzip)
-
-
-class HHBDIntermediateSchema(HHBDTask):
-    """
-    Convert to intermediate schema via metafacture.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return HHBDCombine(date=self.date, format='oai_dc')
-
-    def run(self):
-        output = shellout("span-import -i hhbd < {input} | pigz -c > {output}", input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
