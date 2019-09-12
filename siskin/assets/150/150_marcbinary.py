@@ -163,7 +163,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     ddc = ddcmatch(f082a)
     if ddc:
         marcrecord.add("650", a="mitddc")
-        f980c = ["sid-150-col-monami", "sid-150-col-monamibuch"]
+        f980c = ["sid-150-col-monami", "sid-150-col-monamibbi"]
     else:
         f980c = ["sid-150-col-monami"]
     marcrecord.add("980", a=f001, b="150", c=f980c)
