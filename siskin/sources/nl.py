@@ -74,7 +74,7 @@ class NLFetch(NLTask):
                           replace '#29;' $(printf "\\x1D") '#30;' $(printf "\\x1E") '#31;' $(printf "\\x1F") > {output} """,
                           server=self.config.get('nl', 'solr'),
                           query=self.query)
-        output = shellout("sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' {input} > {output}", input=output)
+        output = shellout("sed ':a;N;$!ba;s/\x1d\x0a/\x1d/g' {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
