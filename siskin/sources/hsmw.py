@@ -1,6 +1,6 @@
 # coding: utf-8
 # pylint: disable=C0301,E1101
-
+#
 # Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
@@ -21,9 +21,17 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
-Hochschule Mittweida, Collection Medien, refs #11832.
+
+Source: Hochschule Mittweida, Collection Medien
+SID: 150
+Ticket: #11832, #15175
+Origin: OAI
+Updates: monthly
+
 """
+
 
 import datetime
 
@@ -35,7 +43,9 @@ from siskin.task import DefaultTask
 
 
 class HSMWTask(DefaultTask):
-    """ Base task for source. """
+    """
+    Base task for source.
+    """
     TAG = '150'
 
     def closest(self):
@@ -51,11 +61,11 @@ class HSMWHarvest(HSMWTask):
     def run(self):
         endpoint, set = "https://monami.hs-mittweida.de/oai", "institutes:medien"
         shellout("""metha-sync -set {set} {endpoint}""", set=set, endpoint=endpoint)
-        output = shellout("""metha-cat -set "institutes:medien" {endpoint} | pigz -c > {output} """, endpoint=endpoint)
+        output = shellout("""metha-cat -set "institutes:medien" {endpoint} > {output} """, endpoint=endpoint)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class HSMWMARC(HSMWTask):
@@ -68,8 +78,8 @@ class HSMWMARC(HSMWTask):
         return HSMWHarvest(date=self.date)
 
     def run(self):
-        output = shellout("python {script} <(unpigz -c {input}) {output} FID-MEDIEN-DE-15",
-                          script=self.assets("150/150_marcbinary.py"),
+        output = shellout("python {script} {input} {output}",
+                          script=self.assets('150/150_marcbinary.py'),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
