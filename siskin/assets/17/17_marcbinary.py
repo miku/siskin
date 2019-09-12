@@ -72,8 +72,6 @@ for record in reader:
     except:
         f082a = ""
     
-    f912a = record.get_fields("912")
-
     for ddc in adlr_ddc_start:
         if f082a.startswith(ddc):
             f082a_startswith_adlr_ddc = True
@@ -81,8 +79,14 @@ for record in reader:
     else:
         f082a_startswith_adlr_ddc = False
 
-    f912a_1 = f912a[0].get_subfields("a")[0]
-    f912a_2 = f912a[1].get_subfields("a")[0]
+    f912a = record.get_fields("912")
+
+    if len(f912a) == 2:
+        f912a_1 = f912a[0].get_subfields("a")[0]
+        f912a_2 = f912a[1].get_subfields("a")[0]
+    else:
+        f912a_1 = f912a[0].get_subfields("a")[0]
+        f912a_2 = ""
 
     if f082a in adlr_ddc or f082a_startswith_adlr_ddc:
         collections = ["a", f001, "b", "17", "c", f912a_1, "c", f912a_2, "c", "sid-17-col-adlr"]
