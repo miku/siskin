@@ -170,6 +170,7 @@ setup(name='siskin',
               'assets/161/*',
               'assets/169/*',
               'assets/170/*',
+              'assets/173/*',
           ]},
       scripts=[
           'bin/taskcat',
