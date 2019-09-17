@@ -71,6 +71,7 @@ from siskin.sources.genios import (GeniosCombinedIntermediateSchema, GeniosISSNL
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
+from siskin.sources.kielfmf import KielFMFIntermediateSchema
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.pqdt import PQDTIntermediateSchema
