@@ -492,7 +492,7 @@ class AIExport(AITask):
         _, tmp = tempfile.mkstemp(prefix='siskin-')
 
         if self.format == 'solr5vu3':
-            shellout("""cp "{input}" "{output}" """, input=self.input["base"].path, output=tmp)
+            shellout("""cp "{input}" "{output}" """, input=self.input().get("base").path, output=tmp)
         else:
             self.logger.debug('ignoring [126] BASE, since format is: %s', self.format)
 
