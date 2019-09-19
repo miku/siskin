@@ -38,6 +38,8 @@ from builtins import *
 import marcx
 import pymarc
 from siskin.mappings import formats
+from siskin.utils import marc_clean_record
+
 
 copytags = ("003", "004", "005", "006", "008", "009", "010", "011", "012", "013", "014", "015", "016", "017", "018",
             "019", "020", "021", "022", "023", "024", "025", "026", "027", "028", "029", "030", "031", "032", "033",
@@ -190,6 +192,7 @@ for oldrecord in reader:
     # Ansigelung
     newrecord.add("980", a=f001, b="14", c="sid-14-col-rism")
 
+    marc_clean_record(newrecord)
     outputfile.write(newrecord.as_marc())
 
 inputfile.close()
