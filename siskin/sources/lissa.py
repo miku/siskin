@@ -104,7 +104,7 @@ class LissaIntermediateSchema(LissaTask):
                 "rft.atitle": source["title"],
                 "rft.genre": "article",
                 "rft.pub": source.get("publishers", []),
-                "rft.authors": [{
+                "authors": [{
                     "rft.au": name
                 } for name in source["contributors"]],
                 "url": [link for link in source["identifiers"] if link.startswith("http")],
