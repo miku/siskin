@@ -23,7 +23,18 @@ copytags = ("003", "004", "005", "006", "008", "009", "010", "011", "012", "013"
             "595", "596", "597", "650", "657", "700", "710", "730", "762", "773", "775", "787")
 
 
-def get_links(record):
+def has_digitalization_links(record):
+    for field_856 in record.get_fields("856"):
+        for x in field_856.get_subfields("x"):
+            if "Digitalization" == x:
+                return True
+        for z in field_856.get_subfields("z"):
+            if "digit" in z or "Digit" in z and not ("Bach digital" in z or "Bach Digital" in z):
+                return True
+            if "exemplar" in z or "Exemplar" in z:
+                return True
+
+def get_digitalization_links(record):
     """
     Given a marc record, just return all links (from 856.u).
 
@@ -35,9 +46,20 @@ def get_links(record):
         ['http://google.com']
 
     """
-    for field in record.get_fields("856"):
-        for url in field.get_subfields("u"):
-            yield url
+    for field_856 in record.get_fields("856"):
+        is_digitalization = False
+        for x in field_856.get_subfields("x"):
+            if "Digitalization" == x:
+                is_digitalization = True
+        if not is_digitalization:
+            for z in field_856.get_subfields("z"):
+                if "digit" in z or "Digit" in z and not ("Bach digital" in z or "Bach Digital" in z):
+                    is_digitalization = True
+                elif "exemplar" in z or "Exemplar" in z:
+                    is_digitalization = True
+        if is_digitalization:
+            for url in field_856.get_subfields("u"):
+                yield url
 
 
 def get_titles(record):
@@ -77,9 +99,9 @@ for oldrecord in reader:
     if not f245:
         continue
 
-    # prüfen, ob es sich um Digitalisat handelt
+    # prüfen, ob es sich um Digitalisat handelt bzw. ein Link zu einem Digitalisat enthalten ist
     f856 = oldrecord["856"]
-    if not f856:
+    if not f856 or not has_digitalization_links(oldrecord):
         continue
 
     for field in oldrecord.get_fields("856"):
@@ -130,9 +152,10 @@ for oldrecord in reader:
         pass
 
     # 856 (Digitalisat)
-    links = list(get_links(oldrecord))
-    if len(links) > 0:
-        newrecord.add("856", q="text/html", _3="Link zum Digitalisat", u=links[0])
+    digitalization_links = list(get_digitalization_links(oldrecord))
+    if len(digitalization_links) > 0:
+        for digitalization_link in digitalization_links:
+            newrecord.add("856", q="text/html", _3="Link zum Digitalisat", u=digitalization_link)
 
     # 856 (Datensatz)
     newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://opac.rism.info/search?id=" + f001)
