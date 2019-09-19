@@ -66,7 +66,8 @@ class MediarepMARC(MediarepTask):
                         dir=self.config.get('core', 'metha-dir'),
                         prefix=self.prefix,
                         url=self.url)
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets('170/170_marcbinary.py'),
                           input=data)
         luigi.LocalTarget(output).move(self.output().path)

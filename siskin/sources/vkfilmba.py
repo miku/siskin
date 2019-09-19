@@ -229,7 +229,8 @@ class VKFilmBAMARC(VKFilmBATask):
         return VKFilmBAUpdates(date=self.date)
 
     def run(self):
-        output = shellout("python {script} {input} {output}",
+        output = shellout("{python} {script} {input} {output}",
+                          python=self.config.get("core", "python"),
                           script=self.assets("148/148_marcbinary.py"),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)

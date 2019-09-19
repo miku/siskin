@@ -63,7 +63,8 @@ class UMBIMARC(UMBITask):
         return UMBIXML()
 
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets("156/156_marcbinary.py"),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)

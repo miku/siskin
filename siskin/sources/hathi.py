@@ -84,9 +84,10 @@ class HathiMARC(HathiTask):
         return HathiCombine(date=self.date, prefix="marc21")
 
     def run(self):
-        output = shellout(""" python {script} <(unpigz -c "{input}") {output} """,
-                         script=self.assets("35/35_marcbinary.py"),
-                         input=self.input().path)
+        output = shellout(""" {python} {script} <(unpigz -c "{input}") {output} """,
+                          python=self.config.get("core", "python"),
+                          script=self.assets("35/35_marcbinary.py"),
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

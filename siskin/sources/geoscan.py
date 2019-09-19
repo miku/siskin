@@ -57,7 +57,8 @@ class GeoscanMARC(GeoscanTask):
     link = luigi.Parameter(default="http://geoscan.nrcan.gc.ca/rss/newpub_e.rss", significant=False)
 
     def run(self):
-        output = shellout("""python {script} <(curl --fail -sL {link}) {output}""",
+        output = shellout("""{python} {script} <(curl --fail -sL {link}) {output}""",
+                          python=self.config.get("core", "python"),
                           link=self.link,
                           script=self.assets("129/129_marcbinary.py"))
         luigi.LocalTarget(output).move(self.output().path)

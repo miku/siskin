@@ -177,7 +177,8 @@ class IMSLPConvert(IMSLPTask):
     def run(self):
         tempdir = tempfile.mkdtemp(prefix='siskin-')
         shellout("tar -xzf {archive} -C {tempdir}", archive=self.input().path, tempdir=tempdir)
-        output = shellout("python {script} {tempdir} {output} {fieldmap}",
+        output = shellout("{python} {script} {tempdir} {output} {fieldmap}",
+                          python=self.config.get("core", "python"),
                           script=self.assets('15/15_marcbinary.py'),
                           tempdir=tempdir,
                           fieldmap=self.assets('15/15_fieldmap.json'))

@@ -46,7 +46,8 @@ class SPOWITask(DefaultTask):
 class SPOWIMARC(SPOWITask):
     """ Convert CSV to BinaryMarc """
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets("160/160_marcbinary.py"),
                           input=self.config.get('spowi', 'input'))
         luigi.LocalTarget(output).move(self.output().path)

@@ -119,7 +119,8 @@ class ArchiveMARC(ArchiveTask):
 
     def run(self):
         inputs = [target.path for target in self.input()]
-        output = shellout("python {script} {output} {inputs}",
+        output = shellout("{python} {script} {output} {inputs}",
+                          python=self.config.get("core", "python"),
                           script=self.assets("153/153_marcbinary.py"),
                           inputs=' '.join(inputs))
         luigi.LocalTarget(output).move(self.output().path)

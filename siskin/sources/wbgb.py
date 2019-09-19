@@ -55,7 +55,8 @@ class WBGBMARC(WBGBTask):
     Converts MARC to FincMARC.
     """
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets("173/173_marcbinary.py"),
                           input=self.config.get("wbgb", "input"))
         luigi.LocalTarget(output).move(self.output().path)

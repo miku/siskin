@@ -70,7 +70,8 @@ class HHBDMARC(HHBDTask):
         return HHBDCombine(date=self.date, format='oai_dc')
 
     def run(self):
-        output = shellout("python {script} {input} {output}",
+        output = shellout("{python} {script} {input} {output}",
+                          python=self.config.get("core", "python"),
                           script=self.assets('107/107_marcbinary.py'),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)

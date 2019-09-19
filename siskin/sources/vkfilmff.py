@@ -101,7 +101,8 @@ class VKFilmFFMARC(VKFilmFFTask):
                     continue
                 output = shellout("unpigz -c {file} | sed 's/\xC2\x98//g;s/\xC2\x9C//g' > {output}", file=row.path)
                 output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)
-                output = shellout("python {script} {input} {output}",
+                output = shellout("{python} {script} {input} {output}",
+                                  python=self.config.get("core", "python"),
                                   script=self.assets("119/119_marcbinary.py"),
                                   input=output)
                 luigi.LocalTarget(output).move(self.output().path)

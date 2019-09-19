@@ -55,7 +55,8 @@ class ZMPMARC(ZMPTask):
         return ZMPSpreadsheet()
 
     def run(self):
-        output = shellout("""python {script} "{input}" "{output}" """,
+        output = shellout("""{python} {script} "{input}" "{output}" """,
+                          python=self.config.get("core", "python"),
                           script=self.assets("99/99_marcbinary.py"),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)

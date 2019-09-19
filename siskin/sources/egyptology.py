@@ -52,7 +52,8 @@ class EgyptologyFincMARC(EgyptologyTask):
     Convert to binary MARC.
     """
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets('70/70_marcbinary.py'),
                           input=self.config.get('egyptology', 'input'))
         luigi.LocalTarget(output).move(self.output().path)

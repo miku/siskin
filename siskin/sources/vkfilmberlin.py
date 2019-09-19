@@ -61,7 +61,8 @@ class VKFilmBerlinRawMARC(VKFilmBerlinTask):
         """
         output = shellout("marccount {input} > {output}", input=self.input().path)
         record_count = int(open(output).read().strip())
-        output = shellout("python {script} {input} {output} {record_count}",
+        output = shellout("{python} {script} {input} {output} {record_count}",
+                          python=self.config.get("core", "python"),
                           script=self.assets("117/117_marcbinary.py"),
                           input=self.input().path,
                           record_count=record_count)

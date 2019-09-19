@@ -116,7 +116,8 @@ class VDEHMARC(VDEHTask):
         return VDEHRemoveIllegalChars()
 
     def run(self):
-        output = shellout("""python {script} {input} {output} {server}""",
+        output = shellout("""{python} {script} {input} {output} {server}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets("130/130_marcbinary.py"),
                           input=self.input().path,
                           server=self.config.get('vdeh', 'index-url'))

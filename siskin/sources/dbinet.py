@@ -92,8 +92,9 @@ class DBInetJSON(DBInetTask):
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=('path', )):
                 shellout(
-                    """python {xmltojson} <(xsltproc {xsl} <(sed -e 's/&#.;//g' -e 's/&#..;//g' {input})) /dev/stdout |
+                    """{python} {xmltojson} <(xsltproc {xsl} <(sed -e 's/&#.;//g' -e 's/&#..;//g' {input})) /dev/stdout |
                             jq -cr ".list[][]" >> {output} """,
+                    python=self.config.get("core", "python"),
                     xmltojson=self.assets('80/xmltojson.py'),
                     xsl=self.assets('80/convert.xsl'),
                     input=row.path,

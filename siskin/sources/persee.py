@@ -93,7 +93,8 @@ class PerseeMARC(PerseeTask):
     def run(self):
         issnfile = shellout(""" curl -sL --fail "{fid_issn_url}" > {output} """,
                             fid_issn_url=self.config.get('persee', 'fid-issn-url'))
-        output = shellout("""python {script} <(unpigz -c {input}) {output} {issnfile}""",
+        output = shellout("""{python} {script} <(unpigz -c {input}) {output} {issnfile}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets('39/39_marcbinary.py'),
                           input=self.input().path,
                           issnfile=issnfile)

@@ -48,7 +48,8 @@ class GDMBTask(DefaultTask):
 class GDMBMARC(GDMBTask):
     """ Convert JSON to BinaryFincMarc """
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets("131/131_marcbinary.py"),
                           input=self.config.get("gdmb", "input"))
         luigi.LocalTarget(output).move(self.output().path)

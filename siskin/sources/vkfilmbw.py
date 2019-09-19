@@ -131,7 +131,8 @@ class VKFilmBWMARC(VKFilmBWTask):
         return VKFilmBWDownload(date=self.date)
 
     def run(self):
-        output = shellout("""python {script} {input} {output}""",
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
                           script=self.assets("151/151_marcbinary.py"),
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)

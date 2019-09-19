@@ -103,7 +103,10 @@ class KHMMARC(KHMTask):
         output = shellout("""sed -e 's/'$(echo "\o001")'/ /g' < {input} > {output}""",
                           input=self.config.get('khm', 'dump'))
         # TODO(miku): maybe check, if cleanup is still required.
-        output = shellout("python {script} {input} {output}", script=self.assets("109/109_marcbinary.py"), input=output)
+        output = shellout("{python} {script} {input} {output}",
+                          script=self.assets("109/109_marcbinary.py"),
+                          input=output,
+                          python=self.config.get("core", "python"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -168,7 +171,8 @@ class KHMMARCDeprecated(KHMTask):
         if not len(tarballs) == 2:
             raise RuntimeError('limitation: we need exactly two tarballs')
 
-        output = shellout("python {script} {t1} {t2} {output}",
+        output = shellout("{python} {script} {t1} {t2} {output}",
+                          python=self.config.get("core", "python"),
                           script=self.assets("109/109_marcbinary.py"),
                           t1=tarballs[0],
                           t2=tarballs[1])
