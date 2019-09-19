@@ -37,6 +37,7 @@ from builtins import *
 
 import marcx
 import pymarc
+from siskin.mappings import formats
 
 copytags = ("003", "004", "005", "006", "008", "009", "010", "011", "012", "013", "014", "015", "016", "017", "018",
             "019", "020", "021", "022", "023", "024", "025", "026", "027", "028", "029", "030", "031", "032", "033",
@@ -95,12 +96,15 @@ if len(sys.argv) == 3:
 
 inputfile = io.open(inputfilename, "rb")
 outputfile = io.open(outputfilename, "wb")
-
 reader = pymarc.MARCReader(inputfile)
+
+format = "Score"
 
 for oldrecord in reader:
 
     newrecord = marcx.Record()
+    newrecord.force_utf8 = True
+    newrecord.strict = False
 
     # prüfen, ob Titel vorhanden ist
     f245 = oldrecord["245"]
@@ -116,15 +120,16 @@ for oldrecord in reader:
         f856 = field if "http" in field else ""
 
     # leader
-    leader = "     " + oldrecord.leader[5:]
+    leader = formats[format]["Leader"]
     newrecord.leader = leader
 
     # 001
     f001 = oldrecord["001"].data
     newrecord.add("001", data="finc-14-%s" % f001)
 
-    # Format 007
-    newrecord.add("007", data="cr")
+    # Zugangsfacette
+    f007 = formats[format]["e007"]
+    newrecord.add("007", data=f007)
 
     # Originalfelder, die ohne Änderung übernommen werden
     for tag in copytags:
@@ -142,6 +147,14 @@ for oldrecord in reader:
     f246a = get_field(oldrecord, "245", "a")
     if f246a != "[without title]":
         newrecord.add("246", a=f246a)
+
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    newrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    newrecord.add("338", b=f338b)
 
     # Fußnote
     f852a = get_field(oldrecord, "852", "a")
@@ -167,10 +180,14 @@ for oldrecord in reader:
     # 856 (Datensatz)
     newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://opac.rism.info/search?id=" + f001)
 
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    newrecord.add("935", c=f935c)
+
     # 970
     newrecord.add("970", c="PN")
 
-    # 980
+    # Ansigelung
     newrecord.add("980", a=f001, b="14", c="sid-14-col-rism")
 
     outputfile.write(newrecord.as_marc())
