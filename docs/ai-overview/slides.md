@@ -210,7 +210,7 @@ set net:max-retries 5;
 set net:timeout 10;
 set mirror:parallel-directories 1;
 set ssl:verify-certificate no;
-set ftp:ssl-protect-data true; 
+set ftp:ssl-protect-data true;
 mirror --verbose=0 --only-newer -I '*' /
 /tmp/siskin-data/common/FTPMirror/b57115...;
 exit"
@@ -258,7 +258,7 @@ while True:
         'filter': filter,
         'cursor': cursor
     }
-    
+
     url = 'http://api.crossref.org/works?%s' % (...)
 
     for attempt in range(1, self.attempts):
@@ -454,7 +454,7 @@ We use a dedicated orchestration framework written in Python. It documents the w
 
 * https://github.com/spotify/luigi
 
-> Luigi is a Python module that helps you build complex pipelines of batch jobs. It handles dependency resolution, workflow management, visualization etc. It also comes with Hadoop support built in. 
+> Luigi is a Python module that helps you build complex pipelines of batch jobs. It handles dependency resolution, workflow management, visualization etc. It also comes with Hadoop support built in.
 
 Uses a dependency graph (DAG).
 
@@ -533,7 +533,7 @@ Development
 ===========
 
 * Why [Python](https://www.python.org/)? It's [popular](https://www.tiobe.com/tiobe-index/) and has wide range of application in the scientific domain.
-* Why [Metafacture](https://github.com/culturegraph/metafacture-core/wiki)? A comprehensive and declarative tool. 
+* Why [Metafacture](https://github.com/culturegraph/metafacture-core/wiki)? A comprehensive and declarative tool.
 * Why UNIX? 40 plus years of [text processing](http://www.oreilly.com/openbook/utp/UnixTextProcessing.pdf).
 * Why [Go](http://golang.org/)? It's fast and easy to deploy.
 
