@@ -131,8 +131,8 @@ for oldrecord in reader:
     newrecord.strict = False
 
     # prüfen, ob Titel vorhanden ist
-    f245 = oldrecord["245"]
-    if not f245:
+    maintitle = oldrecord["240"]
+    if not maintitle:
         continue
 
     # prüfen, ob es sich um Digitalisat handelt bzw. ein Link zu einem Digitalisat enthalten ist
