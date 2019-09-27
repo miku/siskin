@@ -58,6 +58,7 @@ for record in reader:
     # Identifikator
     f001 = record["001"].data
     f001 = f001.replace("-", "")
+    f001 = f001.replace(",T", "")
     record.remove_fields("001")
     record.add("001", data="159-" + f001)
 
