@@ -70,13 +70,17 @@ class VKFilmDusConvert(VKFilmDusTask):
     Convert from binary MAB to MABXML.
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    encoding = luigi.Parameter(default='UTF-8',
+                               description='input encoding for Mab2Mabxml.jar, e.g. UTF-8 or ISO-8859-1',
+                               significant=False)
 
     def run(self):
         """
         Extract zip on the fly, convert with Mab2Mabxml.jar.
         """
         mabfile = shellout("unzip -p {input} > {output}", input=self.config.get('vkfilmdus', 'input'), encoding='utf-8')
-        output = shellout("java -jar {jarfile} -encin ISO-8859-1 -i {input} -o {output}",
+        output = shellout("java -jar {jarfile} -encin {encoding} -i {input} -o {output}",
+                          encoding=self.encoding,
                           jarfile=self.config.get("vkfilmdus", "Mab2Mabxml.jar"),
                           input=mabfile)
         luigi.LocalTarget(output).move(self.output().path)
