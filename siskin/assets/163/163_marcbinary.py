@@ -61,13 +61,18 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="163-" + f001)
 
+    #Titel
+    f245p = record["245"]["a"]
+    record.remove_fields("245")
+    record.add("245", a="Autographensammlung Wustmann", p=f245p)
+
     # Elternelemente
-    record.add("773", t=["Digitale Sammlungen: Nachlässe und Archive", "Autographensammlung Wustmann"])
+    technicalCollectionID = record["912"]["a"]
+    record.add("773", w=technicalCollectionID)
 
     # Ansigelung
-    f980c = record["912"]["a"]
     record.remove_fields("912")
-    record.add("980", a=f001, b="163", c=f980c)
+    record.add("980", a=f001, b="163", c=technicalCollectionID)
 
     marc_clean_record(record)
     outputfile.write(record.as_marc())
