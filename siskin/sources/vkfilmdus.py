@@ -78,9 +78,9 @@ class VKFilmDusConvert(VKFilmDusTask):
         """
         Extract zip on the fly, convert with Mab2Mabxml.jar.
         """
-        mabfile = shellout("unzip -p {input} > {output}", input=self.config.get('vkfilmdus', 'input'), encoding='utf-8')
-        output = shellout("java -jar {jarfile} -encin {encoding} -i {input} -o {output}",
-                          encoding=self.encoding,
+        mabfile = shellout("unzip -p {input} > {output}", input=self.config.get('vkfilmdus', 'input'))
+        output = shellout("java -jar {jarfile} -encin {encin} -i {input} -o {output}",
+                          encin=self.encoding,
                           jarfile=self.config.get("vkfilmdus", "Mab2Mabxml.jar"),
                           input=mabfile)
         luigi.LocalTarget(output).move(self.output().path)
