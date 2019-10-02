@@ -80,3 +80,21 @@ class NLFetch(NLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="mrc", digest=True))
 
+class NLMARC(NLTask):
+    """
+    Transform FincMARC.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return NLFetch(date=self.date)
+
+    def run(self):
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
+                          script=self.assets("17/17_marcbinary.py"),
+                          input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='fincmarc.mrc'))
