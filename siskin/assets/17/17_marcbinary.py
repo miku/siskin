@@ -82,10 +82,10 @@ for record in reader:
     f912a = record.get_fields("912")
 
     if len(f912a) == 2:
-        f912a_1 = f912a[0].get_subfields("a")[0]
-        f912a_2 = f912a[1].get_subfields("a")[0]
+        f912a_1 = f912a[0].get_subfields("a")[0].lower()
+        f912a_2 = f912a[1].get_subfields("a")[0].lower()
     else:
-        f912a_1 = f912a[0].get_subfields("a")[0]
+        f912a_1 = f912a[0].get_subfields("a")[0].lower()
         f912a_2 = ""
 
     if f082a in adlr_ddc or f082a_startswith_adlr_ddc:
