@@ -36,18 +36,11 @@ import sys
 
 import marcx
 import pymarc
+
+from io import StringIO, BytesIO
+from siskin.utils import xmlstream
 from siskin.utils import marc_clean_record
 
-
-inputfilename = "17_input.mrc"
-outputfilename = "17_output.mrc"
-
-if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
-
-inputfile = open(inputfilename, "rb")
-outputfile = open(outputfilename, "wb")
-reader = pymarc.MARCReader(inputfile, force_utf8=True)
 
 adlr_ddc = ["175", "303.38", "342.0853", "384", "778.5", "791"]
 
@@ -55,9 +48,21 @@ adlr_ddc_start = ["002", "070", "302.2", "303.375", "303.376", "303.4833", "303.
                "323.445", "324.73", "343.099", "384.3", "384.54", "384.55", "384.8",
                "659", "741.5", "770", "781.54", "791.4", "794.8"]
 
-for record in reader:
+inputfilename = "17_input.xml"
+outputfilename = "17_output.mrc"
 
-    record = marcx.Record.from_record(record)
+if len(sys.argv) == 3:
+    inputfilename, outputfilename = sys.argv[1:]
+
+outputfile = open(outputfilename, "wb")
+
+for oldrecord in xmlstream(inputfilename, "record"):
+
+    oldrecord = BytesIO(oldrecord)
+    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+    oldrecord = oldrecord[0]
+
+    record = marcx.Record.from_record(oldrecord)
     record.force_utf8 = True
     record.strict = False
 
@@ -98,5 +103,4 @@ for record in reader:
     marc_clean_record(record)
     outputfile.write(record.as_marc())
 
-inputfile.close()
 outputfile.close()
