@@ -75,10 +75,11 @@ class NLFetch(NLTask):
                           server=self.config.get('nl', 'solr'),
                           query=self.query)
         output = shellout("sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' {input} > {output}", input=output)
+        output = shellout("yaz-marcdump -i marc -o marcxml {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="mrc", digest=True))
+        return luigi.LocalTarget(path=self.path(ext="xml", digest=True))
 
 class NLMARC(NLTask):
     """
