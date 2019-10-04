@@ -43,7 +43,7 @@ class MediarepTask(DefaultTask):
     TAG = '170'
 
     def closest(self):
-        return monthly(date=self.date)
+        return weekly(date=self.date)
 
 
 class MediarepMARC(MediarepTask):
