@@ -36,60 +36,10 @@ import re
 import sys
 
 import xmltodict
-
 import marcx
 
-formatmaps = {
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    },
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    },
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    },
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    },
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    },
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    },
-    '': {
-        'leader': '',
-        '007': '',
-        '008': '',
-        '935b': '',
-        '935c': ''
-    }
-}
+from siskin.mappings import formats
+from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
 
 def delistify(value, first=True, concat=None):
@@ -126,13 +76,17 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         continue
 
     marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
 
-    # Leader
+    # Formatmerkennung
     format = xmlrecord["metadata"]["oai_dc:dc"]["dc:type"]
     if format[0] == "article":
-        marcrecord.leader = "     nab  22        4500"
+        format = "Article"
     else:
-        marcrecord.leader = "     cam  22        4500"
+        format = "Book"
+
+    # Leader
+    leader = formats[format]["Leader"]
 
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
@@ -143,8 +97,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     else:
         print(u"Der Identifier konnte nicht zerlegt werden: " + f001)
 
-    # 007
-    marcrecord.add("007", data="cr")
+    # Zugangsfacette
+    f007 = formats[format]["e007"]
+    marcrecord.add("007", data=f007)
 
     # ISBN
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
@@ -211,6 +166,14 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     publisher = ["b", delistify(f260b), "c", delistify(f260c)]
     marcrecord.add("260", subfields=publisher)
 
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
     # Beschreibung
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:description"):
         f520a = xmlrecord["metadata"]["oai_dc:dc"]["dc:description"]
@@ -227,6 +190,11 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         else:
             if not re.search("\d\d\d", subject):
                 marcrecord.add("650", a=subject)
+
+    # GND-Inhalts- und Datenträgertyp
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("338", a=f655a, _2=f6552)
 
     # weitere Urheber
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:creator"):
@@ -261,8 +229,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         elif "doi.org" in f856u:
             marcrecord.add("856", q="text/html", _3="Zitierlink (DOI)", u=f856u)
 
-    # Medientyp
-    marcrecord.add("935", b="cofz")
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
 
     # Kollektion
     collection = ["a", f001, "b", "170", "c", "sid-170-col-mediarep"]
