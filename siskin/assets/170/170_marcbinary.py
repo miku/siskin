@@ -147,9 +147,10 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
         if isinstance(subjects, list):
             for subject in subjects:
-                if re.search("\d\d\d", subject):
-                    marcrecord.add("082", a=subject, _2="ddc")
-                    break
+                if subject:
+                    if re.search("\d\d\d", subject):
+                        marcrecord.add("082", a=subject, _2="ddc")
+                        break
         else:
             if re.search("\d\d\d", subjects):
                 marcrecord.add("084", a=subjects, _2="ddc")
@@ -190,8 +191,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         subjects = xmlrecord["metadata"]["oai_dc:dc"]["dc:subject"]
         if isinstance(subjects, list):
             for subject in subjects:
-                if not re.search("\d\d\d", subject):
-                    marcrecord.add("650", a=subject)
+                if subject:
+                    if not re.search("\d\d\d", subject):
+                        marcrecord.add("650", a=subject)
         else:
             if not re.search("\d\d\d", subject):
                 marcrecord.add("650", a=subject)
