@@ -82,11 +82,14 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     format = xmlrecord["metadata"]["oai_dc:dc"]["dc:type"]
     if format[0] == "article":
         format = "Article"
+    elif format == "bookPart":
+        format = "Chapter"
     else:
         format = "Book"
 
     # Leader
     leader = formats[format]["Leader"]
+    marcrecord.leader = leader
 
     # Identifier
     f001 = xmlrecord["header"]["identifier"]
@@ -95,7 +98,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         f001 = regexp.group(1)
         marcrecord.add("001", data="finc-170-" + f001)
     else:
-        print(u"Der Identifier konnte nicht zerlegt werden: " + f001)
+        print("Der Identifier konnte nicht zerlegt werden: " + f001)
 
     # Zugangsfacette
     f007 = formats[format]["e007"]
@@ -205,7 +208,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     # GND-Inhalts- und Datenträgertyp
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
-    marcrecord.add("338", a=f655a, _2=f6552)
+    marcrecord.add("655", a=f655a, _2=f6552)
 
     # weitere Urheber
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:creator"):
