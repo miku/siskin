@@ -106,9 +106,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
         if isinstance(identifiers, list):
             for identifier in identifiers:
-                if re.search("([0-9xX-]{10,17})", identifier):
-                    marcrecord.add("020", a=identifier)
-                    break
+                f020a = check_isbn(identifier)
+                marcrecord.add("020", a=f020a)
+                break
 
     # ISSN
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
@@ -116,9 +116,9 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         if isinstance(identifiers, list):
             for identifier in identifiers:
                 identifier = identifier.replace("issn:", "")
-                if re.search("\d\d\d\d-\d\d\d\d$", identifier):
-                    marcrecord.add("022", a=identifier)
-                    break
+                f022a = check_issn(identifier)
+                marcrecord.add("022", a=f022a)
+                break
 
     # Sprache
     language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
