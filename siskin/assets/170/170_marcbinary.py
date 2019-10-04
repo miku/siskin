@@ -101,6 +101,18 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     f007 = formats[format]["e007"]
     marcrecord.add("007", data=f007)
 
+    # Periodizität
+    if xmlrecord["metadata"]["oai_dc:dc"].get("dc:date"):
+        year = xmlrecord["metadata"]["oai_dc:dc"]["dc:date"]
+    else:
+        year = ""
+    periodicity = formats[format]["008"]
+    language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
+    if language == "de" or language == "deu":
+        language = "ger"
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+
     # ISBN
     if xmlrecord["metadata"]["oai_dc:dc"].get("dc:identifier"):
         identifiers = xmlrecord["metadata"]["oai_dc:dc"]["dc:identifier"]
@@ -124,7 +136,6 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     language = xmlrecord["metadata"]["oai_dc:dc"]["dc:language"]
     if language == "de" or language == "deu":
         language = "ger"
-    marcrecord.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
     marcrecord.add("041", a=language)
 
     # Fachgebiet
