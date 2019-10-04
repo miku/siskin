@@ -73,12 +73,13 @@ for line in inputfile:
         remove_field(record, "vf1_author_orig")
         remove_field(record, "vf1_author2")
         remove_field(record, "vf1_author2_role")
+        remove_field(record, "vf1_author2-role")
         remove_field(record, "vf1_author2_orig")
         remove_field(record, "vf1_author_corp")
         remove_field(record, "vf1_author_corp_orig")
         remove_field(record, "vf1_author_corp2")
         remove_field(record, "vf1_author_corp2_orig")
-        
+
         record = json.dumps(record)
         record = record + "\n"
         outputfile.write(str(record))
