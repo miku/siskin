@@ -79,6 +79,7 @@ for line in inputfile:
         remove_field(record, "vf1_author_corp_orig")
         remove_field(record, "vf1_author_corp2")
         remove_field(record, "vf1_author_corp2_orig")
+        remove_field(record, "title_part")
 
         record = json.dumps(record)
         record = record + "\n"
