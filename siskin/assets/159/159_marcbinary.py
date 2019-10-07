@@ -36,6 +36,8 @@ import sys
 
 import marcx
 import pymarc
+
+from siskin.mappings import formats
 from siskin.utils import marc_clean_record
 
 
@@ -54,6 +56,13 @@ for record in reader:
     record = marcx.Record.from_record(record)
     record.force_utf8 = True
     record.strict = False
+
+    # Formatfestlegung
+    format = "Manuscript"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    record.leader = leader
 
     # Identifikator
     f001 = record["001"].data
