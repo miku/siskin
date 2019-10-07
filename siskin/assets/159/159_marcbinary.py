@@ -75,14 +75,13 @@ for record in reader:
         for field in fields:
             person = field.get_subfields("a")[0]
             gnd = field.get_subfields("1")
-            if gnd:
-                gnd = gnd[0]
             if person and gnd:
-                if person not in unique_persons and gnd not in unique_persons:
+                gnd = gnd[0]
+                if gnd not in unique_persons:
                     record.add("700", a=person, _1=gnd)
                     unique_persons.append(person)
                     unique_persons.append(gnd)
-            if person:
+            elif person:
                 if person not in unique_persons:
                     record.add("700", a=person)
                     unique_persons.append(person)
