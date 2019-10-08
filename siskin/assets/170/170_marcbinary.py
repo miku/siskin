@@ -79,13 +79,22 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.strict = False
 
     # Formatmerkennung
-    format = xmlrecord["metadata"]["oai_dc:dc"]["dc:type"]
-    if format[0] == "article":
-        format = "Article"
-    elif format == "bookPart":
-        format = "Chapter"
+    allformats = xmlrecord["metadata"]["oai_dc:dc"]["dc:type"]
+    for format in allformats:
+        if format == "book":
+            format = "Book"
+            break
+        elif format == "bookPart":
+            format = "Chapter"
+            break
+        elif format == "doctoralThesis":
+            format = "Thesis"
+            break
+        elif format == "MovingImage":
+            format = "Online-Video"
+            break
     else:
-        format = "Book"
+        format = "Article"
 
     # Leader
     leader = formats[format]["Leader"]
