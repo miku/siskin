@@ -76,6 +76,9 @@ for record in reader:
     record.remove_fields("245")
     record.add("245", a="Abendländische mittelalterliche Handschriften", p=f245p)
 
+    # Sprachekürzel
+    record.remove_fields("546")
+
     # weitere Urheber
     unique_persons = []
     fields = record.get_fields("700")
