@@ -36,7 +36,6 @@ import sys
 import marcx
 import pymarc
 
-from io import StringIO, BytesIO
 from siskin.utils import xmlstream
 from siskin.utils import marc_clean_record
 
