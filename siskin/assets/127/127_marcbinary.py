@@ -341,7 +341,9 @@ for record in reader:
 
     # übergeordnetes Werk
     f773g = record.field("596", alt="")
-    f773t = record.field("597", alt="")
+    f773t = record.field("590", alt="")
+    if not f773t:
+        f773t = record.field("597", alt="")
     f773w = record.field("010", alt="")
     marcrecord.add("773", t=f773t, g=f773g, w=f773w, x=f022a)
 
