@@ -341,6 +341,9 @@ for record in reader:
 
     # übergeordnetes Werk
     f773g = record.field("596", alt="")
+    match = re.search("(.*)\. - Sign", f773g)
+    if match:
+        f773g = match.group(1)
     f773t = record.field("590", alt="")
     if not f773t:
         f773t = record.field("597", alt="")
