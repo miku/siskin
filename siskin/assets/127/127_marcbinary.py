@@ -43,6 +43,20 @@ from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
 
+def get_valid_language(record, field):
+    """
+    Takes languages codes and returns the first in a valid form.
+    """
+    languages = record.field(field, alt ="")
+    if "$$" in languages:
+        languages = languages.split("$$")
+    elif ";" in languages:
+        languages = languages.split(" ; ")
+    else:
+        languages = languages.split("$")
+    return languages[0]
+
+
 inputfilename = "127_input.xml"
 outputfilename = "127_output.mrc"
 
@@ -190,12 +204,7 @@ for record in reader:
     # Periodizität
     year = record.field("425", alt="")
     periodicity = formats[format]["008"]
-    languages = record.field("037", alt="")
-    if "$$" in languages:
-        languages = languages.split("$$")
-    else:
-        languages = languages.split("$")
-    language = languages[0]
+    language = get_valid_language(record, "037")
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
@@ -213,7 +222,7 @@ for record in reader:
         marcrecord.add("022", a=f022a)
 
     # Sprache
-    f041a = record.field("037", alt="")
+    f041a = get_valid_language(record, "037")
     marcrecord.add("041", a=f041a)
 
     # 1. Urheber
