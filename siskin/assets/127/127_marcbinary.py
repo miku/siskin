@@ -57,6 +57,19 @@ def get_valid_language(record, field):
     return languages[0]
 
 
+def get_clean_url(record, url):
+    """
+    Takes a URL and returns it without subfield codes and other fragments.
+    """
+    match1 = re.search("^(http.*?)\$", url)
+    match2 = re.search("\$(.*?)\$", url)
+    if match1:
+        url = match1.group(1)
+    elif match2:
+        url = match2.group(1)
+    return url
+
+
 inputfilename = "127_input.xml"
 outputfilename = "127_output.mrc"
 
@@ -362,15 +375,17 @@ for record in reader:
     # "http://www.oapen.org/search?identifier" in URL
     # "http://dx.doi.org/" in URL
 
-    f856u = record.field("655", alt ="")
+    url = record.field("655", alt ="")
+    if url:
 
-    if f856u:
-        if "Volltext" in f856u or "http://www.bibliothek.uni-regensburg.de/ezeit/" in f856u or "http://www.oapen.org/search?identifier" in f856u or "http://dx.doi.org/" in f856u:
+        if "Volltext" in url or "http://www.bibliothek.uni-regensburg.de/ezeit/" in url or "http://www.oapen.org/search?identifier" in url or "http://dx.doi.org/" in url:
             f8563 = "Link zur Ressource"
+            f856u = get_clean_url(record, url)
             marcrecord.add("856", _3=f8563, u=f856u)
         
-        if "Inhalt" in f856u:
+        if "Inhalt" in url:
             f8563 = "Link zum Inhaltsverzeichnis"
+            f856u = get_clean_url(record, url)
             marcrecord.add("856", _3=f8563, u=f856u)    
 
     # Link zum Datensatz
