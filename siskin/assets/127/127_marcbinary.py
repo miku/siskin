@@ -366,16 +366,16 @@ for record in reader:
 
     if f856u:
         if "Volltext" in f856u or "http://www.bibliothek.uni-regensburg.de/ezeit/" in f856u or "http://www.oapen.org/search?identifier" in f856u or "http://dx.doi.org/" in f856u:
-            f856q = "Link zur Ressource"
-            marcrecord.add("856", q=f856q, u=f856u)
+            f8563 = "Link zur Ressource"
+            marcrecord.add("856", _3=f8563, u=f856u)
         
         if "Inhalt" in f856u:
-            f856q = "Link zum Inhaltsverzeichnis"
-            marcrecord.add("856", q=f856q, u=f856u)    
+            f8563 = "Link zum Inhaltsverzeichnis"
+            marcrecord.add("856", _3=f8563, u=f856u)    
 
     # Link zum Datensatz
     id = record.field("001")
-    marcrecord.add("856", q="Link zu Filmuniversität Babelsberg Konrad Wolf", u="http://server8.bibl.filmuniversitaet.de/F/?func=find-c&ccl_term=idn=%s&local_base=HFF01" % id)
+    marcrecord.add("856", _3="Link zu Filmuniversität Babelsberg Konrad Wolf", u="http://server8.bibl.filmuniversitaet.de/F/?func=find-c&ccl_term=idn=%s&local_base=HFF01" % id)
 
     # Kollektion
     marcrecord.add("912", a="vkfilm")
