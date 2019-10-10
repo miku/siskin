@@ -33,6 +33,7 @@ Ticket: 1145, #4435, #16018
 
 import io
 import sys
+import re
 from builtins import *
 
 import marcx
@@ -203,7 +204,8 @@ for oldrecord in reader:
             newrecord.add("856", q="text/html", _3="Link zum Digitalisat", u=digitalization_link)
 
     # 856 (Datensatz)
-    newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://opac.rism.info/search?id=" + f001)
+    id = re.sub("^00000", "", f001)
+    newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://opac.rism.info/search?id=" + id)
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
