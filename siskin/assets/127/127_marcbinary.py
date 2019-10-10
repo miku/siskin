@@ -328,11 +328,26 @@ for record in reader:
         marcrecord.add("521", a=f521a)
 
     # Schlagwörter
+    all_subjects = set()
+
     subjects = record.fields("710")
+    if subjects:
+        for subject in subjects:
+            match = re.search("(.*)\/\w\$", subject)
+            if match:
+                subject = match.group(1)
+            all_subjects.add(subject)
+
+    subjects = record.field("720", alt="")
+    if " / " in subjects:
+        subjects = subjects.split(" / ")
+    else:
+        subjects = subjects.split(" ; ")
+
     for subject in subjects:
-        match = re.search("(.*)\/\w\$", subject)
-        if match:
-            subject = match.group(1)
+        all_subjects.add(subject)
+
+    for subject in all_subjects:
         marcrecord.add("650", a=subject)
 
     # GND-Inhalts- und Datenträgertyp
