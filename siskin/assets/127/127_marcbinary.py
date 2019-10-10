@@ -329,13 +329,16 @@ for record in reader:
 
     # Schlagwörter
     all_subjects = set()
-
     subjects = record.fields("710")
     if subjects:
         for subject in subjects:
-            match = re.search("(.*)\/\w\$", subject)
-            if match:
-                subject = match.group(1)
+            match1 = re.search("(.*?)\/\w\$", subject)
+            match2 = re.search("(.*?)\$", subject)
+            if match1:
+                subject = match1.group(1)
+            elif match2:
+                subject = match2.group(1)
+            subject = subject.replace("/C/", " ; ")
             all_subjects.add(subject)
 
     subjects = record.field("720", alt="")
