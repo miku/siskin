@@ -70,6 +70,20 @@ def get_clean_url(record, url):
     return url
 
 
+def get_clean_subject(subject):
+    """
+    Takes a subject and returns it without old subfield codes and other invalid chars.
+    """
+    subject = subject.replace("/C/", " ; ")
+    match1 = re.search("(.*?)\/\w\$", subject)
+    match2 = re.search("(.*?)\$", subject)
+    if match1:
+        subject = match1.group(1)
+    elif match2:
+        subject = match2.group(1)
+    return subject
+
+
 inputfilename = "127_input.xml"
 outputfilename = "127_output.mrc"
 
@@ -332,13 +346,7 @@ for record in reader:
     subjects = record.fields("710")
     if subjects:
         for subject in subjects:
-            match1 = re.search("(.*?)\/\w\$", subject)
-            match2 = re.search("(.*?)\$", subject)
-            if match1:
-                subject = match1.group(1)
-            elif match2:
-                subject = match2.group(1)
-            subject = subject.replace("/C/", " ; ")
+            subject = get_clean_subject(subject)
             all_subjects.add(subject)
 
     subjects = record.field("720", alt="")
@@ -348,6 +356,7 @@ for record in reader:
         subjects = subjects.split(" ; ")
 
     for subject in subjects:
+        subject = get_clean_subject(subject)
         all_subjects.add(subject)
 
     for subject in all_subjects:
