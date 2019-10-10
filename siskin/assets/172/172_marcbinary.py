@@ -36,6 +36,10 @@ import sys
 
 import marcx
 
+from siskin.mappings import formats
+from siskin.utils import check_isbn, check_issn, marc_build_field_008
+
+
 # Default input and output
 inputfilename = "172_input.tsv"
 outputfilename = "172_output.mrc"
