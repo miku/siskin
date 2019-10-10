@@ -372,6 +372,10 @@ for record in reader:
     match = re.search("(.*)\. - Sign", f773g)
     if match:
         f773g = match.group(1)
+    year = record.field("425", alt="")
+    match = re.match("\d\d\d\d", year)
+    if f773g and match:
+        f773g = year + ". - " + f773g
     f773t = record.field("590", alt="")
     if not f773t:
         f773t = record.field("597", alt="")
