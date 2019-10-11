@@ -1,6 +1,6 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,R0904,E1103,C0301
-
+#
 # Copyright 2017 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Robert Schenk, <robert.schenk@uni-leipzig.de>
@@ -23,17 +23,21 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-"""
-VKFilm (Postdam), #8575, about 120000 records.
 
-TODO: Unify VK* tasks.
+"""
+
+Source: Filmuniversität Babelsberg Konrad Wolf (VK Film)
+SID: 127
+Ticket: #8575, #13016, #14547, #14898
+Origin: FTP
+Updates: manually
 
 Config
 ------
 
 [vkfilm]
-
 file = /path/to/file
+
 """
 
 import luigi
@@ -55,14 +59,12 @@ class VKFilmFile(VKFilmTask, luigi.ExternalTask):
 
 class VKFilmMarc(VKFilmTask):
     """
-    Convert to some MARC XML via metafacture. Custom morphs and flux are
-    kept in assets/127.
+    Convert to MARC XML via Python.
     """
     def requires(self):
         return VKFilmFile()
 
     def run(self):
-        # XXX: Does this really work?
         output = shellout("""iconv -f utf-8 -t utf-8 -c {input} > {output}""", input=self.input().path)
         output = shellout("""flux.sh {flux} in={input} > {output}""", flux=self.assets("127/127.flux"), input=output)
         luigi.LocalTarget(output).move(self.output().path)
