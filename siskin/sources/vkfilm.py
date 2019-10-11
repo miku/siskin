@@ -57,16 +57,18 @@ class VKFilmFile(VKFilmTask, luigi.ExternalTask):
         return luigi.LocalTarget(path=self.config.get('vkfilm', 'file'))
 
 
-class VKFilmMarc(VKFilmTask):
+class VKFilmMARC(VKFilmTask):
     """
-    Convert to MARC XML via Python.
+    Convert to binary MARC via Python.
     """
     def requires(self):
         return VKFilmFile()
 
     def run(self):
-        output = shellout("""iconv -f utf-8 -t utf-8 -c {input} > {output}""", input=self.input().path)
-        output = shellout("""flux.sh {flux} in={input} > {output}""", flux=self.assets("127/127.flux"), input=output)
+        output = shellout("""{python} {script} {input} {output}""",
+                          python=self.config.get("core", "python"),
+                          script=self.assets("127/127_marcbinary.py"),
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
