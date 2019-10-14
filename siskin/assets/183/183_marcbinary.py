@@ -128,7 +128,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     elif f002c == "kartografisches Bild" and f002d == "ohne Hilfsmittel zu benutzen" and f002e == "Blatt":
         format = "Map"
     elif f002c == "gesprochenes Wort" and f002d == "audio" and f002e == "Audiodisk":
-        format = "Audio-CD"
+        format = "CD-Audio"
     else:
         format = "Book"
 
