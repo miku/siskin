@@ -67,6 +67,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
 
     # Ansigelung und Kollektion
+    record.remove_fields("980")
     record.add("980", a=f001, b="68", c="sid-200-col-finctest")
 
     marc_clean_record(record)
