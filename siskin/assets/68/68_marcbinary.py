@@ -27,63 +27,49 @@
 
 Source: Online Contents (OLC)
 SID: 68
-Ticket: #5163, #6743, #9354, #10294 
+Ticket: #5163, #6743, #9354, #10294, #16196
 
 """
 
-import io
-import json
-import os
 import re
 import sys
 
-from siskin.mappings import formats
-from siskin.utils import check_isbn, check_issn, marc_build_field_008
+import marcx
+import pymarc
+
+from io import StringIO, BytesIO
+from siskin.utils import xmlstream
+from siskin.utils import marc_clean_record
 
 
-def remove_field(record, field):
-    try:
-        del record[field]
-    except:
-        pass
-
-
-inputfilename = "68_input.json"
-outputfilename = "68_output.json"
+inputfilename = "68_input.xml"
+outputfilename = "68_output.mrc"
 
 if len(sys.argv) == 3:
     inputfilename, outputfilename = sys.argv[1:]
 
-inputfile = open(inputfilename, "r")
-outputfile = open(outputfilename, "w")
+outputfile = open(outputfilename, "wb")
 
-for line in inputfile:
+for oldrecord in xmlstream(inputfilename, "record"):
 
-    record = json.loads(line)
-    fullrecord = record["fullrecord"]
-    
-    if "SSG-OLC-FTH" in fullrecord or "SSG-OLC-MKW" in fullrecord:
+    oldrecord = BytesIO(oldrecord)
+    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+    oldrecord = oldrecord[0]
 
-        id = record["id"]
-        id = id.replace("dswarm-", "")
-        record["id"] = id
-      
-        remove_field(record, "vf1_author")
-        remove_field(record, "vf1_author_role")
-        remove_field(record, "vf1_author_orig")
-        remove_field(record, "vf1_author2")
-        remove_field(record, "vf1_author2_role")
-        remove_field(record, "vf1_author2-role")
-        remove_field(record, "vf1_author2_orig")
-        remove_field(record, "vf1_author_corp")
-        remove_field(record, "vf1_author_corp_orig")
-        remove_field(record, "vf1_author_corp2")
-        remove_field(record, "vf1_author_corp2_orig")
-        remove_field(record, "title_part")
+    record = marcx.Record.from_record(oldrecord)
+    record.force_utf8 = True
+    record.strict = False
 
-        record = json.dumps(record)
-        record = record + "\n"
-        outputfile.write(str(record))
-  
-inputfile.close()
+    # Identifikator
+    f001 = record["001"].data
+    record.remove_fields("001")
+    record.add("001", data="68-" + f001)
+
+
+    # Ansigelung und Kollektion
+    record.add("980", a=f001, b="68", c="sid-200-col-finctest")
+
+    marc_clean_record(record)
+    outputfile.write(record.as_marc())
+
 outputfile.close()
