@@ -61,6 +61,12 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="181-" + f001)
 
+    # Zugangsart
+    try:
+        f007 = record["007"].data
+    except:
+        record.add("007", data="tu")
+
     collections = ["a", f001, "b", "181", "c", "sid-181-col-blfidbbi"]
     record.add("980", subfields=collections)
 
