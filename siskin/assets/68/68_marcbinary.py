@@ -65,6 +65,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
     record.remove_fields("001")
     record.add("001", data="68-" + f001)
 
+    # Zugangstyp
+    record.add("007", data="cr")
 
     # Ansigelung und Kollektion
     record.remove_fields("980")
