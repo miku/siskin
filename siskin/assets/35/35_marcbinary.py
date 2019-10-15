@@ -31,7 +31,6 @@ Ticket: #14511, #15487
 
 """
 
-from __future__ import print_function
 
 import re
 import sys
