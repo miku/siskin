@@ -39,37 +39,29 @@ from io import BytesIO, StringIO
 import marcx
 import pymarc
 from siskin.mappings import formats
-from siskin.utils import marc_clean_record
+from siskin.utils import marc_clean_record, xmlstream
 
-setlist = ["hathitrust:pd"]
 
 inputfilename = "35_input.xml"
 outputfilename = "35_output.mrc"
+lccfilename = "lcc"
 
-if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+if len(sys.argv) == 4:
+    inputfilename, outputfilename, lccfilename = sys.argv[1:]
 
 inputfile = open(inputfilename, "r", encoding='utf-8')
 outputfile = open(outputfilename, "wb")
+lccfile = open(lccfilename, "r")
+lccs = lccfile.readlines()
 
-pattern = re.compile(r"<setSpec>(.*?)</setSpec>.*<metadata>(.*)</metadata>")
+for oldrecord in xmlstream(inputfilename, "record"):
 
-for line in (line.strip() for line in inputfile if line.strip()):
+    oldrecord = BytesIO(oldrecord)
+    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+    oldrecord = oldrecord[0]
 
-    result = pattern.search(line)
-    if not result:
-        continue
-
-    set, marc = result.groups()
-
-    if set not in setlist:
-        continue
-
-    sio = StringIO(marc)
-    parsed = pymarc.marcxml.parse_xml_to_array(sio)
-    if len(parsed) != 1:
-        raise ValueError("Der Record entspricht nicht genau einer Zeile: " + parsed)
-    marcrecord = marcx.Record.from_record(parsed[0])
+    marcrecord = marcx.Record.from_record(oldrecord)
+    marcrecord.force_utf8 = True
     marcrecord.strict = False
 
     # Leader
@@ -82,7 +74,7 @@ for line in (line.strip() for line in inputfile if line.strip()):
         f001 = match.group(1)
         f001 = f001.replace(".", "")
         marcrecord.remove_fields("001")
-        marcrecord.add("001", data="finc-35-%s" % f001)
+        marcrecord.add("001", data="35-" + f001)
     else:
         continue
 
@@ -95,11 +87,14 @@ for line in (line.strip() for line in inputfile if line.strip()):
     except:
         continue
 
-    if f050a:
-        match = re.search("^M[LT][0-9]+.*$", f050a)
-    if not match:
+    for lcc in lccs:
+        match = re.search(lcc, f050a)
+        if match:
+            break
+    else:
         continue
 
+    # Kollektion und Ansigelung
     collections = ["a", f001, "b", "35", "c", u"sid-35-col-hathi"]
     marcrecord.add("980", subfields=collections)
 
