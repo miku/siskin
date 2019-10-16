@@ -67,7 +67,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     collections = ["a", f001, "b", "183", "c", "sid-183-col-kxpbbi"]
     marcrecord.add("980", subfields=collections)
 
-    marc_clean_record(record)
+    marc_clean_record(marcrecord)
     outputfile.write(marcrecord.as_marc())
 
 outputfile.close()
