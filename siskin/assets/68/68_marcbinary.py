@@ -70,7 +70,18 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # Ansigelung und Kollektion
     record.remove_fields("980")
-    record.add("980", a=f001, b="68", c="sid-200-col-finctest")
+    fields = record.get_fields("912")
+    if fields:
+        for field in fields:
+            f912a = field.get_subfields("a")[0]
+            if "SSG-OLC-MKW" in f912a:
+                record.add("980", a=f001, b="68", c="sid-68-col-olcmkw")
+                break
+            elif "SSG-OLC-FTH" in f912a:
+                record.add("980", a=f001, b="68", c="sid-68-col-olcfth")
+                break
+        else:
+            continue
 
     marc_clean_record(record)
     outputfile.write(record.as_marc())
