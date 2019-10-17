@@ -91,6 +91,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         continue
 
     for lcc in lccs:
+        lcc = lcc.rstrip("\n")
         match = re.search(lcc, f050a)
         if match:
             break
