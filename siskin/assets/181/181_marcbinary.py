@@ -67,6 +67,26 @@ for record in reader:
     except:
         record.add("007", data="tu")
 
+    # Link zum EThOS-Datensatz
+    try:
+        f852b = record["852"]["b"]
+    except:
+        f852b = ""
+
+    try:
+        f852c = record["852"]["c"]
+    except:
+        f852c = ""
+
+    try:
+        f852j = record["852"]["j"]
+    except:
+        f852j = ""
+
+    if f852b == "DSC" and f852c == "DRT" and f852j:
+        f856u = "https://ethos.bl.uk/OrderDetails.do?uin=uk.bl.ethos." + f852j
+        record.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
     collections = ["a", f001, "b", "181", "c", "sid-181-col-blfidbbi"]
     record.add("980", subfields=collections)
 
