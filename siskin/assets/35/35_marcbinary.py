@@ -87,6 +87,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
     except:
         continue
 
+    if not f050a:
+        continue
+
     for lcc in lccs:
         match = re.search(lcc, f050a)
         if match:
