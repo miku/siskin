@@ -31,6 +31,7 @@
 
 """
 
+import os
 import sys
 from io import BytesIO, StringIO
 
@@ -40,34 +41,41 @@ from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
 
 
-inputfilename = "183_input.xml"
+input_directory = "input"
 outputfilename = "183_output.mrc"
 
 if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+    input_directory, outputfilename = sys.argv[1:]
 
 outputfile = open(outputfilename, "wb")
 
-for oldrecord in xmlstream(inputfilename, "record"):
+for root, _, files in os.walk(input_directory):
 
-    oldrecord = BytesIO(oldrecord)
-    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
-    oldrecord = oldrecord[0]
+    for filename in files:
+        if not filename.endswith(".xml"):
+            continue
+        inputfilepath = os.path.join(root, filename)
 
-    marcrecord = marcx.Record.from_record(oldrecord)
-    marcrecord.force_utf8 = True
-    marcrecord.strict = False
+        for oldrecord in xmlstream(inputfilepath, "record"):
 
-    # Identifikator
-    f001 = marcrecord["001"].data
-    marcrecord.remove_fields("001")
-    marcrecord.add("001", data="183-" + f001)
+            oldrecord = BytesIO(oldrecord)
+            oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+            oldrecord = oldrecord[0]
 
-    # Ansigelung und Kollektion
-    collections = ["a", f001, "b", "183", "c", "sid-183-col-kxpbbi"]
-    marcrecord.add("980", subfields=collections)
+            marcrecord = marcx.Record.from_record(oldrecord)
+            marcrecord.force_utf8 = True
+            marcrecord.strict = False
 
-    marc_clean_record(marcrecord)
-    outputfile.write(marcrecord.as_marc())
+            # Identifikator
+            f001 = marcrecord["001"].data
+            marcrecord.remove_fields("001")
+            marcrecord.add("001", data="183-" + f001)
+
+            # Ansigelung und Kollektion
+            collections = ["a", f001, "b", "183", "c", "sid-183-col-kxpbbi"]
+            marcrecord.add("980", subfields=collections)
+
+            marc_clean_record(marcrecord)
+            outputfile.write(marcrecord.as_marc())
 
 outputfile.close()
