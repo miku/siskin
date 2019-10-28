@@ -81,6 +81,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
     # Zugangsfacette
     marcrecord.add("007", data="cr")
 
+    # DDC-Klasse
+    marcrecord.remove_fields("082")
+
     # Profilierung
     try:
         f050a = marcrecord["050"]["a"]
