@@ -109,6 +109,11 @@ while start < all_records:
         newrecord.force_utf8 = True
         newrecord.strict = False
 
+        try:
+            newrecord["245"]["a"]
+        except:
+            continue
+
         # Identifikator
         f001 = newrecord["001"].data
         newrecord.remove_fields("001")
