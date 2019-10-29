@@ -67,7 +67,7 @@ for root, _, files in os.walk(input_directory):
             marcrecord.strict = False
 
             try:
-                newrecord["245"]["a"]
+                marcrecord["245"]["a"]
             except:
                 continue
 
