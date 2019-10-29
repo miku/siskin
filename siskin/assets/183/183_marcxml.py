@@ -66,6 +66,11 @@ for root, _, files in os.walk(input_directory):
             marcrecord.force_utf8 = True
             marcrecord.strict = False
 
+            try:
+                marcrecord["245"]["a"]
+            except:
+                continue
+
             # Identifikator
             f001 = marcrecord["001"].data
             marcrecord.remove_fields("001")
