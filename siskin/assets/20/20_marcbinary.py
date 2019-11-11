@@ -253,7 +253,14 @@ for oldrecord in xmlstream(inputfilename, "Record"):
             marcrecord.add("856", q="text/html", _3="Link zur Gesamtaufnahme", u=f856u)
 
     f856u = oldrecord["dc:identifier"][0]
-    marcrecord.add("856", q="image/jpeg", _3="Link zum Digitalisat", u=f856u, z="kostenfrei")
+    rights = oldrecord.get("dc:rights", [""])
+    for right in rights:
+        if "restricted use" in right:
+            f856z = ""
+            break
+    else:
+        f856z = "kostenfrei"
+    marcrecord.add("856", q="image/jpeg", _3="Link zum Digitalisat", u=f856u, z=f856z)
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
