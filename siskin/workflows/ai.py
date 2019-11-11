@@ -58,7 +58,6 @@ from siskin.benchmark import timed
 from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART,
                                  AMSLService)
-from siskin.sources.arxiv import ArxivIntermediateSchema
 from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
@@ -203,7 +202,6 @@ class AIQuality(AITask):
 
     def requires(self):
         return [
-            ArxivIntermediateSchema(date=self.date),
             CrossrefIntermediateSchema(date=self.date),
             DegruyterIntermediateSchema(date=self.date),
             DOAJIntermediateSchema(date=self.date),
@@ -238,7 +236,6 @@ class AIIntermediateSchema(AITask):
 
     def requires(self):
         return [
-            ArxivIntermediateSchema(date=self.date, stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
