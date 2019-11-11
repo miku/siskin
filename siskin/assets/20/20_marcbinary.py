@@ -237,13 +237,20 @@ for oldrecord in xmlstream(inputfilename, "Record"):
         marcrecord.add("700", a=f700a, d=f700d, _4=f7004)
 
     # Link zu Datensatz und Ressource
-    f856u = oldrecord["dc:relation"][0]
+    urls = oldrecord["dc:relation"]
+    for url in urls:
 
-    match = re.search("(http.*catalogue.*)", f856u)
-    if match:
         # Notice du catalogue : http://catalogue.bnf.fr/ark:/12148/cb42874085r
-        f856u = match.group(1)
-        marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
+        match = re.search("Notice du catalogue : (.*)", url)
+        if match:
+            f856u = match.group(1)
+            marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
+
+        # Notice d'ensemble : http://catalogue.bnf.fr/ark:/12148/cb342961941
+        match = re.search("Notice d'ensemble : (.*)", url)
+        if match:
+            f856u = match.group(1)
+            marcrecord.add("856", q="text/html", _3="Link zur Gesamtaufnahme", u=f856u)
 
     f856u = oldrecord["dc:identifier"][0]
     marcrecord.add("856", q="image/jpeg", _3="Link zum Digitalisat", u=f856u)
