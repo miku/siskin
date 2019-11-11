@@ -33,6 +33,8 @@ Ticket: #15924
 
 import sys
 import json
+import pymarc
+import argparse
 
 import marcx
 from siskin.mappings import formats
@@ -49,14 +51,35 @@ def get_field(jsonrecord, field):
     return str(value)
 
 
-inputfilename = "185_input.ndj"
-outputfilename = "185_output.mrc"
+# Keyword arguments
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i",
+                    dest="inputfilename",
+                    help="inputfile",
+                    default="185_input.ndj",
+                    metavar="inputfilename")
+parser.add_argument("-o",
+                    dest="outputfilename",
+                    help="outputfile",
+                    default="185_output.mrc",
+                    metavar="outputfilename")
+parser.add_argument("-f",
+                    dest="outputformat",
+                    help="outputformat marc or marcxml",
+                    default="marc",
+                    metavar="outputformat")
 
-if len(sys.argv) == 3:
-    inputfilename, outputfilename = sys.argv[1:]
+args = parser.parse_args()
+inputfilename = args.inputfilename
+outputfilename = args.outputfilename
+outputformat = args.outputformat
+
+if outputformat == "marcxml":
+    outputfile = pymarc.XMLWriter(open(outputfilename,"wb"))
+else:
+    outputfile = open(outputfilename, "wb")
 
 inputfile = open(inputfilename, "r")
-outputfile = open(outputfilename, "wb")
 jsonrecords = inputfile.readlines()
 
 for jsonrecord in jsonrecords:
@@ -190,6 +213,9 @@ for jsonrecord in jsonrecords:
     collections = ["a", f001, "b", "185", "c", "sid-185-col-dabi"]
     marcrecord.add("980", subfields=collections)
 
-    outputfile.write(marcrecord.as_marc())
+    if outputformat == "marcxml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
 
 outputfile.close()
