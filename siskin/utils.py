@@ -474,6 +474,26 @@ def marc_build_imprint(place="", publisher="", year=""):
     return ["a", place + del1, "b", publisher + del2, "c", year]
 
 
+def marc_build_field_773g(volume="", year="", issue="", startpage="", endpage=""):
+    """
+    Takes volume, year, issue and page range of the parent journal and returns them as entire string.
+    """
+    if year:
+        year = "(" + year + ")"
+
+    if issue:
+        issue = ", Heft " + issue
+
+    pages = ""
+    if startpage and startpage != "0":
+        pages = ", S. " + startpage
+
+    if startpage and startpage != "0" and endpage and endpage != "0":
+        pages = ", S. " + startpage + "-" + endpage
+
+    return volume + year + issue + pages
+
+
 def marc_build_field_008(year="", periodicity="", language=""):
     """
     Takes year of publication, periodicity and language and returns entire field.
