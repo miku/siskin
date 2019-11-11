@@ -38,7 +38,7 @@ import argparse
 
 import marcx
 from siskin.mappings import formats
-from siskin.utils import marc_build_field_008, check_isbn, check_issn
+from siskin.utils import marc_build_field_008, marc_build_field_773g, check_isbn, check_issn
 
 
 def get_field(jsonrecord, field):
@@ -190,10 +190,7 @@ for jsonrecord in jsonrecords:
     year = get_field(jsonrecord, "jahr")
     spage = get_field(jsonrecord, "anfangsseite")
     epage = get_field(jsonrecord, "endseite")
-    if epage == "0":
-        spage = ""
-        epage = ""
-    f773g = volume + "(" + year + ") Heft " + issue + ", S. " + spage + "-" + epage
+    f773g = marc_build_field_773g(volume, year, issue, spage, epage)
     marcrecord.add("773", t=f773t, g=f773g)
 
     # Link zur Ressource
