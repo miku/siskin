@@ -61,10 +61,6 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="163-" + f001)
 
-    # Elternelemente
-    technicalCollectionID = record["912"]["a"]
-    record.add("773", w=technicalCollectionID)
-
     # Ansigelung
     record.add("980", a=f001, b="163", c=technicalCollectionID)
 
