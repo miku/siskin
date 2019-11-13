@@ -62,7 +62,8 @@ for record in reader:
     record.add("001", data="163-" + f001)
 
     # Ansigelung
-    record.add("980", a=f001, b="163", c=technicalCollectionID)
+    f980c = record["912"]["a"]
+    record.add("980", a=f001, b="163", c=f980c)
 
     marc_clean_record(record)
     outputfile.write(record.as_marc())
