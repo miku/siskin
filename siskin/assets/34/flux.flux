@@ -5,7 +5,7 @@
 // override default values if necessary
 default MAP_DIR ="/assets/maps/";
 default sid = "34";
-default mega_collection = "PQDT Open";
+default mega_collection = "ProQuest Open Access Dissertations and Theses (PQDT Open)";
 default format = "ElectronicThesis";
 default fileName = in;
 
