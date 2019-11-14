@@ -123,10 +123,14 @@ for record in reader:
         technicalCollectionID = "id-159-col-buchhsabendlandneuzeit"
     elif f912a == "Hebräische Handschriften":
         technicalCollectionID = "sid-159-col-buchhshebraeisch"
+    elif f912a == "Musikhandschriften":
+        technicalCollectionID = "sid-159-col-buchhsmusik"
+    elif f912a == "Urkunden":
+        technicalCollectionID = "sid-159-col-buchhsurkunden"
+    elif f912a == "Islamische Handschriften":
+        technicalCollectionID = "sid-159-col-buchhsislamisch"
     else:
         continue
-
-    #technicalCollectionID = "Abendländische mittelalterliche Handschriften"
 
     # digitale Kollektion
     record.remove_fields("912")
