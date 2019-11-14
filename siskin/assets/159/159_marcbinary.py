@@ -71,12 +71,7 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="159-" + f001)
 
-    # Titel
-    f245p = record["245"]["b"]
-    record.remove_fields("245")
-    record.add("245", a="Abendländische mittelalterliche Handschriften", p=f245p)
-
-    # Sprachekürzel
+    # Sprachkürzel
     record.remove_fields("546")
 
     # weitere Urheber
@@ -97,32 +92,49 @@ for record in reader:
                 if person not in unique_persons:
                     record.add("700", a=person)
                     unique_persons.append(person)
-    
-    # Elternelemente
-    record.add("773", w="sid-159-col-buchhsabendlandmittelalter")
 
-    # Ansigelung
+    # Kollektionen
     try:
         f912a = record["912"]["a"]
     except:
-        print(f001)
         continue
-    if f912a == "Abendländische mittelalterliche Handschriften" or f912a == "abendländische mittelalterliche Handschriften":
-        f980c = "sid-159-col-buchhsabendlandmittelalter"
-    elif f912a == "Abendländische neuzeitliche Handschriften":
-        f980a = "id-159-col-buchhsabendlandneuzeit"
-    #elif f912a == "Andere Buchhandschriften":
-    #    f980a = ""
-    elif f912a == "Fragmente":
-        f980a = "sid-159-col-buchhsfragmente"
-    elif f912a == "Griechische Handschriften":
-        f980a = "sid-159-col-buchhsgriechisch"
-    elif f912a == "Neuzeitliche Handschriften":
-        f980a = "id-159-col-buchhsabendlandneuzeit"
-    elif f912a == "Hebräische Handschriften":
-        f980a = "sid-159-col-buchhshebraeisch"
-    record.add("980", a=f001, b="159", c=f980c)
 
+    if f912a == "abendländische mittelalterliche Handschriften":
+        f912a = "Abendländische mittelalterliche Handschriften"
+
+    if f912a == "abendländische neuzeitliche Handschriften":
+        f912a = "Abendländische neuzeitliche Handschriften"
+
+    if f912a == "griechische Handschriften":
+        f912a = "Griechische Handschriften"
+
+    if f912a == "hebräische Handschriften":
+        f912a = "Hebräische Handschriften"
+
+    if f912a == "Abendländische mittelalterliche Handschriften":
+        technicalCollectionID = "sid-159-col-buchhsabendlandmittelalter"
+    elif f912a == "Abendländische neuzeitliche Handschriften":
+        technicalCollectionID = "id-159-col-buchhsabendlandneuzeit"
+    elif f912a == "Fragmente":
+        technicalCollectionID = "sid-159-col-buchhsfragmente"
+    elif f912a == "Griechische Handschriften":
+        technicalCollectionID = "sid-159-col-buchhsgriechisch"
+    elif f912a == "Neuzeitliche Handschriften":
+        technicalCollectionID = "id-159-col-buchhsabendlandneuzeit"
+    elif f912a == "Hebräische Handschriften":
+        technicalCollectionID = "sid-159-col-buchhshebraeisch"
+    else:
+        continue
+
+    #technicalCollectionID = "Abendländische mittelalterliche Handschriften"
+
+    # digitale Kollektion
+    record.remove_fields("912")
+    record.add("912", a=technicalCollectionID)
+
+    # Ansigelung
+    record.add("980", a=f001, b="159", c=technicalCollectionID)
+    
     marc_clean_record(record)
     outputfile.write(record.as_marc())
 
