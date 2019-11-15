@@ -391,8 +391,12 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
     detached = old_sourcebyinstitutions - current_sourcebyinstitutions
 
     for d in detached:
-        message = u"Die folgende Quelle und Institution wurde abgesigelt: %s" % d
-        messages.append(message)
+        match = re.match("SID\s(\d+)\s", d)
+        if match:
+            sid = match.group(1)
+            if sid in current_sources: # nur melden, wenn Quelle nicht komplett fehlt, sonst gibt es separaten Hinweis
+                message = u"Die folgende Quelle und Institution wurde abgesigelt: %s" % d
+                messages.append(message)
 
 
 # Parse keyword arguments
