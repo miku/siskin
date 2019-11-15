@@ -115,7 +115,7 @@ def send_message(message):
 
     send_mail(sender=smtp_sender,
               tolist=recipients,
-              subject="SolrCheckup Warnung!",
+              subject="Indexkontrolle abgeschlossen",
               message=message,
               smtp=smtp_server,
               smtp_port=smtp_port,
@@ -204,7 +204,7 @@ def update_sources(conn, sqlite, k10plus, ai):
 
     for old_source in old_sources:
         if source_table_is_filled and old_source not in current_sources:
-            message = u"Die SID %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die SID aus der Datenbank loeschen." % old_source
+            message = u"Die SID %s ist im aktuellen Import nicht mehr vorhanden." % old_source
             messages.append(message)
 
     for current_source in current_sources:
@@ -309,7 +309,7 @@ def update_institutions(conn, sqlite, k10plus, ai):
 
     for old_institution in old_institutions:
         if institution_table_is_filled and old_institution not in current_institutions:
-            message = u"Die ISIL %s ist im aktuellen Import nicht mehr vorhanden.\nWenn dies beabsichtigt ist, bitte die Institution aus der Datenbank loeschen." % old_institution
+            message = u"Die ISIL %s ist im aktuellen Import nicht mehr vorhanden." % old_institution
             messages.append(message)
 
     for current_institution in current_institutions:
@@ -496,7 +496,7 @@ update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
 
 # 4. Step: Send report
 if len(messages) == 0:
-    messages.append(u"SolrCheckup erfolgreich durchgelaufen.")
+    messages.append(u"Es wurde keine Unregelmaessigkeiten festgestellt.")
 message = u"\n".join(messages)
 send_message(message)
 
