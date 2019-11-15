@@ -492,7 +492,7 @@ update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
 
 # 4. Step: Send report
 if len(messages) == 0:
-    message.append(u"SolrCheckup erfolgreich durchgelaufen.")
+    messages.append(u"SolrCheckup erfolgreich durchgelaufen.")
 message = u"\n".join(messages)
 send_message(message)
 
