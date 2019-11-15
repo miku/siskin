@@ -77,7 +77,7 @@ def send_mail(sender=None,
         server.login(username, password)
     else:
         logger.debug("no username and password given, proceeding without login")
-    msg = u'Subject: {} {}\n\n{}'.format(DEFAULT_SUBJECT_PREFIX, subject, message)
+    msg = u'From: {}\nSubject: {} {}\n\n{}'.format(sender, DEFAULT_SUBJECT_PREFIX, subject, message)
     server.sendmail(sender, tolist, msg)
     server.quit()
 
