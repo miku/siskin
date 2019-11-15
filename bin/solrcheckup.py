@@ -386,10 +386,14 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
 
-    for old_sourcebyinstitution in old_sourcebyinstitutions:
-        if old_sourcebyinstitution not in current_sourcebyinstitutions:
-            message = u"Die %s ist nicht laenger fuer die SID %s angesigelt." % (institution, source)
-            messages.append(message)
+    old_sourcebyinstitutions = set(old_sourcebyinstitutions)
+    current_sourcebyinstitutions = set(current_sourcebyinstitutions)
+    detached = old_sourcebyinstitutions - current_sourcebyinstitutions
+
+    for d in detached:
+        message = u"Die folgende Quelle und Institution wurde abgesigelt: %s" % d
+        messages.append(message)
+
 
 # Parse keyword arguments
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
