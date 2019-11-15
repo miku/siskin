@@ -377,8 +377,11 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
             if number != 0:
                 old_sourcebyinstitution_number = get_old_sourcebyinstitution_number(conn, sqlite, sourcebyinstitution)
                 if number < old_sourcebyinstitution_number:
-                    message = u"Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import verringert." % (sourcebyinstitution)
-                    messages.append(message)
+                    difference = old_sourcebyinstitution_number - number
+                    percent = difference / old_sourcebyinstitution_number * 100
+                    if percent > 5:
+                        message = u"Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import um %d verringert." % (sourcebyinstitution, percent)
+                        messages.append(message)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
             time.sleep(0.25)
