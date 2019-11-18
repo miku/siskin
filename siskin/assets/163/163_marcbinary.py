@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Nachlässe der UB Leipzig, Autographensammlung Wustmann
@@ -37,7 +36,6 @@ import sys
 import marcx
 import pymarc
 from siskin.utils import marc_clean_record
-
 
 inputfilename = "163_input.mrc"
 outputfilename = "163_output.mrc"

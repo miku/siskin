@@ -30,17 +30,16 @@ Ticket: #7967, #9371, #10831, #12048, #12967, #14649, #15882
 
 """
 
+import base64
 import io
 import re
 import sys
 
-import marcx
-import base64
 import xlrd
 
+import marcx
 from siskin.mappings import formats
 from siskin.utils import check_issn, marc_build_field_008
-
 
 inputfilename = "101_input.xlsx"
 outputfilename = "101_output.mrc"
@@ -55,7 +54,6 @@ sheet = workbook.sheet_by_name("Tabelle1")
 
 format = "Article"
 access = "electronic"
-
 """
 authors = 0
 rft_atitle = 1
@@ -88,7 +86,7 @@ for row in range(1, sheet.nrows):
     try:
         url = csvrecord[13]
     except:
-       continue
+        continue
     url = bytes(url, "utf-8")
     url = base64.b64encode(url)
     f001 = url.decode("utf-8").rstrip("=")
@@ -103,7 +101,7 @@ for row in range(1, sheet.nrows):
 
     # Feld 008
     year = csvrecord[8]
-    year = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
+    year = str(year).rstrip("0").rstrip(".")  # rstrip(".0") doesn't work equally here
     periodicity = formats[format]["008"]
     language = "ger"
     f008 = marc_build_field_008(year, periodicity, language)
@@ -143,7 +141,7 @@ for row in range(1, sheet.nrows):
 
     # Erscheinungsvermerk
     year = csvrecord[8]
-    f260c = str(year).rstrip("0").rstrip(".") # rstrip(".0") doesn't work equally here
+    f260c = str(year).rstrip("0").rstrip(".")  # rstrip(".0") doesn't work equally here
     subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", f260c)
     marcrecord.add("260", subfields=subfields)
 
@@ -169,7 +167,7 @@ for row in range(1, sheet.nrows):
     year = str(csvrecord[8]).rstrip(".0")
     pages = str(csvrecord[12])
     issue = str(csvrecord[6]).rstrip(".0")
-    f773g = "(" + year + "), Heft: " + issue + ", S. " + pages 
+    f773g = "(" + year + "), Heft: " + issue + ", S. " + pages
     marcrecord.add("773", t=f773t, g=f773g)
 
     # Link

@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 OLC, refs #16279.
 
@@ -33,7 +32,6 @@ import datetime
 import os
 
 import luigi
-
 from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
@@ -61,11 +59,11 @@ class OLCDump(OLCTask):
     collection = luigi.Parameter(default='SSG-OLC-ARC', description='SSG-OLC-XXX, see: https://is.gd/8DFvOo')
 
     def run(self):
-        output = shellout(""" solrdump -server {server} -q 'collection_details:{collection}' | zstd -q -c > {output} """,
-                          server=self.config.get('olc', 'solr'),
-                          collection=self.collection)
+        output = shellout(
+            """ solrdump -server {server} -q 'collection_details:{collection}' | zstd -q -c > {output} """,
+            server=self.config.get('olc', 'solr'),
+            collection=self.collection)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.zst'), format=Zstd)
-

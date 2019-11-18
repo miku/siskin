@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Nationallizenzen
@@ -33,20 +32,18 @@ Ticket: #15788, #15863, ##15865
 
 import re
 import sys
+from io import BytesIO, StringIO
 
 import marcx
 import pymarc
-
-from io import StringIO, BytesIO
-from siskin.utils import xmlstream
-from siskin.utils import marc_clean_record
-
+from siskin.utils import marc_clean_record, xmlstream
 
 adlr_ddc = ["175", "303.38", "342.0853", "384", "778.5", "791"]
 
-adlr_ddc_start = ["002", "070", "302.2", "303.375", "303.376", "303.4833", "303.4834",
-               "323.445", "324.73", "343.099", "384.3", "384.54", "384.55", "384.8",
-               "659", "741.5", "770", "781.54", "791.4", "794.8"]
+adlr_ddc_start = [
+    "002", "070", "302.2", "303.375", "303.376", "303.4833", "303.4834", "323.445", "324.73", "343.099", "384.3",
+    "384.54", "384.55", "384.8", "659", "741.5", "770", "781.54", "791.4", "794.8"
+]
 
 inputfilename = "17_input.xml"
 outputfilename = "17_output.mrc"
@@ -76,7 +73,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         f082a = record["082"]["a"]
     except:
         f082a = ""
-    
+
     for ddc in adlr_ddc_start:
         if f082a.startswith(ddc):
             f082a_startswith_adlr_ddc = True
@@ -97,7 +94,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
         collections = ["a", f001, "b", "17", "c", f912a_1, "c", f912a_2, "c", "sid-17-col-adlr"]
     else:
         collections = ["a", f001, "b", "17", "c", f912a_1, "c", f912a_2]
-    
+
     record.add("980", subfields=collections)
 
     marc_clean_record(record)

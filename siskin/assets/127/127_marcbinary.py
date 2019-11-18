@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Filmuniversität Babelsberg Konrad Wolf (VK Film)
@@ -47,7 +46,7 @@ def get_valid_language(record, field):
     """
     Takes languages codes and returns the first in a valid form.
     """
-    languages = record.field(field, alt ="")
+    languages = record.field(field, alt="")
     if "$$" in languages:
         languages = languages.split("$$")
     elif ";" in languages:
@@ -126,8 +125,8 @@ for record in reader:
     f052 = record.field("052", alt="")
     f519 = record.field("519", alt="")
     f001 = record.field("001")
-    match = re.search("^a", f051) # Artikel
-    
+    match = re.search("^a", f051)  # Artikel
+
     # a||||||||||||| --> Buch
     # |||||ce|d||||| --> Video auf optischem Speichermedium
     # |||||ce||||||| --> Video
@@ -156,7 +155,7 @@ for record in reader:
     if f001 in parent_ids:
         format = "Multipart"
     elif f519:
-        format = "Thesis"    
+        format = "Thesis"
     elif f052:
         format = "Journal"
     elif match:
@@ -211,8 +210,8 @@ for record in reader:
         format = "Film-Role"
     else:
         format = "Book"
-    
-    # Leader  
+
+    # Leader
     leader = formats[format]["Leader"]
     marcrecord.leader = leader
 
@@ -220,7 +219,7 @@ for record in reader:
     f001 = record.field("001")
     f001 = "127-" + f001
     marcrecord.add("001", data=f001)
-   
+
     # Zugangstyp
     if access == "physical":
         f007 = formats[format]["p007"]
@@ -335,7 +334,7 @@ for record in reader:
     # Systemvoraussetzung
     f538a = record.field("651", alt="")
     marcrecord.add("538", a=f538a)
-    
+
     # FSK-Hinweis
     f521a = record.field("501", alt="")
     if "FSK" in f500a:
@@ -368,11 +367,13 @@ for record in reader:
     marcrecord.add("655", a=f655a, _2=f6552)
 
     # weitere Urheber
-    fields = ["100", "104", "108", "112", "116", "120", "124", "128", "132", "136", "140", "144", "148",
-              "152", "156", "160", "164", "168", "172", "176", "180", "184", "188", "192", "196"]
+    fields = [
+        "100", "104", "108", "112", "116", "120", "124", "128", "132", "136", "140", "144", "148", "152", "156", "160",
+        "164", "168", "172", "176", "180", "184", "188", "192", "196"
+    ]
 
     for field in fields:
-        f700a = record.field(field, alt="")        
+        f700a = record.field(field, alt="")
         if "$$" in f700a:
             f700a = f700a.split("$$")
             f700a = f700a[0]
@@ -406,22 +407,24 @@ for record in reader:
     # "http://www.oapen.org/search?identifier" in URL
     # "http://dx.doi.org/" in URL
 
-    url = record.field("655", alt ="")
+    url = record.field("655", alt="")
     if url:
 
         if "Volltext" in url or "http://www.bibliothek.uni-regensburg.de/ezeit/" in url or "http://www.oapen.org/search?identifier" in url or "http://dx.doi.org/" in url:
             f8563 = "Link zur Ressource"
             f856u = get_clean_url(record, url)
             marcrecord.add("856", _3=f8563, u=f856u)
-        
+
         if "Inhalt" in url:
             f8563 = "Link zum Inhaltsverzeichnis"
             f856u = get_clean_url(record, url)
-            marcrecord.add("856", _3=f8563, u=f856u)    
+            marcrecord.add("856", _3=f8563, u=f856u)
 
     # Link zum Datensatz
     id = record.field("001")
-    marcrecord.add("856", _3="Link zu Filmuniversität Babelsberg Konrad Wolf", u="http://server8.bibl.filmuniversitaet.de/F/?func=find-c&ccl_term=idn=%s&local_base=HFF01" % id)
+    marcrecord.add("856",
+                   _3="Link zu Filmuniversität Babelsberg Konrad Wolf",
+                   u="http://server8.bibl.filmuniversitaet.de/F/?func=find-c&ccl_term=idn=%s&local_base=HFF01" % id)
 
     # Kollektion
     marcrecord.add("912", a="vkfilm")

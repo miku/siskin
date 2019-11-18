@@ -23,7 +23,6 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 #
-
 """
 
 Source: Filmuniversität Babelsberg Konrad Wolf (VK Film)

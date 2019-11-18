@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: British Library Catalogue
@@ -35,10 +34,7 @@ import sys
 
 import marcx
 import pymarc
-
-from siskin.utils import xmlstream
-from siskin.utils import marc_clean_record
-
+from siskin.utils import marc_clean_record, xmlstream
 
 inputfilename = "181_input.mrc"
 outputfilename = "181_output.mrc"

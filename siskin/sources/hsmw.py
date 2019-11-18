@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Hochschule Mittweida, Collection Medien
@@ -31,7 +30,6 @@ Origin: OAI
 Updates: monthly
 
 """
-
 
 import datetime
 

@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Abendländische mittelalterliche Handschriften
@@ -36,10 +35,8 @@ import sys
 
 import marcx
 import pymarc
-
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record
-
 
 inputfilename = "159_input.xml"
 outputfilename = "159_output.mrc"
@@ -138,7 +135,7 @@ for record in reader:
 
     # Ansigelung
     record.add("980", a=f001, b="159", c=technicalCollectionID)
-    
+
     marc_clean_record(record)
     outputfile.write(record.as_marc())
 

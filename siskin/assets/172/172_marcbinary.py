@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: 14442
@@ -31,14 +30,11 @@ Ticket: #14442
 
 """
 
-
 import sys
 
 import marcx
-
 from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_build_field_008
-
 
 # Default input and output
 inputfilename = "172_input.tsv"
@@ -139,7 +135,7 @@ for line in records[1:]:
 
     # Rechtehinweis
     f500a = fields[3]
-    marcrecord.add("500", a=f500a) 
+    marcrecord.add("500", a=f500a)
 
     # Beschreibung
     f520a = fields[1]
@@ -164,7 +160,7 @@ for line in records[1:]:
 
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
-    marcrecord.add("935", c=f935c)    
+    marcrecord.add("935", c=f935c)
 
     # Kollektion
     marcrecord.add("980", a=f001, b="172", c="sid-172-col-opal")

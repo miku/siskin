@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Hathi Trust
@@ -30,7 +29,6 @@ SID: 35
 Ticket: #14511, #15487
 
 """
-
 
 import re
 import sys
@@ -40,7 +38,6 @@ import marcx
 import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
-
 
 inputfilename = "35_input.xml"
 outputfilename = "35_output.mrc"

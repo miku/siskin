@@ -81,6 +81,7 @@ class NLFetch(NLTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml", digest=True))
 
+
 class NLMARC(NLTask):
     """
     Transform FincMARC.

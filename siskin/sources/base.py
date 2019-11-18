@@ -66,8 +66,7 @@ class BasePaths(BaseTask):
     """
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False,
-                                 description='timeout in seconds')
+    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
         return FTPMirror(host=self.config.get('base', 'ftp-host'),
@@ -120,4 +119,3 @@ class BaseSingleFile(BaseTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
-

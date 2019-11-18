@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: mediarep
@@ -36,8 +35,8 @@ import re
 import sys
 
 import xmltodict
-import marcx
 
+import marcx
 from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_build_field_008
 

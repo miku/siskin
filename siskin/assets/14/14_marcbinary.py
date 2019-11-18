@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: RISM
@@ -32,15 +31,14 @@ Ticket: 1145, #4435, #16018
 """
 
 import io
-import sys
 import re
+import sys
 from builtins import *
 
 import marcx
 import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record
-
 
 copytags = ("003", "004", "005", "006", "008", "009", "010", "011", "012", "013", "014", "015", "016", "017", "018",
             "019", "020", "021", "022", "023", "024", "025", "026", "027", "028", "029", "030", "031", "032", "033",
@@ -67,6 +65,7 @@ def has_digitalization_links(record):
                 return True
             if "exemplar" in z or "Exemplar" in z:
                 return True
+
 
 def get_digitalization_links(record):
     """

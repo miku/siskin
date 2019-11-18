@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 # Source: K10plus Verbundkatalog (für spezielle Profilierung)
@@ -39,7 +38,6 @@ import marcx
 import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
-
 
 input_directory = "input"
 outputfilename = "183_output.mrc"

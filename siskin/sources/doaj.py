@@ -68,7 +68,8 @@ class DOAJHarvest(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
+        output = shellout(
+            """metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
             dir=self.config.get('core', 'metha-dir'),
             endpoint='http://www.doaj.org/oai.article')
         luigi.LocalTarget(output).move(self.output().path)

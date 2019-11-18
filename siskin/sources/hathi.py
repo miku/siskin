@@ -74,6 +74,7 @@ class HathiCombine(HathiTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xml.gz"))
 
+
 class HathiMARC(HathiTask):
     """
     Convert to MARC.

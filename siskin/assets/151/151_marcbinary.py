@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Filmakademie Baden-Württemberg (VK Film)
@@ -36,11 +35,9 @@ import re
 import sys
 
 import marcx
-
 from siskin.mappings import formats, roles
 from siskin.utils import check_isbn, marc_build_field_008
 from six.moves import html_parser
-
 
 parser = html_parser.HTMLParser()
 
@@ -116,7 +113,7 @@ for record in records:
 
         # format recognition
         if form and not format:
-            
+
             regexp1 = re.search("\d\]?\sS\.", form)
             regexp2 = re.search("\d\]?\sSeit", form)
             regexp3 = re.search("\d\]?\sBl", form)
@@ -156,14 +153,14 @@ for record in records:
             elif regexp17 or regexp18:
                 format = "CD-Video"
             elif regexp19:
-                format = "Article"                
+                format = "Article"
 
         if f001 == "":
-            f001 = get_field(field, "001")            
+            f001 = get_field(field, "001")
 
         if f020a == "":
             f020a = get_subfield(field, "540", "a")
-        
+
         if f100a == "":
             f100a = get_subfield(field, "100", "a")
             if f100a != "":
@@ -181,10 +178,10 @@ for record in records:
                             print("Missing role: %s." % role)
                         f100.append("4")
                         f100.append(f1004)
-       
+
         if f245a == "":
             f245a = get_field(field, "331")
-         
+
         if f260a == "":
             f260a = get_field(field, "410")
 
@@ -216,9 +213,9 @@ for record in records:
         if f650a != "":
             subjects.append(f650a)
 
-        regexp = re.search('tag="1\d\d"', field) # checks if there is a person field
+        regexp = re.search('tag="1\d\d"', field)  # checks if there is a person field
         if regexp:
-            for i in range(101, 197):  
+            for i in range(101, 197):
                 f700a = get_subfield(field, i, "a")
                 if f700a != "":
                     f700.append("a")
@@ -247,12 +244,12 @@ for record in records:
         # print("Missing format: %s (Default = Book)" % form)
 
     # leader
-    leader = formats[format]["Leader"]     
+    leader = formats[format]["Leader"]
     marcrecord.leader = leader
 
     # identifier
     marcrecord.add("001", data="finc-151-" + f001)
-    
+
     # access
     f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
@@ -263,7 +260,7 @@ for record in records:
     language = ""
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
-    
+
     # ISBN
     f020a = check_isbn(f020a)
     marcrecord.add("020", a=f020a)
@@ -273,7 +270,7 @@ for record in records:
 
     # title
     marcrecord.add("245", a=f245a)
-    
+
     # imprint
     publisher = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
@@ -305,7 +302,7 @@ for record in records:
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
 
-    # Ansigelung 
+    # Ansigelung
     collections = ["a", f001, "b", "151", "c", "sid-151-col-filmakademiebawue"]
     marcrecord.add("980", subfields=collections)
 

@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: DABI
@@ -31,14 +30,14 @@ Ticket: #15924
 
 """
 
-import sys
-import json
-import pymarc
 import argparse
+import json
+import sys
 
 import marcx
+import pymarc
 from siskin.mappings import formats
-from siskin.utils import marc_build_field_008, marc_build_field_773g, check_isbn, check_issn
+from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
 
 
 def get_field(jsonrecord, field):
@@ -53,16 +52,8 @@ def get_field(jsonrecord, field):
 
 # Keyword arguments
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i",
-                    dest="inputfilename",
-                    help="inputfile",
-                    default="185_input.ndj",
-                    metavar="inputfilename")
-parser.add_argument("-o",
-                    dest="outputfilename",
-                    help="outputfile",
-                    default="185_output.mrc",
-                    metavar="outputfilename")
+parser.add_argument("-i", dest="inputfilename", help="inputfile", default="185_input.ndj", metavar="inputfilename")
+parser.add_argument("-o", dest="outputfilename", help="outputfile", default="185_output.mrc", metavar="outputfilename")
 parser.add_argument("-f",
                     dest="outputformat",
                     help="outputformat marc or marcxml",
@@ -75,7 +66,7 @@ outputfilename = args.outputfilename
 outputformat = args.outputformat
 
 if outputformat == "marcxml":
-    outputfile = pymarc.XMLWriter(open(outputfilename,"wb"))
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
 else:
     outputfile = open(outputfilename, "wb")
 

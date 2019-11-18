@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 # Source: K10plus Verbundkatalog (für spezielle Profilierung)
@@ -40,14 +39,13 @@ import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
 
-
 input_directory = "input"
 outputfilename = "183_output.xml"
 
 if len(sys.argv) == 3:
     input_directory, outputfilename = sys.argv[1:]
 
-writer = pymarc.XMLWriter(open(outputfilename,"wb"))
+writer = pymarc.XMLWriter(open(outputfilename, "wb"))
 
 for root, _, files in os.walk(input_directory):
 

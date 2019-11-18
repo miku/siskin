@@ -87,7 +87,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     #Series</dc:type>
     #Text</dc:type>
     #Volume</dc:type>
-    
+
     format = get_field("dc:type")
 
     if format == "Article":

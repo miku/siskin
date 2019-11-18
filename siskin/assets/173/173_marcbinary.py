@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Wolfenbütteler Bibliographie zur Geschichte des Buchwesens
@@ -50,7 +49,7 @@ def get_inds_for_field_245(title):
     """
     Checks if the title starts with an article and returns the appropriate.
     """
-    
+
     if title.startswith("A "):
         return " 2"
     elif title.startswith("Un "):
