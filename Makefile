@@ -3,13 +3,13 @@
 SHELL := /bin/bash
 PY_FILES := $(shell find siskin -name \*.py -print)
 
-.PHONY: dist upload clean imports pylint style
-
 # Create a source distribution.
+.PHONY: dist
 dist:
 	python setup.py sdist
 
 # Upload requires https://github.com/pypa/twine.
+.PHONY: upload
 upload: dist
 	# https://pypi.org/account/register/
 	# $ cat ~/.pypirc
@@ -19,8 +19,11 @@ upload: dist
 	#
 	# For internal repositories, name them in ~/.pypirc, then run: make upload
 	# TWINE_OPTS="-r internal" to upload to hosted pypi repository.
+	#
+	# For automatic package deployments, also see: .gitlab-ci.yml.
 	twine upload $(TWINE_OPTS) dist/*
 
+.PHONY: clean
 clean:
 	rm -rf siskin.egg-info
 	rm -rf build/ dist/ .tox/ .pytest_cache/
@@ -31,14 +34,17 @@ clean:
 	rm -f .coverage
 
 # Fix imports, requires https://github.com/timothycrosley/isort.
+.PHONY: imports
 imports:
 	isort -rc --atomic .
 
 # Basic scoring, requires https://www.pylint.org/.
+.PHONY: pylint
 pylint:
 	pylint siskin
 
 # Automatic code formatting, requires https://github.com/google/yapf.
+.PHONY: style
 style:
 	yapf -p -i -r siskin
 
@@ -48,12 +54,4 @@ docs/catalog/AIUpdate.png: $(PY_FILES)
 
 docs/sids.tsv:
 	curl -v "https://projekte.ub.uni-leipzig.de/projects/metadaten-quellen/wiki/SIDs.xml?key=$$REDMINE_API_KEY" | xmlcutty -path /wiki_page/text | sed -e 's/"//g' | cut -d '|' -f2-5 | awk -F '|' '{print $$1"\t"$$2"\t"$$3}' | tail -n +4 > $@
-
-# Experimental: build a single file executable for `taskdo` command.
-siskin.pex:
-	pex -v -r <(pip freeze) --disable-cache -c taskdo -o $@
-
-# Experimental: build a single file executable for `taskdo` command.
-siskin.shiv:
-	shiv -c siskin -o $@ .
 
