@@ -113,7 +113,7 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     marcrecord.add("001", data="186-" + f001)
    
     # Zugangsfacette
-    f007 = formats[format]["e007"]
+    f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
 
     # Periodizität
