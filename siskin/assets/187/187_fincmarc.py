@@ -130,10 +130,14 @@ for root, _, files in os.walk(inputfile_directory):
 
             # Identifier
             id = xmlrecord["dc:identifier"][0]
-            match = re.search("jparticle_(\d+)", id)
-            if not match:
+            match1 = re.search("jparticle_(\d+)", id)
+            match2 = re.search("jpvolume_(\d+)", id)
+            if match1:
+                f001 = match1.group(1)
+            elif match2:
+                f001 = match2.group(1)
+            else:
                 continue
-            f001 = match.group(1)
             marcrecord.add("001", data="187-" + f001)
 
             # Zugangsfacete
