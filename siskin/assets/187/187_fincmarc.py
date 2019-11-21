@@ -134,7 +134,7 @@ for root, _, files in os.walk(inputfile_directory):
             if not match:
                 continue
             f001 = match.group(1)
-            marcrecord.add("001", data="200-" + f001)
+            marcrecord.add("001", data="187-" + f001)
 
             # Zugangsfacete
             f007 = formats[format]["e007"]
