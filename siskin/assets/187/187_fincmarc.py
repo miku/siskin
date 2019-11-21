@@ -230,24 +230,32 @@ for root, _, files in os.walk(inputfile_directory):
 
             # übergeordnete Ressource
             if setspec == "jportal_jpjournal_00001103":
+                f773t = "Annalen der Naturphilosophie"
                 f773w = "572422962"
             elif setspec == "jportal_jpjournal_00001120":
+                f773t = "Deutsch als Fremdsprache"
                 f773w = "745617522"
             elif setspec == "jportal_jpjournal_00001109":
+                f773t = "Jenaische Beyträge zur neuesten gelehrten Geschichte"
                 f773w = "756302161"
             elif setspec == "jportal_jpjournal_00001110":
+                f773t = "Neue Berichte von Gelehrten Sachen"
                 f773w = "756825113"
             elif setspec == "jportal_jpjournal_00001311":
+                f773t = "Erneuerte Berichte von gelehrten Sachen"
                 f773w = "756825156"
             elif setspec == "jportal_jpjournal_00001014":
+                f773t = "Neue Zeitungen von gelehrten Sachen"
                 f773w = "728151391"
             elif setspec == "jportal_jpjournal_00001102":
+                f773t = "Signale für die musikalische Welt"
                 f773w = "756825202"
             elif setspec == "jportal_jpjournal_00001225":
+                f773t = "Magazin für Schullehrer..."
                 f773w = "820686344"
             else:
                 sys.exit("Set unbekannt: " + setspec)
-            marcrecord.add("773", w=f773w)
+            marcrecord.add("773", t=f773t, w=f773w)
 
             # Link zur Ressource
             f856u = xmlrecord["dc:identifier"][1]
