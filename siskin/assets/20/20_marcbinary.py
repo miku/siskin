@@ -255,6 +255,8 @@ for oldrecord in xmlstream(inputfilename, "Record"):
     f856u = oldrecord["dc:identifier"][0]
     rights = oldrecord.get("dc:rights", [""])
     for right in rights:
+        if isinstance(right, dict):
+            right = right["#text"]
         if "restricted use" in right:
             f856z = ""
             break
