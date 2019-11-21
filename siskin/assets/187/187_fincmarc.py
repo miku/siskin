@@ -195,13 +195,17 @@ for root, _, files in os.walk(inputfile_directory):
                     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
             # Umfangsangabe
-            f300a = xmlrecord["dc:format"]
-            f300a = f300a.replace("SizeOrDuration", "")
-            f300a = f300a.replace(" 00", " ")
-            f300a = f300a.replace(" 0", " ")
-            f300a = f300a.replace("-00", "-")
-            f300a = f300a.replace("-0", "-")
-            marcrecord.add("300", a=f300a)
+            try:
+                f300a = xmlrecord["dc:format"]
+            except:
+                f300a = ""
+            if f300a:
+                f300a = f300a.replace("SizeOrDuration", "")
+                f300a = f300a.replace(" 00", " ")
+                f300a = f300a.replace(" 0", " ")
+                f300a = f300a.replace("-00", "-")
+                f300a = f300a.replace("-0", "-")
+                marcrecord.add("300", a=f300a)
 
             # RDA-Inhaltstyp
             f336b = formats[format]["336b"]
