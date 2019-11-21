@@ -52,6 +52,8 @@ elif [[ "$OUTPUT" == *gz ]]; then
 	fastzcat "$OUTPUT"
 elif [[ "$OUTPUT" == *zip ]]; then
 	unzip -l "$OUTPUT"
+elif [[ "$OUTPUT" == *zst ]]; then
+	unzstd -c "$OUTPUT"
 else
 	cat "$OUTPUT"
 fi
