@@ -170,7 +170,7 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     f260b = get_field(xmlrecord, "75")
     f260c = get_field(xmlrecord, "76")
     subfields = ("a", f260a, "b", f260b, "c", f260c)
-    marcrecord.add("260", subfields=subfields, indicators=" 1")
+    marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
     f300a = get_field(xmlrecord, "77")
