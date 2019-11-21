@@ -53,7 +53,7 @@ elif [[ "$OUTPUT" == *gz ]]; then
 elif [[ "$OUTPUT" == *zip ]]; then
 	unzip -l "$OUTPUT"
 elif [[ "$OUTPUT" == *zst ]]; then
-	unzstd -c "$OUTPUT"
+	unzstd -q -c "$OUTPUT"
 else
 	cat "$OUTPUT"
 fi
