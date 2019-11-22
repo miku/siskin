@@ -380,7 +380,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
                     difference = old_sourcebyinstitution_number - number
                     percent = difference / old_sourcebyinstitution_number * 100
                     if percent >= 10:
-                        message = u"Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import um %d % verringert." % (sourcebyinstitution, percent)
+                        message = u"Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import um %d %% verringert." % (sourcebyinstitution, percent)
                         messages.append(message)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
