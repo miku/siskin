@@ -175,7 +175,7 @@ for root, _, files in os.walk(inputfile_directory):
             elif " / " in title:
                 f245 = title.split(" / ")
                 f245a = f245[0]
-                f245a = f245[-1]
+                f245c = f245[-1]
             else:
                 f245a = title
                 f245c = ""
