@@ -94,7 +94,7 @@ for root, _, files in os.walk(inputfile_directory):
         inputfilepath = os.path.join(root, inputfilename)
         inputfile = open(inputfilepath, "r", encoding='utf-8')
         xmlfile = inputfile.read()
-        xmlrecords = xmltodict.parse(xmlfile, force_list="dc:creator")
+        xmlrecords = xmltodict.parse(xmlfile, force_list=["dc:creator", "dc:contributor"])
 
         for xmlrecord in xmlrecords["Records"]["Record"]:
 
@@ -234,6 +234,15 @@ for root, _, files in os.walk(inputfile_directory):
             # weitere Urheber
             for f700a in persons[1:]:
                 marcrecord.add("700", a=f700a)
+
+            # Herausgeber und sonstige Beteiligte
+            try:
+                editors = xmlrecord["dc:contributor"]
+            except:
+                editors = []
+            if editors:
+                for f700a in editors:
+                    marcrecord.add("700", a=f700a, _4="edt")
 
             # übergeordnete Ressource
             if setspec == "jportal_jpjournal_00001103":
