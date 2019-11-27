@@ -164,7 +164,7 @@ for root, _, files in os.walk(inputfile_directory):
                 persons = []
             if persons:
                 f100a = persons[0]
-                marcrecord.add("100", a=f100a)
+                marcrecord.add("100", a=f100a, _4="aut")
           
             # Haupttitel
             title = xmlrecord["dc:title"]
@@ -233,7 +233,7 @@ for root, _, files in os.walk(inputfile_directory):
 
             # weitere Urheber
             for f700a in persons[1:]:
-                marcrecord.add("700", a=f700a)
+                marcrecord.add("700", a=f700a, _4="aut")
 
             # Herausgeber und sonstige Beteiligte
             try:
