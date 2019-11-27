@@ -205,6 +205,8 @@ for root, _, files in os.walk(inputfile_directory):
                 f300a = f300a.replace(" 0", " ")
                 f300a = f300a.replace("-00", "-")
                 f300a = f300a.replace("-0", "-")
+                f300a = f300a.replace(" - ", "-")
+                f300a = "S. " + f300a
                 marcrecord.add("300", a=f300a)
 
             # RDA-Inhaltstyp
