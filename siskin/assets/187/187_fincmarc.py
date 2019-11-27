@@ -171,7 +171,7 @@ for root, _, files in os.walk(inputfile_directory):
             if " :: " in title:
                 match = re.search("(.*?)\s::\s(.*?)\s:", title)
                 if match:
-                    f245c, f245a = match.groups()
+                    f245a, f245c = match.groups()
             elif " / " in title:
                 f245 = title.split(" / ")
                 f245a = f245[0]
