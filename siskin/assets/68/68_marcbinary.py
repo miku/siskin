@@ -32,6 +32,7 @@ Ticket: #5163, #6743, #9354, #10294, #16196
 
 import re
 import sys
+import json
 from io import BytesIO, StringIO
 
 import marcx
@@ -49,22 +50,38 @@ outputfile = open(outputfilename, "wb")
 issnlistfile = open(issnlistfilename, "r")
 issn_list = [line.strip() for line in issnlistfile]
 
-ids = []
+ids = set()
 
 for x in issn_list:
     x = json.loads(x)
     try:
-        issn = x["issn"][0]
+        issns = x["issn"]
     except:
         continue
     try:
-        title = x["title_short"]
+        #title = x["title_short"]
+        title = x["title"]
     except:
         continue
+
     title = title.replace(" ", "")
-    title = title.split(":")[0]
-    id = issn + title
-    ids.append(id)
+    title = title.replace(",", "")
+    title = title.replace(";", "")
+    title = title.replace(".", "")
+    title = title.replace("?", "")
+    title = title.replace("!", "")
+    title = title.replace(":", "")
+    title = title.replace("/", "")
+    title = title.replace(")", "")
+    title = title.replace("(", "")
+    title = title.replace("-", "")
+    title = title.lower()
+    #title = title.split(":")[0]
+
+    for issn in issns:
+        issn = issn.replace("-", "")
+        id = issn + title
+        ids.add(id)
 
 for oldrecord in xmlstream(inputfilename, "record"):
 
@@ -86,25 +103,49 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # ISSN-Check
     try:
-        issn = record["022"]["a"]
+        issns = record.get_fields("773")
     except:
-        issn = ""
+        issns = []
 
     try:
         title = record["245"]["a"]
     except:
         continue
+
+    try:
+        subtitle = record["245"]["b"]
+    except:
+        subtitle = ""
+
+    if not subtitle:
+        subtitle = ""
+    title = title + subtitle
+    
     title = title.replace(" ", "")
-    title = title.split(":")[0]
+    title = title.replace(",", "")
+    title = title.replace(";", "")
+    title = title.replace(".", "")
+    title = title.replace("?", "")
+    title = title.replace("!", "")
+    title = title.replace(":", "")
+    title = title.replace("/", "")
+    title = title.replace(")", "")
+    title = title.replace("(", "")
+    title = title.replace("-", "")
+    title = title.lower()
+    #title = title.split(":")[0]
 
-    if issn:
-        #issn = issn.replace("-", "")
-        id = issn + title
+    if issns:
+        for issn in issns:
+            issn = issn.get_subfields("x")
+            if issn:
+                issn = issn[0]
+                issn = issn.replace("-", "")
+                id = issn + title
+                print(id)
+                if id in ids:
+                    continue
     else:
-        continue    
-
-    if id in ids:
-        #print(id)
         continue
 
     # Ansigelung und Kollektion
