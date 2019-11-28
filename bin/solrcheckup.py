@@ -209,7 +209,7 @@ def update_sources(conn, sqlite, k10plus, ai):
 
     for current_source in current_sources:
         if current_source not in old_sources:
-            message = u"The source %s is new in Solr." % current_source
+            message = u"Die Quelle %s ist neu im Index." % current_source
             if source_table_is_filled:
                 messages.append(message)
             else:
@@ -316,7 +316,7 @@ def update_institutions(conn, sqlite, k10plus, ai):
         if current_institution == " " or '"' in current_institution:
             continue
         if current_institution not in old_institutions:
-            message = u"The institution %s is new in Solr." % current_institution
+            message = u"Das Haus %s wurde erstmals für eine Quelle angesigelt." % current_institution
             if institution_table_is_filled:
                 messages.append(message)
             else:
