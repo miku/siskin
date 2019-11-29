@@ -97,7 +97,7 @@ Siskin is based on [luigi](https://github.com/spotify/luigi). Luigi typically
 uses [two configuration
 files](https://luigi.readthedocs.io/en/stable/configuration.html):
 
-* `/etc/luigi/client.conf`
+* `/etc/luigi/luigi.conf`
 * `/etc/luigi/logging.conf`
 
 while siskin has a single configuration file: siskin.ini.
