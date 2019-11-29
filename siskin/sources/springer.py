@@ -116,7 +116,10 @@ class SpringerCleanup(SpringerTask):
                 raise RuntimeError('FTP site does not contain total_tpu.ldj.gz')
         output = shellout("""
             unpigz -c {input} | jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"])' |
-            jq -c '. + {{ "finc.record_id": .doi, "finc.format": "ElectronicArticle", "url": ["https://doi.org/" + .doi] }}' | pigz -c > {output}
+            jq -c '. + {{ "finc.record_id": .doi,
+                          "finc.format": "ElectronicArticle",
+                          "url": ["https://doi.org/" + .doi],
+                          "finc.mega_collection": [.["finc.mega_collection"][0], "sid-105-col-springerjournals"] }}' | pigz -c > {output}
         """,
                           input=realpath)
         luigi.LocalTarget(output).move(self.output().path)
