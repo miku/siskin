@@ -92,7 +92,7 @@ class CrossrefTask(DefaultTask):
 
 class CrossrefHarvestChunkWithCursor(CrossrefTask):
     """
-    Harvest window with cursors (https://git.io/v1K27).
+    Harvest window with cursors (https://git.io/JeDC4).
     """
     begin = luigi.DateParameter(description='start of harvesting window')
     end = luigi.DateParameter(description='end of harvesting window, inclusive')
