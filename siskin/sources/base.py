@@ -102,6 +102,14 @@ class BaseSingleFile(BaseTask):
                 continue
 
             realpath = os.path.realpath(path)
+
+            # Since 12/2019 symlinks might be an absolute path (on the server),
+            # which makes this more flaky. Assume, that symlink points to the
+            # same directory.
+            if realpath.startswith('/'):
+                self.logger.debug('absolute path detected; assume, symlinked file is in the same directory')
+                realpath = os.path.join(os.path.dirname(path), os.path.basename(realpath))
+
             self.logger.debug("found: %s", realpath)
 
             if realpath.endswith("tar.gz"):
