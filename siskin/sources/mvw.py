@@ -93,32 +93,11 @@ class MVWDownloadSnapshot(MVWTask):
         return luigi.LocalTarget(path=self.path(ext="xz"))
 
 
-class MVWDownload(MVWTask):
-    """
-    Download file list for a given date.
-    """
-    date = ClosestDateParameter(default=yesterday())
-
-    def run(self):
-        url = "%s/%04d/%02d/%s-filme.xz" % (self.config.get("mediathekviewweb",
-                                                            "archive"), self.date.year, self.date.month, self.date)
-        output = shellout("""curl --fail "{url}" > {output}""", url=url)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="xz"))
-
-
 class MVWMARC(MVWTask):
     """
     Convert to a MARC via script.
 
     Note: The MARC file for today will request the download for yesterday.
-
-        $ taskdeps MVWMARC
-          └─ MVWMARC(date=2018-08-29)
-                └─ MVWDownload(date=2018-08-28)
-
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
