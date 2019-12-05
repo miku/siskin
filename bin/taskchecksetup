@@ -72,6 +72,8 @@ if __name__ == '__main__':
         ('filterline', 'http://github.com/miku/filterline/releases'),
         ('flux.sh', 'https://github.com/culturegraph/metafacture-core/wiki'),
         ('groupcover', 'http://github.com/miku/groupcover/releases'),
+        ('iconv', 'https://linux.die.net/man/1/iconv'),
+        ('iconv-chunks', 'https://github.com/mla/iconv-chunks'),
         ('jq', 'https://stedolan.github.io/jq/'),
         ('marctexttoxml', 'https://github.com/miku/marc21/releases'),
         ('metha-sync', 'http://github.com/miku/metha/releases'),
