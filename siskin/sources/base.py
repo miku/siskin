@@ -97,6 +97,13 @@ class BaseSingleFile(BaseTask):
         with self.input().open() as handle:
             paths = [p.strip().decode('utf-8') for p in handle.readlines()]
 
+        # SOLR has a limit on facet_fields value length.
+        sanitize = """
+        jq -rc '.author[0] = .author[0][0:4000] |
+                .author_sort = .author_sort[0:4000] |
+                .author_facet[0] = .author_facet[0][0:4000]'
+        """
+
         for path in paths:
             if not path.endswith("finc/latest"):
                 continue
@@ -113,11 +120,13 @@ class BaseSingleFile(BaseTask):
             self.logger.debug("found: %s", realpath)
 
             if realpath.endswith("tar.gz"):
-                output = shellout(""" tar -xOzf "{input}" | pigz -c > {output}""", input=realpath)
+                output = shellout(""" tar -xOzf "{input}" | {sanitize} |  pigz -c > {output}""",
+                                  input=realpath, sanitize=sanitize)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             elif realpath.endswith("gz"):
-                output = shellout("""cp "{input}" "{output}" """, input=realpath)
+                output = shellout("""unpigz -c "{input}" | {sanitize} | pigz -c > "{output}" """,
+                                  input=realpath, sanitize=sanitize)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:
