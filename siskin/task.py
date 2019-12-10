@@ -74,7 +74,8 @@ class DefaultTask(BaseTask):
                                 description="update processing time of source via AMSL API",
                                 significant=False)
 
-    def assets(self, path):
+    @classmethod
+    def assets(cls, path):
         """
         Return the absolute path to the asset. `path` is the relative path
         below the assets root dir.

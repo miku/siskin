@@ -117,8 +117,8 @@ class GeniosTask(DefaultTask):
     """
     TAG = '48'
 
-    allowed_kinds = load_set(self.assets('48/allowed_kinds.txt'))
-    database_blacklist = load_set(self.assets('48/database_blacklist.txt'))
+    allowed_kinds = load_set(DefaultTask.assets('48/allowed_kinds.txt'))
+    database_blacklist = load_set(DefaultTask.assets('48/database_blacklist.txt'))
 
     def closest(self):
         return monthly(date=self.date)
