@@ -111,7 +111,7 @@ for record in reader:
     if f912a == "Abendländische mittelalterliche Handschriften":
         technicalCollectionID = "sid-159-col-buchhsabendlandmittelalter"
     elif f912a == "Abendländische neuzeitliche Handschriften":
-        technicalCollectionID = "id-159-col-buchhsabendlandneuzeit"
+        technicalCollectionID = "sid-159-col-buchhsabendlandneuzeit"
     elif f912a == "Fragmente":
         technicalCollectionID = "sid-159-col-buchhsfragmente"
     elif f912a == "Griechische Handschriften":
