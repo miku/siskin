@@ -95,7 +95,7 @@ from gluish.utils import shellout
 from siskin.common import Executable
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
-from siskin.utils import iterfiles
+from siskin.utils import iterfiles, load_set
 
 
 class GeniosTask(DefaultTask):
@@ -117,42 +117,8 @@ class GeniosTask(DefaultTask):
     """
     TAG = '48'
 
-    allowed_kinds = set([
-        'ebooks',
-        'fachzeitschriften',
-        'literaturnachweise_psychologie',
-        'literaturnachweise_recht',
-        'literaturnachweise_sozialwissenschaften',
-        'literaturnachweise_technik',
-        'literaturnachweise_wirtschaftswissenschaften',
-    ])
-
-    database_blacklist = (
-        'AE',
-        'ANP',
-        'AUTO',
-        'AUW',
-        'BSTZ',
-        'EMAR',
-        'FERT',
-        'FLUI',
-        'FP',
-        'FW',
-        'HOLZ',
-        'INST',
-        'KE',
-        'KONT',
-        'LEDI',
-        'MEIN',
-        'MF',
-        'MUM',
-        'NPC',
-        'PROD',
-        'STHZ',
-        'STIF',
-        'WEFO',
-        'WUV',
-    )
+    allowed_kinds = load_set(self.assets('48/allowed_kinds.txt'))
+    database_blacklist = load_set(self.assets('48/database_blacklist.txt'))
 
     def closest(self):
         return monthly(date=self.date)

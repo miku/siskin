@@ -1,0 +1,7 @@
+ebooks
+fachzeitschriften
+literaturnachweise_psychologie
+literaturnachweise_recht
+literaturnachweise_sozialwissenschaften
+literaturnachweise_technik
+literaturnachweise_wirtschaftswissenschaften
