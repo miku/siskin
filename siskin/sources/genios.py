@@ -47,9 +47,11 @@ Examples
 * konsortium_sachsen_fachzeitschriften_STS_reload_201609.zip
 * konsortium_sachsen_fachzeitschriften_update_20160821070003.zip
 
-Ebooks are reloaded monthy:
+Ebooks are reloaded monthly:
 
 * konsortium_sachsen_ebooks_GABA_reload_201607.zip
+
+Other:
 
 * konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_IFOK_reload_201606.zip
 * konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_update_20161122091046.zip
