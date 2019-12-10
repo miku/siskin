@@ -173,7 +173,7 @@ class GeniosReloadDates(GeniosTask):
 
     Group names are hardcoded (regex) in this task. List them with:
 
-        $ taskcat GeniosReloadDates | cut -f1|sort -u
+        $ taskcat GeniosReloadDates | cut -f1 | sort -u
         ebooks
         fachzeitschriften
         literaturnachweise_psychologie
