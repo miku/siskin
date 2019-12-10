@@ -282,6 +282,66 @@ class GeniosDatabases(GeniosTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
+class GeniosLatestReloadList(GeniosTask):
+    """
+    Create a list of the latest shipments for all kinds and databases. The
+    latest shipment does not necessary come from the last month, although most
+    of the time it does.
+
+    $ taskcat GeniosLatestReloadList --kind all | grep -v "201911" | xargs -I {} basename {}
+    konsortium_sachsen_ebooks_SCHE_reload_201711.zip
+    konsortium_sachsen_ebooks_SCHL_reload_201608.zip
+    konsortium_sachsen_fachzeitschriften_BANK_reload_201904.zip
+    konsortium_sachsen_fachzeitschriften_BOND_reload_201904.zip
+    konsortium_sachsen_fachzeitschriften_DSB_reload_201807.zip
+    konsortium_sachsen_fachzeitschriften_FLWA_reload_201904.zip
+    konsortium_sachsen_fachzeitschriften_FSA_reload_201904.zip
+    konsortium_sachsen_fachzeitschriften_GRER_reload_201811.zip
+    konsortium_sachsen_fachzeitschriften_GVPA_reload_201909.zip
+    konsortium_sachsen_fachzeitschriften_HANA_reload_201903.zip
+    konsortium_sachsen_fachzeitschriften_LEMO_reload_201712.zip
+    konsortium_sachsen_fachzeitschriften_PMGC_reload_201710.zip
+    konsortium_sachsen_fachzeitschriften_PMGI_reload_201710.zip
+    konsortium_sachsen_fachzeitschriften_STB_reload_201712.zip
+    konsortium_sachsen_literaturnachweise_technik_FOGR_reload_201610.zip
+    """
+
+    kind = luigi.Parameter(default='fachzeitschriften', description='or: all, ebooks, literaturnachweise_...')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return GeniosReloadDates(date=self.date)
+
+    def run(self):
+        """
+        Map each database name to the latest file. Since the required task is
+        sorted, the last entry for a name should be the latest.
+        """
+        if self.kind not in GeniosTask.allowed_kinds and not self.kind == "all":
+            raise RuntimeError('apart from the catch-all "all" only these --kind parameters are allowed: %s' %
+                               ', '.join(GeniosTask.allowed_kinds))
+
+        filemap = {}
+
+        with self.input().open() as handle:
+            for row in handle.iter_tsv(cols=('kind', 'db', 'year', 'month', 'path')):
+                if not row.kind.startswith(self.kind) and not self.kind == "all":
+                    continue
+                if int(row.year) < self.date.year or int(row.month) < self.date.month:
+                    self.logger.debug("maybe ignoreable, but not ignored for now (#9534): %s", row.path)
+                filemap[row.db] = row.path
+
+        if not filemap:
+            raise RuntimeError('could not find a single file for the specified kind: %s' % self.kind)
+
+        with self.output().open('w') as output:
+            for _, path in filemap.items():
+                output.write_tsv(path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+
+
 class GeniosLatest(GeniosTask):
     """
     Get the latest version of all files, belonging to some kind, e.g. FZS.
