@@ -33,10 +33,10 @@ import os
 import pipes
 import tempfile
 
+import luigi
 import requests
 import six
 
-import luigi
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.utils import shellout

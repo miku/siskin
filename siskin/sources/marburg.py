@@ -39,9 +39,9 @@ import json
 import os
 import tempfile
 
+import luigi
 import xmltodict
 
-import luigi
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

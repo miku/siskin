@@ -45,11 +45,11 @@ import io
 from urllib.parse import urlencode
 from xml.dom.minidom import parseString
 
+import luigi
 import requests
+import tqdm
 import xmltodict
 
-import luigi
-import tqdm
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

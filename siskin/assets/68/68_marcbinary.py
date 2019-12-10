@@ -30,9 +30,9 @@ Ticket: #5163, #6743, #9354, #10294, #16196
 
 """
 
+import json
 import re
 import sys
-import json
 from io import BytesIO, StringIO
 
 import marcx
@@ -120,7 +120,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     if not subtitle:
         subtitle = ""
     title = title + subtitle
-    
+
     title = title.replace(" ", "")
     title = title.replace(",", "")
     title = title.replace(";", "")

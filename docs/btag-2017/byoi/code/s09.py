@@ -19,6 +19,7 @@ Index with solrbulk:
 """
 
 import luigi
+
 from gluish.utils import shellout
 from s08 import \
     TaggedIntermediateSchema  # TaggedAndDeduplicatedIntermediateSchema

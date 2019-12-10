@@ -39,6 +39,7 @@ Highwire, containing data from (approximate counts):
 import datetime
 
 import luigi
+
 from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

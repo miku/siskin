@@ -39,6 +39,7 @@ import os
 import tempfile
 
 import luigi
+
 from gluish.utils import shellout
 from siskin.common import RedmineDownloadAttachments
 from siskin.task import DefaultTask

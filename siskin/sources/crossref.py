@@ -56,12 +56,12 @@ import urllib.parse
 import urllib.request
 from builtins import range
 
+import elasticsearch
+import luigi
 import requests
 from future import standard_library
 from six import string_types
 
-import elasticsearch
-import luigi
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly

@@ -42,6 +42,7 @@ import re
 import tempfile
 
 import luigi
+
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly

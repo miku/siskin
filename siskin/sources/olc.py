@@ -32,6 +32,7 @@ import datetime
 import os
 
 import luigi
+
 from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

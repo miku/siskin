@@ -48,13 +48,13 @@ import json
 import os
 import tempfile
 
+import luigi
 import pytz
 import requests
+from luigi.format import Gzip
 
-import luigi
 from gluish.format import TSV
 from gluish.utils import shellout
-from luigi.format import Gzip
 from siskin.task import DefaultTask
 from siskin.utils import load_set_from_file
 

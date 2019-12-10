@@ -42,12 +42,12 @@ import string
 import tempfile
 import urllib
 
+import luigi
 import requests
 import six
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 
-import luigi
 import rdflib
 from gluish.common import Executable
 from gluish.format import TSV, Gzip

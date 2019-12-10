@@ -31,10 +31,10 @@ import datetime
 import json
 import tempfile
 
-import requests
-
 import luigi
+import requests
 import xlsxwriter
+
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.sources.amsl import AMSLCollections, AMSLService

@@ -39,6 +39,7 @@ input = /path/to/xlsx (ask RS)
 """
 
 import luigi
+
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 

@@ -47,6 +47,7 @@ import datetime
 import os
 
 import luigi
+
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.common import FTPMirror
@@ -121,12 +122,14 @@ class BaseSingleFile(BaseTask):
 
             if realpath.endswith("tar.gz"):
                 output = shellout(""" tar -xOzf "{input}" | {sanitize} |  pigz -c > {output}""",
-                                  input=realpath, sanitize=sanitize)
+                                  input=realpath,
+                                  sanitize=sanitize)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             elif realpath.endswith("gz"):
                 output = shellout("""unpigz -c "{input}" | {sanitize} | pigz -c > "{output}" """,
-                                  input=realpath, sanitize=sanitize)
+                                  input=realpath,
+                                  sanitize=sanitize)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:

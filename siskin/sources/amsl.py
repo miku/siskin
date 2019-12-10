@@ -59,6 +59,7 @@ import tempfile
 import zipfile
 
 import luigi
+
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.task import DefaultTask

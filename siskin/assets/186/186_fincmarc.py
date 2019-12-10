@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Datenbank Buch und Papier
@@ -31,17 +30,17 @@ Ticket: #16115
 
 """
 
+import argparse
 import io
 import re
 import sys
-import pymarc
-import argparse
 
 import xmltodict
 
 import marcx
+import pymarc
 from siskin.mappings import formats
-from siskin.utils import marc_build_field_008, check_isbn, check_issn, marc_build_field_773g
+from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
 
 
 def get_field(xmlrecord, tag):
@@ -61,16 +60,8 @@ def get_field(xmlrecord, tag):
 
 # Keyword arguments
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i",
-                    dest="inputfilename",
-                    help="inputfile",
-                    default="186_input.xml",
-                    metavar="inputfilename")
-parser.add_argument("-o",
-                    dest="outputfilename",
-                    help="outputfile",
-                    default="186_output.mrc",
-                    metavar="outputfilename")
+parser.add_argument("-i", dest="inputfilename", help="inputfile", default="186_input.xml", metavar="inputfilename")
+parser.add_argument("-o", dest="outputfilename", help="outputfile", default="186_output.mrc", metavar="outputfilename")
 parser.add_argument("-f",
                     dest="outputformat",
                     help="outputformat marc or marcxml",
@@ -82,18 +73,18 @@ inputfilename = args.inputfilename
 outputfilename = args.outputfilename
 outputformat = args.outputformat
 
-inputfile = open(inputfilename,"r")
+inputfile = open(inputfilename, "r")
 
 if outputformat == "marcxml":
-    outputfile = pymarc.XMLWriter(open(outputfilename,"wb"))
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
 else:
     outputfile = open(outputfilename, "wb")
 
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile, force_list=('field',))
+xmlrecords = xmltodict.parse(xmlfile, force_list=('field', ))
 
 for xmlrecord in xmlrecords["collection"]["record"]:
-    
+
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
@@ -111,7 +102,7 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     # Identifier
     f001 = get_field(xmlrecord, "10")
     marcrecord.add("001", data="186-" + f001)
-   
+
     # Zugangsfacette
     f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
@@ -127,7 +118,7 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     f020a = get_field(xmlrecord, "87")
     f020a = check_isbn(f020a)
     marcrecord.add("020", a=f020a)
-    
+
     # ISSN
     f022a = get_field(xmlrecord, "88")
     f022a = check_isbn(f022a)
@@ -252,7 +243,6 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     # SWB-Inhaltstyp
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
-
 
     marcrecord.add("980", a=f001, b="186", c="sid-186-col-bup")
 

@@ -44,6 +44,7 @@ index-url = http://localhost:8983/solr/biblio/select
 import datetime
 
 import luigi
+
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

@@ -37,9 +37,9 @@ import datetime
 import json
 import os
 
+import luigi
 import requests
 
-import luigi
 import marcx
 import pymarc
 from gluish.format import TSV

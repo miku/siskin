@@ -39,9 +39,9 @@ import os
 import pipes
 import tempfile
 
+import luigi
 import six
 
-import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

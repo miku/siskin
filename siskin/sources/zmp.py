@@ -34,6 +34,7 @@ input = /path/to/excel.file.xls
 """
 
 import luigi
+
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 

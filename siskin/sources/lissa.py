@@ -36,9 +36,9 @@ import itertools
 import json
 
 import langdetect
+import luigi
 from iso639 import languages
 
-import luigi
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

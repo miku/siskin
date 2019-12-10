@@ -48,6 +48,7 @@ import tempfile
 import zipfile
 
 import luigi
+
 import pymarc
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

@@ -41,15 +41,15 @@ import sys
 import tempfile
 import xml.etree.cElementTree as ET
 
+import backoff
 import bs4
+import luigi
 import requests
 import six
 from dateutil import relativedelta
 from future import standard_library
 from six import string_types
 
-import backoff
-import luigi
 from siskin import __version__
 from siskin.mappings import languages
 from six.moves.urllib.parse import urlparse

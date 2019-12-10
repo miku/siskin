@@ -36,6 +36,7 @@ ftp-pattern = *
 import datetime
 
 import luigi
+
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from siskin.common import FTPMirror

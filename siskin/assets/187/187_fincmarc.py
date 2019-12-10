@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: UBL / Digitalisierte Zeitschriften (UrMEL)
@@ -31,14 +30,14 @@ Ticket: #15951
 
 """
 
-import sys
-import re
-import os
 import argparse
+import os
+import re
+import sys
 
 import xmltodict
-import marcx
 
+import marcx
 from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
@@ -64,11 +63,7 @@ parser.add_argument("-i",
                     help="directory of inputfiles",
                     default="187_input",
                     metavar="inputfile_directory")
-parser.add_argument("-o",
-                    dest="outputfilename",
-                    help="outputfile",
-                    default="187_output.mrc",
-                    metavar="outputfilename")
+parser.add_argument("-o", dest="outputfilename", help="outputfile", default="187_output.mrc", metavar="outputfilename")
 parser.add_argument("-f",
                     dest="outputformat",
                     help="outputformat marc or marcxml",
@@ -81,7 +76,7 @@ outputfilename = args.outputfilename
 outputformat = args.outputformat
 
 if outputformat == "marcxml":
-    outputfile = pymarc.XMLWriter(open(outputfilename,"wb"))
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
 else:
     outputfile = open(outputfilename, "wb")
 
@@ -165,7 +160,7 @@ for root, _, files in os.walk(inputfile_directory):
             if persons:
                 f100a = persons[0]
                 marcrecord.add("100", a=f100a, _4="aut")
-          
+
             # Haupttitel
             title = xmlrecord["dc:title"]
             if " :: " in title:
