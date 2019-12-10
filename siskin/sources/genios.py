@@ -390,7 +390,7 @@ class GeniosLatest(GeniosTask):
                 filemap[row.db] = row.path
 
         if not filemap:
-            raise RuntimeError('could not file a single file for the specified kind: %s' % self.kind)
+            raise RuntimeError('could not find a single file for the specified kind: %s' % self.kind)
 
         _, stopover = tempfile.mkstemp(prefix='siskin-')
         for _, path in filemap.items():
