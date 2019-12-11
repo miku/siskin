@@ -65,20 +65,25 @@ required for every task).
 
 ```shell
 $ taskchecksetup
-ok     7z
-ok     curl
-ok     filterline
-ok     flux.sh
-ok     groupcover
-ok     jq
-ok     metha-sync
-ok     pigz
-ok     solrbulk
-ok     span-import
-ok     unzip
-ok     wget
-ok     xmllint
-ok     yaz-marcdump
+ok      7z
+ok      csvcut
+ok      curl
+ok      filterline
+ok      flux.sh
+ok      groupcover
+ok      iconv
+ok      iconv-chunks
+ok      jq
+ok      marctexttoxml
+ok      metha-sync
+ok      oaicrawl
+ok      pigz
+ok      solrbulk
+ok      span-import
+ok      unzip
+ok      wget
+ok      xmllint
+ok      yaz-marcdump
 ```
 
 ## Update
