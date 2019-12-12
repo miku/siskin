@@ -61,7 +61,7 @@ def get_year(xmlrecord):
     """
     dates = xmlrecord["dc:date"]
     for date in dates:
-        match = re.search("(\d\d\d\d)", date)
+        match = re.match("(\d\d\d\d)", date)
         if match:
             year = match.group(1)
             return year
