@@ -99,7 +99,7 @@ else:
 
 inputfile = open(inputfilename, "r", encoding='utf-8')
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile, force_list=["setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language", "dc:publisher", "dc:date", "dc:title"])
+xmlrecords = xmltodict.parse(xmlfile, force_list=["setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language", "dc:subject", "dc:publisher", "dc:date", "dc:title"])
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
@@ -178,8 +178,12 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         marcrecord.add("041", a=language)
 
     # DDC-Notation
-    f082a = xmlrecord["dc:subject"][1]
-    marcrecord.add("082", a=f082a)
+    subjects = xmlrecord["dc:subject"]
+    for subject in subjects:
+        match = re.match("\d+", subject)
+        if match:
+            marcrecord.add("082", a=subject)
+            break
 
     # 1. Urheber
     try:
@@ -243,12 +247,15 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("500", a=f500a)
 
     # Schlagwörter
-    subjects = xmlrecord["dc:subject"][0]
-    subjects = subjects.split(";")
-    for subject in subjects:
-        f650a = subject.strip()
-        f650a = f650a.title()
-        marcrecord.add("650", a=f650a)
+    dcsubjects = xmlrecord["dc:subject"]
+    for dcsubject in dcsubjects:
+        match = re.match("\d+", dcsubject)
+        if not match:
+            subjects = dcsubject.split(";")
+            for subject in subjects:
+                f650a = subject.strip()
+                f650a = f650a.title()
+                marcrecord.add("650", a=f650a)
 
     # GND-Inhalts- und Datenträgertyp
     f655a = formats[format]["655a"]
