@@ -85,7 +85,7 @@ else:
 
 inputfile = open(inputfilename, "r", encoding='utf-8')
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile, force_list=["setSpec", "dc:creator", "dc:contributor", "dc:type", "dc:language", "dc:publisher", "dc:date", "dc:title"])
+xmlrecords = xmltodict.parse(xmlfile, force_list=["setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language", "dc:publisher", "dc:date", "dc:title"])
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
