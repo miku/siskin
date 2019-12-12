@@ -47,12 +47,26 @@ def clean_language(language):
     """
     Returns a correct language code for MARC.  
     """
-    if language == "deu":
+    if language == "deu" or language == "de":
         language = "ger"
 
     if language != "ger" and language != "eng" and language != "":
         sys.exit("check language: " + language)
     return language
+
+
+def get_year(xmlrecord):
+    """
+    Takes all fields dc:date and returns a proper four-digit year.
+    """
+    dates = xmlrecord["dc:date"]
+    for date in dates:
+        match = re.search("(\d\d\d\d)", date)
+        if match:
+            year = match.group(1)
+            return year
+    else:
+        return ""
 
 
 # Keyword arguments
@@ -135,7 +149,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("007", data=f007)
 
     # Periodizität
-    year = xmlrecord["dc:date"][2]
+    year = get_year(xmlrecord)
     periodicity = formats[format]["008"]
     try:
         language = xmlrecord["dc:language"][0]
@@ -210,7 +224,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
         else:
             f260a = xmlrecord["dc:publisher"][0]
     
-    f260c = xmlrecord["dc:date"][2]
+    f260c = get_year(xmlrecord)
     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
     # RDA-Inhaltstyp
