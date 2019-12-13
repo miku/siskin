@@ -289,7 +289,10 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     marcrecord.add("980", a=f001, b="188", c="sid-188-col-goescholar")
 
     # MARC-Datensatz in Datei schreiben
-    outputfile.write(marcrecord.as_marc())
+    if outputformat == "marcxml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
 
 inputfile.close()
 outputfile.close()
