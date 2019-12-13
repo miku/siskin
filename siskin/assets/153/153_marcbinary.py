@@ -30,6 +30,7 @@ import sys
 import xmltodict
 
 import marcx
+import pymarc
 
 colormap = {
     u"black and white": u"Schwarzweiß",
