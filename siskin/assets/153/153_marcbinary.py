@@ -92,7 +92,7 @@ input_filenames = glob.glob('153/*.ldj')
 if len(sys.argv) > 2:
     outputfilename, input_filenames = sys.argv[1], sys.argv[2:]
 
-outputfile = open(outputfilename, "wb")
+outputfile = pymarc.XMLWriter(open(outputfilename,"wb"))
 
 for filepath in input_filenames:
     filename = os.path.basename(filepath)
