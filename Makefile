@@ -8,7 +8,7 @@ PY_FILES := $(shell find siskin -name \*.py -print)
 dist:
 	python setup.py sdist
 
-# Upload requires https://github.com/pypa/twine.
+# Upload requires https://github.com/pypa/twine and some configuration.
 .PHONY: upload
 upload: dist
 	# https://pypi.org/account/register/
@@ -17,8 +17,9 @@ upload: dist
 	# username:abc
 	# password:secret
 	#
-	# For internal repositories, name them in ~/.pypirc, then run: make upload
-	# TWINE_OPTS="-r internal" to upload to hosted pypi repository.
+	# For internal repositories, name them in ~/.pypirc (e.g. "internal"), then
+	# run: make upload TWINE_OPTS="-r internal" to upload to hosted pypi
+	# repository.
 	#
 	# For automatic package deployments, also see: .gitlab-ci.yml.
 	twine upload $(TWINE_OPTS) dist/*
@@ -32,6 +33,7 @@ clean:
 	rm -f siskin.pex
 	rm -f siskin.shiv
 	rm -f .coverage
+	rm -f tags
 
 # Fix imports, requires https://github.com/timothycrosley/isort.
 .PHONY: imports
@@ -52,6 +54,9 @@ style:
 docs/catalog/AIUpdate.png: $(PY_FILES)
 	taskdeps-dot AIUpdate | dot -Tpng > $@
 
+# Generate a SID list for reference.
 docs/sids.tsv:
-	curl -v "https://projekte.ub.uni-leipzig.de/projects/metadaten-quellen/wiki/SIDs.xml?key=$$REDMINE_API_KEY" | xmlcutty -path /wiki_page/text | sed -e 's/"//g' | cut -d '|' -f2-5 | awk -F '|' '{print $$1"\t"$$2"\t"$$3}' | tail -n +4 > $@
+	curl -v "https://projekte.ub.uni-leipzig.de/projects/metadaten-quellen/wiki/SIDs.xml?key=$$REDMINE_API_KEY" | \
+		xmlcutty -path /wiki_page/text | sed -e 's/"//g' | cut -d '|' -f2-5 | \
+		awk -F '|' '{print $$1"\t"$$2"\t"$$3}' | tail -n +4 > $@
 
