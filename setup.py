@@ -49,7 +49,6 @@ install_requires = [
     'decorator>=3.4.0',
     'elasticsearch>=2',
     'feedparser==5.2.1',
-    'future>=0.16',
     'gluish>=0.2.17',
     'gspread>=0.2.2',
     'internetarchive>=1.7.6',

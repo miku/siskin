@@ -54,12 +54,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from builtins import range
 
 import elasticsearch
 import luigi
 import requests
-from future import standard_library
 from six import string_types
 
 from gluish.common import Executable
@@ -74,7 +72,6 @@ from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
 
-standard_library.install_aliases()
 
 
 class CrossrefTask(DefaultTask):

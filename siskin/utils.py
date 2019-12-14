@@ -47,15 +47,11 @@ import luigi
 import requests
 import six
 from dateutil import relativedelta
-from future import standard_library
 from six import string_types
 
 from siskin import __version__
 from siskin.mappings import languages
 from six.moves.urllib.parse import urlparse
-
-# XXX: move to six.
-standard_library.install_aliases()
 
 logger = logging.getLogger('siskin')
 

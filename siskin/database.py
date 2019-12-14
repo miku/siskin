@@ -27,19 +27,13 @@ Helper for databases.
 
 import logging
 import sqlite3
-from builtins import object
-
-from future import standard_library
 
 import pymysql
 import six.moves.urllib.parse
 from pymysql.cursors import SSCursor
 
-# XXX: move to six.
-standard_library.install_aliases()
 
-
-class sqlitedb(object):
+class sqlitedb():
     """
     Simple cursor context manager for sqlite3 databases. Commits everything at exit.
 
@@ -65,7 +59,7 @@ class sqlitedb(object):
         self.conn.close()
 
 
-class mysqldb(object):
+class mysqldb():
     """
     Context manager for MySQL database access. Example:
 
