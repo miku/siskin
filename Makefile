@@ -30,11 +30,12 @@ clean:
 	rm -rf build/ dist/ .tox/ .pytest_cache/
 	find . -name "*.pyc" -exec rm -f {} \;
 	find . -name ".DS_Store" -exec rm -f {} \;
+	rm -f .coverage
 	rm -f siskin.pex
 	rm -f siskin.shiv
-	rm -f .coverage
 	rm -f tags
 	rm -rf logs # Probably automatically created by Java MAB library.
+	rm -rf notebooks/.ipynb_checkpoints
 
 # Fix imports, requires https://github.com/timothycrosley/isort.
 .PHONY: imports
