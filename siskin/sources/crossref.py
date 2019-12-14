@@ -193,7 +193,7 @@ class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
             raise RuntimeError('update can only be: days, weeks or months')
         dates = [dt for dt in date_range(self.begin, self.end, 1, self.update)]
         tasks = [CrossrefHarvestChunkWithCursor(begin=dates[i], end=dates[i + 1]) for i in range(len(dates) - 1)]
-        return sorted(tasks)
+        return sorted(tasks, key=lambda v: str(v))
 
     def output(self):
         return self.input()
