@@ -18,7 +18,7 @@
 17	UBL-main	Nationallizenzen (eBooks / Monographien)
 18	UBL-main	Oxford Scholarship Online
 19	UBL-main	Kubon &amp; Sagner Digital
-20	UBL-main	Bibliothèque nationale de France (BnF): Gallica (Musik)
+20	UBL-main	Bibliothèque nationale de France (BnF): Gallica
 21	UBL-main	GBVcentral Dumps Musik
 22	UBL-main	Qucosa
 23	UBL-main	Hochschulschriften HSZIGR Hochschule Zittau/Görlitz
@@ -66,7 +66,7 @@
 65	SLUB-dswarm	GBV Central (sonstige Inhalte)
 66	SLUB-dswarm	HeidICON
 67	SLUB-dswarm	SLUB/Deutsche Fotothek
-68	SLUB-dswarm	OLC Online Contents (aus GBV Central)
+68	UBL-main	OLC Online Contents (aus GBV Central)
 69	SLUB-dswarm	Wiley ebooks (SLUB Profil)
 70	UBL-main	Institut Ägyptologie (UBL)
 71	UBL-main	OstDok (Virtuelle Fachbibliothek Osteuropa)
@@ -84,7 +84,7 @@
 83	SLUB-dswarm	SLUB/Mediathek
 84	UBL-main	OCLC WorldShare Collection Manager
 85	UBL-ai	Elsevier Journals (Sachsen Profil)
-86	UBL-main	Cambridge University Press eBooks (UBL Profil)
+86	UBL-main	Cambridge University Press eBooks (EBS komplett mit HSS und STM)
 87	UBL-ai	International Journal of Communication
 88	UBL-main	Zeitschrift Rundfunk und Geschichte
 89	UBL-ai	IEEE Xplore Library
@@ -97,14 +97,14 @@
 98	SLUB-dswarm	GNM - Germanisches Nationalmuseum Nürnberg
 99	UBL-main	Media Perspektiven
 100	UBL-main	Medienwissenschaft Berichte und Papiere
-101	UBL-ai	Kieler Beiträge zur Filmmusikforschung
+101	UBL-main	Kieler Beiträge zur Filmmusikforschung
 102	UBL-ai	Daphne Objektdatenbank SKD
 103	UBL-main	Margaret Herrick Library
 104	SLUB-dswarm	WTI
 105	SLUB-dswarm	Springer Journals
 105	UBL-ai	Springer Journals
 106	UBL-main	Primary Sources for Slavic Studies
-107	UBL-ai	Heidelberger historische Bestände digital
+107	UBL-main	Heidelberger historische Bestände digital
 108	UBL-main	De Gruyter eBooks Open Access
 109	UBL-main	Kunsthochschule für Medien Köln (VK Film)
 110	UBL-ai	Sowiport (GESIS)
@@ -170,10 +170,22 @@
 170	UBL-main	media/rep/ - Repositorium für die Medienwissenschaft
 171	UBL-main	PressReader (via Digento)
 172	UBL-main	OER aus OPAL (UB Freiberg)
-173	UBL-ai	Wolfenbütteler Bibliographie zur Geschichte des Buchwesens
+173	UBL-main	Wolfenbütteler Bibliographie zur Geschichte des Buchwesens
 174		Zenodo
 175	UBL-main	Libris-Katalog der schwedischen Nationalbibliothek
 176	UBL-main	Fennica-Katalog der finnischen Nationalbibliothek
 177	UBL-ai	DataCite
+178	UBL-main	Nationalbibliothek Norwegens
+179	UBL-ai	LISSA - LIS Scholarship Archive
+180	UBL-main	British National Bibliography
+181	UBL-main	British Library Catalogue
+182	UBL-main	HeBIS-Verbundkatalog
+183	UBL-main	K10plus Verbundkatalog (für spezielle Profilierung)
+184	UBL-main	RILM Répertoire International de Littérature Musicale
+185	UBL-main	DABI Datenbank Deutsches Bibliothekswesen
+186	UBL-main	Datenbank Buch und Papier
+187	UBL-main	UrMEL - Universal Multimedia Electronic Library
+188	UBL-main	GoeScholar - Publikationenserver der Georg-August-Universität Göttingen
 200	UBL-main	finc TEST
 201	SLUB-dswarm	Perinorm
+202	SLUB-dswarm	Zentralinstitut für Kunstgeschichte
