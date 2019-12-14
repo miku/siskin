@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-INPUT_FILE=$1
-START_LINE=`head -n1 $INPUT_FILE`
-PATTERN="(.*refs #[0-9][0-9]*.*|v[0-9.]+|^Merge branch)"
-if ! [[ "$START_LINE" =~ $PATTERN ]]; then
-   echo "Bad commit message: it should contain ticket reference (refs #1234), version (v0.1.0) or default 'Merge branch' note."
-  exit 1
-fi
