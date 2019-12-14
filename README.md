@@ -197,7 +197,7 @@ etc
 ├── bash_completion.d
 │   └── siskin_completion.sh
 ├── luigi
-│   ├── client.cfg
+│   ├── luigi.cfg
 │   └── logging.ini
 └── siskin
     └── siskin.ini
@@ -288,10 +288,8 @@ have differing opinions).
 
 Other tools:
 
-* [commit-msg](https://raw.githubusercontent.com/miku/siskin/master/contrib/githooks.commit-msg) git hook for keeping issues and commits in line
 * use [pylint](https://github.com/PyCQA/pylint), currently 9.18/10 with many errors ignored, maybe with [git commit hook](https://github.com/sebdah/git-pylint-commit-hook)
 * use [pytest](https://docs.pytest.org/), [pytest-cov](https://pypi.org/project/pytest-cov/), coverage at 9%
-* use [tox](https://tox.readthedocs.io/) for testing siskin Python 2 and 3 compatibility
 
 ## Naming conventions
 
@@ -311,7 +309,7 @@ may be considered as well.
 
 Rough examples:
 
-```
+```python
 # coding: utf-8
 # pylint: ...
 #
@@ -368,7 +366,7 @@ password = helloadmin
 
 A distribution can be created via Makefile.
 
-```
+```shell
 $ make dist
 $ tree dist/
 dist/
