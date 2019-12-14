@@ -6,7 +6,7 @@ Lookup a list of DOI, refs #11958 (#note-9).
 
 import json
 import sys
-import urllib
+from urllib.parse import quote_plus
 
 import requests
 
@@ -124,18 +124,20 @@ dois = [
 
 if __name__ == '__main__':
     for doi in dois:
-        url = "%s/select?wt=json&q=%s" % (solr, urllib.quote_plus('"%s"' % doi))
+        url = "%s/select?wt=json&q=%s" % (solr, quote_plus('"%s"' % doi))
         r = requests.get(url)
         if r.status_code >= 400:
             raise RuntimeError("%s at %s" % (r.status_code, url))
         resp = json.loads(r.text)
         isils = set()
         for doc in resp['response']['docs']:
+            if not 'institution' in doc:
+                continue
             isils.update(doc['institution'])
         print("%s\t%s\t%s" % (doi, resp['response']['numFound'], ', '.join(isils)))
 
-# 2017-01-15
-# bin/11958.py http://0.0.0.0:8085/solr/biblio | csvlook -t -H
+# $ bin/11958.py http://0.0.0.0:8085/solr/biblio | csvlook -t -H # 2017-01-15
+#
 # |-------------------------------+---------+---------------------------------------------------------------------------------------------------------------------------|
 # |  column1                      | column2 | column3                                                                                                                   |
 # |-------------------------------+---------+---------------------------------------------------------------------------------------------------------------------------|
