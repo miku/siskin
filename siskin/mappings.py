@@ -22,8 +22,12 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
 """
-Static mappings for reuse
+Static mappings for reuse.
+
+XXX: Maybe this can be moved into a static file, e.g. JSON or YAML, so it's
+easier reused.
 """
 
 from collections import defaultdict
