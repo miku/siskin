@@ -1,9 +1,0 @@
-# Example cron entries.
-
-SHELL=/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-
-# Run AI data update.
-# AIExport output goes to SOLR (solrbulk).
-# AIIntermediateSchema goes to blob server (memcldj).
-3 2 1 * * root taskdo AIUpdate
