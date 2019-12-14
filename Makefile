@@ -34,6 +34,7 @@ clean:
 	rm -f siskin.shiv
 	rm -f .coverage
 	rm -f tags
+	rm -rf logs # Probably automatically created by Java MAB library.
 
 # Fix imports, requires https://github.com/timothycrosley/isort.
 .PHONY: imports
