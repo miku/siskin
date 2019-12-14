@@ -26,16 +26,17 @@ upload: dist
 
 .PHONY: clean
 clean:
-	rm -rf siskin.egg-info
-	rm -rf build/ dist/ .tox/ .pytest_cache/
-	find . -name "*.pyc" -exec rm -f {} \;
-	find . -name ".DS_Store" -exec rm -f {} \;
+	find . -name "*.pyc" -exec rm -f "{}" +
+	find . -name ".DS_Store" -exec rm -f "{}" +
+	find . -name "__pycache__" -exec rm -rf "{}" +
+	find . -type d -name ".ipynb_checkpoints" -exec rm -rf "{}" +
 	rm -f .coverage
 	rm -f siskin.pex
 	rm -f siskin.shiv
 	rm -f tags
+	rm -rf build/ dist/ .tox/ .pytest_cache/
 	rm -rf logs # Probably automatically created by Java MAB library.
-	rm -rf notebooks/.ipynb_checkpoints
+	rm -rf siskin.egg-info
 
 # Fix imports, requires https://github.com/timothycrosley/isort.
 .PHONY: imports
