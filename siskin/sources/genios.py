@@ -311,7 +311,7 @@ class GeniosLatestReloadList(GeniosTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GeniosReloadDates(date=self.date)
+        return GeniosReloadDates(date=self.date, kind='all')
 
     def run(self):
         """
