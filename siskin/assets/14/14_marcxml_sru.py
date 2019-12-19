@@ -39,6 +39,7 @@ import requests
 
 import marcx
 import pymarc
+from siskin.mappings import formats
 from siskin.utils import marc_clean_record
 from six.moves.urllib.parse import urlencode
 
@@ -158,13 +159,30 @@ while start < all_records:
         if not f856 or not has_digitalization_links(newrecord):
             continue
 
+        # Formatfestlegung, pauschal für gesamte Quelle
+        format = "Score"
+
+        # Leader
+        newrecord.remove_fields("Leader")
+        leader = formats[format]["Leader"]
+        newrecord.leader = leader
+
         # Identifikator
         f001 = newrecord["001"].data
         newrecord.remove_fields("001")
         newrecord.add("001", data="14-" + f001)
 
         # Zugangsfacette
-        newrecord.add("007", data="cr")
+        f007 = formats[format]["e007"]
+        newrecord.add("007", data=f007)
+
+        # RDA-Inhaltstyp
+        f336b = formats[format]["336b"]
+        newrecord.add("336", b=f336b)
+
+        # RDA-Datenträgertyp
+        f338b = formats[format]["338b"]
+        newrecord.add("338", b=f338b)
 
         # Link zum Digitalisat
         digitalization_links = list(get_digitalization_links(newrecord))
@@ -176,6 +194,10 @@ while start < all_records:
         # Link zum Datensatz
         id = re.sub("^00000", "", f001)
         newrecord.add("856", q="text/html", _3="Link zum Datensatz", u="https://opac.rism.info/search?id=" + id)
+
+        # SWB-Inhaltstyp
+        f935c = formats[format]["935c"]
+        newrecord.add("935", c=f935c)
 
         # 970
         newrecord.add("970", c="PN")
