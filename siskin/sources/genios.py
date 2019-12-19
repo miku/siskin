@@ -307,11 +307,11 @@ class GeniosLatestReloadList(GeniosTask):
     konsortium_sachsen_literaturnachweise_technik_FOGR_reload_201610.zip
     """
 
-    kind = luigi.Parameter(default='fachzeitschriften', description='or: all, ebooks, literaturnachweise_...')
+    kind = luigi.Parameter(default='all', description='or: all, ebooks, literaturnachweise_...')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return GeniosReloadDates(date=self.date, kind='all')
+        return GeniosReloadDates(date=self.date)
 
     def run(self):
         """
