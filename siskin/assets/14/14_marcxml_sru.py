@@ -170,7 +170,7 @@ while start < all_records:
         # Identifikator
         f001 = newrecord["001"].data
         newrecord.remove_fields("001")
-        newrecord.add("001", data="14-" + f001)
+        newrecord.add("001", data="finc-14-" + f001)
 
         # Zugangsfacette
         f007 = formats[format]["e007"]
