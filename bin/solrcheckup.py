@@ -499,9 +499,8 @@ update_institutions(conn, sqlite, k10plus, ai)
 update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
 
 # 4. Step: Send report
-if len(messages) == 0:
-    messages.append(u"Es wurden keine Unregelmaessigkeiten festgestellt.")
-message = u"\n".join(messages)
-send_message(message)
+if len(messages) != 0:
+    message = u"\n".join(messages)
+    send_message(message)
 
 sqlite.close()
