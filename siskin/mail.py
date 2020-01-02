@@ -28,16 +28,22 @@ Helper for sending mail.
 import logging
 import smtplib
 import socket
+import datetime
 
 from siskin.configuration import Config
+
 
 config = Config.instance()
 logger = logging.getLogger("siskin")
 
-DEFAULT_SUBJECT_PREFIX = "[siskin at %s]" % (socket.gethostname())
+now = datetime.datetime.now()
+day = now.strftime("%A")[:3]
+month = now.strftime("%B")[:3]
+date = now.strftime(day + ", %d " + month + " %Y %H:%M:%S +0100")
 
 
 def send_mail(sender=None,
+              date=date,
               tolist=None,
               subject=None,
               message=None,
@@ -77,7 +83,7 @@ def send_mail(sender=None,
         server.login(username, password)
     else:
         logger.debug("no username and password given, proceeding without login")
-    msg = u'From: {}\nSubject: {} {}\n\n{}'.format(sender, DEFAULT_SUBJECT_PREFIX, subject, message)
+    msg = u'From: {}\nDate: {}\nSubject: {}\n\n{}'.format(sender, date, subject, message)
     server.sendmail(sender, tolist, msg)
     server.quit()
 
