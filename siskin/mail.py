@@ -37,8 +37,8 @@ config = Config.instance()
 logger = logging.getLogger("siskin")
 
 now = datetime.datetime.now()
-day = now.strftime("%A")[:3]
-month = now.strftime("%B")[:3]
+day = now.strftime("%a")
+month = now.strftime("%b")
 date = now.strftime(day + ", %d " + month + " %Y %H:%M:%S +0100")
 
 
