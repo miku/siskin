@@ -67,7 +67,7 @@ class BLCHarvest(BLCTask):
     def run(self):
         auth = self.config.get("blc", "z39auth")
         commands = self.assets("181/commands_fine")
-        output = shellout("""yaz-client -f <(cat {auth} {commands}) -m {output} """, auth=auth, commands=commands)
+        output = shellout("""yaz-client -f <(cat <(echo {auth}) {commands}) -m {output} """, auth=auth, commands=commands)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
