@@ -79,16 +79,11 @@ def get_digitalization_links(newrecord):
 def get_sru_records(start, max):
 
     params = {
-        "maximumRecords":
-        max,
-        "startRecord":
-        start,
-        "recordSchema":
-        "marc",
-        "operation":
-        "searchRetrieve",
-        "query":
-        '*'
+        "maximumRecords": max,
+        "startRecord": start,
+        "recordSchema": "marc",
+        "operation": "searchRetrieve",
+        "query": '*'
     }
 
     params = urlencode(params)

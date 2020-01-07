@@ -25,13 +25,12 @@
 Helper for sending mail.
 """
 
+import datetime
 import logging
 import smtplib
 import socket
-import datetime
 
 from siskin.configuration import Config
-
 
 config = Config.instance()
 logger = logging.getLogger("siskin")

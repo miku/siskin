@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: British Library Catalogue
@@ -37,7 +36,6 @@ Configuration:
 z39auth = authentication USERNAME/PASSWORD
 
 """
-
 
 import datetime
 
@@ -64,10 +62,13 @@ class BLCHarvest(BLCTask):
     Harvest with Z39.50 client. https://www.bl.uk/help/get-marc-21-data
     """
     date = luigi.DateParameter(default=datetime.date.today())
+
     def run(self):
         auth = self.config.get("blc", "z39auth")
         commands = self.assets("181/commands_fine")
-        output = shellout("""yaz-client -f <(cat <(echo {auth}) {commands}) -m {output} """, auth=auth, commands=commands)
+        output = shellout("""yaz-client -f <(cat <(echo {auth}) {commands}) -m {output} """,
+                          auth=auth,
+                          commands=commands)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

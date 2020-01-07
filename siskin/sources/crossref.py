@@ -73,7 +73,6 @@ from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
 
 
-
 class CrossrefTask(DefaultTask):
     """
     Crossref related tasks. See: http://www.crossref.org/

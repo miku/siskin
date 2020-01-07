@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: GoeScholar - Publikationenserver der Georg-August-Universität Göttingen
@@ -31,15 +30,15 @@ Ticket: #16357
 
 """
 
-import sys
-import re
-import os
 import argparse
+import os
+import re
+import sys
 
 import xmltodict
+
 import marcx
 import pymarc
-
 from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_build_field_008
 
@@ -72,16 +71,8 @@ def get_year(xmlrecord):
 
 # Keyword arguments
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i",
-                    dest="inputfilename",
-                    help="inputfile",
-                    default="188_input.xml",
-                    metavar="inputfilename")
-parser.add_argument("-o",
-                    dest="outputfilename",
-                    help="outputfile",
-                    default="188_output.mrc",
-                    metavar="outputfilename")
+parser.add_argument("-i", dest="inputfilename", help="inputfile", default="188_input.xml", metavar="inputfilename")
+parser.add_argument("-o", dest="outputfilename", help="outputfile", default="188_output.mrc", metavar="outputfilename")
 parser.add_argument("-f",
                     dest="outputformat",
                     help="outputformat marc or marcxml",
@@ -94,13 +85,17 @@ outputfilename = args.outputfilename
 outputformat = args.outputformat
 
 if outputformat == "marcxml":
-    outputfile = pymarc.XMLWriter(open(outputfilename,"wb"))
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
 else:
     outputfile = open(outputfilename, "wb")
 
 inputfile = open(inputfilename, "r", encoding='utf-8')
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile, force_list=["setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language", "dc:subject", "dc:publisher", "dc:date", "dc:title"])
+xmlrecords = xmltodict.parse(xmlfile,
+                             force_list=[
+                                 "setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language",
+                                 "dc:subject", "dc:publisher", "dc:date", "dc:title"
+                             ])
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
@@ -110,7 +105,8 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if xmlrecord["header"]["@status"] == "deleted":
         continue
 
-    if "col_1_11730" not in xmlrecord["header"]["setSpec"] and "col_goescholar_3015" not in xmlrecord["header"]["setSpec"]:
+    if "col_1_11730" not in xmlrecord["header"]["setSpec"] and "col_goescholar_3015" not in xmlrecord["header"][
+            "setSpec"]:
         continue
 
     xmlrecord = xmlrecord["metadata"]["oai_dc:dc"]
@@ -194,7 +190,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if persons:
         f100a = persons[0]
         marcrecord.add("100", a=f100a, _4="aut")
-  
+
     # Haupttitel
     title = xmlrecord["dc:title"][0]
     if ":" in title:
@@ -228,7 +224,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
             f260b = xmlrecord["dc:publisher"][0]
         else:
             f260a = xmlrecord["dc:publisher"][0]
-    
+
     f260c = get_year(xmlrecord)
     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
