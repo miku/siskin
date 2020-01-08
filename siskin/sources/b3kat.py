@@ -84,7 +84,7 @@ class B3KatTask(DefaultTask):
     """
     Base task for B3Kat.
     """
-    TAG = 'b3kat'
+    TAG = '12'
 
     def closest(self):
         """ Find exact date on this site: https://www.bib-bvb.de/web/b3kat/open-data """
