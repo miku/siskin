@@ -173,6 +173,7 @@ setup(name='siskin',
               'assets/169/*',
               'assets/170/*',
               'assets/173/*',
+              'assets/180/*',
               'assets/181/*',
           ]},
       scripts=[
