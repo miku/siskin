@@ -1,0 +1,126 @@
+open tcp:z3950cat.bl.uk:9909/BNB03U
+find @attr 1=13 @attr 5=1 "002"
+show 1+10000
+find @attr 1=13 @attr 5=1 "003.5"
+show 1+10000
+find @attr 1=13 @attr 5=1 "004.09"
+show 1+10000
+find @attr 1=13 @attr 5=1 "005.7"
+show 1+10000
+find @attr 1=13 @attr 5=1 "005.8"
+show 1+10000
+find @attr 1=13 @attr 5=1 "006.3"
+show 1+10000
+find @attr 1=13 @attr 5=1 "006.4"
+show 1+10000
+find @attr 1=13 @attr 5=1 "006.6"
+show 1+10000
+find @attr 1=13 @attr 5=1 "006.8"
+show 1+10000
+find @attr 1=13 @attr 5=1 "020"
+show 1+10000
+find @attr 1=13 @attr 5=1 "021"
+show 1+10000
+find @attr 1=13 @attr 5=1 "022"
+show 1+10000
+find @attr 1=13 @attr 5=1 "023"
+show 1+10000
+find @attr 1=13 @attr 5=1 "025"
+show 1+10000
+find @attr 1=13 @attr 5=1 "026"
+show 1+10000
+find @attr 1=13 @attr 5=1 "027"
+show 1+10000
+find @attr 1=13 @attr 5=1 "028"
+show 1+10000
+find @attr 1=13 @attr 5=1 "069.1"
+show 1+10000
+find @attr 1=13 @attr 5=1 "069.2"
+show 1+10000
+find @attr 1=13 @attr 5=1 "069.5"
+how 1+10000
+find @attr 1=13 @attr 5=1 "069.6"
+how 1+10000
+find @attr 1=13 @attr 5=1 "070.5"
+how 1+10000
+find @attr 1=13 @attr 5=1 "090"
+how 1+10000
+find @attr 1=13 @attr 5=1 "094"
+how 1+10000
+find @attr 1=13 @attr 5=1 "302.232"
+how 1+10000
+find @attr 1=13 @attr 5=1 "381.45002"
+how 1+10000
+find @attr 1=13 @attr 5=1 "686.1"
+show 1+10000
+find @attr 1=13 @attr 5=1 "686.2"
+show 1+10000
+find @attr 1=13 @attr 5=1 "686.3"
+show 1+10000
+find @attr 1=13 @attr 5=1 "745.67"
+show 1+10000
+find @attr 1=13 @attr 5=1 "760"
+show 1+10000
+find @attr 1=13 "003.3"
+show 1+10000
+find @attr 1=13 "004.5"
+show 1+10000
+find @attr 1=13 "004.616"
+show 1+10000
+find @attr 1=13 "004.62"
+show 1+10000
+find @attr 1=13 "004.65"
+show 1+10000
+find @attr 1=13 "004.652"
+show 1+10000
+find @attr 1=13 "004.66"
+show 1+10000
+find @attr 1=13 "004.67"
+show 1+10000
+find @attr 1=13 "004.678"
+show 1+10000
+find @attr 1=13 "004.6782"
+show 1+10000
+find @attr 1=13 "004.9"
+show 1+10000
+find @attr 1=13 "005.019"
+show 1+10000
+find @attr 1=13 "069.0288"
+show 1+10000
+find @attr 1=13 "069.4"
+show 1+10000
+find @attr 1=13 "091"
+show 1+10000
+find @attr 1=13 "092"
+show 1+10000
+find @attr 1=13 "093"
+show 1+10000
+find @attr 1=13 "095"
+show 1+10000
+find @attr 1=13 "302.2244"
+show 1+10000
+find @attr 1=13 "302.231"
+show 1+10000
+find @attr 1=13 "306.42"
+show 1+10000
+find @attr 1=13 "306.488"
+show 1+10000
+find @attr 1=13 "346.0482"
+show 1+10000
+find @attr 1=13 "352.744"
+show 1+10000
+find @attr 1=13 "353.73"
+show 1+10000
+find @attr 1=13 "381.4537132"
+show 1+10000
+find @attr 1=13 "658.4038"
+show 1+10000
+find @attr 1=13 "676"
+show 1+10000
+find @attr 1=13 "741.64"
+show 1+10000
+find @attr 1=13 "801.3"
+show 1+10000
+find @attr 1=13 "809.9339"
+show 1+10000
+exit
