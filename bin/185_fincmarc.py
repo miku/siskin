@@ -59,7 +59,7 @@ def get_field(jsonrecord, field):
     Returns a field or an empty string.
     """
     value = jsonrecord[field]
-    if value == None or value == "NULL":
+    if value is None or value == "NULL":
         value = ""
     return str(value)
 
@@ -74,7 +74,7 @@ dabi_to_ddc = {
                 "6.1": "020",
                 "6.2": "020",
                 "6.3": "020",
-                # shortended for testing 
+                # shortended for testing
 }
 
 
@@ -94,7 +94,7 @@ overwrite = args.overwrite
 outputformat = args.outputformat
 interval = args.interval
 
-if interval != "monthly" and interval != "weekly" and interval != "daily" and interval != "manually":
+if interval not in ("monthly", "weekly", "daily", "manually"):
     sys.exit("Unsupported interval: " + interval)
 
 if interval == "manually" and not overwrite:
@@ -108,7 +108,7 @@ elif interval == "weekly":
 elif interval == "daily" or interval == "manually":
     date = today
 
-date = str(date).replace("-", "")
+date = date.strftime("%Y%m%d")
 outputfilename = SID + "-output-" + date + "-fincmarc." + outputformat
 
 if os.path.isfile(outputfilename) and not overwrite:
@@ -122,9 +122,9 @@ else:
     sys.exit("Unsupported format: " + outputformat + " (Use mrc or xml instead).")
 
 
-# 2. Acquise data
+# 2. Acquire data
 
-if not inputfilename:    
+if not inputfilename:
     config = Config.instance()
     inputfilename = config.get("dabi", "input")
 
