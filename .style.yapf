@@ -2,4 +2,4 @@
 
 based_on_style = pep8
 split_before_logical_operator = true
-column_limit = 120
+column_limit = 160
