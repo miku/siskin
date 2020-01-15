@@ -216,7 +216,7 @@ parser.add_argument("--filemap", dest="filemap", help="path of the file containi
 parser.add_argument("--overwrite", dest="overwrite", help="overwrite existing outputfile", nargs="?", const=True, default=False)
 parser.add_argument("--format", dest="outputformat", help="outputformat mrc or xml", default="mrc")
 parser.add_argument("--interval", dest="interval", help="interval for update", default="monthly")
-parser.add_argument("--path", dest="path", help="path for all data")
+parser.add_argument("--root", dest="root", help="root path for all data")
 
 args = parser.parse_args()
 inputfilename = args.inputfilename
@@ -224,7 +224,7 @@ filemap = args.filemap
 overwrite = args.overwrite
 outputformat = args.outputformat
 interval = args.interval
-path = args.path
+root = args.root
 
 # Check interval
 if interval not in ("monthly", "weekly", "daily", "manually"):
@@ -252,37 +252,33 @@ date = date.strftime("%Y%m%d")
 outputfilename = SID + "-output-" + date + "-fincmarc." + outputformat
 
 # Check default path for data
-if not path:
+if not root:
     config = Config.instance()
     try:
-        path = config.get("core", "home")
+        root = config.get("core", "home")
     except:
-        path = ""
+        root = ""
 
-if not path:
-    sys.exit("No path for data given. Use --path or specify a default path in the siskin.ini configuration file.")
+if not root:
+    sys.exit("No root path for data given. Use --root or specify a default root in the siskin.ini configuration file.")
 
-path = path.rstrip("/")
-path = path.rstrip(SID)
-path = path.rstrip("/")
-path = path + "/"
-
-if os.path.isdir(path):
-    path = path + SID + "/"
+if os.path.isdir(root):
+    path = os.path.join(root, SID)
     if not os.path.isdir(path):
         os.mkdir(path)
 else:
-    sys.exit("Path does not exists: " + path)
+    sys.exit("Root path does not exists: " + root)
 
 # Check if current output already exist
-if os.path.isfile(path + outputfilename) and not overwrite:
+outputfilename = os.path.join(path, outputfilename)
+if os.path.isfile(outputfilename) and not overwrite:
     sys.exit("Outputfile already exists. Use --overwrite.")
 
 # Set output format for MARC record
 if outputformat == "xml":
-    outputfile = pymarc.XMLWriter(open(path + outputfilename, "wb"))
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
 elif outputformat == "mrc":
-    outputfile = open(path + outputfilename, "wb")
+    outputfile = open(outputfilename, "wb")
 else:
     sys.exit("Unsupported format. Choose mrc or xml.")
 
