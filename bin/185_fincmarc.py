@@ -346,6 +346,13 @@ for jsonrecord in jsonrecords:
     f520a = get_field(jsonrecord, "abstract")
     marcrecord.add("520", a=f520a)
 
+    # Schlagwörter
+    subjects = get_field(jsonrecord, "schlagworte")
+    subjects = subjects.split(";")
+    for subject in subjects:
+        subject = subject.strip()
+        marcrecord.add("650", a=subject)
+
     # GND-Inhalts- und Datenträgertyp
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
