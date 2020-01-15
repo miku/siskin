@@ -228,14 +228,14 @@ root = args.root
 
 # Check interval
 if interval not in ("monthly", "weekly", "daily", "manually"):
-    sys.exit("Unsupported interval. Choose monthly, weekly, daily or manually.")
+    sys.exit(SID + ": Unsupported interval. Choose monthly, weekly, daily or manually.")
 
 if interval == "manually" and not overwrite:
-    sys.exit("Interval is manually. Use --overwrite to force a new output.")
+    sys.exit(SID + ": Interval is manually. Use --overwrite to force a new output.")
 
 # Check filemap
 if not filemap:
-    #sys.exit("No --filemap given. A filemap is necessary for this source.")
+    #sys.exit(SID + ": No --filemap given. A filemap is necessary for this source.")
     pass
 
 # Set closest date
@@ -260,19 +260,19 @@ if not root:
         root = ""
 
 if not root:
-    sys.exit("No root path for data given. Use --root or specify a default root in the siskin.ini configuration file.")
+    sys.exit(SID + ": No root path for data given. Use --root or specify a default root in the siskin.ini configuration file.")
 
 if os.path.isdir(root):
     path = os.path.join(root, SID)
     if not os.path.isdir(path):
         os.mkdir(path)
 else:
-    sys.exit("Root path does not exists: " + root)
+    sys.exit(SID + ": Root path does not exists: " + root)
 
 # Check if current output already exist
 outputfilename = os.path.join(path, outputfilename)
 if os.path.isfile(outputfilename) and not overwrite:
-    sys.exit("Outputfile already exists. Use --overwrite.")
+    sys.exit(SID + ": Outputfile already exists. Use --overwrite.")
 
 # Set output format for MARC record
 if outputformat == "xml":
@@ -280,7 +280,7 @@ if outputformat == "xml":
 elif outputformat == "mrc":
     outputfile = open(outputfilename, "wb")
 else:
-    sys.exit("Unsupported format. Choose mrc or xml.")
+    sys.exit(SID + ": Unsupported format. Choose mrc or xml.")
 
 
 ##################################################################################
