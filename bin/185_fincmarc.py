@@ -38,18 +38,13 @@ input = path/to/json
 """
 
 
-import argparse
-import datetime
 import json
-import sys
-import os.path
-
 import marcx
 import pymarc
-from siskin.configuration import Config
-from gluish.intervals import monthly, weekly
-from gluish.parameter import ClosestDateParameter
+
 from siskin.mappings import formats
+from siskin.configuration import Config
+from siskin.arguments import get_arguments, build_inputfilename, build_outputfilename
 from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
 
 
@@ -203,88 +198,26 @@ dabi_to_ddc = {
 }
 
 
+##################################################################################
+# 1. Parse arguments and prepare
+##################################################################################
+
 SID = "185"
 
-
-##################################################################################
-# 1. Parse arguments
-##################################################################################
-
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i", "--input", dest="inputfilename", help="inputfile")
-parser.add_argument("--filemap", dest="filemap", help="path of the file containing a dictionary, list or another map")
-parser.add_argument("--overwrite", dest="overwrite", help="overwrite existing outputfile", nargs="?", const=True, default=False)
-parser.add_argument("--format", dest="outputformat", help="outputformat mrc or xml", default="mrc")
-parser.add_argument("--interval", dest="interval", help="interval for update", default="monthly")
-parser.add_argument("--root", dest="root", help="root path for all data")
-
-args = parser.parse_args()
+args = get_arguments()
+outputfilename = build_outputfilename(args, SID)
 inputfilename = args.inputfilename
-filemap = args.filemap
-overwrite = args.overwrite
 outputformat = args.outputformat
-interval = args.interval
-root = args.root
-
-# Check interval
-if interval not in ("monthly", "weekly", "daily", "manually"):
-    sys.exit(SID + ": Unsupported interval. Choose monthly, weekly, daily or manually.")
-
-if interval == "manually" and not overwrite:
-    sys.exit(SID + ": Interval is manually. Use --overwrite to force a new output.")
-
-# Check filemap
-if not filemap:
-    #sys.exit(SID + ": No --filemap given. A filemap is necessary for this source.")
-    pass
-
-# Set closest date
-today = datetime.date.today()
-if interval == "monthly":
-    date = monthly(today)
-elif interval == "weekly":
-    date = weekly(today)
-elif interval == "daily" or interval == "manually":
-    date = today
-
-# Set file name
-date = date.strftime("%Y%m%d")
-outputfilename = SID + "-output-" + date + "-fincmarc." + outputformat
-
-# Check default path for data
-if not root:
-    config = Config.instance()
-    try:
-        root = config.get("core", "home")
-    except:
-        root = ""
-
-if not root:
-    sys.exit(SID + ": No root path for data given. Use --root or specify a default root in the siskin.ini configuration file.")
-
-if os.path.isdir(root):
-    path = os.path.join(root, SID)
-    if not os.path.isdir(path):
-        os.mkdir(path)
-else:
-    sys.exit(SID + ": Root path does not exists: " + root)
-
-# Check if current output already exist
-outputfilename = os.path.join(path, outputfilename)
-if os.path.isfile(outputfilename) and not overwrite:
-    sys.exit(SID + ": Outputfile already exists. Use --overwrite.")
 
 # Set output format for MARC record
 if outputformat == "xml":
     outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
-elif outputformat == "mrc":
-    outputfile = open(outputfilename, "wb")
 else:
-    sys.exit(SID + ": Unsupported format. Choose mrc or xml.")
+    outputfile = open(outputfilename, "wb")
 
 
 ##################################################################################
-# 2. Acquire data
+# 2. Acquire input data
 ##################################################################################
 
 if not inputfilename:
