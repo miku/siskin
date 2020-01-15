@@ -204,6 +204,7 @@ def test_check_isbn():
     assert check_isbn("123") == ""
     assert check_isbn("12345678") == ""
     assert check_isbn("1234567890") == "1234567890"
+    assert check_isbn("978-3-527-76070-1 : circa EUR 44.99 (DE)") == "978-3-527-76070-1"
     assert check_isbn("1XXXXXXXX") == ""
     assert check_isbn("XXXXXXXXXX") == ""
     assert check_isbn("1XXXXXXXXXXX") == "1XXXXXXXXX"
