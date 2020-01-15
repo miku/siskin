@@ -46,7 +46,6 @@ import os.path
 
 import marcx
 import pymarc
-from gluish.intervals import monthly
 from siskin.configuration import Config
 from gluish.intervals import monthly, weekly
 from gluish.parameter import ClosestDateParameter
@@ -213,6 +212,7 @@ SID = "185"
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input", dest="inputfilename", help="inputfile")
+parser.add_argument("--filemap", dest="filemap", help="path of the file containing a dictionary, list or another map")
 parser.add_argument("--overwrite", dest="overwrite", help="overwrite existing outputfile", nargs="?", const=True, default=False)
 parser.add_argument("--format", dest="outputformat", help="outputformat mrc or xml", default="mrc")
 parser.add_argument("--interval", dest="interval", help="interval for update", default="monthly")
@@ -220,6 +220,7 @@ parser.add_argument("--path", dest="path", help="path for all data")
 
 args = parser.parse_args()
 inputfilename = args.inputfilename
+filemap = args.filemap
 overwrite = args.overwrite
 outputformat = args.outputformat
 interval = args.interval
@@ -231,6 +232,11 @@ if interval not in ("monthly", "weekly", "daily", "manually"):
 
 if interval == "manually" and not overwrite:
     sys.exit("Interval is manually. Use --overwrite to force a new output.")
+
+# Check filemap
+if not filemap:
+    #sys.exit("No --filemap given. A filemap is necessary for this source.")
+    pass
 
 # Set closest date
 today = datetime.date.today()
