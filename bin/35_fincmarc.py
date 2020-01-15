@@ -64,11 +64,11 @@ else:
 
 
 ##################################################################################
-# 2. Acquire data
+# 2. Acquire input data
 ##################################################################################
 
 if not inputfilename:
-    inputfilename = build_inputfilename(args, "ndj", SID)
+    inputfilename = build_inputfilename(args, "xml", SID)
     os.system("metha-sync -set hathitrust:pd https://quod.lib.umich.edu/cgi/o/oai/oai")
     os.system("metha-cat -set hathitrust:pd https://quod.lib.umich.edu/cgi/o/oai/oai > %s" % inputfilename)
 
