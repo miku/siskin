@@ -206,26 +206,33 @@ dabi_to_ddc = {
 
 SID = "185"
 
+
+##################################################################################
 # 1. Parse arguments
+##################################################################################
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input", dest="inputfilename", help="inputfile")
 parser.add_argument("--overwrite", dest="overwrite", help="overwrite existing outputfile", nargs="?", const=True, default=False)
 parser.add_argument("--format", dest="outputformat", help="outputformat mrc or xml", default="mrc")
 parser.add_argument("--interval", dest="interval", help="interval for update", default="monthly")
+parser.add_argument("--path", dest="path", help="path for all data")
 
 args = parser.parse_args()
 inputfilename = args.inputfilename
 overwrite = args.overwrite
 outputformat = args.outputformat
 interval = args.interval
+path = args.path
 
+# Check interval
 if interval not in ("monthly", "weekly", "daily", "manually"):
-    sys.exit("Unsupported interval: " + interval)
+    sys.exit("Unsupported interval. Choose monthly, weekly, daily or manually.")
 
 if interval == "manually" and not overwrite:
     sys.exit("Interval is manually. Use --overwrite to force a new output.")
 
+# Set closest date
 today = datetime.date.today()
 if interval == "monthly":
     date = monthly(today)
@@ -234,21 +241,49 @@ elif interval == "weekly":
 elif interval == "daily" or interval == "manually":
     date = today
 
+# Set file name
 date = date.strftime("%Y%m%d")
 outputfilename = SID + "-output-" + date + "-fincmarc." + outputformat
 
-if os.path.isfile(outputfilename) and not overwrite:
+# Check default path for data
+if not path:
+    config = Config.instance()
+    try:
+        path = config.get("core", "home")
+    except:
+        path = ""
+
+if not path:
+    sys.exit("No path for data given. Use --path or specify a default path in the siskin.ini configuration file.")
+
+path = path.rstrip("/")
+path = path.rstrip(SID)
+path = path.rstrip("/")
+path = path + "/"
+
+if os.path.isdir(path):
+    path = path + SID + "/"
+    if not os.path.isdir(path):
+        os.mkdir(path)
+else:
+    sys.exit("Path does not exists: " + path)
+
+# Check if current output already exist
+if os.path.isfile(path + outputfilename) and not overwrite:
     sys.exit("Outputfile already exists. Use --overwrite.")
 
+# Set output format for MARC record
 if outputformat == "xml":
-    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+    outputfile = pymarc.XMLWriter(open(path + outputfilename, "wb"))
 elif outputformat == "mrc":
-    outputfile = open(outputfilename, "wb")
+    outputfile = open(path + outputfilename, "wb")
 else:
-    sys.exit("Unsupported format: " + outputformat + " (Use mrc or xml instead).")
+    sys.exit("Unsupported format. Choose mrc or xml.")
 
 
+##################################################################################
 # 2. Acquire data
+##################################################################################
 
 if not inputfilename:
     config = Config.instance()
@@ -258,7 +293,9 @@ inputfile = open(inputfilename, "r")
 jsonrecords = inputfile.readlines()
 
 
+##################################################################################
 # 3. Process data
+##################################################################################
 
 for jsonrecord in jsonrecords:
 
