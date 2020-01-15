@@ -561,7 +561,7 @@ def check_issn(issn=""):
         issn = issn1 + "-" + issn2
     issn = issn.replace(" ", "-")
     issn = issn.replace(".", "-")
-    match = re.search("([0-9xX-]{9,9})", issn)
+    match = re.match("([0-9xX-]{9,9})", issn)
     if match:
         return match.group(1)
     return ""
