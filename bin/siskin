@@ -1,0 +1,4 @@
+!/bin/bash
+
+35-fincmarc  --interval monthly  --format marc --filemap /home/schenk/lcc
+185-fincmarc --interval manually --format marc
