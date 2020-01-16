@@ -45,7 +45,7 @@ from siskin.arguments import get_arguments, build_inputfilename, build_outputfil
 
 
 ##################################################################################
-# 1. Parse arguments and prepare
+# 1. Parse arguments and prepare outputfile
 ##################################################################################
 
 SID = "35"
@@ -69,8 +69,8 @@ else:
 
 if not inputfilename:
     inputfilename = build_inputfilename(args, "xml", SID)
-    os.system("metha-sync -set hathitrust:pd https://quod.lib.umich.edu/cgi/o/oai/oai")
-    os.system("metha-cat -set hathitrust:pd https://quod.lib.umich.edu/cgi/o/oai/oai > %s" % inputfilename)
+    os.system("metha-sync -set hathitrust:pd -format marc21 https://quod.lib.umich.edu/cgi/o/oai/oai")
+    os.system("metha-cat -set hathitrust:pd -format marc21 https://quod.lib.umich.edu/cgi/o/oai/oai > %s" % inputfilename)
 
 lccfile = open(filemap, "r")
 lccs = lccfile.readlines()
