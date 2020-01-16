@@ -47,7 +47,7 @@ try:
 except (AttributeError, ImportError):
     pass
 
-__version__ = '0.84.1'
+__version__ = '0.84.2'
 
 config = Config.instance()
 if sys.version_info.major == 2:
