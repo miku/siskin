@@ -209,6 +209,9 @@ setup(name='siskin',
           'bin/taskwc',
           'bin/xmltools.py',
           'bin/solrcheckup.py',
+          'bin/siskin',
+          'bin/35-fincmarc',
+          'bin/185-fincmarc',
       ],
       entry_points={
         'console_scripts': [
