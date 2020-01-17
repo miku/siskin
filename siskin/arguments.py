@@ -104,7 +104,7 @@ def build_outputfilename(args, SID):
 
     # Set outputfilename
     date = date.strftime("%Y%m%d")
-    outputfilename = SID + "-output-" + date + "." + outputformat
+    outputfilename = SID + "-output-" + date + ".fincmarc." + outputformat
     outputfilename = os.path.join(path, outputfilename)
 
     # Check if current output already exist
