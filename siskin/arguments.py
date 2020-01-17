@@ -2,6 +2,8 @@ import argparse
 import datetime
 import os.path
 import pymarc
+import glob
+import re
 import sys
 
 from siskin.configuration import Config
@@ -18,6 +20,8 @@ def get_arguments():
     parser.add_argument("--format", dest="outputformat", help="outputformat mrc or xml", default="mrc")
     parser.add_argument("--interval", dest="interval", help="interval for update", default="monthly")
     parser.add_argument("--root", dest="root", help="root path for all data")
+    parser.add_argument("--output-history", dest="output_history", help="number of older outputfiles to keep", default="3")
+    parser.add_argument("--input-history", dest="input_history", help="number of older inputfiles to keep", default="3")
 
     args = parser.parse_args()
     return args
@@ -44,7 +48,31 @@ def get_path(args, SID):
     else:
         sys.exit(SID + ": Root path does not exists: " + root)
 
-    return path    
+    return path
+
+
+def remove_old_inputfiles(args, SID):
+
+    n = int(args.input_history)
+    inputfilenames_to_delete = build_inputfilename(args, SID)
+    inputfilenames_to_delete = re.sub("-input-(.*)", "*", inputfilenames_to_delete)
+
+    files = glob.glob(inputfilenames_to_delete)
+    files = sorted(files, key=os.path.getctime)
+    for filename in files[:-n]:
+        os.remove(filename)
+
+
+def remove_old_outputfiles(args, SID):
+
+    n = int(args.output_history)
+    outputfilenames_to_delete = build_outputfilename(args, SID)
+    outputfilenames_to_delete = re.sub("-output-(.*)", "*", outputfilenames_to_delete)
+
+    files = glob.glob(outputfilenames_to_delete)
+    files = sorted(files, key=os.path.getctime)
+    for filename in files[:-n]:
+        os.remove(filename)
 
 
 def build_outputfilename(args, SID):
