@@ -41,7 +41,7 @@ import marcx
 import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
-from siskin.arguments import get_arguments, build_inputfilename, build_outputfilename
+from siskin.arguments import get_arguments, build_inputfilename, build_outputfilename, remove_old_outputfiles, remove_old_inputfiles
 
 
 ##################################################################################
@@ -55,6 +55,9 @@ outputfilename = build_outputfilename(args, SID)
 inputfilename = args.inputfilename
 outputformat = args.outputformat
 filemap = args.filemap
+
+remove_old_outputfiles(args, SID)
+remove_old_inputfiles(args, SID)
 
 # Set output format for MARC record
 if outputformat == "xml":
