@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
-35-fincmarc  --interval monthly  --format mrc --filemap /home/schenk/lcc
+35-fincmarc  --interval monthly  --format mrc --input-history 3 --output-history 5 --filemap /home/schenk/lcc
 185-fincmarc --interval manually --format mrc
