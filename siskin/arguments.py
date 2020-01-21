@@ -184,13 +184,11 @@ class FincArgumentParser():
 
         # If you need the args of the wrapped ArgumentParser explicitly, use `parse_args`.
         args = fip.parse_args()
-
     """
     def __init__(self, config=None):
         """
         Create a parser with default flags. The config is a standard library
-        [ConfigParser](https://docs.python.org/3/library/configparser.html#configparser.ConfigParser)
-        object.
+        ConfigParser (https://docs.python.org/3/library/configparser.html#configparser.ConfigParser) object.
         """
         self.config = config
         if self.config is None:
@@ -208,11 +206,16 @@ class FincArgumentParser():
         self.parser.add_argument("--input-hist-size", dest="input_hist_size", type=int, help="number of older inputfiles to keep", default=5)
 
     def parse_args(self):
+        """
+        Returns the args as parsed by argparse.ArgumentParser.
+        """
         return self.parser.parse_args()
 
     def sid_path(self, sid):
         """
-        Return path for a given source id.
+        Return path (direcoty) for a given source id. This will create the
+        output directory, if it does not exist. The root directory however, must
+        exist before.
         """
         root = self.parse_args().root
         if not root:
@@ -271,10 +274,8 @@ class FincArgumentParser():
 
         if args.outputformat not in ("mrc", "xml"):
             raise ValueError(sid + ": Unsupported format. Choose mrc or xml.")
-
         if args.interval not in ("monthly", "weekly", "daily", "manually"):
             raise ValueError(sid + ": Unsupported interval. Choose monthly, weekly, daily or manually.")
-
         if args.interval == "manually" and not args.overwrite:
             raise ValueError(sid + ": Interval is manually. Use --overwrite to force a new output.")
 
@@ -294,6 +295,9 @@ class FincArgumentParser():
         return outputfilename
 
     def inputfilename(self, sid):
+        """
+        Return the path to the expected input filename for a given sid.
+        """
         args = self.parse_args()
         date = datetime.date.today()
 
