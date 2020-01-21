@@ -65,10 +65,7 @@ class DataciteCombine(DataciteTask):
         return Executable(name='metha-sync', message='https://github.com/miku/metha')
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix,
-                 url=self.url,
-                 dir=self.config.get('core', 'metha-dir'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
                           prefix=self.prefix,
                           url=self.url,
@@ -111,9 +108,7 @@ class DataciteExport(DataciteTask):
         return DataciteIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
-                          input=self.input().path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

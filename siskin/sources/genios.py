@@ -319,8 +319,7 @@ class GeniosLatestReloadList(GeniosTask):
         sorted, the last entry for a name should be the latest.
         """
         if self.kind not in GeniosTask.allowed_kinds and not self.kind == "all":
-            raise RuntimeError('apart from the catch-all "all" only these --kind parameters are allowed: %s' %
-                               ', '.join(GeniosTask.allowed_kinds))
+            raise RuntimeError('apart from the catch-all "all" only these --kind parameters are allowed: %s' % ', '.join(GeniosTask.allowed_kinds))
 
         filemap = {}
 
@@ -481,9 +480,7 @@ class GeniosCombinedExport(GeniosTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path,
                           input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
-                          input=output)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -501,19 +498,12 @@ class GeniosISSNList(GeniosTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': GeniosCombinedIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
-        }
+        return {'input': GeniosCombinedIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=output)
-        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=output)
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         output = shellout("""LC_ALL=C sort -S35% -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -528,14 +518,10 @@ class GeniosDOIList(GeniosTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': GeniosCombinedIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
-        }
+        return {'input': GeniosCombinedIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     def run(self):
-        output = shellout("""jq -c -r '.["doi"]' <(unpigz -c {input}) | sort -S35% -u >> {output} """,
-                          input=self.input().get('input').path)
+        output = shellout("""jq -c -r '.["doi"]' <(unpigz -c {input}) | sort -S35% -u >> {output} """, input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

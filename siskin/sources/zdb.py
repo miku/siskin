@@ -84,9 +84,7 @@ class ZDBShortTitleMap(ZDBTask):
         """
         source = self.run.__doc__.replace("\n", "").replace(" ", "").replace("@", "ICAg")
         tempcode = shellout("""echo '{code}' | base64 -d > {output}.go """, code=source, preserve_whitespace=True)
-        output = shellout(""" unpigz -c {input} | go run {code}.go > {output} """,
-                          code=tempcode,
-                          input=self.input().path)
+        output = shellout(""" unpigz -c {input} | go run {code}.go > {output} """, code=tempcode, input=self.input().path)
         os.remove(tempcode)
         luigi.LocalTarget(output).move(self.output().path)
 

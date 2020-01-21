@@ -123,9 +123,7 @@ class B3KatDownload(B3KatTask):
         with self.input().open() as handle:
             for i, row in enumerate(handle.iter_tsv(cols=('url', )), start=1):
                 downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
-                output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""",
-                                  input=downloaded,
-                                  stopover=stopover)
+                output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""", input=downloaded, stopover=stopover)
                 try:
                     os.remove(downloaded)
                     os.remove(output)

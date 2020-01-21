@@ -23,18 +23,7 @@ from siskin.utils import marc_build_imprint
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-lang_map = {
-    "de": "ger",
-    "en": "eng",
-    "fr": "fre",
-    "ru": "rus",
-    "it": "ita",
-    "es": "spa",
-    "af": "afr",
-    "cs": "csb",
-    "ar": "ara",
-    "hu": "hung"
-}
+lang_map = {"de": "ger", "en": "eng", "fr": "fre", "ru": "rus", "it": "ita", "es": "spa", "af": "afr", "cs": "csb", "ar": "ara", "hu": "hung"}
 
 inputfilename = "70_input.ctv6"
 outputfilename = "70_output.mrc"
@@ -246,13 +235,11 @@ for i, record in enumerate(sqlite):
     callnumber = record[14]
     if not callnumber:
         callnumber = "nicht verfügbar"
-    marcrecord.add(
-        "856",
-        q="text/html",
-        _3="Link zur Bestandsinformation",
-        u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html",
-        z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " +
-        callnumber)
+    marcrecord.add("856",
+                   q="text/html",
+                   _3="Link zur Bestandsinformation",
+                   u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html",
+                   z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
 
     # Kollektion
     collections = ["a", f001, "b", "70", "c", "sid-70-col-aegyptologie"]

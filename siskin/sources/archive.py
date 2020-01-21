@@ -94,8 +94,7 @@ class ArchiveSearchMetadata(ArchiveTask):
         return ArchiveSearch(date=self.date, query=self.query)
 
     def run(self):
-        output = shellout("for i in $(jq -r .identifier {input}); do ia metadata $i; done >> {output}",
-                          input=self.input().path)
+        output = shellout("for i in $(jq -r .identifier {input}); do ia metadata $i; done >> {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

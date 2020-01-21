@@ -56,8 +56,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART,
-                                 AMSLService)
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
 from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
@@ -302,8 +301,7 @@ class AIErrorDistribution(AITask):
 
     @timed
     def run(self):
-        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}",
-                          input=self.input().path)
+        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -413,10 +411,9 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout(
-            """unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
-            size=self.batchsize,
-            input=self.input().path)
+        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
+                          size=self.batchsize,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -434,9 +431,7 @@ class AIInstitutionChanges(AITask):
         return AILocalData(date=self.date)
 
     def run(self):
-        output = shellout(
-            """groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}""",
-            input=self.input().path)
+        output = shellout("""groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -460,10 +455,9 @@ class AIIntermediateSchemaDeduplicated(AITask):
         Update intermediate schema labels from file. We cut out the ID and the
         ISIL list from the changes.
         """
-        output = shellout(
-            "unpigz -c {input} | span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
-            input=self.input().get('file').path,
-            file=self.input().get('changes').path)
+        output = shellout("unpigz -c {input} | span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
+                          input=self.input().get('file').path,
+                          file=self.input().get('changes').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -493,10 +487,7 @@ class AIExport(AITask):
         else:
             self.logger.debug('ignoring [126] BASE, since format is: %s', self.format)
 
-        shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}",
-                 format=self.format,
-                 input=self.input().get('ai').path,
-                 output=tmp)
+        shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}", format=self.format, input=self.input().get('ai').path, output=tmp)
 
         luigi.LocalTarget(tmp).move(self.output().path)
 
@@ -786,10 +777,9 @@ class AIDOIList(AITask):
         return AILicensing(date=self.date)
 
     def run(self):
-        output = shellout(
-            """ unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output} """,
-            input=self.input().path,
-            isil=self.isil)
+        output = shellout(""" unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output} """,
+                          input=self.input().path,
+                          isil=self.isil)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

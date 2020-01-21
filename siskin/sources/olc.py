@@ -60,10 +60,9 @@ class OLCDump(OLCTask):
     collection = luigi.Parameter(default='SSG-OLC-ARC', description='SSG-OLC-XXX, see: https://is.gd/8DFvOo')
 
     def run(self):
-        output = shellout(
-            """ solrdump -verbose -server {server} -q 'collection_details:{collection}' | zstd -q -c > {output} """,
-            server=self.config.get('olc', 'solr'),
-            collection=self.collection)
+        output = shellout(""" solrdump -verbose -server {server} -q 'collection_details:{collection}' | zstd -q -c > {output} """,
+                          server=self.config.get('olc', 'solr'),
+                          collection=self.collection)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -48,8 +48,7 @@ def check_swb_issn(issn, title):
     """
     The length of the response can indicate, whether records exist.
     """
-    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' %
-                       (servername, issn, title))
+    req = requests.get('%s?q=source_id:0+institution:DE-105+issn:%s+title_short:"%s"&wt=csv&fl=id' % (servername, issn, title))
     return len(req.text)
 
 
@@ -175,8 +174,7 @@ for record in reader:
 
     # Sprache
     languages = record.field("037", alt="")
-    f041a = [languages[i:i + 3]
-             for i in range(0, len(languages), 3)]  # to handle uncommon language codes like "gerengfre"
+    f041a = [languages[i:i + 3] for i in range(0, len(languages), 3)]  # to handle uncommon language codes like "gerengfre"
     marcrecord.add("041", a=f041a)
 
     # 1. Urheber

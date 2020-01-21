@@ -62,11 +62,7 @@ def get_field(xmlrecord, tag):
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", dest="inputfilename", help="inputfile", default="186_input.xml", metavar="inputfilename")
 parser.add_argument("-o", dest="outputfilename", help="outputfile", default="186_output.mrc", metavar="outputfilename")
-parser.add_argument("-f",
-                    dest="outputformat",
-                    help="outputformat marc or marcxml",
-                    default="marc",
-                    metavar="outputformat")
+parser.add_argument("-f", dest="outputformat", help="outputformat marc or marcxml", default="marc", metavar="outputformat")
 
 args = parser.parse_args()
 inputfilename = args.inputfilename

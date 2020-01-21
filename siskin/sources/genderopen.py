@@ -54,8 +54,7 @@ class GenderopenIntermediateSchema(GenderopenTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("metha-sync {repo} && metha-cat {repo} | span-import -i genderopen | gzip -c > {output}",
-                          repo=self.REPO)
+        output = shellout("metha-sync {repo} && metha-cat {repo} | span-import -i genderopen | gzip -c > {output}", repo=self.REPO)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

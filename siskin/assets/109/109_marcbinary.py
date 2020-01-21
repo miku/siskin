@@ -218,8 +218,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
         format = u"Mehrbänder"
     elif len(isbn) > 0 and "Videokassette" not in format and "VHS" not in format and "DVD" not in format:
         format = "Buch"
-    elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format
-          or "X," in format or "Bde." in format or ": graph" in format):
+    elif ("S." in format or "Bl." in format or "Ill." in format or " p." in format or "XI" in format or "XV" in format or "X," in format or "Bde." in format
+          or ": graph" in format):
         format = "Buch"
     elif "CD" in format:
         format = "CD"
@@ -233,9 +233,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
         format = "Loseblattsammlung"
     elif regexp:
         format = "Aufsatz"
-    elif ("Plakat" in format or "Kassette" in format or "Box" in format or "Karton" in format or "Postkarten" in format
-          or "Teile" in format or "USB" in format or "Schachtel" in format or "Schautafel" in format
-          or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format or "Schuber" in format):
+    elif ("Plakat" in format or "Kassette" in format or "Box" in format or "Karton" in format or "Postkarten" in format or "Teile" in format or "USB" in format
+          or "Schachtel" in format or "Schautafel" in format or "Medienkombination" in format or "Tafel" in format or "Faltbl" in format
+          or "Schuber" in format):
         format = "Objekt"
     elif id in parent_ids and len(isbn) == 0:  # Zeitschrift
         continue

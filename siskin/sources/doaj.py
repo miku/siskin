@@ -69,10 +69,9 @@ class DOAJHarvest(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout(
-            """metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
-            dir=self.config.get('core', 'metha-dir'),
-            endpoint='http://www.doaj.org/oai.article')
+        output = shellout("""metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | pigz -c > {output}""",
+                          dir=self.config.get('core', 'metha-dir'),
+                          endpoint='http://www.doaj.org/oai.article')
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -111,8 +110,7 @@ class DOAJIntermediateSchemaDirty(DOAJTask):
 
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="doaj-oai",
-                             description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
+    format = luigi.Parameter(default="doaj-oai", description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
 
     def requires(self):
         return {
@@ -145,9 +143,7 @@ class DOAJTable(DOAJTask):
         return DOAJIntermediateSchemaDirty(date=self.date)
 
     def run(self):
-        output = shellout(
-            """unpigz -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """,
-            input=self.input().path)
+        output = shellout("""unpigz -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -182,8 +178,7 @@ class DOAJIntermediateSchema(DOAJTask):
     Respect whitelist.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="doaj-oai",
-                             description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
+    format = luigi.Parameter(default="doaj-oai", description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
 
     def requires(self):
         return {
@@ -209,20 +204,13 @@ class DOAJISSNList(DOAJTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': DOAJIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='http://git.io/NYpfTw')
-        }
+        return {'input': DOAJIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='http://git.io/NYpfTw')}
 
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=stopover)
+        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
+        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -244,9 +232,8 @@ class DOAJDOIList(DOAJTask):
 
     @timed
     def run(self):
-        output = shellout(
-            """jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
-            input=self.input().get('input').path)
+        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
+                          input=self.input().get('input').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -61,8 +61,7 @@ class NLFetch(NLTask):
     Stream from SOLR.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    query = luigi.Parameter(default="collection_details:GBV_NL_EBOOK",
-                            description="to test: id:NLEB006936695 OR id:NLEB006936733")
+    query = luigi.Parameter(default="collection_details:GBV_NL_EBOOK", description="to test: id:NLEB006936695 OR id:NLEB006936733")
 
     def run(self):
         """

@@ -66,9 +66,7 @@ class BLBHarvest(BLBTask):
     def run(self):
         auth = self.config.get("blb", "z39auth")
         commands = self.assets("180/commands_fein")
-        output = shellout("""yaz-client -f <(cat <(echo {auth}) {commands}) -m {output} """,
-                          auth=auth,
-                          commands=commands)
+        output = shellout("""yaz-client -f <(cat <(echo {auth}) {commands}) -m {output} """, auth=auth, commands=commands)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

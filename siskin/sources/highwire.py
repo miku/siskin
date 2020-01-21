@@ -95,9 +95,7 @@ class HighwireIntermediateSchema(HighwireTask):
         return HighwireCombine(date=self.date, url=self.url, prefix=self.prefix)
 
     def run(self):
-        output = shellout("unpigz -c {input} | span-import -i highwire | pigz -c > {output}",
-                          input=self.input().path,
-                          pipefail=False)
+        output = shellout("unpigz -c {input} | span-import -i highwire | pigz -c > {output}", input=self.input().path, pipefail=False)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -115,9 +113,7 @@ class HighwireExport(HighwireTask):
         return HighwireIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
-                          input=self.input().path)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -59,10 +59,7 @@ class MediarepMARC(MediarepTask):
         return Executable(name='metha-sync', message='https://github.com/miku/metha'),
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix,
-                 url=self.url,
-                 dir=self.config.get('core', 'metha-dir'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         data = shellout("""METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} > {output}""",
                         dir=self.config.get('core', 'metha-dir'),
                         prefix=self.prefix,
@@ -94,10 +91,7 @@ class MediarepIntermediateSchema(MediarepTask):
         ]
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix,
-                 url=self.url,
-                 dir=self.config.get('core', 'metha-dir'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("""METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} |
                              span-import -i mediarep-dim | pigz -c > {output}""",
                           prefix=self.prefix,

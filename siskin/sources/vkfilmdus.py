@@ -71,9 +71,7 @@ class VKFilmDusConvert(VKFilmDusTask):
     Convert from binary MAB to MABXML.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    encoding = luigi.Parameter(default='UTF-8',
-                               description='input encoding for Mab2Mabxml.jar, e.g. UTF-8 or ISO-8859-1',
-                               significant=False)
+    encoding = luigi.Parameter(default='UTF-8', description='input encoding for Mab2Mabxml.jar, e.g. UTF-8 or ISO-8859-1', significant=False)
 
     def run(self):
         """

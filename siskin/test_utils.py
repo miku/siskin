@@ -8,9 +8,8 @@ import responses
 
 import marcx
 import pymarc
-from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, dictcheck, get_task_import_cache, load_set,
-                          marc_build_field_008, marc_build_imprint, marc_clean_record, marc_clean_subfields, nwise,
-                          random_string, scrape_html_listing, xmlstream)
+from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, dictcheck, get_task_import_cache, load_set, marc_build_field_008, marc_build_imprint,
+                          marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
 
 
 def test_set_encoder_dumps():
@@ -188,14 +187,10 @@ def test_marc_build_field_008():
     assert marc_build_field_008() == " " * 40
     assert marc_build_field_008(year="2000") == "       2000                             "
     assert marc_build_field_008(year="2000", language="ger") == "       2000                        ger  "
-    assert marc_build_field_008(year="2000", periodicity="1",
-                                language="ger") == "       2000          1             ger  "
-    assert marc_build_field_008(year="2000", periodicity="1",
-                                language=["ger", "fre"]) == "       2000          1             ger  "
-    assert marc_build_field_008(year="2000", periodicity="1",
-                                language=["ger", "fre", "day"]) == "       2000          1             mul  "
-    assert marc_build_field_008(year="20XX", periodicity="1",
-                                language=["ger", "fre", "day"]) == "                     1             mul  "
+    assert marc_build_field_008(year="2000", periodicity="1", language="ger") == "       2000          1             ger  "
+    assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre"]) == "       2000          1             ger  "
+    assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre", "day"]) == "       2000          1             mul  "
+    assert marc_build_field_008(year="20XX", periodicity="1", language=["ger", "fre", "day"]) == "                     1             mul  "
 
 
 def test_check_isbn():

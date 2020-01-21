@@ -163,8 +163,6 @@ def openurl_parameters_from_intermediateschema(doc, rfr_id='www.ub.uni-leipzig.d
     return params
 
 
-def openurl_link_from_intermediateschema(doc,
-                                         base='http://www.redi-bw.de/links/ubl?rl_site=ubl&',
-                                         rfr_id='www.ub.uni-leipzig.de'):
+def openurl_link_from_intermediateschema(doc, base='http://www.redi-bw.de/links/ubl?rl_site=ubl&', rfr_id='www.ub.uni-leipzig.de'):
     params = openurl_parameters_from_intermediateschema(doc, rfr_id=rfr_id)
     return '{}{}'.format(base, urlencode(params))

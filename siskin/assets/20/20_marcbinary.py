@@ -30,8 +30,8 @@ outputfile = open(outputfilename, "wb")
 for oldrecord in xmlstream(inputfilename, "Record"):
 
     oldrecord = xmltodict.parse(oldrecord,
-                                force_list=("setSpec", "dc:identifier", "dc:language", "dc:creator", "dc:title",
-                                            "dc:publisher", "dc:rights", "dc:subject", "dc:relation", "dc:description"))
+                                force_list=("setSpec", "dc:identifier", "dc:language", "dc:creator", "dc:title", "dc:publisher", "dc:rights", "dc:subject",
+                                            "dc:relation", "dc:description"))
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 

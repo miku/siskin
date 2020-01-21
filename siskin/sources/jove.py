@@ -53,8 +53,7 @@ class JoveMARC(JoveTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl -sL --fail "{url}" | marctexttoxml | xmllint --format - > {output}""",
-                          url=self.config.get("jove", "url"))
+        output = shellout("""curl -sL --fail "{url}" | marctexttoxml | xmllint --format - > {output}""", url=self.config.get("jove", "url"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -114,9 +114,7 @@ class VKFilmBADump(VKFilmBATask):
     Only a single fixed item, no date.
     """
     def run(self):
-        output = shellout(
-            """curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}"""
-        )
+        output = shellout("""curl -sL --fail "https://speicherwolke.uni-leipzig.de/index.php/s/KMUldvGMJRc7iLP/download" > {output}""")
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

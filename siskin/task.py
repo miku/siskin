@@ -71,9 +71,7 @@ class DefaultTask(BaseTask):
     """
     BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
-    stamp = luigi.BoolParameter(default=False,
-                                description="update processing time of source via AMSL API",
-                                significant=False)
+    stamp = luigi.BoolParameter(default=False, description="update processing time of source via AMSL API", significant=False)
 
     @classmethod
     def assets(cls, path):
@@ -172,9 +170,7 @@ class DefaultTask(BaseTask):
             return
 
         try:
-            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """,
-                     write_url=write_url,
-                     sid=sid)
+            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """, write_url=write_url, sid=sid)
         except RuntimeError as err:
             self.logger.warn(err)
             return

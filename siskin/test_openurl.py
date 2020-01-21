@@ -136,8 +136,7 @@ def test_openurl_from_intermediateschema():
                 'ctx_enc': 'info:ofi/enc:UTF-8',
                 'ctx_ver': 'Z39.88-2004',
                 'rfr_id': 'info:sid/www.ub.uni-leipzig.de:generator',
-                'rft.atitle':
-                'An Analysis of Correlations Among 4 Outcome Scales Employed in Clinical Trials of Patients With Major Depressive Disorder',
+                'rft.atitle': 'An Analysis of Correlations Among 4 Outcome Scales Employed in Clinical Trials of Patients With Major Depressive Disorder',
                 'rft.aufirst': 'Q',
                 'rft.aulast': 'JIANG',
                 'rft.date': '2006-07-01',

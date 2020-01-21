@@ -52,9 +52,7 @@ class IJOCHarvest(IJOCTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        shellout("""METHA_DIR={dir} metha-sync "{endpoint}" """,
-                 dir=self.config.get('core', 'metha-dir'),
-                 endpoint=self.endpoint)
+        shellout("""METHA_DIR={dir} metha-sync "{endpoint}" """, dir=self.config.get('core', 'metha-dir'), endpoint=self.endpoint)
         output = shellout("""METHA_DIR={dir} metha-cat -root Records "{endpoint}" > {output}""",
                           dir=self.config.get('core', 'metha-dir'),
                           endpoint=self.endpoint)
@@ -99,11 +97,10 @@ class IJOCFincSolr(IJOCTask):
         return {'config': AMSLFilterConfig(date=self.date), 'file': IJOCIntermediateSchema(date=self.date)}
 
     def run(self):
-        output = shellout(
-            """span-tag -c {config} <(unpigz -c {input}) | span-export -o {format} -with-fullrecord > {output}""",
-            config=self.input().get('config').path,
-            input=self.input().get('file').path,
-            format=self.format)
+        output = shellout("""span-tag -c {config} <(unpigz -c {input}) | span-export -o {format} -with-fullrecord > {output}""",
+                          config=self.input().get('config').path,
+                          input=self.input().get('file').path,
+                          format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

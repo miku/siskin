@@ -22,14 +22,17 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
 import argparse
-import sys
-import tempfile
-import shutil
 import datetime
 import os
-import configparser
+import shutil
+import sys
+import tempfile
 from pathlib import Path
+
+import configparser
+
 from siskin.arguments import FincArgumentParser
+
 
 def test_plain_parser():
     parser = FincArgumentParser()
@@ -37,6 +40,7 @@ def test_plain_parser():
     assert parser is not None
     assert parser.config is not None
     assert isinstance(parser.parser, argparse.ArgumentParser)
+
 
 def test_no_args():
     sys.argv = ["<dummy>"]
@@ -54,6 +58,7 @@ def test_no_args():
     assert args.overwrite is False
     assert args.filemap is None
 
+
 def test_with_root():
     sys.argv = ["<testing>", "--root", "/tmp/siskin-test-arguments"]
 
@@ -62,6 +67,7 @@ def test_with_root():
 
     assert args is not None
     assert args.root == "/tmp/siskin-test-arguments"
+
 
 def test_outputfilename():
     with tempfile.TemporaryDirectory(prefix='siskin-test-arguments-') as dirname:
@@ -74,6 +80,7 @@ def test_outputfilename():
         filename = '{}-output-{}.fincmarc.mrc'.format(sid, date)
         assert parser.outputfilename(sid) == os.path.join(dirname, sid, filename)
 
+
 def test_inputfilename():
     with tempfile.TemporaryDirectory(prefix='siskin-test-arguments-') as dirname:
         sys.argv = ["<dummy>", "--root", dirname]
@@ -84,6 +91,7 @@ def test_inputfilename():
         sid, date = '234', datetime.date.today().strftime('%Y%m01')
         filename = '{}-input-{}.mrc'.format(sid, date)
         assert parser.inputfilename(sid) == os.path.join(dirname, sid, filename)
+
 
 def test_with_config_root():
     # Explicitly set sys.argv, since this may contain values from other test functions.
@@ -99,6 +107,7 @@ def test_with_config_root():
 
         assert parser.config is not None
         assert parser.sid_path("123") == os.path.join(dirname, "123")
+
 
 def test_remove_old_inputfiles():
 
@@ -120,6 +129,7 @@ def test_remove_old_inputfiles():
         parser.remove_old_inputfiles(sid)
         assert len(os.listdir(parser.sid_path(sid))) == 5
 
+
 def test_remove_old_inputfiles():
 
     with tempfile.TemporaryDirectory(prefix='siskin-test-arguments-') as dirname:
@@ -139,4 +149,3 @@ def test_remove_old_inputfiles():
         assert len(os.listdir(parser.sid_path(sid))) == 10
         parser.remove_old_outputfiles(sid)
         assert len(os.listdir(parser.sid_path(sid))) == 3
-

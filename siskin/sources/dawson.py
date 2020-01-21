@@ -110,10 +110,7 @@ class DawsonIntermediateSchema(DawsonTask):
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""",
-                          flux=self.assets("124/124.flux"),
-                          mapdir=mapdir,
-                          input=self.input().path)
+        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} > {output}""", flux=self.assets("124/124.flux"), mapdir=mapdir, input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

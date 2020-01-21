@@ -60,8 +60,7 @@ for record in xmlstream(inputfilename, "record"):
     descriptions = [d[:8000] for d in descriptions]
     total = sum((len(s) for s in descriptions))
     if total > 9000:
-        logging.warn('%s: sum of descriptions exceeds (%d) limit, keeping 1 of %d fields', f001, total,
-                     len(descriptions))
+        logging.warn('%s: sum of descriptions exceeds (%d) limit, keeping 1 of %d fields', f001, total, len(descriptions))
         descriptions = descriptions[:1]
     for description in descriptions:
         record.add("520", a=description)

@@ -86,8 +86,7 @@ for line in inputfile:
             counters["fid"][issn] = resp["response"]["numFound"]
 
 data = [(names[issn], issn, freq, counters["ai"][issn], counters["fid"][issn],
-         '%0.2f%%' % (100 * float(counters["fid"][issn]) / max(0.01, counters["ai"][issn])))
-        for issn, freq in counters["c"].most_common()]
+         '%0.2f%%' % (100 * float(counters["fid"][issn]) / max(0.01, counters["ai"][issn]))) for issn, freq in counters["c"].most_common()]
 
 df = pd.DataFrame(data, columns=["title", "issn", "count", "ai", "ai-fid", "pct"])
 df.to_excel("68.xlsx")

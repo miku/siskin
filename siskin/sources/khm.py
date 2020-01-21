@@ -101,8 +101,7 @@ class KHMMARC(KHMTask):
         return KHMDropbox(date=self.date)
 
     def run(self):
-        output = shellout("""sed -e 's/'$(echo "\o001")'/ /g' < {input} > {output}""",
-                          input=self.config.get('khm', 'dump'))
+        output = shellout("""sed -e 's/'$(echo "\o001")'/ /g' < {input} > {output}""", input=self.config.get('khm', 'dump'))
         # TODO(miku): maybe check, if cleanup is still required.
         output = shellout("{python} {script} {input} {output}",
                           script=self.assets("109/109_marcbinary.py"),
@@ -133,9 +132,7 @@ class KHMLatest(KHMTask):
         """
         with self.input().open() as handle:
             with self.output().open('w') as output:
-                records = sorted(handle.iter_tsv(cols=('path', )),
-                                 reverse=True,
-                                 key=lambda row: os.path.basename(row.path))
+                records = sorted(handle.iter_tsv(cols=('path', )), reverse=True, key=lambda row: os.path.basename(row.path))
                 if len(records) == 0:
                     raise RuntimeError('no files found, cannot determine latest date')
                 match = re.search(self.FILEPATTERN, records[0].path)

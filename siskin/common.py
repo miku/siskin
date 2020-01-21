@@ -77,8 +77,8 @@ class FTPMirror(CommonTask):
         for a given (host, username, base, pattern) is just synced.
         """
         base = os.path.dirname(self.output().path)
-        subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(
-            host=self.host, username=self.username, base=self.base, pattern=self.pattern).encode('utf-8')).hexdigest()
+        subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(host=self.host, username=self.username, base=self.base,
+                                                                          pattern=self.pattern).encode('utf-8')).hexdigest()
 
         target = os.path.join(base, subdir)  # target is the root of the mirror
         if not os.path.exists(target):
@@ -169,8 +169,7 @@ class RedmineDownload(CommonTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...", self.issue,
-                         self.config.get('redmine', 'baseurl'), self.issue)
+        self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...", self.issue, self.config.get('redmine', 'baseurl'), self.issue)
         url = "%s/issues/%s.json?include=attachments" % (self.config.get('redmine', 'baseurl'), self.issue)
         output = shellout(""" curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
                           apikey=self.config.get("redmine", "apikey"),

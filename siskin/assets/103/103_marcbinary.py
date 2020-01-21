@@ -274,8 +274,7 @@ for record in xml["Records"]["Record"]:
 
         if matches == 0:
 
-            values = (identifier, title, description, subject, type, format, relation, publisher, date, source,
-                      language, rights, url, creator, coverage)
+            values = (identifier, title, description, subject, type, format, relation, publisher, date, source, language, rights, url, creator, coverage)
 
             query = """
                 INSERT INTO

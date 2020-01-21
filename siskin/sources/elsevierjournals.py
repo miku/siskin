@@ -157,9 +157,7 @@ class ElsevierJournalsExport(ElsevierJournalsTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path,
                           input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-                          format=self.format,
-                          input=output)
+        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -177,10 +175,7 @@ class ElsevierJournalsDOIList(ElsevierJournalsTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': ElsevierJournalsIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
-        }
+        return {'input': ElsevierJournalsIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):
@@ -188,9 +183,7 @@ class ElsevierJournalsDOIList(ElsevierJournalsTask):
         # process substitution sometimes results in a broken pipe, so extract
         # beforehand
         output = shellout("unpigz -c {input} > {output}", input=self.input().get('input').path)
-        shellout("""jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
-                 input=output,
-                 output=stopover)
+        shellout("""jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """, input=output, output=stopover)
         os.remove(output)
         output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
@@ -206,20 +199,13 @@ class ElsevierJournalsISSNList(ElsevierJournalsTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': ElsevierJournalsIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
-        }
+        return {'input': ElsevierJournalsIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=output)
-        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=output)
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         output = shellout("""sort -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 

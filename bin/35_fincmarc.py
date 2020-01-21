@@ -33,16 +33,16 @@ Origin: OAI
 """
 
 
-import re
 import os
+import re
 from io import BytesIO, StringIO
 
 import marcx
 import pymarc
+from siskin.arguments import (build_inputfilename, build_outputfilename,
+                              get_arguments)
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
-from siskin.arguments import get_arguments, build_inputfilename, build_outputfilename
-
 
 ##################################################################################
 # 1. Parse arguments and prepare outputfile

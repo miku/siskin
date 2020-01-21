@@ -58,17 +58,9 @@ def clean_language(language):
 
 # Keyword arguments
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i",
-                    dest="inputfile_directory",
-                    help="directory of inputfiles",
-                    default="187_input",
-                    metavar="inputfile_directory")
+parser.add_argument("-i", dest="inputfile_directory", help="directory of inputfiles", default="187_input", metavar="inputfile_directory")
 parser.add_argument("-o", dest="outputfilename", help="outputfile", default="187_output.mrc", metavar="outputfilename")
-parser.add_argument("-f",
-                    dest="outputformat",
-                    help="outputformat marc or marcxml",
-                    default="marc",
-                    metavar="outputformat")
+parser.add_argument("-f", dest="outputformat", help="outputformat marc or marcxml", default="marc", metavar="outputformat")
 
 args = parser.parse_args()
 inputfile_directory = args.inputfile_directory

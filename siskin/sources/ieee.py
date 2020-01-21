@@ -93,8 +93,7 @@ class IEEEUpdatesIntermediateSchema(IEEETask):
         return IEEEPaths(date=self.date)
 
     def run(self):
-        output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}",
-                          input=self.input().path)
+        output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -121,9 +120,8 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     // XML syntax error on line 402780414: invalid character entity &10 (no semicolon)
     """
     def run(self):
-        output = shellout(
-            """tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",
-            input=self.config.get('ieee', 'backlog-archive'))
+        output = shellout("""tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",
+                          input=self.config.get('ieee', 'backlog-archive'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -162,9 +160,7 @@ class IEEESolrExport(IEEETask):
         """
         TODO: get ISIL attachments from AMSL.
         """
-        output = shellout(
-            """span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(unpigz -c {input}) | span-export | pigz -c > {output}""",
-            input=self.input().path)
+        output = shellout("""span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(unpigz -c {input}) | span-export | pigz -c > {output}""", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -176,10 +172,7 @@ class IEEEDOIList(IEEETask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': IEEEIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
-        }
+        return {'input': IEEEIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     @timed
     def run(self):

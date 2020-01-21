@@ -22,7 +22,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: GoeScholar
@@ -63,9 +62,7 @@ class GeolarHarvest(GeolarTask):
 
     def run(self):
         shellout("""metha-sync -rm -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
-        output = shellout("""metha-cat -format {format} {endpoint} > {output}""",
-                          endpoint=self.endpoint,
-                          format=self.format)
+        output = shellout("""metha-cat -format {format} {endpoint} > {output}""", endpoint=self.endpoint, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

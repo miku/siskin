@@ -96,8 +96,7 @@ class ThiemeIntermediateSchema(ThiemeTask):
         return ThiemeCombine(date=self.date, prefix='nlm', set=self.set)
 
     def run(self):
-        output = shellout("span-import -i thieme-nlm <(unpigz -c {input}) | pigz -c > {output}",
-                          input=self.input().path)
+        output = shellout("span-import -i thieme-nlm <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -112,8 +111,7 @@ class ThiemeExport(ThiemeTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     set = luigi.Parameter(default='journalarticles')
-    version = luigi.Parameter(default='solr5vu3',
-                              description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
+    version = luigi.Parameter(default='solr5vu3', description='export JSON flavors, e.g.: solr4vu13v{1,10}, solr5vu3v11')
 
     def requires(self):
         return {
@@ -125,9 +123,7 @@ class ThiemeExport(ThiemeTask):
         output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
                           config=self.input().get('config').path,
                           input=self.input().get('is').path)
-        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}",
-                          input=output,
-                          version=self.version)
+        output = shellout("span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}", input=output, version=self.version)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -141,19 +137,12 @@ class ThiemeISSNList(ThiemeTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {
-            'input': ThiemeIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='https://github.com/stedolan/jq')
-        }
+        return {'input': ThiemeIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
 
     def run(self):
         _, output = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=output)
-        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
-                 input=self.input().get('input').path,
-                 output=output)
+        shellout("""jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
+        shellout("""jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """, input=self.input().get('input').path, output=output)
         output = shellout("""sort -u {input} > {output} """, input=output)
         luigi.LocalTarget(output).move(self.output().path)
 

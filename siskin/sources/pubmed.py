@@ -57,11 +57,7 @@ class PubmedMetadataPaths(PubmedTask):
     timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
 
     def requires(self):
-        return FTPMirror(host='ftp.ncbi.nlm.nih.gov',
-                         base='/pub/pmc/',
-                         pattern='articles*tar.gz',
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
+        return FTPMirror(host='ftp.ncbi.nlm.nih.gov', base='/pub/pmc/', pattern='articles*tar.gz', max_retries=self.max_retries, timeout=self.timeout)
 
     @timed
     def run(self):
@@ -79,8 +75,7 @@ class PubmedJournalList(PubmedTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout(
-            """curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
+        output = shellout("""curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

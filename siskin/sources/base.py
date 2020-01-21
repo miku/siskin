@@ -121,15 +121,11 @@ class BaseSingleFile(BaseTask):
             self.logger.debug("found: %s", realpath)
 
             if realpath.endswith("tar.gz"):
-                output = shellout(""" tar -xOzf "{input}" | {sanitize} |  pigz -c > {output}""",
-                                  input=realpath,
-                                  sanitize=sanitize)
+                output = shellout(""" tar -xOzf "{input}" | {sanitize} |  pigz -c > {output}""", input=realpath, sanitize=sanitize)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             elif realpath.endswith("gz"):
-                output = shellout("""unpigz -c "{input}" | {sanitize} | pigz -c > "{output}" """,
-                                  input=realpath,
-                                  sanitize=sanitize)
+                output = shellout("""unpigz -c "{input}" | {sanitize} | pigz -c > "{output}" """, input=realpath, sanitize=sanitize)
                 luigi.LocalTarget(output).move(self.output().path)
                 break
             else:

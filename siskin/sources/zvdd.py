@@ -81,9 +81,7 @@ class ZVDDHarvest(ZVDDTask):
         -w int
                 number of parallel connections (default 16)
         """
-        output = shellout("""oaicrawl -w 12 -retry 5 -e 15s -f {prefix} -b -verbose "{url}" | pigz -c > {output}""",
-                          prefix=self.prefix,
-                          url=self.url)
+        output = shellout("""oaicrawl -w 12 -retry 5 -e 15s -f {prefix} -b -verbose "{url}" | pigz -c > {output}""", prefix=self.prefix, url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

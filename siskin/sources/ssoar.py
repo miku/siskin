@@ -55,9 +55,7 @@ class SSOARHarvest(SSOARTask):
 
     def run(self):
         shellout("""metha-sync -rm -format {format} {endpoint} """, endpoint=self.endpoint, format=self.format)
-        output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""",
-                          endpoint=self.endpoint,
-                          format=self.format)
+        output = shellout("""metha-cat -format {format} -root Records {endpoint} > {output}""", endpoint=self.endpoint, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

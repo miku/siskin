@@ -74,8 +74,7 @@ for line in tqdm.tqdm(fileinput.input(), total=941528):
             resp = search(query)
             counters["fid"][issn] = resp["response"]["numFound"]
 
-data = [(names[k], k, v, counters["ai"][k], counters["fid"][k],
-         '%0.2f%%' % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])))
+data = [(names[k], k, v, counters["ai"][k], counters["fid"][k], '%0.2f%%' % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])))
         for k, v in counters["c"].most_common()]
 
 df = pd.DataFrame(data, columns=["name", "issn", "count", "ai", "ai-fid", "pct"])

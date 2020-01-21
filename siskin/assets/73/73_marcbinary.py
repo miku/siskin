@@ -56,9 +56,7 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
 
     # ISSN
     try:
-        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource",
-                                                        {}).get("dcite:relatedIdentifiers",
-                                                                {}).get("dcite:relatedIdentifier", [])
+        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:relatedIdentifiers", {}).get("dcite:relatedIdentifier", [])
         for identifier in identifiers:
             if identifier["@relatedIdentifierType"] == "ISSN":
                 f022a = identifier["#text"]
@@ -82,8 +80,7 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
 
     # 1. Urheber
     try:
-        f100a = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:creators",
-                                                                            {}).get("dcite:creator", "")
+        f100a = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:creators", {}).get("dcite:creator", "")
     except Exception as exc:
         f100a = ""
         print('[100] %s' % type(f100a))
@@ -160,9 +157,7 @@ for i, xmlrecord in enumerate(xmlrecords["Records"]["Record"]):
 
     # Link zur Ressource
     try:
-        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource",
-                                                        {}).get("dcite:relatedIdentifiers",
-                                                                {}).get("dcite:relatedIdentifier", [])
+        identifiers = xmlrecord.get("metadata", {}).get("dcite:resource", {}).get("dcite:relatedIdentifiers", {}).get("dcite:relatedIdentifier", [])
         for identifier in identifiers:
             if identifier["@relatedIdentifierType"] == "URL":
                 f856u = identifier["#text"]

@@ -91,8 +91,7 @@ for record in records.entries:
         f260c = ", " + f260c
         f300a = ""
     else:
-        print(u"Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description,
-              file=sys.stderr)
+        print(u"Der folgende String konnte nicht mittels regulärer Ausdrücke zerlegt werden: %s" % description, file=sys.stderr)
         f260c = ""
         f300a = ""
         link = ""

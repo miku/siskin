@@ -65,10 +65,7 @@ class PQDTCombine(PQDTTask):
 
     def run(self):
         url = self.config.get('pqdt', 'oai')
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}",
-                 prefix=self.prefix,
-                 url=url,
-                 dir=self.config.get('core', 'metha-dir'))
+        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
         output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
                           prefix=self.prefix,
                           url=url,
@@ -114,9 +111,7 @@ class PQDTExport(PQDTTask):
         }
 
     def run(self):
-        output = shellout(""" span-tag -c {config} {input} > {output} """,
-                          config=self.input().get('config').path,
-                          input=self.input().get('file').path)
+        output = shellout(""" span-tag -c {config} {input} > {output} """, config=self.input().get('config').path, input=self.input().get('file').path)
         output = shellout(""" span-export -o {format} {input} > {output} """, input=output, format=self.format)
         luigi.LocalTarget(output).move(self.output().path)
 

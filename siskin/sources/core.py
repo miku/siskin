@@ -79,8 +79,7 @@ class CoreDownload(CoreTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail https://core.ac.uk/datasets/core_{date}_metadata.tar > {output}""",
-                          date=self.closest().strftime("%Y-%m-%d"))
+        output = shellout("""curl --fail https://core.ac.uk/datasets/core_{date}_metadata.tar > {output}""", date=self.closest().strftime("%Y-%m-%d"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -94,8 +93,7 @@ class CoreDownloadFulltext(CoreTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail https://core.ac.uk/datasets/core_{date}_fulltext.tar > {output}""",
-                          date=self.closest().strftime("%Y-%m-%d"))
+        output = shellout("""curl --fail https://core.ac.uk/datasets/core_{date}_fulltext.tar > {output}""", date=self.closest().strftime("%Y-%m-%d"))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

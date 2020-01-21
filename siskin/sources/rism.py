@@ -79,9 +79,7 @@ class RISMDownload(RISMTask):
         output = shellout("""curl --fail "{url}" > {output} """, url=url)
         cleanup.add(output)
 
-        output = shellout(
-            """unzip -p {input} $(unzip -l {input} | grep -Eo "rism_[0-9]{{6,6}}.xml" | head -1) > {output}""",
-            input=output)
+        output = shellout("""unzip -p {input} $(unzip -l {input} | grep -Eo "rism_[0-9]{{6,6}}.xml" | head -1) > {output}""", input=output)
         cleanup.add(output)
 
         output = shellout("yaz-marcdump -i marcxml -o marc {input} > {output}", input=output)

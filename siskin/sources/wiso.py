@@ -78,10 +78,7 @@ class Wiso2018Files(WisoTask):
             for row in handle.iter_tsv(cols=('path', )):
                 # Read CSV file and prepend the basename of the file to the line.
                 filename = os.path.basename(row.path)
-                shellout(""" awk '{{print "{filename};"$0}}' < {input} >> {output}""",
-                         filename=filename,
-                         input=row.path,
-                         output=combined)
+                shellout(""" awk '{{print "{filename};"$0}}' < {input} >> {output}""", filename=filename, input=row.path, output=combined)
 
         luigi.LocalTarget(combined).move(self.output().path)
 

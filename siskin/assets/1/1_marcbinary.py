@@ -129,8 +129,7 @@ for line in inputfile:
         record.append(line)
 
     if line.startswith("</rdf:RDF>"):
-        record = xmltodict.parse('\n'.join(record),
-                                 force_list=("dcterms:hasFormat", "dcterms:subject", "dcterms:creator"))
+        record = xmltodict.parse('\n'.join(record), force_list=("dcterms:hasFormat", "dcterms:subject", "dcterms:creator"))
 
         for file in record["rdf:RDF"]["pgterms:ebook"].get("dcterms:hasFormat", []):
             files.append(file.get("pgterms:file", {}).get("@rdf:about", ""))

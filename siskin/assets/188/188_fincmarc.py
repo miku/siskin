@@ -73,11 +73,7 @@ def get_year(xmlrecord):
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", dest="inputfilename", help="inputfile", default="188_input.xml", metavar="inputfilename")
 parser.add_argument("-o", dest="outputfilename", help="outputfile", default="188_output.mrc", metavar="outputfilename")
-parser.add_argument("-f",
-                    dest="outputformat",
-                    help="outputformat marc or marcxml",
-                    default="marc",
-                    metavar="outputformat")
+parser.add_argument("-f", dest="outputformat", help="outputformat marc or marcxml", default="marc", metavar="outputformat")
 
 args = parser.parse_args()
 inputfilename = args.inputfilename
@@ -91,11 +87,9 @@ else:
 
 inputfile = open(inputfilename, "r", encoding='utf-8')
 xmlfile = inputfile.read()
-xmlrecords = xmltodict.parse(xmlfile,
-                             force_list=[
-                                 "setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language",
-                                 "dc:subject", "dc:publisher", "dc:date", "dc:title"
-                             ])
+xmlrecords = xmltodict.parse(
+    xmlfile,
+    force_list=["setSpec", "dc:identifier", "dc:creator", "dc:contributor", "dc:type", "dc:language", "dc:subject", "dc:publisher", "dc:date", "dc:title"])
 
 for xmlrecord in xmlrecords["Records"]["Record"]:
 
@@ -105,8 +99,7 @@ for xmlrecord in xmlrecords["Records"]["Record"]:
     if xmlrecord["header"]["@status"] == "deleted":
         continue
 
-    if "col_1_11730" not in xmlrecord["header"]["setSpec"] and "col_goescholar_3015" not in xmlrecord["header"][
-            "setSpec"]:
+    if "col_1_11730" not in xmlrecord["header"]["setSpec"] and "col_goescholar_3015" not in xmlrecord["header"]["setSpec"]:
         continue
 
     xmlrecord = xmlrecord["metadata"]["oai_dc:dc"]

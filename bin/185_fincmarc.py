@@ -39,13 +39,15 @@ input = path/to/json
 
 
 import json
+
 import marcx
 import pymarc
-
-from siskin.mappings import formats
+from siskin.arguments import (build_inputfilename, build_outputfilename,
+                              get_arguments)
 from siskin.configuration import Config
-from siskin.arguments import get_arguments, build_inputfilename, build_outputfilename
-from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
+from siskin.mappings import formats
+from siskin.utils import (check_isbn, check_issn, marc_build_field_008,
+                          marc_build_field_773g)
 
 
 def get_field(jsonrecord, field):

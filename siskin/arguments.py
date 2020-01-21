@@ -20,22 +20,21 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Helper for argument parsing for direct processing scripts (e.g. bin/185_fincmarc.py).
 """
 
 import argparse
 import datetime
-import os.path
-import pymarc
 import glob
+import os.path
 import re
 import sys
 
-from siskin.configuration import Config
+import pymarc
 from gluish.intervals import monthly, weekly
 from gluish.parameter import ClosestDateParameter
+from siskin.configuration import Config
 
 
 def get_arguments():
@@ -303,8 +302,7 @@ class FincArgumentParser():
         if args.interval == "weekly":
             date = weekly()
 
-        filename = sid + "-input-" + date.strftime("%Y%m%d")+ "." + args.inputformat
+        filename = sid + "-input-" + date.strftime("%Y%m%d") + "." + args.inputformat
         inputfilename = os.path.join(self.sid_path(sid), filename)
 
         return inputfilename
-

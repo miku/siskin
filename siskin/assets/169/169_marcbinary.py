@@ -45,8 +45,8 @@ import tqdm
 
 import marcx
 
-channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB", "SR",
-            "SRF", "SRF.Podcast", "SWR", "WDR", "ZDF", "ZDF-tivi", "3sat")
+channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB", "SR", "SRF", "SRF.Podcast", "SWR", "WDR",
+            "ZDF", "ZDF-tivi", "3sat")
 
 records = collections.defaultdict(dict)
 seen = set()
@@ -119,8 +119,8 @@ for line in lines:
         hash.update(fields.encode("utf-8").strip())
         hash_record = hash.hexdigest()
 
-        f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record[
-            "hr_duration"] + record["size"] + record["timestamp"]
+        f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record[
+            "timestamp"]
         f001 = f001.encode("utf-8")
         f001 = base64.urlsafe_b64encode(f001)
         f001 = f001.decode("utf-8").rstrip("=")

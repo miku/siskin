@@ -61,8 +61,8 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     if not format:
         format = ""
 
-    if ("Bachelorarbeit" in format or "Masterarbeit" in format or "Diplomarbeitarbeit" in format
-            or "Magisterarbeitarbeit" in format or "Dissertation" in format):
+    if ("Bachelorarbeit" in format or "Masterarbeit" in format or "Diplomarbeitarbeit" in format or "Magisterarbeitarbeit" in format
+            or "Dissertation" in format):
 
         leader = "     nam  22        4500"
         f935c = "hs"
