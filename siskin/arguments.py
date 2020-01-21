@@ -39,7 +39,9 @@ from gluish.parameter import ClosestDateParameter
 
 
 def get_arguments():
-
+    """
+    Return default set of arguments for lightweight scripts.
+    """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-i", "--input", dest="inputfilename", help="inputfile")
     parser.add_argument("--filemap", dest="filemap", help="path of the file containing a dictionary, list or another map")
