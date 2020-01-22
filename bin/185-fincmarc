@@ -44,7 +44,7 @@ import pymarc
 
 from siskin.mappings import formats
 from siskin.configuration import Config
-from siskin.arguments import get_arguments, build_inputfilename, build_outputfilename, remove_old_outputfiles, remove_old_inputfiles
+from siskin.arguments import FincArgumentParser
 from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
 
 
@@ -204,12 +204,14 @@ dabi_to_ddc = {
 
 SID = "185"
 
-args = get_arguments()
-outputfilename = build_outputfilename(args, SID)
-inputfilename = args.inputfilename
+fip = FincArgumentParser()
+inputfilename = fip.inputfilename(SID)
+outputfilename = fip.outputfilename(SID)
+args = fip.parse_args()
 outputformat = args.outputformat
 
-remove_old_outputfiles(args, SID)
+fip.sid_path("123")
+fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
 if outputformat == "xml":
