@@ -61,7 +61,7 @@ class BLBHarvest(BLBTask):
     """
     Harvest with Z39.50 client. https://www.bl.uk/help/get-marc-21-data
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         auth = self.config.get("blb", "z39auth")
@@ -77,7 +77,7 @@ class BLBMARC(BLBTask):
     """
     Custom convert to FincMARC.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return BLBHarvest(date=self.date)
