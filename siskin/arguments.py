@@ -78,6 +78,10 @@ class FincArgumentParser():
         self.parser.add_argument("--output-hist-size", dest="output_hist_size", type=int, help="number of older outputfiles to keep", default=3)
         self.parser.add_argument("--input-hist-size", dest="input_hist_size", type=int, help="number of older inputfiles to keep", default=5)
 
+    @property
+    def args(self):
+        return self.parse_args()
+
     def parse_args(self):
         """
         Returns the args as parsed by argparse.ArgumentParser.
