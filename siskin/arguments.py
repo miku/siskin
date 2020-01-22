@@ -46,7 +46,6 @@ class FincArgumentParser():
 
     Example usage:
 
-
         # somescript.py --root /tmp/abc --interval daily --format mrc
         fip = FincArgumentParser()
 
@@ -55,8 +54,8 @@ class FincArgumentParser():
         fip.inputfilename()
         fip.outputfilename()
 
-        # If you need the args of the wrapped ArgumentParser explicitly, use `parse_args`.
-        args = fip.parse_args()
+        # If you need the args of the wrapped ArgumentParser explicitly, use:
+        root = fip.args.root
     """
     def __init__(self, config=None):
         """
