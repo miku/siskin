@@ -207,8 +207,7 @@ SID = "185"
 fip = FincArgumentParser()
 inputfilename = fip.inputfilename(SID)
 outputfilename = fip.outputfilename(SID)
-args = fip.parse_args()
-outputformat = args.outputformat
+outputformat = fip.args.outputformat
 
 fip.sid_path("123")
 fip.remove_old_outputfiles(SID)
