@@ -165,7 +165,7 @@ class FincArgumentParser():
         filename = sid + "-output-" + date.strftime("%Y%m%d") + ".fincmarc." + args.outputformat
         outputfilename = os.path.join(self.sid_path(sid), filename)
 
-        if os.path.isfile(outputfilename) and not overwrite:
+        if os.path.isfile(outputfilename) and not args.overwrite:
             raise ValueError(sid + ": Outputfile already exists. Use --overwrite.")
 
         return outputfilename
