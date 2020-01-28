@@ -184,8 +184,8 @@ def get_task_import_cache():
         try:
             task_import_cache = json.load(handle)
         except Exception as err:
-            print("failed to load task import cache, remove %s, then try again" % path, file=sys.stderr)
-            sys.exit(1)
+            message = "failed to load task import cache, remove %s, then try again (%s)" % (path, err)
+            raise RuntimeError(message))
 
     return task_import_cache, path
 
