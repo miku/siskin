@@ -33,6 +33,7 @@ base-url = http://example.com/export
 
 import datetime
 import os
+import tempfile
 
 import luigi
 
@@ -55,6 +56,10 @@ class RISMDownload(RISMTask):
     Download raw data and prepare. Assume the URL (https://is.gd/ZTwzoT) of the
     complete dump does not change.
 
+    Output will be a symlink: date-2020-01-01-sha1-current.mrc ->
+    date-2020-01-01-sha1-3a0babb00b51e539f0aafc5864959ceff835f074.mrc, sha1
+    from raw download from URL (hardcoded).
+
         Archive:  /tmp/gluish-S4wdR6
         Length      Date    Time    Name
         ---------  ---------- -----   ----
@@ -67,6 +72,7 @@ class RISMDownload(RISMTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    sha1 = luigi.Parameter(default='current', description='checksum of input file')
 
     def run(self):
         """
@@ -74,10 +80,21 @@ class RISMDownload(RISMTask):
         (rism_170316.xml), but let's assume there is a pattern.
         """
         cleanup = set()
-        url = "https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip"
 
-        output = shellout("""curl --fail "{url}" > {output} """, url=url)
+        # tempfile, where tee can write the sha1 of the downloaded file.
+        _, sha1file = tempfile.mkstemp(prefix='siskin-')
+
+        # url = "https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" # default
+        url = "https://bit.ly/2uH0Jzm" # temp, via https://github.com/rism-ch/muscat/pull/884
+
+        output = shellout("""curl -sL --fail "{url}" | tee {output} | sha1sum | awk '{{ print $1 }}' > {sha1file} """,
+                          url=url, sha1file=sha1file)
         cleanup.add(output)
+
+        # Set the sha1 parameter to the contents of the sha1file.
+        with open(sha1file) as handle:
+            self.sha1 = handle.read().strip()
+            self.logger.debug("found content sha1: %s" % self.sha1)
 
         output = shellout("""unzip -p {input} $(unzip -l {input} | grep -Eo "rism_[0-9]{{6,6}}.xml" | head -1) > {output}""", input=output)
         cleanup.add(output)
@@ -87,6 +104,16 @@ class RISMDownload(RISMTask):
 
         for file in cleanup:
             os.remove(file)
+
+        # symlink "xxx-sha1-current" -> "xxx-sha1-ae849fc3954e253e5f8bc414e00c9b50128984ea"
+        link = self.output().path.replace("sha1-%s" % self.sha1, "sha1-current")
+        self.logger.debug("symbolic link: %s" % link)
+        try:
+            os.remove(link)
+        except OSError as err:
+            self.logger.warn(err)
+        os.symlink(self.output().path, link)
+        self.logger.debug("symlinked downloaded file to %s" % link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
