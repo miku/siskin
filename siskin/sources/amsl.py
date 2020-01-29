@@ -36,6 +36,18 @@ These tasks wrap API responses, allow access to holding files, and create a
 filterconfig which can be use fed into
 [span-tag](https://github.com/miku/span/tree/master/cmd/span-tag).
 
+----
+
+TODO: migrate to FOLIO API.
+
+----
+
+TODO: #14841 jstor names
+
+    $ taskcat AMSLService | jq -r '.[] | select(.sourceID == "55") | [.technicalCollectionID, .megaCollection] | @tsv' | sort -u
+
+----
+
 Config:
 
 [amsl]

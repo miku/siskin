@@ -294,12 +294,44 @@ class JstorIntermediateSchemaGenericCollection(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+class JstorAMSLNames(JstorTask):
+    """
+    Report technical collection id and collection name as TSV from AMSL, refs #14841.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AMSLService(date=self.date)
+
+    def run(self):
+        output = shellout(""" gunzip -c {input} | jq -r '.[] | select(.sourceID == "55") | [.technicalCollectionID, .megaCollection] | @tsv' | \
+                          sort -u > {output} """, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv'))
+
+class JstorCollectionNames(JstorTask):
+    """
+    List current collection names, as notes in column 27 of
+    https://www.jstor.org/kbart/collections/all-archive-titles, refs #14841.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
+                          tail -n +2 | cut -f 27 | tr ';' '\n' | \
+                          sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u > {output}""", preserve_whitespace=True)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='tsv'))
 
 class JstorCollectionMapping(JstorTask):
     """
     Create a mapping from ISSN to collection name.
 
-    Experimental, refs #11467. See: http://www.jstor.org/kbart/collections/all-archive-titles
+    Experimental, refs #11467. See: https://www.jstor.org/kbart/collections/all-archive-titles
 
         {
         "1957-7745": [
@@ -317,13 +349,13 @@ class JstorCollectionMapping(JstorTask):
 
     There are currently (April 2019) 126 JSTOR collections in the KBART file:
 
-        $ curl -sL "http://www.jstor.org/kbart/collections/all-archive-titles" | \
+        $ curl -sL "https://www.jstor.org/kbart/collections/all-archive-titles" | \
                 csvcut -t -c 27 | tr ';' '\n' | sed -e 's/^ *//g' | sed -e 's/ *$//g' | \
                 tr -d '"' | sort -u | wc -l
 
-    Versus 28 collection names in AMSL:
+    Versus 30 collection names in AMSL:
 
-        $ taskcat AMSLService | jq -r '.[] | select(.sourceID == "55") | .megaCollection' | sort -u | wc -l
+        $ taskcat AMSLService | jq -r '.[] | select(.sourceID == "55") | [.technicalCollectionID, .megaCollection] | @tsv' | sort -u
 
     TODO(miku): Better mapping would match on journal identifier and would use
     package names from column 27, refs #14841.
@@ -369,7 +401,7 @@ class JstorCollectionMapping(JstorTask):
     @timed
     def run(self):
         names = collections.defaultdict(set)
-        url = "http://www.jstor.org/kbart/collections/all-archive-titles"
+        url = "https://www.jstor.org/kbart/collections/all-archive-titles"
         output = shellout("""curl -sL "{url}" > {output} """, url=url)
 
         with luigi.LocalTarget(output, format=TSV).open() as handle:
