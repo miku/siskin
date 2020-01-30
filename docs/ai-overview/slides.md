@@ -429,7 +429,7 @@ Last Steps
 
 We use a another key-value store, to keep the intermediate schema files. This is not strictly necessary, but might increase performance, as SOLR index is a bit smaller.
 
-* used [memcachedb](https://code.google.com/archive/p/memcachedb/) (archived), switched to [microblob](https://github.com/miku/microblob) (less features, faster)
+* used [memcachedb](https://code.google.com/archive/p/memcachedb/) (archived), switched to [microblob](https://github.com/miku/microblob) (fewer features, faster)
 
 ----
 
