@@ -537,7 +537,7 @@ class JstorIntermediateSchema(JstorTask):
                         amsl_names = [jstor_to_tcid.get(name) for name in names]
                         # Check validity against AMSL names.
                         clean_names = [name for name in amsl_names if name in tcid_to_mega_collection]
-                        clean_names = [tcid_to_mega_collection[tcid] for tcid in clean_names]
+                        clean_names = clean_names + [tcid_to_mega_collection[tcid] for tcid in clean_names]
 
                         # The clean_names list has both TCID and mega_collection.
                         doc['finc.mega_collection'] = clean_names
