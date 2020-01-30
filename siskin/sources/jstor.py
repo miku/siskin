@@ -37,6 +37,7 @@ import itertools
 import json
 import os
 import pipes
+import re
 import tempfile
 
 import luigi
@@ -278,7 +279,8 @@ class JstorXML(JstorTask):
 
 class JstorIntermediateSchemaGenericCollection(JstorTask):
     """
-    Convert to intermediate format via span. Use generic JSTOR collection name.
+    Convert to intermediate format via span. Use generic "JSTOR" collection
+    name.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -322,10 +324,18 @@ class JstorCollectionNames(JstorTask):
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
+        """
+        Names may be in column 27 and 28.
+        """
         output = shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
                           tail -n +2 | cut -f 27 | tr ';' '\n' | \
                           sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u > {output}""",
                           preserve_whitespace=True)
+        shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
+                 tail -n +2 | cut -f 28 | tr ';' '\n' | \
+                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u >> {output}""",
+                 output=output, preserve_whitespace=True)
+        output = shellout("""sort -u {input} | grep -v ^$ > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -415,10 +425,13 @@ class JstorCollectionMapping(JstorTask):
                     self.logger.warn("short KBART row, skipping: %s", row)
                     continue
 
-                issns = row[1:3]
+                issns = [v.strip() for v in row[1:3]]
                 parts = [p.strip() for p in row[26].split(";")]
 
-                for issn in [v.strip() for v in issns]:
+                # Sometimes, a collection name is in column "27"
+                parts = parts + [p.strip() for p in row[27].split(";")]
+
+                for issn in issns:
                     if not issn:
                         continue
                     for name in parts:
@@ -435,10 +448,10 @@ class JstorCollectionMapping(JstorTask):
 
 class JstorIntermediateSchema(JstorTask):
     """
-    Turn single collection name "JStor" (https://git.io/vdHYh) into finer
+    Turn single collection name "JSTOR" (https://git.io/vdHYh) into finer
     grained names via title lists (https://is.gd/W37Uwg), refs #11467.
 
-    @2017-01-23 JSTOR ISSN to Collection mapping: https://git.io/vNwSJ
+    @2017-01-23 JSTOR ISSN to collection mapping: https://git.io/vNwSJ
     @2019-04-04 AMSL:
         JSTOR Arts & Sciences I Archive
         JSTOR Arts & Sciences II Archive
@@ -469,7 +482,7 @@ class JstorIntermediateSchema(JstorTask):
         JSTOR Music Archive
         JSTOR Religion & Theology
 
-    XXX: Why is JSTOR (about 500 records) still attached for DE-15, refs #12066.
+    XXX: Why is JSTOR (about 500 records) still attached for DE-15, refs #12066?
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -478,44 +491,25 @@ class JstorIntermediateSchema(JstorTask):
         return {
             'file': JstorIntermediateSchemaGenericCollection(date=self.date),
             'mapping': JstorCollectionMapping(date=self.date),
-            'amsl': AMSLService(date=self.date),
         }
 
     @timed
     def run(self):
         """
-        Only use collection names, which we find in AMSL as well. XXX: FIX deviations.
+        Only use collection names, which we find in AMSL as well.
         """
-        output = shellout("""unpigz -c {input} | jq -rc '.[] | select(.sourceID == "55") | .megaCollection' > {output} """, input=self.input().get("amsl").path)
-        allowed_collection_names = load_set_from_file(output)
-        self.logger.debug("allowing via AMSL: %s", allowed_collection_names)
+        self.logger.debug("loading static mappings for jstor")
+        tcid_to_mega_collection = dict()
+        jstor_to_tcid = dict()
 
-        # XXX: Hack to map original JSTOR collection names to names in AMSL. We
-        # will need an authoritative source of such names.
-        jstor_amsl_collection_name_mapping = {
-            'Arts & Sciences I Collection': 'JSTOR Arts & Sciences I Archive',
-            'Arts & Sciences II Collection': 'JSTOR Arts & Sciences II Archive',
-            'Arts & Sciences III Collection': 'JSTOR Arts & Sciences III Archive',
-            'Arts & Sciences IV Collection': 'JSTOR Arts & Sciences IV Archive',
-            'Arts & Sciences IX Collection': 'JSTOR Arts & Sciences IX Archive',
-            'Arts & Sciences V Collection': 'JSTOR Arts & Sciences V Archive',
-            'Arts & Sciences VI Collection': 'JSTOR Arts & Sciences VI Archive',
-            'Arts & Sciences VII Collection': 'JSTOR Arts & Sciences VII Archive',
-            'Arts & Sciences VIII Collection': 'JSTOR Arts & Sciences VIII Archive',
-            'Arts & Sciences X Collection': 'JSTOR Arts & Sciences X Archive',
-            'Arts & Sciences XI Collection': 'JSTOR Arts & Sciences XI Archive',
-            'Arts & Sciences XII Collection': 'JSTOR Arts & Sciences XII Archive',
-            'Arts & Sciences XIII Collection': 'JSTOR Arts & Sciences XIII Archive',
-            'Arts & Sciences XIV Collection': 'JSTOR Arts & Sciences XIV Archive',
-            'Arts & Sciences XV Collection': 'JSTOR Arts & Sciences XV Archive',
-            'Business I Collection': 'JSTOR Business I Archive',
-            'Business II Collection': 'JSTOR Business II Archive',
-            'Film & Performing Arts Discipline Package': 'JSTOR Film and Performing Arts',
-            'Language & Literature Discipline Package': 'JSTOR Language & Literature Archive',
-            'Life Sciences Collection': 'JSTOR Life Sciences Archive',
-            'Music Collection': 'JSTOR Music Archive',
-        }
-
+        with open(self.assets('55/tcid_amsl.tsv')) as handle:
+            for line in handle:
+                tcid, mega_collection = line.strip().split('\t')
+                tcid_to_mega_collection[tcid] = mega_collection
+        with open(self.assets('55/tcid_jstor.tsv')) as handle:
+            for line in handle:
+                tcid, jstor_collection = line.strip().split('\t')
+                jstor_to_tcid[jstor_collection] = tcid
         with self.input().get('mapping').open() as mapfile:
             mapping = json.load(mapfile)
 
@@ -539,20 +533,32 @@ class JstorIntermediateSchema(JstorTask):
                             names.add(name)
 
                     if len(names) > 0:
-                        # Translate JSTOR names to AMSL. TODO(miku): Get rid of special cases here.
-                        amsl_names = [jstor_amsl_collection_name_mapping.get(name) for name in names if name in jstor_amsl_collection_name_mapping]
+                        # Translate JSTOR names to technical collection id.
+                        amsl_names = [jstor_to_tcid.get(name) for name in names]
                         # Check validity against AMSL names.
-                        clean_names = [name for name in amsl_names if name in allowed_collection_names]
+                        clean_names = [name for name in amsl_names if name in tcid_to_mega_collection]
+                        clean_names = [tcid_to_mega_collection[tcid] for tcid in clean_names]
 
-                        # Use names that appear in AMSL.
+                        # The clean_names list has both TCID and mega_collection.
                         doc['finc.mega_collection'] = clean_names
 
                         if len(doc['finc.mega_collection']) == 0:
-                            self.logger.warn("no collection name given to %s: %s", doc["finc.id"], names)
+                            # self.logger.warn("no collection name given to %s: %s", doc["finc.id"], names)
                             counter["err.collection.not.in.amsl"] += 1
                     else:
-                        self.logger.warn("JSTOR record without issn or issn mapping: %s", doc.get("finc.id"))
-                        counter["err.name"] += 1
+                        # As of 01/2020, there are two rough types of stable
+                        # JSTOR URLs, one which has many (or most) OA content
+                        # (24695). We check for this pattern to make these
+                        # records accessible. And discard the other 13328, e.g.
+                        # https://www.jstor.org/stable/10.5250/femigermstud.35.0147.
+                        assumed_oa_pattern = r'http[s]?://www.jstor.org/stable/[0-9]+$'
+                        if any((re.search(assumed_oa_pattern, url) for url in doc.get('url', []))):
+                            # TODO(miku): These names are not official yet.
+                            doc['finc.mega_collection'] = ['Open JSTOR Collection', 'sid-55-col-jstoropen'] # Maybe, https://www.jstor.org/stable/26167842.
+                            counter["assumed_oa"] += 1
+                        else:
+                            self.logger.warn("JSTOR record without issn or issn mapping and likely not open access neither: %s, %s", doc.get("finc.id"), doc.get('url'))
+                            counter["err.name"] += 1
 
                     line = json.dumps(doc)
                     if isinstance(line, six.string_types):
