@@ -294,6 +294,7 @@ class JstorIntermediateSchemaGenericCollection(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
+
 class JstorAMSLNames(JstorTask):
     """
     Report technical collection id and collection name as TSV from AMSL, refs #14841.
@@ -305,11 +306,13 @@ class JstorAMSLNames(JstorTask):
 
     def run(self):
         output = shellout(""" gunzip -c {input} | jq -r '.[] | select(.sourceID == "55") | [.technicalCollectionID, .megaCollection] | @tsv' | \
-                          sort -u > {output} """, input=self.input().path)
+                          sort -u > {output} """,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'))
+
 
 class JstorCollectionNames(JstorTask):
     """
@@ -321,11 +324,13 @@ class JstorCollectionNames(JstorTask):
     def run(self):
         output = shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
                           tail -n +2 | cut -f 27 | tr ';' '\n' | \
-                          sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u > {output}""", preserve_whitespace=True)
+                          sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u > {output}""",
+                          preserve_whitespace=True)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='tsv'))
+
 
 class JstorCollectionMapping(JstorTask):
     """

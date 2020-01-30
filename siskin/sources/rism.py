@@ -85,10 +85,9 @@ class RISMDownload(RISMTask):
         _, sha1file = tempfile.mkstemp(prefix='siskin-')
 
         # url = "https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" # default
-        url = "https://bit.ly/2uH0Jzm" # temp, via https://github.com/rism-ch/muscat/pull/884
+        url = "https://bit.ly/2uH0Jzm"  # temp, via https://github.com/rism-ch/muscat/pull/884
 
-        output = shellout("""curl -sL --fail "{url}" | tee {output} | sha1sum | awk '{{ print $1 }}' > {sha1file} """,
-                          url=url, sha1file=sha1file)
+        output = shellout("""curl -sL --fail "{url}" | tee {output} | sha1sum | awk '{{ print $1 }}' > {sha1file} """, url=url, sha1file=sha1file)
         cleanup.add(output)
 
         # Set the sha1 parameter to the contents of the sha1file.
