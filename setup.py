@@ -212,7 +212,9 @@ setup(name='siskin',
           'bin/solrcheckup.py',
           'bin/siskin-cronjobs',
           'bin/35-fincmarc',
+          'bin/183-fincmarc',
           'bin/185-fincmarc',
+          'bin/186-fincmarc',
       ],
       entry_points={
         'console_scripts': [
