@@ -79,7 +79,7 @@ fip = FincArgumentParser()
 outputfilename = fip.outputfilename(SID)
 outputformat = fip.args.outputformat
 
-fip.sid_path("183")
+fip.sid_path(SID)
 fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
