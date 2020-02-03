@@ -154,7 +154,7 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     # Haupttitel und Verantwortlichkeitsangabe
     f245 = get_field(xmlrecord, "20")
     f245 = f245.replace("¬", "")
-    f245 = f245.replace("\n", "")
+    f245 = f245.replace("\n", " ")
     f245 = f245.replace("   ", "")
     if ":" in f245:
         f245 = f245.split(":")
