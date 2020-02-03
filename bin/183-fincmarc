@@ -63,6 +63,9 @@ def get_sru_records(start, max):
 
     params = urlencode(params)
     result = requests.get("https://sru.k10plus.de/k10plus?%s" % params)
+    x = result.status_code
+    if x != 200:
+        print(x)
     result = result.text
     result = result.replace("\n", "")
     result = result.replace("</record>", "</record>\n")
