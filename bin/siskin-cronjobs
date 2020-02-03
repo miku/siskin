@@ -1,5 +1,5 @@
 #!/bin/bash
 
-35-fincmarc  --interval monthly  --format mrc --input-history 3 --output-history 5 --filemap /home/schenk/lcc
-183-fincmarc --interval weekly   --format xml --output-history 5
+35-fincmarc  --interval monthly  --format mrc --input-hist-size 3 --output-hist-size 5 --filemap /home/schenk/lcc
+183-fincmarc --interval weekly   --format xml --output-hist-size 5
 185-fincmarc --interval manually --format mrc
