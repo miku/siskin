@@ -4,3 +4,4 @@
 183-fincmarc --interval weekly   --format xml --output-hist-size 5
 185-fincmarc --interval manually --format mrc --output-hist-size 10
 186-fincmarc --interval manually --format mrc --output-hist-size 10
+187-fincmarc --interval monthly  --format mrc --output-hist-size 10
