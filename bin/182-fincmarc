@@ -1,0 +1,131 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: HeBIS-Verbundkatalog - Bibliographie zum Archivwesen der Archivschule Marburg
+Source: HeBIS-Verbundkatalog - Gutenberg-Museum Mainz
+SID: 182
+Ticket: #16049
+Origin: local files
+
+"""
+
+
+import os
+import re
+import sys
+from io import BytesIO, StringIO
+
+import marcx
+import pymarc
+
+from siskin.configuration import Config
+from siskin.utils import marc_clean_record, xmlstream
+from siskin.arguments import FincArgumentParser
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "182"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+outputformat = fip.args.outputformat
+input_directory = fip.args.inputfilename
+path = fip.sid_path(SID)
+
+fip.remove_old_outputfiles(SID)
+
+# Set output format for MARC newrecord
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not input_directory:
+    config = Config.instance()
+    try:
+        input_directory = config.get(SID, "input")
+    except:
+        sys.exit("Input directory required. Use --input.")
+
+for root, _, files in os.walk(input_directory):
+
+    for inputfilename in files:
+
+        if not "input" in inputfilename and not inputfilename.endswith(".xml"):
+            continue
+        
+        if "archiv" in inputfilename:
+            database = "Archivwesen"
+        else:
+            database = "Gutenberg"
+
+        inputfilepath = os.path.join(root, inputfilename)
+        
+
+        ##################################################################################
+        # 3. Process data
+        ##################################################################################
+
+        for oldrecord in xmlstream(inputfilepath, "record"):
+
+            oldrecord = BytesIO(oldrecord)
+            oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+            oldrecord = oldrecord[0]
+
+            newrecord = marcx.Record.from_record(oldrecord)
+            newrecord.force_utf8 = True
+            newrecord.strict = False    
+
+            # Identifikator
+            f001 = newrecord["001"].data
+            newrecord.remove_fields("001")
+            newrecord.add("001", data="182-" + f001)
+
+            # Kollektion und Ansigelung
+            if database == "Archivwesen":
+                f980c = "sid-182-col-archivwesen"
+            else:
+                f980c = "sid-182-col-gutenberg"
+
+            collections = ["a", f001, "b", "182", "c", f980c]
+            newrecord.add("980", subfields=collections)
+
+            marc_clean_record(newrecord)
+
+            if outputformat == "xml":
+                outputfile.write(newrecord)
+            else:
+                outputfile.write(newrecord.as_marc())
+
+outputfile.close()
