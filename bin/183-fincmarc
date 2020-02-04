@@ -35,6 +35,7 @@ Origin: SRU
 import os
 import re
 import sys
+import time
 from io import BytesIO, StringIO
 
 import requests
@@ -62,11 +63,19 @@ def get_sru_records(start, max):
     }
 
     params = urlencode(params)
-    result = requests.get("https://sru.k10plus.de/k10plus?%s" % params)
-    x = result.status_code
-    if x != 200:
-        print(x)
-    result = result.text
+
+    while True:
+
+        result = requests.get("https://sru.k10plus.de/k10plus?%s" % params)
+        x = result.status_code
+        if x != 200:
+            print(x)
+        result = result.text
+        if "Access to specified database denied" not in result:
+            break
+        else:
+            time.sleep(5)
+
     result = result.replace("\n", "")
     result = result.replace("</record>", "</record>\n")
     return result.split("\n")
