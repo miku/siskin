@@ -307,7 +307,7 @@ for root, _, files in os.walk(input_directory):
                 f856u = "https://zs.thulb.uni-jena.de/rsc/viewer/jportal_derivate_00234793/" + image
                 marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
             else:
-                print(url)
+                sys.exit("Wrong URL pattern: " + url)
 
             # SWB-Inhaltstyp
             f935c = formats[format]["935c"]
