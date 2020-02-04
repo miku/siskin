@@ -300,9 +300,14 @@ for root, _, files in os.walk(input_directory):
             marcrecord.add("773", t=f773t, w=f773w)
 
             # Link zur Ressource
-            f856u = xmlrecord["dc:identifier"][1]
-            if f856u:
+            url = xmlrecord["dc:identifier"][1]
+            match = re.search("\d/(.*?)$", url)
+            if match:
+                image = match.group(1)
+                f856u = "https://zs.thulb.uni-jena.de/rsc/viewer/jportal_derivate_00234793/" + image
                 marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+            else:
+                print(url)
 
             # SWB-Inhaltstyp
             f935c = formats[format]["935c"]
