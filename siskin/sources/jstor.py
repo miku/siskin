@@ -519,7 +519,7 @@ class JstorIntermediateSchema(JstorTask):
             with self.output().open('w') as output:
                 for i, line in enumerate(handle):
                     if i % 100000 == 0:
-                        self.logger.debug("processed %d lines", i)
+                        self.logger.debug("[jstor] processed %d lines", i)
                     doc = json.loads(line)
                     issns, names = set(), set()
 
