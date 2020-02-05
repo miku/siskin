@@ -57,7 +57,7 @@ The siskin project includes a [bunch of
 scripts](https://github.com/miku/siskin/tree/master/bin), that allow to create,
 inspect or remove tasks or task artifacts.
 
-Python 2 and 3 support is mostly done, rough edges might remain.
+Starting 02/2020, only Python 3 is supported.
 
 Run `taskchecksetup` to see, what additional tools might need to be installed
 (this is a manually [curated](https://git.io/fhZvG) list, not everything is
