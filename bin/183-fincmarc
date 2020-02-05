@@ -71,7 +71,7 @@ def get_sru_records(start, max):
         if x != 200:
             print(x)
         result = result.text
-        if "Access to specified database denied" not in result:
+        if "</record>" in result:
             break
         else:
             time.sleep(5)
@@ -132,7 +132,7 @@ while start < all_records:
     if len(oldrecords) == 0:
         sys.exit("leere Liste")
 
-    for oldrecord in oldrecords[:-1]:
+    for oldrecord in oldrecords:
 
         match = re.search("(\<record.*?\>.*?\</record\>)", oldrecord)  #327963263
 
