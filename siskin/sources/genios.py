@@ -426,7 +426,13 @@ class GeniosIntermediateSchema(GeniosTask):
 
     def run(self):
         if not os.path.exists(self.taskdir()):
-            os.makedirs(self.taskdir())
+            try:
+                os.makedirs(self.taskdir())
+            except FileExistsError:
+                pass
+            else:
+                raise
+
         output = shellout("span-import -i genios <(unpigz -c {input}) | pigz -c >> {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
