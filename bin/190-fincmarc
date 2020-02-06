@@ -89,7 +89,7 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="190-" + f001)
 
-    collections = ["a", f001, "b", "190", "c", "sid-190-col-eebo"]
+    collections = ["a", f001, "b", "190", "c", "sid-190-col-eebo", "c", "ZDB-1-EEB"]
     record.add("980", subfields=collections)
 
     marc_clean_record(record)
