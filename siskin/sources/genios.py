@@ -79,6 +79,55 @@ The 201805 shipment contains the following tags:
       3 <Module>0WISOSOZI</Module>
       2 <Module>0WISOPSYC</Module>
 
+Update 2020-02-06
+-----------------
+
+Using:
+
+    $ taskcat GeniosCombinedIntermediateSchema > genios.jsonl
+
+Almost all databases seem to have module descriptions now, only a few are seemingly missing.
+
+    $ LC_ALL=C grep '"Genios"' genios.jsonl | jq -r '.url[]' | \
+        sed -e 's@https://www.wiso-net.de/document/@@g' | cut -f 1 -d '_' | \
+        sort | uniq -c | sort -nr
+
+     236403 DZI
+      64902 FOGR
+      32010 PMGC
+      18894 LEMO
+       9336 STB
+       6171 PMGI
+        566 HMDS
+          6 JCS
+          1 BEFO
+
+Maybe these have not been updated in a while?
+
+    $ taskcat GeniosLatestReloadList | grep -f <(LC_ALL=C grep '"Genios"' genios.jsonl | \
+        jq -r '.url[]' | sed -e 's@https://www.wiso-net.de/document/@@g' | \
+        cut -f 1 -d '_' | sort -u) | xargs basename
+
+    konsortium_sachsen_fachzeitschriften_ESTB_reload_201911.zip
+    konsortium_sachsen_fachzeitschriften_HMDS_reload_201911.zip
+    konsortium_sachsen_fachzeitschriften_JCS_reload_201911.zip
+    konsortium_sachsen_fachzeitschriften_JCSM_reload_201911.zip
+    konsortium_sachsen_fachzeitschriften_LEMO_reload_201712.zip
+    konsortium_sachsen_fachzeitschriften_PMGC_reload_201710.zip
+    konsortium_sachsen_fachzeitschriften_PMGI_reload_201710.zip
+    konsortium_sachsen_fachzeitschriften_STB_reload_201712.zip
+    konsortium_sachsen_fachzeitschriften_STBG_reload_201911.zip
+    konsortium_sachsen_fachzeitschriften_USTB_reload_201911.zip
+    konsortium_sachsen_literaturnachweise_sozialwissenschaften_DZI_reload_201911.zip
+    konsortium_sachsen_literaturnachweise_technik_FOGR_reload_201610.zip
+    konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_BEFO_reload_201911.zip
+
+Possible workaround: Drop any record, that does not have a module designation
+(although some DZI links look fine, e.g.
+https://www.wiso-net.de/document/DZI__8F6D6F155196479464CF8E6A461608BC, other
+less so, e.g.
+https://www.wiso-net.de/document/DZI__86D01B6DF9C3893B6FDEE47C9E5F926B.
+
 """
 
 import datetime
