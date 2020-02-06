@@ -5,3 +5,4 @@
 185-fincmarc --interval manually --format mrc --output-hist-size 10
 186-fincmarc --interval manually --format mrc --output-hist-size 10
 187-fincmarc --interval monthly  --format mrc --output-hist-size 10
+190-fincmarc --interval manually --format mrc --output-hist-size 10
