@@ -123,10 +123,8 @@ Maybe these have not been updated in a while?
     konsortium_sachsen_literaturnachweise_wirtschaftswissenschaften_BEFO_reload_201911.zip
 
 Possible workaround: Drop any record, that does not have a module designation
-(although some DZI links look fine, e.g.
-https://www.wiso-net.de/document/DZI__8F6D6F155196479464CF8E6A461608BC, other
-less so, e.g.
-https://www.wiso-net.de/document/DZI__86D01B6DF9C3893B6FDEE47C9E5F926B.
+(although some DZI links look fine, e.g. https://www.wiso-net.de/document/DZI__8F6D6F155196479464CF8E6A461608BC, other
+less so, e.g. https://www.wiso-net.de/document/DZI__86D01B6DF9C3893B6FDEE47C9E5F926B).
 
 """
 
