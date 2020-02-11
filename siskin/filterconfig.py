@@ -32,10 +32,32 @@ wants (or is allowed) to access from a shared index (expressed as YAML at
 
 """
 
+import collections
+
+Entry = collections.namedtuple('Entry', 'sid collection kbart package')
+
 class FilterConfig:
     """
     Config accumulator and serializer.
     """
     def __init__(self):
-        pass
+        self.map = collections.defaultdict(list)
 
+    def add(self, isil=None, sid=None, collection=None, kbart=None, package=None):
+        """
+        Say: isil wants to see sid and maybe one or more collections and
+        holding files.
+        """
+        # TODO(martin): listify.
+        entry = Entry(sid=sid, collection=collection, kbart=kbart, package=package)
+        self.map[isil].append(entry)
+
+    def to_dict(self):
+        """
+        Return the dict, that will be used for JSON export.
+        """
+
+    def to_json(self):
+        """
+        Return filterconfig JSON.
+        """
