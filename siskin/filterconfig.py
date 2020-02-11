@@ -1,7 +1,7 @@
 # coding: utf-8
 # pylint: disable=F0401,C0111,W0232,E1101,E1103,C0301,C0103,W0614,W0401,E0202
 
-# Copyright 2018 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
@@ -48,9 +48,16 @@ class FilterConfig:
         Say: isil wants to see sid and maybe one or more collections and
         holding files.
         """
-        # TODO(martin): listify.
-        entry = Entry(sid=sid, collection=collection, kbart=kbart, package=package)
-        self.map[isil].append(entry)
+        # TODO(martin): listify more.
+        if isinstance(collection, str):
+            entry = Entry(sid=sid, collection=collection, kbart=kbart, package=package)
+            self.map[isil].append(entry)
+        elif isinstance(collection, (tuple, list, set)):
+            for c in collection:
+                entry = Entry(sid=sid, collection=collection, kbart=kbart, package=package)
+                self.map[isil].append(entry)
+        else:
+            raise ValueError('collection must be a string or list like')
 
     def to_dict(self):
         """
