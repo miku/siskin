@@ -63,3 +63,5 @@ docs/sids.tsv:
 		xmlcutty -path /wiki_page/text | sed -e 's/"//g' | cut -d '|' -f2-5 | \
 		awk -F '|' '{print $$1"\t"$$2"\t"$$3}' | tail -n +4 > $@
 
+docs/filterconfig.yaml.zst:
+	taskcat AMSLFilterConfig | yq r --prettyPrint - | zstd -c9 > $@
