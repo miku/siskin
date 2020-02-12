@@ -178,6 +178,29 @@ class AMSLService(AMSLTask):
         return luigi.LocalTarget(path=self.path(digest=True, ext='json.gz'), format=Gzip)
 
 
+class AMSLServiceTab(AMSLTask):
+    """
+    Turn API response into TSV.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+    name = luigi.Parameter(default='outboundservices:discovery', description='ignored, kept for compatibility')
+
+    def requires(self):
+        if self.name != 'outboundservices:discovery':
+            return AMSLServiceDeprecated(date=self.date, name=self.name)
+        return []
+
+    def run(self):
+        if self.name == 'outboundservices:discovery':
+            output = shellout("span-amsl-discovery -f -live {live} | pigz -c > {output}", live=self.config.get('amsl', 'base'))
+        else:
+            output = self.input().path
+
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(digest=True, ext='tsv.gz'), format=Gzip)
+
 class AMSLCollections(AMSLTask):
     """
     Report all collections, that appear in AMSL.
