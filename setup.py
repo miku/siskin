@@ -217,6 +217,7 @@ setup(name='siskin',
           'bin/186-fincmarc',
           'bin/187-fincmarc',
           'bin/190-fincmarc',
+          'bin/191-fincmarc',
       ],
       entry_points={
         'console_scripts': [
