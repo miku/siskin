@@ -56,19 +56,30 @@ def get_osf_records(page):
     return result
 
 
-def get_author(url):
+def get_authors(url):
 
     result = requests.get(url)
     result = result.json()
-    if "data" not in result:
-        return None
+    try:
+        result["data"][0]["embeds"]["users"]
+    except:
+        return [""]
 
     authors = []
+
     for author in result["data"]:
-        forename = author["embeds"]["users"]["data"]["attributes"]["given_name"]
-        surname = author["embeds"]["users"]["data"]["attributes"]["family_name"]
-        author = surname + ", " + forename
+
+        try:
+            author = author["embeds"]["users"]["data"]["attributes"]
+        except:
+            author = author["embeds"]["users"]["errors"][0]["meta"]
+
+        forename = author["given_name"]
+        middlenames = author["middle_names"]
+        surname = author["family_name"]
+        author = surname + ", " + forename + " " + middlenames
         authors.append(author)
+
     return authors
 
 
@@ -139,7 +150,7 @@ while True:
 
         # 1. Urheber
         url = jsonrecord["relationships"]["contributors"]["links"]["related"]["href"]
-        authors = get_author(url)
+        authors = get_authors(url)
         f100a = authors[0]
         marcrecord.add("100", a=f100a, _4="aut")
 
