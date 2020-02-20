@@ -167,6 +167,7 @@ class B3KatFilterSSG(B3KatTask):
 
         """
         counter = collections.Counter()
+        self.logger.debug("filtering out records from %s", self.input().path)
         with open(self.input().path, 'rb') as handle:
             with self.output().open('wb') as output:
                 reader = pymarc.MARCReader(handle)
