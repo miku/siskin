@@ -174,13 +174,16 @@ class B3KatFilterSSG(B3KatTask):
                 writer = pymarc.MARCWriter(output)
                 for i, record in enumerate(reader):
                     if i % 100000 == 0:
-                        self.logger.debug('filtered %d/%d records', counter['written'], i)
+                        self.logger.debug('filtered %d/%d records, %s', counter['written'], i, counter)
                     record = marcx.Record.from_record(record)
                     if not 'ssgn' in record.values('84.2'):
+                        counter['not-ssgn'] += 1
                         continue
                     if not '9,2' in record.values('84.a'):
+                        counter['not-9,2'] += 1
                         continue
                     if not 'digit' in record.values('912.a'):
+                        counter['not-digit'] += 1
                         continue
                     writer.write(record)
                     counter['written'] += 1
