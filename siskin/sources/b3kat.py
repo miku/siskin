@@ -169,17 +169,17 @@ class B3KatFilterSSG(B3KatTask):
         counter = collections.Counter()
         self.logger.debug("filtering out records from %s", self.input().path)
         with open(self.input().path, 'rb') as handle:
-            with self.output().open('wb') as output:
+            with tempfile.NamedTemporaryFile('wb', delete=False) as output:
                 reader = pymarc.MARCReader(handle)
                 writer = pymarc.MARCWriter(output)
                 for i, record in enumerate(reader):
                     if i % 100000 == 0:
                         self.logger.debug('filtered %d/%d records, %s', counter['written'], i, counter)
                     record = marcx.Record.from_record(record)
-                    if not 'ssgn' in record.values('84.2'):
+                    if not 'ssgn' in record.values('084.2'):
                         counter['not-ssgn'] += 1
                         continue
-                    if not '9,2' in record.values('84.a'):
+                    if not '9,2' in record.values('084.a'):
                         counter['not-9,2'] += 1
                         continue
                     if not 'digit' in record.values('912.a'):
@@ -187,6 +187,7 @@ class B3KatFilterSSG(B3KatTask):
                         continue
                     writer.write(record)
                     counter['written'] += 1
+            luigi.LocalTarget(output.name).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
