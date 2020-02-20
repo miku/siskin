@@ -67,9 +67,12 @@ dtype: int64
 
 """
 
+import collections
 import datetime
 import os
 import tempfile
+import pymarc
+import marcx
 
 import luigi
 
@@ -131,6 +134,55 @@ class B3KatDownload(B3KatTask):
                     self.logger.error(err)
 
         luigi.LocalTarget(stopover).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='mrc'))
+
+
+class B3KatFilterSSG(B3KatTask):
+    """
+    Slice out a binary MARC file from the complete dump based on SSG.
+
+    List of shortcuts for SSG can be found here:
+
+    * https://www.dfg.de/download/pdf/foerderung/programme/lis/fid_zwischenbilanz_umstrukturierung_foerderung_sondersammelgebiete.pdf
+    * https://web.archive.org/web/20190503122507/https://www.dfg.de/download/pdf/foerderung/programme/lis/fid_zwischenbilanz_umstrukturierung_foerderung_sondersammelgebiete.pdf
+    """
+    ssg = luigi.Parameter(default='9,2', description='ssgn designation to be matched against 84.a')
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return B3KatDownload(date=self.date)
+
+    def run(self):
+        """
+        Taken from 012_filter.sh
+
+        unzip -p $f | tr -d '\t' | sed -e 's/\(<marc:record>\)/\t\1/g' | tr -d
+        '\n' | tr '\t' '\n' | grep '<marc:datafield tag="084" ind1="."
+        ind2="."><marc:subfield code="a">9,2</marc:subfield><marc:subfield
+        code="2">ssgn</marc:subfield>' | grep '<marc:datafield tag="912"
+        ind1="." ind2="."><marc:subfield
+        code="a">digit</marc:subfield></marc:datafield>' >$t
+
+        """
+        counter = collections.Counter()
+        with open(self.input().path, 'rb') as handle:
+            with self.output().open('wb') as output:
+                reader = pymarc.MARCReader(handle)
+                writer = pymarc.MARCWriter(output)
+                for i, record in enumerate(reader):
+                    if i % 100000 == 0:
+                        self.logger.debug('filtered %d/%d records', counter['written'], i)
+                    record = marcx.Record.from_record(record)
+                    if not 'ssgn' in record.values('84.2'):
+                        continue
+                    if not '9,2' in record.values('84.a'):
+                        continue
+                    if not 'digit' in record.values('912.a'):
+                        continue
+                    writer.write(record)
+                    counter['written'] += 1
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='mrc'))
