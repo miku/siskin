@@ -58,7 +58,7 @@ install_requires = [
     'logilab-common>=0.61.0',
     'luigi>=2.2',
     'lxml>=3.4.2',
-    'marcx>=0.2.9',
+    'marcx>=0.2.10',
     'nose>=1.3.3',
     'numpy<1.17',
     'pandas>=0.20.0,<0.24',
