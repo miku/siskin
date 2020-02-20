@@ -414,7 +414,10 @@ def xmlstream(filename, tag):
         'start',
         'end',
     )))
-    _, root = next(context)
+    try:
+        _, root = next(context)
+    except StopIteration:
+        return
 
     for event, elem in context:
         if not strip_ns(elem.tag) == tag or event == 'start':
