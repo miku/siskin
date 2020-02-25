@@ -132,7 +132,7 @@ while start < all_records:
     if len(oldrecords) == 0:
         sys.exit("leere Liste")
 
-    for oldrecord in oldrecords:
+    for oldrecord in oldrecords[:-1]:
 
         match = re.search("(\<record.*?\>.*?\</record\>)", oldrecord)  #327963263
 
