@@ -26,7 +26,7 @@
 
 Source: Early English Books Online EEBO
 SID: 190
-Ticket: #16749
+Ticket: #16749, #16965
 Origin: local file
 
 """
@@ -83,6 +83,12 @@ for record in reader:
     record = marcx.Record.from_record(record)
     record.force_utf8 = True
     record.strict = False
+
+    # Ergänze Pos 18, da Metadaten ISBD-Zeichen enthalten
+    leader1 = record.leader[:18]
+    leader2 = record.leader[19:]
+    leader = leader1 + "i" + leader2
+    record.leader = leader
 
     # Identifikator
     f001 = record["001"].data
