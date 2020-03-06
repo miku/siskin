@@ -53,6 +53,10 @@ lang_map = {
     "portugiesisch": "por",
     "italienisch": "ita",
     "tuerkisch": "tur",
+    "niederlaendisch": "dut",
+    "norwegisch": "nor",
+    "russisch": "rus",
+    "japanisch": "jap",
     "schwedisch": "swe"
 }
 
@@ -162,10 +166,10 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     if languages:
         languages = languages.split("; ")
         if len(languages) < 4:
-            language = "mul"
-        else:
             language = languages[0]
             language = lang_map.get(language, "")
+        else:
+            language = "mul"
     else:
         language = ""
     f008 = marc_build_field_008(year, periodicity, language)
@@ -184,8 +188,8 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         languages = languages.split("; ")
         if len(languages) < 4:
             subfields = []
-            for f041a in languages:
-                f041a = lang_map.get(f041a, "")
+            for language in languages:
+                f041a = lang_map.get(language, "")
                 if f041a:
                     subfields.append("a")
                     subfields.append(f041a)
