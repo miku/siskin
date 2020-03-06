@@ -182,20 +182,18 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
     languages = xmlrecord["SPRACHE"]
     if languages:
         languages = languages.split("; ")
-        language = languages[0]
-        language = lang_map.get(language, "")
-        if language != "":
-            if len(languages) < 4:
-                subfields = []
-                for f041a in languages:
+        if len(languages) < 4:
+            subfields = []
+            for f041a in languages:
+                f041a = lang_map.get(f041a, "")
+                if f041a:
                     subfields.append("a")
-                    f041a = lang_map.get(f041a, "")
                     subfields.append(f041a)
-                    marcrecord.add("041", subfields=subfields)
-            else:
-                marcrecord.add("041", a="mul")
+                else:
+                    print("Die Sprache %s fehlt in der Lang_Map!" % language)
+            marcrecord.add("041", subfields=subfields)
         else:
-            print("Die Sprache %s fehlt in der Lang_Map!" % language)
+            marcrecord.add("041", a="mul")
 
     # 1. Urheber
     persons = xmlrecord["AUTOR"]
