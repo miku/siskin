@@ -64,13 +64,14 @@ fip.remove_old_outputfiles(SID)
 
 if not inputfilename:
 
+    tmpfilename = path + "/159_input.tmp"
     inputfilename = path + "/159_input.mrc"
     os.system("mkdir /tmp/159")
     os.system('curl "https://goobi-prod.ub.uni-leipzig.de:12105/repo/Buchhandschriften/fincimport" > /tmp/159/urls')
     os.system("wget -i /tmp/159/urls -P /tmp/159")
     os.system("""sed -i -e 's/ind1=""/ind1=" "/g' -e 's/ind2=""/ind2=" "/g' /tmp/159/*""")
-    os.system("""yaz-marcdump -i marcxml -o marc /tmp/159/xml* > 159_input.tmp""")
-    os.system("""yaz-marcdump -i marc -o marcxml 159_input.tmp > %s""" % inputfilename)
+    os.system("""yaz-marcdump -i marcxml -o marc /tmp/159/xml* > %s""" % tmpfilename)
+    os.system("""yaz-marcdump -i marc -o marcxml %s > %s""" % (tmpfilename, inputfilename))
 
 inputfile = open(inputfilename, "rb")
 reader = pymarc.parse_xml_to_array(inputfile)
