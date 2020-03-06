@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Buchhandschriften
+SID: 163
+Ticket: #13316
+Origin: Speicherwolke
+
+"""
+
+
+import os
+import sys
+
+import marcx
+import pymarc
+from siskin.mappings import formats
+from siskin.configuration import Config
+from siskin.utils import marc_clean_record
+from siskin.arguments import FincArgumentParser
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "163"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+outputformat = fip.args.outputformat
+inputfilename = fip.args.inputfilename
+path = fip.sid_path("163")
+
+fip.remove_old_outputfiles(SID)
+
+
+##################################################################################
+# 2. Get input data
+##################################################################################
+
+if not inputfilename:
+
+    inputfilename = path + "/163_input.mrc"
+    os.system("mkdir /tmp/163")
+    os.system('curl "https://goobi-prod.ub.uni-leipzig.de:12105/repo/NachlassWustmann/fincimport" > /tmp/163/urls')
+    os.system("wget -i /tmp/163/urls -P /tmp/163")
+    os.system("""sed -i -e 's/ind1=""/ind1=" "/g' -e 's/ind2=""/ind2=" "/g' /tmp/163/*""")
+    os.system("""yaz-marcdump -i marcxml -o marc /tmp/163/* > %s""" % inputfilename)
+
+inputfile = open(inputfilename, "rb")
+reader = pymarc.MARCReader(inputfile, force_utf8=True)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for record in reader:
+
+    record = marcx.Record.from_record(record)
+    record.force_utf8 = True
+    record.strict = False
+
+    # Identifikator
+    f001 = record["001"].data
+    f001 = f001.replace("-", "")
+    record.remove_fields("001")
+    record.add("001", data="163-" + f001)
+
+    # digitale Kollektion
+    record.remove_fields("912")
+    record.add("912", a="sid-163-col-nachlasswustmann")
+
+    # Ansigelung
+    record.add("980", a=f001, b="163", c="sid-163-col-nachlasswustmann")
+
+    marc_clean_record(record)
+
+    if outputformat == "xml":
+        outputfile.write(record)
+    else:
+        outputfile.write(record.as_marc())
+
+inputfile.close()
+outputfile.close()
