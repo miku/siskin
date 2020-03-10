@@ -42,12 +42,12 @@ import string
 import tempfile
 import urllib
 
-import luigi
 import requests
 import six
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 
+import luigi
 import rdflib
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
@@ -244,7 +244,7 @@ class AIIntermediateSchema(AITask):
             IEEEIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchema(date=self.date, stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
-            SpringerIntermediateSchema(stamp=True), # TODO(martin): drop this, contained in [49], refs #16915
+            SpringerIntermediateSchema(stamp=True),  # TODO(martin): drop this, contained in [49], refs #16915
             PQDTIntermediateSchema(date=self.date, stamp=True),
             IJOCIntermediateSchema(stamp=True),
             CeeolJournalsIntermediateSchema(stamp=True),

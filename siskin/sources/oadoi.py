@@ -38,9 +38,8 @@ import json
 import sys
 
 import luigi
-from luigi.format import Gzip
-
 from gluish.utils import shellout
+from luigi.format import Gzip
 from siskin.task import DefaultTask
 
 

@@ -38,7 +38,6 @@ input = /path/to/mrc (ask RS)
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 

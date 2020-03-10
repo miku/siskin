@@ -40,9 +40,9 @@ import pipes
 import re
 import tempfile
 
-import luigi
 import six
 
+import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -334,7 +334,8 @@ class JstorCollectionNames(JstorTask):
         shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
                  tail -n +2 | cut -f 28 | tr ';' '\n' | \
                  sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u >> {output}""",
-                 output=output, preserve_whitespace=True)
+                 output=output,
+                 preserve_whitespace=True)
         output = shellout("""sort -u {input} | grep -v ^$ > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -554,10 +555,11 @@ class JstorIntermediateSchema(JstorTask):
                         assumed_oa_pattern = r'http[s]?://www.jstor.org/stable/[0-9]+$'
                         if any((re.search(assumed_oa_pattern, url) for url in doc.get('url', []))):
                             # TODO(miku): These names are not official yet.
-                            doc['finc.mega_collection'] = ['Open JSTOR Collection', 'sid-55-col-jstoropen'] # Maybe, https://www.jstor.org/stable/26167842.
+                            doc['finc.mega_collection'] = ['Open JSTOR Collection', 'sid-55-col-jstoropen']  # Maybe, https://www.jstor.org/stable/26167842.
                             counter["assumed_oa"] += 1
                         else:
-                            self.logger.warn("JSTOR record without issn or issn mapping and likely not open access neither: %s, %s", doc.get("finc.id"), doc.get('url'))
+                            self.logger.warn("JSTOR record without issn or issn mapping and likely not open access neither: %s, %s", doc.get("finc.id"),
+                                             doc.get('url'))
                             counter["err.name"] += 1
 
                     line = json.dumps(doc)

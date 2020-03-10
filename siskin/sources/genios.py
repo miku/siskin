@@ -135,7 +135,6 @@ import tempfile
 import zipfile
 
 import luigi
-
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

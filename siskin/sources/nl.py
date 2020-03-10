@@ -38,7 +38,6 @@ solr = https://example.com/vaqrk/FYHO
 import datetime
 
 import luigi
-
 from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter

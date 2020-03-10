@@ -9,10 +9,10 @@ import json
 import re
 import sys
 
-import pandas as pd
 import requests
-import tqdm
 
+import pandas as pd
+import tqdm
 from six.moves import urllib
 
 if len(sys.argv) != 3:

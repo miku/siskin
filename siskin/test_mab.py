@@ -7,7 +7,6 @@ import os
 import tempfile
 
 import pytest
-
 from siskin.mab import MabXMLFile
 
 try:

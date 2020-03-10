@@ -41,9 +41,8 @@ import json
 import re
 import sys
 
-import tqdm
-
 import marcx
+import tqdm
 
 channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB", "SR", "SRF", "SRF.Podcast", "SWR", "WDR",
             "ZDF", "ZDF-tivi", "3sat")
