@@ -67,7 +67,7 @@ if not inputfilename:
     tmpfilename = path + "/159_input.tmp"
     inputfilename = path + "/159_input.mrc"
     os.system("mkdir /tmp/159")
-    os.system('curl "https://goobi-prod.ub.uni-leipzig.de:12105/repo/Buchhandschriften/fincimport" > /tmp/159/urls')
+    os.system('curl "http://172.18.85.86:12105/repo/Buchhandschriften/fincimport" > /tmp/159/urls')
     os.system("wget -i /tmp/159/urls -P /tmp/159")
     os.system("""sed -i -e 's/ind1=""/ind1=" "/g' -e 's/ind2=""/ind2=" "/g' /tmp/159/*""")
     os.system("""yaz-marcdump -i marcxml -o marc /tmp/159/xml* > %s""" % tmpfilename)
