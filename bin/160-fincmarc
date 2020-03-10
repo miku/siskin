@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: UBL SpoWi Diplomarbeiten
+SID: 160
+Ticket: #17002
+Origin: local file
+
+"""
+
+
+import os
+import sys
+import re
+
+import marcx
+import pymarc
+
+from siskin.configuration import Config
+from siskin.mappings import formats
+from siskin.utils import marc_build_imprint, marc_build_field_008
+from siskin.arguments import FincArgumentParser
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "160"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+outputformat = fip.args.outputformat
+inputfilename = fip.args.inputfilename
+
+fip.remove_old_outputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfilename:
+    config = Config.instance()
+    inputfilename = config.get(SID, "input")
+
+inputfile = open(inputfilename, "r", encoding="utf-8")
+csvrecords = inputfile.readlines()
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for csvrecord in csvrecords[1:]:
+
+    csvrecord = csvrecord.split("\t")
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.force_utf8 = True
+    marcrecord.strict = False
+
+    # Formatfestlegung
+    format ="Thesis"
+    
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifikator
+    f001 = "finc-160-" + str(csvrecord[0])
+    marcrecord.add("001", data=f001)
+
+    # Zugangsfacette
+    f007 = formats[format]["p007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodizität
+    year = csvrecord[6]
+    periodicity = formats[format]["008"]
+    language = csvrecord[2]
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+
+    # Sprache
+    marcrecord.add("041", a=csvrecord[2])
+
+    # Notation
+    marcrecord.add("084", a="ZX 3900", _2="rvk")
+
+    # 1. Urheber
+    marcrecord.add("100", a=csvrecord[13], _4="aut")
+
+    # Titel
+    marcrecord.add("245", a=csvrecord[3])
+
+    # Erscheinungsvermerk
+    f260a = csvrecord[4]
+    f260b = csvrecord[5]
+    f260c = csvrecord[6]
+    imprint = ["a", f260a, "b", f260b, "c", f260c]
+    marcrecord.add("260", subfields=imprint)
+
+    # Umfang
+    marcrecord.add("300", a=csvrecord[7])
+
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # Fußnote
+    marcrecord.add("500", a=u"Signatur: " + csvrecord[9])
+
+    # Hochschulvermerk
+    university = csvrecord[8]
+    match1 = re.search("(.*?),\s(.*?),\s(.*?),\s([\[\d].*)", university)
+    match2 = re.search("(.*?),\s(.*?),\s(.*?),\s(.*?),\s([\[\d].*)", university)
+    if match1 or match2:
+        marcrecord.add("502", a=university)
+
+    # Schlagwort
+    subjects = csvrecord[10]
+    subjects = subjects.split("; ")
+    for subject in subjects:
+        marcrecord.add("650", a=subject)
+
+    # weitere Urheber
+    for i in range (14, 35):
+        f700a = csvrecord[i]
+        f700a = f700a.replace("\n", "")
+        if f700a:
+            marcrecord.add("700", a=f700a, _4="aut")
+
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Kollektion
+    marcrecord.add("980", a=str(csvrecord[0]), b="160", c="sid-160-col-diplspowi")
+
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+outputfile.close()
