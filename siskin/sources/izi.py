@@ -35,7 +35,6 @@ import datetime
 import os
 
 import luigi
-
 from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

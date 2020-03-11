@@ -19,7 +19,6 @@ To clean:
 """
 
 import luigi
-
 from gluish.task import BaseTask
 from gluish.utils import shellout
 from part2_crossref import CrossrefIntermediateSchema

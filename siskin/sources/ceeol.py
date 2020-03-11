@@ -49,7 +49,6 @@ import sys
 import tempfile
 
 import luigi
-
 import marcx
 import pymarc
 from gluish.utils import shellout

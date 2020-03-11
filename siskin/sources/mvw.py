@@ -53,7 +53,6 @@ archive = https://verteiler.mediathekviewweb.de/archiv
 import datetime
 
 import luigi
-
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

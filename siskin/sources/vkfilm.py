@@ -40,7 +40,6 @@ file = /path/to/file
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 

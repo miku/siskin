@@ -55,11 +55,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-import elasticsearch
-import luigi
 import requests
 from six import string_types
 
+import elasticsearch
+import luigi
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly

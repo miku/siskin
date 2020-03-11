@@ -36,7 +36,6 @@ download-url = http://exa.com/store/123
 """
 
 import luigi
-
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 

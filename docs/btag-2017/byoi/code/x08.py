@@ -18,9 +18,8 @@ import os
 import tempfile
 
 import luigi
-from luigi.format import Gzip
-
 from gluish.utils import shellout
+from luigi.format import Gzip
 from x06 import IntermediateSchema
 
 

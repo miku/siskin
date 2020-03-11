@@ -35,7 +35,6 @@ from __future__ import print_function
 import sys
 
 from luigi.task import Register
-
 from siskin import __version__
 from siskin.benchmark import green, yellow
 from siskin.sources import *

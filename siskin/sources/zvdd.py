@@ -28,7 +28,6 @@ ZVDD, refs #6610.
 import datetime
 
 import luigi
-
 from gluish.format import Gzip
 from gluish.intervals import quarterly
 from gluish.parameter import ClosestDateParameter

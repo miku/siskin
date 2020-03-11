@@ -37,12 +37,11 @@ import json
 
 import langdetect
 import luigi
-from iso639 import languages
-
 from gluish.format import Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from iso639 import languages
 from siskin.task import DefaultTask
 
 

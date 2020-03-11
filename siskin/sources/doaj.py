@@ -41,7 +41,6 @@ from builtins import map, range
 
 import elasticsearch
 import luigi
-
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly

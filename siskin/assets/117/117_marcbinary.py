@@ -6,10 +6,9 @@ import re
 import sys
 from builtins import *
 
-from tqdm import tqdm
-
 import marcx
 import pymarc
+from tqdm import tqdm
 
 copytags = [
     "003", "005", "006", "008", "010", "013", "015", "016", "017", "020", "022", "024", "026", "028", "029", "030", "032", "033", "035", "040", "041", "044",

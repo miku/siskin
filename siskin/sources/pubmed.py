@@ -30,7 +30,6 @@ from __future__ import print_function
 import datetime
 
 import luigi
-
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter

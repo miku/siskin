@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 Helper functions for generating filter config files.
 
@@ -32,10 +31,10 @@ wants (or is allowed) to access from a shared index (expressed as YAML at
 
 """
 
+
 class FilterConfig:
     """
     Config accumulator and serializer.
     """
     def __init__(self):
         pass
-
