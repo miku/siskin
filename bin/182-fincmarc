@@ -105,7 +105,19 @@ for root, _, files in os.walk(input_directory):
 
             newrecord = marcx.Record.from_record(oldrecord)
             newrecord.force_utf8 = True
-            newrecord.strict = False    
+            newrecord.strict = False
+
+            # Leader Pos 7 anpassen, falls Artikel statt Buchkapitel vorliegt
+            try:
+                is_article = newrecord["773"]["x"]
+            except:
+                is_article = ""
+
+            if is_article:
+                leader1 = newrecord.leader[:7]
+                leader2 = newrecord.leader[8:]
+                leader = leader1 + "b" + leader2
+                newrecord.leader = leader
 
             # Identifikator
             f001 = newrecord["001"].data
