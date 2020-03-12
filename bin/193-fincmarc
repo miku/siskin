@@ -157,7 +157,7 @@ while start < all_records:
         newrecord.add("001", data="193-" + f001)
 
         # Ansigelung und Kollektion
-        collections = ["a", f001, "b", "183", "c", "sid-193-col-hebisbbi"]
+        collections = ["a", f001, "b", "193", "c", "sid-193-col-hebisbbi"]
         newrecord.add("980", subfields=collections)
 
         marc_clean_record(newrecord)
