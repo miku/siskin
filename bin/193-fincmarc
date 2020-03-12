@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: HeBIS-Verbundkatalog (Profil FID BBI)
+SID: 193
+Ticket: #16049, #16867
+Origin: SRU
+
+"""
+
+
+import os
+import re
+import sys
+import time
+from io import BytesIO, StringIO
+
+import requests
+
+import marcx
+import pymarc
+from siskin.utils import marc_clean_record, xmlstream
+from siskin.arguments import FincArgumentParser
+
+
+def get_sru_records(start, max):
+
+    params = {
+        "maximumRecords":
+        max,
+        "startRecord":
+        start,
+        "recordSchema":
+        "marcxml",
+        "operation":
+        "searchRetrieve",
+        "query":
+        'pica.rvp="AM 1*" or pica.rvp="AM 2*" or pica.rvp="AM 3*" or pica.rvp="AM 4*" or pica.rvp="AM 5*" or pica.rvp="AM 6*" or pica.rvp="AM 7*" or pica.rvp="AM 8*" or pica.rvp="AM 9*" or pica.rvp="AN 1*" or pica.rvp="AN 2*" or pica.rvp="AN 3*" or pica.rvp="AN 4*" or pica.rvp="AN 5*" or pica.rvp="AN 6*" or pica.rvp="AN 7*" or pica.rvp="AN 8*" or pica.rvp="AN 9*" or pica.rvp="AP 25*" or pica.rvp="AP 28*" or pica.rvp="LH 72*" or pica.rvp="LK 86*" or pica.rvp="LR 5570*" or pica.rvp="LR 5580*" or pica.rvp="LR 5581*" or pica.rvp="LR 5582*" or pica.rvp="LR 5586*" or pica.rvp="LR 57240" or pica.rvp="LT 5570*" or pica.rvp="LT 5580*" or pica.rvp="LT 5581*" or pica.rvp="LT 5582*" or pica.rvp="LT 5586*" or pica.rvp="LT 57240"'
+    }
+
+    while True:
+
+        result = requests.get("http://cbsopac.rz.uni-frankfurt.de/sru/DB=2.1?", params=params)
+        x = result.status_code
+        if x != 200:
+            print(x)
+        result = result.text
+        if "</record>" in result:
+            break
+        else:
+            time.sleep(5)
+
+    result = result.replace("\n", "")
+    result = result.replace("</record>", "</record>\n")
+    return result.split("\n")
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "193"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+outputformat = fip.args.outputformat
+
+fip.sid_path(SID)
+fip.remove_old_outputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Fetch input data
+################################################################################
+
+result = get_sru_records(1, 1)
+n = result[0]
+match = re.search("\<srw:numberOfRecords\>(.*?)\</srw:numberOfRecords\>", n)
+if match:
+    all_records = match.group(1)
+else:
+    sys.exit("could get numberOfRecords")
+
+all_records = int(all_records)
+max_records_request = 100
+start = 1
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+while start < all_records:
+
+    oldrecords = get_sru_records(start, max_records_request)
+
+    if not oldrecords:
+        sys.exit("Anfrage nicht erfolgreich")
+
+    if len(oldrecords) == 0:
+        sys.exit("leere Liste")
+
+    for oldrecord in oldrecords[:-1]:
+
+        match = re.search("(\<record.*?\>.*?\</record\>)", oldrecord)
+
+        if not match:
+            sys.exit("kein record-Element")
+
+        oldrecord = match.group(1)
+        oldrecord = oldrecord.encode("latin-1")
+        oldrecord = BytesIO(oldrecord)
+        oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+        oldrecord = oldrecord[0]
+
+        newrecord = marcx.Record.from_record(oldrecord)
+        newrecord.force_utf8 = True
+        newrecord.strict = False
+
+        try:
+            newrecord["245"]["a"]
+        except:
+            continue
+
+        # Identifikator
+        f001 = newrecord["001"].data
+        newrecord.remove_fields("001")
+        newrecord.add("001", data="193-" + f001)
+
+        # Ansigelung und Kollektion
+        collections = ["a", f001, "b", "183", "c", "sid-193-col-hebisbbi"]
+        newrecord.add("980", subfields=collections)
+
+        marc_clean_record(newrecord)
+
+        if outputformat == "xml":
+            outputfile.write(newrecord)
+        else:
+            outputfile.write(newrecord.as_marc())
+
+    start += max_records_request
+
+outputfile.close()
