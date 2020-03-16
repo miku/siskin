@@ -105,7 +105,7 @@ for line in records[1:]:
     f007 = formats[format]["e007"]
     marcrecord.add("007", data=f007)
 
-    # 008
+    # Periodizität
     language = fields[7]
     if language == "engrish":
         language = "eng"
@@ -203,4 +203,5 @@ for line in records[1:]:
     else:
         outputfile.write(marcrecord.as_marc())
 
+inputfile.close()
 outputfile.close()
