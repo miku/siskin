@@ -144,7 +144,7 @@ for record in records.entries:
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
     # 980
-    collections = ["a", f001, "b", "129", "c", "geoscan"]
+    collections = ["a", f001, "b", "129", "c", "sid-129-col-geoscan"]
     marcrecord.add("980", subfields=collections)
 
     outputfile.write(marcrecord.as_marc())
