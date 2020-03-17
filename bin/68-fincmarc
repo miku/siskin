@@ -92,7 +92,10 @@ for oldrecord in xmlstream(inputfilename, "record"):
     record.add("001", data="68-" + f001)
 
     # Zugangstyp
-    record.add("007", data="cr")
+    try:
+        f007 = record["007"].data
+    except:
+        record.add("007", data="cr")
 
     # Ansigelung und Kollektion
     record.remove_fields("980")
@@ -105,6 +108,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
                 break
             elif "SSG-OLC-FTH" in f912a:
                 record.add("980", a=f001, b="68", c="sid-68-col-olcfth")
+                break
+            elif "SSG-OLC-BUB" in f912a:
+                record.add("980", a=f001, b="68", c="sid-68-col-olcbub")
                 break
         else:
             continue    
