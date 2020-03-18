@@ -1,0 +1,231 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: GEOSCAN
+SID: 129
+Ticket: #9871
+Origin: Cloud
+
+"""
+
+
+import os
+import sys
+import csv
+
+import marcx
+import pymarc
+from siskin.configuration import Config
+from siskin.mappings import formats
+from siskin.arguments import FincArgumentParser
+from siskin.utils import check_isbn, check_issn, marc_build_field_008, marc_get_languages
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "129"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+outputformat = fip.args.outputformat
+inputfilename = fip.args.inputfilename
+
+fip.remove_old_outputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfilename:
+    inputfilename = fip.inputfilename(SID)
+    config = Config.instance()
+    url = config.get(SID, "input")
+    os.system('wget -O %s "%s"' % (inputfilename, url))
+
+inputfile = open(inputfilename, "r")
+csvrecords = csv.reader(inputfile, delimiter="\t")
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for csvrecord in csvrecords:
+
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    # Formatfestlegung
+    format = csvrecord[9]
+    
+    if format == "format":
+        continue
+    elif format == "online resource":
+        format = "Article"
+        is_electronic = True
+    elif format == "offline resource":
+        format = "Article"
+        is_electronic = False
+    elif format == "microfilm" or format == "microfiche":
+        format = "Microform"
+        is_electronic = False
+    else:
+        sys.exit("Format nicht bekannt: " + format)
+
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifikator
+    f001 = csvrecord[0]
+    f001 = f001.replace("129-finc-", "finc-129-")
+    marcrecord.add("001", data=f001)
+
+    # Zugangstyp
+    if is_electronic:
+        f007 = formats[format]["e007"]
+    else:
+        f007 = formats[format]["p007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodizität
+    languages = csvrecord[12]
+    languages = marc_get_languages(languages)
+    year = csvrecord[3]
+    periodicity = formats[format]["008"]
+    f008 = marc_build_field_008(year, periodicity, languages)
+    marcrecord.add("008", data=f008)
+
+    # Sprachen
+    marcrecord.add("041", a=languages)
+
+    # 1. Urheber
+    authors = csvrecord[5]
+    if ",  " in authors:
+        authors = authors.split(",  ")
+    else:
+        authors = authors.split("; ")
+    author = authors[0]
+    if " " in author and not ", " in author:
+        marcrecord.add("110", a=author, _4="aut")
+    else:
+        marcrecord.add("100", a=author, _4="aut")
+
+    # Titel
+    f245 = csvrecord[10]
+    if ":" in f245:
+        f245a, f245b = f245.split(":", 1)
+    else:
+        f245a = f245
+        f245b = ""
+    f245a = f245a.strip()
+    f245b = f245b.strip()
+    marcrecord.add("245", a=f245a, b=f245b)
+
+    # Ausgabe
+    f250a = csvrecord[19]
+    marcrecord.add("250", a=f250a)
+
+    # Erscheinungsvermerk
+    f260b = csvrecord[17]
+    f260c = csvrecord[3]
+    marcrecord.add("260", b=f260b, c=f260c)
+
+    # Umfangsangabe
+    f300a = csvrecord[15]
+    marcrecord.add("300", a=f300a)
+
+    # Reihe
+    f490a = csvrecord[16]
+    marcrecord.add("490", a=f490a)
+
+    # Inhaltsbeschreibung
+    f520a = csvrecord[18]
+    marcrecord.add("520", a=f520a)
+
+    # RDA-Inhaltstyp
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Datenträgertyp
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # Schlagwörter
+    subjects = csvrecord[13]
+    subjects = subjects.split(", ")
+    for subject in subjects:
+        subject = subject.strip()
+        marcrecord.add("651", a=subject)
+
+    # GND-Inhalts- und Datenträgertyp
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("655", a=f655a, _2=f6552)
+
+    # weitere Urheber
+    for author in authors[1:]:
+        if " " in author and not ", " in author:
+            marcrecord.add("710", a=author, _4="aut")
+        else:
+            marcrecord.add("700", a=author, _4="aut")
+
+    # Link zur Ressource
+    urls = csvrecord[1]
+    urls = urls.split(", ")
+    for url in urls:
+        if "doi.org" in url:
+            f856u = url
+            break
+    else:
+        f856u = urls[0]
+    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Kollektion
+    id = csvrecord[0]
+    f980a = id.replace("129-finc-", "")
+    marcrecord.add("980", a=f980a, b="129", c="sid-129-col-geoscan")
+
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+inputfile.close()
+outputfile.close()
