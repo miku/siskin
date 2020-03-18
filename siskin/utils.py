@@ -456,6 +456,46 @@ def marc_clean_record(record):
         marc_clean_subfields(field, inplace=True)
 
 
+def marc_get_languages(oldlanguages):
+    """
+    Gets languages in different form and returns list with propper languages codes for MARC.
+    """
+    if not oldlanguages:
+        oldlanguages = [""]
+
+    if isinstance(oldlanguages, six.string_types):
+
+        if ";" in oldlanguages:
+            oldlanguages = oldlanguages.split(";")
+        elif "," in oldlanguages:
+            oldlanguages = oldlanguages.split(",")
+
+        elif "/" in oldlanguages:
+            oldlanguages = oldlanguages.split("/")
+        else:
+            oldlanguages = [oldlanguages]
+
+    if isinstance(oldlanguages, list) and len(oldlanguages) == 0:
+        oldlanguages = [""]
+
+    newlanguages = []
+
+    for oldlanguage in oldlanguages:
+        if oldlanguage:
+            oldlanguage = oldlanguage.strip()
+            oldlanguage = oldlanguage.lower()
+            language = languages.get(oldlanguage, "")
+            if language:
+                newlanguages.append(language)
+            else:
+                print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % oldlanguage, file=sys.stderr)
+
+    if len(newlanguages) == 0:
+        newlanguages.append("")
+
+    return newlanguages
+
+
 def marc_build_imprint(place="", publisher="", year=""):
     """
     Takes place, publisher, year and returns imprint with delimiters as list.
@@ -493,7 +533,7 @@ def marc_build_field_773g(volume="", year="", issue="", startpage="", endpage=""
     return volume + year + issue + pages
 
 
-def marc_build_field_008(year="", periodicity="", language=""):
+def marc_build_field_008(year="", periodicity="", language=[""]):
     """
     Takes year of publication, periodicity and language and returns entire field.
     """
@@ -506,25 +546,12 @@ def marc_build_field_008(year="", periodicity="", language=""):
     else:
         year = "    "
 
-    if len(periodicity) != 1:
-        periodicity = " "
-
-    if isinstance(language, list):
-        if len(language) == 0:
-            language = "   "
-        elif len(language) > 0 and len(language) < 3:
-            language = language[0]
-        else:
-            language = "mul"
-
-    if language and isinstance(language, six.string_types):
-        if len(language) != 3:
-            lang = language.lower()
-            language = languages.get(lang, "   ")
-            if language == "   ":
-                print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % lang, file=sys.stderr)
-    else:
+    language = language[0]
+    if len(language) != 3:
         language = "   "
+
+    if len(periodicity) != 1:
+        periodicity = " "    
 
     return 7 * ' ' + year + 10 * ' ' + periodicity + 13 * ' ' + language + 2 * ' '
 
