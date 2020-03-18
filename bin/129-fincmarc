@@ -110,7 +110,7 @@ for csvrecord in csvrecords:
 
     # Identifikator
     f001 = csvrecord[0]
-    f001 = f001.replace("129-finc-", "finc-129-")
+    f001 = f001.replace("129-finc-", "129-")
     marcrecord.add("001", data=f001)
 
     # Zugangstyp
