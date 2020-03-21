@@ -39,6 +39,7 @@ import re
 import string
 import sys
 import tempfile
+import base64 as b64
 import xml.etree.cElementTree as ET
 
 import bs4
@@ -49,6 +50,7 @@ from six import string_types
 
 import backoff
 import luigi
+import siskin
 from siskin import __version__
 from siskin.mappings import languages
 from six.moves.urllib.parse import urlparse
@@ -595,3 +597,37 @@ def check_issn(issn=""):
     if match:
         return match.group(1)
     return ""
+
+
+def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
+    """
+    Iterates over the record and converts all identifier to Finc schema.
+    """
+    fieldspecs = ["770.w", "772.w", "773.w", "775.w", "800.w", "810.w", "811.w", "830.w"]
+
+    for fieldspec in fieldspecs:
+
+        for field, oldvalue in marcx.fieldgetter(fieldspec)(record):
+
+            index = field.subfields.index("w")
+            index += 1
+            oldvalue = field.subfields[index]
+
+            oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
+            oldvalue = re.sub("^finc-", "", oldvalue)
+            oldvalue = re.sub("^{SID}-", "", oldvalue)
+            oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
+
+            if base64:
+                oldvalue = oldvalue.encode("utf8")
+                oldvalue = b64.b64encode(oldvalue)
+                oldvalue = oldvalue.decode("ascii")
+
+            if finc_prefix:
+                newvalue = "finc-" + SID + "-" + oldvalue
+            else:
+                newvalue = SID + "-" + oldvalue
+
+            field.subfields[index] = newvalue
+
+    return record
