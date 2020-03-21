@@ -50,7 +50,7 @@ from six import string_types
 
 import backoff
 import luigi
-import siskin
+import marcx
 from siskin import __version__
 from siskin.mappings import languages
 from six.moves.urllib.parse import urlparse
