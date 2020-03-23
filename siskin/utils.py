@@ -610,7 +610,7 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
     """
     Iterates over the record and converts all identifier to Finc schema, refs #16561.
     """
-    fieldspecs = ["770.w", "772.w", "773.w", "775.w", "800.w", "810.w", "811.w", "830.w"]
+    fieldspecs = ["001", "770.w", "772.w", "773.w", "775.w", "800.w", "810.w", "811.w", "830.w"]
 
     for fieldspec in fieldspecs:
 
