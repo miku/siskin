@@ -39,7 +39,7 @@ import re
 import string
 import sys
 import tempfile
-import base64 as b64
+import base64
 import xml.etree.cElementTree as ET
 
 import bs4
@@ -599,7 +599,7 @@ def check_issn(issn=""):
     return ""
 
 
-def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
+def convert_to_finc_id(SID, record, encode=False, finc_prefix=False):
     """
     Iterates over the record and converts all identifier to Finc schema.
     """
@@ -622,9 +622,9 @@ def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
             oldvalue = re.sub("^{SID}-", "", oldvalue)
             oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
 
-            if base64:
+            if encode:
                 oldvalue = oldvalue.encode("utf8")
-                oldvalue = b64.b64encode(oldvalue)
+                oldvalue = base64.b64encode(oldvalue)
                 oldvalue = oldvalue.decode("ascii")
                 oldvalue = oldvalue.strip("=")
 
