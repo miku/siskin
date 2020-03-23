@@ -617,24 +617,24 @@ def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
             else:
                 oldvalue = field.data
 
-                oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
-                oldvalue = re.sub("^finc-", "", oldvalue)
-                oldvalue = re.sub("^{SID}-", "", oldvalue)
-                oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
+            oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
+            oldvalue = re.sub("^finc-", "", oldvalue)
+            oldvalue = re.sub("^{SID}-", "", oldvalue)
+            oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
 
-                if base64:
-                    oldvalue = oldvalue.encode("utf8")
-                    oldvalue = b64.b64encode(oldvalue)
-                    oldvalue = oldvalue.decode("ascii")
+            if base64:
+                oldvalue = oldvalue.encode("utf8")
+                oldvalue = b64.b64encode(oldvalue)
+                oldvalue = oldvalue.decode("ascii")
 
-                if finc_prefix:
-                    newvalue = "finc-" + SID + "-" + oldvalue
-                else:
-                    newvalue = SID + "-" + oldvalue
+            if finc_prefix:
+                newvalue = "finc-" + SID + "-" + oldvalue
+            else:
+                newvalue = SID + "-" + oldvalue
 
-                if field.tag != "001":
-                    field.subfields[index] = newvalue
-                else:
-                    field.data = newvalue
+            if field.tag != "001":
+                field.subfields[index] = newvalue
+            else:
+                field.data = newvalue
 
     return record
