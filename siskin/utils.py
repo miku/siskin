@@ -599,7 +599,7 @@ def check_issn(issn=""):
     return ""
 
 
-def convert_to_finc_id(SID, record, encode=False, finc_prefix=False):
+def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
     """
     Iterates over the record and converts all identifier to Finc schema.
     """
@@ -629,9 +629,9 @@ def convert_to_finc_id(SID, record, encode=False, finc_prefix=False):
                 oldvalue = oldvalue.strip("=")
 
             if finc_prefix:
-                newvalue = "finc-" + SID + "-" + oldvalue
+                newvalue = "finc-" + sid + "-" + oldvalue
             else:
-                newvalue = SID + "-" + oldvalue
+                newvalue = sid + "-" + oldvalue
 
             if field.tag != "001":
                 field.subfields[index] = newvalue
