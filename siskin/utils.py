@@ -609,25 +609,32 @@ def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
 
         for field, oldvalue in marcx.fieldgetter(fieldspec)(record):
 
-            index = field.subfields.index("w")
-            index += 1
-            oldvalue = field.subfields[index]
+            if field.tag != "001":
+                index = field.subfields.index("w")
+                index += 1
+                oldvalue = field.subfields[index]
 
-            oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
-            oldvalue = re.sub("^finc-", "", oldvalue)
-            oldvalue = re.sub("^{SID}-", "", oldvalue)
-            oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
-
-            if base64:
-                oldvalue = oldvalue.encode("utf8")
-                oldvalue = b64.b64encode(oldvalue)
-                oldvalue = oldvalue.decode("ascii")
-
-            if finc_prefix:
-                newvalue = "finc-" + SID + "-" + oldvalue
             else:
-                newvalue = SID + "-" + oldvalue
+                oldvalue = field.data
 
-            field.subfields[index] = newvalue
+                oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
+                oldvalue = re.sub("^finc-", "", oldvalue)
+                oldvalue = re.sub("^{SID}-", "", oldvalue)
+                oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
+
+                if base64:
+                    oldvalue = oldvalue.encode("utf8")
+                    oldvalue = b64.b64encode(oldvalue)
+                    oldvalue = oldvalue.decode("ascii")
+
+                if finc_prefix:
+                    newvalue = "finc-" + SID + "-" + oldvalue
+                else:
+                    newvalue = SID + "-" + oldvalue
+
+                if field.tag != "001":
+                    field.subfields[index] = newvalue
+                else:
+                    field.data = newvalue
 
     return record
