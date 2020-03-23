@@ -626,6 +626,7 @@ def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
                 oldvalue = oldvalue.encode("utf8")
                 oldvalue = b64.b64encode(oldvalue)
                 oldvalue = oldvalue.decode("ascii")
+                oldvalue = oldvalue.strip("=")
 
             if finc_prefix:
                 newvalue = "finc-" + SID + "-" + oldvalue
