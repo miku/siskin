@@ -609,13 +609,13 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
 
         for field, oldvalue in marcx.fieldgetter(fieldspec)(record):
 
-            if field.tag != "001":
+            if field.is_control_field():
+                 oldvalue = field.data
+
+            else:
                 index = field.subfields.index("w")
                 index += 1
                 oldvalue = field.subfields[index]
-
-            else:
-                oldvalue = field.data
 
             oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
             oldvalue = re.sub("^finc-", "", oldvalue)
@@ -633,9 +633,9 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
             else:
                 newvalue = sid + "-" + oldvalue
 
-            if field.tag != "001":
-                field.subfields[index] = newvalue
-            else:
+            if field.is_control_field():
                 field.data = newvalue
+            else:
+                field.subfields[index] = newvalue
 
     return record
