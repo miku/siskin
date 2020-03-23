@@ -8,7 +8,7 @@ import requests
 import marcx
 import pymarc
 import responses
-from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, dictcheck, get_task_import_cache, load_set, marc_build_field_008, marc_build_imprint,
+from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, convert_to_finc_id, dictcheck, get_task_import_cache, load_set, marc_build_field_008, marc_build_imprint,
                           marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
 
 
@@ -225,3 +225,33 @@ def test_check_issn():
     assert check_issn("1234-5678X") == "1234-5678"
     assert check_issn("1234-5678X3344") == "1234-5678"
     assert check_issn("9780201038019 is an valid isbn") == "978020103"
+
+def test_convert_to_finc_id():
+    for tag in ("770", "772", "773", "775", "800", "810", "811", "830"):
+        # Prefixed by sid.
+        r = marcx.Record()
+        r.add(tag, a="dummy", w="3322")
+
+        result = convert_to_finc_id("123", r, encode=False, finc_prefix=False)
+        assert result[tag].subfields == ["a", "dummy", "w", "123-3322"]
+
+        # A existing id remains unchanged.
+        r = marcx.Record()
+        r.add(tag, a="dummy", w="finc-123-3322")
+
+        result = convert_to_finc_id("123", r, encode=False, finc_prefix=True)
+        assert result[tag].subfields == ["a", "dummy", "w", "finc-123-3322"]
+
+        # Prefix is added.
+        r = marcx.Record()
+        r.add(tag, a="dummy", w="123-3322")
+
+        result = convert_to_finc_id("123", r, encode=False, finc_prefix=True)
+        assert result[tag].subfields == ["a", "dummy", "w", "finc-123-3322"]
+
+        # Value is encoded.
+        r = marcx.Record()
+        r.add(tag, a="dummy", w="10.123/1;2")
+
+        result = convert_to_finc_id("123", r, encode=True, finc_prefix=True)
+        assert result[tag].subfields == ["a", "dummy", "w", "finc-123_MTAuMTIzLzE7Mg"]

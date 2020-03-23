@@ -623,9 +623,9 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
                 index += 1
                 oldvalue = field.subfields[index]
 
-            oldvalue = re.sub("^finc-{SID}-", "", oldvalue)
+            oldvalue = re.sub("^finc-{}-".format(sid), "", oldvalue)
             oldvalue = re.sub("^finc-", "", oldvalue)
-            oldvalue = re.sub("^{SID}-", "", oldvalue)
+            oldvalue = re.sub("^{}-".format(sid), "", oldvalue)
             oldvalue = re.sub("^\([A-Za-z0-9-]{6}\)", "", oldvalue)
 
             if encode:
