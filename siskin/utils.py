@@ -601,7 +601,7 @@ def check_issn(issn=""):
 
 def convert_to_finc_id(SID, record, base64=False, finc_prefix=False):
     """
-    Iterates over the record and converts all identifier to Finc schema.
+    Iterates over the record and converts all identifier to Finc schema, refs #16561.
     """
     fieldspecs = ["770.w", "772.w", "773.w", "775.w", "800.w", "810.w", "811.w", "830.w"]
 
