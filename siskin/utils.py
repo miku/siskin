@@ -627,11 +627,14 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
                 oldvalue = base64.b64encode(oldvalue)
                 oldvalue = oldvalue.decode("ascii")
                 oldvalue = oldvalue.strip("=")
+                separator = "_"
+            else:
+                separator = "-"
 
             if finc_prefix:
-                newvalue = "finc-" + sid + "-" + oldvalue
+                newvalue = "finc-" + sid + separator + oldvalue
             else:
-                newvalue = sid + "-" + oldvalue
+                newvalue = sid + separator + oldvalue
 
             if field.is_control_field():
                 field.data = newvalue
