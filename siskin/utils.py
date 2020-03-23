@@ -535,10 +535,17 @@ def marc_build_field_773g(volume="", year="", issue="", startpage="", endpage=""
     return volume + year + issue + pages
 
 
-def marc_build_field_008(year="", periodicity="", language=[""]):
+def marc_build_field_008(year="", periodicity="", language=None):
     """
-    Takes year of publication, periodicity and language and returns entire field.
+    Takes year of publication, periodicity
+    (https://www.loc.gov/marc/bibliographic/bd008s.html) and language and
+    returns entire field.
     """
+    if language is None:
+        language = [""]
+    elif isinstance(language, six.string_types):
+        language = [language]
+
     if isinstance(year, six.string_types):
         match = re.search("(\d\d\d\d)", year)
         if match:
@@ -553,7 +560,7 @@ def marc_build_field_008(year="", periodicity="", language=[""]):
         language = "   "
 
     if len(periodicity) != 1:
-        periodicity = " "    
+        periodicity = " "
 
     return 7 * ' ' + year + 10 * ' ' + periodicity + 13 * ' ' + language + 2 * ' '
 
@@ -611,7 +618,6 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
 
             if field.is_control_field():
                  oldvalue = field.data
-
             else:
                 index = field.subfields.index("w")
                 index += 1

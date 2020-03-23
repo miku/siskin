@@ -189,8 +189,9 @@ def test_marc_build_field_008():
     assert marc_build_field_008(year="2000", language="ger") == "       2000                        ger  "
     assert marc_build_field_008(year="2000", periodicity="1", language="ger") == "       2000          1             ger  "
     assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre"]) == "       2000          1             ger  "
-    assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre", "day"]) == "       2000          1             mul  "
-    assert marc_build_field_008(year="20XX", periodicity="1", language=["ger", "fre", "day"]) == "                     1             mul  "
+    assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre", "day"]) == "       2000          1             ger  "
+    assert marc_build_field_008(year="20XX", periodicity="1", language=["ger", "fre", "day"]) == "                     1             ger  "
+    assert marc_build_field_008(year="1980", periodicity="i", language=["de", "fre"]) == "       1980          i                  "
 
 
 def test_check_isbn():
