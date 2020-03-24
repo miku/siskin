@@ -39,7 +39,7 @@ import xmltodict
 import marcx
 from siskin.mab import MabXMLFile
 from siskin.mappings import formats
-from siskin.utils import check_isbn, check_issn, marc_build_field_008
+from siskin.utils import check_isbn, check_issn, marc_build_field_008, marc_get_languages, convert_to_finc_id
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"
@@ -50,15 +50,23 @@ if len(sys.argv) == 3:
 reader = MabXMLFile(inputfilename, replace=(u"‰", ""), encoding='utf-8')
 outputfile = open(outputfilename, "wb")
 
+series_ids = []
 parent_ids = []
 parent_titles = {}
 
 for record in reader:
 
     parent_id = record.field("010", alt="")
-
     if len(parent_id) > 0:
         parent_ids.append(parent_id)
+
+    series_id = record.field("453", alt="")
+    if len(series_id) > 0:
+        series_ids.append(series_id)
+
+    series_id = record.field("463", alt="")
+    if len(series_id) > 0:
+        series_ids.append(series_id)
 
 for record in reader:
 
@@ -97,6 +105,8 @@ for record in reader:
 
     if id in parent_ids:
         format = "Multipart"
+    elif id in series_ids:
+        format = "Series"
     elif "Seiten" in format or "Blatt" in format or "nicht gez" in format or format == "" or u"Zählung" in format or regexp1:
         format = "Book"
     elif "Loseblatt" in format:
@@ -147,6 +157,7 @@ for record in reader:
     year = record.field("425", alt="")
     periodicity = formats[format]["008"]
     language = record.field("037", alt="")
+    language = marc_get_languages(language)
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
@@ -228,6 +239,14 @@ for record in reader:
     # übergeordnetes Werk
     marcrecord.add("773", w=f773w)
 
+    # Link auf Reihe
+    f830a = record.field("451")
+    f830w = record.field("453", alt="")
+    marcrecord.add("830", a=f830a, w=f830w)
+    f830a = record.field("461")
+    f830w = record.field("463", alt="")
+    marcrecord.add("830", a=f830a, w=f830w)
+
     # Link zu Datensatz und Ressource
     f655z = record.field("655", "z")
     f6553 = record.field("655", "3")
@@ -249,6 +268,8 @@ for record in reader:
     f001 = record.field("001")
     collections = ["a", f001, "b", "142", "c", "sid-142-col-gesamtkatduesseldorf"]
     marcrecord.add("980", subfields=collections)
+
+    marcrecord = convert_to_finc_id("142", marcrecord, encode=False, finc_prefix=True)
 
     outputfile.write(marcrecord.as_marc())
 
