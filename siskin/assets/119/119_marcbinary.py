@@ -36,7 +36,7 @@ import sys
 
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record
+from siskin.utils import marc_clean_record, convert_to_finc_id
 
 
 def check_fulltext(record):
@@ -116,6 +116,8 @@ for record in reader:
     # Ansigelung
     collections = ["a", f001, "b", "119", "c", "sid-119-col-ubfrankfurt"]
     record.add("980", subfields=collections)
+
+    record = convert_to_finc_id("119", record, encode=False, finc_prefix=True)
 
     marc_clean_record(record)
     outputfile.write(record.as_marc())
