@@ -39,7 +39,7 @@ import xmltodict
 import marcx
 from siskin.mab import MabXMLFile
 from siskin.mappings import formats
-from siskin.utils import check_isbn, check_issn, marc_build_field_008
+from siskin.utils import check_isbn, check_issn, marc_build_field_008, convert_to_finc_id
 
 
 def get_valid_language(record, field):
@@ -437,6 +437,8 @@ for record in reader:
     f001 = record.field("001")
     collections = ["a", f001, "b", "127", "c", "sid-127-col-filmunivpotsdam"]
     marcrecord.add("980", subfields=collections)
+
+    marcrecord = convert_to_finc_id("127", marcrecord, encode=False, finc_prefix=True)
 
     outputfile.write(marcrecord.as_marc())
 
