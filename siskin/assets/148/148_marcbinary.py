@@ -8,6 +8,7 @@ from builtins import *
 
 import marcx
 import pymarc
+from siskin.utils import convert_to_finc_id
 
 copytags = ("002", "003", "004", "005", "006", "008", "009", "010", "011", "012", "013", "014", "016", "017", "018", "022", "024", "030", "035", "040", "041",
             "100", "110", "111", "240", "242", "243", "245", "246", "247", "249", "250", "260", "263", "300", "310", "362", "490", "500", "501", "502", "504",
@@ -105,6 +106,8 @@ for oldrecord in reader:
     # Ansigelung für Adlr
     collections = ["a", f001, "b", "148", "c", "sid-148-col-bundesarchivfilm"]
     newrecord.add("980", subfields=collections)
+
+    newrecord = convert_to_finc_id("148", newrecord, encode=False, finc_prefix=True)
 
     outputfile.write(newrecord.as_marc())
 
