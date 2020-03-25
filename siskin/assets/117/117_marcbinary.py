@@ -9,6 +9,7 @@ from builtins import *
 import marcx
 import pymarc
 from tqdm import tqdm
+from siskin.utils import convert_to_finc_id
 
 copytags = [
     "003", "005", "006", "008", "010", "013", "015", "016", "017", "020", "022", "024", "026", "028", "029", "030", "032", "033", "035", "040", "041", "044",
@@ -134,6 +135,8 @@ for oldrecord in tqdm(reader, total=total):
 
     # 980
     newrecord.add("980", a=f001, b="117", c="sid-117-col-udkberlin")
+
+    newrecord = convert_to_finc_id("117", newrecord, encode=False, finc_prefix=True)
 
     outputfile.write(newrecord.as_marc())
 
