@@ -471,9 +471,10 @@ def marc_get_languages(oldlanguages):
             oldlanguages = oldlanguages.split(";")
         elif "," in oldlanguages:
             oldlanguages = oldlanguages.split(",")
-
         elif "/" in oldlanguages:
             oldlanguages = oldlanguages.split("/")
+        elif "¶" in oldlanguages:
+            oldlanguages = oldlanguages.split("¶")
         else:
             oldlanguages = [oldlanguages]
 
