@@ -58,6 +58,10 @@ from six.moves.urllib.parse import urlparse
 logger = logging.getLogger('siskin')
 
 
+marc_compliant_language_codes = ["ger", "fre", "eng", "ita", "rus", "jpn", "cze", "chi", "dut", "por", "rum", "tur",
+                                "pol", "spa", "swe", "per", "fin", "ara", "tha", "dan", "est", "kor", "nor", "nld"]
+
+
 class SetEncoder(json.JSONEncoder):
     """
     Helper to encode python sets into JSON lists.
@@ -487,9 +491,12 @@ def marc_get_languages(oldlanguages):
         if oldlanguage:
             oldlanguage = oldlanguage.strip()
             oldlanguage = oldlanguage.lower()
-            language = languages.get(oldlanguage, "")
-            if language:
-                newlanguages.append(language)
+            if oldlanguage not in marc_compliant_language_codes:
+                newlanguage = languages.get(oldlanguage, "")
+            else:
+                newlanguage = oldlanguage
+            if newlanguage:
+                newlanguages.append(newlanguage)
             else:
                 print("Die Sprache '%s' ist in der Mapping-Tabelle nicht enthalten." % oldlanguage, file=sys.stderr)
 
