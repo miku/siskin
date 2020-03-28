@@ -2,6 +2,7 @@
 
 35-fincmarc  --interval monthly  --format mrc --output-hist-size 5  --input-hist-size 3 --filemap /home/schenk/lcc
 78-fincmarc  --interval manually --format mrc --output-hist-size 5
+142-fincmarc --interval manually --format mrc --output-hist-size 5
 159-fincmarc --interval monthly  --format mrc --output-hist-size 10
 160-fincmarc --interval manually --format mrc --output-hist-size 5
 163-fincmarc --interval monthly  --format mrc --output-hist-size 10
