@@ -50,6 +50,11 @@ $ wc -l amsl.tsv
 $ cut -f1 amsl.tsv | sort -u > amsl.collections
 $ comm -12 amsl.collections ai.collections | wc -l
 11341
+```
+
+The majority of names matches, 11341.
+
+```shell
 $ comm -13 amsl.collections ai.collections | wc -l
 5689
 $ comm -23 amsl.collections ai.collections | wc -l
@@ -58,7 +63,7 @@ $ comm -23 amsl.collections ai.collections | wc -l
 
 5689 collections in AI, which are not in AMSL, a sample:
 
-```
+```shell
 $ comm -13 amsl.collections ai.collections | shuf -n 10
 ebooks_sozi
 The USA Journals (CrossRef)
@@ -74,7 +79,7 @@ Universitas Kebangsaan (CrossRef)
 
 4584 collections in AMSL, which are not in AI, a sample:
 
-```
+```shell
 $ comm -23 amsl.collections ai.collections | shuf -n 10
 base_ftsillinoisuedw
 base_ftenssib
