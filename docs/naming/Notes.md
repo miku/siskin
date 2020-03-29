@@ -92,3 +92,49 @@ base_ftqueensuniv
 base_ftnagasakijuncol
 base_ftjohnmarshallaw
 ```
+
+If we exclude BASE, we are down to 825:
+
+```shell
+$ comm -23 amsl.collections ai.collections | grep -v "base_" | wc -l
+825
+```
+
+A sample:
+
+```shell
+$ comm -23 amsl.collections ai.collections | grep -v "base_" | shuf -n 10
+Agriprima, Journal of Applied Agricultural Sciences (CrossRef)
+UP4 Institute of Sciences, S.L. (CrossRef)
+OLC SSG Germanistik
+The Sea Shore (CrossRef)
+18th/19th/20th Century House of Commons Parliamentary Papers 1688-2004
+American Antiquarian Society (AAS) Historical Periodicals 1 (1691-1820)
+Saglik Bilimleri ve Meslekleri Dergisi (CrossRef)
+MONAliesA
+Institute of Human Cognition and Brain Science (IHCBS) (CrossRef)
+Geological Society of America Memoirs (CrossRef)
+```
+
+Somehow, there are 511 names containing "CrossRef" in AMSL, which are not in AI anymore.
+
+```shell
+$ comm -23 amsl.collections ai.collections | grep -v "base_" | grep -c "CrossRef"
+511
+```
+
+A sample from that subset:
+
+```shell
+$ comm -23 amsl.collections ai.collections | grep -v "base_" | grep "CrossRef" | shuf -n 10
+Journal of Istanbul Faculty of Medicine (CrossRef)
+Revista FLAMMAE (CrossRef)
+Association of Experimental Stroke and Translational Medicine (CrossRef)
+Joanna Briggs Institute (CrossRef)
+Böhlau Verlag GmbH & CIE. (CrossRef)
+Medical Media Communications, Ltd. T/A Radcliffe Cardiology (CrossRef)
+International Journal of Business, Economics, and Management Perspectives (CrossRef)
+Institut f.intern.Arch.Dok. GmbH&amp;Co. KG. (CrossRef)
+HPS - Health Publishing & Services SRL (CrossRef)
+Revista Neurociencias (CrossRef)
+```
