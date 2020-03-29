@@ -44,6 +44,8 @@ $ wc -l amsl.tsv
 15943 amsl.tsv
 ```
 
+15943 collections in AMSL.
+
 ## Collections overlaps
 
 ```shell
@@ -52,7 +54,7 @@ $ comm -12 amsl.collections ai.collections | wc -l
 11341
 ```
 
-The majority of names matches, 11341.
+The majority of names match: 11341.
 
 ```shell
 $ comm -13 amsl.collections ai.collections | wc -l
