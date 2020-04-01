@@ -656,3 +656,37 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
                 field.subfields[index] = newvalue
 
     return record
+
+
+def remove_delimiter(record):
+    """
+    Iterates over the record and removes surplus delimiters (ISBD etc.), refs #16965.
+    """
+    fieldspecs = ["100.a", "245.a", "245.b", "245.c", "245.h", "260.a", "260.b", "260.c", "700.a"]
+
+    for fieldspec in fieldspecs:
+
+        for field, oldvalue in marcx.fieldgetter(fieldspec)(record):
+
+            if field.tag == "245" or field.tag == "260":
+                for n in ["a", "b", "c", "h"]:
+                    if n in field.subfields:
+                        index = field.subfields.index(n)
+                        index += 1
+                        oldvalue = field.subfields[index]
+                        oldvalue = oldvalue.strip(" ")
+                        oldvalue = oldvalue.strip(",")
+                        oldvalue = oldvalue.strip(":")
+                        oldvalue = oldvalue.strip("/")
+                        oldvalue = oldvalue.strip(".")
+                        newvalue = oldvalue.strip(" ")
+                        field.subfields[index] = newvalue
+            else:
+                index = field.subfields.index("a")
+                index += 1
+                oldvalue = field.subfields[index]
+                oldvalue = oldvalue.strip(" ")
+                newvalue = oldvalue.strip(",")
+                field.subfields[index] = newvalue
+
+    return record
