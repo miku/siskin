@@ -38,7 +38,7 @@ import sys
 import marcx
 import pymarc
 from siskin.configuration import Config
-from siskin.utils import marc_clean_record
+from siskin.utils import marc_clean_record, remove_delimiter
 from siskin.arguments import FincArgumentParser
 
 
@@ -97,6 +97,9 @@ for record in reader:
 
     collections = ["a", f001, "b", "190", "c", "sid-190-col-eebo", "c", "ZDB-1-EEB"]
     record.add("980", subfields=collections)
+
+    # Removes surplus delimiters (ISBD etc.), refs #16965
+    record = remove_delimiter(record)
 
     marc_clean_record(record)
 
