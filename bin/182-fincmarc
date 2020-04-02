@@ -124,12 +124,21 @@ for root, _, files in os.walk(input_directory):
             newrecord.remove_fields("001")
             newrecord.add("001", data="182-" + f001)
 
-            # Kollektion und Ansigelung
+            # Remove old classifications
+            newrecord.remove_fields("082")
+            newrecord.remove_fields("083")
+            newrecord.remove_fields("084")
+            newrecord.remove_fields("085")
+
+            # Set collection and class facet
             if database == "Archivwesen":
+                newrecord.add("082", a="002")
                 f980c = "sid-182-col-archivwesen"
             else:
+                newrecord.add("084", a="06.90", _2="bkl")
                 f980c = "sid-182-col-gutenberg"
 
+            # Collection
             collections = ["a", f001, "b", "182", "c", f980c]
             newrecord.add("980", subfields=collections)
 
