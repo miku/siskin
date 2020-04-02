@@ -151,6 +151,18 @@ while start < all_records:
         except:
             continue
 
+        # Adapt Leader Pos 7, if record is an article instead of book chapter
+        try:
+            is_article = newrecord["773"]["x"]
+        except:
+            is_article = ""
+
+        if is_article:
+            leader1 = newrecord.leader[:7]
+            leader2 = newrecord.leader[8:]
+            leader = leader1 + "b" + leader2
+            newrecord.leader = leader
+
         # Identifikator
         f001 = newrecord["001"].data
         newrecord.remove_fields("001")
