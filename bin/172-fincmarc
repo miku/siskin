@@ -71,8 +71,10 @@ else:
 if not inputfilename:
     inputfilename = fip.inputfilename(SID)
     config = Config.instance()
-    url = config.get(SID, "input")
-    os.system('wget -O %s "%s"' % (inputfilename, url))
+    user = config.get(SID, "user")
+    password = config.get(SID, "password")
+    url = config.get(SID, "url")
+    os.system('wget -O %s --user=%s --password=%s "%s"' % (inputfilename, user, password, url))
 
 inputfile = open(inputfilename, "r", encoding="utf-16")
 records = csv.reader(inputfile, delimiter="\t")
