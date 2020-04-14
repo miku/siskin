@@ -34,6 +34,7 @@ Origin: Cloud
 
 import os
 import sys
+import csv
 
 import marcx
 import pymarc
@@ -73,18 +74,19 @@ if not inputfilename:
     url = config.get(SID, "input")
     os.system('wget -O %s "%s"' % (inputfilename, url))
 
-inputfile = open(inputfilename, "r")
-records = inputfile.readlines()
+inputfile = open(inputfilename, "r", encoding="utf-16")
+records = csv.reader(inputfile, delimiter="\t")
 
 
 ##################################################################################
 # 3. Process data
 ##################################################################################
 
-for line in records[1:]:
+for fields in records:
 
-    fields = line.split("\t")
-    print(fields)
+    if fields[0] == "id":
+        continue
+
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
