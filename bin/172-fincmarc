@@ -110,14 +110,14 @@ for fields in records:
     marcrecord.add("007", data=f007)
 
     # Periodizität
-    language = fields[7]
+    language = fields[11]
     if language == "engrish":
         language = "eng"
     elif language == "English":
         language = "eng"
     elif language == "Deutsch":
         language = "ger"
-    year = fields[12]
+    year = fields[9]
     year = year.replace("\n", "")
     periodicity = formats[format]["008"]
     f008 = marc_build_field_008(year, periodicity, language)
@@ -128,7 +128,7 @@ for fields in records:
         marcrecord.add("041", a=language)
 
     # 1. Schöpfer
-    persons = fields[4]
+    persons = fields[6]
     if persons:
         num_persons = persons.split(" ")
         if len(num_persons) > 3:
@@ -145,19 +145,19 @@ for fields in records:
         marcrecord.add("100", a=f100a)
 
     # Haupttitel
-    f245a = fields[1]
-    f245b = fields[6]
+    f245a = fields[4]
+    f245b = fields[1]
     if not f245a:
-        f245a = fields[6]
+        f245a = fields[4]
         f245b = ""
     if f245a == f245b:
         f245b = ""
-    f245c = fields[4]
+    f245c = fields[6]
     marcrecord.add("245", a=f245a, b=f245b, c=f245c)
 
     # Erscheinungsvermerk
     f260b = fields[8]
-    f260c = fields[12]
+    f260c = fields[9]
     f260c = f260c.replace("\n", "")
     if len(f260c) == 4:
         marcrecord.add("260", b=f260b, c=f260c)
@@ -171,15 +171,11 @@ for fields in records:
     marcrecord.add("338", b=f338b)
 
     # Rechtehinweis
-    f500a = fields[3]
+    f500a = fields[2]
     marcrecord.add("500", a=f500a)
 
-    # Beschreibung
-    f520a = fields[1]
-    marcrecord.add("520", a=f520a)
-
     # Schlagwörter
-    f650a = fields[9]
+    f650a = fields[12]
     marcrecord.add("650", a=f650a)
 
     # GND-Inhalts- und Datenträgertyp
@@ -192,7 +188,7 @@ for fields in records:
         marcrecord.add("700", a=person)
 
     # Link zur Ressource
-    f856u = fields[10]
+    f856u = fields[3]
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
     # SWB-Inhaltstyp
