@@ -148,7 +148,7 @@ for fields in records:
     f245a = fields[4]
     f245b = fields[1]
     if not f245a:
-        f245a = fields[4]
+        f245a = fields[1]
         f245b = ""
     if f245a == f245b:
         f245b = ""
