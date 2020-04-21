@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Babelscores
+SID: 192
+Ticket: #16862
+Origin: local file
+
+"""
+
+
+import os
+import sys
+import base64
+
+import marcx
+import pymarc
+from siskin.configuration import Config
+from siskin.utils import marc_clean_record, remove_delimiter
+from siskin.arguments import FincArgumentParser
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "192"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+outputformat = fip.args.outputformat
+inputfilename = fip.args.inputfilename
+
+fip.remove_old_outputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfilename:
+    config = Config.instance()
+    inputfilename = config.get(SID, "input")
+
+inputfile = open(inputfilename, "rb")
+reader = pymarc.MARCReader(inputfile, force_utf8=True)
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for record in reader:
+
+    record = marcx.Record.from_record(record)
+    record.force_utf8 = True
+    record.strict = False
+
+    # Identifikator
+    f001 = record["856"]["u"]
+    f001 = f001.encode("utf8")
+    f001 = base64.b64encode(f001)
+    f001 = f001.decode("ascii")
+    f001 = f001.strip("=")
+    record.add("001", data="190-" + f001)
+
+    collections = ["a", f001, "b", "192", "c", "sid-192-col-babel"]
+    record.add("980", subfields=collections)
+
+    # Removes surplus delimiters (ISBD etc.)
+    record = remove_delimiter(record)
+
+    # Removes empty subfields
+    marc_clean_record(record)
+
+    if outputformat == "xml":
+        outputfile.write(record)
+    else:
+        outputfile.write(record.as_marc())
+
+inputfile.close()
+outputfile.close()
