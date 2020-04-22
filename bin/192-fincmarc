@@ -85,6 +85,13 @@ for record in reader:
     record.force_utf8 = True
     record.strict = False
 
+    # Leader
+    leader = record.leader
+    leader1 = record.leader[:5]
+    leader2 = record.leader[8:]
+    leader = leader1 + "ccm" + leader2
+    record.leader = leader
+
     # Identifikator
     f001 = record["856"]["u"]
     f001 = f001.encode("utf8")
@@ -95,6 +102,12 @@ for record in reader:
 
     # Access type
     record.add("007", data="cr")
+
+    # RDA Content type
+    record.add("336", b="ntm")
+
+    # SWB Content type
+    record.add("935", c="muno")
 
     # Collection
     collections = ["a", f001, "b", "192", "c", "sid-192-col-babel"]
