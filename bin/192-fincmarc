@@ -91,7 +91,7 @@ for record in reader:
     f001 = base64.b64encode(f001)
     f001 = f001.decode("ascii")
     f001 = f001.strip("=")
-    record.add("001", data="190-" + f001)
+    record.add("001", data="192-" + f001)
 
     # Access type
     record.add("007", data="cr")
