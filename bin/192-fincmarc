@@ -93,6 +93,10 @@ for record in reader:
     f001 = f001.strip("=")
     record.add("001", data="190-" + f001)
 
+    # Access type
+    record.add("007", data="cr")
+
+    # Collection
     collections = ["a", f001, "b", "192", "c", "sid-192-col-babel"]
     record.add("980", subfields=collections)
 
