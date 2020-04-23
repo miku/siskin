@@ -97,12 +97,13 @@ for oldrecord in xmlstream(inputfilename, "record"):
     issue = get_field(record, "773", "l")
     spage = get_field(record, "773", "q")
     volume = get_field(record, "773", "v")
+    issn = get_field(record, "773", "x")
     url = get_field(record, "856", "u")
     fulltext = get_field(record, "856", "3")
 
     if url and fulltext:
         pass
-    elif issue and spage and volume:
+    elif issue and spage and volume and issn:
         pass
     else:
         continue
