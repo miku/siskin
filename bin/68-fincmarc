@@ -86,13 +86,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
     record.force_utf8 = True
     record.strict = False
 
-    # Leader Pos 7 anpassen, falls Artikel statt Buchkapitel vorliegt
-    try:
-        is_article = record["773"]["x"]
-    except:
-        is_article = ""
-
-    if is_article:
+    # Leader Pos 7 anpassen, falls als Buchkapitel ausgewiesen
+    leader = record.leader
+    if leader[7] == "a":
         leader1 = record.leader[:7]
         leader2 = record.leader[8:]
         leader = leader1 + "b" + leader2
