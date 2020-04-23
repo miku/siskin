@@ -43,6 +43,13 @@ from siskin.utils import marc_clean_record, xmlstream
 from siskin.arguments import FincArgumentParser
 
 
+def get_field(record, field, subfield):
+    try:
+        return record[field][subfield]
+    except:
+        return ""
+
+
 ##################################################################################
 # 1. Parse arguments and prepare outputfile
 ##################################################################################
@@ -85,6 +92,20 @@ for oldrecord in xmlstream(inputfilename, "record"):
     record = marcx.Record.from_record(oldrecord)
     record.force_utf8 = True
     record.strict = False
+
+    # Kick titles without URL or data needed for link resolver
+    issue = get_field(record, "773", "l")
+    spage = get_field(record, "773", "q")
+    volume = get_field(record, "773", "v")
+    url = get_field(record, "856", "u")
+    fulltext = get_field(record, "856", "3")
+
+    if url and fulltext:
+        pass
+    elif issue and spage and volume:
+        pass
+    else:
+        continue
 
     # Leader Pos 7 anpassen, falls als Buchkapitel ausgewiesen
     leader = record.leader
