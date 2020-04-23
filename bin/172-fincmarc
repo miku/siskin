@@ -171,8 +171,8 @@ for fields in records:
     marcrecord.add("338", b=f338b)
 
     # Rechtehinweis
-    f500a = fields[2]
-    marcrecord.add("500", a=f500a)
+    f540a = fields[2]
+    marcrecord.add("540", a=f540a, u="http://creativecommons.org/licenses/by/4.0/")
 
     # Schlagwörter
     f650a = fields[12]
