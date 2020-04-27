@@ -39,7 +39,7 @@ from io import BytesIO, StringIO
 import marcx
 import pymarc
 from siskin.configuration import Config
-from siskin.utils import marc_clean_record, xmlstream
+from siskin.utils import marc_clean_record, xmlstream, convert_to_finc_id
 from siskin.arguments import FincArgumentParser
 
 
@@ -103,8 +103,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     if url and fulltext:
         pass
-    elif issue and spage and volume and issn:
-        pass
+    elif issue and spage and issn: # and not volume
+        continue
     else:
         continue
 
@@ -143,8 +143,12 @@ for oldrecord in xmlstream(inputfilename, "record"):
                 record.add("980", a=f001, b="68", c="sid-68-col-olcbub")
                 break
         else:
-            continue    
+            continue
 
+    # Convert all identifier in 001, 770, 772 ... to Finc schema
+    record = convert_to_finc_id(SID, record, encode=False, finc_prefix=False)
+
+    # Remove empty subfields
     marc_clean_record(record)
 
     if outputformat == "xml":
