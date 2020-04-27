@@ -34,7 +34,7 @@ Origin: local file
 
 import os
 import sys
-import base64
+import re
 
 import marcx
 import pymarc
@@ -93,12 +93,13 @@ for record in reader:
     record.leader = leader
 
     # Identifikator
-    f001 = record["856"]["u"]
-    f001 = f001.encode("utf8")
-    f001 = base64.b64encode(f001)
-    f001 = f001.decode("ascii")
-    f001 = f001.strip("=")
-    record.add("001", data="192-" + f001)
+    url = record["856"]["u"]
+    match = re.search("virtuemart_product_id=(\d+)&", url)
+    if match:
+        f001 = match.group(1)
+        record.add("001", data="192-" + f001)
+    else:
+        sys.exit("Could not find product id in URL: " + url)
 
     # Access type
     record.add("007", data="cr")
