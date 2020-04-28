@@ -8,8 +8,8 @@ from builtins import *
 
 import marcx
 import pymarc
-from tqdm import tqdm
 from siskin.utils import convert_to_finc_id
+from tqdm import tqdm
 
 copytags = [
     "003", "005", "006", "008", "010", "013", "015", "016", "017", "020", "022", "024", "026", "028", "029", "030", "032", "033", "035", "040", "041", "044",
