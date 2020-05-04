@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Online Contents (OLC)
+SID: 68
+Ticket: #5163, #6743, #9354, #10294, #16196
+Origin: HTTP
+
+"""
+
+
+import re
+import sys
+import json
+
+import marcx
+from siskin.configuration import Config
+from siskin.arguments import FincArgumentParser
+
+
+def get_field(record, field):
+    try:
+        return record[field]
+    except:
+        return ""
+
+
+def rename_field(record, oldname, newname):
+    try:
+        record[newname] = record.pop(oldname)
+    except:
+        pass
+
+
+def remove_field(record, field):
+    try:
+        del record[field]
+    except:
+        pass
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "68"
+
+fip = FincArgumentParser()
+outputfilename = fip.outputfilename(SID)
+inputfilename = fip.args.inputfilename
+outputformat = "json"
+
+fip.remove_old_inputfiles(SID)
+fip.remove_old_outputfiles(SID)
+
+outputfile = open(outputfilename, "w")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfilename:
+    config = Config.instance()
+    inputfilename = config.get(SID, "input")
+    # os.system("" % inputfilename)
+
+inputfile = open(inputfilename, "r")
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for record in inputfile:
+
+    record = json.loads(record)
+
+    # Set Finc-ID
+    old_id = record["id"]
+    finc_id = "68-" + old_id
+    record["finc.id"] = finc_id
+
+    # Set access type
+    if record["isfreeaccess_txt"] == "True":
+        record["facet_avail"] =  "free"
+    else:
+        record["facet_avail"] =  "online"  # always ???
+
+    # Add Mega Collections
+    sets = record["collection_details"]
+    mega_collections = []    
+    if "SSG-OLC-BUB" in sets:
+        mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
+
+    if "SSG-OLC-MKW" in sets:
+        mega_collections.append("OLC SSG Medien- / Kommunikationswissenschaft")
+    
+    if "SSG-OLC-FTH" in sets:
+        mega_collections.append("OLC SSG Film / Theater")
+    record["finc.mega_collection"] = mega_collections
+
+    # Add Source-ID
+    record["finc.source_id"] = "68"
+
+    # Rename fields
+    rename_field(record, "title_full", "rft.btitle")
+    rename_field(record, "title_sub", "x.subtitle")
+    rename_field(record, "container_title", "rft.jtitle")
+    rename_field(record, "container_issue", "rft.issue")
+    rename_field(record, "container_volume", "rft.issue")
+    rename_field(record, "container_startpage", "rft.pages")
+    rename_field(record, "lang_code", "languages")
+    rename_field(record, "publisher", "rft.pub")
+    rename_field(record, "publish_place", "rft.place")
+    rename_field(record, "publishDateSort", "rft.date")
+    rename_field(record, "format", "finc.format")
+    rename_field(record, "issn", "rft.eissn")
+    rename_field(record, "abstract", "x.footnotes")
+    # TODO: Pages
+
+    # Remove fields
+    remove_field(record, "id")
+    remove_field(record, "title_short")
+    remove_field(record, "isfreeaccess_txt")
+    remove_field(record, "collection_details")
+
+    # Write one JSON-record
+    outputfile.write(str(record) + "\n")
+
+inputfile.close()
+outputfile.close()
