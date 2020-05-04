@@ -139,7 +139,6 @@ for record in inputfile:
     rename_field(record, "publishDateSort", "rft.date")
     rename_field(record, "format", "finc.format")
     rename_field(record, "issn", "rft.eissn")
-    rename_field(record, "abstract", "x.footnotes")
     # TODO: Pages
 
     # Remove fields
