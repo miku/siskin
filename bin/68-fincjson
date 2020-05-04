@@ -132,7 +132,7 @@ for record in inputfile:
     rename_field(record, "container_title", "rft.jtitle")
     rename_field(record, "container_issue", "rft.issue")
     rename_field(record, "container_volume", "rft.issue")
-    rename_field(record, "container_startpage", "rft.pages")
+    rename_field(record, "container_start_page", "rft.pages")
     rename_field(record, "lang_code", "languages")
     rename_field(record, "publisher", "rft.pub")
     rename_field(record, "publish_place", "rft.place")
