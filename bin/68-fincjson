@@ -101,7 +101,7 @@ for record in inputfile:
 
     # Set Finc-ID
     old_id = record["id"]
-    finc_id = "68-" + old_id
+    finc_id = "ai-68-" + old_id
     record["finc.id"] = finc_id
 
     # Add Mega Collections
