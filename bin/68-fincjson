@@ -127,7 +127,7 @@ for record in inputfile:
     record["finc.source_id"] = "68"
 
     # Rename fields
-    rename_field(record, "title_full", "rft.btitle")
+    rename_field(record, "title_full", "rft.atitle")  # sometimes also rft.btitle???
     rename_field(record, "title_sub", "x.subtitle")
     rename_field(record, "container_title", "rft.jtitle")
     rename_field(record, "container_issue", "rft.issue")
