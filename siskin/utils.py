@@ -27,6 +27,7 @@ Various utilities.
 
 from __future__ import print_function
 
+import base64
 import errno
 import hashlib
 import itertools
@@ -39,7 +40,6 @@ import re
 import string
 import sys
 import tempfile
-import base64
 import xml.etree.cElementTree as ET
 
 import bs4
@@ -57,9 +57,10 @@ from six.moves.urllib.parse import urlparse
 
 logger = logging.getLogger('siskin')
 
-
-marc_compliant_language_codes = ["ger", "fre", "eng", "ita", "rus", "jpn", "cze", "chi", "dut", "por", "rum", "tur",
-                                "pol", "spa", "swe", "per", "fin", "ara", "tha", "dan", "est", "kor", "nor", "nld"]
+marc_compliant_language_codes = [
+    "ger", "fre", "eng", "ita", "rus", "jpn", "cze", "chi", "dut", "por", "rum", "tur", "pol", "spa", "swe", "per", "fin", "ara", "tha", "dan", "est", "kor",
+    "nor", "nld"
+]
 
 
 class SetEncoder(json.JSONEncoder):
@@ -625,7 +626,7 @@ def convert_to_finc_id(sid, record, encode=False, finc_prefix=False):
         for field, oldvalue in marcx.fieldgetter(fieldspec)(record):
 
             if field.is_control_field():
-                 oldvalue = field.data
+                oldvalue = field.data
             else:
                 index = field.subfields.index("w")
                 index += 1
