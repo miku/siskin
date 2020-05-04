@@ -104,12 +104,6 @@ for record in inputfile:
     finc_id = "68-" + old_id
     record["finc.id"] = finc_id
 
-    # Set access type
-    if record["isfreeaccess_txt"] == "True":
-        record["facet_avail"] =  "free"
-    else:
-        record["facet_avail"] =  "online"  # always ???
-
     # Add Mega Collections
     sets = record["collection_details"]
     mega_collections = []    
