@@ -142,7 +142,7 @@ for record in inputfile:
     remove_field(record, "collection_details")
 
     # Write one JSON-record
-    outputfile.write(str(record) + "\n")
+    outputfile.write(json.dumps(record) + "\n")
 
 inputfile.close()
 outputfile.close()
