@@ -1,5 +1,6 @@
 #!/bin/bash
 
+14-fincmarc  --interval monthly  --format mrc --output-hist-size 5  --input-hist-size 3
 35-fincmarc  --interval monthly  --format mrc --output-hist-size 5  --input-hist-size 3 --filemap /home/schenk/lcc
 78-fincmarc  --interval manually --format mrc --output-hist-size 5
 142-fincmarc --interval manually --format mrc --output-hist-size 5
