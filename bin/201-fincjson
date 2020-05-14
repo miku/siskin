@@ -85,13 +85,14 @@ inputfile = open(inputfilename, "r")
 # 3. Process data
 ##################################################################################
 
+amslsets = get_amsl_data()
+
 for record in inputfile:
 
     record = json.loads(record)    
 
     # Add institutions
     mega_collection = get_field(record, "mega_collection")
-    amslsets = get_amsl_data()
     institutions = []
 
     for amslset in amslsets:
