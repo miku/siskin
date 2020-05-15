@@ -150,7 +150,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
     oldrecord = oldrecord[0]
 
-    newrecord = marcx.Record.from_record(oldrecord)
+    newrecord = marcx.Record()
     newrecord.force_utf8 = True
     newrecord.strict = False
 
