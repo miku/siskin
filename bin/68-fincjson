@@ -48,9 +48,11 @@ def get_field(record, field):
         return ""
 
 
-def rename_field(record, oldname, newname):
+def rename_field(record, oldname, newname, singlevalued=False):
     try:
         record[newname] = record.pop(oldname)
+        if singlevalued:
+            record[newname] = record[newname][0]
     except:
         pass
 
@@ -106,33 +108,55 @@ for record in inputfile:
 
     # Add Mega Collections
     sets = record["collection_details"]
-    mega_collections = []    
+    mega_collections = []
+    institutions = []
     if "SSG-OLC-BUB" in sets:
         mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
+        institutions.append("FID-BBI-DE-23")
 
     if "SSG-OLC-MKW" in sets:
         mega_collections.append("OLC SSG Medien- / Kommunikationswissenschaft")
+        institutions.append("DE-15-FID")
     
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
+        institutions.append("DE-15-FID")
+
     record["finc.mega_collection"] = mega_collections
+    record["x.labels"] = institutions
 
     # Add Source-ID
     record["finc.source_id"] = "68"
 
+    # Author
+    authors = get_field(record, "author2")
+    if  isinstance(authors, list):
+        aut = []
+        for author in authors:
+            aut.append({"rft.au": author})
+        record["authors"] = aut
+    remove_field(record, "author2")
+
+    # Publish date
+    date = get_field(record, "publishDateSort")
+    if date:
+        #date = date + "-01-01T00:00:00Z00:00"
+        date = date + "-01-01T00:00:00Z"
+        record["x.date"] = date
+
     # Rename fields
-    rename_field(record, "title_full", "rft.atitle")  # sometimes also rft.btitle???
-    rename_field(record, "title_sub", "x.subtitle")
+    rename_field(record, "title_full", "rft.atitle", singlevalued=True)  # sometimes also rft.btitle???
+    rename_field(record, "title_sub", "x.subtitle", singlevalued=True)
     rename_field(record, "container_title", "rft.jtitle")
     rename_field(record, "container_issue", "rft.issue")
-    rename_field(record, "container_volume", "rft.issue")
-    rename_field(record, "container_start_page", "rft.pages")
+    rename_field(record, "container_volume", "rft.volume")
+    rename_field(record, "container_start_page", "rft.spage")
     rename_field(record, "lang_code", "languages")
     rename_field(record, "publisher", "rft.pub")
     rename_field(record, "publish_place", "rft.place")
-    rename_field(record, "publishDateSort", "rft.date")
-    rename_field(record, "format", "finc.format")
+    rename_field(record, "format", "finc.format", singlevalued=True)
     rename_field(record, "issn", "rft.eissn")
+    rename_field(record, "abstract", "abstract", singlevalued=True)
     # TODO: Pages
 
     # Remove fields
@@ -140,6 +164,7 @@ for record in inputfile:
     remove_field(record, "title_short")
     remove_field(record, "isfreeaccess_txt")
     remove_field(record, "collection_details")
+    remove_field(record, "publishDateSort")
 
     # Write one JSON-record
     outputfile.write(json.dumps(record) + "\n")
