@@ -148,13 +148,13 @@ for record in inputfile:
     format = get_field(record, "format")
     format = format[0]
     if format == "eJournal":
-        record["format"] = "Journal"
+        record["format"] = ["Journal"]
     elif format == "electronic Article":
-        record["format"] = "Article"
+        record["format"] = ["Article"]
     elif format == "Monograph Series":
-        record["format"] = "Serial"
+        record["format"] = ["Serial"]
     elif format == "Serial Volume":
-        record["format"] = "Book"
+        record["format"] = ["Book"]
 
     # Rename fields
     rename_field(record, "title_short", "rft.atitle", singlevalued=True)  # sometimes also rft.btitle???
