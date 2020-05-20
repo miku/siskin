@@ -146,6 +146,7 @@ for record in inputfile:
 
     # Map formats
     format = get_field(record, "format")
+    format = format[0]
     if format == "eJournal":
         record["format"] = "Journal"
     elif format == "electronic Article":
