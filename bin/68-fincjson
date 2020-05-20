@@ -144,6 +144,17 @@ for record in inputfile:
         date = date + "-01-01T00:00:00Z"
         record["x.date"] = date
 
+    # Map formats
+    format = get_field(record, "format")
+    if format == "eJournal":
+        record["format"] = "Journal"
+    elif format == "electronic Article":
+        record["format"] = "Article"
+    elif format == "Monograph Series":
+        record["format"] = "Serial"
+    elif format == "Serial Volume":
+        record["format"] = "Book"
+
     # Rename fields
     rename_field(record, "title_short", "rft.atitle", singlevalued=True)  # sometimes also rft.btitle???
     rename_field(record, "title_sub", "x.subtitle", singlevalued=True)
