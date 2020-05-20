@@ -145,7 +145,7 @@ for record in inputfile:
         record["x.date"] = date
 
     # Rename fields
-    rename_field(record, "title_full", "rft.atitle", singlevalued=True)  # sometimes also rft.btitle???
+    rename_field(record, "title_short", "rft.atitle", singlevalued=True)  # sometimes also rft.btitle???
     rename_field(record, "title_sub", "x.subtitle", singlevalued=True)
     rename_field(record, "container_title", "rft.jtitle")
     rename_field(record, "container_issue", "rft.issue")
@@ -161,7 +161,8 @@ for record in inputfile:
 
     # Remove fields
     remove_field(record, "id")
-    remove_field(record, "title_short")
+    #remove_field(record, "title_short")
+    remove_field(record, "title_full")
     remove_field(record, "isfreeaccess_txt")
     remove_field(record, "collection_details")
     remove_field(record, "publishDateSort")
