@@ -581,10 +581,10 @@ def check_isbn(isbn=""):
     isbn = isbn.strip()
     isbn = isbn.replace(" ", "-")
     isbn = isbn.replace(".", "-")
-    match1 = re.match("(\d[0-9xX-]{16,16})", isbn)
-    match2 = re.match("(\d[0-9xX-]{12,12})", isbn)
-    match3 = re.match("(\d[0-9xX]{9,9})", isbn)
-    match4 = re.match("(\d[0-9xX]{12,12})", isbn)
+    match1 = re.search("(\d[0-9xX-]{16,16})", isbn)
+    match2 = re.search("(\d[0-9xX-]{12,12})", isbn)
+    match3 = re.search("(\d[0-9xX]{9,9})", isbn)
+    match4 = re.search("(\d[0-9xX]{12,12})", isbn)
 
     if match1:
         return match1.group(1)
