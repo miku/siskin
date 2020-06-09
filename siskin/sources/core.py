@@ -68,7 +68,7 @@ class CoreTask(DefaultTask):
     TAG = 'core'
 
     def closest(self):
-        return datetime.date(2017, 11, 1)
+        return datetime.date(2018, 3, 1)
 
 
 class CoreDownload(CoreTask):
