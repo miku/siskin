@@ -59,7 +59,7 @@ logger = logging.getLogger('siskin')
 
 marc_compliant_language_codes = [
     "ger", "fre", "eng", "ita", "rus", "jpn", "cze", "chi", "dut", "por", "rum", "tur", "pol", "spa", "swe", "per", "fin", "ara", "tha", "dan", "est", "kor",
-    "nor", "nld"
+    "nor", "nld", "hin", "zxx", "hrv", "alb", "bel", "wen", "cat", "und", "fil"
 ]
 
 
