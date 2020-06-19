@@ -311,18 +311,13 @@ for oldrecord in xmlstream(inputfilename, "record"):
     if "http" in f856u:
         marcrecord.add("856", q="text/html", _3=f8563, u=f856u)
 
-    # Format
-    f935b = get_field_935b(format=format)
-    f935c = get_field_935c(format=format)
-    marcrecord.add("935", b=f935b, c=f935c)
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
 
     # Kollektion
     collection = ["a", f001, "b", "109", "c", "sid-109-col-kunsthochschulekoeln"]
     marcrecord.add("980", subfields=collection)
-
-    # SWB-Inhaltstyp
-    f935c = formats[format]["935c"]
-    marcrecord.add("935", c=f935c)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
     marcrecord = convert_to_finc_id(sid, marcrecord, encode=False, finc_prefix=True)
