@@ -60,13 +60,19 @@ def get_datafield(record, tag, code, all=False):
                 if subfield["@code"] != code:
                     continue
                 if not all:
+                    if isinstance(subfield["#text"], list):
+                        return ""
                     return subfield["#text"]
                 values.append(subfield["#text"])
         else:
             if field["ns0:subfield"]["@code"] == code:
                 if not all:
+                    if isinstance(field["ns0:subfield"]["#text"], list):
+                        return ""
                     return field["ns0:subfield"]["#text"]
                 values.append(field["ns0:subfield"]["#text"])
+    if len(values) == 0:
+        return ""
     return values
 
 
@@ -204,9 +210,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # Periodizität
     language = get_datafield(record, "037", "a")
+    language = marc_get_languages(language)
     year = get_datafield(record, "425", "a")
-    if isinstance(year, list):
-        year = year[0]
     periodicity = formats[format]["008"]
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
@@ -238,15 +243,9 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # Erscheinungsvermerk
     f260a = get_datafield(record, "410", "a")
-    if isinstance(f260a, list):
-        f260a = ""
     f260b = get_datafield(record, "412", "a")
-    if isinstance(f260b, list):
-        f260b = ""
     f260b = remove_brackets(f260b)
     f260c = get_datafield(record, "425", "a")
-    if isinstance(f260c, list):
-        f260c = ""
     subfields = marc_build_imprint(f260a, f260b, f260c)
     marcrecord.add("260", subfields=subfields)
 
