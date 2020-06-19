@@ -246,7 +246,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     f260b = get_datafield(record, "412", "a")
     f260b = remove_brackets(f260b)
     f260c = get_datafield(record, "425", "a")
-    subfields = marc_build_imprint(f260a, f260b, f260c)
+    subfields = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=subfields)
 
     # Umfangsangabe
