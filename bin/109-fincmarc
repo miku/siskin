@@ -204,6 +204,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # Periodizität
     language = get_datafield(record, "037", "a")
+    language = marc_get_languages(language)
     year = get_datafield(record, "425", "a")
     if isinstance(year, list):
         year = ""
