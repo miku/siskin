@@ -206,7 +206,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     language = get_datafield(record, "037", "a")
     year = get_datafield(record, "425", "a")
     if isinstance(year, list):
-        year = year[0]
+        year = ""
     periodicity = formats[format]["008"]
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
