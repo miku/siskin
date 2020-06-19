@@ -76,10 +76,10 @@ def get_datafield(record, tag, code, all=False):
     return values
 
 
-    def remove_brackets(field):
-        if isinstance(field, list) and len(field) == 0:
-            return ""
-        return field.replace("<<", "").replace(">>", "")
+def remove_brackets(field):
+    if isinstance(field, list) and len(field) == 0:
+        return ""
+    return field.replace("<<", "").replace(">>", "")
 
 
 ##################################################################################
