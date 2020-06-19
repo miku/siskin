@@ -320,7 +320,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     marcrecord.add("980", subfields=collection)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
-    marcrecord = convert_to_finc_id(sid, marcrecord, encode=False, finc_prefix=True)
+    marcrecord = convert_to_finc_id(SID, marcrecord, encode=False, finc_prefix=True)
 
     # Write output file
     if outputformat == "xml":
