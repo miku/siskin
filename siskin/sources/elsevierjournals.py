@@ -77,6 +77,24 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
 class ElsevierJournalsPaths(ElsevierJournalsTask):
     """
     Sync.
+
+    Note: For some reason, the tarballs received are occasionally corrupt.
+
+    The following files were affected at one point or another:
+
+    94c9592ddf6ccd189f3950e711a7010cdd3872c9  SAXC0000000001621A.tar
+    b67214eb569e4497a626ddcd5e69ba97594eec39  SAXC0000000001628A.tar
+    e0ff177484e6611d81f1ca8c422eb12f21516a25  SAXC0000000001647A.tar
+    60c0bc7cebe6b0cb926ec810aac1804ab23d11ba  SAXC0000000001658A.tar
+    246247177b6df07f0739936d0d34047a15280c5c  SAXC0000000001673A.tar
+
+    The [tarcheck](https://git.io/JJf7j) tool reports:
+
+    SAXC0000000001621A.tar  unexpected EOF
+    SAXC0000000001628A.tar  unexpected EOF
+    SAXC0000000001647A.tar  unexpected EOF
+    SAXC0000000001658A.tar  unexpected EOF
+    SAXC0000000001673A.tar  unexpected EOF
     """
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
