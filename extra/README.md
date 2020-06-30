@@ -70,6 +70,8 @@ $ zstdcat doaj_doi_subjects_files_50k.ndj.zst | jq -rc .files[].size | \
 89GiB
 ```
 
+### Example document
+
 A document contains DOI, files and the original payload, containing subjects.
 
 ```json
