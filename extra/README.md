@@ -4,6 +4,8 @@ Misc special scripts and datasets.
 
 ## DOI and DDC
 
+Refs: ec5a52ec-b32d-5bfe-14e4-26e3efa48c00, Wed, 24 Jun 2020 00:16:31 PDT.
+
 There are no DDC in crossref.
 
 Extract DOI and subjects from DOAJ dump.
