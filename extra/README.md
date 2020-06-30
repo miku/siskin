@@ -57,7 +57,16 @@ Mostly LCC.
   35843 QD241-441
 ```
 
-Sample dataset with 50000 documents: [doi_subjects_files_50k.ndj.zst](https://github.com/ubleipzig/siskin/raw/master/extra/doaj_doi_subjects_files_50k.ndj.zst)
+Sample dataset with 50000 documents:
+[doi_subjects_files_50k.ndj.zst](https://github.com/ubleipzig/siskin/raw/master/extra/doaj_doi_subjects_files_50k.ndj.zst).
+The linked PDF files would use at least about 90GB, if downloaded. The full
+3.5M documents would occupy around 7TB.
+
+```shell
+$ zstdcat doaj_doi_subjects_files_50k.ndj.zst | jq -rc .files[].size | \
+    paste -sd+ | bc -l | numfmt --to=iec-i --suffix=B
+89GiB
+```
 
 A document contains DOI, files and the original payload, containing subjects.
 
