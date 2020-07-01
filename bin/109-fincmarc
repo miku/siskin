@@ -155,6 +155,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     f245p = ""
     f773w = ""
     f773t = ""
+    is_child = False
 
     if len(parent_id) > 0:
         has_parent_title = parent_titles.get(parent_id, None)
@@ -163,6 +164,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
             f245p = title
             f773w = "(DE-576)" + parent_id
             f773t = f245a
+            is_child = True
 
     # Format
     format = get_datafield(record, "433", "a")
@@ -200,6 +202,8 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # Leader
     leader = formats[format]["Leader"]
+    if is_child:
+        leader = leader[:19] + "c4500"
     marcrecord.leader = leader
 
     # Identifier
@@ -304,7 +308,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
 
     # übergeordnetes Werk
     if f773t and f773w:
-        marcrecord.add("773", t=f773t, w=f773w)
+        marcrecord.add("773", t=f773t, w=f773w, indicators="18")
 
     # Links
     f856u = get_datafield(record, "655", "u")
