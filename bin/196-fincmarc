@@ -34,6 +34,7 @@ Origin: SRU
 
 import os
 import sys
+import re
 
 import marcx
 import pymarc
@@ -88,6 +89,18 @@ for record in reader:
     f001 = record["001"].data
     record.remove_fields("001")
     record.add("001", data="196-" + f001)
+
+    # Put date into field 260c
+    f773g = record["773"]["g"]
+    match = re.search("(\d\d\d\d)", f773g)
+    if match:
+        f260c = match.group(1)
+        record.add("260", c=f260c)
+    for field, oldvalue in marcx.fieldgetter("773.x")(record):
+        subfields = field.subfields
+
+    record.remove_fields("773")
+    record.add("773", subfields=subfields)
 
     # Kollektion
     record.add("980", a=f001, b=SID, c="sid-196-col-obs")
