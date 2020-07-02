@@ -96,11 +96,11 @@ for record in reader:
     if match:
         f260c = match.group(1)
         record.add("260", c=f260c)
-    for field, oldvalue in marcx.fieldgetter("773.x")(record):
-        subfields = field.subfields
 
+    # Only use 773t and 773x and remove the rest.
+    f773x = record["773"]["x"]
     record.remove_fields("773")
-    record.add("773", subfields=subfields)
+    record.add("773", t="Medienobservationen", x=f773x)
 
     # Kollektion
     record.add("980", a=f001, b=SID, c="sid-196-col-obs")
