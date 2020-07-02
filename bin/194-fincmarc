@@ -105,7 +105,7 @@ for fields in records:
 
     # ID
     f001 = fields[0]
-    marcrecord.add("001", data="finc-194-" + f001)
+    marcrecord.add("001", data="194-" + f001)
 
     # Zugangstyp
     f007 = formats[format]["e007"]
