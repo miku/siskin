@@ -74,7 +74,7 @@ if not inputfilename:
     user = config.get(SID, "user")
     password = config.get(SID, "password")
     url = config.get(SID, "url")
-    os.system('wget -O %s --user=%s --password=%s "%s"' % (inputfilename, user, password, url))
+    os.system('wget -O %s --user=%s --password=%s "%s" --no-check-certificate' % (inputfilename, user, password, url))
 
 inputfile = open(inputfilename, "r", encoding="utf-8")
 records = csv.reader(inputfile, delimiter=",")
