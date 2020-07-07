@@ -124,7 +124,6 @@ class FincArgumentParser():
 
         files = glob.glob(inputfilenames_to_delete)
         files = sorted(files, key=os.path.getctime)
-        # TODO: if there are less than n files, this will delete all of them?
         for filename in files[:-n]:
             os.remove(filename)
 
@@ -139,7 +138,6 @@ class FincArgumentParser():
 
         files = glob.glob(outputfilenames_to_delete)
         files = sorted(files, key=os.path.getctime)
-        # TODO: if there are less than n files, this will delete all of them?
         for filename in files[:-n]:
             os.remove(filename)
 
