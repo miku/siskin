@@ -75,8 +75,8 @@ class FincArgumentParser():
         self.parser.add_argument("--overwrite", dest="overwrite", help="overwrite existing outputfile", nargs="?", const=True, default=False)
         self.parser.add_argument("--interval", dest="interval", help="interval for update", default="monthly")
         self.parser.add_argument("--root", dest="root", help="root path for all data")
-        self.parser.add_argument("--output-hist-size", dest="output_hist_size", type=int, help="number of older outputfiles to keep", default=3)
-        self.parser.add_argument("--input-hist-size", dest="input_hist_size", type=int, help="number of older inputfiles to keep", default=5)
+        self.parser.add_argument("--output-hist-size", dest="output_hist_size", type=int, help="number of older outputfiles to keep", default=20)
+        self.parser.add_argument("--input-hist-size", dest="input_hist_size", type=int, help="number of older inputfiles to keep", default=20)
 
     @property
     def args(self):
