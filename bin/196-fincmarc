@@ -50,11 +50,17 @@ from siskin.arguments import FincArgumentParser
 SID = "196"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
-outputformat = fip.args.outputformat
-inputfilename = fip.args.inputfilename
 
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old input and outputfiles as specified in input-hist-size and output-hist-size
 fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
 
 # Set output format for MARC record
 if outputformat == "xml":
@@ -67,11 +73,11 @@ else:
 # 2. Get input data
 ################################################################################
 
-if not inputfilename:
-    inputfilename = fip.inputfilename(SID)
-    os.system('srufetch -e https://services.dnb.de/sru/dnb -m 30 -q "partOfat=019676700" -a MARC21-xml -xr "(?ms)(<record xmlns(.*?)</record>)" > %s' % inputfilename)
+if not inputfile:
+    inputfile = fip.inputfilename(SID)
+    os.system('srufetch -e https://services.dnb.de/sru/dnb -m 30 -q "partOfat=019676700" -a MARC21-xml -xr "(?ms)(<record xmlns(.*?)</record>)" > %s' % inputfile)
 
-inputfile = open(inputfilename, "rb")
+inputfile = open(inputfile, "rb")
 reader = pymarc.marcxml.parse_xml_to_array(inputfile)
 
 
