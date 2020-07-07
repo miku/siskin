@@ -120,7 +120,7 @@ class FincArgumentParser():
         args = self.parse_args()
         n = args.input_hist_size
         inputfilename = self.inputfilename(sid)
-        inputfilenames_to_delete = re.sub("-input-(.*)", "*", inputfilename)
+        inputfilenames_to_delete = re.sub("-input-.*", "-input-*", inputfilename)
 
         files = glob.glob(inputfilenames_to_delete)
         files = sorted(files, key=os.path.getctime)
@@ -135,7 +135,7 @@ class FincArgumentParser():
         args = self.parse_args()
         n = args.output_hist_size
         outputfilename = self.outputfilename(sid)
-        outputfilenames_to_delete = re.sub("-output-(.*)", "*", outputfilename)
+        outputfilenames_to_delete = re.sub("-output-.*", "-output-*", outputfilename)
 
         files = glob.glob(outputfilenames_to_delete)
         files = sorted(files, key=os.path.getctime)
