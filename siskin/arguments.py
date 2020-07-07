@@ -68,6 +68,7 @@ class FincArgumentParser():
 
         self.parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         self.parser.add_argument("--inputfile", dest="inputfile", help="inputfile")
+        self.parser.add_argument("--inputfolder", dest="inputfolder", help="inputfolder")
         self.parser.add_argument("--inputformat", dest="inputformat", help="inportformat mrc or xml", default="mrc")
         self.parser.add_argument("--outputformat", dest="outputformat", help="outputformat mrc or xml", default="mrc")
         self.parser.add_argument("--filemap", dest="filemap", help="path of the file containing a dictionary, list or another map")
