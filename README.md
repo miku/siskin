@@ -1,6 +1,6 @@
 # siskin
 
-Various tasks for heterogeneous metadata handling for Project
+Various tasks for heterogeneous metadata handling for project
 [finc](https://finc.info) at [Leipzig University Library](https://www.ub.uni-leipzig.de). Based on
 [luigi](https://github.com/spotify/luigi) from Spotify.
 
