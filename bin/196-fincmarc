@@ -97,10 +97,9 @@ for record in reader:
         f260c = match.group(1)
         record.add("260", c=f260c)
 
-    # Only use 773t and 773x and remove the rest.
-    f773x = record["773"]["x"]
+    # Only use 773t and 773x and kick the rest.
     record.remove_fields("773")
-    record.add("773", t="Medienobservationen", x=f773x)
+    record.add("773", t="Medienobservationen", x="1612-7315")
 
     # Kollektion
     record.add("980", a=f001, b=SID, c="sid-196-col-obs")
