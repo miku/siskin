@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: PQDT
+SID: 34
+Ticket: #10495, #10493, #10822, #17931
+Origin: OAI
+
+"""
+
+
+import sys
+import re
+
+import marcx
+import pymarc
+import xmltodict
+
+from siskin.configuration import Config
+from siskin.mappings import formats
+from siskin.arguments import FincArgumentParser
+from siskin.utils import xmlstream, check_isbn, check_issn, marc_build_field_008, marc_get_languages
+
+
+def get_field(xmlrecord, tag):
+    try:
+        return xmlrecord[tag]
+    except:
+        return ""
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "200"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old input and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfile:
+    inputfile = fip.inputfilename(SID)
+    os.system("metha-sync http://pqdtoai.proquest.com/OAIHandler")
+    os.system("metha-cat http://pqdtoai.proquest.com/OAIHandler > %s" % inputfile)
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for xmlrecord in xmlstream(inputfile, "Record"):
+
+    xmlrecord = xmltodict.parse(xmlrecord)
+    xmlrecord = xmlrecord["Record"]["metadata"]["ns0:dc"]
+
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    # Format 
+    format = "Thesis"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifier
+    identifier = xmlrecord["dc:identifier"]
+    match = re.search("dispub=(\d+)", identifier) # Pattern: http://pqdtopen.proquest.com/#viewpdf?dispub=3292440
+    if match:
+        f001 = match.group(1)
+        marcrecord.add("001", data="finc-34-" + f001)
+    else:
+        sys.exit("No valid identifier: " + identifier)
+
+    # Access type
+    f007 = formats[format]["e007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodicity
+    language = xmlrecord["dc:language"]
+    language = marc_get_languages(language)
+    date = xmlrecord["dc:date"]
+    match = re.match("(\d\d\d\d)", date)
+    if match:
+        year = match.group(1)
+    periodicity = formats[format]["008"]
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+
+    # Language
+    marcrecord.add("041", a=language)
+
+    # 1. Creator
+    f100a = xmlrecord["dc:creator"]
+    marcrecord.add("100", a=f100a, _4="aut")
+
+    # Main title and subtitle
+    f245a = xmlrecord["dc:title"]
+    marcrecord.add("245", a=f245a)
+
+    # Imprint
+    f260b = get_field(xmlrecord, "dc:publisher")
+    marcrecord.add("260", b=f260b, c=year)
+
+    # RDA-Content
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Carrier
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # Description
+    f520a = get_field(xmlrecord, "dc:description")
+    marcrecord.add("520", a=f520a)
+
+    # Subjects
+    subjects = get_field(xmlrecord, "dc:subject")
+    if subjects:
+        subjects = subjects.split("|")
+        for subject in subjects:
+            marcrecord.add("650", a=subject)
+
+    # URL
+    f856u = xmlrecord["dc:identifier"]
+    marcrecord.add("856", _3="Link zur Ressource", u=f856u)
+
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Collection
+    marcrecord.add("980", a=f001, b=SID, c="sid-200-col-test")
+
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+outputfile.close()
