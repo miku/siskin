@@ -42,7 +42,7 @@ import xmltodict
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.arguments import FincArgumentParser
-from siskin.utils import xmlstream, check_isbn, check_issn, marc_build_field_008, marc_get_languages
+from siskin.utils import xmlstream, marc_build_field_008, marc_get_languages
 
 
 def get_field(xmlrecord, tag):
