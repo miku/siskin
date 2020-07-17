@@ -161,7 +161,10 @@ class FincArgumentParser():
         if args.interval == "weekly":
             date = weekly()
 
-        filename = sid + "-output-" + date.strftime("%Y%m%d") + ".fincmarc." + args.outputformat
+        if args.outputformat == "mrc" or args.outputformat == "xml":
+            filename = sid + "-output-" + date.strftime("%Y%m%d") + ".fincmarc." + args.outputformat
+        elif args.outputformat == "json":
+            filename = sid + "-output-" + date.strftime("%Y%m%d") + ".is." + args.outputformat
         outputfilename = os.path.join(self.sid_path(sid), filename)
 
         if os.path.isfile(outputfilename) and not args.overwrite:
