@@ -142,7 +142,7 @@ for oldrecord in inputfile:
     newrecord["x.labels"] = institutions
 
     # Source-ID
-    newrecord["finc.source_id"] = "200"
+    newrecord["finc.source_id"] = "68"
 
     # Author
     authors = get_field(oldrecord, "author2")
