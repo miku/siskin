@@ -100,9 +100,9 @@ outputfile = open(outputfilename, "w")
 if not inputfile:
     inputfile = fip.inputfilename(SID)
     os.system("""solrdump -verbose -server https://findex.ubl-proxy.slub-dresden.de/index/SLUB -q "collection_details:SSG-OLC-FTH OR
-                 collection_details:SSG-OLC-MKW" -fl "id,title,physical,issn,container_title,container_issue,container_volume,
-                 container_start_page,publisher,publish_place,lang_code,publishDateSort,format,abstract,isfreeaccess_txt,
-                 author2,url,topic_facet,collection_details" | jq . -c > %s""" % inputfile)
+                 collection_details:SSG-OLC-MKW OR collection_details:SSG-OLC-BUB" -fl "id,title,physical,issn,container_title,
+                 container_issue,container_volume,container_start_page,publisher,publish_place,lang_code,publishDateSort,format,
+                 abstract,isfreeaccess_txt,author2,url,topic_facet,collection_details" | jq . -c > %s""" % inputfile)
 
 inputfile = open(inputfile, "r")
 
@@ -133,6 +133,10 @@ for oldrecord in inputfile:
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
         institutions.append("DE-15-FID")
+
+    if "SSG-OLC-BUB" in sets:
+        mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
+        institutions.append("FID-BBI-DE-23")
 
     newrecord["finc.mega_collection"] = mega_collections
     newrecord["x.labels"] = institutions
