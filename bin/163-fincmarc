@@ -26,7 +26,7 @@
 
 Source: Nachlässe der UB Leipzig, Autographensammlung Wustmann
 SID: 163
-Ticket: #14668, #14527, #16052
+Ticket: #14668, #14527, #16052, #18110
 Origin: Speicherwolke
 
 """
@@ -50,9 +50,18 @@ from siskin.arguments import FincArgumentParser
 SID = "163"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
+
+# Get arguments
 outputformat = fip.args.outputformat
 inputfilename = fip.args.inputfilename
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old input and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
 path = fip.sid_path("163")
 
 fip.remove_old_outputfiles(SID)
