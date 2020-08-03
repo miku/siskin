@@ -71,7 +71,7 @@ fip.remove_old_outputfiles(SID)
 # 2. Get input data
 ##################################################################################
 
-if not inputfilename:
+if not inputfile:
 
     inputfilename = path + "/163_input.mrc"
     os.system("mkdir /tmp/163")
