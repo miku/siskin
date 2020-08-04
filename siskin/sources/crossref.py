@@ -274,34 +274,6 @@ class CrossrefIntermediateSchema(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class CrossrefExport(CrossrefTask):
-    """
-    Tag with ISILs, then export to various formats.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3', description='export format')
-
-    def requires(self):
-        return {
-            'file': CrossrefIntermediateSchema(date=self.date),
-            'config': AMSLFilterConfig(date=self.date),
-        }
-
-    def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path,
-                          input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        extensions = {
-            'solr5vu3': 'ldj.gz',
-            'formeta': 'form.gz',
-        }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
-
-
 class CrossrefCollections(CrossrefTask):
     """
     A collection of crossref collections, refs. #6985. XXX: Save counts as well.
