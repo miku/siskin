@@ -168,7 +168,7 @@ class FincArgumentParser():
         outputfilename = os.path.join(self.sid_path(sid), filename)
 
         if os.path.isfile(outputfilename) and not args.overwrite:
-            raise ValueError(sid + ": Outputfile already exists. Use --overwrite.")
+            raise ValueError("{}: Outputfile already exists at {}, use --overwrite.".format(sid, outputfilename))
 
         return outputfilename
 
