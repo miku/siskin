@@ -30,9 +30,10 @@ https://is.gd/8DFvOo (GBV).
 
 import datetime
 import os
+import glob
 
 import luigi
-from gluish.format import Zstd
+from gluish.format import Zstd, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -66,3 +67,26 @@ class OLCDump(OLCTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.zst'), format=Zstd)
+
+class OLCExport(OLCTask):
+    """
+    Run and collect OLC, 68, standalone script.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        """
+        Find any output file in the typical location.
+        """
+        shellout("68-fincjson", ignoremap={1: "expected error from existing file"})
+        taskdir = os.path.join(self.BASE, self.TAG)
+        outputs = sorted(glob.glob(os.path.join(taskdir, '68-output-*')), reverse=True)
+        if len(outputs) == 0:
+            raise RuntimeError("could not find any artifacts for source at {}".format(taskdir))
+        path = outputs[0]
+        if not path.endswith("gz"):
+            raise RuntimeError("excepted gzip compressed file: {}".format(path))
+        luigi.LocalTarget(path).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)

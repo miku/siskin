@@ -125,11 +125,11 @@ for oldrecord in inputfile:
     sets = get_field(oldrecord, "collection_details")
     mega_collections = []
     institutions = []
-    
+
     if "SSG-OLC-MKW" in sets:
         mega_collections.append("OLC SSG Medien- / Kommunikationswissenschaft")
         institutions.append("DE-15-FID")
-    
+
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
         institutions.append("DE-15-FID")
@@ -160,16 +160,16 @@ for oldrecord in inputfile:
 
     # Format mapping
     format = get_field(oldrecord, "format", multivalue=False)
-      
+
     if format == "Journal" or format == "eJournal":
         newrecord["finc.format"] = "Journal"
-   
+
     elif format == "Article" or format == "electronic Article":
         newrecord["finc.format"] = "Article"
-   
+
     elif format == "Monograph Series":
         newrecord["finc.format"] = "Serial"
-   
+
     elif format == "Serial Volume":
         newrecord["finc.format"] = "Book"
 
