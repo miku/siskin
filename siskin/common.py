@@ -96,6 +96,7 @@ class FTPMirror(CommonTask):
             set mirror:parallel-directories 1;
             set ssl:verify-certificate no;
             set ftp:ssl-protect-data true;
+            set xfer:verify true;
 
         mirror --verbose=0 --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
 
