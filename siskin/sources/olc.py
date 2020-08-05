@@ -70,23 +70,26 @@ class OLCDump(OLCTask):
 
 class OLCExport(OLCTask):
     """
-    Run and collect OLC, 68, standalone script.
+    Run and collect OLC, 68, standalone script. This source has fixed
+    "DE-15-FID" label, does not need tagging and will be appendable to the
+    final AIExport output.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         """
-        Find any output file in the typical location.
+        Find the most recent output, compress and move into the "siskin" tree.
         """
-        shellout("68-fincjson", ignoremap={1: "expected error from existing file"})
+        shellout("68-fincjson --outputformat json", ignoremap={1: "most probably ok for skip, due to existing file"})
         taskdir = os.path.join(self.BASE, self.TAG)
-        outputs = sorted(glob.glob(os.path.join(taskdir, '68-output-*')), reverse=True)
+        outputs = sorted(glob.glob(os.path.join(taskdir, '68-output-*json')), reverse=True)
         if len(outputs) == 0:
             raise RuntimeError("could not find any artifacts for source at {}".format(taskdir))
         path = outputs[0]
-        if not path.endswith("gz"):
-            raise RuntimeError("excepted gzip compressed file: {}".format(path))
-        luigi.LocalTarget(path).move(self.output().path)
+
+        # Compress before moving into place.
+        compressed_and_exported = shellout("span-export {input} | pigz -c > {output}", input=path)
+        luigi.LocalTarget(compressed_and_exported).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)

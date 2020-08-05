@@ -67,6 +67,7 @@ from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
 from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.genios import (GeniosCombinedIntermediateSchema, GeniosISSNList)
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
+from siskin.sources.olc import OLCExport
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
@@ -476,13 +477,15 @@ class AIExport(AITask):
         return {
             'ai': AIIntermediateSchemaDeduplicated(date=self.date),
             'base': BaseSingleFile(date=self.date),
+            'olc': OLCExport(date=self.date),
         }
 
     def run(self):
         _, tmp = tempfile.mkstemp(prefix='siskin-')
 
         if self.format == 'solr5vu3':
-            shellout("""cp "{input}" "{output}" """, input=self.input().get("base").path, output=tmp)
+            shellout("""cat "{input}" >> "{output}" """, input=self.input().get("base").path, output=tmp)
+            shellout("""cat "{input}" >> "{output}" """, input=self.input().get("olc").path, output=tmp)
         else:
             self.logger.debug('ignoring [126] BASE, since format is: %s', self.format)
 
