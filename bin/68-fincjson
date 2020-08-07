@@ -132,7 +132,8 @@ for oldrecord in inputfile:
 
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
-        institutions.append("DE-15-FID")
+        if "DE-15-FID" not in institutions:
+            institutions.append("DE-15-FID")
 
     if "SSG-OLC-BUB" in sets:
         mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
