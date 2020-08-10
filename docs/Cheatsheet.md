@@ -1,5 +1,7 @@
 # Cheatsheet
 
+> Long running scripts ahead; please run in screen or tmux (or anything else).
+
 The current version?
 
 ```
