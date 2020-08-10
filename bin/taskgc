@@ -47,7 +47,7 @@ tasks=(
 # Check whether there is anything to delete at all.
 found=$(for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -and -not -name $(date +"date-%Y-%m-*")
+		find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"
 	done
 done | wc -l)
 
@@ -59,23 +59,23 @@ fi
 # Just print out all files.
 for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -and -not -name $(date +"date-%Y-%m-*")
+		find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"
 	done
 done
 
 # Calculate aggregate filesize (GB).
 freed=$(for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -not -name $(date +"date-%Y-%m-*") -exec stat --printf="%s\n" {} \;
+		find "$taskhome/$src/$t" -type f -not -name "$(date +'date-%Y-%m-*')" -exec stat --printf="%s\n" {} \;
 	done
 done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
 echo -e -n "Delete the above ${found} file(s) [yN] [${CO}${freed}GB${NC} would be freed]?"
-read answer
+read -r answer
 if [ "$answer" != "${answer#[Yy]}" ]; then
 	for src in "${!tasks[@]}"; do
 		for t in ${tasks[$src]}; do
-			find "$taskhome/$src/$t" -type f -not -name $(date +"date-%Y-%m-*") -exec rm -vf {} \;
+			find "$taskhome/$src/$t" -type f -not -name "$(date +'date-%Y-%m-*')" -exec rm -vf {} \;
 		done
 	done
 else
