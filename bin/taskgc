@@ -33,7 +33,7 @@ NC='\033[0m'
 
 taskhome=$(taskhome) # Root directory of outputs.
 
-# Note that find wants these directories to exists, so the names must match.
+# Note that find wants these directories to exists, so the task names must match.
 declare -A tasks
 tasks=(
 	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact"
@@ -44,12 +44,6 @@ tasks=(
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
 )
 
-for src in "${!tasks[@]}"; do
-	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -and -not -name $(date +"date-%Y-%m-*")
-	done
-done
-
 # Check whether there is anything to delete at all.
 found=$(for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
@@ -58,16 +52,23 @@ found=$(for src in "${!tasks[@]}"; do
 done | wc -l)
 
 if [ "$found" -eq "0" ]; then
-	echo "Nothing to delete. Bye"
+	echo "Nothing to delete. Bye."
 	exit 0
 fi
+
+# Just print out all files.
+for src in "${!tasks[@]}"; do
+	for t in ${tasks[$src]}; do
+		find "$taskhome/$src/$t" -type f -and -not -name $(date +"date-%Y-%m-*")
+	done
+done
 
 # Calculate aggregate filesize (GB).
 freed=$(for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
 		find "$taskhome/$src/$t" -type f -not -name $(date +"date-%Y-%m-*") -exec stat --printf="%s\n" {} \;
 	done
-done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -lq)
+done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
 echo -e -n "Delete the above ${found} file(s) [yN] [${CO}${freed}GB${NC} would be freed]?"
 read answer
@@ -78,5 +79,5 @@ if [ "$answer" != "${answer#[Yy]}" ]; then
 		done
 	done
 else
-	echo "Nothing to delete. Bye."
+	echo "Not deleting anything. Bye."
 fi
