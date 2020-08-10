@@ -38,7 +38,7 @@ declare -A tasks
 tasks=(
 	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact"
 	["28"]="DOAJIntermediateSchemaDirty DOAJIntermediateSchema DOAJHarvest DOAJDownloadDump DOAJTable"
-	["49"]="CrossrefRawItems CrossrefUniqItems CrossrefIntermediateSchema"
+	["49"]="CrossrefUniqItems CrossrefIntermediateSchema"
 	["55"]="JstorXML JstorIntermediateSchemaGenericCollection JstorIntermediateSchema JstorMembers JstorLatestMembers"
 	["85"]="ElsevierJournalsIntermediateSchema ElsevierJournalsUpdatesIntermediateSchema"
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
@@ -50,6 +50,18 @@ for src in "${!tasks[@]}"; do
 	done
 done
 
+# Check whether there is anything to delete at all.
+found=$(for src in "${!tasks[@]}"; do
+	for t in ${tasks[$src]}; do
+		find "$taskhome/$src/$t" -type f -and -not -name $(date +"date-%Y-%m-*")
+	done
+done | wc -l)
+
+if [ "$found" -eq "0" ]; then
+	echo "Nothing to delete. Bye"
+	exit 0
+fi
+
 # Calculate aggregate filesize (GB).
 freed=$(for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
@@ -57,7 +69,7 @@ freed=$(for src in "${!tasks[@]}"; do
 	done
 done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -lq)
 
-echo -e -n "Delete the above file(s) [yN] [${CO}${freed}GB${NC} would be freed]?"
+echo -e -n "Delete the above ${found} file(s) [yN] [${CO}${freed}GB${NC} would be freed]?"
 read answer
 if [ "$answer" != "${answer#[Yy]}" ]; then
 	for src in "${!tasks[@]}"; do
