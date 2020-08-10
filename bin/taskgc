@@ -69,6 +69,7 @@ freed=$(for src in "${!tasks[@]}"; do
 	done
 done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
+echo
 echo -e -n "Delete the above ${found} file(s) [yN] [${CO}${freed}GB${NC} would be freed]?"
 read -r answer
 if [ "$answer" != "${answer#[Yy]}" ]; then
