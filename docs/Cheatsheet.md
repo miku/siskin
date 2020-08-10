@@ -93,3 +93,8 @@ Then run, in `/var/microblob`:
 $ chown -R memcachedb.memcachedb date-*.ldj* && pkill microblob; nohup startmicroblob.sh &
 ```
 
+Occasional cleanup:
+
+```
+$ taskgc
+```
