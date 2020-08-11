@@ -37,7 +37,6 @@ declare -A tasks
 tasks=(
 	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact"
 	["28"]="DOAJIntermediateSchemaDirty DOAJIntermediateSchema DOAJHarvest DOAJDownloadDump DOAJTable"
-	["49"]="CrossrefUniqItems CrossrefIntermediateSchema"
 	["55"]="JstorXML JstorIntermediateSchemaGenericCollection JstorIntermediateSchema JstorMembers JstorLatestMembers"
 	["85"]="ElsevierJournalsIntermediateSchema ElsevierJournalsUpdatesIntermediateSchema"
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
