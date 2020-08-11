@@ -42,40 +42,36 @@ tasks=(
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
 )
 
-# Check whether there is anything to delete at all.
-found=$(for src in "${!tasks[@]}"; do
-	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"
-	done
-done | wc -l)
+matching_files=()
 
-if [ "$found" -eq "0" ]; then
+for src in "${!tasks[@]}"; do
+	for t in ${tasks[$src]}; do
+		for f in $(find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"); do
+			matching_files+=($f)
+		done
+	done
+done
+
+if [ "${#matching_files[@]}" -eq "0" ]; then
 	echo "Nothing to delete. Bye."
 	exit 0
 fi
 
-# Just print out all files.
-for src in "${!tasks[@]}"; do
-	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"
-	done
+for f in ${matching_files[@]}; do
+	echo $f
 done
 
-# Calculate aggregate filesize (GB).
-freed=$(for src in "${!tasks[@]}"; do
-	for t in ${tasks[$src]}; do
-		find "$taskhome/$src/$t" -type f -not -name "$(date +'date-%Y-%m-*')" -exec stat --printf="%s\n" {} \;
-	done
+# How much space can we reclaim? Needs bc(1).
+freed=$(for f in ${matching_files[@]}; do
+	stat --printf="%s\n" "$f"
 done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
 echo
-echo -e -n "Delete the above ${found} file(s) [yN] [${CO}${freed}GB${NC} would be freed]? "
+echo -e -n "Delete the above ${#matching_files[@]} file(s) [yN] [${CO}${freed}GB${NC} would be freed]? "
 read -r answer
 if [ "$answer" != "${answer#[Yy]}" ]; then
-	for src in "${!tasks[@]}"; do
-		for t in ${tasks[$src]}; do
-			find "$taskhome/$src/$t" -type f -not -name "$(date +'date-%Y-%m-*')" -exec rm -vf {} \;
-		done
+	for f in ${matching_files[@]}; do
+		rm -vf "$f"
 	done
 else
 	echo "Not deleting anything. Bye."
