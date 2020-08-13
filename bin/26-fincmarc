@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: DOAB
+SID: 26
+Ticket: #15786, #18026
+Origin: OAI
+
+"""
+
+
+import os
+import sys
+import re
+from io import BytesIO
+
+import marcx
+import pymarc
+from siskin.configuration import Config
+from siskin.mappings import formats
+from siskin.utils import xmlstream, marc_clean_record, convert_to_finc_id
+from siskin.arguments import FincArgumentParser
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "26"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old input and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfile:
+    inputfile = fip.inputfilename(SID)
+    os.system("metha-sync -format marcxml http://www.doabooks.org/oai")
+    os.system("metha-cat -format marcxml http://www.doabooks.org/oai > %s" % inputfile)
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for oldrecord in xmlstream(inputfile, "record"):
+
+    oldrecord = BytesIO(oldrecord)
+    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+    oldrecord = oldrecord[0]
+
+    record = marcx.Record.from_record(oldrecord)
+    record.force_utf8 = True
+    record.strict = False
+
+    # Format 
+    format = "Book"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    record.leader = leader
+
+    # Identifikator
+    f001 = record["001"].data
+    record.remove_fields("001")
+    record.add("001", data="26-" + f001)
+
+    # Access type
+    record.remove_fields("007")
+    f007 = formats[format]["e007"]
+    record.add("007", data=f007)
+
+    # RDA-Content
+    f336b = formats[format]["336b"]
+    record.add("336", b=f336b)
+
+    # RDA-Carrier
+    f338b = formats[format]["338b"]
+    record.add("338", b=f338b)
+
+    # SWB-Inhaltstyp
+    f935c = formats[format]["935c"]
+    record.add("935", c=f935c)
+
+    # Kollektion
+    record.add("980", a=f001, b=SID, c="sid-26-col-doab")
+
+    # Convert all identifier in 001, 770, 772 ... to Finc schema
+    record = convert_to_finc_id(SID, record, encode=False, finc_prefix=False)
+
+    # Remove empty subfields
+    marc_clean_record(record)
+
+    # Write record to file
+    if outputformat == "xml":
+        outputfile.write(record)
+    else:
+        outputfile.write(record.as_marc())
+
+outputfile.close()
