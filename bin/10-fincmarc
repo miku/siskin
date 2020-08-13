@@ -87,7 +87,7 @@ else:
 if not inputfile:
     
     inputfilename = fip.inputfilename(SID)
-    inputfile = open(inputfilename, "w", encoding="utf-8")
+    inputfile = open(inputfilename, "w+", encoding="utf-8")
 
     page = 1 
     retry_count = 5
@@ -117,7 +117,8 @@ if not inputfile:
         retry_count = 5
         time.sleep(5)
 
-inputfile = open(inputfile, "r")
+else:
+    inputfile = open(inputfile, "r")
 
 
 ##################################################################################
