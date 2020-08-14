@@ -61,7 +61,8 @@ marc_compliant_language_codes = [
     "ger", "fre", "eng", "ita", "rus", "jpn", "cze", "chi", "dut", "por", "rum", "tur", "pol", "spa", "swe", "per", "fin", "ara", "tha", "dan", "est", "kor",
     "nor", "nld", "hin", "zxx", "hrv", "alb", "bel", "wen", "cat", "und", "fil", "gre", "tgl", "lit", "lat", "arm", "srp", "ben", "slo", "bul", "hun", "vie",
     "scr", "ukr", "ira", "san", "mac", "ltz", "scc", "baq", "slv", "grc", "heb", "ice", "swa", "bos", "may", "gsw", "yid", "guj", "ale", "crp", "ind", "nah",
-    "tib", "roh", "fry", "mol", "sin", "mal", "myn", "mon", "tgk", "tmh", "kaz", "kur", "esp", "geo", "egy", "gba", "afr", "lav", "cze", "gle", "rom", "gez"
+    "tib", "roh", "fry", "mol", "sin", "mal", "myn", "mon", "tgk", "tmh", "kaz", "kur", "esp", "geo", "egy", "gba", "afr", "lav", "cze", "gle", "rom", "gez",
+    "epo", "wel"
 
 ]
 
