@@ -63,7 +63,7 @@ SID = "10"
 fip = FincArgumentParser()
 
 # Get arguments
-inputfile = fip.args.inputfile
+inputfilename = fip.args.inputfile
 outputformat = fip.args.outputformat
 
 # Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
@@ -84,10 +84,10 @@ else:
 # 2. Get input data
 ################################################################################
 
-if not inputfile:
+if not inputfilename:
     
     inputfilename = fip.inputfilename(SID)
-    inputfile = open(inputfilename, "w+", encoding="utf-8")
+    inputfile = open(inputfilename, "w", encoding="utf-8")
 
     page = 1 
     retry_count = 5
@@ -108,6 +108,7 @@ if not inputfile:
 
         check = json.loads(result.text)
         if check.get("status") == 404:
+            inputfile.close()
             break
         
         inputfile.write(result.text)
@@ -117,8 +118,7 @@ if not inputfile:
         retry_count = 5
         time.sleep(5)
 
-else:
-    inputfile = open(inputfile, "r")
+inputfile = open(inputfilename, "r")
 
 
 ##################################################################################
