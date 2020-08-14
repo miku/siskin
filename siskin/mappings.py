@@ -406,6 +406,7 @@ languages["spanish"] = "spa"
 languages["inuktitut"] = "iku"
 languages["chinese"] = "chi"
 languages["chipewyan (dene)"] = "chp"
+languages["unbekannt"] = "und"
 
 languages["ar"] = "ara"
 languages["bo"] = "tib"
