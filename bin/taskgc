@@ -30,6 +30,8 @@ set -e -u -o pipefail
 CO='\033[0;33m'
 NC='\033[0m'
 
+command -v taskhome >/dev/null 2>&1 || { echo >&2 "taskhome not found, assuming siskin not installed, exiting"; exit 1; }
+
 taskhome=$(taskhome) # Root directory of outputs.
 
 # Note that find wants these directories to exists, so the task names must match.
