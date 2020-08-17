@@ -662,10 +662,12 @@ class AMSLWisoPackages(AMSLTask):
         for item in doc:
             isil, sid = item.get('ISIL'), item.get('sourceID')
             mega_collection = item.get('megaCollection')
+            tcid = item.get("technicalCollectionID")
             lthf = item.get('linkToHoldingsFile')
             if sid != "48":
                 continue
             isilpkg[isil][lthf].add(mega_collection)
+            isilpkg[isil][lthf].add(tcid)
 
         filterconfig = collections.defaultdict(dict)
         fzs_package_name = 'Genios (Fachzeitschriften)'
