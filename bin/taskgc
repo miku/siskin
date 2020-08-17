@@ -23,7 +23,7 @@
 
 # Cleanup obsolete task artifacts.
 #
-# Will delete all artifacts of configured tasks, except those having the date of the current month.
+# Will delete all except the most recent artifacts of configured tasks.
 
 set -e -u -o pipefail
 
@@ -39,15 +39,18 @@ declare -A tasks
 tasks=(
 	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact"
 	["28"]="DOAJIntermediateSchemaDirty DOAJIntermediateSchema DOAJHarvest DOAJDownloadDump DOAJTable"
+    ["48"]="GeniosIntermediateSchema GeniosCombinedIntermediateSchema"
 	["55"]="JstorXML JstorIntermediateSchemaGenericCollection JstorIntermediateSchema JstorMembers JstorLatestMembers"
 	["85"]="ElsevierJournalsIntermediateSchema ElsevierJournalsUpdatesIntermediateSchema"
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
 )
 
+# Collect deletion candidates.
 matching_files=()
 
 for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
+        # Limitation: the filename must start with "date-..." (check output filename via "taskoutput TASKNAME")
 		for f in $(find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"); do
 			matching_files+=($f)
 		done
