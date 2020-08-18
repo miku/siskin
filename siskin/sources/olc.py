@@ -80,7 +80,7 @@ class OLCExport(OLCTask):
         """
         Find the most recent output, compress and move into the "siskin" tree.
         """
-        shellout("68-fincjson --outputformat json", ignoremap={1: "most probably ok for skip, due to existing file"})
+        shellout("68-fincjson --overwrite --outputformat json", ignoremap={1: "most probably ok for skip, due to existing file"})
         taskdir = os.path.join(self.BASE, self.TAG)
         outputs = sorted(glob.glob(os.path.join(taskdir, '68-output-*json')), reverse=True)
         if len(outputs) == 0:
