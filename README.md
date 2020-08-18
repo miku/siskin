@@ -4,13 +4,13 @@ Various tasks for heterogeneous metadata handling for project
 [finc](https://finc.info) at [Leipzig University Library](https://www.ub.uni-leipzig.de). Based on
 [luigi](https://github.com/spotify/luigi) from Spotify.
 
-We use the [scripts](bin) in the repository to harvest about twenty [data
-sources](siskin/sources) of various flavors (FTPs, OAIs, HTTPs), mix and match
-CSV, XML and JSON, run conversions and deduplication to create a single file
-that is indexable and conforms to a customized VuFind SOLR schema, running on
-an unified index host serving part of the data in the online catalogs of
+We use a couple of [scripts](bin) in the repository to harvest about twenty
+[data sources](siskin/sources) of various flavors (FTPs, OAIs, HTTPs), mix and
+match CSV, XML and JSON, run conversions and deduplication to create a single
+file that is indexable and conforms to a customized VuFind SOLR schema, running
+on an unified index host serving part of the data in the online catalogs of
 [partners](https://finc.info/de/anwender). Apart from this workflow, we use
-many one-step conversion scripts to generate a custom MARC format.
+many one-step conversion scripts to generate a custom [MARC](https://www.loc.gov/marc/bibliographic/) format.
 
 [![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
