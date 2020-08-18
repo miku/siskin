@@ -11,6 +11,7 @@ before_script:
 tests:
   stage: test
   script:
+    - pip install backports.csv # try installing this from pypi, nexus may not like the [.]
     - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
     - pytest
   tags: [docker]
