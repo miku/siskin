@@ -228,7 +228,7 @@ def test_check_issn():
 
 
 def test_convert_to_finc_id():
-    for tag in ("001", "770", "772", "773", "775", "800", "810", "811", "830"):
+    for tag in ("770", "772", "773", "775", "800", "810", "811", "830"):
         # Prefixed by sid.
         r = marcx.Record()
         r.add(tag, a="dummy", w="3322")

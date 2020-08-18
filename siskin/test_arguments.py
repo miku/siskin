@@ -49,11 +49,11 @@ def test_no_args():
     args = parser.parse_args()
 
     assert args is not None
-    assert args.inputfilename == None
+    assert args.inputfile == None
     assert args.outputformat == "mrc"
     assert args.interval == "monthly"
-    assert args.output_hist_size == 3
-    assert args.input_hist_size == 5
+    assert args.output_hist_size == 20
+    assert args.input_hist_size == 20
     assert args.root == None
     assert args.overwrite is False
     assert args.filemap is None
@@ -89,7 +89,7 @@ def test_inputfilename():
         parser.parse_args()
 
         sid, date = '234', datetime.date.today().strftime('%Y%m01')
-        filename = '{}-input-{}.mrc'.format(sid, date)
+        filename = '{}-input-{}.xml'.format(sid, date) # extension dependent on default
         assert parser.inputfilename(sid) == os.path.join(dirname, sid, filename)
 
 
@@ -119,18 +119,18 @@ def test_remove_old_inputfiles():
             os.makedirs(parser.sid_path(sid))
 
         # Create dummy files.
-        for i in range(10):
+        for i in range(30):
             date = (datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y%m%d")
             filename = '{}-input-{}.mrc'.format(sid, date)
             of = Path(os.path.join(parser.sid_path(sid), filename))
             of.touch()
 
-        assert len(os.listdir(parser.sid_path(sid))) == 10
+        assert len(os.listdir(parser.sid_path(sid))) == 30
         parser.remove_old_inputfiles(sid)
-        assert len(os.listdir(parser.sid_path(sid))) == 5
+        assert len(os.listdir(parser.sid_path(sid))) == 20
 
 
-def test_remove_old_inputfiles():
+def test_remove_old_outputfiles():
 
     with tempfile.TemporaryDirectory(prefix='siskin-test-arguments-') as dirname:
         sys.argv = ["<dummy>", "--interval", "daily", "--root", dirname]
@@ -139,13 +139,13 @@ def test_remove_old_inputfiles():
         if not os.path.exists(parser.sid_path(sid)):
             os.makedirs(parser.sid_path(sid))
 
-        # Create dummy files.
-        for i in range(10):
+        # Create dummy files. We are testing both the removal and the default value.
+        for i in range(30):
             date = (datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y%m%d")
             filename = '{}-output-{}.mrc'.format(sid, date)
             of = Path(os.path.join(parser.sid_path(sid), filename))
             of.touch()
 
-        assert len(os.listdir(parser.sid_path(sid))) == 10
+        assert len(os.listdir(parser.sid_path(sid))) == 30
         parser.remove_old_outputfiles(sid)
-        assert len(os.listdir(parser.sid_path(sid))) == 3
+        assert len(os.listdir(parser.sid_path(sid))) == 20
