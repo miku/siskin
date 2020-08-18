@@ -68,6 +68,7 @@ class OLCDump(OLCTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.zst'), format=Zstd)
 
+
 class OLCExport(OLCTask):
     """
     Run and collect OLC, 68, standalone script. This source has fixed

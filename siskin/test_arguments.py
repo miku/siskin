@@ -89,7 +89,7 @@ def test_inputfilename():
         parser.parse_args()
 
         sid, date = '234', datetime.date.today().strftime('%Y%m01')
-        filename = '{}-input-{}.xml'.format(sid, date) # extension dependent on default
+        filename = '{}-input-{}.xml'.format(sid, date)  # extension dependent on default
         assert parser.inputfilename(sid) == os.path.join(dirname, sid, filename)
 
 

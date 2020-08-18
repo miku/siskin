@@ -27,10 +27,7 @@ siskin is a set of tasks for library metadata management. For more information
 on the project, please refer to https://finc.info.
 """
 
-from __future__ import print_function
-
 import sys
-
 from siskin import __version__
 
 try:
