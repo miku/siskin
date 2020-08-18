@@ -43,6 +43,7 @@ tasks=(
 	["55"]="JstorXML JstorIntermediateSchemaGenericCollection JstorIntermediateSchema JstorMembers JstorLatestMembers"
 	["85"]="ElsevierJournalsIntermediateSchema ElsevierJournalsUpdatesIntermediateSchema"
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
+    ["126"]="BaseSingleFile"
 )
 
 # Collect deletion candidates.
