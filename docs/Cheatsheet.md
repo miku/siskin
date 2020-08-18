@@ -18,13 +18,22 @@ $ taskhome
 
 ## Create Files
 
-Generate `AIExport` (solr) and `AIRedact` (blob) artifacts. This may take a few hours.
+Generate `AIExport` (solr) and `AIRedact` (blob) artifacts. This may take many
+(6-24) hours, depending on the date and already finished tasks. One large
+source, CrossRef, is updated monthly - and it takes a few hours to fetch the
+new records from their API.
 
 ```
 $ taskdo AIUpdate --workers 8 --AILicensing-override
 ```
 
-Inspect task outputs:
+While running, the progress can be inspected with `taskps` (in watch):
+
+```
+$ watch taskps
+```
+
+Once done, you can (hopefully) inspect task outputs:
 
 ```
 $ taskls AIExport
