@@ -37,7 +37,7 @@ taskhome=$(taskhome) # Root directory of outputs.
 # Note that find wants these directories to exists, so the task names must match.
 declare -A tasks
 tasks=(
-	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact"
+	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact AIInstitutionChanges"
 	["28"]="DOAJIntermediateSchemaDirty DOAJIntermediateSchema DOAJHarvest DOAJDownloadDump DOAJTable"
     ["48"]="GeniosIntermediateSchema GeniosCombinedIntermediateSchema"
 	["55"]="JstorXML JstorIntermediateSchemaGenericCollection JstorIntermediateSchema JstorMembers JstorLatestMembers"
