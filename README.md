@@ -12,7 +12,7 @@ an unified index host serving part of the data in the online catalogs of
 [partners](https://finc.info/de/anwender). Apart from this workflow, we use
 many one-step conversion scripts to generate a custom MARC format.
 
-[![pypi version](https://badge.fury.io/py/siskin.png)](https://pypi.python.org/pypi/siskin) [![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 * Overview in a [few markdown slides](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
 
