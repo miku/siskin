@@ -72,7 +72,7 @@ freed=$(for f in ${matching_files[@]}; do
 done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
 echo
-echo -e -n "Delete the above ${#matching_files[@]} file(s) [yN] [${CO}${freed}GB${NC} would be freed]? "
+echo -e -n "Delete the above ${#matching_files[@]} file(s) [${CO}${freed}GB${NC} would be freed] [y/N]? "
 read -r answer
 if [ "$answer" != "${answer#[Yy]}" ]; then
 	for f in ${matching_files[@]}; do
