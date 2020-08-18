@@ -48,6 +48,8 @@ import os
 
 import luigi
 from gluish.format import TSV, Gzip
+from gluish.intervals import monthly
+from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
@@ -58,6 +60,9 @@ class BaseTask(DefaultTask):
     Various tasks around base, refs #14947.
     """
     TAG = '126'
+
+    def closest(self):
+        return monthly(date=self.date)
 
 
 class BasePaths(BaseTask):
@@ -88,7 +93,7 @@ class BaseSingleFile(BaseTask):
     """
     Create a single compressed file of tarball.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return BasePaths(date=self.date)
