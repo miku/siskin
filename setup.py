@@ -53,7 +53,6 @@ install_requires = [
     'gspread>=0.2.2',
     'internetarchive>=1.7.6',
     'iso-639>=0.4.5',
-    'jsonpath-rw>=1.3.0',
     'langdetect>=1.0.7',
     'logilab-common>=0.61.0',
     'luigi>=2.2',
