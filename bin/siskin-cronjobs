@@ -2,6 +2,7 @@
 
 10-fincmarc  --interval monthly  --inputformat json --outputformat mrc --input-hist-size 15 --output-hist-size 15
 14-fincmarc  --interval monthly  --format mrc --output-hist-size 5  --input-hist-size 3
+15-fincmarc  --interval monthly  --output-hist-size 10 --filemap /home/schenk/15_fieldmap.json
 26-fincmarc  --interval monthly  --inputformat xml  --outputformat mrc --input-hist-size 10 --output-hist-size 10
 35-fincmarc  --interval monthly  --format mrc --output-hist-size 5  --input-hist-size 3 --filemap /home/schenk/lcc
 78-fincmarc  --interval manually --format mrc --output-hist-size 5
