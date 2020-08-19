@@ -71,10 +71,11 @@ class OLCDump(OLCTask):
 
 class OLCIntermediateSchema(OLCTask):
     """
-    Run and collect OLC, 68, standalone script. This source has fixed
-    "DE-15-FID" label, does not need tagging and will be appendable to the
-    final AIExport output.
+    Run and collect OLC, 68, standalone script. There is licensing information
+    added in the standalone script and later during AILicening, too. That
+    should be ok.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -96,4 +97,3 @@ class OLCIntermediateSchema(OLCTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
-
