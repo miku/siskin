@@ -30,7 +30,10 @@ set -e -u -o pipefail
 CO='\033[0;33m'
 NC='\033[0m'
 
-command -v taskhome >/dev/null 2>&1 || { echo >&2 "taskhome not found, assuming siskin not installed, exiting"; exit 1; }
+command -v taskhome >/dev/null 2>&1 || {
+	echo >&2 "taskhome not found, assuming siskin not installed, exiting"
+	exit 1
+}
 
 taskhome=$(taskhome) # Root directory of outputs.
 
@@ -39,11 +42,11 @@ declare -A tasks
 tasks=(
 	["ai"]="AIApplyOpenAccessFlag AIExport AIIntermediateSchema AIIntermediateSchemaDeduplicated AILicensing AILocalData AIRedact AIInstitutionChanges"
 	["28"]="DOAJIntermediateSchemaDirty DOAJIntermediateSchema DOAJHarvest DOAJDownloadDump DOAJTable"
-    ["48"]="GeniosIntermediateSchema GeniosCombinedIntermediateSchema"
+	["48"]="GeniosIntermediateSchema GeniosCombinedIntermediateSchema"
 	["55"]="JstorXML JstorIntermediateSchemaGenericCollection JstorIntermediateSchema JstorMembers JstorLatestMembers"
 	["85"]="ElsevierJournalsIntermediateSchema ElsevierJournalsUpdatesIntermediateSchema"
 	["89"]="IEEEUpdatesIntermediateSchema IEEEIntermediateSchema"
-    ["126"]="BaseSingleFile"
+	["126"]="BaseSingleFile"
 )
 
 # Collect deletion candidates.
@@ -51,7 +54,7 @@ matching_files=()
 
 for src in "${!tasks[@]}"; do
 	for t in ${tasks[$src]}; do
-        # Limitation: the filename must start with "date-..." (check output filename via "taskoutput TASKNAME")
+		# Limitation: the filename must start with "date-..." (check output filename via "taskoutput TASKNAME")
 		for f in $(find "$taskhome/$src/$t" -type f -and -not -name "$(date +'date-%Y-%m-*')"); do
 			matching_files+=($f)
 		done
