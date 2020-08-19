@@ -139,3 +139,20 @@ This will interactively try to free disk space.
 ```
 $ taskgc
 ```
+
+## Switching servers
+
+Edit nginx configuration snippet (on proxy):
+
+```
+$ vim /etc/nginx/which_SOLR-which_BLOB_is_live
+```
+
+Then check and reload:
+
+```
+$ nginx -t
+$ systemctl reload nginx
+```
+
+It takes a few seconds (to minutes) until SOLR is warmed up.
