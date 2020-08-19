@@ -69,7 +69,7 @@ class OLCDump(OLCTask):
         return luigi.LocalTarget(path=self.path(ext='ndj.zst'), format=Zstd)
 
 
-class OLCExport(OLCTask):
+class OLCIntermediateSchema(OLCTask):
     """
     Run and collect OLC, 68, standalone script. This source has fixed
     "DE-15-FID" label, does not need tagging and will be appendable to the
@@ -82,15 +82,18 @@ class OLCExport(OLCTask):
         Find the most recent output, compress and move into the "siskin" tree.
         """
         shellout("68-fincjson --overwrite --outputformat json", ignoremap={1: "most probably ok for skip, due to existing file"})
+
+        # Find the output file.
         taskdir = os.path.join(self.BASE, self.TAG)
         outputs = sorted(glob.glob(os.path.join(taskdir, '68-output-*json')), reverse=True)
         if len(outputs) == 0:
             raise RuntimeError("could not find any artifacts for source at {}".format(taskdir))
         path = outputs[0]
 
-        # Compress before moving into place.
-        compressed_and_exported = shellout("span-export {input} | pigz -c > {output}", input=path)
-        luigi.LocalTarget(compressed_and_exported).move(self.output().path)
+        # Compress as AIIntermediateSchema requires all artifacts to be gzip compressed.
+        output = shellout("pigz -c {input} > {output}", input=path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
+
