@@ -106,3 +106,5 @@ if __name__ == '__main__':
     except TaskClassNotFoundException as err:
         print(err, file=sys.stderr)
         sys.exit(1)
+    except BrokenPipeError:
+        pass
