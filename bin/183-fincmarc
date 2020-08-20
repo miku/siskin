@@ -119,6 +119,8 @@ start = 1
 # 3. Process data
 ##################################################################################
 
+records_written = 0
+
 while start < all_records:
 
     oldrecords = get_sru_records(start, max_records_request)
@@ -167,6 +169,12 @@ while start < all_records:
         else:
             outputfile.write(newrecord.as_marc())
 
+        records_written += 1
+
     start += max_records_request
 
 outputfile.close()
+
+if records_written < 508000:
+    os.system("rm -f s%" % outputfilename)
+    print("Too few records: do not write output file.")
