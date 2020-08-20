@@ -164,6 +164,7 @@ versions.
 
 * in `siskin/__init__.py` increment the version
 * run `git commit`, by convention with commit message containing the version like so: "v1.2.3"
+* run `git tag`, by convention using the version, like so: "v1.2.3"
 
 Push changes to repository with `git push`, and also push tags with `git push
 [remote] --tags` - this will trigger a build. After a few seconds, the build
