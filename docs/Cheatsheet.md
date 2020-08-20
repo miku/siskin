@@ -156,3 +156,16 @@ $ systemctl reload nginx
 ```
 
 It takes a few seconds (to minutes) until SOLR is warmed up.
+
+## Development
+
+We use `gitlab-ci.yml` and sonatype Nexus repository manager to publish new
+versions.
+
+* in `siskin/__init__.py` increment the version
+* run `git commit`, by convention with commit message containing the version like so: "v1.2.3"
+
+Push changes to repository with `git push`, and also push tags with `git push
+[remote] --tags` - this will trigger a build. After a few seconds, the build
+should be copied over to nexus and will be installable via `pip install -U
+siskin` on the target machine.
