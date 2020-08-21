@@ -212,7 +212,7 @@ for root, _, files in os.walk(inputfolder):
         f245a = html_unescape(f245a)
         marcrecord.add("245", a=f245a)
 
-        # Alternativtitel
+        # Alternative title
         f246a = get_field("additionalTitle")
         f246a = html_unescape(f246a)
         marcrecord.add("246", a=f246a)
