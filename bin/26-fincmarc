@@ -120,11 +120,11 @@ for oldrecord in xmlstream(inputfile, "record"):
     f338b = formats[format]["338b"]
     record.add("338", b=f338b)
 
-    # SWB-Inhaltstyp
+    # SWB-Content
     f935c = formats[format]["935c"]
     record.add("935", c=f935c)
 
-    # Kollektion
+    # Collection
     record.add("980", a=f001, b=SID, c="sid-26-col-doab")
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
