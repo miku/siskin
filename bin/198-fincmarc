@@ -133,9 +133,10 @@ for record in reader:
         if "<" in f773t and not f773q:
             f773 = f773t.split("<")
             f773t = f773[0]
+            f773g = "Seite: " + f773[1]
             f773q = "<" + f773[1]
             record.remove_fields("773")
-            record.add("773", t=f773t, q=f773q, _7=f7737, d=f773d)
+            record.add("773", t=f773t, g=f773g, q=f773q, _7=f7737, d=f773d)
 
     # Collection
     collections = ["a", f001, "b", "198", "c", "sid-198-col-bho"]
