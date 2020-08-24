@@ -115,6 +115,28 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="198-" + f001)
 
+    # Put start page in the correct field
+    if f773:
+        f773t = record["773"]["t"]
+        f7737 = record["773"]["7"]
+
+        try:
+            f773q = record["773"]["q"]
+        except:
+            f773q = ""
+
+        try:
+            f773d = record["773"]["d"]
+        except:
+            f773d = ""
+
+        if "<" in f773t and not f773q:
+            f773 = f773t.split("<")
+            f773t = f773[0]
+            f773q = "<" + f773[1]
+            record.remove_fields("773")
+            record.add("773", t=f773t, q=f773q, _7=f7737, d=f773d)
+
     # Collection
     collections = ["a", f001, "b", "198", "c", "sid-198-col-bho"]
     record.add("980", subfields=collections)
