@@ -38,6 +38,7 @@ import re
 
 import marcx
 import pymarc
+from siskin.mappings import formats
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record
 from siskin.arguments import FincArgumentParser
@@ -89,6 +90,25 @@ for record in reader:
     record = marcx.Record.from_record(record)
     record.force_utf8 = True
     record.strict = False
+
+    # Format mapping
+    try:
+        f773 = record["773"]
+    except:
+        f773 = ""
+
+    if f773:
+        format = "Article"
+    else:
+        format = "Book"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    record.leader = leader
+
+    # Access type
+    f007 = formats[format]["p007"]
+    record.add("007", data=f007)
 
     # Identifier
     f001 = record["001"].data
