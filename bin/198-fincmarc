@@ -131,10 +131,12 @@ for record in reader:
             f773d = ""
 
         if "<" in f773t and not f773q:
+            f773t = re.sub("<pp\.?\s?", "<", f773t)
             f773 = f773t.split("<")
             f773t = f773[0]
-            f773g = "Seite: " + f773[1]
-            f773q = "<" + f773[1]
+            pages = f773[1]
+            f773g = "Seite: " + pages
+            f773q = "<" + pages
             record.remove_fields("773")
             record.add("773", t=f773t, g=f773g, q=f773q, _7=f7737, d=f773d)
 
