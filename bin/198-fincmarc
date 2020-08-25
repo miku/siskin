@@ -115,6 +115,9 @@ for record in reader:
     record.remove_fields("001")
     record.add("001", data="198-" + f001)
 
+    # Subject facet
+    record.add("082", a="002")
+
     # Put start page in the correct field
     if f773:
         f773t = record["773"]["t"]
