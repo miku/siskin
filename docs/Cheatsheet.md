@@ -163,10 +163,23 @@ We use `gitlab-ci.yml` and sonatype Nexus repository manager to publish new
 versions.
 
 * in `siskin/__init__.py` increment the version
+
+Then.
+
 * run `git commit`, by convention with commit message containing the version like so: "v1.2.3"
 * run `git tag`, by convention using the version, like so: "v1.2.3"
+
+```
+$ git commit -m "v1.2.3"
+$ git tag v1.2.3
+```
 
 Push changes to repository with `git push`, and also push tags with `git push
 [remote] --tags` - this will trigger a build. After a few seconds, the build
 should be copied over to nexus and will be installable via `pip install -U
 siskin` on the target machine.
+
+```
+$ git push origin master
+$ git push origin --tags
+```
