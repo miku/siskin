@@ -361,7 +361,7 @@ class AIDOIStats(AITask):
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+                output.write_tsv(k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2))))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
