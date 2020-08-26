@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Update non-live blobserver file and restart service.
+
+# TODO:
+# find non-live blob
+# ssh kill
+# rsync
+# ssh replace file
+# ssh restart service

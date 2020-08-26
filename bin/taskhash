@@ -61,7 +61,7 @@ def calculate_task_hashes():
         module = importlib.import_module(modulename)
         klass = getattr(module, klassname)
         sha1 = hashlib.sha1()
-        sha1.update(inspect.getsource(klass))
+        sha1.update(inspect.getsource(klass).encode('utf-8'))
         hashes.append((sha1.hexdigest(), "%s.%s" % (modulename, klassname)))
     return hashes
 
