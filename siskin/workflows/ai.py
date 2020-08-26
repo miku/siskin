@@ -56,29 +56,19 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent,
-                                 AMSLHoldingsFile, AMSLOpenAccessKBART,
-                                 AMSLService)
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
 from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
-from siskin.sources.crossref import (CrossrefDOIList,
-                                     CrossrefIntermediateSchema,
-                                     CrossrefUniqISSNList)
+from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.dbinet import DBInetIntermediateSchema
-from siskin.sources.degruyter import (DegruyterDOIList,
-                                      DegruyterIntermediateSchema,
-                                      DegruyterISSNList)
-from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
-                                 DOAJISSNList)
-from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
-                                             ElsevierJournalsISSNList)
+from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
+from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
+from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema, ElsevierJournalsISSNList)
 from siskin.sources.genderopen import GenderopenIntermediateSchema
-from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
-                                   GeniosISSNList)
+from siskin.sources.genios import (GeniosCombinedIntermediateSchema, GeniosISSNList)
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
-from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
-                                  JstorISSNList)
+from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema

@@ -81,23 +81,9 @@ create_schema = """
 #
 # datum, source_id, institution, anzahl
 # datum, collection, institution, anzahl
-#
-# Some other ideas.
-#
-# (a) Generic time series approach with: time, key, value; where key could be
-# various metrics, like "sid:0", "sid:0,isil:DE-15", "isil:DE-15", ...
-#
-# (b) Something, where we could piggyback on some frontend, e.g. kibana /
-# elasticsearch.
-#
-# (c) Logging only. Log some structured JSON to a file and then write and run
-# analyzer scripts for reports.
 
-
-
-# XXX: Encapsulate this better, to get rid of globals.
-smtp_server = "mail.example.com" # XXX: use generic config for this
-smtp_port = 465 # XXX: use generic config for this
+smtp_server = "mail.example.com"
+smtp_port = 465
 smtp_name = ""
 smtp_password = ""
 

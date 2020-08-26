@@ -40,8 +40,7 @@ import xmltodict
 import marcx
 import pymarc
 from siskin.mappings import formats
-from siskin.utils import (check_isbn, check_issn, marc_build_field_008,
-                          marc_build_field_773g)
+from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
 
 
 def get_field(xmlrecord, tag):

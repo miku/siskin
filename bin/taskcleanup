@@ -33,6 +33,11 @@ With GNU date, one can write, e.g for a task MVWMARC:
 
     $ taskcleanup MVWMARC $(date +"%Y-%m-%d" --date='14 days ago')
 
+Another example:
+
+    $ $ taskcleanup JstorXML 2020-08-04
+    removing: /media/titan/siskin-data/55/JstorXML/date-2020-08-03-version-2.xml.gz
+
 This will only work for tasks, that do not require additional parameters.
 """
 
@@ -83,6 +88,7 @@ if __name__ == '__main__':
                     continue
                 parsed = datetime.datetime.strptime(match.group(), "date-%Y-%m-%d")
                 if parsed < boundary:
+                    print("removing: {}".format(path))
                     os.remove(path)
         except AttributeError as err:
             print('output of task has no path', file=sys.stderr)

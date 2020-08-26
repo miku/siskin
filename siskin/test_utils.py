@@ -8,11 +8,8 @@ import requests
 import marcx
 import pymarc
 import responses
-from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn,
-                          convert_to_finc_id, dictcheck, get_task_import_cache,
-                          load_set, marc_build_field_008, marc_build_imprint,
-                          marc_clean_record, marc_clean_subfields, nwise,
-                          random_string, scrape_html_listing, xmlstream)
+from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, convert_to_finc_id, dictcheck, get_task_import_cache, load_set, marc_build_field_008,
+                          marc_build_imprint, marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
 
 
 def test_set_encoder_dumps():
