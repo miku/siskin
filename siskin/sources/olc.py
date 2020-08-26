@@ -29,11 +29,11 @@ https://is.gd/8DFvOo (GBV).
 """
 
 import datetime
-import os
 import glob
+import os
 
 import luigi
-from gluish.format import Zstd, Gzip
+from gluish.format import Gzip, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout

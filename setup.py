@@ -28,6 +28,7 @@ on the project, please refer to https://finc.info.
 """
 
 import sys
+
 from siskin import __version__
 
 try:
