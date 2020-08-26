@@ -56,22 +56,32 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent,
+                                 AMSLHoldingsFile, AMSLOpenAccessKBART,
+                                 AMSLService)
 from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
-from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
+from siskin.sources.crossref import (CrossrefDOIList,
+                                     CrossrefIntermediateSchema,
+                                     CrossrefUniqISSNList)
 from siskin.sources.dbinet import DBInetIntermediateSchema
-from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
-from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
-from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema, ElsevierJournalsISSNList)
+from siskin.sources.degruyter import (DegruyterDOIList,
+                                      DegruyterIntermediateSchema,
+                                      DegruyterISSNList)
+from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema,
+                                 DOAJISSNList)
+from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema,
+                                             ElsevierJournalsISSNList)
 from siskin.sources.genderopen import GenderopenIntermediateSchema
-from siskin.sources.genios import (GeniosCombinedIntermediateSchema, GeniosISSNList)
+from siskin.sources.genios import (GeniosCombinedIntermediateSchema,
+                                   GeniosISSNList)
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
-from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
-from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
+from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema,
+                                  JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.lynda import LyndaIntermediateSchema
+from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
@@ -87,140 +97,19 @@ class AITask(DefaultTask):
         return weekly(self.date)
 
 
-class AIDOIStats(AITask):
-    """
-    DOI overlaps between various sources.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
+# Tasks for sigelage and deduplication, solr export and blob server export follow.
+#
+# AIIntermediateSchema (merge)
+# AIRedact (prepare file for blob)
+# AILicensing (apply licensing)
+#
+# AILocalData                      |
+# AIInstitutionChanges             | (doi deduplication per isil)
+# AIIntermediateSchemaDeduplicated |
 
-    def requires(self):
-        return {
-            'crossref': CrossrefDOIList(date=self.date),
-            'degruyter': DegruyterDOIList(date=self.date),
-            'doaj': DOAJDOIList(date=self.date),
-            'jstor': JstorDOIList(date=self.date)
-        }
-
-    @timed
-    def run(self):
-        with self.output().open('w') as output:
-            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
-                s1 = load_set_from_target(self.input().get(k1))
-                s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class AIISSNStats(AITask):
-    """
-    Match ISSN lists. Note: This should be OLAP, not batch.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date)
-        }
-
-    @timed
-    def run(self):
-        with self.output().open('w') as output:
-            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
-                s1 = load_set_from_target(self.input().get(k1))
-                s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class AIISSNOverlaps(AITask):
-    """
-    Match ISSN lists. Note: This should be OLAP, not batch.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date)
-        }
-
-    @timed
-    def run(self):
-        with self.output().open('w') as output:
-            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
-                s1 = load_set_from_target(self.input().get(k1))
-                s2 = load_set_from_target(self.input().get(k2))
-                for issn in sorted(s1.intersection(s2)):
-                    output.write_tsv(k1, k2, issn)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class AIISSNList(AITask):
-    """
-    List of uniq ISSNs in AI.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date),
-            'thieme': ThiemeISSNList(date=self.date),
-            'elsevier': ElsevierJournalsISSNList(date=self.date),
-        }
-
-    @timed
-    def run(self):
-        _, output = tempfile.mkstemp(prefix='siskin-')
-        for _, target in list(self.input().items()):
-            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
-        output = shellout("sort -u {input} > {output}", input=output)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class AIQuality(AITask):
-    """
-    Create short quality report.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return [
-            CrossrefIntermediateSchema(date=self.date),
-            DegruyterIntermediateSchema(date=self.date),
-            DOAJIntermediateSchema(date=self.date),
-            ElsevierJournalsIntermediateSchema(date=self.date),
-            GeniosCombinedIntermediateSchema(date=self.date),
-            IEEEIntermediateSchema(date=self.date),
-            JstorIntermediateSchema(date=self.date),
-            ThiemeIntermediateSchema(date=self.date),
-        ]
-
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout(""" echo "S:{input}" >> {output} """, input=target.path, output=stopover)
-            shellout("span-check <(unpigz -c {input}) 2>&1 | jq . >> {output}", input=target.path, output=stopover)
-        luigi.LocalTarget(stopover).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='txt'))
+# AIExport (solr schema)
+#
+# See also: https://git.io/JUTOO
 
 
 class AIIntermediateSchema(AITask):
@@ -273,42 +162,6 @@ class AIIntermediateSchema(AITask):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
 
 
-class AICheckStats(AITask):
-    """
-    Run quality check and gather error records.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return AIIntermediateSchema(date=self.date)
-
-    @timed
-    def run(self):
-        output = shellout("span-check -verbose <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
-class AIErrorDistribution(AITask):
-    """
-    Error distribution.
-    """
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return AICheckStats(date=self.date)
-
-    @timed
-    def run(self):
-        output = shellout("unpigz -c {input} | jq -rc .err | sort | uniq -c | sort -nr > {output}", input=self.input().path)
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='txt'))
-
-
 class AIRedact(AITask):
     """
     Redact intermediate schema.
@@ -326,35 +179,6 @@ class AIRedact(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
-
-
-class AIBlobDB(AITask):
-    """
-    Create data.db file for microblob, then:
-
-    $ microblob -db $(taskoutput AIBlobDB) -file $(taskoutput AIRedact) -serve
-    """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return AIRedact(date=self.date)
-
-    @timed
-    def run(self):
-        """
-        Extract intermediate schema file temporarily.
-        """
-        tempdir = tempfile.mkdtemp(prefix="siskin-")
-        extracted = shellout("unpigz -c {input} > {output}", input=self.input().path)
-
-        shellout("microblob -db {tempdir} -file {input} -key finc.id", tempdir=tempdir, input=extracted)
-        os.remove(extracted)
-        os.makedirs(os.path.dirname(self.output().path))
-        shutil.move(tempdir, self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldb'))
 
 
 class AILicensing(AITask):
@@ -502,7 +326,7 @@ class AIExport(AITask):
 
 class AIUpdate(AITask, luigi.WrapperTask):
     """
-    Just a wrapper task for updates, refs #5702.
+    A wrapper task for updates, refs #5702.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -511,6 +335,117 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
     def output(self):
         return self.input()
+
+
+# Other tasks
+# -----------
+
+
+class AIDOIStats(AITask):
+    """
+    DOI overlaps between various sources.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefDOIList(date=self.date),
+            'degruyter': DegruyterDOIList(date=self.date),
+            'doaj': DOAJDOIList(date=self.date),
+            'jstor': JstorDOIList(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        with self.output().open('w') as output:
+            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
+                s1 = load_set_from_target(self.input().get(k1))
+                s2 = load_set_from_target(self.input().get(k2))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class AIISSNStats(AITask):
+    """
+    Match ISSN lists. Note: This should be OLAP, not batch.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        with self.output().open('w') as output:
+            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
+                s1 = load_set_from_target(self.input().get(k1))
+                s2 = load_set_from_target(self.input().get(k2))
+                output.write_tsv(k1, k2, len(s1), len(s2), len(s1.intersection(s2)))
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class AIISSNOverlaps(AITask):
+    """
+    Match ISSN lists. Note: This should be OLAP, not batch.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date)
+        }
+
+    @timed
+    def run(self):
+        with self.output().open('w') as output:
+            for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
+                s1 = load_set_from_target(self.input().get(k1))
+                s2 = load_set_from_target(self.input().get(k2))
+                for issn in sorted(s1.intersection(s2)):
+                    output.write_tsv(k1, k2, issn)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class AIISSNList(AITask):
+    """
+    List of uniq ISSNs in AI.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            'crossref': CrossrefUniqISSNList(date=self.date),
+            'degruyter': DegruyterISSNList(date=self.date),
+            'doaj': DOAJISSNList(date=self.date),
+            'jstor': JstorISSNList(date=self.date),
+            'thieme': ThiemeISSNList(date=self.date),
+            'elsevier': ElsevierJournalsISSNList(date=self.date),
+        }
+
+    @timed
+    def run(self):
+        _, output = tempfile.mkstemp(prefix='siskin-')
+        for _, target in list(self.input().items()):
+            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
+        output = shellout("sort -u {input} > {output}", input=output)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
 class AICollectionsAndSerialNumbers(AITask):
