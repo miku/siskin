@@ -72,7 +72,7 @@ $ scp $(taskoutput AIRedact) 172.18.113.99:/tmp
 Log into nonlive blobserver:
 
 ```
-$ ssh -A name@172.18.113.99
+$ ssh -A user@172.18.113.99
 $ root -A
 ```
 
@@ -83,32 +83,32 @@ $ cd /var/microblob
 $ rm -rf date-*
 ```
 
-Uncompress new file (takes about 20min), change owner.
+Uncompress new file (takes about 20min), change owner to `daemon`.
 
 Filename does not matter, but it used to be close to the compressed file name,
 e.g. uncompress `date-2020-08-01.ldj.gz` into `date-2020-08-01.ldj` and so on.
 
 ```
 $ unpigz -c /tmp/date-2020-08-01.ldj.gz > /var/microblob/date-2020-08-01.ldj
-$ chown memcachedb.memcachedb /var/microblob/date-2020-08-01.ldj
+$ chown daemon.daemon /var/microblob/date-2020-08-01.ldj
 ```
 
-Edit the `/usr/local/bin/startmicroblob.sh` file.
+Edit the `/etc/microblob/microblob.ini` file. Adjust the path to the file.
 
 ```bash
-# will start a listener on 8820
-# make sure blob file perms are memcachedb.memcachedb
+[main]
 
-cd /var/microblob
-su memcachedb -c "microblob -log /var/log/microblob.log -addr 172.18.113.99:8820 -key finc.id date-2020-08-01.ldj"
+file = /var/microblob/date-2020-08-01.ldj
+addr = 0.0.0.0:8820
+batchsize = 50000
+key = finc.id
+log = /var/log/microblob.log
 ```
 
-Replace `date-2020-08-01.ldj` with the filename in `/var/microblob`.
-
-Then run, in `/var/microblob`, this will first "index" the file (takes about 1h) then switch to "serve" mode.
+Then restart microblob: this will first "index" the file (takes a good hour) then switch to "serve" mode.
 
 ```
-$ chown -R memcachedb.memcachedb date-*.ldj* && pkill microblob; nohup startmicroblob.sh &
+$ systemctl restart microblob
 ```
 
 When microblob finished indexing the file, it will respond to HTTP requests:
