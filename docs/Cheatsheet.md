@@ -76,7 +76,7 @@ $ ssh -A user@172.18.113.99
 $ root -A
 ```
 
-Delete any old blobserver files:
+Important: delete any old blobserver files and associated leveldb directories:
 
 ```
 $ cd /var/microblob
