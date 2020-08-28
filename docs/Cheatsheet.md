@@ -83,10 +83,11 @@ $ cd /var/microblob
 $ rm -rf date-*
 ```
 
-Uncompress new file (takes about 20min), change owner to `daemon`.
+Uncompress new file (takes about 20min), change owner to `daemon` (legacy user name, https://is.gd/aYr8C7).
 
 Filename does not matter, but it used to be close to the compressed file name,
-e.g. uncompress `date-2020-08-01.ldj.gz` into `date-2020-08-01.ldj` and so on.
+e.g. we uncompressed `date-2020-08-01.ldj.gz` into `date-2020-08-01.ldj` and so
+on.
 
 ```
 $ unpigz -c /tmp/date-2020-08-01.ldj.gz > /var/microblob/date-2020-08-01.ldj
@@ -123,7 +124,7 @@ $ curl -s 172.18.113.99:8820 | jq .
 }
 ```
 
-The keys can be directly appended to the hostport:
+To lookup a document, the key can be used as path in the URL, like:
 
 ```
 $ curl -s 172.18.113.99:8820/ai-49-aHR0cDovL2R4LmRvaS5vcmcvMTAuMTAzNy8xMDE2Ny0wMDU | jq -rc '.url'
@@ -156,6 +157,16 @@ $ systemctl reload nginx
 ```
 
 It takes a few seconds (to minutes) until SOLR is warmed up.
+
+## Compare live and nonlive SOLR servers
+
+There is a `span-compare` program, that when invoked with:
+
+```
+$ span-compare -e -t
+```
+
+will emit copy-and-pastable textile comparison table to stdout.
 
 ## Development
 
