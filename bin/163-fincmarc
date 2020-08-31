@@ -62,10 +62,6 @@ outputfilename = fip.outputfilename(SID)
 fip.remove_old_outputfiles(SID)
 fip.remove_old_inputfiles(SID)
 
-path = fip.sid_path("163")
-
-fip.remove_old_outputfiles(SID)
-
 
 ##################################################################################
 # 2. Get input data
