@@ -1,27 +1,27 @@
 #!/bin/bash
 
 10-fincmarc --interval monthly --inputformat json --outputformat mrc --input-hist-size 15 --output-hist-size 15
-14-fincmarc --interval monthly --format mrc --output-hist-size 5 --input-hist-size 3
+#14-fincmarc --interval monthly --format mrc --output-hist-size 5 --input-hist-size 3
 15-fincmarc --interval monthly --output-hist-size 10 --filemap /home/schenk/15_fieldmap.json
 26-fincmarc --interval monthly --inputformat xml --outputformat mrc --input-hist-size 10 --output-hist-size 10
-35-fincmarc --interval monthly --format mrc --output-hist-size 5 --input-hist-size 3 --filemap /home/schenk/lcc
-78-fincmarc --interval manually --format mrc --output-hist-size 5
-109-fincmarc --interval manually --format mrc --output-hist-size 10 --input-hist-size 10
-127-fincmarc --interval manually --format mrc --output-hist-size 5
-142-fincmarc --interval manually --format mrc --output-hist-size 5
-159-fincmarc --interval monthly --format mrc --output-hist-size 10
-160-fincmarc --interval manually --format mrc --output-hist-size 5
-163-fincmarc --interval monthly --format mrc --output-hist-size 10
-172-fincmarc --interval monthly --format mrc --output-hist-size 10 --input-hist-size 10 --inputformat tsv
-182-fincmarc --interval manually --format mrc --output-hist-size 10
-183-fincmarc --interval weekly --format xml --output-hist-size 5
-185-fincmarc --interval manually --format mrc --output-hist-size 10
-186-fincmarc --interval manually --format mrc --output-hist-size 10
-187-fincmarc --interval monthly --format mrc --output-hist-size 10
-190-fincmarc --interval manually --format mrc --output-hist-size 10
-191-fincmarc --interval daily --format mrc --output-hist-size 20
-192-fincmarc --interval manually --format mrc --output-hist-size 10
-193-fincmarc --interval monthly --format mrc --output-hist-size 5
-194-fincmarc --interval monthly --format mrc --output-hist-size 10 --input-hist-size 10 --inputformat csv
-196-fincmarc --interval daily --format mrc --output-hist-size 15 --input-hist-size 15
+#35-fincmarc --interval monthly --format mrc --output-hist-size 5 --input-hist-size 3 --filemap /home/schenk/lcc
+#78-fincmarc --interval manually --format mrc --output-hist-size 5
+#109-fincmarc --interval manually --format mrc --output-hist-size 10 --input-hist-size 10
+#127-fincmarc --interval manually --format mrc --output-hist-size 5
+#142-fincmarc --interval manually --format mrc --output-hist-size 5
+#159-fincmarc --interval monthly --format mrc --output-hist-size 10
+#160-fincmarc --interval manually --format mrc --output-hist-size 5
+163-fincmarc --interval monthly --inputformat mrc --outputformat mrc --input-hist-size 10 --output-hist-size 10
+#172-fincmarc --interval monthly --format mrc --output-hist-size 10 --input-hist-size 10 --inputformat tsv
+#182-fincmarc --interval manually --format mrc --output-hist-size 10
+#183-fincmarc --interval weekly --format xml --output-hist-size 5
+#185-fincmarc --interval manually --format mrc --output-hist-size 10
+#186-fincmarc --interval manually --format mrc --output-hist-size 10
+#187-fincmarc --interval monthly --format mrc --output-hist-size 10
+#190-fincmarc --interval manually --format mrc --output-hist-size 10
+191-fincmarc --interval daily --outputformat mrc --output-hist-size 20 # without input file (on-the-fly)
+#192-fincmarc --interval manually --format mrc --output-hist-size 10
+#193-fincmarc --interval monthly --format mrc --output-hist-size 5
+#194-fincmarc --interval monthly --format mrc --output-hist-size 10 --input-hist-size 10 --inputformat csv
+196-fincmarc --interval daily --inputformat xml --outputformat mrc --input-hist-size 20 --output-hist-size 20
 198-fincmarc --interval manually --inputformat mrc --outputformat mrc --input-hist-size 10 --output-hist-size 10
