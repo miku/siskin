@@ -168,6 +168,8 @@ $ span-compare -e -t
 
 will emit copy-and-pastable textile comparison table to stdout.
 
+![](static/TextileTable.png)
+
 ## Development
 
 We use `gitlab-ci.yml` and sonatype Nexus repository manager to publish new
