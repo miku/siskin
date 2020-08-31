@@ -55,13 +55,17 @@ upstream solr_nonlive           { server 172.18.113.15:8085; }
 
 ## SOLR
 
-Delete the old data from index and reindex (nonlive server needs to be set manually; takes about 10h):
+Delete the old data from index and reindex (nonlive server needs to be set manually; takes about 10h), e.g. with [solrbulk](https://github.com/ubleipzig/solrbulk):
 
 ```
 $ time solrbulk -purge -purge-pause 20s -w 20 -verbose -z -server 172.18.113.15:8085/solr/biblio $(taskoutput AIExport)
 ```
 
 ## Blob
+
+Sidenote: We currently use [microblob](https://github.com/ubleipzig/microblob)
+as a key-value server (increasing the index size by adding the "intermediate"
+JSON to the SOLR "fullrecord" field seemed like a bad idea at the time).
 
 Copy blobfile to nonlive (e.g. 172.18.113.99) blobserver (takes about 20min).
 
@@ -160,7 +164,7 @@ It takes a few seconds (to minutes) until SOLR is warmed up.
 
 ## Compare live and nonlive SOLR servers
 
-There is a `span-compare` program, that when invoked with:
+There is a [`span-compare`](https://github.com/ubleipzig/span/blob/master/cmd/span-compare/main.go) program, that when invoked with:
 
 ```
 $ span-compare -e -t
@@ -172,10 +176,10 @@ will emit copy-and-pastable textile comparison table to stdout.
 
 ## Development
 
-We use `gitlab-ci.yml` and sonatype Nexus repository manager to publish new
+We use [`gitlab-ci.yml`](../.gitlab-ci.yml) and sonatype Nexus repository manager to publish new
 versions.
 
-* in `siskin/__init__.py` increment the version
+* in [`siskin/__init__.py`](../siskin/__ini__.py) increment the version
 
 Then.
 
