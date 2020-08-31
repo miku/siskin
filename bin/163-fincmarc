@@ -73,12 +73,8 @@ fip.remove_old_outputfiles(SID)
 
 if not inputfile:
 
-    inputfile = path + "/163_input.mrc"
-    os.system("mkdir /tmp/163")
-    os.system('curl "http://172.18.85.86:12105/repo/NachlassWustmann/fincimport" > /tmp/163/urls')
-    os.system("wget -i /tmp/163/urls -P /tmp/163")
-    os.system("""sed -i -e 's/ind1=""/ind1=" "/g' -e 's/ind2=""/ind2=" "/g' /tmp/163/*""")
-    os.system("""yaz-marcdump -i marcxml -o marc /tmp/163/* > %s""" % inputfile)
+    inputfile = fip.inputfilename(SID)
+    os.system("""yaz-marcdump -i marcxml -o marc /var/nfs/incoming/kitodo/*xml > %s""" % inputfile)
 
 inputfile = open(inputfile, "rb")
 reader = pymarc.MARCReader(inputfile, force_utf8=True)
