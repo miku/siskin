@@ -179,7 +179,7 @@ will emit copy-and-pastable textile comparison table to stdout.
 We use [`gitlab-ci.yml`](../.gitlab-ci.yml) and sonatype Nexus repository manager to publish new
 versions.
 
-* in [`siskin/__init__.py`](../siskin/__ini__.py) increment the version
+* in [`siskin/__init__.py`](../siskin/__init__.py) increment the version
 
 Then.
 
