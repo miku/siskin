@@ -135,6 +135,19 @@ $ curl -s 172.18.113.99:8820/ai-49-aHR0cDovL2R4LmRvaS5vcmcvMTAuMTAzNy8xMDE2Ny0wM
 ["http://dx.doi.org/10.1037/10167-005"]
 ```
 
+## Compare live and nonlive SOLR servers
+
+There is a [`span-compare`](https://github.com/ubleipzig/span/blob/master/cmd/span-compare/main.go) program, that when invoked with:
+
+```
+$ span-compare -e -t
+```
+
+will emit copy-and-pastable textile comparison table to stdout.
+
+![](static/TextileTable.png)
+
+
 ## Cleanup
 
 Occasional cleanup with
@@ -161,18 +174,6 @@ $ systemctl reload nginx
 ```
 
 It takes a few seconds (to minutes) until SOLR is warmed up.
-
-## Compare live and nonlive SOLR servers
-
-There is a [`span-compare`](https://github.com/ubleipzig/span/blob/master/cmd/span-compare/main.go) program, that when invoked with:
-
-```
-$ span-compare -e -t
-```
-
-will emit copy-and-pastable textile comparison table to stdout.
-
-![](static/TextileTable.png)
 
 ## Development
 
