@@ -75,7 +75,7 @@ freed=$(for f in "${matching_files[@]}"; do
 	stat --printf="%s\n" "$f"
 done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
-if [ "$1" == "--force" ]; then
+if [ "${1-}" == "--force" ]; then
 	for f in "${matching_files[@]}"; do
 		rm -vf "$f"
 	done
