@@ -409,6 +409,8 @@ languages["chipewyan (dene)"] = "chp"
 languages["unbekannt"] = "und"
 
 languages["deu"] = "ger"
+languages["frz"] = "fre"
+languages["fra"] = "fre"
 
 languages["ar"] = "ara"
 languages["bo"] = "tib"
