@@ -1,0 +1,326 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: MediathekViewWeb
+SID: 169
+Ticket: #13842, #13876, #18259
+Origin: HTTP
+
+"""
+
+
+import os
+import base64
+import collections
+import datetime
+import hashlib
+import json
+import re
+import sys
+
+import tqdm
+import marcx
+from siskin.configuration import Config
+from siskin.mappings import formats
+from siskin.arguments import FincArgumentParser
+from siskin.utils import marc_build_field_008
+
+
+channels = ("3Sat", "ARD", "ARTE.DE", "ARTE.FR", "BR", "DW", "HR", "KiKA", "MDR", "NDR", "ORF", "PHOENIX", "RBB", "SR", "SRF", "SRF.Podcast", "SWR", "WDR",
+            "ZDF", "ZDF-tivi", "3sat")
+
+records = collections.defaultdict(dict)
+seen = set()
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "169"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Get current path
+path = fip.sid_path(SID)
+
+# Removes n old input and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfile:
+    inputfile_compressed = path + "/Filmliste-akt.xz"
+    inputfile_decompressed = path + "/Filmliste-akt"
+    inputfile = fip.inputfilename(SID)
+    os.system("curl -sL --fail 'https://verteiler1.mediathekview.de/Filmliste-akt.xz' > %s" % inputfile_compressed)
+    os.system("xz -fd %s" % inputfile_compressed)
+    os.system("mv %s %s" % (inputfile_decompressed, inputfile))
+
+inputfile = open(inputfile, "r", encoding="utf-8")
+content = inputfile.read()
+pattern = re.compile(r"""^{"Filmliste":|,"X":|}$""")
+lines = pattern.split(content)
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for line in lines:
+
+    # Drop doublets
+    if line in seen:
+        print('dropping duplicate line: %s ...' % line[:40], file=sys.stderr)
+        continue
+    seen.add(line)
+
+    # Check input file
+    try:
+        doc = json.loads(line)
+    except Exception as exc:
+        print(exc, file=sys.stderr)
+    else:
+        if doc[0] != "":
+            current_channel = doc[0]
+        if doc[1] != "":
+            current_topic = doc[1]
+        
+        # Prepare dictionary
+        record = {
+            "channel": current_channel,
+            "topic": current_topic,
+            "title": doc[2],
+            "hr_duration": doc[5],
+            "size": doc[6],
+            "description": doc[7],
+            "url_video": doc[8],
+            "url_website": doc[9],
+            "url_subtitle": doc[10],
+            "url_video_low": doc[12],
+            "url_video_hd": doc[14],
+            "timestamp": doc[16],
+        }
+
+        # Get the correct URL for low quality video
+        try:
+            if record["url_video_low"] and "|" in record["url_video_low"]:
+                offset, suffix = record["url_video_low"].split("|")
+                record['url_video_low'] = record['url_video'][:int(offset)] + suffix
+        except Exception as exc:
+            print(exc, file=sys.stderr)
+
+        # Get the correct URL for high quality video
+        try:
+            if record["url_video_hd"] and "|" in record["url_video_hd"]:
+                offset, suffix = record["url_video_hd"].split("|")
+                record['url_video_hd'] = record['url_video'][:int(offset)] + suffix
+        except Exception as exc:
+            print(exc, file=sys.stderr)
+
+        # Kick record without timestamp
+        if record["timestamp"] == "":
+            continue
+
+        # Build hash-table
+        hash = hashlib.sha1()
+        fields = record["channel"] + record["topic"] + record["title"] + record["timestamp"]
+        hash.update(fields.encode("utf-8").strip())
+        hash_record = hash.hexdigest()
+
+        # Build unique identifier
+        f001 = record["channel"] + record["topic"][:10] + record["title"][:20] + record["title"][-20:] + record["hr_duration"] + record["size"] + record[
+            "timestamp"]
+        f001 = f001.encode("utf-8")
+        f001 = base64.urlsafe_b64encode(f001)
+        f001 = f001.decode("utf-8").rstrip("=")
+        records[hash_record].update({"f001": f001})
+
+        # Get title
+        f245a = record["title"]
+        records[hash_record].update({"f245a": f245a})
+
+        # Get imprint
+        timestamp = record["timestamp"]
+        if timestamp:
+            timestamp = int(timestamp)
+            f260c = datetime.datetime.fromtimestamp(timestamp).strftime("%Y")
+        else:
+            f260c = ""
+        publisher = ["b", record["channel"] + ", ", "c", f260c]
+        records[hash_record].update({"f260": publisher})
+
+        # Get duration
+        f306a = record["hr_duration"]
+        records[hash_record].update({"f306a": f306a})
+
+        # Get subject headings
+        if record["topic"] not in channels and " / " not in record["topic"] and record["topic"] != record["title"]:
+            records[hash_record].update({"f490a": record["topic"]})
+
+        # Get broadcasting time
+        timestamp = record["timestamp"]
+        if timestamp:
+            timestamp = int(timestamp)
+            f500a = datetime.datetime.fromtimestamp(timestamp).strftime("Gesendet am %d.%m.%Y um %H:%M Uhr")
+            if "00:00" in f500a:
+                f500a = f500a.replace(" um 00:00 Uhr", "")
+            records[hash_record].update({"f500a": f500a})
+
+        # Get description
+        f520a = record["description"]
+        desc = records[hash_record].setdefault("f520a", [])
+        if f520a not in desc:
+            records[hash_record].setdefault("f520a", []).append(f520a)
+
+        # Get links to website and videos with different quality
+        if record["url_website"]:
+            sites = records[hash_record].setdefault("website", [])
+            if record["url_website"] not in sites:
+                records[hash_record].setdefault("website", []).append(record["url_website"])
+        if record["url_video_low"]:
+            records[hash_record].setdefault("low", []).append(record["url_video_low"])
+        if record["url_video"]:
+            records[hash_record].setdefault("medium", []).append(record["url_video"])
+        if record["url_video_hd"]:
+            records[hash_record].setdefault("high", []).append(record["url_video_hd"])
+
+for record in tqdm.tqdm(records.values(), total=len(records)):
+
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    # Set a universal format
+    format = "Online-Video"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifier
+    marcrecord.add("001", data="finc-169-" + record["f001"])
+    
+    # Access type
+    f007 = formats[format]["e007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodicity
+    year = record["f260"][3]
+    periodicity = formats[format]["008"]
+    language = "ger"
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)    
+
+    # Title
+    marcrecord.add("245", a=record["f245a"])
+    
+    # Imprint
+    marcrecord.add("260", subfields=record["f260"])
+    
+    # Duration
+    marcrecord.add("306", a=record["f306a"])
+
+    # RDA-Content
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Carrier
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+    
+    # Series
+    marcrecord.add("490", a=record.get("f490a"))
+    
+    # Footnote
+    marcrecord.add("500", a=record["f500a"])
+
+    # Description
+    for i, f520a in enumerate(record.get("f520a", []), start=1):
+        if len(record["f520a"]) == 1:
+            label = ""
+        else:
+            label = "Video " + str(i) + ":\n"
+        marcrecord.add("520", a=label + f520a)
+
+    # GND-Content and -Carrier
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("655", a=f655a, _2=f6552)
+
+    # Links to website and videos with different quality
+    for i, url in enumerate(record.get("website", []), start=1):
+        if len(record["website"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zur Webseite %s" % i, u=url)
+
+    for i, url in enumerate(record.get("low", []), start=1):
+        if len(record["low"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zu Video %s (LD)" % i, u=url)
+
+    for i, url in enumerate(record.get("medium", []), start=1):
+        if len(record["medium"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zu Video %s (SD)" % i, u=url)
+
+    for i, url in enumerate(record.get("high", []), start=1):
+        if len(record["high"]) == 1:
+            i = ""
+        marcrecord.add("856", q="text/html", _3="Link zu Video %s (HD)" % i, u=url)
+
+    # SWB-Content
+    marcrecord.add("935", b="cofz", c="vide")
+
+    # Collection and sealing
+    subfields = ["a", f001, "b", "169", "c", "sid-169-col-mediathek"]
+    marcrecord.add("980", subfields=subfields)
+
+    # Write record to file
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+inputfile.close()
+outputfile.close()
