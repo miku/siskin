@@ -12,7 +12,7 @@
 #159-fincmarc --interval monthly --format mrc --output-hist-size 10
 #160-fincmarc --interval manually --format mrc --output-hist-size 5
 163-fincmarc --interval monthly --inputformat mrc --outputformat mrc --input-hist-size 10 --output-hist-size 10
-170-fincmarc --interval monthly --inputformat mrc --outputformat xml --input-hist-size 15 --output-hist-size 15
+170-fincmarc --interval monthly --inputformat xml --outputformat xml --input-hist-size 15 --output-hist-size 15
 #172-fincmarc --interval monthly --format mrc --output-hist-size 10 --input-hist-size 10 --inputformat tsv
 #182-fincmarc --interval manually --format mrc --output-hist-size 10
 #183-fincmarc --interval weekly --format xml --output-hist-size 5
