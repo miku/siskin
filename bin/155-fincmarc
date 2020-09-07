@@ -55,6 +55,16 @@ def get_field(xmlrecord, number):
     return ""
 
 
+def is_journal(xmlrecord):
+    tags = ["31", "312", "313", "314", "315"]
+    for tag in tags:
+        subjects = get_field(xmlrecord, tag)
+        if "Zeitschrift" in subjects:
+            return True
+    else:
+        return False
+
+
 ##################################################################################
 # 1. Parse arguments and prepare outputfile
 ##################################################################################
@@ -108,11 +118,15 @@ for xmlrecord in xmlstream(inputfile, "record"):
     marcrecord.strict = False
 
     # Format mapping
+    pages = get_field(xmlrecord, "708")
     carrier = get_field(xmlrecord, "770")
     carrier = carrier.lower()
     thesis = get_field(xmlrecord, "818")
+    journal = is_journal(xmlrecord)
 
-    if thesis:
+    if "-" in pages:
+        format = "Article"
+    elif thesis:
         format = "Thesis"
     elif carrier == "dvd":
         format = "DVD-Video"
@@ -126,6 +140,8 @@ for xmlrecord in xmlstream(inputfile, "record"):
         format = "Vinyl-Record"
     elif carrier == "cdr":
         format = "CD-ROM"
+    elif journal:
+        format = "Journal"
     else:
         format = "Book"
 
