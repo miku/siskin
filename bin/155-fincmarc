@@ -110,7 +110,11 @@ for xmlrecord in xmlstream(inputfile, "record"):
     # Format mapping
     carrier = get_field(xmlrecord, "770")
     carrier = carrier.lower()
-    if carrier == "dvd":
+    thesis = get_field(xmlrecord, "818")
+
+    if thesis:
+        format = "Thesis"
+    elif carrier == "dvd":
         format = "DVD-Video"
     elif carrier == "ftp":
         format = "Remote-Computerfile"
@@ -230,6 +234,10 @@ for xmlrecord in xmlstream(inputfile, "record"):
     # Footnote
     f500a = get_field(xmlrecord, "81")
     marcrecord.add("500", a=f500a)
+
+    # Thesis note
+    f502a = get_field(xmlrecord, "818")
+    marcrecord.add("502", a=f502a)
 
     # Subject heading
     f650 = []
