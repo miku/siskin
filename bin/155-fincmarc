@@ -140,7 +140,11 @@ for xmlrecord in xmlstream(inputfile, "record"):
     marcrecord.add("001", data="155-" + f001)
 
     # Access type
-    f007 = formats[format]["p007"]
+    url = get_field(xmlrecord, "8e")
+    if not url:
+        f007 = formats[format]["p007"]
+    else:
+        f007 = formats[format]["e007"]
     marcrecord.add("007", data=f007)
 
     # Periodicity
