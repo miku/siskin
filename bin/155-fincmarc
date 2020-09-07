@@ -290,20 +290,21 @@ for xmlrecord in xmlstream(inputfile, "record"):
 
     # Parent journal
     if format == "Article":
-        f773t = get_field(xmlrecord, "78")
-        f773t = f773t.replace("¬", "")
-        volume = get_field(xmlrecord, "72")
+        f773t = get_field(xmlrecord, "70")
+        volume = get_field(xmlrecord, "704")
         year = get_field(xmlrecord, "76")
-        issue = get_field(xmlrecord, "73")
-        pages = get_field(xmlrecord, "77")
+        issue = get_field(xmlrecord, "706")
+        pages = get_field(xmlrecord, "708")
         match = re.search("(\d+)-(\d+)", pages)
         if match:
             spage, epage = match.groups()
         else:
             spage = ""
             epage = ""
+        issn = get_field(xmlrecord, "88")
+        issn = check_isbn(issn)
         f773g = marc_build_field_773g(volume, year, issue, spage, epage)
-        marcrecord.add("773", t=f773t, g=f773g)
+        marcrecord.add("773", t=f773t, g=f773g, x=issn)
 
     # Link to fulltext or further information
     f856u = get_field(xmlrecord, "8e")
