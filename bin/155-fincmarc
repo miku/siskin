@@ -56,11 +56,13 @@ def get_field(xmlrecord, number):
 
 
 def is_journal(xmlrecord):
-    tags = ["31", "312", "313", "314", "315"]
-    for tag in tags:
-        subjects = get_field(xmlrecord, tag)
-        if "Zeitschrift" in subjects:
-            return True
+    publishing_history = get_field(xmlrecord, "76p")
+    parent = get_field(xmlrecord, "70")
+    isbn = get_field(xmlrecord, "87")
+    issn = get_field(xmlrecord, "88")
+
+    if issn and publishing_history and not parent and not isbn:
+        return True
     else:
         return False
 
