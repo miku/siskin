@@ -225,6 +225,7 @@ setup(name='siskin',
           'bin/192-fincmarc',
           'bin/193-fincmarc',
           'bin/194-fincmarc',
+          'bin/195-fincmarc',
           'bin/196-fincmarc',
           'bin/198-fincmarc'
       ],
