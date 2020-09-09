@@ -27,7 +27,7 @@
 Source: Kanopy
 SID: 195
 Ticket: #17808, #18310
-Origin: local file
+Origin: Cloud
 
 """
 
@@ -74,8 +74,8 @@ else:
 ##################################################################################
 
 if not inputfile:
-    config = Config.instance()
-    inputfile = config.get(SID, "input")
+    inputfile = fip.inputfilename(SID)
+    os.system("wget -O %s https://speicherwolke.uni-leipzig.de/index.php/s/ceD3gqssTS5b93y/download" % inputfile)
 
 inputfile = open(inputfile, "rb")
 reader = pymarc.MARCReader(inputfile, force_utf8=True)
