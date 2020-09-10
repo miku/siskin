@@ -181,7 +181,7 @@ for xmlrecord in xmlstream(inputfile, "record"):
 
     # ISSN
     f022a = get_field(xmlrecord, "88")
-    f022a = check_isbn(f022a)
+    f022a = check_issn(f022a)
     marcrecord.add("022", a=f022a)
 
     # Language
