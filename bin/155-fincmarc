@@ -116,6 +116,11 @@ for xmlrecord in xmlstream(inputfile, "record"):
     else:
         continue
 
+    # Kick journals
+    journal = is_journal(xmlrecord)
+    if journal:
+        continue
+
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
@@ -124,7 +129,6 @@ for xmlrecord in xmlstream(inputfile, "record"):
     carrier = get_field(xmlrecord, "770")
     carrier = carrier.lower()
     thesis = get_field(xmlrecord, "818")
-    journal = is_journal(xmlrecord)
 
     if "-" in pages:
         format = "Article"
@@ -142,8 +146,6 @@ for xmlrecord in xmlstream(inputfile, "record"):
         format = "Vinyl-Record"
     elif carrier == "cdr":
         format = "CD-ROM"
-    elif journal:
-        format = "Journal"
     else:
         format = "Book"
 
