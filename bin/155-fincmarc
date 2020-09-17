@@ -216,7 +216,7 @@ for xmlrecord in xmlstream(inputfile, "record"):
 
     # First creator (person)
     f100a = get_field(xmlrecord, "40")
-    marcrecord.add("100", a=f100a)
+    marcrecord.add("100", a=f100a, _4="aut")
 
     # First creator (corporation)
     f110a = get_field(xmlrecord, "60")
