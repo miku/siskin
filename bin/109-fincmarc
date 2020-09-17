@@ -89,10 +89,15 @@ def remove_brackets(field):
 SID = "109"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
-outputformat = fip.args.outputformat
-inputfilename = fip.args.inputfilename
 
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
 fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
@@ -328,7 +333,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     marcrecord.add("935", c=f935c)
 
     # Collection
-    collection = ["a", f001, "b", "109", "c", "sid-109-col-kunsthochschulekoeln"]
+    collection = ["a", f001, "b", SID, "c", "sid-109-col-kunsthochschulekoeln"]
     marcrecord.add("980", subfields=collection)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
