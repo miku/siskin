@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -210,11 +210,11 @@ for oldrecord in xmlstream(inputfilename, "record"):
     f001 = get_datafield(record, "001", "a")
     marcrecord.add("001", data="finc-109-" + f001)
 
-    # Zugangstyp
+    # Access type
     f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
 
-    # Periodizität
+    # Periodicity
     language = get_datafield(record, "037", "a")
     language = marc_get_languages(language)
     year = get_datafield(record, "425", "a")
@@ -230,24 +230,24 @@ for oldrecord in xmlstream(inputfilename, "record"):
     f020a = check_isbn(isbn)
     marcrecord.add("020", a=f020a)
 
-    # Sprache
+    # Language
     languages = get_datafield(record, "037", "a")
     f041a = marc_get_languages(languages)
     marcrecord.add("041", a=f041a)
 
-    # 1. Urheber
+    # First creator
     f100a = get_datafield(record, "100", "a")
     f100a = remove_brackets(f100a)
     marcrecord.add("100", a=f100a, _4="aut")
 
-    # Haupttitel & Verantwortlichenangabe
+    # Main title, part title and responsibility
     f245a = remove_brackets(f245a)
     f245c = get_datafield(record, "359", "a")
     f245p = remove_brackets(f245p)
     f245 = ["a", f245a, "c", f245c, "p", f245p]
     marcrecord.add("245", subfields=f245)
 
-    # Erscheinungsvermerk
+    # Imprint
     f260a = get_datafield(record, "410", "a")
     f260b = get_datafield(record, "412", "a")
     f260b = remove_brackets(f260b)
@@ -255,21 +255,22 @@ for oldrecord in xmlstream(inputfilename, "record"):
     subfields = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=subfields)
 
-    # Umfangsangabe
+    # Extent
     f300a = get_datafield(record, "433", "a")
     f300a = remove_brackets(f300a)
     f300b = get_datafield(record, "434", "a")
     f300 = ["a", f300a, "b", f300b]
     marcrecord.add("300", subfields=f300)
 
-    # RDA-Inhaltstyp
+    # RDA-Content
     f336b = formats[format]["336b"]
     marcrecord.add("336", b=f336b)
 
-    # RDA-Datenträgertyp
+    # RDA-Carrier
     f338b = formats[format]["338b"]
     marcrecord.add("338", b=f338b)
 
+    # Series
     f490 = get_datafield(record, "451", "a")
     if len(f490) > 0:
         f490 = f490.split(" ; ")
@@ -281,6 +282,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
             f490v = ""
         marcrecord.add("490", a=f490a, v=f490v)
 
+    # Subject headings
     for f650a in set(get_datafield(record, "710", "a", all=True)):
         f650a = remove_brackets(f650a)
         marcrecord.add("650", a=f650a)
@@ -289,24 +291,24 @@ for oldrecord in xmlstream(inputfilename, "record"):
         f650a = remove_brackets(f650a)
         marcrecord.add("650", a=f650a)
 
-    # GND-Inhalts- und Datenträgertyp
+    # GND-Content and carrier
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
     marcrecord.add("655", a=f655a, _2=f6552)
 
-    # weitere Urheber
+    # Additional creators
     for tag in range(101, 200):
         f700a = get_datafield(record, str(tag), "a")
         f700a = remove_brackets(f700a)
         marcrecord.add("700", a=f700a)
 
-    # weitere Körperschaften
+    # Additional institutions
     for tag in range(200, 300):
         f710a = get_datafield(record, str(tag), "a")
         f710a = remove_brackets(f710a)
         marcrecord.add("710", a=f710a)
 
-    # übergeordnetes Werk
+    # Parent work
     if f773t and f773w:
         marcrecord.add("773", t=f773t, w=f773w, indicators="18")
 
@@ -325,7 +327,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
 
-    # Kollektion
+    # Collection
     collection = ["a", f001, "b", "109", "c", "sid-109-col-kunsthochschulekoeln"]
     marcrecord.add("980", subfields=collection)
 
