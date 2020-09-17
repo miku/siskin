@@ -115,9 +115,6 @@ if not inputfile:
     config = Config.instance()
     inputfile = config.get(SID, "input")
 
-inputfile = open(inputfile, "rb")
-reader = pymarc.MARCReader(inputfile, force_utf8=True)
-
 
 ##################################################################################
 # 3. Process data
@@ -126,7 +123,7 @@ reader = pymarc.MARCReader(inputfile, force_utf8=True)
 parent_ids = []
 parent_titles = {}
 
-for oldrecord in xmlstream(inputfilename, "record"):
+for oldrecord in xmlstream(inputfile, "record"):
 
     record = xmltodict.parse(oldrecord)
     parent_id = get_datafield(record, "010", "a")
@@ -134,7 +131,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     if len(parent_id) > 0:
         parent_ids.append(parent_id)
 
-for oldrecord in xmlstream(inputfilename, "record"):
+for oldrecord in xmlstream(inputfile, "record"):
 
     record = xmltodict.parse(oldrecord)
     id = get_datafield(record, "001", "a")
@@ -143,7 +140,7 @@ for oldrecord in xmlstream(inputfilename, "record"):
     if id in parent_ids:
         parent_titles[id] = title
 
-for oldrecord in xmlstream(inputfilename, "record"):
+for oldrecord in xmlstream(inputfile, "record"):
 
     record = xmltodict.parse(oldrecord)
     marcrecord = marcx.Record(force_utf8=True)
@@ -345,5 +342,4 @@ for oldrecord in xmlstream(inputfilename, "record"):
     else:
         outputfile.write(marcrecord.as_marc())
 
-inputfile.close()
 outputfile.close()
