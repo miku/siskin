@@ -111,11 +111,11 @@ else:
 # 2. Get input data
 ################################################################################
 
-if not inputfilename:
+if not inputfile:
     config = Config.instance()
-    inputfilename = config.get(SID, "input")
+    inputfile = config.get(SID, "input")
 
-inputfile = open(inputfilename, "rb")
+inputfile = open(inputfile, "rb")
 reader = pymarc.MARCReader(inputfile, force_utf8=True)
 
 
