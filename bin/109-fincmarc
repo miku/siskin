@@ -340,4 +340,5 @@ for oldrecord in xmlstream(inputfilename, "record"):
     else:
         outputfile.write(marcrecord.as_marc())
 
+inputfile.close()
 outputfile.close()
