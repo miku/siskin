@@ -165,6 +165,11 @@ for xmlrecord in xmlstream(inputfile, "record"):
     else:
         format = "Book"
 
+    # Kick webites without URL
+    url = get_url(xmlrecord)
+    if format == "Website" and not url:
+        continue
+
     # Leader
     leader = formats[format]["Leader"]
     marcrecord.leader = leader
