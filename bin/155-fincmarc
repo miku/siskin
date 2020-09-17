@@ -315,6 +315,9 @@ for xmlrecord in xmlstream(inputfile, "record"):
     if f856u:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
+    # Collection facet for entire Verbundkatalog Film
+    marcrecord.add("912", a="vkfilm")
+
     # SWB-Content
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
