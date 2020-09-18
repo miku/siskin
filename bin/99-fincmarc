@@ -1,0 +1,210 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Zeitschrift "Media Perspektiven"
+SID: 99
+Ticket: #7798, #11499, #13997, #15880, #18367
+Origin: local file
+
+"""
+
+
+import os
+import sys
+import re
+
+import marcx
+import xlrd
+from siskin.mappings import formats
+from siskin.configuration import Config
+from siskin.utils import check_issn, marc_build_field_008
+from siskin.arguments import FincArgumentParser
+
+
+def clean_number(value):
+    """
+    Removes trailing '.0' in fields containing numbers.
+    """
+    return re.sub("\.0$", "", value)
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "99"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old inputfiles and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+################################################################################
+
+if not inputfile:
+    config = Config.instance()
+    inputfile = config.get(SID, "input")
+
+workbook = xlrd.open_workbook(inputfile)
+sheet = workbook.sheet_by_name("Tabelle1")
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for i, row in enumerate(range(sheet.nrows), start=0):
+
+    csvrecord = [u"{}".format(v) for v in sheet.row_values(row)]
+    
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    # Kick first line
+    if csvrecord[0] == "authors":
+        continue
+
+    # Set format for entire source
+    format = "Article"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifier
+    f001 = str(i)
+    marcrecord.add("001", data="finc-99-" + f001)
+
+    # Access type
+    marcrecord.add("007", data="cr")
+
+    # Periodicity
+    year = csvrecord[8]
+    year = clean_number(year)
+    periodicity = formats[format]["008"]
+    language = ""
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+   
+    # ISSN
+    f022a = csvrecord[5]
+    f022a = check_issn(f022a)
+    marcrecord.add("022", a=f022a)
+
+    # First creator
+    f100a = csvrecord[0]
+    f100a = f100a.split("; ")
+    f100a = f100a[0]
+    if f100a:
+        marcrecord.add("100", a=f100a, _4="aut")
+
+    # Main title
+    f245a = csvrecord[1]
+    marcrecord.add("245", a=f245a)
+
+    # Imprint
+    f260b = csvrecord[3]
+    f260b = f260b.lstrip("Frankfurt: ")
+    f260c = csvrecord[8]
+    f260c = clean_number(f260c)
+    publisher = ["a", "Frankfurt : ", "b", f260b + ", ", "c", f260c]
+    marcrecord.add("260", subfields=publisher)
+
+    # Page count
+    f300a = csvrecord[11]
+    if f300a != "":
+        f300a = clean_number(f300a)
+        f300a = f300a + " S."
+        marcrecord.add("300", a=f300a)
+
+    # RDA-Content
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-Carrier
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # GND-Content- and Carrier
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("655", a=f655a, _2=f6552)
+
+    # Additional creators
+    f700a = csvrecord[0]
+    f700a = f700a.split("; ")
+    if len(f700a) > 1:
+        for person in f700a[1:]:
+            marcrecord.add("700", a=person, _4="aut")
+
+    # Parent work
+    f773t = csvrecord[2]
+    issue = csvrecord[6]
+    issue = clean_number(issue)
+    volume = csvrecord[7]
+    volume = clean_number(volume)
+    year = csvrecord[8]
+    year = clean_number(year)
+    pages = csvrecord[12]
+    pages = clean_number(pages)
+    f773g = "%s(%s)%s, S. %s" % (volume, year, issue, pages)
+    marcrecord.add("773", g=f773g, t=f773t)
+
+    # Link to fulltext
+    f856u = csvrecord[13]
+    marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
+    # SWB-Content
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Collection and sealing
+    marcrecord.add("980", a=f001, b=SID, c="sid-99-col-mediaperspektiven")
+
+    # Write record to file
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+outputfile.close()
