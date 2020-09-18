@@ -124,8 +124,15 @@ for oldrecord in xmlstream(inputfile, "record"):
     f935c = formats[format]["935c"]
     record.add("935", c=f935c)
 
-    # Collection
-    record.add("980", a=f001, b=SID, c="sid-26-col-doab")
+    # Collection and sealing
+    adlr_subjects = ['Communication. Mass media', 'Information theory', 'Motion pictures', 'Music', 'Performing Arts']
+    for __subjects in record.get_fields('650'):
+        for subject in __subjects.get_subfields('a'):
+            if subject in adlr_subjects:
+                f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
+            else:
+                f980c = "sid-26-col-doab"
+    record.add("980", a=f001, b=SID, c=f980c)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
     record = convert_to_finc_id(SID, record, encode=False, finc_prefix=False)
