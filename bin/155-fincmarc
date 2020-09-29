@@ -223,7 +223,12 @@ for xmlrecord in xmlstream(inputfile, "record"):
     marcrecord.add("110", a=f110a)
 
     # Main title and responsibility
-    f245 = get_field(xmlrecord, "20")
+    f19 = get_field(xmlrecord, "19")
+    f20 = get_field(xmlrecord, "20")
+    if " : " in f19 and not " : " in f20:
+        f245 = f19
+    else:
+        f245 = f20
     f245 = f245.replace("¬", "")
     f245 = f245.replace("\n", " ")
     f245 = f245.replace("   ", "")
