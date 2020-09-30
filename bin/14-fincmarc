@@ -116,7 +116,6 @@ fip = FincArgumentParser()
 
 # Get arguments
 inputfile = fip.args.inputfile
-inputformat = fip.args.inputformat
 outputformat = fip.args.outputformat
 
 # Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
