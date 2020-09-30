@@ -164,7 +164,7 @@ for row in range(1, sheet.nrows):
 
     # Imprint
     year = csvrecord[8]
-    f260c = str(year).rstrip("0").rstrip(".")  # rstrip(".0") doesn't work equally here
+    f260c = clean_number(year)
     subfields = ("a", "Kiel", "b", "Kieler Gesellschaft für Filmmusikforschung", "c", f260c)
     marcrecord.add("260", subfields=subfields)
 
