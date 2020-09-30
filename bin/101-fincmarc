@@ -144,7 +144,7 @@ for row in range(1, sheet.nrows):
     if authors:
         authors = authors.split("; ")
         f100a = authors[0]
-        marcrecord.add("100", a=f100a)
+        marcrecord.add("100", a=f100a, _4="aut")
 
     # Main title
     title = csvrecord[1]
