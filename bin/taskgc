@@ -70,17 +70,23 @@ for f in "${matching_files[@]}"; do
 	echo "$f"
 done
 
-# How much space can we reclaim? Needs bc(1).
-freed=$(for f in "${matching_files[@]}"; do
-	stat --printf="%s\n" "$f"
-done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
-
+# Get out early.
 if [ "${1-}" == "--force" ]; then
 	for f in "${matching_files[@]}"; do
 		rm -vf "$f"
 	done
 	exit 0
 fi
+
+# How much space can we reclaim? Needs bc(1).
+freed=$(for f in "${matching_files[@]}"; do
+	stat --printf="%s\n" "$f"
+done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
+
+# How much space can we reclaim? Needs bc(1).
+freed=$(for f in "${matching_files[@]}"; do
+	stat --printf="%s\n" "$f"
+done | paste -sd+ | awk '{ print "scale=2; ("$0") / 1073741824"}' | bc -ql)
 
 echo
 echo -e -n "Delete the above ${#matching_files[@]} file(s) [${CO}${freed}GB${NC} would be freed] [y/N]? "
