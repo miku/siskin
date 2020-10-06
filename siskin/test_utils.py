@@ -1,3 +1,5 @@
+# pylint: disable=C0111,C0301
+
 import io
 import json
 import os
