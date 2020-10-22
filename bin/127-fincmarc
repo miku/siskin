@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
 # Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -94,11 +94,16 @@ def get_clean_subject(subject):
 sid = "127"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(sid)
-outputformat = fip.args.outputformat
-inputfilename = fip.args.inputfilename
 
-fip.remove_old_outputfiles(sid)
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
+fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
 if outputformat == "xml":
@@ -111,11 +116,11 @@ else:
 # 2. Get input data
 ################################################################################
 
-if not inputfilename:
+if not inputfile:
     config = Config.instance()
-    inputfilename = config.get(sid, "input")
+    inputfile = config.get(sid, "input")
 
-reader = MabXMLFile(inputfilename, replace=(u"�", ""), encoding='utf-8')
+reader = MabXMLFile(inputfile, replace=(u"�", ""), encoding='utf-8')
 
 
 ##################################################################################
