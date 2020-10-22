@@ -91,7 +91,7 @@ def get_clean_subject(subject):
 # 1. Parse arguments and prepare outputfile
 ##################################################################################
 
-sid = "127"
+SID = "127"
 
 fip = FincArgumentParser()
 
