@@ -292,7 +292,8 @@ for record in reader:
     if "$$" in f100a:
         f100a = f100a.split("$$")
         f100a = f100a[0]
-    marcrecord.add("100", a=f100a, _4="aut")
+    if f100a:
+        marcrecord.add("100", a=f100a, _4="aut")
 
     # Worktitle
     f240a = record.field("304")
