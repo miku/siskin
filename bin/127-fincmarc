@@ -114,11 +114,11 @@ else:
 
 ##################################################################################
 # 2. Get input data
-################################################################################
+##################################################################################
 
 if not inputfile:
     config = Config.instance()
-    inputfile = config.get(sid, "input")
+    inputfile = config.get(SID, "input")
 
 reader = MabXMLFile(inputfile, replace=(u"�", ""), encoding='utf-8')
 
@@ -148,7 +148,7 @@ for record in reader:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    # Formaterkennung
+    # Format mapping
     url = record.field("655", alt="")
     if url and "http://d-nb.info" not in url:
         access = "electronic"
@@ -250,19 +250,19 @@ for record in reader:
     leader = formats[format]["Leader"]
     marcrecord.leader = leader
 
-    # Identifikator
+    # Identifier
     f001 = record.field("001")
     f001 = "127-" + f001
     marcrecord.add("001", data=f001)
 
-    # Zugangstyp
+    # Access type
     if access == "physical":
         f007 = formats[format]["p007"]
     else:
         f007 = formats[format]["e007"]
     marcrecord.add("007", data=f007)
 
-    # Periodizität
+    # Periodicity
     year = record.field("425", alt="")
     periodicity = formats[format]["008"]
     language = get_valid_language(record, "037")
@@ -283,22 +283,22 @@ for record in reader:
         f022a = check_issn(issn)
         marcrecord.add("022", a=f022a)
 
-    # Sprache
+    # Language
     f041a = get_valid_language(record, "037")
     marcrecord.add("041", a=f041a)
 
-    # 1. Urheber
+    # First creator
     f100a = record.field("100", alt="")
     if "$$" in f100a:
         f100a = f100a.split("$$")
         f100a = f100a[0]
     marcrecord.add("100", a=f100a, _4="aut")
 
-    # Werktitel
+    # Worktitle
     f240a = record.field("304")
     marcrecord.add("240", a=f240a)
 
-    # Haupttitel, Titelzusatz und Verantwortliche
+    # Main title, subtitle and responsibility
     f010 = record.field("010")
     try:
         parent_titles[f010]
@@ -315,52 +315,52 @@ for record in reader:
     f245n = record.field("089", alt="")
     marcrecord.add("245", a=f245a, b=f245b, c=f245c, n=f245n, p=f245p)
 
-    # Parallel- und Alternativtitel
+    # Parallel- and alternative title
     f246a = record.field("340", alt="")
     marcrecord.add("246", a=f246a)
     f246a = record.field("370", alt="")
     marcrecord.add("246", a=f246a)
 
-    # beigefügtes Werk
+    # Attached work
     f249a = record.field("361", alt="")
     marcrecord.add("249", a=f249a)
 
-    # Ausgabe
+    # Edition
     f250a = record.field("403", alt="")
     marcrecord.add("250", a=f250a)
 
-    # Erscheinungsvermerk
+    # Imprint
     f260a = record.field("410", alt="")
     f260b = record.field("412", alt="")
     f260c = record.field("425", alt="")
     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
-    # Umfangsangabe
+    # Extent
     f300a = record.field("433", alt="")
     f300b = record.field("434", alt="")
     f300c = record.field("435", alt="")
     marcrecord.add("300", a=f300a, b=f300b, c=f300c)
 
-    # RDA-Inhaltstyp
+    # RDA-content
     f336b = formats[format]["336b"]
     marcrecord.add("336", b=f336b)
 
-    # RDA-Datenträgertyp
+    # RDA-carrier
     f338b = formats[format]["338b"]
     marcrecord.add("338", b=f338b)
 
-    # Fußnote
+    # Footnote
     f500a = record.field("501", alt="")
     if "FSK" not in f500a:
         marcrecord.add("500", a=f500a)
 
-    # Hochschulvermerk
+    # University note
     f502a = record.field("519", alt="")
     marcrecord.add("502", a=f502a)
     f502a = record.field("520", alt="")
     marcrecord.add("502", a=f502a)
 
-    # Inhaltszusammenfassung
+    # Abstract
     fields = ["750", "753", "754", "755", "756", "757", "758"]
     for field in fields:
         f520a = record.field(field, alt="")
@@ -371,16 +371,16 @@ for record in reader:
         f520a = record.field("750", subfield, alt="")
         marcrecord.add("520", a=f520a)
 
-    # Systemvoraussetzung
+    # System requirements
     f538a = record.field("651", alt="")
     marcrecord.add("538", a=f538a)
 
-    # FSK-Hinweis
+    # FSK note
     f521a = record.field("501", alt="")
     if "FSK" in f500a:
         marcrecord.add("521", a=f521a)
 
-    # Schlagwörter
+    # Subject headings
     all_subjects = set()
     subjects = record.fields("710")
     if subjects:
@@ -401,12 +401,12 @@ for record in reader:
     for subject in all_subjects:
         marcrecord.add("650", a=subject)
 
-    # GND-Inhalts- und Datenträgertyp
+    # GND-content and -carrier
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
     marcrecord.add("655", a=f655a, _2=f6552)
 
-    # weitere Urheber
+    # Additional creators
     fields = [
         "100", "104", "108", "112", "116", "120", "124", "128", "132", "136", "140", "144", "148", "152", "156", "160", "164", "168", "172", "176", "180",
         "184", "188", "192", "196"
@@ -420,7 +420,7 @@ for record in reader:
         if f700a != f100a:
             marcrecord.add("700", a=f700a)
 
-    # übergeordnetes Werk
+    # Parent work
     f773g = record.field("596", alt="")
     match = re.search("(.*)\. - Sign", f773g)
     if match:
@@ -460,29 +460,26 @@ for record in reader:
             f856u = get_clean_url(record, url)
             marcrecord.add("856", _3=f8563, u=f856u)
 
-    # Link zum Datensatz
+    # Link to fulltext
     id = record.field("001")
     marcrecord.add("856",
                    _3="Link zu Filmuniversität Babelsberg Konrad Wolf",
                    u="http://server8.bibl.filmuniversitaet.de/F/?func=find-c&ccl_term=idn=%s&local_base=HFF01" % id)
 
-    # Kollektion
+    # Collection
     marcrecord.add("912", a="vkfilm")
 
-    # SWB-Inhaltstyp
+    # SWB-content
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
 
-    # Ansigelung
+    # Collection and sealing
     f001 = record.field("001")
-    collections = ["a", f001, "b", "127", "c", "sid-127-col-filmunivpotsdam"]
+    collections = ["a", f001, "b", SID, "c", "sid-127-col-filmunivpotsdam"]
     marcrecord.add("980", subfields=collections)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
-    marcrecord = convert_to_finc_id(sid, marcrecord, encode=False, finc_prefix=True)
-
-    # Remove empty subfields
-    marc_clean_record(marcrecord)
+    marcrecord = convert_to_finc_id(SID, marcrecord, encode=False, finc_prefix=True)
 
     # Write record to file
     if outputformat == "xml":
