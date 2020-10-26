@@ -22,7 +22,7 @@
 #183-fincmarc --interval weekly --format xml --output-hist-size 5
 #185-fincmarc --interval manually --format mrc --output-hist-size 10
 #186-fincmarc --interval manually --format mrc --output-hist-size 10
-#187-fincmarc --interval monthly --format mrc --output-hist-size 10
+187-fincmarc --interval monthly --inputformat xml --outputformat mrc --output-hist-size 10
 #190-fincmarc --interval manually --format mrc --output-hist-size 10
 191-fincmarc --interval daily --outputformat mrc --output-hist-size 20 # without input file (on-the-fly)
 #192-fincmarc --interval manually --format mrc --output-hist-size 10
