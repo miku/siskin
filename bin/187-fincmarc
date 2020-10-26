@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
 # Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -67,11 +67,18 @@ def clean_language(language):
 SID = "187"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
-outputformat = fip.args.outputformat
-input_directory = fip.args.inputfilename
-path = fip.sid_path(SID)
 
+# Get arguments
+inputfolder = fip.args.inputfolder
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Generates path for inputfiles
+current_path = fip.sid_path(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
 fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
@@ -85,16 +92,16 @@ else:
 # 2. Get input data
 ################################################################################
 
-if not input_directory:
+if not inputfolder:
     config = Config.instance()
     try:
-        input_directory = config.get(SID, "input")
+        inputfolder = config.get(SID, "input")
     except:
-        input_directory = ""
+        inputfolder = ""
 
-if not input_directory:
+if not inputfolder:
 
-    input_directory = path
+    inputfolder = current_path + "/inputfiles/"
 
     sets = ['jportal_jpjournal_00001103',
             'jportal_jpjournal_00001120',
@@ -108,9 +115,9 @@ if not input_directory:
     for i, set in enumerate(sets, start=1):
         
         os.system("metha-sync -set '%s' https://zs.thulb.uni-jena.de/oai2" % set)
-        os.system("metha-cat -set '%s' https://zs.thulb.uni-jena.de/oai2 > %s/187_input%d.xml" % (set, input_directory, i))
+        os.system("metha-cat -set '%s' https://zs.thulb.uni-jena.de/oai2 > %s/187_input%d.xml" % (set, inputfolder, i))
  
-for root, _, files in os.walk(input_directory):
+for root, _, files in os.walk(inputfolder):
 
     for inputfilename in files:
         if not inputfilename.endswith(".xml"):
@@ -145,14 +152,14 @@ for root, _, files in os.walk(input_directory):
             if title == "Inhalt":
                 continue
 
-            # Formatfestlegung
+            # Format
             format = xmlrecord["dc:type"]
             if format == "article":
                 format = "Article"
             elif format == "volume":
                 format = "Book"
             else:
-                sys.exit("Format unbekannt: " + format)
+                sys.exit("Unknown format: " + format)
 
             # Leader
             leader = formats[format]["Leader"]
@@ -170,11 +177,11 @@ for root, _, files in os.walk(input_directory):
                 continue
             marcrecord.add("001", data="187-" + f001)
 
-            # Zugangsfacete
+            # Access facet
             f007 = formats[format]["e007"]
             marcrecord.add("007", data=f007)
 
-            # Periodizität
+            # Periodicity
             year = xmlrecord["dc:date"]
             periodicity = formats[format]["008"]
             language = xmlrecord["dc:language"]
@@ -182,12 +189,12 @@ for root, _, files in os.walk(input_directory):
             f008 = marc_build_field_008(year, periodicity, language)
             marcrecord.add("008", data=f008)
 
-            # Sprache
+            # Language
             language = xmlrecord["dc:language"]
             language = clean_language(language)
             marcrecord.add("041", a=language)
 
-            # 1. Urheber
+            # First creator
             try:
                 persons = xmlrecord["dc:creator"]
             except:
@@ -196,7 +203,7 @@ for root, _, files in os.walk(input_directory):
                 f100a = persons[0]
                 marcrecord.add("100", a=f100a, _4="aut")
 
-            # Haupttitel
+            # Title
             title = xmlrecord["dc:title"]
             if " :: " in title:
                 match = re.search("(.*?)\s::\s(.*?)\s:", title)
@@ -211,12 +218,12 @@ for root, _, files in os.walk(input_directory):
                 f245c = ""
             marcrecord.add("245", a=f245a, c=f245c)
 
-            # Erscheinungsvermerk
+            # Imprint of digitalization
             f260b = xmlrecord["dc:publisher"]
             f260c = xmlrecord["dc:date"]
             marcrecord.add("260", b=f260b, c=f260c)
 
-            # Originalimprint
+            # Original imprint
             title = xmlrecord["dc:title"]
             if " :: " in title:
                 match = re.search(".*?\s::\s.*?\s:\s(.*?),\s(.*?),\s(\d\d\d\d)", title)
@@ -224,7 +231,7 @@ for root, _, files in os.walk(input_directory):
                     f260a, f260b, f260c = match.groups()
                     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
-            # Umfangsangabe
+            # Extent
             try:
                 f300a = xmlrecord["dc:format"]
             except:
@@ -240,28 +247,28 @@ for root, _, files in os.walk(input_directory):
                     f300a = "S. " + f300a
                 marcrecord.add("300", a=f300a)
 
-            # RDA-Inhaltstyp
+            # RDA-content
             f336b = formats[format]["336b"]
             marcrecord.add("336", b=f336b)
 
-            # RDA-Datenträgertyp
+            # RDA-carrier
             f338b = formats[format]["338b"]
             marcrecord.add("338", b=f338b)
 
-            # Rechtehinweis
+            # Rights
             f500a = xmlrecord["dc:rights"]
             marcrecord.add("500", a=f500a)
 
-            # GND-Inhalts- und Datenträgertyp
+            # GND-content and -carrier
             f655a = formats[format]["655a"]
             f6552 = formats[format]["6552"]
             marcrecord.add("655", a=f655a, _2=f6552)
 
-            # weitere Urheber
+            # Additional creators
             for f700a in persons[1:]:
                 marcrecord.add("700", a=f700a, _4="aut")
 
-            # Herausgeber und sonstige Beteiligte
+            # Editors and other contributors
             try:
                 editors = xmlrecord["dc:contributor"]
             except:
@@ -270,7 +277,7 @@ for root, _, files in os.walk(input_directory):
                 for f700a in editors:
                     marcrecord.add("700", a=f700a, _4="edt")
 
-            # übergeordnete Ressource
+            # Parent work
             if setspec == "jportal_jpjournal_00001103":
                 f773t = "Annalen der Naturphilosophie"
                 f773w = "572422962"
@@ -299,7 +306,7 @@ for root, _, files in os.walk(input_directory):
                 sys.exit("Set unbekannt: " + setspec)
             marcrecord.add("773", t=f773t, w=f773w)
 
-            # Link zur Ressource
+            # Link to Digitalization
             url = xmlrecord["dc:identifier"][1]
             match = re.search("\d/(.*?)$", url)
             if match:
@@ -309,11 +316,11 @@ for root, _, files in os.walk(input_directory):
             else:
                 sys.exit("Wrong URL pattern: " + url)
 
-            # SWB-Inhaltstyp
+            # SWB-content
             f935c = formats[format]["935c"]
             marcrecord.add("935", c=f935c)
 
-            # Kollektion
+            # Collection and sealing
             marcrecord.add("980", a=f001, b="187", c="sid-187-col-urmel")
 
             if outputformat == "xml":
