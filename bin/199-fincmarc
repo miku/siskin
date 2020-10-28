@@ -45,7 +45,7 @@ from siskin.arguments import FincArgumentParser
 from siskin.utils import check_isbn, marc_build_field_008
 
 
-persons_non_grata = ["NN", "Anonym", "(Hrsg.)", "TK 25", "Autorenkollektiv", "S.B.", "(Bearb.)"]
+persons_non_grata = ["NN.", "Anonym", "(Hrsg.)", "TK 25", "Autorenkollektiv", "S.B.", "(Bearb.)"]
 
 
 ##################################################################################
