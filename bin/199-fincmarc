@@ -125,9 +125,15 @@ for fields in records:
     # Periodicity
     language = "und"
     series = fields[3]
-    match = re.search("\s(\d\d\d\d),", series)
-    if match:
-        year = match.group(1)
+    match1 = re.search("\s(\d\d\d\d), S.", series)
+    match2 = re.search(":\s(\d\d\d\d)", series)
+    match3 = re.search("\s(\d\d\d\d)", series)
+    if match1:
+        year = match1.group(1)
+    elif match2:
+        year = match2.group(1)
+    elif match3:
+        year = match3.group(1)
     else:
         year = ""
     periodicity = formats[format]["008"]
