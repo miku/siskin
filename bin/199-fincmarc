@@ -139,6 +139,10 @@ for fields in records:
         year = match3.group(1)
     else:
         year = ""
+    if year:
+        y = int(year)
+        if y > 2040:
+            year = ""
     periodicity = formats[format]["008"]
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
