@@ -45,6 +45,9 @@ from siskin.arguments import FincArgumentParser
 from siskin.utils import check_isbn, marc_build_field_008
 
 
+persons_non_grata = ["NN", "Anonym", "(Hrsg.)", "TK 25", "Autorenkollektiv", "S.B.", "(Bearb.)"]
+
+
 ##################################################################################
 # 1. Parse arguments and prepare outputfile
 ##################################################################################
@@ -150,7 +153,8 @@ for fields in records:
     authors = authors.split("; ")
     f100a = authors[0]
     f100a = f100a.rstrip(":")
-    marcrecord.add("100", a=f100a)
+    if f100a not in persons_non_grata:
+        marcrecord.add("100", a=f100a)
 
     # Title
     f245a = fields[2]
@@ -188,7 +192,8 @@ for fields in records:
     # Additional creators
     for f700a in authors[1:]:
         f700a = f700a.rstrip(":")
-        marcrecord.add("700", a=f700a)
+        if f700a not in persons_non_grata:
+            marcrecord.add("700", a=f700a)
 
     # Parent work
     f773g = fields[3]
