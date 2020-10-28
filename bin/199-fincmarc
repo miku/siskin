@@ -141,7 +141,7 @@ for fields in records:
         year = ""
     if year:
         y = int(year)
-        if y > 2040:
+        if y > 2025:
             year = ""
     periodicity = formats[format]["008"]
     f008 = marc_build_field_008(year, periodicity, language)
