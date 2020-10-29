@@ -201,6 +201,7 @@ for fields in records:
 
     # Parent work
     f773g = fields[3]
+    f773g = f773g.rstrip(",")
     marcrecord.add("773", g=f773g)
 
     # SWB-content
