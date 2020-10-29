@@ -153,6 +153,9 @@ for oldrecord in xmlstream(inputfile, "record"):
 
     record.add("980", subfields=collections)
 
+    # Convert all identifier in 001, 770, 772 ... to Finc schema
+    record = convert_to_finc_id(SID, record, encode=False, finc_prefix=False)
+
     # Remove empty subfields
     marc_clean_record(record)
 
