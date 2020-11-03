@@ -166,8 +166,6 @@ for oldrecord in xmlstream(inputfile, "Record"):
     # Language
     language = oldrecord.get("dc:language", [""])
     f041a = marc_get_languages(language)
-    if f041a and len(f041a) != 3:
-        sys.exit("Die Sprache ist nicht MARC-konform: " + f041a)
     marcrecord.add("041", a=f041a)
 
     # DDC-Class
