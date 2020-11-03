@@ -1,0 +1,358 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Gallica
+SID: 20
+Ticket: #14793, #18595
+Origin: OAI
+
+"""
+
+
+import re
+import os
+import sys
+
+import xmltodict
+
+import marcx
+from siskin.configuration import Config
+from siskin.mappings import formats, roles
+from siskin.utils import check_isbn, check_issn, marc_build_field_008, xmlstream, marc_get_languages
+from siskin.arguments import FincArgumentParser
+
+
+setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:02"]
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "20"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Generates path for inputfile
+path = fip.sid_path(SID)
+
+# Removes n old inputfiles and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+##################################################################################
+
+if not inputfile:
+    config = Config.instance()
+    try:
+        inputfile = config.get(SID, "input")
+    except:
+        inputfile = ""
+    if not inputfile:
+        print("No inputfile given. Starting new harvesting ...")
+        inputfile = fip.inputfilename(SID)
+        os.system("metha-sync -format oai_dc http://oai.bnf.fr/oai2/OAIHandler")
+        os.system("metha-cat -format oai_dc http://oai.bnf.fr/oai2/OAIHandler > %s" % inputfile)
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for oldrecord in xmlstream(inputfile, "record"):
+
+    oldrecord = xmltodict.parse(oldrecord, force_list=("setSpec", "dc:identifier", "dc:language",
+                                                       "dc:creator", "dc:title", "dc:publisher",
+                                                       "dc:rights", "dc:subject", "dc:relation",
+                                                       "dc:description"))
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    status = oldrecord["Record"]["header"]["@status"]
+    setspec = oldrecord["Record"]["header"]["setSpec"][0]
+    metadata = oldrecord["Record"]["metadata"]
+
+    if setspec not in setlist or not metadata or status == "deleted":
+        continue
+
+    oldrecord = oldrecord["Record"]["metadata"]["ns0:dc"]
+
+    # Format
+    if setspec == "gallica:typedoc:partitions":
+        format = "Score"
+    else:
+        format = "Book"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifier
+    id = oldrecord["dc:identifier"][0]
+    match = re.search("gallica.bnf.fr/ark:/\d+/(.*)", id)
+    if match:
+        f001 = match.group(1)
+        f001 = f001.rstrip("/date")
+        f980a = match.group(1)
+        f980a = f980a.rstrip("/date")
+
+    else:
+        sys.exit("Could not match ID: " + f001)
+    f001 = "finc-20-" + f001
+    marcrecord.add("001", data=f001)
+
+    # Access type
+    f007 = formats[format]["e007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodicity
+    year = oldrecord.get("dc:date", "")
+    periodicity = formats[format]["008"]
+    language = oldrecord.get("dc:language", [""])
+    language = marc_get_languages(language)
+    f008 = marc_build_field_008(year, periodicity, language)
+    marcrecord.add("008", data=f008)
+
+    # ISBN and ISSN
+    numbers = oldrecord["dc:identifier"]
+    for number in numbers:
+        if "ISBN" in number:
+            f020a = check_isbn(number)
+            marcrecord.add("020", a=f020a)
+        if "ISSN" in number:
+            f022a = check_issn(number)
+            marcrecord.add("022", a=f022a)
+
+    # Language
+    language = oldrecord.get("dc:language", [""])
+    f041a = marc_get_languages(language)
+    if f041a and len(f041a) != 3:
+        sys.exit("Die Sprache ist nicht MARC-konform: " + f041a)
+    marcrecord.add("041", a=f041a)
+
+    # DDC-Class
+    if setspec == "gallica:theme:0:00":
+        marcrecord.add("082", a="000")
+    elif setspec == "gallica:theme:0:02":
+        marcrecord.add("082", a="020")
+    elif setspec == "gallica:typedoc:partitions":
+        marcrecord.add("082", a="780")
+
+    # First creator
+    creators = oldrecord.get("dc:creator", "")
+    if creators:
+        match = re.search("(.*?)\s\(([0-9\.-]{9,9})\)\.\s(.*)", creators[0])
+        if match:
+            f100a, f100d, f100e = match.groups()
+            f100e = f100e.lower()
+            f1004 = roles.get(f100e, "")
+            if not f1004:
+                print("No role '%s' in mapping table." % f100e)
+        else:
+            f100a = creators[0]
+            f100d = ""
+            f1004 = ""
+        marcrecord.add("100", a=f100a, d=f100d, _4=f1004)
+
+    # Main title, subtitle and responsibility
+    titles = oldrecord["dc:title"]
+    if len(titles) == 1:
+        f245 = titles[0]
+    else:
+        if "#text" in titles[0] and "@xml:lang" in titles[0]:
+            # [OrderedDict([('@xml:lang', '')]), OrderedDict([('@xml:lang', ''), ('#text', 'Andante')])]
+            f245 = titles[0]["#text"]
+        elif "@xml:lang" in titles[0] and not "#text" in titles[0]:
+            f245 = titles[1]["#text"]
+        else:
+            f245 = titles[0]
+    match1 = re.search("(.*?)\s:\s(.*)\s\/\s(.*)", f245)
+    match2 = re.search("(.*)\s:\s(.*)", f245)
+    match3 = re.search("(.*)\s\/\s(.*)", f245)
+    if match1:
+        f245a = match1.group(1)
+        f245b = match1.group(2)
+        f245c = match1.group(3)
+    elif match2:
+        f245a = match2.group(1)
+        f245b = match2.group(2)
+        f245c = ""
+    elif match3:
+        f245a = match3.group(1)
+        f245b = ""
+        f245c = match3.group(2)
+    else:
+        f245a = f245
+        f245b = ""
+        f245c = ""
+    subfields = ["a", f245a, "b", f245b, "c", f245c]
+    marcrecord.add("245", subfields=subfields)
+
+    # Alternative title
+    if len(titles) == 2:
+        if "@xml:lang" in titles[1]:
+            f246a = titles[1]["#text"]
+        else:
+            f246a = titles[1]
+        if f246a != f245:
+            marcrecord.add("246", a=f246a)
+
+    # Imprint
+    f260a = ""
+    f260b = ""
+    publishers = oldrecord.get("dc:publisher", "")
+    for publisher in publishers:
+        match = re.search("(.*)\s\((.*)\)", publisher)
+        if match:
+            f260a, f260b = match.groups()
+        else:
+            f260a = publisher
+            f260b = ""
+        f260c = oldrecord.get("dc:date", "")
+        subfields = ["a", f260a, "b", f260b, "c", f260c]
+        marcrecord.add("260", subfields=subfields)
+
+    # Extension
+    f300a = oldrecord.get("dc:format", "")
+    marcrecord.add("300", a=f300a)
+
+    # RDA-content
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-carrier
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # Legal notice
+    f500a = oldrecord.get("dc:rights", [""])
+    if len(f500a) == 2:
+        f500a = f500a[1]["#text"].title()
+    else:
+        f500a = f500a[0].title()
+    marcrecord.add("500", a=f500a)
+
+    # Abstract
+    descriptions = oldrecord.get("dc:description", [""])
+    for f520a in descriptions:
+        if f520a:  # sometimes None
+            if len(f520a) > 8000:
+                f520a = f520a[:8000]
+            marcrecord.add("520", a=f520a)
+
+    # Subject headings
+    subjects = oldrecord.get("dc:subject", "")
+    for subject in subjects:
+        f650a = subject["#text"]
+        marcrecord.add("650", a=f650a)
+
+    # GND-content and -carrier
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("655", a=f655a, _2=f6552)
+
+    # Additional creators
+    creators = oldrecord.get("dc:creator", "")
+    for creator in creators[1:]:
+        match = re.search("(.*?)\s\(([0-9\.-]{9,9})\)\.\s(.*)", creator)
+        if match:
+            f700a, f700d, f700e = match.groups()
+            f700e = f700e.lower()
+            f7004 = roles.get(f700e, "")
+            if not f7004:
+                print("No role '%s' in mapping table." % f700e)
+        else:
+            f700a = creator
+            f700d = ""
+            f7004 = ""
+        marcrecord.add("700", a=f700a, d=f700d, _4=f7004)
+
+    # Link to the original catalog entry and resource
+    urls = oldrecord["dc:relation"]
+    for url in urls:
+
+        # Notice du catalogue : http://catalogue.bnf.fr/ark:/12148/cb42874085r
+        match = re.search("Notice du catalogue : (.*)", url)
+        if match:
+            f856u = match.group(1)
+            marcrecord.add("856", q="text/html", _3="Link zum Datensatz", u=f856u)
+
+        # Notice d'ensemble : http://catalogue.bnf.fr/ark:/12148/cb342961941
+        match = re.search("Notice d'ensemble : (.*)", url)
+        if match:
+            f856u = match.group(1)
+            marcrecord.add("856", q="text/html", _3="Link zur Gesamtaufnahme", u=f856u)
+
+    f856u = oldrecord["dc:identifier"][0]
+    rights = oldrecord.get("dc:rights", [""])
+    for right in rights:
+        if isinstance(right, dict):
+            right = right["#text"]
+        if "restricted use" in right:
+            f856z = ""
+            break
+    else:
+        f856z = "kostenfrei"
+    marcrecord.add("856", q="image/jpeg", _3="Link zum Digitalisat", u=f856u, z=f856z)
+
+    # SWB-content
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Collection and sealing
+    if setspec == "gallica:theme:0:00":
+        f980c = "sid-20-col-gallicabuch"
+    elif setspec == "gallica:theme:0:02":
+        f980c = "sid-20-col-gallicabuch"
+    else:
+        f980c = "sid-20-col-gallica"
+    collections = ["a", f980a, "b", SID, "c", f980c]
+    marcrecord.add("980", subfields=collections)
+
+    # Write record to file
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+outputfile.close()
