@@ -76,6 +76,9 @@ def get_sru_records(start, max):
                 break
             else:
                 time.sleep(5)
+        else:
+            print("Server error. Retry in a minute ...")
+            time.sleep(60)
 
     result = result.replace("\n", "")
     result = result.replace("</record>", "</record>\n")
