@@ -142,8 +142,8 @@ else:
 if not inputfile:
     config = Config.instance()
     os.system("wget -P %s https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" % path)
-    os.system("unzip -o -p rismAllMARCXML.zip rism*.xml > %s/14_input.xml" % path)
-    inputfile = "14_input.xml"
+    os.system("unzip -o -p %s/rismAllMARCXML.zip rism*.xml > %s/14_input.xml" % (path, path))
+    inputfile = path + "/14_input.xml"
 
 
 ##################################################################################
