@@ -410,6 +410,7 @@ languages["unbekannt"] = "und"
 languages["yiddish"] = "yid"
 languages["basque"] = "baq"
 
+languages["français moyen"] = "frm"
 languages["français"] = "fre"
 languages["allemand"] = "ger"
 languages["anglais"] = "eng"
