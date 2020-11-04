@@ -281,7 +281,10 @@ for oldrecord in xmlstream(inputfile, "Record"):
     # Subject headings
     subjects = oldrecord.get("dc:subject", "")
     for subject in subjects:
-        f650a = subject["#text"]
+        try:
+            f650a = subject["#text"]
+        except:
+            f650a = ""
         marcrecord.add("650", a=f650a)
 
     # GND-content and -carrier
