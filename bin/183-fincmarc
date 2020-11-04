@@ -63,15 +63,19 @@ def get_sru_records(start, max):
 
     while True:
 
-        result = requests.get("https://sru.k10plus.de/k10plus?", params=params)
-        x = result.status_code
-        if x != 200:
-            print(x)
-        result = result.text
-        if "</record>" in result:
-            break
-        else:
-            time.sleep(5)
+        try:
+            result = requests.get("https://sru.k10plus.de/k10plus?", params=params)
+        except:
+            result = ""
+        if result:
+            x = result.status_code
+            if x != 200:
+                print(x)
+            result = result.text
+            if "</record>" in result:
+                break
+            else:
+                time.sleep(5)
 
     result = result.replace("\n", "")
     result = result.replace("</record>", "</record>\n")
