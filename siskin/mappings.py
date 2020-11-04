@@ -412,6 +412,7 @@ languages["basque"] = "baq"
 languages["occitan"] = "oci"
 languages["breton"] = "bre"
 
+languages["dialecte français"] = "fre"
 languages["français moyen"] = "frm"
 languages["français ancien"] = "fro"
 languages["français"] = "fre"
