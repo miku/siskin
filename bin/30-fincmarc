@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#                   Martin Czygan, <martin.czygan@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: SSOAR
+SID: 30
+Ticket: #6699, #7893, #12686, #12737, #13168, #13234, #14285, #13609, #13261, #18601
+Origin: OAI
+
+"""
+
+
+import re
+import os
+from io import BytesIO
+
+import marcx
+import pymarc
+from siskin.configuration import Config
+from siskin.utils import marc_clean_record, xmlstream, convert_to_finc_id
+from siskin.arguments import FincArgumentParser
+
+
+whitelist = set(["1080400", "10800", "1080401", "1080402", "1080403", "1080404", "1080405",
+                 "1080406", "1080407", "1080408", "1080409", "1080410", "1080411", "1080412",
+                 "10800", "1080400", "10899"])
+
+collection_map = {
+    "1080400": "Massenkommunikation",
+    "10800": "Kommunikationswissenschaften",
+    "1080401": "Rundfunk, Telekommunikation",
+    "1080402": "Druckmedien",
+    "1080403": "Andere Medien",
+    "1080404": "Interaktive, elektronische Medien",
+    "1080405": "Medieninhalte, Aussagenforschung",
+    "1080406": "Kommunikatorforschung, Journalismus",
+    "1080407": "Wirkungsforschung, Rezipientenforschung",
+    "1080408": "Meinungsforschung",
+    "1080409": "Werbung, Public Relations, Öffentlichkeitsarbeit",
+    "1080410": "Medienpädagogik",
+    "1080411": "Medienpolitik, Informationspolitik, Medienrecht",
+    "1080412": "Medienökonomie, Medientechnik",
+    "10800": "Kommunikationswissenschaften",
+    "1080400": "Massenkommunikation (allgemein)",
+    "10899": "Sonstiges zu Kommunikationswissenschaften"
+}
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "30"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+filemap = fip.args.filemap
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old inputfiles and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Acquire input data
+##################################################################################
+
+if not inputfile:    
+    config = Config.instance()
+    try:
+        inputfile = config.get(SID, "input")
+    except:
+        inputfile = ""
+
+    if not inputfile:
+        inputfile = fip.inputfilename(SID)
+        os.system("metha-sync -format marcxml http://www.ssoar.info/OAIHandler/request")
+        os.system("metha-cat -format marcxml http://www.ssoar.info/OAIHandler/request > %s" % inputfile)
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for oldrecord in xmlstream(inputfile, "record"):
+
+    oldrecord = BytesIO(oldrecord)
+    oldrecord = pymarc.marcxml.parse_xml_to_array(oldrecord)
+    oldrecord = oldrecord[0]
+
+    marcrecord = marcx.Record.from_record(oldrecord)
+    marcrecord.force_utf8 = True
+    marcrecord.strict = False
+
+    # Identifier
+    for identifiers in oldrecord.get_fields("856"):
+        for f001 in identifiers.get_subfields("u"):
+            regexp = re.search("/document/(\d+)", f001)
+            if regexp:
+                f001 = regexp.group(1)
+                marcrecord.add("001", data="finc-30-%s" % f001)
+                break
+        break
+
+    # Series
+    for collections in oldrecord.get_fields("084"):
+        for collection in collections.get_subfields("a"):
+            f490a = collection_map.get(collection, "")
+            marcrecord.add("490", a=f490a)
+
+    # Collection and sealing
+    f980 = ["a", f001, "b", "30", "c", "sid-30-col-ssoar"]
+    for collections in oldrecord.get_fields("084"):
+        for collection in collections.get_subfields("a"):
+            if collection in whitelist:
+                f980 = ["a", f001, "b", SID, "c", "sid-30-col-ssoar", "c", "sid-30-col-ssoaradlr"]
+                break
+    marcrecord.add("980", subfields=f980)
+
+    # Convert all identifier in 001, 770, 772 ... to Finc schema
+    marcrecord = convert_to_finc_id(SID, marcrecord, encode=False, finc_prefix=True)
+
+    # Remove empty subfields
+    marc_clean_record(marcrecord)
+
+    # Write record to file
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+outputfile.close()
