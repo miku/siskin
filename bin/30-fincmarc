@@ -36,6 +36,7 @@ Origin: OAI
 import re
 import os
 from io import BytesIO
+from datetime import date
 
 import marcx
 import pymarc
@@ -66,6 +67,21 @@ collection_map = {
     "10800": "Kommunikationswissenschaften",
     "1080400": "Massenkommunikation (allgemein)",
     "10899": "Sonstiges zu Kommunikationswissenschaften"
+}
+
+month_map = {
+    "Jan": "01",
+    "Feb": "02",
+    "Mrz": "03",
+    "Apr": "04",
+    "Mai": "05",
+    "Jun": "06",
+    "Jul": "07",
+    "Aug": "08",
+    "Sep": "09",
+    "Okt": "10",
+    "Nov": "11",
+    "Dez": "12"
 }
 
 
@@ -116,6 +132,12 @@ if not inputfile:
 # 3. Process data
 ##################################################################################
 
+# Get current date as integer
+today = date.today()
+today = str(today)
+today = today.replace("-", "")
+today = int(today)
+
 for oldrecord in xmlstream(inputfile, "record"):
 
     oldrecord = BytesIO(oldrecord)
@@ -125,6 +147,28 @@ for oldrecord in xmlstream(inputfile, "record"):
     marcrecord = marcx.Record.from_record(oldrecord)
     marcrecord.force_utf8 = True
     marcrecord.strict = False
+
+    # Kick titles with embargo
+    has_current_embargo = False
+    for footnotes in oldrecord.get_fields("500"):
+        for footnote in footnotes.get_subfields("a"):
+            if "Embargo" in footnote:
+                match = re.search("\s(\d\d)\.\s(\w\w\w)\.?\s(\d\d\d\d)", footnote)
+                if match:
+                    day, month, year = match.groups()
+                    month = month_map[month]
+                    embargo = year + month + day
+                    embargo = int(embargo)
+                    if embargo > today:
+                        has_current_embargo = True
+                    break
+                else:
+                    print("Embargo note does not match: " + footnote)
+            else:
+                continue
+
+    if has_current_embargo:
+        continue
 
     # Identifier
     for identifiers in oldrecord.get_fields("856"):
