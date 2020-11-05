@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
 # Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -51,11 +51,17 @@ from siskin.utils import check_isbn, check_issn, marc_build_field_008
 SID = "172"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
-outputformat = fip.args.outputformat
-inputfilename = fip.args.inputfilename
 
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old inputfiles and outputfiles as specified in input-hist-size and output-hist-size
 fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
 
 # Set output format for MARC record
 if outputformat == "xml":
@@ -66,17 +72,17 @@ else:
 
 ##################################################################################
 # 2. Get input data
-################################################################################
+##################################################################################
 
-if not inputfilename:
-    inputfilename = fip.inputfilename(SID)
+if not inputfile:
+    inputfile = fip.inputfilename(SID)
     config = Config.instance()
     user = config.get(SID, "user")
     password = config.get(SID, "password")
     url = config.get(SID, "url")
-    os.system('wget -O %s --user=%s --password=%s "%s"' % (inputfilename, user, password, url))
+    os.system('wget -O %s --user=%s --password=%s "%s"' % (inputfile, user, password, url))
 
-inputfile = open(inputfilename, "r", encoding="utf-16")
+inputfile = open(inputfile, "r", encoding="utf-16")
 records = csv.reader(inputfile, delimiter="\t")
 
 
@@ -92,24 +98,24 @@ for fields in records:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    # Formatfestlegung
+    # Format for entire source
     format = "Article"
 
     # Leader
     leader = formats[format]["Leader"]
     marcrecord.leader = leader
 
-    # ID
+    # Identifier
     f001 = fields[0]
     f001 = f001.split("-")
     f001 = f001[2]
     marcrecord.add("001", data="finc-172-" + f001)
 
-    # Zugangstyp
+    # Access facet
     f007 = formats[format]["e007"]
     marcrecord.add("007", data=f007)
 
-    # Periodizität
+    # Periodicity
     language = fields[11]
     if language == "engrish":
         language = "eng"
@@ -123,11 +129,11 @@ for fields in records:
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
-    # Sprache
+    # Language
     if len(language) == 3:
         marcrecord.add("041", a=language)
 
-    # 1. Schöpfer
+    # First creator
     persons = fields[6]
     if persons:
         num_persons = persons.split(" ")
@@ -144,7 +150,7 @@ for fields in records:
         f100a = persons[0]
         marcrecord.add("100", a=f100a)
 
-    # Haupttitel
+    # Title statement
     f245a = fields[4]
     f245b = fields[1]
     if not f245a:
@@ -155,49 +161,50 @@ for fields in records:
     f245c = fields[6]
     marcrecord.add("245", a=f245a, b=f245b, c=f245c)
 
-    # Erscheinungsvermerk
+    # Imprint
     f260b = fields[8]
     f260c = fields[9]
     f260c = f260c.replace("\n", "")
     if len(f260c) == 4:
         marcrecord.add("260", b=f260b, c=f260c)
 
-    # RDA-Inhaltstyp
+    # RDA-content
     f336b = formats[format]["336b"]
     marcrecord.add("336", b=f336b)
 
-    # RDA-Datenträgertyp
+    # RDA-carrier
     f338b = formats[format]["338b"]
     marcrecord.add("338", b=f338b)
 
-    # Rechtehinweis
+    # Legal note
     f540a = fields[2]
     marcrecord.add("540", a=f540a, u="http://creativecommons.org/licenses/by/4.0/")
 
-    # Schlagwörter
+    # Subject headings
     f650a = fields[12]
     marcrecord.add("650", a=f650a)
 
-    # GND-Inhalts- und Datenträgertyp
+    # GND-content and -carrier
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
     marcrecord.add("655", a=f655a, _2=f6552)
 
-    # weitere Schöpfer
+    # Additional creator
     for person in persons[1:]:
         marcrecord.add("700", a=person)
 
-    # Link zur Ressource
+    # Link to fulltext
     f856u = fields[3]
     marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
 
-    # SWB-Inhaltstyp
+    # SWB-content
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
 
-    # Kollektion
+    # Collection and sealing
     marcrecord.add("980", a=f001, b="172", c="sid-172-col-opal")
 
+    # Write record to file
     if outputformat == "xml":
         outputfile.write(marcrecord)
     else:
