@@ -7,7 +7,7 @@
 # Default output-hist-size = 20
 
 10-fincmarc --inputformat json
-14-fincmarc --outputformat xml --output-hist-size 5 --input-hist-size 5
+14-fincmarc --outputformat xml --output-hist-size 5
 15-fincmarc --output-hist-size 10 --filemap /home/schenk/15_fieldmap.json
 17-fincmarc --interval manually --input-hist-size 3 --output-hist-size 3
 20-fincmarc --input-hist-size 3 --output-hist-size 3
