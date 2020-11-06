@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
 # Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -49,9 +49,16 @@ from siskin.arguments import FincArgumentParser
 SID = "190"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
+
+# Get arguments
+inputfile = fip.args.inputfile
 outputformat = fip.args.outputformat
-inputfilename = fip.args.inputfilename
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
+fip.remove_old_outputfiles(SID)
 
 fip.remove_old_outputfiles(SID)
 
@@ -64,13 +71,13 @@ else:
 
 ##################################################################################
 # 2. Get input data
-################################################################################
+##################################################################################
 
-if not inputfilename:
+if not inputfile:
     config = Config.instance()
-    inputfilename = config.get(SID, "input")
+    inputfile = config.get(SID, "input")
 
-inputfile = open(inputfilename, "rb")
+inputfile = open(inputfile, "rb")
 reader = pymarc.MARCReader(inputfile, force_utf8=True)
 
 
@@ -84,28 +91,32 @@ for record in reader:
     record.force_utf8 = True
     record.strict = False
 
-    # Ergänze Pos 18, da Metadaten ISBD-Zeichen enthalten
+    # Add Leader Pos. 18, because metadata contains ISBD characters
     leader1 = record.leader[:18]
     leader2 = record.leader[19:]
     leader = leader1 + "i" + leader2
     record.leader = leader
 
-    # Identifikator
+    # Identifier
     f001 = record["001"].data
     record.remove_fields("001")
     record.add("001", data="190-" + f001)
 
+    # Collection and sealing
     collections = ["a", f001, "b", "190", "c", "sid-190-col-eebo", "c", "ZDB-1-EEB"]
     record.add("980", subfields=collections)
 
     # Removes surplus delimiters (ISBD etc.), refs #16965
     record = remove_delimiter(record)
 
+    # Remove empty subfields
     marc_clean_record(record)
 
+    # Write record to file
     if outputformat == "xml":
         outputfile.write(record)
     else:
         outputfile.write(record.as_marc())
 
+inputfile.close()
 outputfile.close()
