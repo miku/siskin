@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
 # Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -36,7 +36,7 @@ import os
 import re
 import sys
 import time
-from io import BytesIO, StringIO
+from io import BytesIO
 
 import requests
 
@@ -85,10 +85,14 @@ def get_sru_records(start, max):
 SID = "193"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
+
+# Get arguments
 outputformat = fip.args.outputformat
 
-fip.sid_path(SID)
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
 fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
@@ -100,7 +104,7 @@ else:
 
 ##################################################################################
 # 2. Fetch input data
-################################################################################
+##################################################################################
 
 result = get_sru_records(1, 1)
 n = result[0]
@@ -124,17 +128,17 @@ while start < all_records:
     oldrecords = get_sru_records(start, max_records_request)
 
     if not oldrecords:
-        sys.exit("Anfrage nicht erfolgreich")
+        sys.exit("Query failed")
 
     if len(oldrecords) == 0:
-        sys.exit("leere Liste")
+        sys.exit("Empty list")
 
     for oldrecord in oldrecords[:-1]:
 
         match = re.search("(\<record.*?\>.*?\</record\>)", oldrecord)
 
         if not match:
-            sys.exit("kein record-Element")
+            sys.exit("Missing record-tag")
 
         oldrecord = match.group(1)
         oldrecord = oldrecord.encode("latin-1")
@@ -146,6 +150,7 @@ while start < all_records:
         newrecord.force_utf8 = True
         newrecord.strict = False
 
+        # Kick records without title
         try:
             newrecord["245"]["a"]
         except:
@@ -163,17 +168,19 @@ while start < all_records:
             leader = leader1 + "b" + leader2
             newrecord.leader = leader
 
-        # Identifikator
+        # Identifier
         f001 = newrecord["001"].data
         newrecord.remove_fields("001")
         newrecord.add("001", data="193-" + f001)
 
-        # Ansigelung und Kollektion
+        # Collection and sealing
         collections = ["a", f001, "b", "193", "c", "sid-193-col-hebisbbi"]
         newrecord.add("980", subfields=collections)
 
+        # Remove empty subfields
         marc_clean_record(newrecord)
 
+        # Write record to file
         if outputformat == "xml":
             outputfile.write(newrecord)
         else:
