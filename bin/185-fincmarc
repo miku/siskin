@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
 # Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
@@ -19,7 +19,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -29,11 +29,6 @@ Source: DABI
 SID: 185
 Ticket: #15924
 Origin: local file
-
-config:
-
-[dabi]
-input = path/to/json
 
 """
 
@@ -205,11 +200,15 @@ dabi_to_ddc = {
 SID = "185"
 
 fip = FincArgumentParser()
-inputfilename = fip.inputfilename(SID)
-outputfilename = fip.outputfilename(SID)
+
+# Get arguments
+inputfile = fip.args.inputfile
 outputformat = fip.args.outputformat
 
-fip.sid_path("123")
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
 fip.remove_old_outputfiles(SID)
 
 # Set output format for MARC record
@@ -223,11 +222,11 @@ else:
 # 2. Acquire input data
 ##################################################################################
 
-if not inputfilename:
+if not inputfile:
     config = Config.instance()
-    inputfilename = config.get("dabi", "input")
+    inputfile = config.get("dabi", "input")
 
-inputfile = open(inputfilename, "r")
+inputfile = open(inputfile, "r")
 jsonrecords = inputfile.readlines()
 
 
@@ -241,20 +240,20 @@ for jsonrecord in jsonrecords:
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    # Formatfestelegung
+    # Format for entire source
     format = "Article"
 
     # Leader
     leader = formats[format]["Leader"]
     marcrecord.leader = leader
 
-    # Identifikator
+    # Identifier
     f001 = get_field(jsonrecord, "artikel_id")
     if not f001:
         continue
     marcrecord.add("001", data="185-" + f001)
 
-    # Zugangsfacette
+    # Access type (online or physical)
     url = get_field(jsonrecord, "url")
     if url:
         f007 = formats[format]["e007"]
@@ -262,7 +261,7 @@ for jsonrecord in jsonrecords:
         f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
 
-    # Periodizität
+    # Periodicity
     year = get_field(jsonrecord, "jahr")
     periodicity = formats[format]["008"]
     language = "ger"
@@ -274,72 +273,72 @@ for jsonrecord in jsonrecords:
     f022a = check_issn(identifier)
     marcrecord.add("022", a=f022a)
 
-    # Sprache
+    # Language
     language = "ger"
     marcrecord.add("041", a=language)
 
-    # DDC
+    # DDC class
     dabi = get_field(jsonrecord, "notationen")
     dabi = dabi.split(";")[0]
     dabi = dabi.replace("a", ".")
     f082 = dabi_to_ddc.get(dabi, "")
     marcrecord.add("082", a=f082)
 
-    # 1. Urheber
+    # First creator
     authors = get_field(jsonrecord, "autoren")
     authors = authors.split("; ")
     f100a = authors[0]
     f100a = f100a.strip()
     marcrecord.add("100", a=f100a, _4="aut")
 
-    # Haupttitel und Titelzusatz
+    # Title statement
     f245a = get_field(jsonrecord, "titel")
     f245b = get_field(jsonrecord, "untertitel")
     marcrecord.add("245", a=f245a, b=f245b)
 
-    # Erscheinungsvermerk
+    # Imprint
     f260a = get_field(jsonrecord, "ort")
     f260b = get_field(jsonrecord, "verlag")
     f260c = get_field(jsonrecord, "jahr")
     marcrecord.add("260", a=f260a, b=f260b, c=f260c)
 
-    # RDA-Inhaltstyp
+    # RDA-content
     f336b = formats[format]["336b"]
     marcrecord.add("336", b=f336b)
 
-    # RDA-Datenträgertyp
+    # RDA-carrier
     f338b = formats[format]["338b"]
     marcrecord.add("338", b=f338b)
 
-    # Fußnote
+    # Footnote
     f500a = get_field(jsonrecord, "bemerkungen")
     marcrecord.add("500", a=f500a)
     f500a = get_field(jsonrecord, "oa_status")
     marcrecord.add("500", a=f500a)
 
-    # Zusammenfassung
+    # Abstract
     f520a = get_field(jsonrecord, "abstract")
     marcrecord.add("520", a=f520a)
 
-    # Schlagwörter
+    # Subject headings
     subjects = get_field(jsonrecord, "schlagworte")
     subjects = subjects.split(";")
     for subject in subjects:
         subject = subject.strip()
         marcrecord.add("650", a=subject)
 
-    # GND-Inhalts- und Datenträgertyp
+    # GND-content and -carrier
     f655a = formats[format]["655a"]
     f6552 = formats[format]["6552"]
     marcrecord.add("655", a=f655a, _2=f6552)
 
-    # weitere Urheber
+    # Additional creators
     if authors:
         for f700a in authors[1:]:
             f700a = f700a.strip()
             marcrecord.add("700", a=f700a, _4="aut")
 
-    # Herausgeber
+    # Editors
     editors = get_field(jsonrecord, "herausgeber")
     if "Schelle-Wolff" in editors:
         editors = editors.split(", ")
@@ -350,7 +349,7 @@ for jsonrecord in jsonrecords:
             f700a = f700a.strip()
             marcrecord.add("700", a=f700a, _4="edt")
 
-    # Zeitschrift
+    # Parent work (journal)
     f773t = get_field(jsonrecord, "zs_titel")
     volume = get_field(jsonrecord, "band")
     issue = get_field(jsonrecord, "heft")
@@ -360,26 +359,29 @@ for jsonrecord in jsonrecords:
     f773g = marc_build_field_773g(volume, year, issue, spage, epage)
     marcrecord.add("773", t=f773t, g=f773g)
 
-    # Link zur Ressource
+    # Link to fulltext
     url = get_field(jsonrecord, "url")
     if url:
         marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=url)
 
-    # Link zur Zeitschrift
+    # Link to journal
     url = get_field(jsonrecord, "zs_link")
     if url:
         marcrecord.add("856", q="text/html", _3="Link zur Zeitschrift", u=url)
 
-    # SWB-Inhaltstyp
+    # SWB-content
     f935c = formats[format]["935c"]
     marcrecord.add("935", c=f935c)
 
+    # Collection and sealing
     collections = ["a", f001, "b", "185", "c", "sid-185-col-dabi"]
     marcrecord.add("980", subfields=collections)
 
+    # Write record to file
     if outputformat == "xml":
         outputfile.write(marcrecord)
     else:
         outputfile.write(marcrecord.as_marc())
 
+inputfile.close()
 outputfile.close()
