@@ -40,3 +40,4 @@
 195-fincmarc --inputformat mrc
 196-fincmarc --interval daily
 198-fincmarc --interval manually --inputformat mrc --input-hist-size 10 --output-hist-size 10
+199-fincmarc --interval manually --inputformat csv --input-hist-size 5 --output-hist-size 5
