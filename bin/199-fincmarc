@@ -104,13 +104,14 @@ for fields in records:
     # topic = 5
     # description = 6
 
+    # Ignore first line
     if fields[0] == "id":
         continue
 
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
 
-    # Format
+    # Format for entire source
     format = "Article"
 
     # Leader
@@ -121,7 +122,7 @@ for fields in records:
     f001 = fields[0]
     marcrecord.add("001", data="199-" + f001)
 
-    # Access type
+    # Access type (online or physical)
     f007 = formats[format]["p007"]
     marcrecord.add("007", data=f007)
 
@@ -211,6 +212,7 @@ for fields in records:
     # Collection and sealing
     marcrecord.add("980", a=f001, b=SID, c="sid-199-col-litmont")
 
+    # Write record to file
     if outputformat == "xml":
         outputfile.write(marcrecord)
     else:
