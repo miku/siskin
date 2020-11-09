@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 
@@ -137,13 +137,20 @@ else:
 
 ##################################################################################
 # 2. Get input data
-################################################################################
+##################################################################################
 
 if not inputfile:
-    os.system("wget -P %s https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" % path)
-    os.system("unzip -o -p %s/rismAllMARCXML.zip rism*.xml > %s/14_input.xml" % (path, path))
-    os.system("rm -f %s/rismAllMARCXML.zip*" % path)
-    inputfile = path + "/14_input.xml"
+    config = Config.instance()
+    try:
+        inputfile = config.get(SID, "input")
+    except:
+        inputfile = ""
+    if not inputfile:
+        print("No inputfile given. Starting new download ...")
+        os.system("wget -P %s https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" % path)
+        os.system("unzip -o -p %s/rismAllMARCXML.zip rism*.xml > %s/14_input.xml" % (path, path))
+        os.system("rm -f %s/rismAllMARCXML.zip*" % path)
+        inputfile = path + "/14_input.xml"
 
 
 ##################################################################################
