@@ -78,7 +78,7 @@ else:
 # 2. Get input data
 ##################################################################################
 
-# Get current ISSN list over AMSL API
+# Get current ISSN list over AMSL-API
 config = Config.instance()
 try:
     issn_list_url = config.get(SID, "issn-list-url")
@@ -90,9 +90,12 @@ if not issn_list_url:
 issn_file = path + "/39_issn_file"
 os.system("curl -sL --fail '%s' > %s" % (issn_list_url, issn_file))
 issn_file = open(issn_file, "r")
+
+# Write ISSNs into list removing line breaks
 issn_list = issn_file.readlines()
 issn_list = [issn.rstrip("\n") for issn in issn_list]
 
+# Check if inputfile exists and harvest new if necessary
 if not inputfile:
     try:
         inputfile = config.get(SID, "input")
