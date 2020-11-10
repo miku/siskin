@@ -168,5 +168,4 @@ for oldrecord in xmlstream(inputfile, "record"):
         outputfile.write(record.as_marc())
 
 issn_file.close()
-inputfile.close()
 outputfile.close()
