@@ -186,6 +186,6 @@ while start < all_records:
 
 outputfile.close()
 
-if records_written < 508000:
+if records_written < 526000:
     os.system("rm -f s%" % outputfilename)
     print("Too few records: do not write output file.")
