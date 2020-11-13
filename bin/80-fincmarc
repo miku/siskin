@@ -1,0 +1,321 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Internetdatenbanken
+SID: 80
+Ticket: #5374, #7956, #9913, #13653, #14643, #14906, #14982, #18642
+Origin: local files
+
+"""
+
+
+import os
+import re
+import sys
+import requests
+
+import xmltodict
+import marcx
+import pymarc
+
+from siskin.mappings import formats
+from siskin.configuration import Config
+from siskin.arguments import FincArgumentParser
+from siskin.utils import marc_build_field_008, marc_get_languages
+
+
+def get_field(xmlrecord, label):
+    """
+    Returns a specific field within the record.  
+    """
+    value = ""
+    fields = xmlrecord["Attribute"]
+    for field in fields:
+        if field["@label"] == label:
+            try:
+                value = field["AttributeValue"][0]["AttributeComponent"][0]["#text"]
+            except:
+                value = ""
+            break
+
+    fields = xmlrecord["Facette"]
+    for field in fields:
+        if field["@label"] == label:
+            try:
+                value = field["Category"][0]["Name"]["#text"]
+            except:
+                value = ""
+            break
+
+    return value
+
+
+def get_year(xmlrecord):
+    """
+    Returns a year from a possible field.
+    """
+    year = get_field(xmlrecord, "dateissued")
+    if not year:
+        edition = get_field(xmlrecord, "edition")
+        notes = get_field(xmlrecord, "notes")
+        match1 = re.search("(\d\d\d\d)", edition)
+        match2 = re.search("\s(\d\d\d\d),\s", notes)
+        if match1:
+            year = match1.group(1)
+        elif match2:
+            year = match2.group(1)
+        else:
+            year = ""
+
+    return year
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "80"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfolder = fip.args.inputfolder
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old outputfiles as specified in output-hist-size
+fip.remove_old_outputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Get input data
+##################################################################################
+
+if not inputfolder:
+    config = Config.instance()
+    inputfolder = config.get(SID, "input")
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+marcrecord = marcx.Record(force_utf8=True)
+marcrecord.strict = False
+
+for root, _, files in os.walk(inputfolder):
+
+    for inputfilename in files:
+
+        if not inputfilename.startswith("monday."):
+            continue
+
+        inputfilepath = os.path.join(root, inputfilename)
+        inputfile = open(inputfilepath, "r", encoding="utf-8")
+        xmlfile = inputfile.read()
+        
+        try:
+            xmlrecords = xmltodict.parse(xmlfile, force_list=["AttributeValue", "AttributeComponent", "Category"])
+        except:
+            continue
+
+        for xmlrecord in xmlrecords["DBClear"]["Resource"]:
+
+            # Only consider fulltext articles with valide URL
+            link = get_field(xmlrecord, "link")
+            if not link.endswith(".pdf"):
+                continue
+
+            try:
+                result = requests.get(link)
+            except:
+                continue
+
+            x = result.status_code
+            if x != 200:
+                continue
+            
+            # Format for entire source
+            format = "Article"
+
+            # Leader
+            leader = formats[format]["Leader"]
+            marcrecord.leader = leader
+
+            # Identifier
+            f001 = xmlrecord["@id"]
+            marcrecord.add("001", data="finc-80-" + f001)
+
+            # Access facet (online or physical)
+            f007 = formats[format]["e007"]
+            marcrecord.add("007", data=f007)
+
+            # Periodicity
+            year = get_year(xmlrecord)
+            periodicity = formats[format]["008"]
+            language = get_field(xmlrecord, "language")
+            language = marc_get_languages(language)
+            f008 = marc_build_field_008(year, periodicity, language)
+            marcrecord.add("008", data=f008)
+
+            # Language
+            marcrecord.add("041", a=language)
+
+            # First creator
+            creator = get_field(xmlrecord, "creator")
+            if creator:
+                if ", " in creator:
+                    marcrecord.add("100", a=creator, _4="aut")
+                else:
+                    marcrecord.add("110", a=creator)
+
+            # Title
+            f245 = get_field(xmlrecord, "title")
+            if ": " in f245:
+                match = re.search("(.*?):\s(.*)", f245)
+                if match:
+                    f245a, f245b = match.groups()
+                    f245a = f245a.strip()
+                else:
+                    sys.exit("Title does not match: " + f245)
+            else:
+                f245a = f245
+                f245b = ""
+            marcrecord.add("245", a=f245a, b=f245b)
+
+            # Alternative title
+            f246a = get_field(xmlrecord, "titlealternative")
+            marcrecord.add("246", a=f246a)
+
+            # Imprint
+            f260a = get_field(xmlrecord, "placeofpublication")
+            f260b = get_field(xmlrecord, "publisher")
+            f260c = get_year(xmlrecord)
+            marcrecord.add("260", a=f260a, b=f260b, c=f260c)
+
+            # Extension
+            f300a = get_field(xmlrecord, "extent")
+            marcrecord.add("300", a=f300a)
+            
+            # RDA-content
+            f336b = formats[format]["336b"]
+            marcrecord.add("336", b=f336b)
+
+            # RDA-carrier
+            f338b = formats[format]["338b"]
+            marcrecord.add("338", b=f338b)
+
+            # Series
+            f490a = get_field(xmlrecord, "notes")
+            if "Schriftenreihe" in f490a:
+                f490a = f490a.replace("Schriftenreihe: ", "")
+                marcrecord.add("490", a=f490a)
+
+            # Rights
+            f500a = get_field(xmlrecord, "accessrights")
+            marcrecord.add("500", a=f500a)
+
+            # Table of content
+            f505a = get_field(xmlrecord, "tableofcontents")
+            marcrecord.add("505", a=f505a)
+
+            # Abstract
+            f520a = get_field(xmlrecord, "description")
+            marcrecord.add("520", a=f520a)
+
+            # Subject headings
+            fields = xmlrecord["Facette"]
+            for field in fields:
+                if field["@label"] == "subjectSWDTheSozKMW":
+                    try:
+                        subjects = field["Category"]
+                    except:
+                        subjects = []
+                    for subject in subjects:
+                        subject = subject["Name"]["#text"]
+                        marcrecord.add("650", a=subject)
+
+            # GND-content and -carrier
+            f655a = formats[format]["655a"]
+            f6552 = formats[format]["6552"]
+            marcrecord.add("655", a=f655a, _2=f6552)
+
+            # Additional creators
+            fields = xmlrecord["Attribute"]
+            for field in fields:
+                if field["@label"] == "creator":
+                    try:
+                        creators = field["AttributeValue"]
+                    except:
+                        creators = ""
+                    if creators:
+                        for creator in creators[1:]:
+                            creator = creator["AttributeComponent"][0]["#text"]
+                            marcrecord.add("700", a=creator)
+
+                if field["@label"] == "contributors":
+                    try:
+                        contributors = field["AttributeValue"]
+                    except:
+                        contributors = ""
+                    if contributors:
+                        for contributor in contributors:
+                            contributor = contributor["AttributeComponent"][0]["#text"]
+                            marcrecord.add("700", a=contributor)
+
+            # Parent work
+            f773g = get_field(xmlrecord, "notes")
+            if "In: " in f773g or "in: " in f773g or "erschienen" in f773g:
+                marcrecord.add("773", g=f773g)
+
+            # Link to fulltext
+            f856u = get_field(xmlrecord, "link")
+            marcrecord.add("856", q="text/html", _3="Link zur Ressource", u=f856u)
+
+            # SWB-content
+            f935c = formats[format]["935c"]
+            marcrecord.add("935", c=f935c)
+
+            # Collection and sealing
+            marcrecord.add("980", a=f001, b=SID, c="sid-200-col-finctest")
+
+            # Write record to file
+            if outputformat == "xml":
+                outputfile.write(marcrecord)
+            else:
+                outputfile.write(marcrecord.as_marc())
+
+        inputfile.close()
+
+outputfile.close()
