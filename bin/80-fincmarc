@@ -315,7 +315,10 @@ for root, _, files in os.walk(inputfolder):
                         creators = ""
                     if creators:
                         for creator in creators[1:]:
-                            creator = creator["AttributeComponent"][0]["#text"]
+                            try:
+                                creator = creator["AttributeComponent"][0]["#text"]
+                            except:
+                                creator = ""
                             marcrecord.add("700", a=creator)
 
                 if field["@label"] == "contributors":
