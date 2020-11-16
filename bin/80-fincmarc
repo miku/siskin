@@ -131,9 +131,6 @@ if not inputfolder:
 # 3. Process data
 ##################################################################################
 
-marcrecord = marcx.Record(force_utf8=True)
-marcrecord.strict = False
-
 for root, _, files in os.walk(inputfolder):
 
     for inputfilename in files:
@@ -165,6 +162,10 @@ for root, _, files in os.walk(inputfolder):
             x = result.status_code
             if x != 200:
                 continue
+
+            # Create record object
+            marcrecord = marcx.Record(force_utf8=True)
+            marcrecord.strict = False
             
             # Format for entire source
             format = "Article"
