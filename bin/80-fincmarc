@@ -155,7 +155,7 @@ for root, _, files in os.walk(inputfolder):
                 continue
 
             try:
-                result = requests.get(link)
+                result = requests.head(link, timeout=1)
             except:
                 continue
 
