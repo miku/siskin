@@ -393,6 +393,17 @@ formats["Object"]["935c"] = "gegenst"
 # Sprachen
 #################################################################################
 
+languages["deutsch"] = "ger"
+languages["englisch"] = "eng"
+languages["französisch"] = "fre"
+languages["spanisch"] = "spa"
+languages["türkisch"] = "ota"
+languages["chinesisch"] = "chi"
+languages["italienisch"] = "ita"
+languages["schwedisch"] = "swe"
+languages["portugiesisch"] = "por"
+languages["niederländisch"] = "dut"
+
 languages["english"] = "eng"
 languages["french"] = "fre"
 languages["german"] = "ger"
