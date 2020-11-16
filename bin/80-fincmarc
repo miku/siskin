@@ -149,11 +149,23 @@ for root, _, files in os.walk(inputfolder):
 
         for xmlrecord in xmlrecords["DBClear"]["Resource"]:
 
-            # Only consider fulltext articles with valide URL
-            link = get_field(xmlrecord, "link")
-            if not link.endswith(".pdf"):
+            # Kick titles that are not full text
+            fields = xmlrecord["Facette"]
+            for field in fields:
+                if field["@label"] == "typeViFaKoMFiT":
+                    try:
+                        format = field["Category"][0]["Description"]["#text"]
+                    except:
+                        format = ""
+                    break
+            else:
                 continue
 
+            if "Elektronische Volltexte" not in format:
+                continue
+
+            # Only consider records with valide URL
+            link = get_field(xmlrecord, "link")
             try:
                 result = requests.head(link, timeout=1)
             except:
@@ -166,9 +178,15 @@ for root, _, files in os.walk(inputfolder):
             # Create record object
             marcrecord = marcx.Record(force_utf8=True)
             marcrecord.strict = False
-            
-            # Format for entire source
-            format = "Article"
+
+            # Format mapping
+            format = get_field(xmlrecord, "typeViFaKoMFiT")
+            if "Hochschulschriften" in format:
+                format = "Thesis"
+            elif "Selbständige Veröffentlichungen" in format:
+                format = "Book"
+            else:
+                format = "Article"
 
             # Leader
             leader = formats[format]["Leader"]
