@@ -73,6 +73,28 @@ def get_field(xmlrecord, label):
     return value
 
 
+def get_subjects(xmlrecord):
+    """
+    Iterates over all possible fields with subjects headings and returns list without doublets.
+    """
+    all_subjects = set()
+    tags = ["subjectSWDTheSozKMW", "subjectSWDTW", "subjectSWDFW"]
+    fields = xmlrecord["Facette"]
+    for field in fields:
+        for tag in tags:
+            if field["@label"] == tag:
+                try:
+                    subjects = field["Category"]
+                except:
+                    subjects = []
+                for subject in subjects:
+                    subject = subject["Name"]["#text"]
+                    if subject != "nicht relevant":
+                        all_subjects.add(subject)
+
+    return all_subjects
+
+
 def get_year(xmlrecord):
     """
     Returns a year from a possible field.
@@ -274,16 +296,9 @@ for root, _, files in os.walk(inputfolder):
             marcrecord.add("520", a=f520a)
 
             # Subject headings
-            fields = xmlrecord["Facette"]
-            for field in fields:
-                if field["@label"] == "subjectSWDTheSozKMW":
-                    try:
-                        subjects = field["Category"]
-                    except:
-                        subjects = []
-                    for subject in subjects:
-                        subject = subject["Name"]["#text"]
-                        marcrecord.add("650", a=subject)
+            subjects = get_subjects(xmlrecord)
+            for subject in subjects:
+                marcrecord.add("650", a=subject)
 
             # GND-content and -carrier
             f655a = formats[format]["655a"]
