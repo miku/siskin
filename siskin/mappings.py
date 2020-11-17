@@ -403,6 +403,7 @@ languages["italienisch"] = "ita"
 languages["schwedisch"] = "swe"
 languages["portugiesisch"] = "por"
 languages["niederländisch"] = "dut"
+languages["norwegisch"] = "nor"
 
 languages["english"] = "eng"
 languages["french"] = "fre"
