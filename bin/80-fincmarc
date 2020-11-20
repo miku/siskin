@@ -189,7 +189,7 @@ for root, _, files in os.walk(inputfolder):
             # Only consider records with valide URL
             link = get_field(xmlrecord, "link")
             try:
-                result = requests.get(link)
+                result = requests.get(link, timeout=5)
             except:
                 continue
 
