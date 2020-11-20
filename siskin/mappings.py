@@ -407,6 +407,8 @@ languages["norwegisch"] = "nor"
 languages["dänisch"] = "dan"
 languages["polnisch"] = "pol"
 languages["tschechisch"] = "cze"
+languages["russisch"] = "rus"
+languages["slowakisch"] = "slo"
 
 languages["english"] = "eng"
 languages["french"] = "fre"
