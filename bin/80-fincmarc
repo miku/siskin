@@ -183,8 +183,8 @@ for root, _, files in os.walk(inputfolder):
             else:
                 continue
 
-            if "Elektronische Volltexte" not in format:
-                continue
+            #if "Elektronische Volltexte" not in format:
+                #continue
 
             # Only consider records with valide URL
             link = get_field(xmlrecord, "link")
@@ -203,12 +203,20 @@ for root, _, files in os.walk(inputfolder):
 
             # Format mapping
             format = get_field(xmlrecord, "typeViFaKoMFiT")
-            if "Hochschulschriften" in format:
+            link = get_field(xmlrecord, "link")
+
+            if link.endswith(".mp3"):
+                format = "Online-Audio"
+            elif link.endswith(".mp4"):
+                format = "Online-Video"
+            elif "Hochschulschriften" in format:
                 format = "Thesis"
-            elif "Selbständige Veröffentlichungen" in format:
+            elif "Selbständige Veröffentlichungen" in format or "Berichte" in format:
                 format = "Book"
-            else:
+            elif "Aufsätze" in format:
                 format = "Article"
+            else:
+                format = "Website"
 
             # Leader
             leader = formats[format]["Leader"]
