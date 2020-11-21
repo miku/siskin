@@ -409,6 +409,7 @@ languages["polnisch"] = "pol"
 languages["tschechisch"] = "cze"
 languages["russisch"] = "rus"
 languages["slowakisch"] = "slo"
+languages["bulgarisch"] = "bul"
 
 languages["english"] = "eng"
 languages["french"] = "fre"
