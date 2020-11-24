@@ -161,7 +161,7 @@ if not inputfile:
             if result.status_code != 200:
                 print("HTTP error %s: %s" % (result.status_code, url))
                 continue
-            print(entry)
+
             doc = parseString(result.text.encode('utf-8').strip())
             document = doc.childNodes[0].childNodes[0]
             document.tagName = 'record'
