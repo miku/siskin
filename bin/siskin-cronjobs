@@ -21,6 +21,7 @@
 109-fincmarc --interval manually --output-hist-size 10 --input-hist-size 10
 127-fincmarc --interval manually --output-hist-size 5
 142-fincmarc --interval manually
+151-fincmarc
 155-fincmarc --interval manually --input-hist-size 10 --output-hist-size 10
 159-fincmarc
 160-fincmarc --interval manually
