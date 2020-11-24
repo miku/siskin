@@ -46,7 +46,7 @@ from urllib.parse import urlencode
 from xml.dom.minidom import parseString
 from siskin.mappings import formats, roles
 from siskin.configuration import Config
-from siskin.utils import marc_build_field_008, check_isbn
+from siskin.utils import marc_build_field_008, check_isbn, xmlstream, marc_get_languages
 from siskin.arguments import FincArgumentParser
 from six.moves import html_parser
 
@@ -54,24 +54,82 @@ from six.moves import html_parser
 parser = html_parser.HTMLParser()
 
 
-def get_field(field, tag):
-    regexp = re.search('<.*? tag="%s">(.*)$' % tag, field)
-    if regexp:
-        _field = regexp.group(1)
-        _field = parser.unescape(_field)
-        return _field
-    else:
-        return ""
+def get_controlfield(xmlrecord, tag):
+    for field in xmlrecord["record"]["controlfield"]:
+        if field["@tag"] != tag:
+            continue
+        else:
+            return field["#text"]
+    return ""
 
 
-def get_subfield(field, tag, subfield):
-    regexp = re.search('^<datafield.*tag="%s".*><subfield code="%s">(.*?)<\/subfield>' % (tag, subfield), field)
-    if regexp:
-        _field = regexp.group(1)
-        _field = parser.unescape(_field)
-        return _field
-    else:
-        return ""
+def get_datafield(xmlrecord, tag):
+    for field in xmlrecord["record"]["datafield"]:
+        if field["@tag"] == tag:
+            return field["#text"]
+    return ""
+
+
+def get_subfield(xmlrecord, tag, code):
+    for datafield in xmlrecord["record"]["datafield"]:
+        if datafield["@tag"] == tag:
+            for subfield in datafield["subfield"]:
+                try:
+                    sc = subfield["@code"]
+                except:
+                    sc = ""
+                if  sc == code:
+                    return subfield["#text"]
+    return ""
+
+
+def get_creators(xmlrecord):
+    values = []
+    for datafield in xmlrecord["record"]["datafield"]:
+        try:
+            tag = int(datafield["@tag"])
+        except:
+            continue
+        if tag in range(101, 197):
+            creator = ""
+            role = ""
+            for subfield in datafield["subfield"]:
+                try:
+                    subfield["@code"]
+                except:
+                    continue
+                if subfield["@code"] == "a":
+                    creator = subfield["#text"]
+
+                if subfield["@code"] == "b":
+                    role = subfield["#text"]
+                    match = re.search("\[(.*?)\]", role)
+                    if match:
+                        role = match.group(1)
+                        role = role.lower()
+                        role = role.replace(".", "")
+                        role = roles.get(role, "")
+            values.append([creator, role])
+    return values
+
+
+def get_subjects(xmlrecord):
+    values = []
+    for datafield in xmlrecord["record"]["datafield"]:
+        if datafield["@tag"] == "710":
+            for subfield in datafield["subfield"]:
+                if subfield["@code"] == "a":
+                    values.append(subfield["#text"])
+                    continue
+    return values
+
+
+def get_languages(xmlrecord):
+    values = []
+    for field in xmlrecord["record"]["datafield"]:
+        if field["@tag"] == "037":
+            values.append(field["#text"])
+    return values
 
 
 ##################################################################################
@@ -172,190 +230,61 @@ if not inputfile:
         ifile.write("</collection>")
         ifile.close()
 
-inputfile = open(inputfile, "r")
-records = inputfile.read()
-records = records.split("</record>")
-
 
 ##################################################################################
 # 3. Process data
 ##################################################################################
 
-for record in records:
+for oldrecord in xmlstream(inputfile, "record"):
 
-    # Prepare fields
-    format = ""
-    form = ""
-    f001 = ""
-    f020a = ""
-    f100a = ""
-    f100e = ""
-    f245a = ""
-    f260a = ""
-    f260b = ""
-    f260c = ""
-    f300a = ""
-    f300b = ""
-    f300c = ""
-    f650a = ""
-    f700a = ""
-    f700e = ""
-
-    subjects = []
-    persons = []
-    f100 = []
-    f700 = []
-
+    xmlrecord = xmltodict.parse(oldrecord, force_list="subfield")
     marcrecord = marcx.Record(force_utf8=True)
     marcrecord.strict = False
-    fields = re.split("(</controlfield>|</datafield>)", record)
 
-    for field in fields:
+    # Format recognition
+    form = get_datafield(xmlrecord, "433")
 
-        field = field.replace("\n", "")
-        field = field.replace("</datafield>", "")
-        field = field.replace("</controlfield>", "")
+    regexp1 = re.search("\d\]?\sS\.", form)
+    regexp2 = re.search("\d\]?\sSeit", form)
+    regexp3 = re.search("\d\]?\sBl", form)
+    regexp4 = re.search("\s?Illl?\.", form)
+    regexp5 = re.search("[XVI],\s", form)
+    regexp6 = re.search("^\d+\s[SsPp]", form)
+    regexp7 = re.search("^DVD", form)
+    regexp8 = re.search("^Blu.?-[Rr]ay", form)
+    regexp9 = re.search("^H[DC] [Cc][Aa][Mm]", form)
+    regexp10 = re.search("^HDCAM", form)
+    regexp11 = re.search("[Bb]et.?-?[Cc]am", form)
+    regexp12 = re.search("CD", form)
+    regexp13 = re.search("[kKCc]asss?ette", form)
+    regexp14 = re.search("^VHS", form)
+    regexp15 = re.search("^Noten", form)
+    regexp16 = re.search("^Losebl", form)
+    regexp17 = re.search("^Film\s?\[", form)
+    regexp18 = re.search("\d\smin", form)
+    regexp19 = re.search("S\.\s\d+\s?-\s?\d+", form)
 
-        # Format recognition
-        form = get_field(field, "433")
-        if form and not format:
-
-            regexp1 = re.search("\d\]?\sS\.", form)
-            regexp2 = re.search("\d\]?\sSeit", form)
-            regexp3 = re.search("\d\]?\sBl", form)
-            regexp4 = re.search("\s?Illl?\.", form)
-            regexp5 = re.search("[XVI],\s", form)
-            regexp6 = re.search("^\d+\s[SsPp]", form)
-            regexp7 = re.search("^DVD", form)
-            regexp8 = re.search("^Blu.?-[Rr]ay", form)
-            regexp9 = re.search("^H[DC] [Cc][Aa][Mm]", form)
-            regexp10 = re.search("^HDCAM", form)
-            regexp11 = re.search("[Bb]et.?-?[Cc]am", form)
-            regexp12 = re.search("CD", form)
-            regexp13 = re.search("[kKCc]asss?ette", form)
-            regexp14 = re.search("^VHS", form)
-            regexp15 = re.search("^Noten", form)
-            regexp16 = re.search("^Losebl", form)
-            regexp17 = re.search("^Film\s?\[", form)
-            regexp18 = re.search("\d\smin", form)
-            regexp19 = re.search("S\.\s\d+\s?-\s?\d+", form)
-
-            if regexp1 or regexp2 or regexp3 or regexp4 or regexp5 or regexp6:
-                format = "Book"
-            elif regexp7:
-                format = "DVD-Video"
-            elif regexp8:
-                format = "Blu-Ray-Disc"
-            elif regexp9 or regexp10 or regexp11:
-                format = "CD-Video"
-            elif regexp12:
-                format = "CD-Audio"
-            elif regexp13 or regexp14:
-                format = "Video-Cassette"
-            elif regexp15:
-                format = "Score"
-            elif regexp16:
-                format = "Loose-leaf"
-            elif regexp17 or regexp18:
-                format = "CD-Video"
-            elif regexp19:
-                format = "Article"
-
-        # Get identifier
-        if f001 == "":
-            f001 = get_field(field, "001")
-
-        # Get ISBN
-        if f020a == "":
-            f020a = get_subfield(field, "540", "a")
-
-        # Get first creator and role
-        if f100a == "":
-            f100a = get_subfield(field, "100", "a")
-            if f100a != "":
-                f100.append("a")
-                f100.append(f100a)
-                role = get_subfield(field, "100", "b")
-                if role != "":
-                    match = re.search("\[(.*?)\]", role)
-                    if match:
-                        role = match.group(1)
-                        role = role.lower()
-                        role = role.replace(".", "")
-                        f1004 = roles.get(role, "")
-                        if not f1004:
-                            print("Missing role: %s." % role)
-                        f100.append("4")
-                        f100.append(f1004)
-
-        # Get title
-        if f245a == "":
-            f245a = get_field(field, "331")
-
-        # Get imprint (place, publisher, year)
-        if f260a == "":
-            f260a = get_field(field, "410")
-
-        if f260b == "":
-            f260b = get_field(field, "412")
-
-        if f260c == "":
-            f260c = get_field(field, "425")
-
-        # Extension and physical description
-        if f300a == "":
-            f300 = get_field(field, "433")
-            # 335 S. : zahlr. Ill. ; 32 cm
-            regexp1 = re.search("(.*)\s?:\s(.*);\s(.*)", f300)
-            # 289 S.: Zahlr. Ill.
-            regexp2 = re.search("(.*)\s?:\s(.*)", f300)
-            # 106 S. ; 21 cm
-            regexp3 = re.search("(.*)\s?;\s(.*)", f300)
-
-            if regexp1:
-                f300a, f300b, f300c = regexp1.groups()
-            elif regexp2:
-                f300a, f300b = regexp2.groups()
-            elif regexp3:
-                f300a, f300c = regexp3.groups()
-            else:
-                f300a = f300
-
-        # Get subject headings
-        f650a = get_subfield(field, "710", "a")
-        if f650a != "":
-            subjects.append(f650a)
-
-        # Get additional creators and their roles
-        regexp = re.search('tag="1\d\d"', field)  # checks if there is a person field
-        if regexp:
-            for i in range(101, 197):
-                f700a = get_subfield(field, i, "a")
-                if f700a != "":
-                    f700.append("a")
-                    f700.append(f700a)
-                    role = get_subfield(field, i, "b")
-                    if role != "":
-                        match = re.search("\[(.*?)\]", role)
-                        if match:
-                            role = match.group(1)
-                            role = role.lower()
-                            role = role.replace(".", "")
-                            f7004 = roles.get(role, "")
-                            if not f7004:
-                                print("Missing role: %s." % role)
-                            f700.append("4")
-                            f700.append(f7004)
-                    persons.append(f700)
-                    f700 = []
-                    break
-
-    # Kick records without identifier
-    if not f001:
-        continue
-
-    # Set book as default format
-    if not format:
+    if regexp1 or regexp2 or regexp3 or regexp4 or regexp5 or regexp6:
+        format = "Book"
+    elif regexp7:
+        format = "DVD-Video"
+    elif regexp8:
+        format = "Blu-Ray-Disc"
+    elif regexp9 or regexp10 or regexp11:
+        format = "CD-Video"
+    elif regexp12:
+        format = "CD-Audio"
+    elif regexp13 or regexp14:
+        format = "Video-Cassette"
+    elif regexp15:
+        format = "Score"
+    elif regexp16:
+        format = "Loose-leaf"
+    elif regexp17 or regexp18:
+        format = "CD-Video"
+    elif regexp19:
+        format = "Article"
+    else:
         format = "Book"
 
     # Leader
@@ -363,6 +292,10 @@ for record in records:
     marcrecord.leader = leader
 
     # Identifier
+    f001 = get_controlfield(xmlrecord, "001")
+    # Kick records without identifier
+    if not f001:
+        continue
     marcrecord.add("001", data="finc-151-" + f001)
 
     # Access facet (online or physical)
@@ -370,27 +303,72 @@ for record in records:
     marcrecord.add("007", data=f007)
 
     # Periodicity
-    year = f260c
+    year = get_datafield(xmlrecord, "425")
     periodicity = formats[format]["008"]
-    language = ""
+    language = get_languages(xmlrecord)
+    language = marc_get_languages(language)
     f008 = marc_build_field_008(year, periodicity, language)
     marcrecord.add("008", data=f008)
 
+    # Language
+    language = get_languages(xmlrecord)
+    f041a = marc_get_languages(language)
+    marcrecord.add("041", a=f041a)
+
     # ISBN
-    f020a = check_isbn(f020a)
+    isbn = get_subfield(xmlrecord, "540", "a")
+    f020a = check_isbn(isbn)
     marcrecord.add("020", a=f020a)
 
-    # First creator
-    marcrecord.add("100", subfields=f100)
+    # First creator and role
+    f100a = get_subfield(xmlrecord, "100", "a")
+    role = get_subfield(xmlrecord, "100", "b")
+    if role:
+        match = re.search("\[(.*?)\]", role)
+        if match:
+            role = match.group(1)
+            role = role.lower()
+            role = role.replace(".", "")
+            f1004 = roles.get(role, "")
+            if not f1004:
+                print("Missing role: %s." % role)
+    else:
+        f1004 = ""
+    marcrecord.add("100", a=f100a, _4=f1004)
 
-    # Title
-    marcrecord.add("245", a=f245a)
+    # Title statement
+    f245a = get_datafield(xmlrecord, "331")
+    f245b = get_datafield(xmlrecord, "335")
+    marcrecord.add("245", a=f245a, b=f245b)
 
-    # Imprint
+    # Imprint (place, publisher, year)
+    f260a = get_datafield(xmlrecord, "410")
+    f260b = get_datafield(xmlrecord, "412")
+    f260c = get_datafield(xmlrecord, "425")
     publisher = ["a", f260a, "b", f260b, "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
     # Extension and physical description
+    f300 = get_datafield(xmlrecord, "433")
+    # 335 S. : zahlr. Ill. ; 32 cm
+    regexp1 = re.search("(.*)\s?:\s(.*);\s(.*)", f300)
+    # 289 S.: Zahlr. Ill.
+    regexp2 = re.search("(.*)\s?:\s(.*)", f300)
+    # 106 S. ; 21 cm
+    regexp3 = re.search("(.*)\s?;\s(.*)", f300)
+
+    f300b = ""
+    f300c = ""
+
+    if regexp1:
+        f300a, f300b, f300c = regexp1.groups()
+    elif regexp2:
+        f300a, f300b = regexp2.groups()
+    elif regexp3:
+        f300a, f300c = regexp3.groups()
+    else:
+        f300a = f300
+
     physicaldescription = ["a", f300a, "b", f300b, "c", f300c]
     marcrecord.add("300", subfields=physicaldescription)
 
@@ -403,12 +381,16 @@ for record in records:
     marcrecord.add("338", b=f338b)
 
     # Subject headings
+    subjects = get_subjects(xmlrecord)
     for f650a in subjects:
         marcrecord.add("650", a=f650a)
 
-    # Addional creators
-    for f700 in persons:
-        marcrecord.add("700", subfields=f700)
+    # Additional creators and their roles
+    creators = get_creators(xmlrecord)
+    for creator in creators:
+        f700a = creator[0]
+        f7004 = creator[1]
+        marcrecord.add("700", a=f700a, _4=f7004)
 
     # Collection
     marcrecord.add("912", a="vkfilm")
@@ -427,5 +409,4 @@ for record in records:
     else:
         outputfile.write(marcrecord.as_marc())
 
-inputfile.close()
 outputfile.close()
