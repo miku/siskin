@@ -136,9 +136,9 @@ if not inputfile:
         no_entries = int(dd["find"]["no_entries"])
 
         inputfile = fip.inputfilename(SID)        
-        inputfile = open(inputfile, "w")
-        inputfile.write("""<?xml version="1.0" encoding="UTF-8" ?>""")
-        inputfile.write("<collection>")
+        ifile = open(inputfile, "w")
+        ifile.write("""<?xml version="1.0" encoding="UTF-8" ?>""")
+        ifile.write("<collection>")
 
         for entry in range(1, no_entries + 1):
             query = {
@@ -167,12 +167,11 @@ if not inputfile:
             document.tagName = 'record'
             document.removeAttribute('base')
             document.removeAttribute('idn')
-            inputfile.write(document.toxml())
+            ifile.write(document.toxml())
 
-        inputfile.write("</collection>")
-        inputfile.close()
+        ifile.write("</collection>")
+        ifile.close()
 
-inputfile = fip.inputfilename(SID)
 inputfile = open(inputfile, "r")
 records = inputfile.read()
 records = records.split("</record>")
