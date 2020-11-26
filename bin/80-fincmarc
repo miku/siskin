@@ -350,7 +350,7 @@ for root, _, files in os.walk(inputfolder):
             marcrecord.add("935", c=f935c)
 
             # Collection and sealing
-            marcrecord.add("980", a=f001, b=SID, c="sid-200-col-finctest")
+            marcrecord.add("980", a=f001, b=SID, c="sid-80-col-internetquellen")
 
             # Write record to file
             if outputformat == "xml":
