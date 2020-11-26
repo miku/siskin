@@ -212,6 +212,8 @@ for root, _, files in os.walk(inputfolder):
                 format = "Book"
             elif "Aufsätze" in format:
                 format = "Article"
+            elif link.endswith(".pdf"):
+                format = "Book"
             else:
                 format = "Website"
 
