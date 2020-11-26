@@ -183,9 +183,6 @@ for root, _, files in os.walk(inputfolder):
             else:
                 continue
 
-            #if "Elektronische Volltexte" not in format:
-                #continue
-
             # Only consider records with valide URL
             link = get_field(xmlrecord, "link")
             try:
