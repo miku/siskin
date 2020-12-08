@@ -97,7 +97,7 @@ if not inputfile:
         except:
             sys.exit("No server given in siskin.ini")
         inputfile = fip.inputfilename(SID)
-        query = "collection_details:GBV_NL_EBOOK"
+        query = "collection_details:GBV_NL_EBOOK OR collection_details:ZDB-95-BKS"
         os.system("""solrdump -verbose -server %s -q "%s" -fl fullrecord | jq -r '.fullrecord' | replace '#29;' $(printf "\x1D") '#30;' $(printf "\x1E") '#31;' $(printf "\x1F") > %s/17_input.mrc""" % (server, query, path))
         os.system("sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' %s/17_input.mrc > %s/17_input_cleaned.mrc" % (path, path))
         os.system("yaz-marcdump -i marc -o marcxml %s/17_input_cleaned.mrc > %s" % (path, inputfile))
@@ -151,6 +151,7 @@ for oldrecord in xmlstream(inputfile, "record"):
     else:
         collections = ["a", f001, "b", "17", "c", f912a_1, "c", f912a_2]
 
+    record.remove_fields("980")
     record.add("980", subfields=collections)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
