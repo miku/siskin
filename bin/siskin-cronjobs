@@ -15,6 +15,7 @@
 30-fincmarc --outputformat xml --input-hist-size 6 --output-hist-size 6
 35-fincmarc --input-hist-size 3 --output-hist-size 3 --filemap /home/schenk/lcc
 39-fincmarc --outputformat xml --input-hist-size 3 --output-hist-size 3
+44-fincmarc
 78-fincmarc --interval manually
 80-fincmarc --interval manually --inputfolder /home/schenk/80_inputfiles
 99-fincmarc --interval manually --inputformat xlsx
