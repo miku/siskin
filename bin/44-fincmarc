@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+# coding: utf-8
+#
+# Copyright 2020 by Leipzig University Library, http://ub.uni-leipzig.de
+#                   The Finc Authors, http://finc.info
+#                   Robert Schenk, <robert.schenk@uni-leipzig.de>
+#
+# This file is part of some open source application.
+#
+# Some open source application is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# Some open source application is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar. If not, see <http://www.gnu.org/licenses/>.
+#
+# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+
+"""
+
+Source: Deutsches Textarchiv
+SID: 44
+Ticket: #14972, #18638
+Origin: OAI
+
+"""
+
+
+import re
+import os
+import base64
+
+import xmltodict
+
+import marcx
+import pymarc
+from siskin.mappings import formats
+from siskin.configuration import Config
+from siskin.utils import marc_build_field_008
+from siskin.arguments import FincArgumentParser
+
+
+##################################################################################
+# 1. Parse arguments and prepare outputfile
+##################################################################################
+
+SID = "44"
+
+fip = FincArgumentParser()
+
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old inputfiles and outputfiles as specified in input-hist-size and output-hist-size
+fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
+
+# Set output format for MARC record
+if outputformat == "xml":
+    outputfile = pymarc.XMLWriter(open(outputfilename, "wb"))
+else:
+    outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 2. Acquire input data
+##################################################################################
+
+if not inputfile:    
+    config = Config.instance()
+    try:
+        inputfile = config.get(SID, "input")
+    except:
+        inputfile = ""
+
+    if not inputfile:
+        inputfile = fip.inputfilename(SID)
+        os.system("metha-sync -rm -format cmdi -set dta -no-intervals https://clarin.bbaw.de/oai-dta/")
+        os.system("metha-cat -format cmdi -set dta https://clarin.bbaw.de/oai-dta/ > %s" % inputfile)
+
+inputfile = open(inputfile, "rb")
+xmlfile = inputfile.read()
+records = xmltodict.parse(xmlfile, force_list=("cmdp:title", "cmdp:author", "cmdp:editor", "cmdp:pubPlace", "cmdp:publisher", "cmdp:date"))
+outputfile = open(outputfilename, "wb")
+
+
+##################################################################################
+# 3. Process data
+##################################################################################
+
+for xmlrecord in records["Records"]["Record"]:
+
+    if not xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"].get("cmdp:titleStmt"):
+        continue
+
+    marcrecord = marcx.Record(force_utf8=True)
+    marcrecord.strict = False
+
+    # Format for entire source
+    format = "Book"
+
+    # Leader
+    leader = formats[format]["Leader"]
+    marcrecord.leader = leader
+
+    # Identifikator
+    id = xmlrecord["header"]["identifier"]
+    id = bytes(id, "utf-8")
+    id = base64.b64encode(id)
+    f001 = id.decode("utf-8").rstrip("=")
+    marcrecord.add("001", data="finc-44-" + f001)
+
+    # Access type
+    f007 = formats[format]["e007"]
+    marcrecord.add("007", data=f007)
+
+    # Periodicity
+    languages = "ger"
+    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get(
+        "cmdp:publicationStmt", "")
+    if imprint:
+        year = imprint["cmdp:date"][0]["#text"]
+        match = re.match("\d\d\d\d", year)
+        if not match:
+            year = ""
+    else:
+        year = ""
+    periodicity = formats[format]["008"]
+    f008 = marc_build_field_008(year, periodicity, languages)
+    marcrecord.add("008", data=f008)
+
+    # Language
+    marcrecord.add("041", a="ger")
+
+    # First creator
+    authors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"].get("cmdp:author", "")
+    if authors:
+        surname = authors[0]["cmdp:persName"].get("cmdp:surname", "")
+        forename = authors[0]["cmdp:persName"].get("cmdp:forename", "")
+        rolename = authors[0]["cmdp:persName"].get("cmdp:roleName", "")
+        if rolename and forename:
+            rolename = " <" + rolename + ">"
+            f100a = forename + rolename
+        elif surname and forename:
+            f100a = surname + ", " + forename
+        elif surname and surname != "N. N.":
+            f100a = surname
+        else:
+            f100a = ""
+        marcrecord.add("100", a=f100a, e="verfasserin", _4="aut")
+
+    # Title statement
+    titles = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"]["cmdp:title"]
+    f245a = titles[0]["#text"]
+    f245b = ""
+    f245n = ""
+    if len(titles) == 2:
+        for title in titles:
+            if "#text" in title:
+                f245b = title["#text"]
+            if "@n" in title:
+                f245n = title["@n"]
+    marcrecord.add("245", a=f245a, b=f245b, n=f245n)
+
+    # Edition
+    edition = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"].get("cmdp:editionStmt", "")
+    if edition:
+        f250a = edition["cmdp:edition"]
+        marcrecord.add("250", a=f250a)
+
+    # Imprint
+    imprint = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get(
+        "cmdp:publicationStmt", "")
+    if imprint:
+        f260a = ""
+        f260b = ""
+        f260c = ""
+        place = imprint.get("cmdp:pubPlace")
+        if place:
+            f260a = place[0]
+        publisher = imprint.get("cmdp:publisher")
+        if publisher:
+            f260b = publisher[0]["cmdp:name"]
+            if not f260b:  # sometimes exists but None
+                f260b = ""
+        f260c = imprint["cmdp:date"][0]["#text"]
+        subfields = ["a", f260a, "b", f260b, "c", f260c]
+        marcrecord.add("260", subfields=subfields)
+
+    # Dimension
+    pages = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:sourceDesc"]["cmdp:biblFull"].get("cmdp:extent", "")
+    if pages:
+        f300a = pages["cmdp:measure"]["#text"]
+        marcrecord.add("300", a=f300a)
+
+    # RDA-content
+    f336b = formats[format]["336b"]
+    marcrecord.add("336", b=f336b)
+
+    # RDA-carrier
+    f338b = formats[format]["338b"]
+    marcrecord.add("338", b=f338b)
+
+    # Abstract
+    abstract = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:profileDesc"].get("cmdp:abstract", "")
+    if abstract:
+        f520a = abstract["cmdp:p"]
+        marcrecord.add("520", a=f520a)
+
+    # Subject headings
+    subjects = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:profileDesc"].get("cmdp:textClass", "")
+    if subjects:
+        for subject in subjects["cmdp:classCode"]:
+            subject = subject["#text"]
+            if subject[0].isupper():
+                subjects = re.split("[;,]", subject)
+                for subject in subjects:
+                    f650a = subject.strip()
+                    marcrecord.add("650", a=f650a)
+
+    # GND-content and -carrier
+    f655a = formats[format]["655a"]
+    f6552 = formats[format]["6552"]
+    marcrecord.add("655", a=f655a, _2=f6552)
+
+    # Additional creators
+    authors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"].get("cmdp:author", "")
+    if authors:
+        for author in authors[1:]:
+            surname = author["cmdp:persName"].get("cmdp:surname", "")
+            forename = author["cmdp:persName"].get("cmdp:forename", "")
+            rolename = author["cmdp:persName"].get("cmdp:roleName", "")
+            if rolename and forename:
+                rolename = " <" + rolename + ">"
+                f700a = forename + rolename
+            elif surname and forename:
+                f700a = surname + ", " + forename
+            elif surname and surname != "N. N.":
+                f700a = surname
+            else:
+                f700a = ""
+            marcrecord.add("700", a=f700a, e="verfasserin", _4="aut")
+
+    # Editors
+    editors = xmlrecord["metadata"]["cmd:CMD"]["cmd:Components"]["cmdp:teiHeader"]["cmdp:fileDesc"]["cmdp:titleStmt"].get("cmdp:editor", "")
+    if authors:
+        for author in authors[1:]:
+            surname = author["cmdp:persName"].get("cmdp:surname", "")
+            forename = author["cmdp:persName"].get("cmdp:forename", "")
+            if surname and forename:
+                f700a = surname + ", " + forename
+            elif surname and surname != "N. N.":
+                f700a = surname
+            else:
+                f700a = ""
+            marcrecord.add("700", a=f700a, e="hrsg", _4="edt")
+
+    # Link to fulltext
+    urls = xmlrecord["metadata"]["cmd:CMD"]["cmd:Resources"]["cmd:ResourceProxyList"]["cmd:ResourceProxy"]
+    xml = urls[0]["cmd:ResourceRef"]
+    html = urls[1]["cmd:ResourceRef"]
+    txt = urls[2]["cmd:ResourceRef"]
+    page = urls[3]["cmd:ResourceRef"]
+    marcrecord.add("856", q="text/xml", _3="Download als XML", u=xml)
+    marcrecord.add("856", q="text/html", _3="Download als HTML", u=html)
+    marcrecord.add("856", q="text/plain", _3="Download als Text", u=txt)
+    marcrecord.add("856", q="text/html", _3="Link zur Seite", u=page)
+
+    # SWB-Content
+    f935c = formats[format]["935c"]
+    marcrecord.add("935", c=f935c)
+
+    # Collection and sealing
+    collections = ["a", f001, "b", SID, "c", "sid-44-col-textarchiv"]
+    marcrecord.add("980", subfields=collections)
+
+    # Write record to file
+    if outputformat == "xml":
+        outputfile.write(marcrecord)
+    else:
+        outputfile.write(marcrecord.as_marc())
+
+inputfile.close()
+outputfile.close()
