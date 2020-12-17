@@ -296,7 +296,7 @@ for root, _, files in os.walk(inputfolder):
 
             # Table of content
             f505a = get_field(xmlrecord, "tableofcontents")
-            marcrecord.add("505", a=f505a)
+            marcrecord.add("505", a=f505a, indicators="0#")
 
             # Abstract
             f520a = get_field(xmlrecord, "description")
