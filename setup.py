@@ -79,19 +79,22 @@ if sys.version_info.major < 3:
 
 
 print("""
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 Installation note:
 
     If you see an error like
 
-    > AttributeError: 'ChangelogAwareDistribution' object has no attribute '_egg_fetcher'
+    > AttributeError: 'ChangelogAwareDistribution' object has no attribute
+      '_egg_fetcher'
 
     or similar from python-daemon, it's unfortunate but fixable: install
-    python-daemon manually, then run setup.py again:
+      python-daemon manually, then run setup.py again:
 
     $ pip install python-daemon
     $ python setup.py develop
 
---------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 """)
 
 setup(name='siskin',
