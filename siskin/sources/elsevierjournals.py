@@ -66,8 +66,9 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     def run(self):
         directory = self.config.get('elsevierjournals', 'backlog-dir')
         _, output = tempfile.mkstemp(prefix='siskin-')
+        warning_message = "since 2020 we observe a few corrupt tarballs, skipping"
         for path in sorted(iterfiles(directory, fun=lambda p: p.endswith('.tar'))):
-            shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output)
+            shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output, ignoremap={1: warning_message})
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
