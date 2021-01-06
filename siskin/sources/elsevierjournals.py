@@ -58,6 +58,7 @@ class ElsevierJournalsTask(DefaultTask):
     """ Elsevier journals base. """
     TAG = '85'
 
+    WARN_CORRUPT_TAR_MSG = "since 2020 we observe corrupt tarballs, skipping"
 
 class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     """
@@ -66,9 +67,8 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     def run(self):
         directory = self.config.get('elsevierjournals', 'backlog-dir')
         _, output = tempfile.mkstemp(prefix='siskin-')
-        warning_message = "since 2020 we observe a few corrupt tarballs, skipping"
         for path in sorted(iterfiles(directory, fun=lambda p: p.endswith('.tar'))):
-            shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output, ignoremap={1: warning_message})
+            shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output, ignoremap={1: self.WARN_CORRUPT_TAR_MSG})
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -133,7 +133,7 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
             for row in sorted(handle.iter_tsv(cols=('path', ))):
                 if not str(row.path).endswith('.tar'):
                     continue
-                shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output)
+                shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output, ignoremap={1: self.WARN_CORRUPT_TAR_MSG})
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
