@@ -133,7 +133,7 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
             for row in sorted(handle.iter_tsv(cols=('path', ))):
                 if not str(row.path).endswith('.tar'):
                     continue
-                shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=path, output=output, ignoremap={1: self.WARN_CORRUPT_TAR_MSG})
+                shellout("span-import -i elsevier-tar {input} | pigz -c >> {output}", input=row.path, output=output, ignoremap={1: self.WARN_CORRUPT_TAR_MSG})
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
