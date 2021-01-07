@@ -74,12 +74,12 @@
     <data source="metadata.dc.date.value" name="rft.date">
       <!-- Date -->
       <!-- Q: Why sv? A: https://repl.it/HvPR/0 -->
-      <dateformat inputformat="yyyy-MM-dd 00:00:00.0" outputformat="SHORT" language="sv"/>
+      <dateformat inputformat="yyyy-MM-dd" outputformat="SHORT" language="sv"/>
     </data>
     <combine name="x.date" value="${date}T00:00:00Z">
       <data source="metadata.dc.date.value" name="date">
         <!-- x.Date -->
-        <dateformat inputformat="yyyy-MM-dd 00:00:00.0" outputformat="SHORT" language="sv"/>
+        <dateformat inputformat="yyyy-MM-dd" outputformat="SHORT" language="sv"/>
       </data>
     </combine>
     <entity name="rft.issn[]" flushWith="record">
