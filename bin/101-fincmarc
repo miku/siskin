@@ -217,7 +217,6 @@ for row in range(1, sheet.nrows):
     # Collection and sealing
     collections = ["a", f001, "b", SID, "c", "sid-101-col-kielfilm"]
     marcrecord.add("980", subfields=collections)
-    outputfile.write(marcrecord.as_marc())
 
     # Write record to file
     if outputformat == "xml":
