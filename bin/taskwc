@@ -24,5 +24,6 @@
 # Count number of lines in task output.
 
 set -eu
+set -o pipefail
 
-wc -l $(taskoutput "$@")
+taskcat "$@" | wc -l
