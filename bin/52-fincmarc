@@ -109,7 +109,11 @@ for oldrecord in xmlstream(inputfile, "record"):
     f001 = f001.replace("_", "")
     record.remove_fields("001")
     record.add("001", data="finc-52-" + f001)
-    
+
+    # Collection and sealing
+    collections = ["a", f001, "b", "52", "c", "sid-52-col-oecd"]
+    record.add("980", subfields=collections)
+
     # Convert all identifier in 001, 770, 772 ... to Finc schema
     record = convert_to_finc_id(SID, record, encode=False, finc_prefix=True)
 
