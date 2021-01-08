@@ -183,6 +183,7 @@ class AILicensing(AITask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
+    drop = luigi.BoolParameter(description="drop records w/o isil")
 
     def requires(self):
         if self.override:
@@ -201,11 +202,16 @@ class AILicensing(AITask):
 
     def run(self):
         """
-        span v0.1.204 or later.
+        A recent version of span might be required.
         """
-        output = shellout("span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path,
-                          input=self.input().get('is').path)
+        if self.drop:
+            output = shellout("span-tag -D -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
+                              config=self.input().get('config').path,
+                              input=self.input().get('is').path)
+        else:
+            output = shellout("span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
+                              config=self.input().get('config').path,
+                              input=self.input().get('is').path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
