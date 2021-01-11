@@ -125,22 +125,54 @@ for oldrecord in inputfile:
     # Mega Collections
     sets = get_field(oldrecord, "collection_details")
     mega_collections = []
-    institutions = []
+    institutions = set()
 
     if "SSG-OLC-MKW" in sets:
         mega_collections.append("OLC SSG Medien- / Kommunikationswissenschaft")
-        institutions.append("DE-15-FID")
+        institutions.add("DE-15-FID")
+        institutions.add("DE-15")
 
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
-        if "DE-15-FID" not in institutions:
-            institutions.append("DE-15-FID")
+        institutions.add("DE-15")
+        institutions.add("DE-953")
+        institutions.add("DE-540")
+        institutions.add("DE-15-FID")
 
     if "SSG-OLC-BUB" in sets:
         mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
-        institutions.append("FID-BBI-DE-23")
+        institutions.add("FID-BBI-DE-23")
+
+    if "SSG-OLC-PHI" in sets:
+        mega_collections.append("OLC SSG Klassische Philologie")
+        institutions.add("DE-540")
+
+    if "SSG-OLC-GWK" in sets:
+        mega_collections.append("OLC SSG Kunst und Kunstwissenschaft")
+        institutions.add("DE-540")
+
+    if "SSG-OLC-ARC" in sets:
+        mega_collections.append("OLC SSG Architektur")
+        institutions.add("DE-540")
+
+    if "SSG-OLC-KPH" in sets:
+        mega_collections.append("OLC SSG Klassische Philologie")
+        institutions.add("DE-82")
+
+    if "SSG-OLC-ANG" in sets:
+        mega_collections.append("OLC SSG Anglistik")
+        institutions.add("DE-82")
+
+    if "SSG-OLC-GER" in sets:
+        mega_collections.append("OLC SSG Germanistik")
+        institutions.add("DE-82")
+
+    if "SSG-OLC-MUS" in sets:
+        mega_collections.append("OLC SSG Musikwissenschaft")
+        institutions.add("DE-953")
 
     newrecord["finc.mega_collection"] = mega_collections
+    institutions = list(institutions) # set not JSON serializable
     newrecord["x.labels"] = institutions
 
     # Source-ID
