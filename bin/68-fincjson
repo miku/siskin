@@ -100,9 +100,10 @@ outputfile = open(outputfilename, "w")
 if not inputfile:
     inputfile = fip.inputfilename(SID)
     os.system("""solrdump -k -verbose -server https://findex.ubl-proxy.slub-dresden.de/index/SLUB -q "collection_details:SSG-OLC-FTH OR
-                 collection_details:SSG-OLC-MKW OR collection_details:SSG-OLC-BUB" -fl "id,title,physical,issn,container_title,
-                 container_issue,container_volume,container_start_page,publisher,publish_place,lang_code,publishDateSort,format,
-                 abstract,isfreeaccess_txt,author2,url,topic_facet,collection_details" | jq . -c > %s""" % inputfile)
+                 collection_details:SSG-OLC-MKW OR collection_details:SSG-OLC-BUB OR collection_details:SSG-OLC-ARC OR collection_details:SSG-OLC-GWK
+                 OR collection_details:SSG-OLC-PHI OR collection_details:SSG-OLC-GER OR collection_details:SSG-OLC-ANG OR collection_details:SSG-OLC-KPH
+                 OR collection_details:SSG-OLC-MUS" -fl "id,title,physical,issn,container_title, container_issue,container_volume,container_start_page,
+                 publisher,publish_place,lang_code,publishDateSort,format,abstract,isfreeaccess_txt,author2,url,topic_facet,collection_details" | jq . -c > %s""" % inputfile)
 
 inputfile = open(inputfile, "r")
 
