@@ -144,7 +144,7 @@ for oldrecord in inputfile:
         institutions.add("FID-BBI-DE-23")
 
     if "SSG-OLC-PHI" in sets:
-        mega_collections.append("OLC SSG Klassische Philologie")
+        mega_collections.append("OLC SSG Philosophie")
         institutions.add("DE-540")
 
     if "SSG-OLC-GWK" in sets:
