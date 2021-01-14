@@ -127,9 +127,16 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     marcrecord.add("110", a="Studienkreis Rundfunk und Geschichte", _4="edt")
 
     # Title statement
-    f245a = csvrecord[10]
-    f245a = str(f245a)
-    marcrecord.add("245", a=f245a)
+    f245 = csvrecord[10]
+    f245 = str(f245)
+    f245 = f245.split(" : ")
+    if len(f245) == 2:
+        f245a = f245[0]
+        f245b = f245[1]
+    else:
+        f245a = f245
+        f245b = ""
+    marcrecord.add("245", a=f245a, b=f245b)
 
     # Imprint (place, publisher, year)
     f260b = csvrecord[2]
