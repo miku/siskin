@@ -184,7 +184,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     year = str(year).rstrip(".0")
     pages = csvrecord[12]
     pages = str(pages).rstrip(".0")    
-    f773g = "%s(%s)%s, S. %s" % (volume, year, issue, pages)
+    f773g = "%s(%s), %s, S. %s" % (volume, year, issue, pages)
     marcrecord.add("773", g=f773g, t=f773t, x=f773x)
 
     # Link to fulltext
