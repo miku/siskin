@@ -129,19 +129,19 @@ for oldrecord in inputfile:
 
     if "SSG-OLC-MKW" in sets:
         mega_collections.append("OLC SSG Medien- / Kommunikationswissenschaft")
-        institutions.add("DE-15-FID")
-        institutions.add("DE-15")
+        #institutions.add("DE-15-FID")
+        #institutions.add("DE-15")
 
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
-        institutions.add("DE-15")
-        institutions.add("DE-15-FID")
-        institutions.add("DE-953")
-        institutions.add("DE-540")
-        institutions.add("DE-Ka84")
-        institutions.add("DE-Frei50")
-        institutions.add("DE-Stg111")
-        institutions.add("DE-Trs1")
+        #institutions.add("DE-15")
+        #institutions.add("DE-15-FID")
+        #institutions.add("DE-953")
+        #institutions.add("DE-540")
+        #institutions.add("DE-Ka84")
+        #institutions.add("DE-Frei50")
+        #institutions.add("DE-Stg111")
+        #institutions.add("DE-Trs1")
 
     if "SSG-OLC-BUB" in sets:
         mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
@@ -149,27 +149,27 @@ for oldrecord in inputfile:
 
     if "SSG-OLC-PHI" in sets:
         mega_collections.append("OLC SSG Philosophie")
-        institutions.add("DE-540")
+        #institutions.add("DE-540")
 
     if "SSG-OLC-GWK" in sets:
         mega_collections.append("OLC SSG Kunst und Kunstwissenschaft")
-        institutions.add("DE-540")
+        #institutions.add("DE-540")
 
     if "SSG-OLC-ARC" in sets:
         mega_collections.append("OLC SSG Architektur")
-        institutions.add("DE-540")
+        #institutions.add("DE-540")
 
     if "SSG-OLC-KPH" in sets:
         mega_collections.append("OLC SSG Klassische Philologie")
-        institutions.add("DE-82")
+        #institutions.add("DE-82")
 
     if "SSG-OLC-ANG" in sets:
         mega_collections.append("OLC SSG Anglistik")
-        institutions.add("DE-82")
+        #institutions.add("DE-82")
 
     if "SSG-OLC-GER" in sets:
         mega_collections.append("OLC SSG Germanistik")
-        institutions.add("DE-82")
+        #institutions.add("DE-82")
 
     if "SSG-OLC-MUS" in sets:
         mega_collections.append("OLC SSG Musikwissenschaft")
