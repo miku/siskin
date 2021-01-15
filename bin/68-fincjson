@@ -135,9 +135,13 @@ for oldrecord in inputfile:
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
         institutions.add("DE-15")
+        institutions.add("DE-15-FID")
         institutions.add("DE-953")
         institutions.add("DE-540")
-        institutions.add("DE-15-FID")
+        institutions.add("DE-Ka84")
+        institutions.add("DE-Frei50")
+        institutions.add("DE-Stg111")
+        institutions.add("DE-Trs1")
 
     if "SSG-OLC-BUB" in sets:
         mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
@@ -170,6 +174,10 @@ for oldrecord in inputfile:
     if "SSG-OLC-MUS" in sets:
         mega_collections.append("OLC SSG Musikwissenschaft")
         institutions.add("DE-953")
+        institutions.add("DE-Ka84")
+        institutions.add("DE-Frei50")
+        institutions.add("DE-Stg111")
+        institutions.add("DE-Trs1")
 
     newrecord["finc.mega_collection"] = mega_collections
     institutions = list(institutions) # set not JSON serializable
