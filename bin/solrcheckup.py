@@ -178,6 +178,33 @@ def get_all_old_sources(conn, sqlite):
     return [r[0] for r in sqlite]
 
 
+def check_sealing(k10plus, ai):
+    """
+    Check if each source is sealed.
+    """
+
+    current_sources = get_all_current_sources(k10plus, ai)
+
+    for current_source in current_sources:
+
+        params = {
+                "q": "source_id:%s" % current_source,
+                "rows": 1,
+                "wt": "json"
+            }
+
+        result = get_solr_result(k10plus, params)
+        numFound = result["response"]["numFound"]
+        try:
+            institution = result["response"]["docs"][0]["institution"]
+        except:
+            institution = ""
+
+        if numFound > 0 and not institution:
+            message = u"Die Quelle %s ist nicht angesigelt." % current_source
+            messages.append(message)
+
+
 def update_sources(conn, sqlite, k10plus, ai):
     """
     Update the source table.
@@ -484,7 +511,10 @@ update_institutions(conn, sqlite, k10plus, ai)
 # 3. Step: Get the number of titles for each SID and log them to database
 update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai)
 
-# 4. Step: Send report
+# 4. Step: Check sealing of each source
+check_sealing(k10plus, ai)
+
+# 5. Step: Send report
 if len(messages) != 0:
     message = u"\n".join(messages)
     send_message(message)
