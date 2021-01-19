@@ -201,7 +201,7 @@ def check_sealing(k10plus, ai):
             institution = ""
 
         if numFound > 0 and not institution:
-            message = u"Die Quelle %s ist nicht angesigelt." % current_source
+            message = u"Die SID %s ist nirgends angesigelt." % current_source
             messages.append(message)
 
 
@@ -222,7 +222,7 @@ def update_sources(conn, sqlite, k10plus, ai):
 
     for current_source in current_sources:
         if current_source not in old_sources:
-            message = u"Die Quelle %s ist neu im Index." % current_source
+            message = u"Die SID %s ist neu im Index." % current_source
             if source_table_is_filled:
                 messages.append(message)
             else:
@@ -329,7 +329,7 @@ def update_institutions(conn, sqlite, k10plus, ai):
         if current_institution == " " or '"' in current_institution:
             continue
         if current_institution not in old_institutions:
-            message = u"Das Haus %s wurde erstmals für eine Quelle angesigelt." % current_institution
+            message = u"Die ISIL %s wurde erstmals für eine Quelle angesigelt." % current_institution
             if institution_table_is_filled:
                 messages.append(message)
             else:
@@ -393,7 +393,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
                     difference = old_sourcebyinstitution_number - number
                     percent = difference / old_sourcebyinstitution_number * 100
                     if percent >= 10:
-                        message = u"Die Anzahl der Titel hat sich bei %s gegenueber einem frueheren Import um %d %% verringert." % (sourcebyinstitution, percent)
+                        message = u"Die Anzahl der Titel hat sich bei der %s um %d %% verringert." % (sourcebyinstitution, percent)
                         messages.append(message)
 
             # requests.exceptions.ConnectionError: HTTPConnectionPool(XXXXXX): Max retries exceeded
@@ -408,7 +408,7 @@ def update_history_and_sourcebyinstitution(conn, sqlite, k10plus, ai):
         if match:
             sid = match.group(1)
             if sid in current_sources: # nur melden, wenn Quelle nicht komplett fehlt, sonst gibt es separaten Hinweis
-                message = u"Die folgende Quelle und Institution wurde abgesigelt: %s" % d
+                message = u"Die %s wurde abgesigelt." % d
                 messages.append(message)
 
 
