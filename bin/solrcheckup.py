@@ -188,15 +188,19 @@ def check_sealing(k10plus, ai):
     for current_source in current_sources:
 
         params = {
-                "q": "source_id:%s" % current_source,
-                "rows": 1,
-                "wt": "json"
-            }
+            "facet": "true",
+            "facet.field": "institution",
+            "facet.mincount": 1,
+            "q": "source_id:%s" % current_source,
+            "rows": 0,
+            "wt": "json"
+        }
 
         result = get_solr_result(k10plus, params)
         numFound = result["response"]["numFound"]
+
         try:
-            institution = result["response"]["docs"][0]["institution"]
+            institution = result["facet_counts"]["facet_fields"]["institution"][1]
         except:
             institution = ""
 
