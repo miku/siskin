@@ -155,9 +155,10 @@ def get_all_current_sources(k10plus, ai):
 
     shared = k10plus_sources.intersection(ai_sources)
     if len(shared) > 0:
-        ssid = [str(sid) for sid in shared]
-        message = u"Die folgenden Quellen befinden sich sowohl im K10plus als auch im AI: {}".format(", ".join(ssid))
-        messages.append(message)
+        sids = [str(sid) for sid in shared]
+        for sid in sids:
+            message = u"Die SID %s befindet sich sowohl im Main-Index als auch im AI." % sid
+            messages.append(message)
 
     return k10plus_sources.union(ai_sources)
 
