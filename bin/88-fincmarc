@@ -111,7 +111,8 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     # Periodicity
     year = csvrecord[10]
-    year = str(year).rstrip(".0")
+    year = str(year)
+    year = re.sub("\.0", "", year)
     periodicity = formats[format]["008"]
     language = ""
     f008 = marc_build_field_008(year, periodicity, language)
@@ -139,13 +140,15 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     f260b = csvrecord[2]
     f260b = str(f260b)
     f260c = csvrecord[10]
-    f260c = str(f260c).rstrip(".0")
+    f260c = str(f260c)
+    f260c = re.sub("\.0", "", f260c)
     publisher = ["b", f260b + ", ", "c", f260c]
     marcrecord.add("260", subfields=publisher)
 
     # Page count
     f300a = csvrecord[11]
-    f300a = str(f300a).rstrip(".0")
+    f300a = str(f300a)
+    f300a = re.sub("\.0", "", f300a)
     f300a = f300a + " S."
     marcrecord.add("300", a=f300a)
 
@@ -174,13 +177,17 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     f773x = csvrecord[5]
     f773x = check_issn(f773x)
     issue = csvrecord[7]
-    issue = str(issue).rstrip(".0")
+    issue = str(issue)
+    issue = re.sub("\.0", "", issue)
     volume = csvrecord[6]
-    volume = str(volume).rstrip(".0")
+    volume = str(volume)
+    volume = re.sub("\.0", "", volume)
     year = csvrecord[10]
-    year = str(year).rstrip(".0")
+    year = str(year)
+    year = re.sub("\.0", "", year)
     pages = csvrecord[12]
-    pages = str(pages).rstrip(".0")    
+    pages = str(pages)
+    pages = re.sub("\.0", "", pages)
     f773g = "%s(%s), %s, S. %s" % (volume, year, issue, pages)
     marcrecord.add("773", g=f773g, t=f773t, x=f773x)
 
