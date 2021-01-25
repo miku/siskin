@@ -110,7 +110,7 @@ for xmlrecord in xmlrecords["collection"]["record"]:
     # Format mapping
     journal = get_field(xmlrecord, "78")
     if journal:
-        format = "Article"
+        format = "jArticle"
     else:
         format = "Book"
 
