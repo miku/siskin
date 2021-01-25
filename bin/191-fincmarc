@@ -126,7 +126,7 @@ while True:
         marcrecord.strict = False
 
         # Formatfestelegung
-        format = "Article"
+        format = "jArticle"
 
         # Leader
         leader = formats[format]["Leader"]
