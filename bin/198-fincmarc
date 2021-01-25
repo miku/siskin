@@ -98,7 +98,7 @@ for record in reader:
         f773 = ""
 
     if f773:
-        format = "Article"
+        format = "jArticle"
     else:
         format = "Book"
 
