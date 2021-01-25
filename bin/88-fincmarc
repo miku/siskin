@@ -95,7 +95,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
         continue
 
     # Set format for entire source
-    format = "Paper"
+    format = "jArticle"
 
     # Leader
     leader = formats[format]["Leader"]
