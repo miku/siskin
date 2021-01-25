@@ -103,7 +103,7 @@ for row in range(1, sheet.nrows):
     marcrecord.strict = False
 
     # Set format for entire source
-    format = "Article"
+    format = "jArticle"
 
     # Leader
     leader = formats[format]["Leader"]
