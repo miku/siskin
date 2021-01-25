@@ -110,7 +110,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     marcrecord.add("007", data=f007)
 
     # Periodicity
-    year = csvrecord[10]
+    year = csvrecord[9]
     year = str(year)
     year = re.sub("\.0", "", year)
     periodicity = formats[format]["008"]
@@ -125,7 +125,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     marcrecord.add("100", a=f100a, _4="aut")
 
     # Title statement
-    f245 = csvrecord[3]
+    f245 = csvrecord[10]
     f245 = str(f245)
     f245 = f245.split(" : ")
     if len(f245) == 2:
@@ -139,7 +139,7 @@ for i, row in enumerate(range(sheet.nrows), start=0):
     # Imprint (place, publisher, year)
     f260b = csvrecord[2]
     f260b = str(f260b)
-    f260c = csvrecord[10]
+    f260c = csvrecord[9]
     f260c = str(f260c)
     f260c = re.sub("\.0", "", f260c)
     publisher = ["b", f260b + ", ", "c", f260c]
@@ -174,15 +174,15 @@ for i, row in enumerate(range(sheet.nrows), start=0):
 
     # Parent work / journal
     f773t = "Rundfunk und Geschichte"
-    f773x = csvrecord[5]
+    f773x = csvrecord[4]
     f773x = check_issn(f773x)
-    issue = csvrecord[7]
+    issue = csvrecord[5]
     issue = str(issue)
     issue = re.sub("\.0", "", issue)
     volume = csvrecord[6]
     volume = str(volume)
     volume = re.sub("\.0", "", volume)
-    year = csvrecord[10]
+    year = csvrecord[9]
     year = str(year)
     year = re.sub("\.0", "", year)
     pages = csvrecord[12]
