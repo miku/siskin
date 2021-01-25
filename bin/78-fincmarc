@@ -134,7 +134,7 @@ for xmlrecord in xmlrecords["IZI_Datensaetze"]["Datensatz"]:
         format = "Book"
 
     elif zeitschrift or artikel or "beitrag" in pubtype:   
-        format = "Article"
+        format = "jArticle"
 
     elif quelle:    
         format = "Loose-leaf"
