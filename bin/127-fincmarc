@@ -194,7 +194,7 @@ for record in reader:
     elif f052:
         format = "Journal"
     elif match:
-        format = "Article"
+        format = "jArticle"
     elif f050 == "a|||||||||||||":
         format = "Book"
     elif f050 == "|||||ce|d|||||":
