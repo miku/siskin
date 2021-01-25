@@ -158,7 +158,7 @@ for root, _, files in os.walk(inputfolder):
             # Format
             format = xmlrecord["dc:type"]
             if format == "article":
-                format = "Article"
+                format = "jArticle"
             elif format == "volume":
                 format = "Book"
             else:
