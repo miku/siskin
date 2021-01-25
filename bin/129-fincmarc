@@ -113,7 +113,7 @@ for csvrecord in csvrecords:
     elif format == "Journal":
         format = "Journal"
     else:
-        format = "Article"
+        format = "jArticle"
 
     if doi:
         is_electronic = True
