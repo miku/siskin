@@ -20,6 +20,7 @@
 70-fincmarc --interval manually
 78-fincmarc --interval manually
 80-fincmarc --interval manually --inputfolder /home/schenk/80_inputfiles
+88-fincmarc --interval manually
 99-fincmarc --interval manually --inputformat xlsx
 101-fincmarc --interval manually --inputformat xlsx
 109-fincmarc --interval manually --output-hist-size 10 --input-hist-size 10
