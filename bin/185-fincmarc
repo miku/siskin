@@ -241,7 +241,7 @@ for jsonrecord in jsonrecords:
     marcrecord.strict = False
 
     # Format for entire source
-    format = "Article"
+    format = "jArticle"
 
     # Leader
     leader = formats[format]["Leader"]
