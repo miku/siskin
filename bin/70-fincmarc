@@ -163,7 +163,7 @@ for i, record in enumerate(sqlite):
     # Format mapping
     format = record[9]
     if format == "JournalArticle" or format == "NewspaperArticle" or format == "Contribution":
-        format = "Article"
+        format = "jArticle"
     elif format == "Thesis":
         pass
     else:
