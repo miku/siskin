@@ -283,7 +283,7 @@ for oldrecord in xmlstream(inputfile, "record"):
     elif regexp17 or regexp18:
         format = "CD-Video"
     elif regexp19:
-        format = "Article"
+        format = "jArticle"
     else:
         format = "Book"
 
