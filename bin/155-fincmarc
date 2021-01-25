@@ -147,7 +147,7 @@ for xmlrecord in xmlstream(inputfile, "record"):
     thesis = get_field(xmlrecord, "818")
 
     if "-" in pages:
-        format = "Article"
+        format = "jArticle"
     elif thesis:
         format = "Thesis"
     elif carrier == "dvd":
