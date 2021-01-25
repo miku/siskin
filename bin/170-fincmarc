@@ -137,7 +137,7 @@ for xmlrecord in xmlrecords:
             format = "Online-Video"
             break
     else:
-        format = "Article"
+        format = "jArticle"
 
     # Leader
     leader = formats[format]["Leader"]
