@@ -169,9 +169,6 @@ for i, row in enumerate(range(sheet.nrows), start=0):
         for person in f700a[1:]:
             marcrecord.add("700", a=person, _4="aut")
 
-    # Corporate editor
-    marcrecord.add("710", a="Studienkreis Rundfunk und Geschichte", _4="edt")
-
     # Parent work / journal
     f773t = "Rundfunk und Geschichte"
     f773x = csvrecord[5]
