@@ -43,6 +43,11 @@ doi-blacklist = /tmp/siskin-data/crossref/CrossrefDOIBlacklist/output.tsv
 
 """
 
+# TODO: see, if
+# https://academictorrents.com/details/e4287cb7619999709f6e9db5c359dda17e93d515
+# is usable, and how often it gets updated
+# https://www.crossref.org/blog/new-public-data-file-120-million-metadata-records/
+
 import datetime
 import io
 import itertools
