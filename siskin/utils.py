@@ -670,7 +670,8 @@ def remove_delimiter(record):
     """
     Iterates over the record and removes surplus delimiters (ISBD etc.), refs #16965.
     """
-    fieldspecs = ["100.a", "245.a", "245.b", "245.c", "245.h", "260.a", "260.b", "260.c", "700.a"]
+    fieldspecs = ["020.a", "100.a", "245.a", "245.b", "245.c", "245.h", "250.a", "260.a", "260.b", "260.c",
+                  "264.a", "264.b", "264.c", "300.a", "300.b", "490.a", "490.x", "650.a", "700.a", "710.a"]
 
     for fieldspec in fieldspecs:
 
