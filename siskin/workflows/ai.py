@@ -120,7 +120,6 @@ class AIIntermediateSchema(AITask):
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
-            GeniosCombinedIntermediateSchema(date=self.date, stamp=True),
             IEEEIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchema(date=self.date, stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
