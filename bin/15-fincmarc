@@ -43,6 +43,7 @@ from xml.sax.saxutils import escape, unescape
 import xmltodict
 import marcx
 
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.arguments import FincArgumentParser
@@ -122,10 +123,10 @@ if not inputfolder:
     latest_file = latest_file[-1]
     path = fip.sid_path(SID)
 
-    os.system("rm -rf %s/inputfiles/" % path)
-    os.system("mkdir %s/inputfiles/" % path)
-    os.system("wget -P %s %s" % (path, latest_file_url))
-    os.system("tar -zxf %s/%s -C %s/inputfiles/" % (path, latest_file, path))
+    shellout("rm -rf %s/inputfiles/" % path)
+    shellout("mkdir %s/inputfiles/" % path)
+    shellout("wget -P %s %s" % (path, latest_file_url))
+    shellout("tar -zxf %s/%s -C %s/inputfiles/" % (path, latest_file, path))
     
     inputfolder = path + "/inputfiles/"
 
