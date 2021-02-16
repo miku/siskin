@@ -32,13 +32,13 @@ Origin: FTP
 """
 
 
-import os
 import sys
 import re
 from io import BytesIO, StringIO
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record, xmlstream
@@ -147,9 +147,9 @@ if not inputfile:
         inputfile = ""
     if not inputfile:
         print("No inputfile given. Starting new download ...")
-        os.system("wget -P %s https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" % path)
-        os.system("unzip -o -p %s/rismAllMARCXML.zip rism*.xml > %s/14_input.xml" % (path, path))
-        os.system("rm -f %s/rismAllMARCXML.zip*" % path)
+        shellout("wget -P %s https://opac.rism.info/fileadmin/user_upload/lod/update/rismAllMARCXML.zip" % path)
+        shellout("unzip -o -p %s/rismAllMARCXML.zip rism*.xml > %s/14_input.xml" % (path, path))
+        shellout("rm -f %s/rismAllMARCXML.zip*" % path)
         inputfile = path + "/14_input.xml"
 
 
