@@ -34,12 +34,12 @@ Origin: OAI
 
 
 import re
-import os
 import sys
 
 import xmltodict
 
 import marcx
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats, roles
 from siskin.utils import check_isbn, check_issn, marc_build_field_008, xmlstream, marc_get_languages
@@ -91,8 +91,8 @@ if not inputfile:
     if not inputfile:
         print("No inputfile given. Starting new harvesting ...")
         inputfile = fip.inputfilename(SID)
-        os.system("metha-sync -format oai_dc http://oai.bnf.fr/oai2/OAIHandler")
-        os.system("metha-cat -format oai_dc http://oai.bnf.fr/oai2/OAIHandler > %s" % inputfile)
+        shellout("metha-sync -format oai_dc http://oai.bnf.fr/oai2/OAIHandler")
+        shellout("metha-cat -format oai_dc http://oai.bnf.fr/oai2/OAIHandler > %s" % inputfile)
 
 
 ##################################################################################
