@@ -33,13 +33,14 @@ Origin: OAI
 """
 
 
-import os
 import sys
 import re
 from io import BytesIO
 
 import marcx
 import pymarc
+
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record, xmlstream
 from siskin.arguments import FincArgumentParser
@@ -88,7 +89,7 @@ if not issn_list_url:
     sys.exit("No issn-list-url found. Add entry issn-list-url to siskin.ini")
 
 issn_file = path + "/39_issn_file"
-os.system("curl -sL --fail '%s' > %s" % (issn_list_url, issn_file))
+shellout("curl -sL --fail '%s' > %s" % (issn_list_url, issn_file))
 issn_file = open(issn_file, "r")
 
 # Write ISSNs into list removing line breaks
@@ -104,8 +105,8 @@ if not inputfile:
     if not inputfile:
         print("No inputfile given. Starting new harvesting ...")
         inputfile = fip.inputfilename(SID)
-        os.system("metha-sync -format marc -from 2000-01-01 http://oai.persee.fr/oai")
-        os.system("metha-cat -format marc -from 2000-01-01 http://oai.persee.fr/oai > %s" % inputfile)
+        shellout("metha-sync -format marc -from 2000-01-01 http://oai.persee.fr/oai")
+        shellout("metha-cat -format marc -from 2000-01-01 http://oai.persee.fr/oai > %s" % inputfile)
 
 
 ##################################################################################
