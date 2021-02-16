@@ -32,13 +32,13 @@ Origin: OAI
 """
 
 
-import os
 import sys
 import re
 from io import BytesIO
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.utils import xmlstream, marc_clean_record, convert_to_finc_id
@@ -77,8 +77,8 @@ else:
 
 if not inputfile:
     inputfile = fip.inputfilename(SID)
-    os.system("metha-sync -format marcxml http://www.doabooks.org/oai")
-    os.system("metha-cat -format marcxml http://www.doabooks.org/oai > %s" % inputfile)
+    shellout("metha-sync -format marcxml http://www.doabooks.org/oai")
+    shellout("metha-cat -format marcxml http://www.doabooks.org/oai > %s" % inputfile)
 
 
 ##################################################################################
