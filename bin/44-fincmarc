@@ -39,7 +39,6 @@ import xmltodict
 
 import marcx
 import pymarc
-
 from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.configuration import Config
