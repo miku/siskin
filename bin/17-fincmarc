@@ -33,12 +33,12 @@ Origin: HTTP
 """
 
 
-import os
 import sys
 from io import BytesIO
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record, xmlstream, convert_to_finc_id
 from siskin.arguments import FincArgumentParser
@@ -98,11 +98,11 @@ if not inputfile:
             sys.exit("No server given in siskin.ini")
         inputfile = fip.inputfilename(SID)
         query = "collection_details:GBV_NL_EBOOK OR collection_details:ZDB-95-BKS"
-        os.system("""solrdump -verbose -server %s -q "%s" -fl fullrecord | jq -r '.fullrecord' | replace '#29;' $(printf "\x1D") '#30;' $(printf "\x1E") '#31;' $(printf "\x1F") > %s/17_input.mrc""" % (server, query, path))
-        os.system("sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' %s/17_input.mrc > %s/17_input_cleaned.mrc" % (path, path))
-        os.system("yaz-marcdump -i marc -o marcxml %s/17_input_cleaned.mrc > %s" % (path, inputfile))
-        os.system("rm -f %s/17_input.mrc" % path)
-        os.system("rm -f %s/17_input_cleaned.mrc" % path)
+        shellout("""solrdump -verbose -server %s -q "%s" -fl fullrecord | jq -r '.fullrecord' | replace '#29;' $(printf "\x1D") '#30;' $(printf "\x1E") '#31;' $(printf "\x1F") > %s/17_input.mrc""" % (server, query, path))
+        shellout("sed ':a;N;$!ba;s/\\x1d\\x0a/\\x1d/g' %s/17_input.mrc > %s/17_input_cleaned.mrc" % (path, path))
+        shellout("yaz-marcdump -i marc -o marcxml %s/17_input_cleaned.mrc > %s" % (path, inputfile))
+        shellout("rm -f %s/17_input.mrc" % path)
+        shellout("rm -f %s/17_input_cleaned.mrc" % path)
 
 
 ##################################################################################
