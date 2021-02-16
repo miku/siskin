@@ -60,12 +60,17 @@ def get_amsl_data():
 SID = "201"
 
 fip = FincArgumentParser()
-outputfilename = fip.outputfilename(SID)
-inputfilename = fip.args.inputfilename
-outputformat = "json"
 
-fip.remove_old_inputfiles(SID)
+# Get arguments
+inputfile = fip.args.inputfile
+outputformat = fip.args.outputformat
+
+# Generates string for outputfilename, example: 196-output-20200701.fincmarc.mrc
+outputfilename = fip.outputfilename(SID)
+
+# Removes n old inputfiles and outputfiles as specified in input-hist-size and output-hist-size
 fip.remove_old_outputfiles(SID)
+fip.remove_old_inputfiles(SID)
 
 outputfile = open(outputfilename, "w")
 
@@ -74,11 +79,11 @@ outputfile = open(outputfilename, "w")
 # 2. Get input data
 ################################################################################
 
-if not inputfilename:
+if not inputfile:
     config = Config.instance()
     inputfilename = config.get(SID, "input")
 
-inputfile = open(inputfilename, "r")
+inputfile = open(inputfile, "r")
 
 
 ##################################################################################
