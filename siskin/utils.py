@@ -670,15 +670,15 @@ def remove_delimiter(record):
     """
     Iterates over the record and removes surplus delimiters (ISBD etc.), refs #16965.
     """
-    fieldspecs = ["020.a", "100.a", "245.a", "245.b", "245.c", "245.h", "250.a", "260.a", "260.b", "260.c",
-                  "264.a", "264.b", "264.c", "300.a", "300.b", "490.a", "490.x", "650.a", "700.a", "710.a"]
+    fieldspecs = ["020.a", "100.a", "245.a", "245.b", "245.c", "245.h", "250.a", "260.a", "260.b",
+                  "260.c", "264.a", "264.b", "264.c", "300.a", "490.a", "650.a", "700.a", "710.a"]
 
     for fieldspec in fieldspecs:
 
         for field, oldvalue in marcx.fieldgetter(fieldspec)(record):
 
-            if field.tag == "245" or field.tag == "260":
-                for n in ["a", "b", "c", "h"]:
+            if field.tag == "245" or field.tag == "260" or field.tag == "264":
+                for n in ["a", "b", "c", "h", "x"]:
                     if n in field.subfields:
                         index = field.subfields.index(n)
                         index += 1
