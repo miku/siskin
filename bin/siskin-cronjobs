@@ -35,6 +35,8 @@
 169-fincmarc --interval weekly  --inputformat json --input-hist-size 10 --output-hist-size 10
 170-fincmarc --outputformat xml
 172-fincmarc --inputformat tsv
+180-fincmarc --inputformat mrc
+181-fincmarc --inputformat mrc
 182-fincmarc --interval manually --output-hist-size 10
 183-fincmarc --interval weekly --outputformat xml --output-hist-size 5
 185-fincmarc --interval manually
