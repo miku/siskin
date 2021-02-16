@@ -34,11 +34,11 @@ Origin: OAI
 
 
 import re
-import os
 from io import BytesIO, StringIO
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
 from siskin.arguments import FincArgumentParser
@@ -77,8 +77,8 @@ else:
 
 if not inputfile:
     inputfile = fip.inputfilename(SID)
-    os.system("metha-sync -set hathitrust:pd -format marc21 https://quod.lib.umich.edu/cgi/o/oai/oai")
-    os.system("metha-cat -set hathitrust:pd -format marc21 https://quod.lib.umich.edu/cgi/o/oai/oai > %s" % inputfile)
+    shellout("metha-sync -set hathitrust:pd -format marc21 https://quod.lib.umich.edu/cgi/o/oai/oai")
+    shellout("metha-cat -set hathitrust:pd -format marc21 https://quod.lib.umich.edu/cgi/o/oai/oai > %s" % inputfile)
 
 lccfile = open(filemap, "r")
 lccs = lccfile.readlines()
