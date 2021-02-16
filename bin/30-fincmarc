@@ -34,12 +34,12 @@ Origin: OAI
 
 
 import re
-import os
 from io import BytesIO
 from datetime import date
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record, xmlstream, convert_to_finc_id
 from siskin.arguments import FincArgumentParser
@@ -124,8 +124,8 @@ if not inputfile:
 
     if not inputfile:
         inputfile = fip.inputfilename(SID)
-        os.system("metha-sync -format marcxml http://www.ssoar.info/OAIHandler/request")
-        os.system("metha-cat -format marcxml http://www.ssoar.info/OAIHandler/request > %s" % inputfile)
+        shellout("metha-sync -format marcxml http://www.ssoar.info/OAIHandler/request")
+        shellout("metha-cat -format marcxml http://www.ssoar.info/OAIHandler/request > %s" % inputfile)
 
 
 ##################################################################################
