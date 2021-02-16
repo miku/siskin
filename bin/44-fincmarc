@@ -33,13 +33,14 @@ Origin: OAI
 
 
 import re
-import os
 import base64
 
 import xmltodict
 
 import marcx
 import pymarc
+
+from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.configuration import Config
 from siskin.utils import marc_build_field_008
@@ -85,8 +86,8 @@ if not inputfile:
 
     if not inputfile:
         inputfile = fip.inputfilename(SID)
-        os.system("metha-sync -rm -format cmdi -set dta -no-intervals https://clarin.bbaw.de/oai-dta/")
-        os.system("metha-cat -format cmdi -set dta https://clarin.bbaw.de/oai-dta/ > %s" % inputfile)
+        shellout("metha-sync -rm -format cmdi -set dta -no-intervals https://clarin.bbaw.de/oai-dta/")
+        shellout("metha-cat -format cmdi -set dta https://clarin.bbaw.de/oai-dta/ > %s" % inputfile)
 
 inputfile = open(inputfile, "rb")
 xmlfile = inputfile.read()
