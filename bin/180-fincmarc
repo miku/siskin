@@ -32,7 +32,6 @@ Origin: Z39.50
 """
 
 
-import os
 import sys
 
 import marcx
