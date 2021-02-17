@@ -32,11 +32,11 @@ Origin: Cloud
 """
 
 
-import os
 import sys
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record
@@ -75,7 +75,7 @@ else:
 
 if not inputfile:
     inputfile = fip.inputfilename(SID)
-    os.system("wget -O %s https://speicherwolke.uni-leipzig.de/index.php/s/ceD3gqssTS5b93y/download" % inputfile)
+    shellout("wget -O %s https://speicherwolke.uni-leipzig.de/index.php/s/ceD3gqssTS5b93y/download" % inputfile)
 
 inputfile = open(inputfile, "rb")
 reader = pymarc.MARCReader(inputfile, force_utf8=True)
