@@ -32,12 +32,12 @@ Origin: Cloud
 """
 
 
-import os
 import sys
 import csv
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.arguments import FincArgumentParser
@@ -80,7 +80,7 @@ if not inputfile:
     user = config.get(SID, "user")
     password = config.get(SID, "password")
     url = config.get(SID, "url")
-    os.system('wget -O %s --user=%s --password=%s "%s" --no-check-certificate' % (inputfile, user, password, url))
+    shellout('wget -O %s --user=%s --password=%s "%s" --no-check-certificate' % (inputfile, user, password, url))
 
 inputfile = open(inputfile, "r", encoding="utf-8")
 records = csv.reader(inputfile, delimiter=",")
