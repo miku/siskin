@@ -37,9 +37,10 @@ import re
 import sys
 
 import xmltodict
+
 import marcx
 import pymarc
-
+from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.configuration import Config
 from siskin.arguments import FincArgumentParser
@@ -114,8 +115,8 @@ if not inputfolder:
 
     for i, set in enumerate(sets, start=1):
         
-        os.system("metha-sync -set '%s' https://zs.thulb.uni-jena.de/oai2" % set)
-        os.system("metha-cat -set '%s' https://zs.thulb.uni-jena.de/oai2 > %s/187_input%d.xml" % (set, inputfolder, i))
+        shellout("metha-sync -set '%s' https://zs.thulb.uni-jena.de/oai2" % set)
+        shellout("metha-cat -set '%s' https://zs.thulb.uni-jena.de/oai2 > %s/187_input%d.xml" % (set, inputfolder, i))
  
 for root, _, files in os.walk(inputfolder):
 
