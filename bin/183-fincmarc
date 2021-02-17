@@ -32,7 +32,6 @@ Origin: SRU
 """
 
 
-import os
 import re
 import sys
 import time
@@ -42,6 +41,7 @@ import requests
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.utils import marc_clean_record, xmlstream
 from siskin.arguments import FincArgumentParser
 
@@ -187,5 +187,5 @@ while start < all_records:
 outputfile.close()
 
 if records_written < 526000:
-    os.system("rm -f s%" % outputfilename)
+    shellout("rm -f s%" % outputfilename)
     print("Too few records: do not write output file.")
