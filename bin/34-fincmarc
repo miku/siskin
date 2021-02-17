@@ -39,6 +39,7 @@ import marcx
 import pymarc
 import xmltodict
 
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.arguments import FincArgumentParser
@@ -84,8 +85,8 @@ else:
 
 if not inputfile:
     inputfile = fip.inputfilename(SID)
-    os.system("metha-sync http://pqdtoai.proquest.com/OAIHandler")
-    os.system("metha-cat http://pqdtoai.proquest.com/OAIHandler > %s" % inputfile)
+    shellout("metha-sync http://pqdtoai.proquest.com/OAIHandler")
+    shellout("metha-cat http://pqdtoai.proquest.com/OAIHandler > %s" % inputfile)
 
 
 ##################################################################################
