@@ -32,11 +32,11 @@ Origin: Speicherwolke
 """
 
 
-import os
 import sys
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.mappings import formats
 from siskin.configuration import Config
 from siskin.utils import marc_clean_record
@@ -79,12 +79,12 @@ if not inputfile:
 
     tmpfile = path + "/159_input.tmp"
     inputfile = path + "/159_input.mrc"
-    os.system("mkdir /tmp/159")
-    os.system('curl "http://172.18.85.86:12105/repo/Buchhandschriften/fincimport" > /tmp/159/urls')
-    os.system("wget -i /tmp/159/urls -P /tmp/159")
-    os.system("""sed -i -e 's/ind1=""/ind1=" "/g' -e 's/ind2=""/ind2=" "/g' /tmp/159/*""")
-    os.system("""yaz-marcdump -i marcxml -o marc /tmp/159/xml* > %s""" % tmpfile)
-    os.system("""yaz-marcdump -i marc -o marcxml %s > %s""" % (tmpfile, inputfile))
+    shellout("mkdir /tmp/159")
+    shellout('curl "http://172.18.85.86:12105/repo/Buchhandschriften/fincimport" > /tmp/159/urls')
+    shellout("wget -i /tmp/159/urls -P /tmp/159")
+    shellout("""sed -i -e 's/ind1=""/ind1=" "/g' -e 's/ind2=""/ind2=" "/g' /tmp/159/*""")
+    shellout("""yaz-marcdump -i marcxml -o marc /tmp/159/xml* > %s""" % tmpfile)
+    shellout("""yaz-marcdump -i marc -o marcxml %s > %s""" % (tmpfile, inputfile))
 
 inputfile = open(inputfile, "rb")
 reader = pymarc.parse_xml_to_array(inputfile)
