@@ -33,7 +33,6 @@ Origin: HTTP
 """
 
 
-import os
 import base64
 import collections
 import datetime
@@ -44,6 +43,7 @@ import sys
 
 import tqdm
 import marcx
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.arguments import FincArgumentParser
@@ -94,9 +94,9 @@ if not inputfile:
     inputfile_compressed = path + "/Filmliste-akt.xz"
     inputfile_decompressed = path + "/Filmliste-akt"
     inputfile = fip.inputfilename(SID)
-    os.system("curl -sL --fail 'https://verteiler1.mediathekview.de/Filmliste-akt.xz' > %s" % inputfile_compressed)
-    os.system("xz -fd %s" % inputfile_compressed)
-    os.system("mv %s %s" % (inputfile_decompressed, inputfile))
+    shellout("curl -sL --fail 'https://verteiler1.mediathekview.de/Filmliste-akt.xz' > %s" % inputfile_compressed)
+    shellout("xz -fd %s" % inputfile_compressed)
+    shellout("mv %s %s" % (inputfile_decompressed, inputfile))
 
 inputfile = open(inputfile, "r", encoding="utf-8")
 content = inputfile.read()
