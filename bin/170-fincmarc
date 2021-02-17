@@ -34,7 +34,6 @@ Origin: OAI
 
 
 import io
-import os
 import re
 import sys
 
@@ -43,6 +42,7 @@ from io import BytesIO
 
 import marcx
 import pymarc
+from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
 from siskin.utils import marc_build_field_008, check_isbn, check_issn, marc_get_languages
@@ -97,8 +97,8 @@ else:
 
 if not inputfile:
     inputfile = fip.inputfilename(SID)
-    os.system('metha-sync -rm -format oai_dc https://mediarep.org/oai/request')
-    os.system('metha-cat -format oai_dc https://mediarep.org/oai/request > %s' % inputfile)
+    shellout('metha-sync -rm -format oai_dc https://mediarep.org/oai/request')
+    shellout('metha-cat -format oai_dc https://mediarep.org/oai/request > %s' % inputfile)
 
 inputfile = open(inputfile, "rb")
 xmlfile = inputfile.read()
