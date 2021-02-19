@@ -731,6 +731,8 @@ def marc_normalize_subjects(record, delimiter=""):
                         subjects = field.split(". ")
                     else:
                         subjects = [field]
+                else:
+                    subjects = field.split(delimiter)
 
                 for subject in subjects:
                     subject = subject.title()
