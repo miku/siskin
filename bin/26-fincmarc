@@ -45,6 +45,19 @@ from siskin.utils import xmlstream, marc_clean_record, convert_to_finc_id
 from siskin.arguments import FincArgumentParser
 
 
+adlr_subjects = ["Communication. Mass media", "Information theory", "Motion pictures", "Music", "Performing Arts", "Communication Studies",
+                     "Media & Communications", "Media And Communications", "Media, Information & Communication Industries", "Political Communication",
+                     "Media And Communication", "Media & Communication", "History Of Communication", "Film Music", "Film", "Film, Tv & Radio",
+                     "Film Theory & Criticism", "Films, Cinema", "Film Studies", "Individual Film Directors, Film-Makers", "Film Theory", "Film History",
+                     "Film Production: Technical & Background Skills", "Filmwissenschaft", "Film: Styles & Genres", "Documentary Films", "Documentary Film",
+                     "Television", "Télévision", "Radio & Television Industry", "Radio", "Media Studies", "Media", "Social Media", "Digital Media",
+                     "Media Aesthetics", "Media Theory", "Sociology Of Media", "Media History", "Entertainment & Media Law", "Intermedialität",
+                     "Intermediality", "New Media", "Media Law", "Media Education", "Media Policy", "Media Philosophy", "European Media", "Transmediality",
+                     "Transmedia", "Media Studies: Internet", "Media Psychology", "Media Literacy", "Media Governance", "Medien", "Medienwissenschaft",
+                     "Medienästhetik", "Digitale Medien", "Mediensoziologie", "Medientheorie", "Mediengeschichte", "Medienrecht", "Medienkunst",
+                     "Medienpädagogik", "Neue Medien", "Mediendidaktik", "Massenmedien", "Medienkultur", "Politische Kommunikation", "Kommunikation"]
+
+
 ##################################################################################
 # 1. Parse arguments and prepare outputfile
 ##################################################################################
@@ -128,7 +141,6 @@ for oldrecord in xmlstream(inputfile, "record"):
 
     # Collection and sealing
     f980c = "sid-26-col-doab"
-    adlr_subjects = ['Communication. Mass media', 'Information theory', 'Motion pictures', 'Music', 'Performing Arts']
     for __subjects in record.get_fields('650'):
         for subject in __subjects.get_subfields('a'):
             subjectlist = subject.split(". ")
