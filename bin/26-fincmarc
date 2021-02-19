@@ -119,6 +119,9 @@ for oldrecord in xmlstream(inputfile, "record"):
         f001 = record["001"].data
     except:
         continue
+    # https://directory.doabooks.org/handle/20.500.12854/56455
+    f001 = f001.split("/")
+    f001 = f001[-1]
     record.remove_fields("001")
     record.add("001", data="26-" + f001)
 
