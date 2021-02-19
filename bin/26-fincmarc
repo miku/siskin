@@ -42,7 +42,7 @@ import marcx
 from gluish.utils import shellout
 from siskin.configuration import Config
 from siskin.mappings import formats
-from siskin.utils import xmlstream, marc_clean_record, convert_to_finc_id
+from siskin.utils import xmlstream, marc_clean_record, convert_to_finc_id, marc_normalize_subjects
 from siskin.arguments import FincArgumentParser
 
 
@@ -139,26 +139,23 @@ for oldrecord in xmlstream(inputfile, "record"):
     f338b = formats[format]["338b"]
     record.add("338", b=f338b)
 
+    # Subject headings
+    subjects = marc_normalize_subjects(record)
+    record.remove_fields("650")
+    record.remove_fields("651")
+    record.remove_fields("653")
+    for subject in subjects:
+        record.add("650", c=subject)
+
     # SWB-Content
     f935c = formats[format]["935c"]
     record.add("935", c=f935c)
 
     # Collection and sealing
     f980c = "sid-26-col-doab"
-    for __subjects in record.get_fields('650'):
-        for subject in __subjects.get_subfields('a'):
-            subjectlist = subject.split(". ")
-            for subject in subjectlist:
-                subject = subject.title()
-                if subject in adlr_subjects:
-                    f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
-    for __subjects in record.get_fields('653'):
-        for subject in __subjects.get_subfields('a'):
-            subjectlist = subject.split(". ")
-            for subject in subjectlist:
-                subject = subject.title()
-                if subject in adlr_subjects:
-                    f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
+    for subject in subjects:
+        if subject in adlr_subjects:
+            f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
     record.add("980", a=f001, b=SID, c=f980c)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
