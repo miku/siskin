@@ -723,11 +723,11 @@ def marc_normalize_subjects(record, delimiter=""):
                         subjects = field.split(" ; ")
                     elif "; " in field:
                         subjects = field.split("; ")
-                    elif "; " in field:
-                        subjects = field.split(";")
                     elif ";" in field:
+                        subjects = field.split(";")
+                    elif " , " in field:
                         subjects = field.split(" , ")
-                    elif "; " in field:
+                    elif ". " in field:
                         subjects = field.split(". ")
                     else:
                         subjects = [field]
