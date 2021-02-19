@@ -146,7 +146,6 @@ for oldrecord in xmlstream(inputfile, "record"):
             subjectlist = subject.split(". ")
             for subject in subjectlist:
                 subject = subject.title()
-                print(subject)
                 if subject in adlr_subjects:
                     f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
     for __subjects in record.get_fields('653'):
@@ -154,7 +153,6 @@ for oldrecord in xmlstream(inputfile, "record"):
             subjectlist = subject.split(". ")
             for subject in subjectlist:
                 subject = subject.title()
-                print(subject)
                 if subject in adlr_subjects:
                     f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
     record.add("980", a=f001, b=SID, c=f980c)
