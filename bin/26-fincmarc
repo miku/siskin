@@ -127,14 +127,24 @@ for oldrecord in xmlstream(inputfile, "record"):
     record.add("935", c=f935c)
 
     # Collection and sealing
+    f980c = "sid-26-col-doab"
     adlr_subjects = ['Communication. Mass media', 'Information theory', 'Motion pictures', 'Music', 'Performing Arts']
     for __subjects in record.get_fields('650'):
         for subject in __subjects.get_subfields('a'):
-            if subject in adlr_subjects:
-                f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
-            else:
-                f980c = "sid-26-col-doab"
-
+            subjectlist = subject.split(". ")
+            for subject in subjectlist:
+                subject = subject.title()
+                print(subject)
+                if subject in adlr_subjects:
+                    f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
+    for __subjects in record.get_fields('653'):
+        for subject in __subjects.get_subfields('a'):
+            subjectlist = subject.split(". ")
+            for subject in subjectlist:
+                subject = subject.title()
+                print(subject)
+                if subject in adlr_subjects:
+                    f980c = ["sid-26-col-doab", "sid-26-col-doabadlr"]
     record.add("980", a=f001, b=SID, c=f980c)
 
     # Convert all identifier in 001, 770, 772 ... to Finc schema
