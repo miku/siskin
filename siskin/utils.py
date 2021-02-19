@@ -45,6 +45,7 @@ import xml.etree.cElementTree as ET
 import bs4
 import requests
 import six
+import pymarc
 from dateutil import relativedelta
 from six import string_types
 
@@ -699,3 +700,40 @@ def remove_delimiter(record):
                 field.subfields[index] = newvalue
 
     return record
+
+
+def marc_normalize_subjects(record, delimiter=""):
+    """
+    Takes a record and returns a list with all occurring subject headings
+    from fields 650, 651, 653. The subjects are capitalized, separated,
+    deduplicated and cleaned from trailing spaces.
+    """
+
+    subjectlist = []
+
+    tags = ["650", "651", "653"]
+
+    for tag in tags:
+
+        for __fields in record.get_fields(tag):
+            for field in __fields.get_subfields("a"):
+
+                if not delimiter:
+                    if " ; " in field:
+                        subjects = field.split(" ; ")
+                    elif "; " in field:
+                        subjects = field.split("; ")
+                    elif "; " in field:
+                        subjects = field.split(" , ")
+                    elif "; " in field:
+                        subjects = field.split(". ")
+                    else:
+                        subjects = [field]
+
+                for subject in subjects:
+                    subject = subject.title()
+                    subject = subject.strip()
+                    if subject not in subjectlist:
+                        subjectlist.append(subject)
+
+    return subjectlist
