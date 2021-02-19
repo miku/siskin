@@ -102,7 +102,10 @@ for oldrecord in xmlstream(inputfile, "record"):
     record.leader = leader
 
     # Identifikator
-    f001 = record["001"].data
+    try:
+        f001 = record["001"].data
+    except:
+        continue
     record.remove_fields("001")
     record.add("001", data="26-" + f001)
 
