@@ -145,7 +145,7 @@ for oldrecord in xmlstream(inputfile, "record"):
     record.remove_fields("651")
     record.remove_fields("653")
     for subject in subjects:
-        record.add("650", c=subject)
+        record.add("650", a=subject)
 
     # SWB-Content
     f935c = formats[format]["935c"]
