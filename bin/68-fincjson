@@ -135,7 +135,7 @@ for oldrecord in inputfile:
     if "SSG-OLC-FTH" in sets:
         mega_collections.append("OLC SSG Film / Theater")
         #institutions.add("DE-15")
-        #institutions.add("DE-15-FID")
+        institutions.add("DE-15-FID")
         #institutions.add("DE-953")
         #institutions.add("DE-540")
         #institutions.add("DE-Ka84")
