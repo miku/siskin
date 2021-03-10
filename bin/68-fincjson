@@ -129,7 +129,7 @@ for oldrecord in inputfile:
 
     if "SSG-OLC-MKW" in sets:
         mega_collections.append("OLC SSG Medien- / Kommunikationswissenschaft")
-        #institutions.add("DE-15-FID")
+        institutions.add("DE-15-FID")
         #institutions.add("DE-15")
 
     if "SSG-OLC-FTH" in sets:
