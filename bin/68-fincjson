@@ -146,6 +146,7 @@ for oldrecord in inputfile:
     if "SSG-OLC-BUB" in sets:
         mega_collections.append("OLC SSG Informations-, Buch- und Bibliothekswesen")
         institutions.add("FID-BBI-DE-23")
+        institutions.add("DE-15-FID")
 
     if "SSG-OLC-PHI" in sets:
         mega_collections.append("OLC SSG Philosophie")
