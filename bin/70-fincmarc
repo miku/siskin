@@ -303,8 +303,8 @@ for i, record in enumerate(sqlite):
     marcrecord.add("856",
                    q="text/html",
                    _3="Link zur Bestandsinformation",
-                   u="http://www.gko.uni-leipzig.de/de/aegyptologisches-institut/bibliothek/informationen.html",
-                   z="Bestand der Bibliothek des Ägyptologischen Institus, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
+                   u="https://www2.gko.uni-leipzig.de/aegyptologisches-institut/bibliothek/informationen.html",
+                   z="Bestand der Bibliothek des Ägyptologischen Instituts, bitte informieren Sie sich vor Ort. Signatur: " + callnumber)
 
     # Collection and sealing
     collections = ["a", f001, "b", "70", "c", "sid-70-col-aegyptologie"]
