@@ -58,7 +58,7 @@ from siskin.benchmark import timed
 from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
 from siskin.sources.base import BaseSingleFile
-from siskin.sources.ceeol import CeeolJournalsIntermediateSchema
+from siskin.sources.ceeol import CeeolIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.dbinet import DBInetIntermediateSchema
 from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
@@ -125,7 +125,7 @@ class AIIntermediateSchema(AITask):
             ThiemeIntermediateSchema(date=self.date, stamp=True),
             PQDTIntermediateSchema(date=self.date, stamp=True),
             IJOCIntermediateSchema(stamp=True),
-            CeeolJournalsIntermediateSchema(stamp=True),
+            CeeolIntermediateSchema(stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
             DBInetIntermediateSchema(stamp=True),
