@@ -242,6 +242,18 @@ def load_set_from_file(filename, func=lambda v: v):
     """
     return load_set(filename, func=func)
 
+def sha1obj(obj):
+    """
+    Return a sha1 of various python objects. This is not comprehensive yet, so
+    use it for things like strings, flat lists and sets only.
+    """
+    sha1 = hashlib.sha1()
+    if isinstance(obj, list):
+        sha1.update(bytes("".join(sorted(obj)), encoding="utf-8"))
+    elif isinstance(obj, str):
+        sha1.update(bytes(str, encoding="utf-8"))
+
+    return sha1.hexdigest()
 
 class URLCache(object):
     """

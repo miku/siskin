@@ -33,11 +33,12 @@ import glob
 import os
 
 import luigi
-from gluish.format import Gzip, Zstd
+from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.utils import sha1obj
 
 
 class OLCTask(DefaultTask):
@@ -45,6 +46,20 @@ class OLCTask(DefaultTask):
     OLC base task.
     """
     TAG = '68'
+
+    # cf. https://is.gd/8DFvOo
+    COLLECTIONS = [
+        'SSG-OLC-ANG',
+        'SSG-OLC-ARC',
+        'SSG-OLC-BUB',
+        'SSG-OLC-FTH',
+        'SSG-OLC-GER',
+        'SSG-OLC-GWK',
+        'SSG-OLC-KPH',
+        'SSG-OLC-MKW',
+        'SSG-OLC-MUS',
+        'SSG-OLC-PHI',
+    ]
 
     def closest(self):
         return monthly(date=self.date)
@@ -57,16 +72,17 @@ class OLCDump(OLCTask):
     Currently, 9/51 collections are requested, but that might change over time.
     """
     date = ClosestDateParameter(default=datetime.date.today())
-    collection = luigi.Parameter(default='SSG-OLC-ARC', description='SSG-OLC-XXX, see: https://is.gd/8DFvOo')
 
     def run(self):
-        output = shellout(""" solrdump -verbose -server {server} -q 'collection_details:{collection}' | zstd -q -c > {output} """,
-                          server=self.config.get('olc', 'solr'),
-                          collection=self.collection)
+        query = ' OR '.join(["collection_details:{}".format(c) for c in self.COLLECTIONS])
+        output = shellout(""" solrdump -verbose -server {server} -q '{query}' | pigz -c > {output} """,
+                          query=query,
+                          server=self.config.get('olc', 'solr'))
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.zst'), format=Zstd)
+        filename = '{}-{}.ndj.gz'.format(self.date, sha1obj(self.COLLECTIONS))
+        return luigi.LocalTarget(path=self.path(filename=filename))
 
 
 class OLCIntermediateSchema(OLCTask):
