@@ -179,6 +179,112 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     return record
 
 
+def olc_to_intermediate_schema(doc):
+    """
+    Convert OLC from SLUB solr into intermediate schema JSON, w/o tags.
+    """
+    # "interne Bezeichnung":"Fachkatalog",
+    internal_to_name = {
+        # $ curl "https://is.gd/qPEypK" |
+        #     pup 'tr json{}' |
+        #     jq -rc '.[] | [.["children"][1]["children"][0]["text"], .["children"][0]["children"][0]["text"]]' |
+        #     sed -e 's@","@":"@; s@^\[@@; s@\]@,@'
+        "SSG-OLC-ALT":"Altertumswissenschaften",
+        "SSG-OLC-ANG":"Anglistik",
+        "SSG-OLC-ARC":"Architektur",
+        "SSG-OLC-ASS":"Afrika südlich der Sahara",
+        "SSG-OLC-AST":"Astronomie",
+        "SSG-OLC-BAL":"Baltische Länder",
+        "SSG-OLC-BEL":"Niederlande",
+        "SSG-OLC-BIF":"Bildungsforschung",
+        "SSG-OLC-BUB":"Informations-, Buch- und Bibliothekswesen",
+        "SSG-OLC-CHE":"Chemie",
+        "SSG-OLC-ETH":"Ethnologie",
+        "SSG-OLC-FOR":"Forstwissenschaften",
+        "SSG-OLC-FRK":"Frankreichkunde und Allgemeine Romanistik",
+        "SSG-OLC-FTH":"Film und Theater", # amsl: "Film / Theater"
+        "SSG-OLC-GEO":"Geowissenschaften",
+        "SSG-OLC-GER":"Germanistik",
+        "SSG-OLC-GWK":"Kunst und Kunstwissenschaft",
+        "SSG-OLC-HIS":"Geschichte",
+        "SSG-OLC-HSW":"Hochschulwesen",
+        "SSG-OLC-IBA":"Ibero-Amerika",
+        "SSG-OLC-IBL":"Internationale Beziehungen und Länderkunde",
+        "SSG-OLC-ITF":"Italienforschung",
+        "SSG-OLC-JUR":"Recht",
+        "SSG-OLC-KPH":"Klassische Philologie",
+        "SSG-OLC-MAT":"Mathematik und Informatik",
+        "SSG-OLC-MFO":"Asien und Nordafrika",
+        "SSG-OLC-MKW":"Medien- und Kommunikationswissenschaft", # amsl: "Medien- / Kommunikationswissenschaft"
+        "SSG-OLC-MUS":"Musikwissenschaft",
+        "SSG-OLC-NED":"Niederlande",
+        "SSG-OLC-OAS":"Ost- und Südostasien",
+        "SSG-OLC-OEB":"Auswahl deutschsprachiger Zeitschriften",
+        "SSG-OLC-OEU":"Osteuropa",
+        "SSG-OLC-PHA":"Pharmazie",
+        "SSG-OLC-PHI":"Philosophie",
+        "SSG-OLC-PHY":"Physik",
+        "SSG-OLC-POL":"Politikwissenschaft und Friedensforschung",
+        "SSG-OLC-PSY":"Psychologie",
+        "SSG-OLC-ROK":"Romanischer Kulturkreis",
+        "SSG-OLC-SAS":"Südasien",
+        "SSG-OLC-SCA":"Nordeuropa",
+        "SSG-OLC-SLA":"Slavistik",
+        "SSG-OLC-SOW":"Sozialwissenschaften",
+        "SSG-OLC-SPO":"Sportwissenschaften",
+        "SSG-OLC-SPP":"Spanien und Portugal",
+        "SSG-OLC-TEC":"Technik",
+        "SSG-OLC-TGE":"Technikgeschichte",
+        "SSG-OLC-UMW":"Umwelt",
+        "SSG-OLC-VET":"Veterinärmedizin",
+        "SSG-OLC-VOR":"Vorderer Orient",
+        "SSG-OLC-WIW":"Wirtschaftswissenschaften",
+        "SSG-OLC-ZGE":"Zeitgeschichte",
+        "SSG-OPC-ANG":"Anglo-American Culture",
+        "SSG-OPC-AST":"Astronomie",
+        "SSG-OPC-BAL":"Baltische Länder",
+        "SSG-OPC-BBI":"Informations-, Buch- und Bibliothekswesen",
+        "SSG-OPC-FIN":"Finnougristik",
+        "SSG-OPC-FOR":"Forstwissenschaften",
+        "SSG-OPC-GEO":"Fachkatalog Geophysik",
+        "SSG-OPC-GGO":"Geowissenschaften",
+        "SSG-OPC-MAT":"Mathematik",
+        "SSG-OPC-PHA":"Pharmazie",
+        "SSG-OPC-VOR":"Vorderer Orient",
+    }
+    olc_format_to_finc_format = {
+        "Journal": "Journal",
+        "eJournal": "Journal",
+        "Article": "Article",
+        "electronic Article": "Article",
+        "Monograph Series": "Serial",
+        "Serial Volume": "Book",
+    }
+    # Philosophie => OLC SSG Philosophie
+    internal_to_mega_collection = lambda internal: "OLC SSG {}".format(internal_to_name[internal])
+
+    result = {
+        "abstract": doc.get("abstract", ""),
+        "authors": [{"rft.au": name} for name in doc.get("author2", [])],
+        "finc.id": "ai-68-{}".format(doc["id"]),
+        "finc.mega_collection": [internal_to_mega_collection[v] for v in doc.get("collection_details", [])],
+        "finc.source_id": "68",
+        "format": olc_format_to_finc_format.get(doc.get("format"), "Article"),
+        "languages": doc.get("lang_code", ""),
+        "rft.genre": "article",
+        "rft.issn": doc.get("issn", ""),
+        "rft.issue": doc.get("container_issue", ""),
+        "rft.jtitle": doc.get("container_title", ""),
+        "rft.place": doc.get("rft.place", ""),
+        "rft.pub": doc.get("publisher", ""),
+        "rft.title": doc.get("title", ""),
+        "rft.volume": doc.get("container_volume", ""),
+        "x.date": "{}-01-01T00:00:00Z".format(doc.get("publishDateSort"), ""),
+        "x.subtitle": doc.get("title_sub", ""),
+    }
+    return result
+
+
 def marburg_to_marc(s):
     """
     Convert a string containing a single XML in datacite from

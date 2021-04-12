@@ -37,6 +37,7 @@ from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.conversions import olc_to_intermediate_schema
 from siskin.task import DefaultTask
 from siskin.utils import sha1obj
 
@@ -82,7 +83,29 @@ class OLCDump(OLCTask):
 
     def output(self):
         filename = '{}-{}.ndj.gz'.format(self.date, sha1obj(self.COLLECTIONS))
-        return luigi.LocalTarget(path=self.path(filename=filename))
+        return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
+
+
+class OLCIntermediateSchemaNext(OLCTask):
+    """
+    Sample convertion.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return OLCDump(date=self.date)
+
+    def run(self):
+        with self.input().open() as file:
+            with self.output().open('w') as output:
+                for line in file:
+                    doc = json.loads(line)
+                    result = olc_format_to_finc_format(doc)
+                    json.dump(result, output)
+                    output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
 
 
 class OLCIntermediateSchema(OLCTask):
