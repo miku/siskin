@@ -75,7 +75,7 @@ class OLCDump(OLCTask):
 
     def run(self):
         query = ' OR '.join(["collection_details:{}".format(c) for c in self.COLLECTIONS])
-        output = shellout(""" solrdump -verbose -server {server} -q '{query}' | pigz -c > {output} """,
+        output = shellout(""" solrdump -verbose -server {server} -q '{query}' | jq -rc . | pigz -c > {output} """,
                           query=query,
                           server=self.config.get('olc', 'solr'))
         luigi.LocalTarget(output).move(self.output().path)
