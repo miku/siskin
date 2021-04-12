@@ -21,9 +21,9 @@ import re
 import sys
 
 import xmltodict
+from siskin.utils import marc_build_imprint, xmlstream
 
 import marcx
-from siskin.utils import marc_build_imprint, xmlstream
 
 formatmap = {
     "Buch": {

@@ -33,14 +33,15 @@ import csv
 import datetime
 import json
 
+from siskin.common import FTPMirror
+from siskin.decorator import deprecated
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import FTPMirror
-from siskin.decorator import deprecated
-from siskin.task import DefaultTask
 
 
 class LyndaTask(DefaultTask):

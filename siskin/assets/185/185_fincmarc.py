@@ -34,10 +34,11 @@ import argparse
 import json
 import sys
 
-import marcx
-import pymarc
 from siskin.mappings import formats
 from siskin.utils import (check_isbn, check_issn, marc_build_field_008, marc_build_field_773g)
+
+import marcx
+import pymarc
 
 
 def get_field(jsonrecord, field):

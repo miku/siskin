@@ -32,14 +32,15 @@ import datetime
 import glob
 import os
 
+from siskin.conversions import olc_to_intermediate_schema
+from siskin.task import DefaultTask
+from siskin.utils import sha1obj
+
 import luigi
 from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.conversions import olc_to_intermediate_schema
-from siskin.task import DefaultTask
-from siskin.utils import sha1obj
 
 
 class OLCTask(DefaultTask):

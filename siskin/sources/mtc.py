@@ -34,10 +34,10 @@ import sys
 import time
 
 import requests
+from siskin.task import DefaultTask
 
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class MTCTask(DefaultTask):

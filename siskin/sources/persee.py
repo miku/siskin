@@ -38,6 +38,8 @@ import json
 import os
 
 import requests
+from siskin.sources.amsl import AMSLService
+from siskin.task import DefaultTask
 
 import luigi
 import marcx
@@ -46,8 +48,6 @@ from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.sources.amsl import AMSLService
-from siskin.task import DefaultTask
 
 
 class PerseeTask(DefaultTask):

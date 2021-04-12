@@ -35,9 +35,10 @@ download-url = http://exa.com/store/123
 
 """
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class DawsonTask(DefaultTask):

@@ -43,15 +43,16 @@ import os
 import tempfile
 from builtins import str
 
-import luigi
-from gluish.common import Executable
-from gluish.format import TSV, Gzip
-from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+
+import luigi
+from gluish.common import Executable
+from gluish.format import TSV, Gzip
+from gluish.utils import shellout
 
 
 class ElsevierJournalsTask(DefaultTask):
@@ -59,6 +60,7 @@ class ElsevierJournalsTask(DefaultTask):
     TAG = '85'
 
     WARN_CORRUPT_TAR_MSG = "since 2020 we observe corrupt tarballs, skipping"
+
 
 class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     """

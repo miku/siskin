@@ -47,13 +47,14 @@ import shutil
 import tempfile
 import zipfile
 
+from siskin.task import DefaultTask
+from siskin.utils import iterfiles
+
 import luigi
 import pymarc
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
-from siskin.utils import iterfiles
 
 
 class VKFilmBATask(DefaultTask):

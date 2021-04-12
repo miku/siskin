@@ -32,10 +32,11 @@ Ticket: #11786
 import re
 import sys
 
-import marcx
-import pymarc
 from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_clean_record
+
+import marcx
+import pymarc
 
 copytags = ("100", "105", "120", "130", "150", "174", "200", "245", "246", "250", "260", "300", "335", "351", "361", "400", "500", "520", "650", "689", "700",
             "710", "800")

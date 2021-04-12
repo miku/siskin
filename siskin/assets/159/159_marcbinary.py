@@ -33,10 +33,11 @@ Ticket: #13316, #14527, #15488, #16052
 import re
 import sys
 
-import marcx
-import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record
+
+import marcx
+import pymarc
 
 inputfilename = "159_input.xml"
 outputfilename = "159_output.mrc"

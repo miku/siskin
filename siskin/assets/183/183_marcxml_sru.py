@@ -36,10 +36,10 @@ import sys
 from io import BytesIO, StringIO
 
 import requests
+from siskin.utils import marc_clean_record
 
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record
 from six.moves.urllib.parse import urlencode
 
 

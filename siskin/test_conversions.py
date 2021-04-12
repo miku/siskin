@@ -1,5 +1,6 @@
-import pymarc
 from siskin.conversions import imslp_xml_to_marc
+
+import pymarc
 
 
 def test_imslp_xml_to_marc():

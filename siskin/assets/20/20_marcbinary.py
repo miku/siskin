@@ -12,10 +12,10 @@ import re
 import sys
 
 import xmltodict
-
-import marcx
 from siskin.mappings import formats, roles
 from siskin.utils import (check_isbn, check_issn, marc_build_field_008, xmlstream)
+
+import marcx
 
 setlist = ["gallica:typedoc:partitions", "gallica:theme:0:00", "gallica:theme:0:02"]
 

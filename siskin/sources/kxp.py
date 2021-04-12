@@ -30,12 +30,13 @@ Tickets: 15833, 15694
 
 import datetime
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class KXPTask(DefaultTask):

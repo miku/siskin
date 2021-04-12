@@ -47,13 +47,13 @@ from xml.dom.minidom import parseString
 
 import requests
 import xmltodict
+from siskin.task import DefaultTask
 
 import luigi
 import tqdm
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class VKFilmBWTask(DefaultTask):

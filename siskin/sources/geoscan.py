@@ -32,11 +32,12 @@ XXX: Only recent works?
 
 import datetime
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class GeoscanTask(DefaultTask):

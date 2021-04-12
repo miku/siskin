@@ -41,17 +41,17 @@ import re
 import tempfile
 
 import six
+from siskin.benchmark import timed
+from siskin.common import Executable, FTPMirror
+from siskin.sources.amsl import AMSLFilterConfig, AMSLService
+from siskin.task import DefaultTask
+from siskin.utils import SetEncoder, load_set_from_file, nwise
 
 import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.common import Executable, FTPMirror
-from siskin.sources.amsl import AMSLFilterConfig, AMSLService
-from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, load_set_from_file, nwise
 
 
 class JstorTask(DefaultTask):

@@ -33,9 +33,10 @@ Ticket: #14668, #14527, #16052
 import re
 import sys
 
+from siskin.utils import marc_clean_record
+
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record
 
 inputfilename = "163_input.mrc"
 outputfilename = "163_output.mrc"

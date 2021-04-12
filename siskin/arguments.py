@@ -31,10 +31,11 @@ import os.path
 import re
 import sys
 
+from siskin.configuration import Config
+
 import pymarc
 from gluish.intervals import monthly, weekly
 from gluish.parameter import ClosestDateParameter
-from siskin.configuration import Config
 
 
 class FincArgumentParser():

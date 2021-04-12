@@ -36,10 +36,10 @@ import re
 import sys
 
 import xlrd
-
-import marcx
 from siskin.mappings import formats
 from siskin.utils import check_issn, marc_build_field_008
+
+import marcx
 
 inputfilename = "101_input.xlsx"
 outputfilename = "101_output.mrc"

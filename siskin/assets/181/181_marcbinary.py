@@ -32,9 +32,10 @@ Ticket: #15835
 
 import sys
 
+from siskin.utils import marc_clean_record, xmlstream
+
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record, xmlstream
 
 inputfilename = "181_input.mrc"
 outputfilename = "181_output.mrc"

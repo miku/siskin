@@ -33,9 +33,10 @@ Ticket: #13640
 import re
 import sys
 
+from siskin.utils import marc_clean_record
+
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record
 
 
 def get_field(record, field, subfield):

@@ -8,9 +8,10 @@ import sys
 from builtins import *
 from io import BytesIO, StringIO
 
+from siskin.utils import marc_clean_record, xmlstream
+
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record, xmlstream
 
 inputfilename = "39_input.xml"
 outputfilename = "39_output.mrc"

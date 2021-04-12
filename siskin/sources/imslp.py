@@ -40,13 +40,14 @@ import os
 import shutil
 import tempfile
 
-import luigi
-from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout
 from siskin.conversions import imslp_tarball_to_marc
 from siskin.decorator import deprecated
 from siskin.task import DefaultTask
 from siskin.utils import scrape_html_listing
+
+import luigi
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 
 
 class IMSLPTask(DefaultTask):

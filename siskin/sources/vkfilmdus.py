@@ -46,10 +46,11 @@ b37c4663fe6e4dcc55e71253266516e417ec9c44  Mab2Mabxml-1.9.9.jar
 import datetime
 import os
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class VKFilmDusTask(DefaultTask):

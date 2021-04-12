@@ -33,9 +33,10 @@ Configuration:
 input = /path/to/json (ask RS)
 """
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class GDMBTask(DefaultTask):

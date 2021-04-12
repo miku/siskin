@@ -34,9 +34,10 @@ import re
 import sys
 from io import BytesIO, StringIO
 
+from siskin.utils import marc_clean_record, xmlstream
+
 import marcx
 import pymarc
-from siskin.utils import marc_clean_record, xmlstream
 
 adlr_ddc = ["175", "303.38", "342.0853", "384", "778.5", "791"]
 

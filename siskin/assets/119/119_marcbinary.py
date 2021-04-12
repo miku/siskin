@@ -34,9 +34,10 @@ import io
 import re
 import sys
 
+from siskin.utils import convert_to_finc_id, marc_clean_record
+
 import marcx
 import pymarc
-from siskin.utils import convert_to_finc_id, marc_clean_record
 
 
 def check_fulltext(record):

@@ -40,15 +40,16 @@ updates-marc = /path/to/file.xml, /path/to/file.xml
 
 from __future__ import print_function
 
-import glob
 import datetime
+import glob
 import os
 import re
 import tempfile
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class CeeolTask(DefaultTask):
@@ -58,6 +59,7 @@ class CeeolTask(DefaultTask):
     TAG = '53'
 
     date = luigi.DateParameter(default=datetime.date(2021, 4, 1))
+
 
 class CeeolIntermediateSchema(CeeolTask):
     """
@@ -75,4 +77,3 @@ class CeeolIntermediateSchema(CeeolTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext=".ndj.gz"))
-

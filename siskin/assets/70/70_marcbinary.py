@@ -16,8 +16,9 @@ import sqlite3
 import sys
 from builtins import *
 
-import marcx
 from siskin.utils import marc_build_imprint
+
+import marcx
 
 # XXX: https://stackoverflow.com/q/3828723
 reload(sys)

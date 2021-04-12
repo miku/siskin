@@ -9,9 +9,9 @@ import sys
 from builtins import *
 
 import xmltodict
+from siskin.utils import marc_build_imprint
 
 import marcx
-from siskin.utils import marc_build_imprint
 
 lang_map = {
     "deutsch": "ger",

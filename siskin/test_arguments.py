@@ -30,7 +30,6 @@ import tempfile
 from pathlib import Path
 
 import configparser
-
 from siskin.arguments import FincArgumentParser
 
 

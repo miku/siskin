@@ -36,10 +36,10 @@ import re
 import sys
 
 import xmltodict
-
-import marcx
 from siskin.mappings import formats
 from siskin.utils import check_isbn, check_issn, marc_build_field_008
+
+import marcx
 
 
 def clean_language(language):

@@ -37,9 +37,10 @@ input = /path/to/mrc (ask RS)
 
 """
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class WBGBTask(DefaultTask):

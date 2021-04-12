@@ -34,9 +34,10 @@ import io
 import re
 import sys
 
-import marcx
 from siskin.mappings import formats, roles
 from siskin.utils import check_isbn, marc_build_field_008
+
+import marcx
 from six.moves import html_parser
 
 parser = html_parser.HTMLParser()

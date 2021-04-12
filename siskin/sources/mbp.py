@@ -33,9 +33,10 @@ Config
 input = /path/to/excel.file.xls
 """
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class MBPTask(DefaultTask):

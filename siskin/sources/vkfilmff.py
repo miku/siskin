@@ -45,12 +45,13 @@ ftp-pattern = *
 
 import datetime
 
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class VKFilmFFTask(DefaultTask):

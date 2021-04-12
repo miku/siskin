@@ -42,18 +42,18 @@ import sys
 import tempfile
 import xml.etree.cElementTree as ET
 
-import bs4
 import requests
 import six
-import pymarc
 from dateutil import relativedelta
+from siskin import __version__
+from siskin.mappings import languages
 from six import string_types
 
 import backoff
+import bs4
 import luigi
 import marcx
-from siskin import __version__
-from siskin.mappings import languages
+import pymarc
 from six.moves.urllib.parse import urlparse
 
 logger = logging.getLogger('siskin')
@@ -242,6 +242,7 @@ def load_set_from_file(filename, func=lambda v: v):
     """
     return load_set(filename, func=func)
 
+
 def sha1obj(obj):
     """
     Return a sha1 of various python objects. This is not comprehensive yet, so
@@ -254,6 +255,7 @@ def sha1obj(obj):
         sha1.update(bytes(str, encoding="utf-8"))
 
     return sha1.hexdigest()
+
 
 class URLCache(object):
     """
@@ -683,8 +685,10 @@ def remove_delimiter(record):
     """
     Iterates over the record and removes surplus delimiters (ISBD etc.), refs #16965.
     """
-    fieldspecs = ["020.a", "100.a", "245.a", "245.b", "245.c", "245.h", "250.a", "260.a", "260.b",
-                  "260.c", "264.a", "264.b", "264.c", "300.a", "490.a", "650.a", "700.a", "710.a"]
+    fieldspecs = [
+        "020.a", "100.a", "245.a", "245.b", "245.c", "245.h", "250.a", "260.a", "260.b", "260.c", "264.a", "264.b", "264.c", "300.a", "490.a", "650.a", "700.a",
+        "710.a"
+    ]
 
     for fieldspec in fieldspecs:
 

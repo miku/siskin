@@ -14,9 +14,9 @@ import re
 import sys
 
 import xmltodict
+from siskin.utils import marc_build_imprint
 
 import marcx
-from siskin.utils import marc_build_imprint
 
 inputfilename = "44_input.xml"
 outputfilename = "44_output.mrc"

@@ -34,11 +34,12 @@ input = /path/to/izi.xml
 import datetime
 import os
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class IZITask(DefaultTask):

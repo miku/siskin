@@ -17,10 +17,10 @@ from builtins import *
 
 import requests
 import xmltodict
-
-import marcx
 from siskin.mab import MabXMLFile
 from siskin.utils import marc_build_imprint
+
+import marcx
 
 formatmap = {
     "p||||||z|||||||": u"Zeitschrift",

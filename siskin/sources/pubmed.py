@@ -29,14 +29,15 @@ from __future__ import print_function
 
 import datetime
 
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class PubmedTask(DefaultTask):

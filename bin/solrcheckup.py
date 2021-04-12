@@ -48,8 +48,8 @@ import time
 from sqlite3 import Error
 
 import requests
-
 from siskin.mail import send_mail
+
 from six.moves.urllib.parse import urlencode
 
 logging.basicConfig(level=logging.DEBUG)

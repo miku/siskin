@@ -35,11 +35,11 @@ import re
 import sys
 
 import xmltodict
-
-import marcx
 from siskin.mab import MabXMLFile
 from siskin.mappings import formats
 from siskin.utils import (check_isbn, check_issn, convert_to_finc_id, marc_build_field_008, marc_get_languages)
+
+import marcx
 
 inputfilename = "142_input.xml"
 outputfilename = "142_output.mrc"

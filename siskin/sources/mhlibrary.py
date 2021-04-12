@@ -27,11 +27,12 @@ Example workflow with OAI harvest and metafacture.
 
 import datetime
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class MHLibraryTask(DefaultTask):

@@ -38,6 +38,9 @@ clean:
 	rm -rf logs # Probably automatically created by Java MAB library.
 	rm -rf siskin.egg-info
 
+.PHONY: fmt
+fmt: imports style
+
 # Fix imports, requires https://github.com/timothycrosley/isort.
 .PHONY: imports
 imports:

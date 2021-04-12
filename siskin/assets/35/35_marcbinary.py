@@ -34,10 +34,11 @@ import re
 import sys
 from io import BytesIO, StringIO
 
-import marcx
-import pymarc
 from siskin.mappings import formats
 from siskin.utils import marc_clean_record, xmlstream
+
+import marcx
+import pymarc
 
 inputfilename = "35_input.xml"
 outputfilename = "35_output.mrc"

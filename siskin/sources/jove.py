@@ -35,10 +35,10 @@ url = https://www.jove.com/api/articles/v0/articlefeed.php?marc=1&journal=1
 import datetime
 
 import requests
+from siskin.task import DefaultTask
 
 import luigi
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class JoveTask(DefaultTask):

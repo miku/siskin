@@ -22,9 +22,9 @@ import sys
 from xml.sax.saxutils import escape, unescape
 
 import xmltodict
+from siskin.mappings import formats
 
 import marcx
-from siskin.mappings import formats
 
 langmap = {
     "Ancient Greek": "grc",

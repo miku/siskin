@@ -6,9 +6,10 @@ import re
 import sys
 from builtins import *
 
+from siskin.utils import convert_to_finc_id
+
 import marcx
 import pymarc
-from siskin.utils import convert_to_finc_id
 from tqdm import tqdm
 
 copytags = [

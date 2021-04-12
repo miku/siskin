@@ -41,17 +41,18 @@ import os
 import re
 import tempfile
 
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
+from siskin.decorator import deprecated
+from siskin.task import DefaultTask
+from siskin.utils import iterfiles
+
 import luigi
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.common import FTPMirror
-from siskin.decorator import deprecated
-from siskin.task import DefaultTask
-from siskin.utils import iterfiles
 
 
 class KHMTask(DefaultTask):

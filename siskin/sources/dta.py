@@ -28,11 +28,12 @@ DTA, refs #14972
 
 import datetime
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class DTATask(DefaultTask):
