@@ -290,9 +290,11 @@ def olc_to_intermediate_schema(doc):
         "rft.pub": doc.get("publisher", []),
         "rft.atitle": de_listify(doc.get("title", "")),
         "rft.volume": doc.get("container_volume", ""),
-        "x.date": "{}-01-01T00:00:00Z".format(doc.get("publishDateSort"), ""),
         "x.subtitle": de_listify(doc.get("title_sub", [])),
     }
+    date = doc.get("publishDateSort")
+    if date and len(date) == 4:
+        result["x.date"] = "{}-01-01T00:00:00Z".format(date),
     return result
 
 
