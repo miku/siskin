@@ -188,7 +188,8 @@ def olc_to_intermediate_schema(doc):
         # $ curl "https://is.gd/qPEypK" |
         #     pup 'tr json{}' |
         #     jq -rc '.[] | [.["children"][1]["children"][0]["text"], .["children"][0]["children"][0]["text"]]' |
-        #     sed -e 's@","@":"@; s@^\[@@; s@\]@,@'
+        #     sed -e 's@","@":"@; s@^\[@@; s@\]@,@' |
+        #     grep 'SSG-'
         "SSG-OLC-ALT": "Altertumswissenschaften",
         "SSG-OLC-ANG": "Anglistik",
         "SSG-OLC-ARC": "Architektur",
@@ -260,7 +261,6 @@ def olc_to_intermediate_schema(doc):
         "Monograph Series": "Serial",
         "Serial Volume": "Book",
     }
-    de_listify = lambda v: v[0] if isinstance(v, list) else v
     mega_collections_set = set()
     for internal in doc.get("collection_details", []):
         if not internal.startswith("SSG-"):
@@ -273,28 +273,52 @@ def olc_to_intermediate_schema(doc):
         mega_collections_set.add(mc)
 
     result = {
-        "abstract": doc.get("abstract", ""),
+        "abstract": de_listify(doc.get("abstract")),
         "authors": [{
             "rft.au": name
         } for name in doc.get("author2", [])],
         "finc.id": "ai-68-{}".format(doc["id"]),
         "finc.mega_collection": list(mega_collections_set),
         "finc.source_id": "68",
-        "format": olc_format_to_finc_format.get(de_listify(doc.get("format")), "Article"),
+        "format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
         "languages": doc.get("lang_code", []),
         "rft.genre": "article",
-        "rft.issn": doc.get("issn", ""),
+        "rft.issn": doc.get("issn", []),
         "rft.issue": doc.get("container_issue", ""),
         "rft.jtitle": doc.get("container_title", ""),
-        "rft.place": doc.get("rft.place", ""),
-        "rft.pub": doc.get("publisher", ""),
-        "rft.title": doc.get("title", ""),
+        "rft.place": doc.get("rft.place", []),
+        "rft.pub": doc.get("publisher", []),
+        "rft.atitle": de_listify(doc.get("title", "")),
         "rft.volume": doc.get("container_volume", ""),
         "x.date": "{}-01-01T00:00:00Z".format(doc.get("publishDateSort"), ""),
-        "x.subtitle": doc.get("title_sub", ""),
+        "x.subtitle": de_listify(doc.get("title_sub", [])),
     }
     return result
 
+
+def de_listify(v, default=None):
+    """
+    Take any value and returns a string or None, possibly truncating multiple
+    values.
+    """
+    if v is None:
+        if default:
+            return default
+        return v
+    if isinstance(v, str):
+        if not v and default:
+            return default
+        return v
+    if isinstance(v, set):
+        v = list(v)
+    if isinstance(v, list):
+        if len(v) > 0:
+            return v[0]
+        else:
+            if default:
+                return default
+            return v
+    raise ValueError("cannot de-listify: {}".format(v))
 
 def marburg_to_marc(s):
     """
