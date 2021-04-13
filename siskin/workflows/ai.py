@@ -51,7 +51,6 @@ from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHo
 from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
-from siskin.sources.dbinet import DBInetIntermediateSchema
 from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema, ElsevierJournalsISSNList)
@@ -128,7 +127,6 @@ class AIIntermediateSchema(AITask):
             CeeolIntermediateSchema(stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
             LyndaIntermediateSchema(date=self.date, stamp=True),
-            DBInetIntermediateSchema(stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
         ]
 
