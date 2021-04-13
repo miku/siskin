@@ -261,7 +261,9 @@ def olc_to_intermediate_schema(doc):
         "Serial Volume": "Book",
     }
     # Philosophie => OLC SSG Philosophie
-    internal_to_mega_collection = lambda internal: "OLC SSG {}".format(internal_to_name[internal])
+    internal_to_mega_collection = lambda internal: "OLC SSG {}".format(internal_to_name[internal]) if internal in internal_to_name else None
+
+    de_listify = lambda v: v[0] if isinstance(v, list) else v
 
     result = {
         "abstract": doc.get("abstract", ""),
@@ -269,9 +271,9 @@ def olc_to_intermediate_schema(doc):
             "rft.au": name
         } for name in doc.get("author2", [])],
         "finc.id": "ai-68-{}".format(doc["id"]),
-        "finc.mega_collection": [internal_to_mega_collection[v] for v in doc.get("collection_details", [])],
+        "finc.mega_collection": [internal_to_mega_collection(v) for v in doc.get("collection_details", [])],
         "finc.source_id": "68",
-        "format": olc_format_to_finc_format.get(doc.get("format"), "Article"),
+        "format": olc_format_to_finc_format.get(de_listify(doc.get("format")), "Article"),
         "languages": doc.get("lang_code", ""),
         "rft.genre": "article",
         "rft.issn": doc.get("issn", ""),

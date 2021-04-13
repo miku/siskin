@@ -29,6 +29,7 @@ https://is.gd/8DFvOo (GBV).
 """
 
 import datetime
+import json
 import glob
 import os
 
@@ -101,7 +102,7 @@ class OLCIntermediateSchemaNext(OLCTask):
             with self.output().open('w') as output:
                 for line in file:
                     doc = json.loads(line)
-                    result = olc_format_to_finc_format(doc)
+                    result = olc_to_intermediate_schema(doc)
                     json.dump(result, output)
                     output.write("\n")
 
