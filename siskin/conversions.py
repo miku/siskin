@@ -317,7 +317,7 @@ def de_listify(v, default=None):
         else:
             if default:
                 return default
-            return v
+            return None
     raise ValueError("cannot de-listify: {}".format(v))
 
 

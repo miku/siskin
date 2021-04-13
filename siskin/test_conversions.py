@@ -45,7 +45,9 @@ def test_de_listify():
     cases = (
         (None, None),
         ("", ""),
+        ([], None),
+        ({1, 2, 3}, 1),
+        ([1, 2, 3], 1),
     )
-
     for v, expected in cases:
         assert de_listify(v) == expected
