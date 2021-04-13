@@ -55,14 +55,12 @@ from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSch
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
 from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema, ElsevierJournalsISSNList)
 from siskin.sources.genderopen import GenderopenIntermediateSchema
-from siskin.sources.genios import (GeniosCombinedIntermediateSchema, GeniosISSNList)
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.lynda import LyndaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
-from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
@@ -122,7 +120,6 @@ class AIIntermediateSchema(AITask):
             IEEEIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchema(date=self.date, stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
-            PQDTIntermediateSchema(date=self.date, stamp=True),
             IJOCIntermediateSchema(stamp=True),
             CeeolIntermediateSchema(stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
@@ -517,7 +514,6 @@ class AICoverageISSN(AITask):
             'jstor': JstorISSNList(date=self.date),
             'degruyter': DegruyterISSNList(date=self.date),
             'doaj': DOAJISSNList(date=self.date),
-            'gbi': GeniosISSNList(date=self.date),
             'elsevierjournals': ElsevierJournalsISSNList(date=self.date),
             'thieme': ThiemeISSNList(date=self.date),
             'file': AMSLHoldingsFile(isil=self.isil),
