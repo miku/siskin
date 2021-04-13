@@ -260,8 +260,17 @@ def olc_to_intermediate_schema(doc):
         "Monograph Series": "Serial",
         "Serial Volume": "Book",
     }
-    # Philosophie => OLC SSG Philosophie
-    internal_to_mega_collection = lambda internal: "OLC SSG {}".format(internal_to_name[internal])
+    de_listify = lambda v: v[0] if isinstance(v, list) else v
+    mega_collections_set = set()
+    for internal in doc.get("collection_details", []):
+        if not internal.startswith("SSG-"):
+            continue
+        name = internal_to_name.get(internal)
+        if not name:
+            continue
+        # Philosophie => OLC SSG Philosophie
+        mc = "OLC SSG {}".format(name)
+        mega_collections_set.add(mc)
 
     result = {
         "abstract": doc.get("abstract", ""),
@@ -269,10 +278,10 @@ def olc_to_intermediate_schema(doc):
             "rft.au": name
         } for name in doc.get("author2", [])],
         "finc.id": "ai-68-{}".format(doc["id"]),
-        "finc.mega_collection": [internal_to_mega_collection[v] for v in doc.get("collection_details", [])],
+        "finc.mega_collection": list(mega_collections_set),
         "finc.source_id": "68",
-        "format": olc_format_to_finc_format.get(doc.get("format"), "Article"),
-        "languages": doc.get("lang_code", ""),
+        "format": olc_format_to_finc_format.get(de_listify(doc.get("format")), "Article"),
+        "languages": doc.get("lang_code", []),
         "rft.genre": "article",
         "rft.issn": doc.get("issn", ""),
         "rft.issue": doc.get("container_issue", ""),

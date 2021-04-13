@@ -29,6 +29,7 @@ https://is.gd/8DFvOo (GBV).
 """
 
 import datetime
+import json
 import glob
 import os
 
@@ -99,14 +100,16 @@ class OLCIntermediateSchemaNext(OLCTask):
     def run(self):
         with self.input().open() as file:
             with self.output().open('w') as output:
-                for line in file:
+                for i, line in enumerate(file):
+                    if i % 100000 == 0:
+                        self.logger.debug("@{}".format(i))
                     doc = json.loads(line)
-                    result = olc_format_to_finc_format(doc)
-                    json.dump(result, output)
-                    output.write("\n")
+                    result = olc_to_intermediate_schema(doc)
+                    output.write(bytes(json.dumps(result), encoding="utf-8"))
+                    output.write(b"\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
 
 
 class OLCIntermediateSchema(OLCTask):
