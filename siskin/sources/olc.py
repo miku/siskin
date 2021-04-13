@@ -29,8 +29,8 @@ https://is.gd/8DFvOo (GBV).
 """
 
 import datetime
-import json
 import glob
+import json
 import os
 
 from siskin.conversions import olc_to_intermediate_schema
@@ -125,7 +125,8 @@ class OLCIntermediateSchema(OLCTask):
         """
         Find the most recent output, compress and move into the "siskin" tree.
         """
-        shellout("{script} --overwrite --outputformat json", script=self.assets("68/68-fincjson", ignoremap={1: "most probably ok for skip, due to existing file"}))
+        shellout("{script} --overwrite --outputformat json",
+                 script=self.assets("68/68-fincjson", ignoremap={1: "most probably ok for skip, due to existing file"}))
 
         # Find the output file.
         taskdir = os.path.join(self.BASE, self.TAG)

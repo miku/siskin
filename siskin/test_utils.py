@@ -4,8 +4,8 @@ import os
 import tempfile
 
 import requests
-from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, convert_to_finc_id, dictcheck, get_task_import_cache, load_set, marc_build_field_008,
-                          marc_build_imprint, marc_clean_record, marc_clean_subfields, nwise, random_string, scrape_html_listing, xmlstream)
+from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing,
+                          xmlstream)
 
 import marcx
 import pymarc
@@ -132,68 +132,6 @@ def test_xmlstream():
     os.remove(filename)
 
 
-def test_marc_clean_subfields():
-    record = marcx.Record()
-    record.add("001", data="1234")
-    record.add("245", a="", b="ok")
-
-    assert record.strict == True
-
-    # Behind the scenes, marcx will not add empty subfield values
-    # (https://git.io/fjIWU).
-    assert marc_clean_subfields(record["245"], inplace=False) == ['b', 'ok']
-    assert record["245"].subfields == ['b', 'ok']
-
-    assert marc_clean_subfields(record["245"], inplace=True) is None
-    assert record["245"].subfields == ['b', 'ok']
-
-    # Test pymarc record.
-    record = pymarc.Record()
-    record.add_field(pymarc.Field(tag='001', data='1234'))
-    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'], subfields=['a', '', 'b', 'ok']))
-
-    assert len(record.get_fields()) == 2
-
-    assert marc_clean_subfields(record["245"], inplace=False) == ['b', 'ok']
-    assert record["245"].subfields == ['a', '', 'b', 'ok']
-    assert marc_clean_subfields(record["245"], inplace=True) is None
-    assert record["245"].subfields == ['b', 'ok']
-
-
-def test_marc_clean_record():
-    record = pymarc.Record()
-    record.add_field(pymarc.Field(tag='001', data='1234'))
-    record.add_field(pymarc.Field(tag='245', indicators=['0', '1'], subfields=['a', '', 'b', 'ok']))
-
-    assert len(record.get_fields()) == 2
-
-    assert record["245"].subfields == ['a', '', 'b', 'ok']
-    marc_clean_record(record)
-    assert record["245"].subfields == ['b', 'ok']
-
-
-def test_marc_build_imprint():
-    assert marc_build_imprint() == ['a', '', 'b', '', 'c', '']
-    assert marc_build_imprint(place="A") == ['a', 'A', 'b', '', 'c', '']
-    assert marc_build_imprint(publisher="B") == ['a', '', 'b', 'B', 'c', '']
-    assert marc_build_imprint(year="C") == ['a', '', 'b', '', 'c', 'C']
-    assert marc_build_imprint(place="A", publisher="B") == ['a', 'A : ', 'b', 'B', 'c', '']
-    assert marc_build_imprint(place="A", year="C") == ['a', 'A', 'b', ', ', 'c', 'C']
-    assert marc_build_imprint(publisher="B", year="C") == ['a', '', 'b', 'B, ', 'c', 'C']
-    assert marc_build_imprint(place="A", publisher="B", year="C") == ['a', 'A : ', 'b', 'B, ', 'c', 'C']
-
-
-def test_marc_build_field_008():
-    assert marc_build_field_008() == " " * 40
-    assert marc_build_field_008(year="2000") == "       2000                             "
-    assert marc_build_field_008(year="2000", language="ger") == "       2000                        ger  "
-    assert marc_build_field_008(year="2000", periodicity="1", language="ger") == "       2000          1             ger  "
-    assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre"]) == "       2000          1             ger  "
-    assert marc_build_field_008(year="2000", periodicity="1", language=["ger", "fre", "day"]) == "       2000          1             ger  "
-    assert marc_build_field_008(year="20XX", periodicity="1", language=["ger", "fre", "day"]) == "                     1             ger  "
-    assert marc_build_field_008(year="1980", periodicity="i", language=["de", "fre"]) == "       1980          i                  "
-
-
 def test_check_isbn():
     assert check_isbn() == ""
     assert check_isbn("1") == ""
@@ -225,5 +163,3 @@ def test_check_issn():
     assert check_issn("1234-5678X") == "1234-5678"
     assert check_issn("1234-5678X3344") == "1234-5678"
     assert check_issn("9780201038019 is an valid isbn") == "978020103"
-
-

@@ -320,6 +320,7 @@ def de_listify(v, default=None):
             return v
     raise ValueError("cannot de-listify: {}".format(v))
 
+
 def marburg_to_marc(s):
     """
     Convert a string containing a single XML in datacite from

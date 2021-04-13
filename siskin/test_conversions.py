@@ -1,4 +1,4 @@
-from siskin.conversions import imslp_xml_to_marc
+from siskin.conversions import de_listify, imslp_xml_to_marc
 
 import pymarc
 
@@ -39,3 +39,13 @@ def test_imslp_xml_to_marc():
     assert result["100"]["a"] == "Skramstad, Hans"
     assert result["245"]["a"] == "Vals for pianoforte"
     assert result["856"]["u"] == "http://imslp.org/wiki/Vals_(Skramstad,_Hans)"
+
+
+def test_de_listify():
+    cases = (
+        (None, None),
+        ("", ""),
+    )
+
+    for v, expected in cases:
+        assert de_listify(v) == expected

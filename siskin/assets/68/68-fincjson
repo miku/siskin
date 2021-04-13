@@ -21,7 +21,6 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
-
 """
 
 Source: Online Contents (OLC)
@@ -30,7 +29,6 @@ Ticket: #5163, #6743, #9354, #10294, #16196
 Origin: HTTP
 
 """
-
 
 import re
 import sys
@@ -92,7 +90,6 @@ fip.remove_old_inputfiles(SID)
 
 outputfile = open(outputfilename, "w")
 
-
 ##################################################################################
 # 2. Get input data
 ################################################################################
@@ -103,10 +100,10 @@ if not inputfile:
                  collection_details:SSG-OLC-MKW OR collection_details:SSG-OLC-BUB OR collection_details:SSG-OLC-ARC OR collection_details:SSG-OLC-GWK
                  OR collection_details:SSG-OLC-PHI OR collection_details:SSG-OLC-GER OR collection_details:SSG-OLC-ANG OR collection_details:SSG-OLC-KPH
                  OR collection_details:SSG-OLC-MUS" -fl "id,title,physical,issn,container_title, container_issue,container_volume,container_start_page,
-                 publisher,publish_place,lang_code,publishDateSort,format,abstract,isfreeaccess_txt,author2,url,topic_facet,collection_details" | jq . -c > %s""" % inputfile)
+                 publisher,publish_place,lang_code,publishDateSort,format,abstract,isfreeaccess_txt,author2,url,topic_facet,collection_details" | jq . -c > %s"""
+             % inputfile)
 
 inputfile = open(inputfile, "r")
-
 
 ##################################################################################
 # 3. Process data
@@ -181,7 +178,7 @@ for oldrecord in inputfile:
         institutions.add("DE-Trs1")
 
     newrecord["finc.mega_collection"] = mega_collections
-    institutions = list(institutions) # set not JSON serializable
+    institutions = list(institutions)  # set not JSON serializable
     newrecord["x.labels"] = institutions
 
     # Source-ID
@@ -189,7 +186,7 @@ for oldrecord in inputfile:
 
     # Author
     authors = get_field(oldrecord, "author2")
-    if  isinstance(authors, list):
+    if isinstance(authors, list):
         aut = []
         for author in authors:
             aut.append({"rft.au": author})
