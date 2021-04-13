@@ -100,14 +100,16 @@ class OLCIntermediateSchemaNext(OLCTask):
     def run(self):
         with self.input().open() as file:
             with self.output().open('w') as output:
-                for line in file:
+                for i, line in enumerate(file):
+                    if i % 100000 == 0:
+                        self.logger.debug("@{}".format(i))
                     doc = json.loads(line)
                     result = olc_to_intermediate_schema(doc)
                     json.dump(result, output)
                     output.write("\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
 
 
 class OLCIntermediateSchema(OLCTask):
