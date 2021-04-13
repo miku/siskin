@@ -274,7 +274,7 @@ def olc_to_intermediate_schema(doc):
         "finc.mega_collection": [internal_to_mega_collection(v) for v in doc.get("collection_details", [])],
         "finc.source_id": "68",
         "format": olc_format_to_finc_format.get(de_listify(doc.get("format")), "Article"),
-        "languages": doc.get("lang_code", ""),
+        "languages": doc.get("lang_code", []),
         "rft.genre": "article",
         "rft.issn": doc.get("issn", ""),
         "rft.issue": doc.get("container_issue", ""),

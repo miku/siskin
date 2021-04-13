@@ -105,8 +105,8 @@ class OLCIntermediateSchemaNext(OLCTask):
                         self.logger.debug("@{}".format(i))
                     doc = json.loads(line)
                     result = olc_to_intermediate_schema(doc)
-                    json.dump(result, output)
-                    output.write("\n")
+                    output.write(bytes(json.dumps(result), encoding="utf-8"))
+                    output.write(b"\n")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
