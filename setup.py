@@ -121,7 +121,6 @@ setup(name='siskin',
               'assets/oai/*',
               'assets/55/*',
               'assets/87/*',
-              'assets/181/*',
               'assets/188/*',
           ]},
       scripts=[
