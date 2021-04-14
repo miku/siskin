@@ -203,7 +203,8 @@ def olc_to_intermediate_schema(doc):
         "SSG-OLC-ETH": "Ethnologie",
         "SSG-OLC-FOR": "Forstwissenschaften",
         "SSG-OLC-FRK": "Frankreichkunde und Allgemeine Romanistik",
-        "SSG-OLC-FTH": "Film und Theater",  # amsl: "Film / Theater"
+        # "SSG-OLC-FTH": "Film und Theater", # refs. #16279
+        "SSG-OLC-FTH": "Film / Theater",
         "SSG-OLC-GEO": "Geowissenschaften",
         "SSG-OLC-GER": "Germanistik",
         "SSG-OLC-GWK": "Kunst und Kunstwissenschaft",
@@ -216,7 +217,8 @@ def olc_to_intermediate_schema(doc):
         "SSG-OLC-KPH": "Klassische Philologie",
         "SSG-OLC-MAT": "Mathematik und Informatik",
         "SSG-OLC-MFO": "Asien und Nordafrika",
-        "SSG-OLC-MKW": "Medien- und Kommunikationswissenschaft",  # amsl: "Medien- / Kommunikationswissenschaft"
+        # "SSG-OLC-MKW": "Medien- und Kommunikationswissenschaft", # refs. #16279
+        "SSG-OLC-MKW": "Medien- / Kommunikationswissenschaft",
         "SSG-OLC-MUS": "Musikwissenschaft",
         "SSG-OLC-NED": "Niederlande",
         "SSG-OLC-OAS": "Ost- und Südostasien",
