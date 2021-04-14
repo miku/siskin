@@ -294,7 +294,7 @@ def olc_to_intermediate_schema(doc):
     }
     date = doc.get("publishDateSort")
     if date and len(date) == 4:
-        result["x.date"] = "{}-01-01T00:00:00Z".format(date),
+        result["x.date"] = "{}-01-01T00:00:00Z".format(date)
     return result
 
 
