@@ -108,7 +108,7 @@ class BaseSingleFile(BaseTask):
         jq -rc '.author[0] = .author[0][0:4000] |
                 .author_sort = .author_sort[0:4000] |
                 .author_facet[0] = .author_facet[0][0:4000] |
-                .publishDate = .publishDate[0:4]'
+                .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""'
         """
 
         for path in paths:
@@ -141,3 +141,5 @@ class BaseSingleFile(BaseTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
+
+
