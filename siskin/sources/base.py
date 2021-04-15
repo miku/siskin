@@ -107,7 +107,8 @@ class BaseSingleFile(BaseTask):
         sanitize = """
         jq -rc '.author[0] = .author[0][0:4000] |
                 .author_sort = .author_sort[0:4000] |
-                .author_facet[0] = .author_facet[0][0:4000]'
+                .author_facet[0] = .author_facet[0][0:4000] |
+                .publishDate = .publishDate[0:4]'
         """
 
         for path in paths:
