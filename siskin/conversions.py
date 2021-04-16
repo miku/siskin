@@ -181,15 +181,15 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
 
 def olc_to_intermediate_schema(doc):
     """
-    Convert OLC from SLUB solr into intermediate schema JSON, w/o tags.
+    Convert a single OLC from SLUB solr into intermediate schema JSON, w/o tags.
     """
-    # "interne Bezeichnung":"Fachkatalog",
+    # "interne Bezeichnung":"Fachkatalog"
     internal_to_name = {
         # $ curl "https://is.gd/qPEypK" |
         #     pup 'tr json{}' |
         #     jq -rc '.[] | [.["children"][1]["children"][0]["text"], .["children"][0]["children"][0]["text"]]' |
         #     sed -e 's@","@":"@; s@^\[@@; s@\]@,@' |
-        #     grep 'SSG-'
+        #     grep 'SSG-OLC'
         "SSG-OLC-ALT": "Altertumswissenschaften",
         "SSG-OLC-ANG": "Anglistik",
         "SSG-OLC-ARC": "Architektur",
