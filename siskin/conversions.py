@@ -282,7 +282,7 @@ def olc_to_intermediate_schema(doc):
         "finc.id": "ai-68-{}".format(doc["id"]),
         "finc.mega_collection": list(mega_collections_set),
         "finc.source_id": "68",
-        "format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
+        "finc.format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
         "languages": doc.get("lang_code", []),
         "rft.genre": "article",
         "rft.issn": doc.get("issn", []),
