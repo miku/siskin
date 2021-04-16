@@ -88,7 +88,7 @@ class OLCDump(OLCTask):
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
 
 
-class OLCIntermediateSchemaNext(OLCTask):
+class OLCIntermediateSchema(OLCTask):
     """
     Sample convertion.
     """
@@ -112,7 +112,7 @@ class OLCIntermediateSchemaNext(OLCTask):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
 
 
-class OLCIntermediateSchema(OLCTask):
+class OLCIntermediateSchemaDeprecated(OLCTask):
     """
     Run and collect OLC, 68, standalone script. There is licensing information
     added in the standalone script and later during AILicening, too. That
