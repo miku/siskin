@@ -5,7 +5,7 @@
 
 // override default values if necessary
 default MAP_DIR ="/assets/maps/";
-default sid = "87"; 
+default sid = "87";
 default mega_collection = "sid-87-col-intjcomm";
 default fileName = in;
 //default fileName = FLUX_DIR + sid + "records.xml";
@@ -14,7 +14,7 @@ default fileName = in;
 fileName|
 open-file|
 decode-xml|
-handle-generic-xml("Record")|
+handle-generic-xml("record")|
 morph(FLUX_DIR + sid + "_morph.xml", *)|
 encode-json|
 write("stdout");
