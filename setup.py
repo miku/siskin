@@ -164,7 +164,7 @@ setup(name='siskin',
       },
       install_requires=install_requires,
       zip_safe=False,
-      classifier=[
+      classifiers=[
           'Development Status :: 4 - Beta',
           'Environment :: Console'
           'License :: GPLv3',
