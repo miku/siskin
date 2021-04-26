@@ -279,19 +279,20 @@ def olc_to_intermediate_schema(doc):
         "authors": [{
             "rft.au": name
         } for name in doc.get("author2", [])],
+        "finc.format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
         "finc.id": "ai-68-{}".format(doc["id"]),
         "finc.mega_collection": list(mega_collections_set),
         "finc.source_id": "68",
-        "finc.format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
         "languages": doc.get("lang_code", []),
+        "rft.atitle": de_listify(doc.get("title", "")),
         "rft.genre": "article",
         "rft.issn": doc.get("issn", []),
         "rft.issue": doc.get("container_issue", ""),
         "rft.jtitle": doc.get("container_title", ""),
         "rft.place": doc.get("rft.place", []),
         "rft.pub": doc.get("publisher", []),
-        "rft.atitle": de_listify(doc.get("title", "")),
         "rft.volume": doc.get("container_volume", ""),
+        "url": doc.get("url", []),
         "x.subtitle": de_listify(doc.get("title_sub", [])),
     }
     date = doc.get("publishDateSort")
