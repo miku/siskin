@@ -60,6 +60,7 @@ from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
+from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
@@ -111,18 +112,19 @@ class AIIntermediateSchema(AITask):
 
     def requires(self):
         return [
+            CeeolIntermediateSchema(stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
-            DegruyterIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
+            DegruyterIntermediateSchema(date=self.date, stamp=True),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
             IEEEIntermediateSchema(date=self.date, stamp=True),
-            JstorIntermediateSchema(date=self.date, stamp=True),
-            ThiemeIntermediateSchema(date=self.date, stamp=True),
             IJOCIntermediateSchema(stamp=True),
-            CeeolIntermediateSchema(stamp=True),
+            JstorIntermediateSchema(date=self.date, stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
+            PQDTIntermediateSchema(stamp=True),
+            ThiemeIntermediateSchema(date=self.date, stamp=True),
         ]
 
     @timed
