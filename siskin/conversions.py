@@ -33,10 +33,10 @@ import tempfile
 from xml.sax.saxutils import escape, unescape
 
 import six
-import xmltodict
 
 import marcx
 import pymarc
+import xmltodict
 
 html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}

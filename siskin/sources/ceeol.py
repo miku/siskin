@@ -46,10 +46,9 @@ import os
 import re
 import tempfile
 
-from siskin.task import DefaultTask
-
 import luigi
 from gluish.utils import shellout
+from siskin.task import DefaultTask
 
 
 class CeeolTask(DefaultTask):

@@ -45,12 +45,12 @@ import xml.etree.cElementTree as ET
 import requests
 import six
 from dateutil import relativedelta
-from siskin import __version__
 from six import string_types
 
 import backoff
 import bs4
 import luigi
+from siskin import __version__
 from six.moves.urllib.parse import urlparse
 
 logger = logging.getLogger('siskin')

@@ -29,11 +29,10 @@ See: goo.gl/90cteW
 
 import os
 
-from siskin.task import DefaultTask
-
 import luigi
 from gluish.format import Gzip
 from gluish.utils import shellout
+from siskin.task import DefaultTask
 
 
 class ZDBTask(DefaultTask):

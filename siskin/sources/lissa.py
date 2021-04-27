@@ -35,8 +35,6 @@ import datetime
 import itertools
 import json
 
-from siskin.task import DefaultTask
-
 import langdetect
 import luigi
 from gluish.format import Gzip
@@ -44,6 +42,7 @@ from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from iso639 import languages
+from siskin.task import DefaultTask
 
 
 class LissaTask(DefaultTask):

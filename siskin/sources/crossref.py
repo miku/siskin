@@ -61,12 +61,6 @@ import urllib.parse
 import urllib.request
 
 import requests
-from siskin import __version__
-from siskin.benchmark import timed
-from siskin.mail import send_mail
-from siskin.sources.amsl import AMSLFilterConfig, AMSLService
-from siskin.task import DefaultTask
-from siskin.utils import URLCache, load_set_from_target
 from six import string_types
 
 import elasticsearch
@@ -76,6 +70,12 @@ from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+from siskin import __version__
+from siskin.benchmark import timed
+from siskin.mail import send_mail
+from siskin.sources.amsl import AMSLFilterConfig, AMSLService
+from siskin.task import DefaultTask
+from siskin.utils import URLCache, load_set_from_target
 
 
 class CrossrefTask(DefaultTask):

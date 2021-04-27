@@ -37,15 +37,14 @@ scp-src = user@ftp.online:/home/cambridge
 import datetime
 import os
 
-from siskin.common import Executable
-from siskin.task import DefaultTask
-from siskin.utils import iterfiles
-
 import luigi
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.common import Executable
+from siskin.task import DefaultTask
+from siskin.utils import iterfiles
 
 
 class CambridgeTask(DefaultTask):

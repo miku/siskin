@@ -1,6 +1,5 @@
-from siskin.conversions import de_listify, imslp_xml_to_marc
-
 import pymarc
+from siskin.conversions import de_listify, imslp_xml_to_marc
 
 
 def test_imslp_xml_to_marc():

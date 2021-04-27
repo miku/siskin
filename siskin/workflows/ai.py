@@ -45,6 +45,15 @@ import urllib
 import requests
 import six
 from dateutil.relativedelta import relativedelta
+
+import luigi
+import rdflib
+from bs4 import BeautifulSoup
+from gluish.common import Executable
+from gluish.format import TSV, Gzip
+from gluish.intervals import weekly
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
@@ -65,15 +74,6 @@ from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
-
-import luigi
-import rdflib
-from bs4 import BeautifulSoup
-from gluish.common import Executable
-from gluish.format import TSV, Gzip
-from gluish.intervals import weekly
-from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout
 
 
 class AITask(DefaultTask):

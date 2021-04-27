@@ -70,12 +70,11 @@ import operator
 import tempfile
 import zipfile
 
-from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, dictcheck
-
 import luigi
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+from siskin.task import DefaultTask
+from siskin.utils import SetEncoder, dictcheck
 
 
 class AMSLTask(DefaultTask):

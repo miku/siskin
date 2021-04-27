@@ -37,11 +37,10 @@ from __future__ import print_function
 import json
 import sys
 
-from siskin.task import DefaultTask
-
 import luigi
 from gluish.utils import shellout
 from luigi.format import Gzip
+from siskin.task import DefaultTask
 
 
 class OADOITask(DefaultTask):

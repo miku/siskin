@@ -39,10 +39,6 @@ import tempfile
 import time
 from builtins import map, range
 
-from siskin.benchmark import timed
-from siskin.task import DefaultTask
-from siskin.utils import load_set_from_file, load_set_from_target
-
 import elasticsearch
 import luigi
 from gluish.common import Executable
@@ -50,6 +46,9 @@ from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.benchmark import timed
+from siskin.task import DefaultTask
+from siskin.utils import load_set_from_file, load_set_from_target
 
 
 class DOAJTask(DefaultTask):
