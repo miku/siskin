@@ -68,6 +68,7 @@ from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
+from siskin.sources.perinorm import PerinormExport
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.springer import SpringerIntermediateSchema
@@ -292,6 +293,7 @@ class AIExport(AITask):
         return {
             'ai': AIIntermediateSchemaDeduplicated(date=self.date),
             'base': BaseSingleFile(date=self.date),
+            'perinorm': PerinormExport(),
         }
 
     def run(self):
@@ -299,11 +301,11 @@ class AIExport(AITask):
 
         if self.format == 'solr5vu3':
             shellout("""cat "{input}" >> "{output}" """, input=self.input().get("base").path, output=tmp)
+            shellout("""cat "{input}" >> "{output}" """, input=self.input().get("perinorm").path, output=tmp)
         else:
             self.logger.debug('ignoring [126] BASE, since format is: %s', self.format)
 
         shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}", format=self.format, input=self.input().get('ai').path, output=tmp)
-
         luigi.LocalTarget(tmp).move(self.output().path)
 
     def output(self):
