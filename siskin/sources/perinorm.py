@@ -94,6 +94,8 @@ class PerinormExport(PerinormTask):
                 raise RuntimeError("could not file {} in ftp filelist".format(self.current["filename"]))
         self.logger.debug("using {}".format(path))
 
+        # XXX: get these from amsl via: span-amsl-discovery -f -live
+        # https://example.amsl.technology | grep "perinorm"
         attachments = {
             "Perinorm (DIN-Normen)": ["DE-Gla1"],
             "Perinorm (DIN-Normen)": ["DE-Gla1"],
