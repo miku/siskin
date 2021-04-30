@@ -8,8 +8,7 @@ import requests
 import marcx
 import pymarc
 import responses
-from siskin.utils import (SetEncoder, URLCache, check_isbn, check_issn, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing,
-                          xmlstream)
+from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing, xmlstream)
 
 
 def test_set_encoder_dumps():
@@ -130,36 +129,3 @@ def test_xmlstream():
     filename = handle.name
     assert [v for v in xmlstream(filename, "b")] == [b'<b>C</b>', b'<b>C</b>']
     os.remove(filename)
-
-
-def test_check_isbn():
-    assert check_isbn() == ""
-    assert check_isbn("1") == ""
-    assert check_isbn("123") == ""
-    assert check_isbn("12345678") == ""
-    assert check_isbn("1234567890") == "1234567890"
-    assert check_isbn("978-3-527-76070-1 : circa EUR 44.99 (DE)") == "978-3-527-76070-1"
-    assert check_isbn("1XXXXXXXX") == ""
-    assert check_isbn("XXXXXXXXXX") == ""
-    assert check_isbn("1XXXXXXXXXXX") == "1XXXXXXXXX"
-    assert check_isbn("1XXXXXXXXXXXxxxx") == "1XXXXXXXXXXXx"
-    assert check_isbn("978-123456789") == "978-123456789"
-    assert check_isbn("123-123123123") == "123-123123123"
-    assert check_isbn("1xxxxXXXXxxxxXXXX1111XXXX") == "1xxxxXXXXxxxxXXXX"
-    assert check_isbn("9780201038019 is an valid isbn") == "9780201038019"
-
-
-def test_check_issn():
-    assert check_issn("") == ""
-    assert check_issn("1") == ""
-    assert check_issn("12") == ""
-    assert check_issn("123") == ""
-    assert check_issn("1234") == ""
-    assert check_issn("12345") == ""
-    assert check_issn("123456") == ""
-    assert check_issn("1234567") == ""
-    assert check_issn("12345678") == "1234-5678"
-    assert check_issn("1234-5678") == "1234-5678"
-    assert check_issn("1234-5678X") == "1234-5678"
-    assert check_issn("1234-5678X3344") == "1234-5678"
-    assert check_issn("9780201038019 is an valid isbn") == "978020103"
