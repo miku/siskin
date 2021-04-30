@@ -61,6 +61,20 @@ class DBLPDownload(DBLPTask):
         return luigi.LocalTarget(path=self.path(ext='xml.gz'))
 
 
+class DBLPIntermediateSchema(DBLPTask):
+
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return DBLPDownload(date=self.date)
+
+    def run(self):
+        pass
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
+
+
 class DBLPDOIList(DBLPTask):
     """ QnD doi list. """
 
