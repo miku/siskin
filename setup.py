@@ -154,8 +154,6 @@ setup(name='siskin',
           'bin/tasktree',
           'bin/taskversion',
           'bin/taskwc',
-          'bin/xmltools.py',
-          'bin/solrcheckup.py'
       ],
       entry_points={
         'console_scripts': [
