@@ -29,6 +29,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.utils import xmlstream
 
 
 class DBLPTask(DefaultTask):
@@ -54,11 +55,11 @@ class DBLPDownload(DBLPTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("curl --fail -L {url} > {output}", url=self.url)
+        output = shellout("curl --fail -L {url} | unpigz -c > {output}", url=self.url)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'))
+        return luigi.LocalTarget(path=self.path(ext='xml'))
 
 
 class DBLPIntermediateSchema(DBLPTask):
@@ -69,7 +70,9 @@ class DBLPIntermediateSchema(DBLPTask):
         return DBLPDownload(date=self.date)
 
     def run(self):
-        pass
+        # https://stackoverflow.com/a/60747245/89391
+        for blob in xmlstream(self.input().path, "article"):
+            print(len(blob))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
