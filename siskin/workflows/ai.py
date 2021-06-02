@@ -119,7 +119,7 @@ class AIIntermediateSchema(AITask):
             DegruyterIntermediateSchema(date=self.date, stamp=True),
             ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
-            IEEEIntermediateSchema(date=datetime.date(2021, 4, 1), stamp=True), # refs. #19795
+            IEEEIntermediateSchema(date=self.date, stamp=True),
             IJOCIntermediateSchema(stamp=True),
             JstorIntermediateSchema(date=self.date, stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
