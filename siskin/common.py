@@ -89,9 +89,9 @@ class FTPMirror(CommonTask):
             exclude_glob = "--exclude-glob %s" % self.exclude_glob
 
         # Note that xfer:verify required "apt install libstring-crc32-perl" on ubuntu 18.04, perl v5.26.1.
+        # Some lftp variables may not be supported by earlier versions, e.g. "set sftp:auto-confirm yes;"
         command = """lftp -u {username},{password}
         -e "
-            set sftp:auto-confirm yes;
             set net:max-retries {max_retries};
             set net:timeout {timeout};
             set mirror:parallel-directories 1;
