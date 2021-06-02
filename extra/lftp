@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Run a legacy lftp for legacy FTP endpoints.
+
+docker run -ti --rm lftplegacy "$@"
