@@ -97,10 +97,10 @@ class PerinormExport(PerinormTask):
         # XXX: get these from amsl via: span-amsl-discovery -f -live
         # https://example.amsl.technology | grep "perinorm"
         attachments = {
-            "Perinorm (DIN-Normen)": ["DE-Gla1"],
-            "Perinorm (DIN-Normen)": ["DE-Gla1"],
-            "Perinorm (DWA-Regelwerk)": ["DE-Gla1"],
-            "Perinorm (ISO Standards)": ["DE-Gla1"],
+            "Perinorm (DIN-Normen)": ["DE-Gla1", "DE-Zi4"],
+            "Perinorm (DIN-Normen)": ["DE-Gla1", "DE-Zi4"],
+            "Perinorm (DWA-Regelwerk)": ["DE-Gla1", "DE-Zi4"],
+            "Perinorm (ISO Standards)": ["DE-Gla1", "DE-Zi4"],
             "Perinorm (VDI-Richtlinien)": ["DE-Gla1", "DE-Zi4"],
         }
 
