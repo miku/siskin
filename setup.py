@@ -164,7 +164,7 @@ setup(name='siskin',
       zip_safe=False,
       classifiers=[
           'Development Status :: 4 - Beta',
-          'Environment :: Console'
+          'Environment :: Console',
           'License :: GPLv3',
           'Operating System :: MacOS :: MacOS X',
           'Operating System :: POSIX',
