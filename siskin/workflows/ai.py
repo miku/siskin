@@ -221,7 +221,7 @@ class AILocalData(AITask):
     batchsize = luigi.IntParameter(default=25000, significant=False)
 
     def requires(self):
-        return AILicensing(date=self.date)
+        return AILicensing(date=self.date, drop=True)
 
     def run(self):
         """
@@ -263,7 +263,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
     def requires(self):
         return {
             'changes': AIInstitutionChanges(date=self.date),
-            'file': AILicensing(date=self.date),
+            'file': AILicensing(date=self.date, drop=True),
         }
 
     def run(self):
