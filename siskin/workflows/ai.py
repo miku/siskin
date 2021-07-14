@@ -71,7 +71,6 @@ from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.perinorm import PerinormExport
 from siskin.sources.pqdt import PQDTIntermediateSchema
-from siskin.sources.springer import SpringerIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
