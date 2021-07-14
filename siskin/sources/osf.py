@@ -29,6 +29,7 @@ research and enable collaboration.
 
 https://api.osf.io/v2/preprints/?filter[provider]=mediarxiv&format=json&page=1
 
+Refs: #20238.
 """
 
 import datetime
