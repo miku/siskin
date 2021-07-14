@@ -110,7 +110,8 @@ class FTPMirror(CommonTask):
                  base=pipes.quote(self.base),
                  max_retries=self.max_retries,
                  timeout=self.timeout,
-                 exclude_glob=exclude_glob, ignoremap={1: "expected: mirror: execvp() failed: No such file or directory"})
+                 exclude_glob=exclude_glob,
+                 ignoremap={1: "expected: mirror: execvp() failed: No such file or directory"})
 
         with self.output().open('w') as output:
             for path in iterfiles(target):
