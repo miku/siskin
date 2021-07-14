@@ -52,7 +52,9 @@ class OSFTask(DefaultTask):
 
 
 class OSFDownload(OSFTask):
-    """ Download file. """
+    """
+    Download OSF metadata via API.
+    """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
