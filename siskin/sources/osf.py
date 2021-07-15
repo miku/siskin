@@ -33,6 +33,7 @@ Refs: #20238.
 """
 
 import datetime
+import time
 
 import requests
 
@@ -60,6 +61,8 @@ class OSFDownload(OSFTask):
 
     def run(self):
         page = 1
+        max_retries = 20 # a "global" retry budget
+        sleep_s = 60
         with self.output().open("w") as output:
             while True:
                 link = "https://api.osf.io/v2/preprints/?page={}".format(page)
@@ -68,7 +71,12 @@ class OSFDownload(OSFTask):
                 if resp.status_code == 404:
                     break
                 if resp.status_code != 200:
-                    raise RuntimeError('osf api failed with {}'.format(resp.status_code))
+                    if max_retries > 0:
+                        time.sleep(sleep_s)
+                        max_retries -= 1
+                        continue
+                    else:
+                        raise RuntimeError('osf api failed with {}'.format(resp.status_code))
                 self.logger.debug("fetched {} from {}: {}".format(len(resp.text), link, resp.text[:40]))
                 output.write(resp.text)
                 output.write("\n")
@@ -76,3 +84,5 @@ class OSFDownload(OSFTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
+
+
