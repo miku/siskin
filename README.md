@@ -406,3 +406,11 @@ on the target machine.
 * [ ] The naming of the scripts is a bit unfortunate, `taskdo`, `taskcat`,
   .... Maybe better `siskin run`, `siskin cat`, `siskin rm` and so on.
 * [ ] Investigate [pytest](https://docs.pytest.org/en/latest/) for testing tasks, given inputs.
+
+# Misc
+
+A short video using luigi's [on_success and
+on_failure](https://luigi.readthedocs.io/en/stable/api/luigi.task.html#luigi.task.Task.on_failure)
+handlers to make the processing audible.
+
+[![](docs/screenie_14.png)](https://vimeo.com/99084953)
