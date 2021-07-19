@@ -182,6 +182,8 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
 def olc_to_intermediate_schema(doc):
     """
     Convert a single OLC from SLUB solr into intermediate schema JSON, w/o tags.
+
+    TODO: every mapping should live outside of code for collaborative editing.
     """
     # "interne Bezeichnung":"Fachkatalog"
     internal_to_name = {
@@ -327,43 +329,76 @@ def de_listify(v, default=None):
     raise ValueError("cannot de-listify: {}".format(v))
 
 
-def marburg_to_marc(s):
+def osf_to_intermediate(osf):
     """
-    Convert a string containing a single XML in datacite from
-    http://archiv.ub.uni-marburg.de/ubfind/OAI/Server into a binary MARC.
+    Convert a document from https://api.osf.io/v2/preprints/?format=json&page=1
+    to intermediate schema; see also kiwi:[191].
     """
-    dd = xmltodict.parse(s, force_list={"dcite:creators", "dcite:titles"})
-    record = marcx.Record()
+    if not "id" in osf:
+        raise ValueError("osf record w/o id: {}".format(osf))
+    id = "ai-191-{}".format(osf["id"])
+    attrs = osf.get("attributes")
+    rels = osf.get("relationships")
+    if not attrs or not rels:
+        raise ValueError("osf record w/o attributes or relationships: {}".format(osf))
 
-    header, metadata = dd["Record"]["header"], dd["Record"]["metadata"]
-    identifier = header["identifier"]
+    def find_osf_language(doc, with_default="eng"):
+        """
+        If possible, detect language from abstract and return 3-letter ISO 639
+        code. Otherwise return a default.
+        """
+        if not attrs.get("description"):
+            return with_default
+        try:
+            import cld3
+            from iso639 import languages
+            result = cld3.get_language(attrs["description"])
+            if not result.is_reliable:
+                return with_default
+            return languages.get(alpha2=result.language).part2b
+        except (ImportError, KeyError):
+            return with_default
 
-    record.add("001", data=base64.b64encode(identifier).rstrip("="))
-    record.add("007", data="cr")
+    def fetch_authors(doc, force=False):
+        """
+        Fetch and cache author docs. We will need an extra request, which we'll
+        cache locally.
+        """
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        url = doc["relationships"]["contributor"]["links"]["related"]["href"]
+        content = cache.get(url)
+        # ...
+        raise NotImplementedError()
 
-    related = metadata["dcite:resource"]["dcite:relatedIdentifiers"]
-    for rid in related:
-        if rid["@relatedIdentifierType"] != "ISSN":
-            continue
-        record.add("022", a=rid["#text"])
+    result = {
+        "abstract": attrs.get("description", ""),
+        "authors": "TODO",  # needs an extra request
+        "finc.format": "Article",
+        "finc.id": "ai-191-{}".format(osf["id"]),
+        "finc.mega_collection": "sid-191-col-{}".format(rels["provider"]["data"]["id"]),
+        "finc.source_id": "191",
+        "languages": [find_osf_language(osf)],
+        "doi": osf["links"]["preprint_doi"].replace("https://doi.org/", ""),
+        "rft.atitle": attrs["title"],
+        "rft.genre": "article",
+        "rft.jtitle": rels["provider"]["data"]["id"],
+        "rft.pub": "OSF Preprints",
+        "url": osf["links"]["preprint_doi"],
+        "subjects": attrs["tags"],
+    }
 
-    language = metadata["dcite:resource"]["dcite:language"]
-    language = marburg_language_mapping.get(language)
-    record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % language)
-    record.add("041", a=marburg_language_mapping.get(language))
+    if "preprint_doi_created" in attrs and attrs["preprint_doi_created"]:
+        result.update({
+            "x.date": attrs.get("preprint_doi_created", ""),
+            "rft.date": attrs.get("preprint_doi_created", "")[:10],
+        })
 
-    for item in metadata["dcite:resource"]["dcite:creators"]:
-        name = item["dcite:creator"]["dcite:creatorName"]["#text"]
-        record.add("100", a=name)
-
-    for item in metadata["dcite:resource"]["dcite:titles"]:
-        title = item["dcite:title"]
-
-    # WIP.
+    return result
 
 
 # Facet fields values from author2_role field across all sources.
 # TODO: fill out empty strings, maybe add https://git.io/fNLwY, too.
+# TODO: move this out of code into an asset folder or the like.
 author_role_mapping = {
     "\xc3\xbcbers": "",
     "\xc3\xbcbersetzer": "",

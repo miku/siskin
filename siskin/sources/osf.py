@@ -33,6 +33,7 @@ Refs: #20238.
 """
 
 import datetime
+import json
 import time
 
 import requests
@@ -40,6 +41,7 @@ import requests
 import luigi
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
+from siskin.conversions import osf_to_intermediate
 from siskin.task import DefaultTask
 
 
@@ -65,7 +67,7 @@ class OSFDownload(OSFTask):
 
     def run(self):
         page = 1
-        max_retries = 20 # a "global" retry budget
+        max_retries = 20  # a "global" retry budget
         sleep_s = 60
         with self.output().open("w") as output:
             while True:
@@ -90,3 +92,24 @@ class OSFDownload(OSFTask):
         return luigi.LocalTarget(path=self.path(ext='json'))
 
 
+class OSFIntermediateSchema(OSFTask):
+    """
+    Convert to intermediate schema (stub).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return OSFDownload()
+
+    def run(self):
+        with self.output().open("w") as output:
+            with self.input().open() as f:
+                for line in f:
+                    resp = json.loads(line)
+                    for doc in resp["data"]:
+                        result = osf_to_intermediate(doc)
+                        json.dump(result, output)
+                        output.write("\n")
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))

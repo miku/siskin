@@ -44,6 +44,7 @@ install_requires = [
     'bs4',
     'colorama>=0.3.3',
     'configparser>=3.5.0',
+    'pycld3>=0.22',
     'decorator>=5.0.9',
     'elasticsearch>=7',
     'feedparser>=6.0.8',
