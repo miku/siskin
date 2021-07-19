@@ -58,6 +58,8 @@ class OSFDownload(OSFTask):
     Download OSF metadata via API. API is kind of slow and flaky.
 
     Pagination docs: https://jsonapi.org/format/#fetching-pagination
+
+    Retrieval of full set takes: 117m13.266s - about 325M, 86651 docs.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
