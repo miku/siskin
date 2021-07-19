@@ -30,12 +30,9 @@ clean:
 	find . -name ".DS_Store" -exec rm -f "{}" +
 	find . -name "__pycache__" -exec rm -rf "{}" +
 	find . -type d -name ".ipynb_checkpoints" -exec rm -rf "{}" +
-	rm -f .coverage
-	rm -f siskin.pex
-	rm -f siskin.shiv
-	rm -f tags
+	rm -f .coverage tags
 	rm -rf build/ dist/ .tox/ .pytest_cache/
-	rm -rf logs # Probably automatically created by Java MAB library.
+	rm -rf logs # Probably automatically created by some Java MAB library.
 	rm -rf siskin.egg-info
 
 .PHONY: fmt
@@ -46,22 +43,13 @@ fmt: imports style
 imports:
 	isort -rc --atomic .
 
-# Basic scoring, requires https://www.pylint.org/.
-.PHONY: pylint
-pylint:
-	pylint siskin
-
 # Automatic code formatting, requires https://github.com/google/yapf.
 .PHONY: style
 style:
 	yapf -p -i -r siskin
 
-# Generate a PNG of the current update dependency tree, https://git.io/v5sdS.
-docs/catalog/AIUpdate.png: $(PY_FILES)
-	taskdeps-dot AIUpdate | dot -Tpng > $@
+# Basic scoring, requires https://www.pylint.org/.
+.PHONY: pylint
+pylint:
+	pylint siskin
 
-# Generate a SID list for reference.
-docs/sids.tsv:
-	curl -v "https://projekte.ub.uni-leipzig.de/projects/metadaten-quellen/wiki/SIDs.xml?key=$$REDMINE_API_KEY" | \
-		xmlcutty -path /wiki_page/text | sed -e 's/"//g' | cut -d '|' -f2-5 | \
-		awk -F '|' '{print $$1"\t"$$2"\t"$$3}' | tail -n +4 > $@
