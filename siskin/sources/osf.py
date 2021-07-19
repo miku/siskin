@@ -55,7 +55,9 @@ class OSFTask(DefaultTask):
 
 class OSFDownload(OSFTask):
     """
-    Download OSF metadata via API.
+    Download OSF metadata via API. API is kind of slow and flaky.
+
+    Pagination docs: https://jsonapi.org/format/#fetching-pagination
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -65,7 +67,7 @@ class OSFDownload(OSFTask):
         sleep_s = 60
         with self.output().open("w") as output:
             while True:
-                link = "https://api.osf.io/v2/preprints/?page={}".format(page)
+                link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(page)
                 self.logger.debug("osf: {}".format(link))
                 resp = requests.get(link)
                 if resp.status_code == 404:
