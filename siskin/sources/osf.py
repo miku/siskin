@@ -102,14 +102,18 @@ class OSFIntermediateSchema(OSFTask):
         return OSFDownload()
 
     def run(self):
+        i = 0
         with self.output().open("w") as output:
             with self.input().open() as f:
                 for line in f:
                     resp = json.loads(line)
                     for doc in resp["data"]:
                         result = osf_to_intermediate(doc)
+                        if i % 1000 == 0:
+                            self.logger.debug("converted {} docs".format(i))
                         json.dump(result, output)
                         output.write("\n")
+                        i += 1
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))

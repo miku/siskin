@@ -27,7 +27,10 @@ A new module for conversions. Complement assets.
 
 import base64
 import collections
+import json
 import logging
+import os
+import sys
 import tarfile
 import tempfile
 from xml.sax.saxutils import escape, unescape
@@ -37,6 +40,7 @@ import six
 import marcx
 import pymarc
 import xmltodict
+from siskin.utils import URLCache
 
 html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
@@ -329,7 +333,7 @@ def de_listify(v, default=None):
     raise ValueError("cannot de-listify: {}".format(v))
 
 
-def osf_to_intermediate(osf):
+def osf_to_intermediate(osf, force=False):
     """
     Convert a document from https://api.osf.io/v2/preprints/?format=json&page=1
     to intermediate schema; see also kiwi:[191].
@@ -359,20 +363,42 @@ def osf_to_intermediate(osf):
         except (ImportError, KeyError):
             return with_default
 
-    def fetch_authors(doc, force=False):
+    def fetch_authors(doc, force=False, best_effort=False):
         """
         Fetch and cache author docs. We will need an extra request, which we'll
         cache locally.
+
+        Example: https://api.osf.io/v2/preprints/egcsk/contributors/
         """
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
-        url = doc["relationships"]["contributor"]["links"]["related"]["href"]
-        content = cache.get(url)
-        # ...
-        raise NotImplementedError()
+        result = []
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'), max_tries=10)
+        url = doc["relationships"]["contributors"]["links"]["related"]["href"]
+        try:
+            content = cache.get(url, force=force)
+        except RuntimeError as exc:
+            if best_effort:
+                return result
+            raise
+        doc = json.loads(content)
+        try:
+            for item in doc["data"]:
+                try:
+                    attrs = item["embeds"]["users"]["data"]["attributes"]
+                except KeyError as exc:
+                    attrs = item["embeds"]["users"]["errors"][0]["meta"]
+                result.append({
+                    "rft.aufirst": attrs["given_name"],
+                    "rft.aulast": attrs["family_name"],
+                })
+        except KeyError as exc:
+            logger.debug("failed to find authors for {}: {}".format(exc, json.dumps(doc, indent=4)))
+        else:
+            logger.debug("fetched {}, found {} author(s)".format(url, len(result)))
+        return result
 
     result = {
         "abstract": attrs.get("description", ""),
-        "authors": "TODO",  # needs an extra request
+        "authors": fetch_authors(osf, force=force, best_effort=True),
         "finc.format": "Article",
         "finc.id": "ai-191-{}".format(osf["id"]),
         "finc.mega_collection": "sid-191-col-{}".format(rels["provider"]["data"]["id"]),
