@@ -365,7 +365,7 @@ def osf_to_intermediate(osf, force=False):
         except (ImportError, KeyError):
             return with_default
 
-    def fetch_authors(doc, force=False, best_effort=False):
+    def fetch_authors(doc, force=False, best_effort=False, max_tries=5):
         """
         Fetch and cache author docs. We will need an extra request, which we'll
         cache locally.
@@ -373,12 +373,13 @@ def osf_to_intermediate(osf, force=False):
         Example: https://api.osf.io/v2/preprints/egcsk/contributors/
         """
         result = []
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'), max_tries=10)
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'), max_tries=max_tries)
         url = doc["relationships"]["contributors"]["links"]["related"]["href"]
         try:
             content = cache.get(url, force=force)
         except RuntimeError as exc:
             if best_effort:
+                logger.debug("[best-effort] skipping: {}".format(exc))
                 return result
             raise
         doc = json.loads(content)
