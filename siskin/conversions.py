@@ -338,6 +338,8 @@ def osf_to_intermediate(osf, force=False):
     Convert a document from https://api.osf.io/v2/preprints/?format=json&page=1
     to intermediate schema; see also kiwi:[191].
     """
+    if not osf:
+        return None
     if not "id" in osf:
         raise ValueError("osf record w/o id: {}".format(osf))
     id = "ai-191-{}".format(osf["id"])
