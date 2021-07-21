@@ -39,6 +39,7 @@ import six
 
 import marcx
 import pymarc
+import requests
 import xmltodict
 from siskin.utils import URLCache
 
@@ -377,7 +378,7 @@ def osf_to_intermediate(osf, force=False):
         url = doc["relationships"]["contributors"]["links"]["related"]["href"]
         try:
             content = cache.get(url, force=force)
-        except RuntimeError as exc:
+        except (RuntimeError, requests.exceptions.ConnectionError) as exc:
             if best_effort:
                 logger.debug("[best-effort] skipping: {}".format(exc))
                 return result
