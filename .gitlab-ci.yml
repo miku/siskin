@@ -1,9 +1,9 @@
-# git push sc master -> run CI
+# git push sc master => runs CI
 #
 # git tag v0.1.2
-# git push sc --tags -> create package and publish on nexus
-#
-image: python:3.9.1-slim-buster
+# git push sc --tags => creates package and uploads to Nexus
+
+image: python:3.9.6-slim-buster
 
 stages:
   - test
