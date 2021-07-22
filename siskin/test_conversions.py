@@ -263,8 +263,7 @@ def test_osf_to_intermediate():
             'Article',
             'finc.id':
             'ai-191-egcsk',
-            'finc.mega_collection':
-            ['sid-191-col-osf', 'Osf'],
+            'finc.mega_collection': ['sid-191-col-osf', 'Osf'],
             'finc.source_id':
             '191',
             'languages': ['eng'],
@@ -276,11 +275,9 @@ def test_osf_to_intermediate():
             'article',
             'rft.jtitle':
             'osf',
-            'rft.pub':
-            ['OSF Preprints'],
+            'rft.pub': ['OSF Preprints'],
             'subjects': ['Gambar', 'Respon', 'Teologi Proses', 'Tuhan'],
-            'url':
-            ['https://doi.org/10.31219/osf.io/egcsk'],
+            'url': ['https://doi.org/10.31219/osf.io/egcsk'],
             'x.date':
             '2021-07-19T07:42:12.695116Z',
         }),

@@ -42,7 +42,9 @@ import luigi
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from siskin.conversions import osf_to_intermediate
+from siskin.sources.amsl import AMSLFilterConfigFreeze
 from siskin.task import DefaultTask
+from gluish.utils import shellout
 
 
 class OSFTask(DefaultTask):
@@ -115,6 +117,29 @@ class OSFIntermediateSchema(OSFTask):
                         json.dump(result, output)
                         output.write("\n")
                         i += 1
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext='json'))
+
+
+class OSFExport(OSFTask):
+    """
+    OSF should be a daily/weekly updated source, so we generate a solr
+    importable file directly.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            "data": OSFIntermediateSchema(),
+            "config": AMSLFilterConfigFreeze(),
+        }
+
+    def run(self):
+        output = shellout("""
+                          span-tag -unfreeze {config} < {input} | span-export > {output}""",
+                          config=self.input().get("config").path, input=self.input().get("data").path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='json'))
