@@ -337,13 +337,31 @@ def de_listify(v, default=None):
 def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     """
     Convert a document from https://api.osf.io/v2/preprints/?format=json&page=1
-    to intermediate schema; see also kiwi:[191].
+    to intermediate schema; see also kiwi:[191], also: 179; refs #20238.
     """
     if not osf:
         return None
     if not "id" in osf:
         raise ValueError("osf record w/o id: {}".format(osf))
-    id = "ai-191-{}".format(osf["id"])
+    source_id = "179"
+
+    def get_tcid_for_provider(provider):
+        # refs 20238#note-8
+        provider_tcid_map = {
+            "eartharxiv": "sid-{}-col-earth".format(source_id),
+            "ecoevorxiv": "sid-{}-col-eco".format(source_id),
+            "lawarxiv": "sid-{}-col-law".format(source_id),
+            "lissa": "sid-{}-col-lissa".format(source_id),
+            "mediarxiv": "sid-{}-col-medi".format(source_id),
+            "psyarxiv": "sid-{}-col-psy".format(source_id),
+            "socarxiv": "sid-{}-col-soc".format(source_id),
+        }
+        try:
+            return provider_tcid_map[provider]
+        except KeyError:
+            return "sid-{}-col-{}".format(source_id, provider)
+
+    id = "ai-{}-{}".format(source_id, osf["id"])
     attrs = osf.get("attributes")
     rels = osf.get("relationships")
     if not attrs or not rels:
@@ -403,13 +421,13 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     result = {
         "abstract": attrs.get("description", ""),
         "authors": fetch_authors(osf, force=force, best_effort=best_effort, max_retries=max_retries),
-        "finc.format": "Article",
-        "finc.id": "ai-191-{}".format(osf["id"]),
+        "finc.format": "Preprint",
+        "finc.id": "ai-{}-{}".format(source_id, osf["id"]),
         "finc.mega_collection": [
-            "sid-191-col-{}".format(rels["provider"]["data"]["id"]),
+            get_tcid_for_provider(rels["provider"]["data"]["id"]),
             rels["provider"]["data"]["id"].capitalize(),
         ],
-        "finc.source_id": "191",
+        "finc.source_id": source_id,
         "languages": [find_osf_language(osf)],
         "doi": osf["links"]["preprint_doi"].replace("https://doi.org/", ""),
         "rft.atitle": attrs["title"],
