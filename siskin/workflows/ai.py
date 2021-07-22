@@ -68,6 +68,7 @@ from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
 from siskin.sources.lissa import LissaIntermediateSchema
+from siskin.sources.osf import OSFIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.perinorm import PerinormExport
 from siskin.sources.pqdt import PQDTIntermediateSchema
@@ -123,6 +124,7 @@ class AIIntermediateSchema(AITask):
             JstorIntermediateSchema(date=self.date, stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
+            OSFIntermediateSchema(date=self.date, stamp=True),
             PQDTIntermediateSchema(stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
         ]

@@ -40,6 +40,7 @@ import requests
 
 import luigi
 from gluish.intervals import weekly
+from gluish.format import Gzip
 from gluish.parameter import ClosestDateParameter
 from siskin.conversions import osf_to_intermediate
 from siskin.sources.amsl import AMSLFilterConfigFreeze
@@ -100,12 +101,14 @@ class OSFIntermediateSchema(OSFTask):
     """
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=5, description='number of HTTP request retries', significant=False)
+    encoding = luigi.Parameter(default="utf-8", significant=False)
 
     def requires(self):
         return OSFDownload()
 
     def run(self):
         i = 0
+        bNL = "\n".encode(self.encoding)
         with self.output().open("w") as output:
             with self.input().open() as f:
                 for line in f:
@@ -114,12 +117,12 @@ class OSFIntermediateSchema(OSFTask):
                         result = osf_to_intermediate(doc, max_retries=self.max_retries)
                         if i % 1000 == 0:
                             self.logger.debug("converted {} docs".format(i))
-                        json.dump(result, output)
-                        output.write("\n")
+                        output.write(json.dumps(result).encode(self.encoding))
+                        output.write(bNL)
                         i += 1
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext='json.gz'), format=Gzip)
 
 
 class OSFExport(OSFTask):
@@ -137,9 +140,9 @@ class OSFExport(OSFTask):
 
     def run(self):
         output = shellout("""
-                          span-tag -unfreeze {config} < {input} | span-export > {output}""",
+                          unpigz -c {input} | span-tag -unfreeze {config} | span-export | pigz -c > {output}""",
                           config=self.input().get("config").path, input=self.input().get("data").path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext='json.gz'))
