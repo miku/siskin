@@ -35,11 +35,11 @@ import tarfile
 import tempfile
 from xml.sax.saxutils import escape, unescape
 
+import requests
 import six
 
 import marcx
 import pymarc
-import requests
 import xmltodict
 from siskin.utils import URLCache
 
@@ -334,7 +334,7 @@ def de_listify(v, default=None):
     raise ValueError("cannot de-listify: {}".format(v))
 
 
-def osf_to_intermediate(osf, force=False):
+def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     """
     Convert a document from https://api.osf.io/v2/preprints/?format=json&page=1
     to intermediate schema; see also kiwi:[191].
@@ -366,7 +366,7 @@ def osf_to_intermediate(osf, force=False):
         except (ImportError, KeyError):
             return with_default
 
-    def fetch_authors(doc, force=False, best_effort=False, max_tries=5):
+    def fetch_authors(doc, force=False, best_effort=False, max_retries=5):
         """
         Fetch and cache author docs. We will need an extra request, which we'll
         cache locally.
@@ -374,7 +374,7 @@ def osf_to_intermediate(osf, force=False):
         Example: https://api.osf.io/v2/preprints/egcsk/contributors/
         """
         result = []
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'), max_tries=max_tries)
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'), max_tries=max_retries)
         url = doc["relationships"]["contributors"]["links"]["related"]["href"]
         try:
             content = cache.get(url, force=force)
@@ -402,24 +402,27 @@ def osf_to_intermediate(osf, force=False):
 
     result = {
         "abstract": attrs.get("description", ""),
-        "authors": fetch_authors(osf, force=force, best_effort=True),
+        "authors": fetch_authors(osf, force=force, best_effort=best_effort, max_retries=max_retries),
         "finc.format": "Article",
         "finc.id": "ai-191-{}".format(osf["id"]),
-        "finc.mega_collection": "sid-191-col-{}".format(rels["provider"]["data"]["id"]),
+        "finc.mega_collection": [
+            "sid-191-col-{}".format(rels["provider"]["data"]["id"]),
+            rels["provider"]["data"]["id"].capitalize(),
+        ],
         "finc.source_id": "191",
         "languages": [find_osf_language(osf)],
         "doi": osf["links"]["preprint_doi"].replace("https://doi.org/", ""),
         "rft.atitle": attrs["title"],
         "rft.genre": "article",
         "rft.jtitle": rels["provider"]["data"]["id"],
-        "rft.pub": "OSF Preprints",
-        "url": osf["links"]["preprint_doi"],
+        "rft.pub": ["OSF Preprints"],
+        "url": [osf["links"]["preprint_doi"]],
         "subjects": attrs["tags"],
     }
 
     if "preprint_doi_created" in attrs and attrs["preprint_doi_created"]:
         result.update({
-            "x.date": attrs.get("preprint_doi_created", ""),
+            "x.date": attrs.get("preprint_doi_created", "") + "Z",
             "rft.date": attrs.get("preprint_doi_created", "")[:10],
         })
 

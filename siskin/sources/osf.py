@@ -97,6 +97,7 @@ class OSFIntermediateSchema(OSFTask):
     Convert to intermediate schema (stub).
     """
     date = ClosestDateParameter(default=datetime.date.today())
+    max_retries = luigi.IntParameter(default=5, description='number of HTTP request retries', significant=False)
 
     def requires(self):
         return OSFDownload()
@@ -108,7 +109,7 @@ class OSFIntermediateSchema(OSFTask):
                 for line in f:
                     resp = json.loads(line)
                     for doc in resp["data"]:
-                        result = osf_to_intermediate(doc)
+                        result = osf_to_intermediate(doc, max_retries=self.max_retries)
                         if i % 1000 == 0:
                             self.logger.debug("converted {} docs".format(i))
                         json.dump(result, output)
