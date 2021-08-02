@@ -42,6 +42,13 @@ class DBLPTask(DefaultTask):
     July 2016, up from about 14,000 in 1995.[2] All important journals on
     computer science are tracked. Proceedings papers of many conferences are
     also tracked. It is mirrored at three sites across the Internet
+
+    2901900 conf
+    2633632 journals
+      28031 reference
+      23347 books
+      19780 series
+
     """
     TAG = 'dblp'
 
