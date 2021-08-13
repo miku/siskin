@@ -33,7 +33,7 @@ import six.moves.urllib.parse
 from pymysql.cursors import SSCursor
 
 
-class sqlitedb():
+class sqlitedb:
     """
     Simple cursor context manager for sqlite3 databases. Commits everything at exit.
 
@@ -59,7 +59,7 @@ class sqlitedb():
         self.conn.close()
 
 
-class mysqldb():
+class mysqldb:
     """
     Context manager for MySQL database access. Example:
 
