@@ -140,12 +140,17 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
 
                 url = 'https://api.crossref.org/works?%s' % (urllib.parse.urlencode(params))
 
+                # TODO: a new 404 "Resource not found" appeared; https://is.gd/lPARux
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
                         time.sleep(self.sleep)
                     body = cache.get(url)
                     try:
-                        content = json.loads(body)
+                        if "Resource not found." in body:
+                            self.logger.debug("stopping at 404")
+                            break
+                        else:
+                            content = json.loads(body)
                     except ValueError as err:
                         if attempt == self.attempts - 1:
                             self.logger.debug('URL was %s', url)
