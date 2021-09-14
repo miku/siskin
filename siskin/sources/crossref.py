@@ -103,6 +103,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
     attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
     sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests')
+    force = luigi.BoolParameter(default=False, significant=False, description='ignore cache')
 
     def run(self):
         """
@@ -144,7 +145,7 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
                         time.sleep(self.sleep)
-                    body = cache.get(url)
+                    body = cache.get(url, force=self.force)
                     try:
                         if "Resource not found." in body:
                             self.logger.debug("stopping at 404")
