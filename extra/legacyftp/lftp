@@ -1,5 +1,16 @@
 #!/bin/bash
 
 # Run a legacy lftp for legacy FTP endpoints.
+DOCKER_IMAGE_NAME=lftplegacyxxx
+
+if ! docker info >/dev/null 2>&1; then
+	echo "this script uses docker, and it isn't running - please start docker and try again!"
+	exit 1
+fi
+
+if [[ "$(docker images -q $DOCKER_IMAGE_NAME 2>/dev/null)" == "" ]]; then
+	echo "cannot find lftplegacy image; build it first with 'make image'"
+	exit 1
+fi
 
 docker run -ti --rm lftplegacy "$@"
