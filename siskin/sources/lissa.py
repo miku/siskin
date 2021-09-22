@@ -96,7 +96,7 @@ class LissaIntermediateSchema(LissaTask):
             doc = {
                 "finc.id": "ai-179-{}".format(source["id"]),
                 "finc.source_id": "179",
-                "finc.format": "ElectronicArticle",
+                "finc.format": "Preprint",
                 "finc.record_id": source["id"],
                 "finc.mega_collection": ["LISSA", "sid-179-col-lissa"],
                 "ris.type": "EJOUR",
