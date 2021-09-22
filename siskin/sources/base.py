@@ -115,26 +115,28 @@ class BaseSingleFile(BaseTask):
                 continue
 
             realpath = os.path.realpath(path)
-
             # Since 12/2019 symlinks might be an absolute path (on the server),
             # which makes this more flaky. Assume, that symlink points to the
             # same directory.
             if realpath.startswith('/'):
-                self.logger.debug('absolute path detected; assume, symlinked file is in the same directory')
+                self.logger.debug('absolute path detected; assuming symlinked file is in the same directory')
                 realpath = os.path.join(os.path.dirname(path), os.path.basename(realpath))
-
             self.logger.debug("found: %s", realpath)
-
+            if not realpath.endswith("gz"):
+                raise RuntimeError('want gz (tarball), got: %s', realpath)
+            decomp = "unpigz -c"
             if realpath.endswith("tar.gz"):
-                output = shellout(""" tar -xOzf "{input}" | {sanitize} |  pigz -c > {output}""", input=realpath, sanitize=sanitize)
-                luigi.LocalTarget(output).move(self.output().path)
-                break
-            elif realpath.endswith("gz"):
-                output = shellout("""unpigz -c "{input}" | {sanitize} | pigz -c > "{output}" """, input=realpath, sanitize=sanitize)
-                luigi.LocalTarget(output).move(self.output().path)
-                break
-            else:
-                raise RuntimeError('neither tarball nor gz: %s', realpath)
+                decomp = "tar -xOzf"
+            self.logger.debug("fixing isil on the fly, refs #20232")
+            output = shellout(""" {decomp} "{input}" |
+                                  {sanitize} |
+                                  sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+                                  pigz -c > {output}""",
+                              decomp=decomp,
+                              input=realpath,
+                              sanitize=sanitize)
+            luigi.LocalTarget(output).move(self.output().path)
+            break
         else:
             raise RuntimeError('no finc/latest in %s', paths)
 

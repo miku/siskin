@@ -89,7 +89,7 @@ class IJOCFincSolr(IJOCTask):
     Tag with ISIL for FID and change record type.
     """
     format = luigi.Parameter(default='solr5vu3', description='export format')
-    isil = luigi.Parameter(default='DE-15-FID', description='isil FID')
+    isil = luigi.Parameter(default='FID-MEDIEN-DE-15', description='isil FID')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):

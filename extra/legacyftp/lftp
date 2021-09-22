@@ -13,4 +13,10 @@ if [[ "$(docker images -q $DOCKER_IMAGE_NAME 2>/dev/null)" == "" ]]; then
 	exit 1
 fi
 
-docker run -ti --rm lftplegacy "$@"
+# Note: add -v host:container volume to allow lftp to actually write files,
+# otherwise: "execvp() failed: No such file or directory"
+# https://docs.docker.com/storage/bind-mounts/
+#
+# Also, the shared folder should be writable by the docker user.
+
+docker run -ti --rm -v /media:/media lftplegacy "$@"

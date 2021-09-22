@@ -13,7 +13,7 @@ Rough steps:
     132  404
     11   403
 
-    # How many would be DE-15-FID?
+    # How many would be FID-MEDIEN-DE-15?
     $ python 5163.py > 68.is
     $ span-tag -unfreeze $(taskoutput AMSLFilterConfigFreeze) 68.is > 68.tagged.is
     $ jq -rc '.["x.labels"][]?' 68.tagged.is | wc -l

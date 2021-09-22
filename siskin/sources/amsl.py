@@ -275,7 +275,7 @@ class AMSLCollectionsISILList(AMSLTask):
         DE-105
         DE-14
         DE-15
-        DE-15-FID
+        FID-MEDIEN-DE-15
         DE-1972
         DE-540
         ...
@@ -680,7 +680,7 @@ class AMSLWisoPackages(AMSLTask):
 
             filters = []
 
-            if include_fzs and isil != 'DE-15-FID':
+            if include_fzs and isil != 'FID-MEDIEN-DE-15':
                 packages = set(itertools.chain(*[c for _, c in list(blob.items())]))
                 packages = self.resolve_ubl_profile(packages)
                 filters.append(
@@ -695,7 +695,7 @@ class AMSLWisoPackages(AMSLTask):
             for lthf, colls in list(blob.items()):
                 if lthf is None or lthf == 'null':
                     continue
-                if isil == 'DE-15-FID':
+                if isil == 'FID-MEDIEN-DE-15':
                     colls = self.resolve_ubl_profile(colls)
                     filter = {
                         'and': [
@@ -888,7 +888,7 @@ class AMSLFilterConfig(AMSLTask):
                 continue
 
             # refs #10495, maybe use a TSV with custom column name to use a subject list?
-            if sid == '34' and isil == 'DE-15-FID':
+            if sid == '34' and isil == 'FID-MEDIEN-DE-15':
                 isilfilters[isil].append({"and": [
                     {
                         "source": ["34"],

@@ -68,9 +68,9 @@ for line in tqdm.tqdm(fileinput.input(), total=941528):
             resp = search(query)
             counters["ai"][issn] = resp["response"]["numFound"]
 
-        # Search ISSN in AI (w/o 65) and DE-15-FID.
+        # Search ISSN in AI (w/o 65) and FID-MEDIEN-DE-15
         if not issn in counters["fid"]:
-            query = 'issn:"%s" AND NOT source_id:65 AND institution:DE-15-FID' % issn
+            query = 'issn:"%s" AND NOT source_id:65 AND institution:FID-MEDIEN-DE-15' % issn
             resp = search(query)
             counters["fid"][issn] = resp["response"]["numFound"]
 

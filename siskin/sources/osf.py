@@ -39,13 +39,13 @@ import time
 import requests
 
 import luigi
-from gluish.intervals import weekly
 from gluish.format import Gzip
+from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.conversions import osf_to_intermediate
 from siskin.sources.amsl import AMSLFilterConfigFreeze
 from siskin.task import DefaultTask
-from gluish.utils import shellout
 
 
 class OSFTask(DefaultTask):
@@ -141,7 +141,8 @@ class OSFExport(OSFTask):
     def run(self):
         output = shellout("""
                           unpigz -c {input} | span-tag -unfreeze {config} | span-export | pigz -c > {output}""",
-                          config=self.input().get("config").path, input=self.input().get("data").path)
+                          config=self.input().get("config").path,
+                          input=self.input().get("data").path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
