@@ -408,7 +408,7 @@ def compare_files(a, b):
     return chka.hexdigest() == chkb.hexdigest()
 
 
-def xmlstream(filename, tag):
+def xmlstream(filename, tag, skip=0):
     """
     Given a path to an XML file and a tag name (without namespace), stream
     through the XML, and emit the element denoted by tag for processing, e.g.
@@ -417,6 +417,9 @@ def xmlstream(filename, tag):
         for snippet in xmlstream("sample.xml", "sometag"):
             print(len(snippet))
 
+    The `skip` parameter is a hack that allows to skip an "end" event, e.g. to
+    wait for another. Use e.g. skip=1 if there are two XML tags with an
+    identical name and you want to get the outer one.
     """
     def strip_ns(tag):
         if not '}' in tag:
@@ -435,6 +438,10 @@ def xmlstream(filename, tag):
 
     for event, elem in context:
         if not strip_ns(elem.tag) == tag or event == 'start':
+            continue
+
+        if skip > 0:
+            skip -= 1
             continue
 
         yield ET.tostring(elem)
