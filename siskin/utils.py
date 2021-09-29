@@ -408,7 +408,7 @@ def compare_files(a, b):
     return chka.hexdigest() == chkb.hexdigest()
 
 
-def xmlstream(filename, tag, skip=0):
+def xmlstream(filename, tag, skip=0, aggregate=False):
     """
     Given a path to an XML file and a tag name (without namespace), stream
     through the XML, and emit the element denoted by tag for processing, e.g.
@@ -436,13 +436,22 @@ def xmlstream(filename, tag, skip=0):
     except StopIteration:
         return
 
+    blobs = []
+
     for event, elem in context:
         if not strip_ns(elem.tag) == tag or event == 'start':
             continue
 
         if skip > 0:
+            blobs.append(ET.tostring(elem))
             skip -= 1
             continue
 
-        yield ET.tostring(elem)
+        if aggregate:
+            blobs.append(ET.tostring(elem))
+            yield blobs
+        else:
+            yield ET.tostring(elem)
+
         root.clear()
+        blobs = []
