@@ -458,4 +458,5 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
             yield ET.tostring(elem)
 
         root.clear()
-        blobs, s = [], skip
+        blobs.clear()
+        s = skip
