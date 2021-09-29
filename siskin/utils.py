@@ -420,6 +420,9 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
     The `skip` parameter is a hack that allows to skip an "end" event, e.g. to
     wait for another. Use e.g. skip=1 if there are two XML tags with an
     identical name and you want to get the outer one.
+
+    The `aggregate` parameter is relevant only if skip > 0. If `aggregate` is
+    True, it will collect all matched tags and will return them as a tuple.
     """
     def strip_ns(tag):
         if not '}' in tag:
@@ -436,22 +439,23 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
     except StopIteration:
         return
 
-    blobs = []
+    blobs, s = [], skip
 
     for event, elem in context:
         if not strip_ns(elem.tag) == tag or event == 'start':
             continue
 
-        if skip > 0:
-            blobs.append(ET.tostring(elem))
-            skip -= 1
+        if s > 0:
+            if aggregate:
+                blobs.append(ET.tostring(elem))
+            s -= 1
             continue
 
         if aggregate:
             blobs.append(ET.tostring(elem))
-            yield blobs
+            yield tuple(blobs)
         else:
             yield ET.tostring(elem)
 
         root.clear()
-        blobs = []
+        blobs, s = [], skip
