@@ -218,7 +218,7 @@ class CrossrefChunkItems(CrossrefTask):
     """
     begin = luigi.DateParameter()
     end = luigi.DateParameter()
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
 
     def requires(self):
         return CrossrefHarvestChunkWithCursor(begin=self.begin, end=self.end, filter=self.filter)
