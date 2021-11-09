@@ -97,7 +97,15 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     """
     begin = luigi.DateParameter(description='start of harvesting window')
     end = luigi.DateParameter(description='end of harvesting window, inclusive')
-    filter = luigi.Parameter(default='deposit', description='index, deposit, update')
+
+    # https://api.crossref.org/swagger-ui/index.html#/Works/get_works
+    #
+    # When using time filters to retrieve periodic, incremental metadata
+    # updates, the from-index-date filter should be used over from-update-date,
+    # from-deposit-date, from-created-date and from-pub-date. The timestamp
+    # that from-index-date filters on is guaranteed to be updated every time
+    # there is a change to metadata requiring a reindex.
+    filter = luigi.Parameter(default='index', description='index, deposit, update')
 
     rows = luigi.IntParameter(default=1000, significant=False)
     max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
