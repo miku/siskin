@@ -28,6 +28,7 @@ Various utilities.
 from __future__ import print_function
 
 import base64
+import datetime
 import errno
 import hashlib
 import itertools
@@ -311,10 +312,22 @@ class URLCache(object):
     def is_cached(self, url):
         return os.path.exists(self.get_cache_file(url))
 
-    def get(self, url, force=False):
+    def get(self, url, force=False, ttl_seconds=None):
         """
-        Return URL, either from cache or the web.
+        Return URL, either from cache or the web. With `force` get will always
+        re-download a URL. Use `ttl_seconds` to set a TTL in seconds (day=86400,
+        month=2592000, six month=15552000, a year=31104000).
         """
+        def is_ttl_expired(url):
+            """
+            Returns True, if modification date of the file lies befores TTL.
+            """
+            if ttl_seconds is None:
+                return False
+            mtime = datetime.datetime.fromtimestamp(os.path.getmtime(self.get_cache_file(url)))
+            xtime = datetime.datetime.now() - datetime.timedelta(seconds=ttl_seconds)
+            return mtime < xtime
+
         @backoff.on_exception(backoff.expo, RuntimeError, max_tries=self.max_tries)
         def fetch(url):
             """
@@ -327,7 +340,7 @@ class URLCache(object):
                 output.write(r.text.encode('utf-8'))
             os.rename(output.name, self.get_cache_file(url))
 
-        if not self.is_cached(url) or force is True:
+        if not self.is_cached(url) or force is True or is_ttl_expired(url):
             fetch(url)
 
         with open(self.get_cache_file(url)) as handle:
