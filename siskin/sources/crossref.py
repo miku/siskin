@@ -94,6 +94,10 @@ class CrossrefTask(DefaultTask):
 class CrossrefHarvestChunkWithCursor(CrossrefTask):
     """
     Harvest window with cursors (https://git.io/JeDC4).
+
+    Caching issue: using cursor, we point to the same URL, hence we are no
+    longer able to cache response sensibly. As a first measure, we disable
+    caching and increase retries.
     """
     begin = luigi.DateParameter(description='start of harvesting window')
     end = luigi.DateParameter(description='end of harvesting window, inclusive')
@@ -108,11 +112,11 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     filter = luigi.Parameter(default='index', description='index, deposit, update')
 
     rows = luigi.IntParameter(default=1000, significant=False)
-    max_retries = luigi.IntParameter(default=10, significant=False, description='HTTP retries')
-    attempts = luigi.IntParameter(default=3, significant=False, description='number of attempts to GET an URL that failed')
+    max_retries = luigi.IntParameter(default=15, significant=False, description='HTTP retries')
+    attempts = luigi.IntParameter(default=10, significant=False, description='number of attempts to GET an URL that failed')
     sleep = luigi.IntParameter(default=1, significant=False, description='sleep between requests')
-    force = luigi.BoolParameter(default=False, significant=False, description='ignore cache')
-    ttl = luigi.IntParameter(default=62208000, significant=False, description='TTL for cached values in seconds')
+    force = luigi.BoolParameter(default=True, significant=False, description='ignore cache (deprecated; defaults to True since 2021-11-10)')
+    ttl = luigi.IntParameter(default=62208000, significant=False, description='TTL for cached values in seconds (deprecated)')
 
     def run(self):
         """
