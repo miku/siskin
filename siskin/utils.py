@@ -329,7 +329,9 @@ class URLCache(object):
                 return False
             mtime = datetime.datetime.fromtimestamp(os.path.getmtime(self.get_cache_file(url)))
             xtime = datetime.datetime.now() - datetime.timedelta(seconds=ttl_seconds)
-            return mtime < xtime
+            is_expired = mtime < xtime
+            logger.debug("[cache] mtime={}, xtime={}, expired={}, file={}".format(mtime, xtime, is_expired, self.get_cache_file(url)))
+            return is_expired
 
         @backoff.on_exception(backoff.expo, RuntimeError, max_tries=self.max_tries)
         def fetch(url):
