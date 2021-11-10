@@ -98,6 +98,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
     Caching issue: using cursor, we point to the same URL, hence we are no
     longer able to cache response sensibly. As a first measure, we disable
     caching and increase retries.
+
+    Other mitigation: shrink harvest windows down to a single day.
     """
     begin = luigi.DateParameter(description='start of harvesting window')
     end = luigi.DateParameter(description='end of harvesting window, inclusive')
