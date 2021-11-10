@@ -72,9 +72,10 @@ import datetime
 import os
 import tempfile
 
+import pymarc
+
 import luigi
 import marcx
-import pymarc
 from gluish.format import TSV, Gzip
 from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter
