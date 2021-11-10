@@ -133,6 +133,8 @@ def dictcheck(obj, contains=None, absent=None, ignore=None):
     True
 
     This is a helper for AMSL-API cases (https://git.io/vpHgS).
+
+    TODO: This might be better suited for a library like pydantic or similar.
     """
     if not isinstance(obj, dict):
         raise ValueError('dictionary only')
@@ -193,7 +195,8 @@ def get_task_import_cache():
 
 def load_set(obj, func=lambda v: v):
     """
-    Load a set from a filename, file-like object or a luigi.LocalTarget.
+    Load a set from a filename, file-like object or a luigi.LocalTarget. Allow
+    to fixup values on the fly.
     """
     s = set()
 
