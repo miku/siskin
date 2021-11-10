@@ -35,11 +35,11 @@ import tarfile
 import tempfile
 from xml.sax.saxutils import escape, unescape
 
+import pymarc
 import requests
 import six
 
 import marcx
-import pymarc
 import xmltodict
 from siskin.utils import URLCache
 
