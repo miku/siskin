@@ -65,7 +65,7 @@ class PQDTCombine(PQDTTask):
     def run(self):
         url = self.config.get('pqdt', 'oai')
         shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
+        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
                           prefix=self.prefix,
                           url=url,
                           dir=self.config.get('core', 'metha-dir'))

@@ -1,5 +1,5 @@
 // FLUX 4.0.0
-// Read XML (look for tagname "Record" foreach record), filter deleted records,
+// Read XML (look for tagname "record" foreach record), filter deleted records,
 // morph to intermediate schema
 
 // override default values if necessary
