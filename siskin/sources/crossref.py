@@ -206,6 +206,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
 class CrossrefHarvest(luigi.WrapperTask, CrossrefTask):
     """
     Harvest everything in incremental steps. Yield the targets sorted by date (ascending).
+
+    > https://i.imgur.com/qysu7rK.png | 11K+ tasks
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     end = luigi.DateParameter(default=datetime.date.today())
