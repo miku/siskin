@@ -247,7 +247,7 @@ class CrossrefRawItems(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
-    update = luigi.Parameter(default='months', description='days, weeks or months')
+    update = luigi.Parameter(default='days', description='days, weeks or months')
 
     def requires(self):
         if self.update not in ('days', 'weeks', 'months'):
