@@ -160,6 +160,9 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                 for attempt in range(1, self.attempts):
                     if not cache.is_cached(url):
                         time.sleep(self.sleep)
+                    # Occasionally, we saw:
+                    # requests.exceptions.ChunkedEncodingError - may need
+                    # to switch to smaller slices.
                     body = cache.get(url, force=self.force, ttl_seconds=self.ttl)
                     try:
                         if "Resource not found." in body:
