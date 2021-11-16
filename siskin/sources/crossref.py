@@ -163,8 +163,8 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                     # Occasionally, we saw:
                     # requests.exceptions.ChunkedEncodingError - may need
                     # to switch to smaller slices.
-                    body = cache.get(url, force=self.force, ttl_seconds=self.ttl)
                     try:
+                        body = cache.get(url, force=self.force, ttl_seconds=self.ttl)
                         if "Resource not found." in body:
                             self.logger.debug("stopping at 404")
                             break
@@ -181,6 +181,9 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                         if os.path.exists(cache_file):
                             self.logger.debug('trying to recover by removing cached entry at %s', cache_file)
                             os.remove(cache_file)
+                    except requests.exceptions.ChunkedEncodingError as exc:
+                        self.logger.warn("failed with: {}".format(exc))
+                        continue
                     else:
                         break
 
