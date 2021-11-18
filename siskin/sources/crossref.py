@@ -187,7 +187,13 @@ class CrossrefHarvestChunkWithCursor(CrossrefTask):
                     else:
                         break
 
-                count = len(content['message']['items'])
+                try:
+                    count = len(content['message']['items'])
+                except KeyError as exc:
+                    self.logger.debug("[skip] last response: {}".format(content))
+                    self.logger.warn("[skip] failed to get message count: {}".format(exc))
+                    break
+
                 self.logger.debug("%s: %s", url, count)
                 if count == 0:
                     break
