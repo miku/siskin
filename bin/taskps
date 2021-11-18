@@ -54,7 +54,6 @@
 #
 # http://bugs.python.org/issue11380
 
-
 from __future__ import print_function
 
 import argparse
@@ -99,13 +98,15 @@ if __name__ == '__main__':
             for task in tasks:
                 print('%s\t* %s' % (status[0].lower(), task))
             print()
+    except (ConnectionRefusedError, urllib3.exceptions.NewConnectionError, requests.exceptions.ConnectionError):
+        pass
+    except BrokenPipeError:
+        pass
     except IOError as err:
         if err.errno == errno.EPIPE:
             pass
         else:
             raise
-    except (ConnectionRefusedError, urllib3.exceptions.NewConnectionError):
-        pass
 
     # http://stackoverflow.com/a/8690674/89391, http://bugs.python.org/issue11380
     for stream in (sys.stdout, sys.stderr):
@@ -113,4 +114,3 @@ if __name__ == '__main__':
             stream.close()
         except:
             pass
-
