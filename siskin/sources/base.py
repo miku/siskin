@@ -131,6 +131,7 @@ class BaseSingleFile(BaseTask):
             output = shellout(""" {decomp} "{input}" |
                                   {sanitize} |
                                   sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+                                  doisniffer |
                                   pigz -c > {output}""",
                               decomp=decomp,
                               input=realpath,
