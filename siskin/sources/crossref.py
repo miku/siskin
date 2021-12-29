@@ -296,7 +296,7 @@ class CrossrefRawItems(CrossrefTask):
 
 class CrossrefUniqItems(CrossrefTask):
     """
-    Calculate current snapshot via span-crossref-snapshot.
+    Calculate current snapshot via span-crossref-snapshot. About 204m30.910s.
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
