@@ -266,6 +266,10 @@ class CrossrefRawItems(CrossrefTask):
 
     $ span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 | pigz -c > $(taskoutput CrossrefRawItems)
 
+    Companion cron:
+
+    28 1 * * *  span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
+
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
@@ -297,6 +301,8 @@ class CrossrefRawItems(CrossrefTask):
 class CrossrefUniqItems(CrossrefTask):
     """
     Calculate current snapshot via span-crossref-snapshot. About 204m30.910s.
+
+    With span-crossref-{sync,snapshot} we get
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
