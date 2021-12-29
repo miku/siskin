@@ -300,9 +300,12 @@ class CrossrefRawItems(CrossrefTask):
 
 class CrossrefUniqItems(CrossrefTask):
     """
-    Calculate current snapshot via span-crossref-snapshot. About 204m30.910s.
+    Calculate current snapshot via span-crossref-snapshot. About 204m30.910s;
+    takes 99m59.783s to extract a value with jq (and parallel).
 
-    With span-crossref-{sync,snapshot} we get
+    With span-crossref-{sync,snapshot} we get 130377934 unique records.
+
+    Cf. https://www.crossref.org/06members/53status.html
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
