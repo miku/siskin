@@ -270,6 +270,8 @@ class CrossrefRawItems(CrossrefTask):
 
     28 1 * * *  span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
 
+    Most updates so far in a single day on 2021-12-22: 10,120,570.
+
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
