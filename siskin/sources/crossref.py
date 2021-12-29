@@ -256,23 +256,39 @@ class CrossrefChunkItems(CrossrefTask):
 class CrossrefRawItems(CrossrefTask):
     """
     Concatenate all harvested items.
+
+    TODO: we can get rid of all tasks before this with span-crossref-sync;
+
+    $ span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
+    $ time cat $(find ~/.cache/span/crossref-sync/ -type f -name "*gz") >> $(taskoutput CrossrefRawItems)
+
+    or:
+
+    $ span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 | pigz -c > $(taskoutput CrossrefRawItems)
+
     """
     begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
     date = ClosestDateParameter(default=datetime.date.today())
     update = luigi.Parameter(default='days', description='days, weeks or months')
 
     def requires(self):
-        if self.update not in ('days', 'weeks', 'months'):
-            raise RuntimeError('update can only be: days, weeks or months')
-        dates = [dt for dt in date_range(self.begin, self.date, 1, self.update)]
-        tasks = [CrossrefChunkItems(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
-        return tasks
+        pass
+        # if self.update not in ('days', 'weeks', 'months'):
+        #     raise RuntimeError('update can only be: days, weeks or months')
+        # dates = [dt for dt in date_range(self.begin, self.date, 1, self.update)]
+        # tasks = [CrossrefChunkItems(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
+        # return tasks
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        for target in self.input():
-            shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        luigi.LocalTarget(stopover).move(self.output().path)
+        crossref_sync_dir = "~/.cache/span/crossref-sync/"
+        output = shellout("""
+                 cat $(find {crossref_sync_dir} -type f -name "*gz") >> {output}
+                 """, crossref_sync_dir=crossref_sync_dir) # 22min
+        luigi.LocalTarget(output).move(self.output().path)
+        # _, stopover = tempfile.mkstemp(prefix='siskin-')
+        # for target in self.input():
+        #     shellout("cat {input} >> {output}", input=target.path, output=stopover)
+        # luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
