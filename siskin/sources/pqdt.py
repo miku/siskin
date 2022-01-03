@@ -80,8 +80,33 @@ class PQDTFetch(PQDTTask):
     """
     Rewrite after endpoint behaviour has changed (12/2021).
     """
+    date = ClosestDateParameter(default=datetime.date.today())
+
     def run(self):
         output = pqdt_harvest()
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="xml"))
+
+
+class PQDTPrepare(PQDTTask):
+    """
+    Some postprocessing.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return PQDTFetch()
+
+    def run(self):
+        output = shellout("""
+                 echo '<Records xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' | gzip -c >> {output} &&
+                 xmlcutty -path /OAI-PMH/ListRecords/record < {input} |
+                 sed -e 's@<record>@<record xmlns="http://www.openarchives.org/OAI/2.0/">@g' | gzip -c >> {output} &&
+                 echo '</Records>' | gzip -c >> {output}
+                 """,
+                          input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -95,7 +120,8 @@ class PQDTIntermediateSchema(PQDTTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return PQDTCombine(date=self.date)
+        # return PQDTCombine(date=self.date)
+        return PQDTPrepare(date=self.date)
 
     def run(self):
         mapdir = 'file:///%s' % self.assets("maps/")

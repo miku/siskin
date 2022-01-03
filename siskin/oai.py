@@ -53,6 +53,11 @@ def pqdt_harvest(sleep=0,
     reading: https://datatracker.ietf.org/doc/html/rfc2616#section-4.2.
 
     Also: a data endpoint that needs session management, nice.
+
+    TODO: We need to build a single XML file.
+
+    <Records xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    </Records>
     """
     link = "{}?metadataPrefix=oai_dc&verb=ListRecords".format(endpoint)
     cookies = None
