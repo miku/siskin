@@ -71,7 +71,6 @@ from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema
 from siskin.sources.perinorm import PerinormExport
-from siskin.sources.pqdt import PQDTIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
@@ -125,7 +124,6 @@ class AIIntermediateSchema(AITask):
             LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
             OSFIntermediateSchema(date=self.date, stamp=True),
-            PQDTIntermediateSchema(stamp=True),
             ThiemeIntermediateSchema(date=self.date, stamp=True),
         ]
 
