@@ -289,7 +289,8 @@ class CrossrefRawItems(CrossrefTask):
         crossref_sync_dir = "~/.cache/span/crossref-sync/"
         output = shellout("""
                  cat $(find {crossref_sync_dir} -type f -name "*gz") >> {output}
-                 """, crossref_sync_dir=crossref_sync_dir) # 22min
+                 """,
+                          crossref_sync_dir=crossref_sync_dir)  # 22min
         luigi.LocalTarget(output).move(self.output().path)
         # _, stopover = tempfile.mkstemp(prefix='siskin-')
         # for target in self.input():
