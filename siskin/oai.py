@@ -37,7 +37,7 @@ import xmltodict
 logger = logging.getLogger("siskin")
 
 
-def pqdt_harvest(sleep=2,
+def pqdt_harvest(sleep=0,
                  user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
                  endpoint="https://pqdtoai.proquest.com/OAIHandler"):
     """
@@ -56,8 +56,9 @@ def pqdt_harvest(sleep=2,
     """
     link = "{}?metadataPrefix=oai_dc&verb=ListRecords".format(endpoint)
     cookies = None
+    prev_cursor, batch_size = None, 100  # assumed, updated while we observe the cursor
 
-    with tempfile.NamedTemporaryFile(delete=False) as tf:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as tf:
         while True:
             logger.debug(link)
             resp = requests.get(link, cookies=cookies, headers={"User-Agent": user_agent})
@@ -65,10 +66,14 @@ def pqdt_harvest(sleep=2,
                 raise RuntimeError('harvest failed: {} {}'.format(link, resp.status_code))
             logger.debug("retrieved {} {}".format(len(resp.text), resp.text[:50], "..."))
             dd = xmltodict.parse(resp.text)
+            tf.write(resp.text)
+            tf.write("\n")
             try:
                 tokenTag = dd["OAI-PMH"]["ListRecords"]["resumptionToken"]
-                cursor = tokenTag["@cursor"]
-                size = tokenTag["@completeListSize"]
+                if tokenTag is None:
+                    break
+                cursor = int(tokenTag["@cursor"])
+                size = int(tokenTag["@completeListSize"])
                 token = tokenTag["#text"]
             except KeyError as exc:
                 logger.debug(json.dumps({
@@ -81,9 +86,15 @@ def pqdt_harvest(sleep=2,
                     break
             if resp.cookies:
                 cookies = resp.cookies
-            link = r"{}?resumptionToken={}&verb=ListRecords".format(endpoint, token)
-            logger.debug("{} {} {}".format(cursor, size, token))
-            time.sleep(sleep)
+            if prev_cursor is not None:
+                batch_size = cursor - prev_cursor
+            if cursor + batch_size >= size:
+                logger.info("harvest done")
+            else:
+                link = r"{}?resumptionToken={}&verb=ListRecords".format(endpoint, token)
+                logger.debug("{} {} {}".format(cursor, size, token))
+                time.sleep(sleep)
+                prev_cursor = cursor
 
     return tf.name
 

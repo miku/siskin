@@ -41,6 +41,7 @@ from gluish.format import Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.oai import pqdt_harvest
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
@@ -69,6 +70,18 @@ class PQDTCombine(PQDTTask):
                           prefix=self.prefix,
                           url=url,
                           dir=self.config.get('core', 'metha-dir'))
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+
+
+class PQDTFetch(PQDTTask):
+    """
+    Rewrite after endpoint behaviour has changed (12/2021).
+    """
+    def run(self):
+        output = pqdt_harvest()
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
