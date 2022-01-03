@@ -101,10 +101,11 @@ class PQDTPrepare(PQDTTask):
 
     def run(self):
         output = shellout("""
+                 echo '<?xml version="1.0" encoding="UTF-8"?>' | gzip -c >> {output} &&
                  echo '<Records xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' | gzip -c >> {output} &&
                  xmlcutty -path /OAI-PMH/ListRecords/record < {input} |
                  sed -e 's@<record>@<record xmlns="http://www.openarchives.org/OAI/2.0/">@g' | gzip -c >> {output} &&
-                 echo '</Records>' | gzip -c >> {output}
+                 echo '</Records>' | gzip -c >> {output} && zcat {output} | xmllint --format - | gzip -c | sponge {output}
                  """,
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
