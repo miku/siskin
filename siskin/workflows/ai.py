@@ -62,7 +62,7 @@ from siskin.sources.ceeol import CeeolIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
-from siskin.sources.elsevierjournals import (ElsevierJournalsIntermediateSchema, ElsevierJournalsISSNList)
+from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
 from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
@@ -116,7 +116,6 @@ class AIIntermediateSchema(AITask):
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
-            ElsevierJournalsIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
             IEEEIntermediateSchema(date=self.date, stamp=True),
             IJOCIntermediateSchema(stamp=True),
