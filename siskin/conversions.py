@@ -461,7 +461,7 @@ def eastview_solr_to_intermediate_schema(blob,
                                          collection_name='Universal Database of Social Sciences & Humanities (UDB-EDU)'):
     """
     Given a string containing raw XML. Each document contains a list of
-    documents (100s).
+    documents (100s), refs #12586.
     """
     parsed = xmltodict.parse(blob)
     converted = []
