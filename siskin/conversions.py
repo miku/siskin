@@ -22,7 +22,15 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 """
-A new module for conversions. Complement assets.
+A module for conversions. This module exists to separate orchestration code
+(luigi task) from data conversion logic (here), cf. this note from the British
+Library:
+
+> The code that performs tasks and the code that orchestrates those tasks were
+mixed together in the same source files. This made it very hard to work on
+improving any individual task on it’s own, and made testing difficult.
+
+* https://blogs.bl.uk/webarchive/2022/01/ukwa-2021-technical-update.html
 """
 
 import base64
