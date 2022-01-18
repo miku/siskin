@@ -467,17 +467,19 @@ def eastview_solr_to_intermediate_schema(blob,
         # keys: 'id', 'title', 'author', 'source', 'src', 'year', 'number',
         # 'place', 'content', 'volume', 'pages', 'language', 'url', 'medium',
         # 'coll', 'cdate'
-        if not dd.get("title"):
+        if not dd.get("title") or not dd.get("url"):
             continue
         encoded_id = base64.b64encode(dd["id"].encode("utf-8")).decode("utf-8").rstrip("=")
-        authors = [{"rft.au": v} for v in dd.get("author", "").split(",")]
+        authors = [{"rft.au": v} for v in dd.get("author", "").split(",") if v]
         result = {
+            'version': '0.9',
+            'finc.format': 'Article',
             'finc.record_id': dd["id"],
             'finc.id': 'ai-{}-{}'.format(source_id, encoded_id),
             'finc.source_id': source_id,
             'rft.atitle': dd["title"],
             'rft.jtitle': dd.get("source", ""),
-            'url': dd.get("url", ""),
+            'url': [dd.get("url", "")],
             'authors': authors,
             'finc.mega_collection': [
                 collection_name,
@@ -485,9 +487,9 @@ def eastview_solr_to_intermediate_schema(blob,
             ]
         }
         if dd.get("content"):
-            result["abstract"] = [dd["content"]]
+            result["abstract"] = dd["content"]
         if dd.get("language"):
-            result["languages"] = dd["language"]
+            result["languages"] = [dd["language"]]
         if dd.get("pages") and dd["pages"] != "-":
             result["rft.pages"] = dd["pages"]
         if dd.get("volume"):
@@ -495,7 +497,7 @@ def eastview_solr_to_intermediate_schema(blob,
         if dd.get("number"):
             result["rft.issue"] = dd["number"]
         if dd.get("place"):
-            result['rft.place'] = dd["place"]
+            result['rft.place'] = [dd["place"]]
         if dd.get("year"):
             result["x.date"] = "{}-01-01T00:00:00Z".format(dd["year"])
             result["rft.date"] = dd["year"]
