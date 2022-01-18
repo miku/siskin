@@ -447,6 +447,62 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     return result
 
 
+def eastview_solr_to_intermediate_schema(blob,
+                                         source_id='210',
+                                         tcid='sid-210-col-udbedu',
+                                         collection_name='Universal Database of Social Sciences & Humanities (UDB-EDU)'):
+    """
+    Given a string containing raw XML. Each document contains a list of
+    documents (100s).
+    """
+    parsed = xmltodict.parse(blob)
+    converted = []
+    for doc in parsed["add"]["doc"]:
+        dd = dict()
+        for f in doc["field"]:
+            key, value = f.get("@name"), f.get("#text")
+            if not key or not value:
+                continue
+            dd[key] = value
+        # keys: 'id', 'title', 'author', 'source', 'src', 'year', 'number',
+        # 'place', 'content', 'volume', 'pages', 'language', 'url', 'medium',
+        # 'coll', 'cdate'
+        if not dd.get("title"):
+            continue
+        encoded_id = base64.b64encode(dd["id"].encode("utf-8")).decode("utf-8").rstrip("=")
+        authors = [{"rft.au": v} for v in dd.get("author", "").split(",")]
+        result = {
+            'finc.record_id': dd["id"],
+            'finc.id': 'ai-{}-{}'.format(source_id, encoded_id),
+            'finc.source_id': source_id,
+            'rft.atitle': dd["title"],
+            'rft.jtitle': dd.get("source", ""),
+            'url': dd.get("url", ""),
+            'authors': authors,
+            'finc.mega_collection': [
+                collection_name,
+                tcid,
+            ]
+        }
+        if dd.get("content"):
+            result["abstract"] = [dd["content"]]
+        if dd.get("language"):
+            result["languages"] = dd["language"]
+        if dd.get("pages") and dd["pages"] != "-":
+            result["rft.pages"] = dd["pages"]
+        if dd.get("volume"):
+            result["rft.volume"] = dd["volume"]
+        if dd.get("number"):
+            result["rft.issue"] = dd["number"]
+        if dd.get("place"):
+            result['rft.place'] = dd["place"]
+        if dd.get("year"):
+            result["x.date"] = "{}-01-01T00:00:00Z".format(dd["year"])
+            result["rft.date"] = dd["year"]
+        converted.append(result)
+    return converted
+
+
 # Facet fields values from author2_role field across all sources.
 # TODO: fill out empty strings, maybe add https://git.io/fNLwY, too.
 # TODO: move this out of code into an asset folder or the like.

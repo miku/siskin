@@ -40,16 +40,20 @@ ftp-pattern = *
 """
 
 import datetime
+import json
+import os
 import tempfile
+import zipfile
 
 import luigi
 from gluish.common import Executable
-from gluish.format import TSV
+from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
+from siskin.conversions import eastview_solr_to_intermediate_schema
 from siskin.task import DefaultTask
 
 
@@ -88,3 +92,39 @@ class EastViewPaths(EastViewTask):
         return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)
 
 
+class EastViewIntermediateSchema(EastViewTask):
+    """
+    Convert to a single (is) file.
+    """
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return EastViewPaths(date=self.date)
+
+    def run(self):
+        with tempfile.NamedTemporaryFile(delete=False, mode="w") as tf:
+            zname = None
+            with self.input().open(mode='r') as f:
+                for line in f:
+                    line = line.decode("utf-8").strip()
+                    if not line.endswith("xml.zip"):
+                        continue
+                    zname = line
+                    break
+            if zname is None:
+                raise ValueError("expected a file named xml.zip")
+            with zipfile.ZipFile(zname) as zf:
+                for name in zf.namelist():
+                    if not name.endswith(".xml"):
+                        continue
+                    with zf.open(name) as f:
+                        docs = eastview_solr_to_intermediate_schema(f.read())
+                    self.logger.debug("{} {}".format(name, len(docs)))
+                    for doc in docs:
+                        tf.write(json.dumps(doc) + "\n")
+        output = shellout("zstd -c -T0 < {tf} > {output}", tf=tf.name)
+        luigi.LocalTarget(output).move(self.output().path)
+        os.remove(tf.name)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
