@@ -47,7 +47,7 @@ import zipfile
 
 import luigi
 from gluish.common import Executable
-from gluish.format import TSV, Zstd
+from gluish.format import TSV, Zstd, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -122,9 +122,9 @@ class EastViewIntermediateSchema(EastViewTask):
                     self.logger.debug("{} {}".format(name, len(docs)))
                     for doc in docs:
                         tf.write(json.dumps(doc) + "\n")
-        output = shellout("zstd -c -T0 < {tf} > {output}", tf=tf.name)
+        output = shellout("gzip -c < {tf} > {output}", tf=tf.name)
         luigi.LocalTarget(output).move(self.output().path)
         os.remove(tf.name)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
+        return luigi.LocalTarget(path=self.path(ext="json.gz"), format=Gzip)
