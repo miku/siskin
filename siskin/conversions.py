@@ -495,7 +495,7 @@ def eastview_solr_to_intermediate_schema(blob,
             ]
         }
         if dd.get("content"):
-            result["abstract"] = dd["content"]
+            result["abstract"] = dd["content"][:500] + "..."
         if dd.get("language"):
             result["languages"] = [dd["language"]]
         if dd.get("pages") and dd["pages"] != "-":
