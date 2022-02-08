@@ -122,7 +122,7 @@ class EastViewIntermediateSchema(EastViewTask):
                     self.logger.debug("{} {}".format(name, len(docs)))
                     for doc in docs:
                         tf.write(json.dumps(doc) + "\n")
-        output = shellout("gzip -c < {tf} > {output}", tf=tf.name)
+        output = shellout("pigz -c < {tf} > {output}", tf=tf.name)
         luigi.LocalTarget(output).move(self.output().path)
         os.remove(tf.name)
 
