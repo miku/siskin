@@ -115,25 +115,13 @@ class CrossrefRawItems(CrossrefTask):
     date = ClosestDateParameter(default=datetime.date.today())
     update = luigi.Parameter(default='days', description='days, weeks or months')
 
-    def requires(self):
-        pass
-        # if self.update not in ('days', 'weeks', 'months'):
-        #     raise RuntimeError('update can only be: days, weeks or months')
-        # dates = [dt for dt in date_range(self.begin, self.date, 1, self.update)]
-        # tasks = [CrossrefChunkItems(begin=dates[i - 1], end=dates[i]) for i in range(1, len(dates))]
-        # return tasks
-
     def run(self):
-        crossref_sync_dir = "~/.cache/span/crossref-sync/"
+        crossref_sync_dir = self.config.get("crossref", "sync-dir")
         output = shellout("""
                  cat $(find {crossref_sync_dir} -type f -name "*gz") >> {output}
                  """,
                           crossref_sync_dir=crossref_sync_dir)  # 22min
         luigi.LocalTarget(output).move(self.output().path)
-        # _, stopover = tempfile.mkstemp(prefix='siskin-')
-        # for target in self.input():
-        #     shellout("cat {input} >> {output}", input=target.path, output=stopover)
-        # luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
