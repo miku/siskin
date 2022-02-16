@@ -118,7 +118,7 @@ class CrossrefRawItems(CrossrefTask):
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
         output = shellout("""
-                 span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} >> {output}
+                 span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} | pigz -c >> {output}
                  """,
                           begin=self.begin,
                           crossref_sync_dir=crossref_sync_dir)  # 22min
