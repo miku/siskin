@@ -113,7 +113,6 @@ class CrossrefRawItems(CrossrefTask):
     """
     begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
-    update = luigi.Parameter(default='days', description='days, weeks or months')
 
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
