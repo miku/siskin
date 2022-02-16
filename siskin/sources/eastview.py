@@ -47,7 +47,7 @@ import zipfile
 
 import luigi
 from gluish.common import Executable
-from gluish.format import TSV, Zstd, Gzip
+from gluish.format import TSV, Gzip, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
