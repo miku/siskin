@@ -118,7 +118,7 @@ class CrossrefRawItems(CrossrefTask):
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
         output = shellout("""
-                 span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} >> { output }
+                 span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} >> {output}
                  """,
                           begin=self.begin,
                           crossref_sync_dir=crossref_sync_dir)  # 22min
@@ -137,7 +137,7 @@ class CrossrefUniqItems(CrossrefTask):
 
     Cf. https://www.crossref.org/06members/53status.html
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -155,7 +155,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     """
     Convert to intermediate format via span.
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -174,7 +174,7 @@ class CrossrefCollections(CrossrefTask):
     """
     A collection of crossref collections, refs. #6985. XXX: Save counts as well.
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -194,7 +194,7 @@ class CrossrefCollectionsCount(CrossrefTask):
     """
     Report collections and the number of titles per collection.
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -227,7 +227,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
     default no email is sent, only when --to is set to one or more comma
     separated email addresses.
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     to = luigi.Parameter(default=None, description="email address of recipient, comma separated, if multiple")
@@ -313,7 +313,7 @@ class CrossrefISSNList(CrossrefTask):
     """
     Just dump a list of all ISSN values. With dups and all.
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -332,7 +332,7 @@ class CrossrefUniqISSNList(CrossrefTask):
     """
     Just dump a list of all ISSN values. Sorted and uniq.
     """
-    begin = luigi.DateParameter(default=datetime.date(2006, 1, 1))
+    begin = luigi.DateParameter(default=datetime.date(2021, 4, 27), description='2021-04-27 seemed to be the start of the current crossref update streak')
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
