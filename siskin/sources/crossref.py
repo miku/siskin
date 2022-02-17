@@ -143,7 +143,7 @@ class CrossrefUniqItems(CrossrefTask):
         return CrossrefRawItems(begin=self.begin, date=self.closest())
 
     def run(self):
-        output = shellout("span-crossref-snapshot -verbose -z -o {output} {input}", input=self.input().path)
+        output = shellout("span-crossref-snapshot -verbose -z -compress-program pigz -o {output} {input}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
