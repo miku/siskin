@@ -435,12 +435,13 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
         for snippet in xmlstream("sample.xml", "sometag"):
             print(len(snippet))
 
-    The `skip` parameter is a hack that allows to skip an "end" event, e.g. to
-    wait for another. Use e.g. skip=1 if there are two XML tags with an
-    identical name and you want to get the outer one.
+    The `skip` parameter is a hack that allows to skip an "end" event, i.e. to
+    wait for another. Use e.g. skip=1 if there are two nested XML tags with the
+    same name and you want to get the outer one.
 
     The `aggregate` parameter is relevant only if skip > 0. If `aggregate` is
-    True, it will collect all matched tags and will return them as a tuple.
+    True, it will collect all matched tags and will return them as a tuple
+    (with the outermost element being the last).
     """
     def strip_ns(tag):
         if not '}' in tag:
