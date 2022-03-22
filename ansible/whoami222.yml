@@ -1,0 +1,16 @@
+# Connection test playbook
+#
+# ansible-playbook -v -i hosts whoami222.yml
+
+---
+- hosts: index
+  tasks:
+  - name: Run as user
+    command: whoami
+
+  - name: Run a command as root
+    command: whoami
+    become: yes
+    become_exe: /usr/bin/ssh
+    become_flags: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l root -p 222 127.0.0.1'
+    become_user: ""

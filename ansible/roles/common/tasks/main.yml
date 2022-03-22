@@ -1,0 +1,29 @@
+- name: "Install common packages"
+  yum:
+    state: present
+    name:
+      - bash-completion
+      - bc
+      - curl
+      - git
+      - htop
+      - jq
+      - logrotate
+      - moreutils
+      - multitail
+      - ncdu
+      - netcat
+      - parallel
+      - pigz
+      - pv
+      - ranger
+      - rsync
+      - rclone
+      - screen
+      - sqlite
+      - tmux
+      - tree
+      - unzip
+      - vim-enhanced
+      - wget
+      - zstd
