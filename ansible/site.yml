@@ -3,6 +3,7 @@
   hosts: index
   roles:
     - common
+    - siskin
 
   become: yes
   become_exe: /usr/bin/ssh

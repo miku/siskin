@@ -27,3 +27,7 @@
       - vim-enhanced
       - wget
       - zstd
+
+- name: "Clean motd"
+  command: truncate -s 0 /etc/motd
+

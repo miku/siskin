@@ -1,0 +1,8 @@
+# TODO: switch to internal artifact servers
+#
+# - name: "Install packages for siskin"
+#   yum:
+#     state: present
+#     name:
+#       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
+#       - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
