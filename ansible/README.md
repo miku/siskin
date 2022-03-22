@@ -8,7 +8,7 @@
 172.2.5.11 ansible_ssh_user=XXX ansible_ssh_args="-o ForwardAgent=yes"
 ```
 
-* symlink you preferred inventory to `hosts` for `Makefile` to pick it up
+* symlink your preferred inventory to `hosts` for `Makefile` to pick it up, e.g.
 
 ```
 $ ln -s hosts.prod hosts
