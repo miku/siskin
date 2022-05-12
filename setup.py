@@ -38,7 +38,7 @@ except ImportError:
 
 # XXX: Break this up into production and development dependencies.
 install_requires = [
-    'XlsxWriter>=1.4.4',
+    'xlsxwriter>=1.4.4',
     'astroid>=1.1.1,<2',
     'backoff>=1.11.1',
     'bs4',
