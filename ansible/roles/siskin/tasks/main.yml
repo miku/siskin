@@ -10,6 +10,7 @@
 - name: "Install required packages for siskin"
   yum:
     state: present
+    disable_gpg_check: true
     name:
       - sshuttle
       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
