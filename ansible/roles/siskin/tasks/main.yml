@@ -29,7 +29,7 @@
 
 - name: "Change crossref cache directory ownership"
   file:
-    path: "/var/cache/span"
+    path: "/var/cache/finc"
     owner: "finc"
     group: "finc"
     state: directory
