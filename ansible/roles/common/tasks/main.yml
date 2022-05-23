@@ -5,6 +5,7 @@
       - bash-completion
       - bc
       - curl
+      - cronie # https://stackoverflow.com/a/21802522/89391
       - git
       - htop
       - jq
@@ -31,3 +32,9 @@
 - name: "Clean motd"
   command: truncate -s 0 /etc/motd
 
+- name: "Enable services" # https://stackoverflow.com/a/37633887/89391
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  with_items:
+    - crond
