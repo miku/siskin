@@ -50,5 +50,5 @@
     hour: "0"
     minute: "5"
     job: >
-      span-crossref-sync -p zstd -c /data/finc/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-0- -interval w > /dev/null
+      span-crossref-sync -p zstd -c /data/finc/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-0- -i w > /dev/null
 
