@@ -20,7 +20,7 @@
       - sshuttle
       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
-      - https://github.com/miku/span/releases/download/v0.1.335/span-0.1.335-0.x86_64.rpm
+      - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
 
 - name: Execute task with extended PATH
   shell: echo $PATH
