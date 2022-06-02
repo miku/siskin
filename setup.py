@@ -124,6 +124,7 @@ setup(name='siskin',
               'assets/87/*',
           ]},
       scripts=[
+          'bin/iconv-chunks',
           'bin/taskcat',
           'bin/taskchecksetup',
           'bin/taskcleanup',

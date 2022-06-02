@@ -1,0 +1,76 @@
+#!/usr/bin/env perl
+
+our $CHUNK_SIZE = 1024 * 1024 * 100; # 100M
+
+=head1 NAME
+
+iconv-chunks - Process huge files with iconv
+
+=head1 SYNOPSIS
+
+  iconv-chunks <filename> [iconv-options]
+
+=head1 DESCRIPTION
+
+The standard iconv program reads the entire input file into
+memory, which doesn't work for large files (such as database exports).
+
+This script is just a wrapper that processes the input file
+in manageable chunks and writes it to standard output.
+
+The first argument is the input filename (use - to specify standard input).
+Anything else is passed through to iconv.
+
+The real iconv needs to be somewhere in your PATH.
+
+=head1 EXAMPLES
+
+  # Convert latin1 to utf-8:
+  ./iconv-chunks database.txt -f latin1 -t utf-8 > out.txt
+
+  # Input filename of - means standard input:
+  ./iconv-chunks - -f iso8859-1 -t utf8 < database.txt > out.txt
+
+  # More complex example, using compressed input/output to minimize disk use:
+  zcat database.txt.gz | ./iconv-chunks - -f iso8859-1 -t utf8 | \
+  gzip - > database-utf.dump.gz
+
+=head1 AUTHOR
+
+Maurice Aubrey <maurice.aubrey+iconv@gmail.com>
+
+=cut
+
+# $Id$
+
+use strict;
+use warnings;
+use bytes;
+use File::Temp qw/ tempfile /;
+
+# iconv errors:
+#   iconv: unable to allocate buffer for input: Cannot allocate memory
+#   iconv: cannot open input file `database.txt': File too large
+
+@ARGV >= 1 or die "Usage: $0 <inputfile> [iconv-options]\n";
+my @options = splice @ARGV, 1;
+
+my($oh, $tmp) = tempfile(UNLINK => 1);
+# warn "Tempfile: $tmp\n";
+
+my $iconv = "iconv @options $tmp";
+sub iconv { system($iconv) == 0 or die "command '$iconv' failed: $!" }
+
+my $size = 0;
+# must read by line to ensure we don't split multi-byte character
+while (<>) { 
+  $size += length $_;
+  print $oh $_;
+  if ($size >= $CHUNK_SIZE) {
+    iconv;
+    truncate $oh, 0 or die "truncate '$tmp' failed: $!";
+    seek $oh, 0, 0 or die "seek on '$tmp' failed: $!";
+    $size = 0;
+  }
+}
+iconv if $size > 0;
