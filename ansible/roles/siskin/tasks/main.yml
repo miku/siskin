@@ -1,5 +1,5 @@
 # TODO: switch to internal artifact servers or use a tunnel
-#
+
 - name: "Ensure group finc exists"
   group:
     name: "{{ siskin_group }}"
@@ -23,6 +23,10 @@
       - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
       - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
 
+- name: "Install siskin"
+  pip:
+    name: siskin
+
 - name: Execute task with extended PATH
   shell: echo $PATH
   environment:
@@ -35,7 +39,6 @@
     group: "{{ siskin_group }}"
     state: directory
     mode: '0755'
-
 
 - name: "Creates an entry like `PATH=/opt/bin:...` on top of crontab"
   cron:
