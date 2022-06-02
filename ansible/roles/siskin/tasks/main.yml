@@ -1,20 +1,5 @@
 # TODO: switch to internal artifact servers or use a tunnel
 
-- name: "Install packages for siskin"
-  yum:
-    state: present
-    name:
-      - gcc
-      - gcc-c++
-      - java-1.8.0-openjdk
-      - protobuf-compiler
-      - protobuf-devel
-      - python-devel
-      - python3-csvkit
-      - python3-pip
-      - yaz
-      - yaz-doc
-
 - name: "Ensure group finc exists"
   group:
     name: "{{ siskin_group }}"
@@ -27,12 +12,27 @@
     shell: /bin/bash
     create_home: true
 
-- name: "Install required packages for siskin"
+- name: "Install common packages for siskin"
+  yum:
+    state: present
+    name:
+      - gcc
+      - gcc-c++
+      - java-1.8.0-openjdk
+      - protobuf-compiler
+      - protobuf-devel
+      - python-devel
+      - python3-csvkit
+      - python3-pip
+      - sshuttle
+      - yaz
+      - yaz-doc
+
+- name: "Install vendor packages required for siskin"
   yum:
     state: present
     disable_gpg_check: true
     name:
-      - sshuttle
       - https://github.com/miku/filterline/releases/download/v0.1.4/filterline-0.1.4-0.x86_64.rpm
       - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
       - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
