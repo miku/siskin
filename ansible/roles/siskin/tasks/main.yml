@@ -6,8 +6,7 @@
     name:
       - gcc
       - gcc-c++
-      - p7zip
-      - p7zip-plugins
+      - java-1.8.0-openjdk
       - protobuf-compiler
       - protobuf-devel
       - python-devel
@@ -40,6 +39,26 @@
       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
       - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
+
+- name: "Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)"
+  get_url:
+    url: https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist.tar.gz
+    checksum: sha1:66c750ed2fa16da18016419e94fe6fa5141a0e2e
+    dest: /opt/metafacture-runner-4.0.0-dist.tar.gz
+
+- name: "Unpack metafacture"
+  unarchive:
+    remote_src: yes
+    src: /opt/metafacture-runner-4.0.0-dist.tar.gz
+    dest: /opt
+
+- name: "Symlink metafacture flux.sh script"
+  file:
+    src: /opt/metafacture-runner-4.0.0/flux.sh
+    dest: /usr/local/bin/flux.sh
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
+    state: link
 
 - name: "Install siskin python package"
   pip:
