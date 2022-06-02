@@ -2,13 +2,13 @@
 #
 - name: "Ensure group finc exists"
   group:
-    name: "finc"
+    name: "{{ siskin_group }}"
     state: present
 
 - name: "Create service worker"
   user:
-    name: "finc"
-    group: "finc"
+    name: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
     shell: /bin/bash
     create_home: true
 
@@ -21,6 +21,7 @@
       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
       - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
+      - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
 
 - name: Execute task with extended PATH
   shell: echo $PATH
@@ -29,9 +30,9 @@
 
 - name: "Change crossref cache directory ownership"
   file:
-    path: "/data/finc"
-    owner: "finc"
-    group: "finc"
+    path: "{{ siskin_data_dir }}"
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
     state: directory
     mode: '0755'
 
@@ -39,16 +40,16 @@
 - name: "Creates an entry like `PATH=/opt/bin:...` on top of crontab"
   cron:
     name: PATH
-    user: "finc"
+    user: "{{ siskin_user }}"
     env: true
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 - name: "Crontab for crossref API sync"
   cron:
     name: Crossref API sync
-    user: "finc"
+    user: "{{ siskin_user }}"
     hour: "0"
     minute: "5"
     job: >
-      span-crossref-sync -p zstd -c /data/finc/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-0- -i w > /dev/null
+      span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i w > /dev/null
 
