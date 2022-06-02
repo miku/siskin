@@ -1,4 +1,10 @@
+# User and group for siskin
 siskin_user: finc
 siskin_group: finc
 
+# Base directory for all raw and intermediate data files
 siskin_data_dir: /data/finc
+
+# Where siskin packages come from
+siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple
+
