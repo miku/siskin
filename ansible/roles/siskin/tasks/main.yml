@@ -70,9 +70,68 @@
   environment:
     PATH: "/usr/other/bin:{{ ansible_env.PATH }}"
 
+- name: "Create luigi configuration directory"
+  file:
+    path: /etc/luigi
+    state: directory
+    mode: "0755"
+
+- name: "Create siskin configuration directories"
+  file:
+    path: /etc/siskin
+    state: directory
+    mode: "0755"
+
+- name: "Copy logging config"
+  copy:
+    src: logging.ini
+    dest: /etc/luigi/logging.ini
+
+- name: "Set siskin log file permissions"
+  file:
+    path: /var/log/siskin.log
+    state: touch
+    mode: "0644"
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
+
+# use "items" for various directories
+
+- name: "Create generic fast, large tmp dir"
+  file:
+    path: "/data/tmp"
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
+    state: directory
+    mode: '0755'
+
+- name: "Create cache dir for metha"
+  file:
+    path: "/data/.cache/metha"
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
+    state: directory
+    mode: '0755'
+
+- name: "Create static dir for manual data shipments"
+  file:
+    path: "/data/static"
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
+    state: directory
+    mode: '0755'
+
 - name: "Change crossref cache directory ownership"
   file:
     path: "{{ siskin_data_dir }}"
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_group }}"
+    state: directory
+    mode: '0755'
+
+- name: "Create data subdir for siskin generate output"
+  file:
+    path: "{{ siskin_data_dir }}/siskin"
     owner: "{{ siskin_user }}"
     group: "{{ siskin_group }}"
     state: directory
@@ -93,4 +152,9 @@
     minute: "5"
     job: >
       span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i w > /dev/null
+
+- debug:
+    msg: >
+      Project siskin and dependencies set up. Complete the following step
+      manually: create /etc/luigi/luigi.cfg, create /etc/siskin/siskin.ini
 
