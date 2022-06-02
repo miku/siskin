@@ -54,10 +54,8 @@ ok      flux.sh
 ok      groupcover
 ok      hurrly
 ok      jq
-ok      marctexttoxml
 ok      metha-sync
 ok      microblob
-ok      oaicrawl
 ok      pigz
 xx      solrbulk        http://github.com/miku/solrbulk/releases
 ok      span-import

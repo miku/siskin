@@ -82,9 +82,7 @@ ok      groupcover
 ok      iconv
 ok      iconv-chunks
 ok      jq
-ok      marctexttoxml
 ok      metha-sync
-ok      oaicrawl
 ok      pigz
 ok      solrbulk
 ok      span-import
