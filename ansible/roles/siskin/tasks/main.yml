@@ -37,7 +37,7 @@
       - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
       - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
-      - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
+      - https://github.com/miku/span/releases/download/v0.1.337/span-0.1.337-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
 
 - name: "Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)"
