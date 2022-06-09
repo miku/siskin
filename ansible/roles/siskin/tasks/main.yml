@@ -1,160 +1,141 @@
 # TODO: switch to internal artifact servers or use a tunnel
 
-- name: "Ensure group finc exists"
+- name: Ensure group finc exists
   group:
-    name: "{{ siskin_group }}"
+    name: '{{ siskin_group }}'
     state: present
-
-- name: "Create service worker"
+- name: Create service worker
   user:
-    name: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    name: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     shell: /bin/bash
     create_home: true
-
-- name: "Install common packages for siskin"
+- name: Install common packages for siskin
   yum:
     state: present
     name:
-      - gcc
-      - gcc-c++
-      - java-1.8.0-openjdk
-      - protobuf-compiler
-      - protobuf-devel
-      - python-devel
-      - python3-csvkit
-      - python3-pip
-      - sshuttle
-      - yaz
-      - yaz-doc
-
-- name: "Install vendor packages required for siskin"
+    - gcc
+    - gcc-c++
+    - java-1.8.0-openjdk
+    - protobuf-compiler
+    - protobuf-devel
+    - python-devel
+    - python3-csvkit
+    - python3-pip
+    - sshuttle
+    - yaz
+    - yaz-doc
+- name: Install vendor packages required for siskin
   yum:
     state: present
     disable_gpg_check: true
     name:
-      - https://github.com/miku/filterline/releases/download/v0.1.4/filterline-0.1.4-0.x86_64.rpm
-      - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
-      - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
-      - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
-      - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
-      - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
-
-- name: "Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)"
+    - https://github.com/miku/filterline/releases/download/v0.1.4/filterline-0.1.4-0.x86_64.rpm
+    - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
+    - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
+    - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
+    - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
+    - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
+- name: Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)
   get_url:
     url: https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist.tar.gz
     checksum: sha1:66c750ed2fa16da18016419e94fe6fa5141a0e2e
     dest: /opt/metafacture-runner-4.0.0-dist.tar.gz
-
-- name: "Unpack metafacture"
+- name: Unpack metafacture
   unarchive:
     remote_src: yes
     src: /opt/metafacture-runner-4.0.0-dist.tar.gz
     dest: /opt
-
-- name: "Symlink metafacture flux.sh script"
+- name: Symlink metafacture flux.sh script
   file:
     src: /opt/metafacture-runner-4.0.0/flux.sh
     dest: /usr/local/bin/flux.sh
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     state: link
-
-- name: "Install siskin python package"
+- name: Install siskin python package
   pip:
     name: siskin
     extra_args: -U -i "{{ siskin_pypi_index_url }}"
-
 - name: Execute task with extended PATH
   shell: echo $PATH
   environment:
-    PATH: "/usr/other/bin:{{ ansible_env.PATH }}"
-
-- name: "Create luigi configuration directory"
+    PATH: /usr/other/bin:{{ ansible_env.PATH }}
+- name: Create luigi configuration directory
   file:
     path: /etc/luigi
     state: directory
-    mode: "0755"
-
-- name: "Create siskin configuration directories"
+    mode: '0755'
+- name: Create siskin configuration directories
   file:
     path: /etc/siskin
     state: directory
-    mode: "0755"
-
-- name: "Copy logging config"
+    mode: '0755'
+- name: Copy logging config
   copy:
     src: logging.ini
     dest: /etc/luigi/logging.ini
-
-- name: "Set siskin log file permissions"
+- name: Set siskin log file permissions
   file:
     path: /var/log/siskin.log
     state: touch
-    mode: "0644"
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
-
-# use "items" for various directories
-
-- name: "Create generic fast, large tmp dir"
+    mode: '0644'
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
+    # use "items" for various directories
+- name: Create generic fast, large tmp dir
   file:
-    path: "/data/tmp"
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    path: /data/tmp
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     state: directory
     mode: '0755'
-
-- name: "Create cache dir for metha"
+- name: Create cache dir for metha
   file:
-    path: "/data/.cache/metha"
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    path: /data/.cache/metha
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     state: directory
     mode: '0755'
-
-- name: "Create static dir for manual data shipments"
+- name: Create static dir for manual data shipments
   file:
-    path: "/data/static"
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    path: /data/static
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     state: directory
     mode: '0755'
-
-- name: "Change crossref cache directory ownership"
+- name: Change crossref cache directory ownership
   file:
-    path: "{{ siskin_data_dir }}"
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    path: '{{ siskin_data_dir }}'
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     state: directory
     mode: '0755'
-
-- name: "Create data subdir for siskin generate output"
+- name: Create data subdir for siskin generate output
   file:
-    path: "{{ siskin_data_dir }}/siskin"
-    owner: "{{ siskin_user }}"
-    group: "{{ siskin_group }}"
+    path: '{{ siskin_data_dir }}/siskin'
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
     state: directory
     mode: '0755'
-
-- name: "Creates an entry like `PATH=/opt/bin:...` on top of crontab"
+- name: Creates an entry like `PATH=/opt/bin:...` on top of crontab
   cron:
     name: PATH
-    user: "{{ siskin_user }}"
+    user: '{{ siskin_user }}'
     env: true
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-
-- name: "Crontab for crossref API sync"
+- name: Crontab for crossref API sync
   cron:
     name: Crossref API sync
-    user: "{{ siskin_user }}"
-    hour: "0"
-    minute: "5"
+    user: '{{ siskin_user }}'
+    hour: '0'
+    minute: '5'
     job: >
-      span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i w > /dev/null
+      span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s
+      -verbose -s 2022-01-01 -P feed-1- -i w > /dev/null
 
 - debug:
     msg: >
-      Project siskin and dependencies set up. Complete the following step
-      manually: create /etc/luigi/luigi.cfg, create /etc/siskin/siskin.ini
+      Project siskin and dependencies set up. Complete the following step manually:
+      create /etc/luigi/luigi.cfg, create /etc/siskin/siskin.ini
 
