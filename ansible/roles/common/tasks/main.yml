@@ -1,44 +1,42 @@
-- name: "Install common packages"
+- name: Install common packages
   yum:
     state: present
     name:
-      - bash-completion
-      - bc
-      - bzip2
-      - cronie # https://stackoverflow.com/a/21802522/89391
-      - curl
-      - git
-      - htop
-      - jq
-      - logrotate
-      - moreutils
-      - multitail
-      - ncdu
-      - netcat
-      - p7zip
-      - p7zip-plugins
-      - parallel
-      - pigz
-      - pv
-      - ranger
-      - rclone
-      - rsync
-      - screen
-      - sqlite
-      - tar
-      - tmux
-      - tree
-      - unzip
-      - vim-enhanced
-      - wget
-      - zstd
-
-- name: "Clean motd"
+    - bash-completion
+    - bc
+    - bzip2
+    - cronie # https://stackoverflow.com/a/21802522/89391
+    - curl
+    - git
+    - htop
+    - jq
+    - logrotate
+    - moreutils
+    - multitail
+    - ncdu
+    - netcat
+    - p7zip
+    - p7zip-plugins
+    - parallel
+    - pigz
+    - pv
+    - ranger
+    - rclone
+    - rsync
+    - screen
+    - sqlite
+    - tar
+    - tmux
+    - tree
+    - unzip
+    - vim-enhanced
+    - wget
+    - zstd
+- name: Clean motd
   command: truncate -s 0 /etc/motd
-
-- name: "Enable services" # https://stackoverflow.com/a/37633887/89391
+- name: Enable services # https://stackoverflow.com/a/37633887/89391
   service:
-    name: "{{ item }}"
+    name: '{{ item }}'
     enabled: yes
   with_items:
-    - crond
+  - crond

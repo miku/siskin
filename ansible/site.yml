@@ -1,11 +1,10 @@
----
 - name: siskin preprocessing deployment
   hosts: index
   roles:
-    - common
-    - siskin
-
+  - common
+  - siskin
   become: yes
   become_exe: /usr/bin/ssh
-  become_flags: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l root -p 222 127.0.0.1'
-  become_user: ""
+  become_flags: -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l root
+    -p 222 127.0.0.1
+  become_user: ''
