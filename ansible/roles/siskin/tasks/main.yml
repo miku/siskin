@@ -30,12 +30,12 @@
     state: present
     disable_gpg_check: true
     name:
-      - https://github.com/miku/filterline/releases/download/v0.1.4/filterline-0.1.4-0.x86_64.rpm
-      - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
-      - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
-      - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
-      - https://github.com/miku/span/releases/download/v0.1.337/span-0.1.337-0.x86_64.rpm
-      - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
+      - https://github.com/miku/filterline/releases/download/v{{ siskin_vendor_version_filterline }}/filterline-{{ siskin_vendor_version_filterline }}-0.x86_64.rpm
+      - https://github.com/miku/groupcover/releases/download/v{{ siskin_vendor_version_groupcover }}/groupcover-{{ siskin_vendor_version_groupcover }}-0.x86_64.rpm
+      - https://github.com/miku/metha/releases/download/v{{ siskin_vendor_version_metha }}/metha-{{ siskin_vendor_version_metha }}-0.x86_64.rpm
+      - https://github.com/miku/solrbulk/releases/download/v{{ siskin_vendor_version_solrbulk }}/solrbulk-{{ siskin_vendor_version_solrbulk }}-0.x86_64.rpm
+      - https://github.com/miku/span/releases/download/v{{ siskin_vendor_version_span }}/span-{{ siskin_vendor_version_span }}-0.x86_64.rpm
+      - https://github.com/ubleipzig/solrdump/releases/download/v{{ siskin_vendor_version_solrdump }}/solrdump-{{ siskin_vendor_version_solrdump }}-0.x86_64.rpm
 - name: Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)
   get_url:
     url: https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist.tar.gz
@@ -55,7 +55,7 @@
     state: link
 - name: Install siskin python package
   pip:
-    name: siskin
+    name: siskin=={{ siskin_vendor_version_siskin }}
     extra_args: -U -i "{{ siskin_pypi_index_url }}"
 - name: Execute task with extended PATH
   shell: echo $PATH
