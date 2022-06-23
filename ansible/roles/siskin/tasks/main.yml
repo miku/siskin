@@ -30,24 +30,13 @@
     state: present
     disable_gpg_check: true
     name:
-<<<<<<< HEAD
       - https://github.com/miku/filterline/releases/download/v0.1.4/filterline-0.1.4-0.x86_64.rpm
       - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
       - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
       - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
       - https://github.com/miku/span/releases/download/v0.1.337/span-0.1.337-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
-
-- name: "Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)"
-=======
-    - https://github.com/miku/filterline/releases/download/v0.1.4/filterline-0.1.4-0.x86_64.rpm
-    - https://github.com/miku/groupcover/releases/download/v0.0.12/groupcover-0.0.12-0.x86_64.rpm
-    - https://github.com/miku/metha/releases/download/v0.2.31/metha-0.2.31-0.x86_64.rpm
-    - https://github.com/miku/solrbulk/releases/download/v0.3.6/solrbulk-0.3.6-0.x86_64.rpm
-    - https://github.com/miku/span/releases/download/v0.1.336/span-0.1.336-0.x86_64.rpm
-    - https://github.com/ubleipzig/solrdump/releases/download/v0.1.7/solrdump-0.1.7-0.x86_64.rpm
 - name: Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)
->>>>>>> ansible: apply yamlfmt (github.com/miekg/yamlfmt)
   get_url:
     url: https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist.tar.gz
     checksum: sha1:66c750ed2fa16da18016419e94fe6fa5141a0e2e
@@ -130,13 +119,7 @@
     hour: '0'
     minute: '5'
     job: >
-<<<<<<< HEAD
       span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d > /dev/null
-=======
-      span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s
-      -verbose -s 2022-01-01 -P feed-1- -i w > /dev/null
->>>>>>> ansible: apply yamlfmt (github.com/miekg/yamlfmt)
-
 - debug:
     msg: >
       Project siskin and dependencies set up. Complete the following step manually:
