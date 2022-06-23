@@ -31,15 +31,9 @@ http://doaj.org
 """
 
 import datetime
-import itertools
-import json
-import operator
 import os
 import tempfile
-import time
-from builtins import map, range
 
-import elasticsearch
 import luigi
 from gluish.common import Executable
 from gluish.format import TSV, Zstd
@@ -48,7 +42,6 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.task import DefaultTask
-from siskin.utils import load_set_from_file, load_set_from_target
 
 
 class DOAJTask(DefaultTask):
