@@ -74,14 +74,12 @@
     PATH: /usr/other/bin:{{ ansible_env.PATH }}
 - name: Create luigi configuration directory
   file:
-    path: /etc/luigi
+    path: "{{ item }}"
     state: directory
     mode: '0755'
-- name: Create siskin configuration directories
-  file:
-    path: /etc/siskin
-    state: directory
-    mode: '0755'
+  loop:
+    - /etc/luigi
+    - /etc/siskin
 - name: Copy logging config
   copy:
     src: logging.ini
@@ -94,27 +92,17 @@
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
     # use "items" for various directories
-- name: Create generic fast, large tmp dir
+- name: Create generic fast, large tmp dir; cache; static
   file:
-    path: /data/tmp
+    path: "{{ item }}"
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
     state: directory
     mode: '0755'
-- name: Create cache dir for metha
-  file:
-    path: /data/.cache/metha
-    owner: '{{ siskin_user }}'
-    group: '{{ siskin_group }}'
-    state: directory
-    mode: '0755'
-- name: Create static dir for manual data shipments
-  file:
-    path: /data/static
-    owner: '{{ siskin_user }}'
-    group: '{{ siskin_group }}'
-    state: directory
-    mode: '0755'
+  loop:
+    - /data/tmp
+    - /data/static
+    - /data/.cache/metha
 - name: Change crossref cache directory ownership
   file:
     path: '{{ siskin_data_dir }}'
