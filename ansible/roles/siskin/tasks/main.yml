@@ -151,7 +151,7 @@
     hour: "0"
     minute: "5"
     job: >
-      span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i w > /dev/null
+      span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d > /dev/null
 
 - debug:
     msg: >
