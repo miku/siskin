@@ -46,7 +46,8 @@ class DDNLTask(DefaultTask):
     """
     Base NL via DD.
     """
-    TAG = 'nl'
+
+    TAG = "nl"
 
 
 class DDNLPaths(DDNLTask):
@@ -56,16 +57,20 @@ class DDNLPaths(DDNLTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
-        return FTPMirror(host=self.config.get('ddnl', 'ftp-host'),
-                         base=self.config.get('ddnl', 'ftp-base'),
-                         username=self.config.get('ddnl', 'ftp-username'),
-                         password=self.config.get('ddnl', 'ftp-password'),
-                         pattern=self.config.get('ddnl', 'ftp-pattern'),
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
+        return FTPMirror(
+            host=self.config.get("ddnl", "ftp-host"),
+            base=self.config.get("ddnl", "ftp-base"),
+            username=self.config.get("ddnl", "ftp-username"),
+            password=self.config.get("ddnl", "ftp-password"),
+            pattern=self.config.get("ddnl", "ftp-pattern"),
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+        )
 
     def run(self):
         self.input().move(self.output().path)

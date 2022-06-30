@@ -59,7 +59,8 @@ class BaseTask(DefaultTask):
     """
     Various tasks around base, refs #14947.
     """
-    TAG = '126'
+
+    TAG = "126"
 
     def closest(self):
         return monthly(date=self.date)
@@ -69,18 +70,23 @@ class BasePaths(BaseTask):
     """
     Mirror SLUB FTP for base.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
-        return FTPMirror(host=self.config.get('base', 'ftp-host'),
-                         base=self.config.get('base', 'ftp-base'),
-                         username=self.config.get('base', 'ftp-username'),
-                         password=self.config.get('base', 'ftp-password'),
-                         pattern=self.config.get('base', 'ftp-pattern'),
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
+        return FTPMirror(
+            host=self.config.get("base", "ftp-host"),
+            base=self.config.get("base", "ftp-base"),
+            username=self.config.get("base", "ftp-username"),
+            password=self.config.get("base", "ftp-password"),
+            pattern=self.config.get("base", "ftp-pattern"),
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+        )
 
     def run(self):
         self.input().move(self.output().path)
@@ -93,6 +99,7 @@ class BaseSingleFile(BaseTask):
     """
     Create a single compressed file of tarball.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -100,7 +107,7 @@ class BaseSingleFile(BaseTask):
 
     def run(self):
         with self.input().open() as handle:
-            paths = [p.strip().decode('utf-8') for p in handle.readlines()]
+            paths = [p.strip().decode("utf-8") for p in handle.readlines()]
 
         # SOLR has a limit on facet_fields value length.
         sanitize = """
@@ -118,28 +125,34 @@ class BaseSingleFile(BaseTask):
             # Since 12/2019 symlinks might be an absolute path (on the server),
             # which makes this more flaky. Assume, that symlink points to the
             # same directory.
-            if realpath.startswith('/'):
-                self.logger.debug('absolute path detected; assuming symlinked file is in the same directory')
-                realpath = os.path.join(os.path.dirname(path), os.path.basename(realpath))
+            if realpath.startswith("/"):
+                self.logger.debug(
+                    "absolute path detected; assuming symlinked file is in the same directory"
+                )
+                realpath = os.path.join(
+                    os.path.dirname(path), os.path.basename(realpath)
+                )
             self.logger.debug("found: %s", realpath)
             if not realpath.endswith("gz"):
-                raise RuntimeError('want gz (tarball), got: %s', realpath)
+                raise RuntimeError("want gz (tarball), got: %s", realpath)
             decomp = "unpigz -c"
             if realpath.endswith("tar.gz"):
                 decomp = "tar -xOzf"
             self.logger.debug("fixing isil on the fly, refs #20232")
-            output = shellout(""" {decomp} "{input}" |
+            output = shellout(
+                """ {decomp} "{input}" |
                                   {sanitize} |
                                   sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
                                   doisniffer -S |
                                   pigz -c > {output}""",
-                              decomp=decomp,
-                              input=realpath,
-                              sanitize=sanitize)
+                decomp=decomp,
+                input=realpath,
+                sanitize=sanitize,
+            )
             luigi.LocalTarget(output).move(self.output().path)
             break
         else:
-            raise RuntimeError('no finc/latest in %s', paths)
+            raise RuntimeError("no finc/latest in %s", paths)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ndj.gz"), format=Gzip)

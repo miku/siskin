@@ -50,23 +50,37 @@ import luigi
 import rdflib
 from bs4 import BeautifulSoup
 from gluish.common import Executable
-from gluish.format import TSV, Gzip
+from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
+from siskin.sources.amsl import (
+    AMSLFilterConfigFreeze,
+    AMSLFreeContent,
+    AMSLHoldingsFile,
+    AMSLOpenAccessKBART,
+    AMSLService,
+)
 from siskin.sources.base import BaseSingleFile
 from siskin.sources.ceeol import CeeolIntermediateSchema
-from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
-from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
-from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
+from siskin.sources.crossref import (
+    CrossrefDOIList,
+    CrossrefIntermediateSchema,
+    CrossrefUniqISSNList,
+)
+from siskin.sources.degruyter import (
+    DegruyterDOIList,
+    DegruyterIntermediateSchema,
+    DegruyterISSNList,
+)
+from siskin.sources.doaj import DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
 from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
-from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
+from siskin.sources.jstor import JstorDOIList, JstorIntermediateSchema, JstorISSNList
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema
@@ -77,8 +91,9 @@ from siskin.utils import URLCache, load_set_from_target
 
 
 class AITask(DefaultTask):
-    """ AI base task. """
-    TAG = 'ai'
+    """AI base task."""
+
+    TAG = "ai"
 
     def closest(self):
         return weekly(self.date)
@@ -105,7 +120,7 @@ class AIIntermediateSchema(AITask):
     is put here, will pass along the ISIL attachment and deduplication
     pipeline.
 
-    All inputs must be gzipped, output will be gzipped.
+    All inputs must be zstd compressed.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -129,26 +144,32 @@ class AIIntermediateSchema(AITask):
     @timed
     def run(self):
         """
-        Check, if all files are gzipped before we concatenate.
+        Check, if all files are zstd compressed before we concatenate.
+
+        https://datatracker.ietf.org/doc/html/rfc8478#section-3.1.1
         """
         for target in self.input():
             with open(target.path, "rb") as f:
-                if binascii.hexlify(f.read(2)) != b'1f8b':
-                    raise RuntimeError('AIIntermediateSchema requires gzipped inputs, failed: %s' % target.path)
+                if binascii.hexlify(f.read(4)) != b"FD2FB528":
+                    raise RuntimeError(
+                        "AIIntermediateSchema requires zstd-compressed inputs, failed: %s"
+                        % target.path
+                    )
 
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AIRedact(AITask):
     """
     Redact intermediate schema.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -156,12 +177,17 @@ class AIRedact(AITask):
 
     @timed
     def run(self):
-        """ A bit slower: `jq 'del(.["x.fulltext"])' input > output` """
-        output = shellout("span-redact <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        """
+        A bit slower: jq 'del(.["x.fulltext"])' input > output
+        """
+        output = shellout(
+            "span-redact <(zstd -cd -T0 {input}) | zstd -c -T0 > {output}",
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AILicensing(AITask):
@@ -174,8 +200,11 @@ class AILicensing(AITask):
 
         00 12  * * * source $HOME/.virtualenvs/siskin/bin/activate && taskdo AMSLFilterConfigFreeze --local-scheduler
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
+    override = luigi.BoolParameter(
+        description="do not use jour fixe", significant=False
+    )
     drop = luigi.BoolParameter(description="drop records w/o isil")
 
     def requires(self):
@@ -189,8 +218,8 @@ class AILicensing(AITask):
         self.logger.debug("AILicensing date: %s (override=%s)", jourfixe, self.override)
 
         return {
-            'is': AIApplyOpenAccessFlag(date=self.date),
-            'config': AMSLFilterConfigFreeze(date=jourfixe),
+            "is": AIApplyOpenAccessFlag(date=self.date),
+            "config": AMSLFilterConfigFreeze(date=jourfixe),
         }
 
     def run(self):
@@ -198,23 +227,28 @@ class AILicensing(AITask):
         A recent version of span might be required.
         """
         if self.drop:
-            output = shellout("span-tag -D -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
-                              config=self.input().get('config').path,
-                              input=self.input().get('is').path)
+            output = shellout(
+                "span-tag -D -unfreeze {config} <(zstd -cd -T0 {input}) | zstd -c -T0 > {output}",
+                config=self.input().get("config").path,
+                input=self.input().get("is").path,
+            )
         else:
-            output = shellout("span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
-                              config=self.input().get('config').path,
-                              input=self.input().get('is').path)
+            output = shellout(
+                "span-tag -unfreeze {config} <(zstd -cd -T0 {input}) | zstd -c -T0 > {output}",
+                config=self.input().get("config").path,
+                input=self.input().get("is").path,
+            )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AILocalData(AITask):
     """
     Extract a CSV about source, id, doi and institutions for deduplication.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
     batchsize = luigi.IntParameter(default=25000, significant=False)
 
@@ -225,13 +259,19 @@ class AILocalData(AITask):
         """
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
-        output = shellout("""unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
-                          size=self.batchsize,
-                          input=self.input().path)
+        output = shellout(
+            """
+            zstd -cd -T0 {input} |
+            span-local-data -b {size} |
+            LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output}
+            """,
+            size=self.batchsize,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='csv'))
+        return luigi.LocalTarget(path=self.path(ext="csv"))
 
 
 class AIInstitutionChanges(AITask):
@@ -239,13 +279,19 @@ class AIInstitutionChanges(AITask):
     Calculate institution changes based on DOI duplicates. Experimental, using
     https://github.com/miku/groupcover with preferences.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return AILocalData(date=self.date)
 
     def run(self):
-        output = shellout("""groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}""", input=self.input().path)
+        output = shellout(
+            """
+            groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}
+            """,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -256,12 +302,13 @@ class AIIntermediateSchemaDeduplicated(AITask):
     """
     A DOI deduplicated version of the intermediate schema. Experimental.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'changes': AIInstitutionChanges(date=self.date),
-            'file': AILicensing(date=self.date, drop=True),
+            "changes": AIInstitutionChanges(date=self.date),
+            "file": AILicensing(date=self.date, drop=True),
         }
 
     def run(self):
@@ -269,13 +316,18 @@ class AIIntermediateSchemaDeduplicated(AITask):
         Update intermediate schema labels from file. We cut out the ID and the
         ISIL list from the changes.
         """
-        output = shellout("unpigz -c {input} | span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
-                          input=self.input().get('file').path,
-                          file=self.input().get('changes').path)
+        output = shellout(
+            """
+            zstd -cd -T0 {input} |
+            span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | zstd -c -T0 > {output}
+            """,
+            input=self.input().get("file").path,
+            file=self.input().get("changes").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AIExport(AITask):
@@ -284,40 +336,53 @@ class AIExport(AITask):
 
     XXX: #11467, crossref vs JSTOR.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3', description='export format')
+    format = luigi.Parameter(default="solr5vu3", description="export format")
 
     def requires(self):
         return {
-            'ai': AIIntermediateSchemaDeduplicated(date=self.date),
-            'base': BaseSingleFile(date=self.date),
-            'perinorm': PerinormExport(),
+            "ai": AIIntermediateSchemaDeduplicated(date=self.date),
+            "base": BaseSingleFile(date=self.date),
+            "perinorm": PerinormExport(),
         }
 
     def run(self):
-        _, tmp = tempfile.mkstemp(prefix='siskin-')
-
-        if self.format == 'solr5vu3':
-            shellout("""cat "{input}" >> "{output}" """, input=self.input().get("base").path, output=tmp)
-            shellout("""cat "{input}" >> "{output}" """, input=self.input().get("perinorm").path, output=tmp)
-        else:
-            self.logger.debug('ignoring [126] BASE, since format is: %s', self.format)
-
-        shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}", format=self.format, input=self.input().get('ai').path, output=tmp)
+        _, tmp = tempfile.mkstemp(prefix="siskin-")
+        shellout(
+            """
+            unpigz -c "{input}" | zstd -c -T0 >> "{output}"
+            """,
+            input=self.input().get("base").path,
+            output=tmp,
+        )
+        shellout(
+            """
+            unpigz -c "{input}" | zstd -c -T0 >> "{output}"
+            """,
+            input=self.input().get("perinorm").path,
+            output=tmp,
+        )
+        shellout(
+            """
+            span-export -o solr5vu3 <(zstd -cd -T0 {input}) |
+            zstd -c -T0 >> {output}
+            """,
+            format=self.format,
+            input=self.input().get("ai").path,
+            output=tmp,
+        )
         luigi.LocalTarget(tmp).move(self.output().path)
 
     def output(self):
-        extensions = {
-            'solr5vu3': 'ldj.gz',
-            'formeta': 'form.gz',
-        }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
 
 
 class AIUpdate(AITask, luigi.WrapperTask):
     """
     A wrapper task for updates, refs #5702.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -335,23 +400,26 @@ class AIDOIStats(AITask):
     """
     DOI overlaps between various sources.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'crossref': CrossrefDOIList(date=self.date),
-            'degruyter': DegruyterDOIList(date=self.date),
-            'doaj': DOAJDOIList(date=self.date),
-            'jstor': JstorDOIList(date=self.date)
+            "crossref": CrossrefDOIList(date=self.date),
+            "degruyter": DegruyterDOIList(date=self.date),
+            "doaj": DOAJDOIList(date=self.date),
+            "jstor": JstorDOIList(date=self.date),
         }
 
     @timed
     def run(self):
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2))))
+                output.write_tsv(
+                    k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2)))
+                )
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -361,19 +429,20 @@ class AIISSNStats(AITask):
     """
     Match ISSN lists. Note: This should be OLAP, not batch.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date)
+            "crossref": CrossrefUniqISSNList(date=self.date),
+            "degruyter": DegruyterISSNList(date=self.date),
+            "doaj": DOAJISSNList(date=self.date),
+            "jstor": JstorISSNList(date=self.date),
         }
 
     @timed
     def run(self):
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
@@ -387,19 +456,20 @@ class AIISSNOverlaps(AITask):
     """
     Match ISSN lists. Note: This should be OLAP, not batch.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date)
+            "crossref": CrossrefUniqISSNList(date=self.date),
+            "degruyter": DegruyterISSNList(date=self.date),
+            "doaj": DOAJISSNList(date=self.date),
+            "jstor": JstorISSNList(date=self.date),
         }
 
     @timed
     def run(self):
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
@@ -414,23 +484,28 @@ class AIISSNList(AITask):
     """
     List of uniq ISSNs in AI.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date),
-            'thieme': ThiemeISSNList(date=self.date),
-            'elsevier': ElsevierJournalsISSNList(date=self.date),
+            "crossref": CrossrefUniqISSNList(date=self.date),
+            "degruyter": DegruyterISSNList(date=self.date),
+            "doaj": DOAJISSNList(date=self.date),
+            "jstor": JstorISSNList(date=self.date),
+            "thieme": ThiemeISSNList(date=self.date),
+            "elsevier": ElsevierJournalsISSNList(date=self.date),
         }
 
     @timed
     def run(self):
-        _, output = tempfile.mkstemp(prefix='siskin-')
+        _, output = tempfile.mkstemp(prefix="siskin-")
         for _, target in list(self.input().items()):
-            shellout("cat {input} | grep -v null >> {output}", input=target.path, output=output)
+            shellout(
+                "cat {input} | grep -v null >> {output}",
+                input=target.path,
+                output=output,
+            )
         output = shellout("sort -u {input} > {output}", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -445,6 +520,7 @@ class AICollectionsAndSerialNumbers(AITask):
     XXX: The collection names are not that uniform. Would need to extract those
     names from AMSL - however, the raw data contains these names ...
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -456,8 +532,10 @@ class AICollectionsAndSerialNumbers(AITask):
         """
         g = rdflib.Graph()
         ns = {
-            "amsl": rdflib.Namespace('http://amsl.technology/'),
-            "disco": rdflib.Namespace('http://amsl.technology/discovery/Metadatenkollektion/'),
+            "amsl": rdflib.Namespace("http://amsl.technology/"),
+            "disco": rdflib.Namespace(
+                "http://amsl.technology/discovery/Metadatenkollektion/"
+            ),
         }
 
         p = ns["amsl"].coveredMediumID
@@ -469,23 +547,25 @@ class AICollectionsAndSerialNumbers(AITask):
                     self.logger.debug("%s %s", i, len(g))
 
                 doc = json.loads(line)
-                issns = list(itertools.chain(doc.get('rft.issn', []), doc.get('rft.eissn', [])))
-                colls = doc.get('finc.mega_collection', [])
+                issns = list(
+                    itertools.chain(doc.get("rft.issn", []), doc.get("rft.eissn", []))
+                )
+                colls = doc.get("finc.mega_collection", [])
 
                 for issn in issns:
                     for c in colls:
-                        s = disco[urllib.quote(c.encode('utf-8'))]
+                        s = disco[urllib.quote(c.encode("utf-8"))]
 
-                        uri = 'urn:ISSN:%s' % urllib.quote(issn)
+                        uri = "urn:ISSN:%s" % urllib.quote(issn)
                         o = rdflib.URIRef(uri.strip())
 
                         g.add((s, p, o))
 
-        with self.output().open('w') as output:
-            output.write(g.serialize(format='turtle'))
+        with self.output().open("w") as output:
+            output.write(g.serialize(format="turtle"))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ttl'))
+        return luigi.LocalTarget(path=self.path(ext="ttl"))
 
 
 class AICoverageISSN(AITask):
@@ -502,47 +582,56 @@ class AICoverageISSN(AITask):
     2091-2730   NOT_FOUND
 
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(default='DE-15')
+    isil = luigi.Parameter(default="DE-15")
 
     def requires(self):
         """
         TODO: Add GBI ISSN list.
         """
         return {
-            'crossref': CrossrefUniqISSNList(date=self.date),
-            'jstor': JstorISSNList(date=self.date),
-            'degruyter': DegruyterISSNList(date=self.date),
-            'doaj': DOAJISSNList(date=self.date),
-            'elsevierjournals': ElsevierJournalsISSNList(date=self.date),
-            'thieme': ThiemeISSNList(date=self.date),
-            'file': AMSLHoldingsFile(isil=self.isil),
+            "crossref": CrossrefUniqISSNList(date=self.date),
+            "jstor": JstorISSNList(date=self.date),
+            "degruyter": DegruyterISSNList(date=self.date),
+            "doaj": DOAJISSNList(date=self.date),
+            "elsevierjournals": ElsevierJournalsISSNList(date=self.date),
+            "thieme": ThiemeISSNList(date=self.date),
+            "file": AMSLHoldingsFile(isil=self.isil),
         }
 
     def run(self):
         issns = collections.defaultdict(set)
 
-        with self.input().get('file').open() as handle:
+        with self.input().get("file").open() as handle:
             for row in handle:
-                fields = row.strip().split('\t')
+                fields = row.strip().split("\t")
                 if len(fields) < 3:
                     continue
 
-                if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[1]):
-                    issns['file'].add(fields[1])
+                if re.search(r"[0-9]{4}-[0-9]{3}[0-9X]", fields[1]):
+                    issns["file"].add(fields[1])
 
-                if re.search(r'[0-9]{4}-[0-9]{3}[0-9X]', fields[2]):
-                    issns['file'].add(fields[2])
+                if re.search(r"[0-9]{4}-[0-9]{3}[0-9X]", fields[2]):
+                    issns["file"].add(fields[2])
 
-        sources = ['crossref', 'jstor', 'degruyter', 'doaj', 'gbi', 'elsevierjournals', 'thieme']
+        sources = [
+            "crossref",
+            "jstor",
+            "degruyter",
+            "doaj",
+            "gbi",
+            "elsevierjournals",
+            "thieme",
+        ]
 
         for source in sources:
             with self.input().get(source).open() as handle:
                 for row in handle:
                     issns[source].add(row.strip())
 
-        with self.output().open('w') as output:
-            for issn in sorted(issns['file']):
+        with self.output().open("w") as output:
+            for issn in sorted(issns["file"]):
                 fields = []
                 for source in sources:
                     if issn in issns[source]:
@@ -569,42 +658,50 @@ class AIISSNCoverageCatalogMatches(AITask):
     0171-7227   FOUND_RESULTS_2 https://katalog.ub.uni-...
 
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(default='DE-15')
+    isil = luigi.Parameter(default="DE-15")
 
     def requires(self):
         return AICoverageISSN(date=self.date, isil=self.isil)
 
     def run(self):
-        if not self.isil == 'DE-15':
-            raise RuntimeError('not implemented except for DE-15')
+        if not self.isil == "DE-15":
+            raise RuntimeError("not implemented except for DE-15")
 
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), ".urlcache"))
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
-        cache.sess.mount('http://', adapter)
+        cache.sess.mount("http://", adapter)
 
         with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
-                    if row.status == 'NOT_FOUND':
-                        link = 'https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN' % row.issn
-                        self.logger.info('fetch #%05d: %s' % (i, link))
+            with self.output().open("w") as output:
+                for i, row in enumerate(handle.iter_tsv(cols=("issn", "status"))):
+                    if row.status == "NOT_FOUND":
+                        link = (
+                            "https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN"
+                            % row.issn
+                        )
+                        self.logger.info("fetch #%05d: %s" % (i, link))
                         body = cache.get(link)
-                        if 'Keine Ergebnisse!' in body:
-                            output.write_tsv(row.issn, 'ERR_NOT_IN_CATALOG', link)
+                        if "Keine Ergebnisse!" in body:
+                            output.write_tsv(row.issn, "ERR_NOT_IN_CATALOG", link)
                         else:
                             soup = BeautifulSoup(body)
                             rs = soup.findAll("div", {"class": "floatleft"})
                             if len(rs) == 0:
-                                output.write_tsv(row.issn, 'ERR_LAYOUT', link)
+                                output.write_tsv(row.issn, "ERR_LAYOUT", link)
                                 continue
                             first = rs[0]
-                            match = re.search(r'Treffer([0-9]+)-([0-9]+)von([0-9]+)', first.text)
+                            match = re.search(
+                                r"Treffer([0-9]+)-([0-9]+)von([0-9]+)", first.text
+                            )
                             if match:
                                 total = match.group(3)
-                                output.write_tsv(row.issn, 'FOUND_RESULTS_%s' % total, link)
+                                output.write_tsv(
+                                    row.issn, "FOUND_RESULTS_%s" % total, link
+                                )
                             else:
-                                output.write_tsv(row.issn, 'ERR_NO_MATCH', link)
+                                output.write_tsv(row.issn, "ERR_NO_MATCH", link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -612,39 +709,47 @@ class AIISSNCoverageCatalogMatches(AITask):
 
 class AIISSNCoverageSolrMatches(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(default='DE-15')
+    isil = luigi.Parameter(default="DE-15")
 
     def requires(self):
         return AICoverageISSN(date=self.date, isil=self.isil)
 
     def run(self):
-        if self.isil != 'DE-15':
-            raise RuntimeError('not implemented except for DE-15')
+        if self.isil != "DE-15":
+            raise RuntimeError("not implemented except for DE-15")
 
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'))
+        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), ".urlcache"))
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
-        cache.sess.mount('http://', adapter)
+        cache.sess.mount("http://", adapter)
 
-        finc = self.config.get('ai', 'finc-solr')
-        ai = self.config.get('ai', 'ai-solr')
+        finc = self.config.get("ai", "finc-solr")
+        ai = self.config.get("ai", "ai-solr")
 
         def numFound(link):
-            """ Given a SOLR query URL, return the number of docs found. """
+            """Given a SOLR query URL, return the number of docs found."""
             body = cache.get(link)
             content = json.loads(body)
-            return content['response']['numFound']
+            return content["response"]["numFound"]
 
         with self.input().open() as handle:
-            with self.output().open('w') as output:
-                for i, row in enumerate(handle.iter_tsv(cols=('issn', 'status'))):
-                    if row.status == 'NOT_FOUND':
-                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (finc, self.isil, row.issn)
-                        self.logger.info('fetch #%05d: %s', i, link)
-                        output.write_tsv('finc', row.issn, numFound(link), link)
+            with self.output().open("w") as output:
+                for i, row in enumerate(handle.iter_tsv(cols=("issn", "status"))):
+                    if row.status == "NOT_FOUND":
+                        link = "%s/select?q=institution:%s+AND+issn:%s&wt=json" % (
+                            finc,
+                            self.isil,
+                            row.issn,
+                        )
+                        self.logger.info("fetch #%05d: %s", i, link)
+                        output.write_tsv("finc", row.issn, numFound(link), link)
                     else:
-                        link = '%s/select?q=institution:%s+AND+issn:%s&wt=json' % (ai, self.isil, row.issn)
-                        self.logger.info('fetch #%05d: %s', i, link)
-                        output.write_tsv('ai', row.issn, numFound(link), link)
+                        link = "%s/select?q=institution:%s+AND+issn:%s&wt=json" % (
+                            ai,
+                            self.isil,
+                            row.issn,
+                        )
+                        self.logger.info("fetch #%05d: %s", i, link)
+                        output.write_tsv("ai", row.issn, numFound(link), link)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -658,13 +763,14 @@ class AIApplyOpenAccessFlag(AITask):
     2. KBART
     3. Gold-OA
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'amslfc': AMSLFreeContent(date=self.date),
-            'kbart': AMSLOpenAccessKBART(date=self.date),
-            'file': AIIntermediateSchema(date=self.date),
+            "amslfc": AMSLFreeContent(date=self.date),
+            "kbart": AMSLOpenAccessKBART(date=self.date),
+            "file": AIIntermediateSchema(date=self.date),
         }
 
     def run(self):
@@ -677,35 +783,44 @@ class AIApplyOpenAccessFlag(AITask):
         #12738. Mark sids as open access via -oasid (span 0.1.272 and later).
         """
 
-        output = shellout("""unpigz -c {input} |
-                             span-oa-filter -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
-                             pigz -c > {output}""",
-                          input=self.input().get('file').path,
-                          kbart=self.input().get('kbart').path,
-                          amslfc=self.input().get('amslfc').path)
+        output = shellout(
+            """
+            zstd -cd -T0 {input} |
+            span-oa-filter -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
+            zstd -c -T0 > {output}""",
+            input=self.input().get("file").path,
+            kbart=self.input().get("kbart").path,
+            amslfc=self.input().get("amslfc").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AIDOIList(AITask):
     """
     List of DOI for a given ISIL,
 
-    taskcat AILicensing | jq -r 'select(.["x.labels"][]? | contains ("DE-15")) | .doi?' > xxxx
+    taskcat AILicensing | jq -r 'select(.["x.labels"][]? | contains ("DE-15")) | .doi?'
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    isil = luigi.Parameter(default='DE-15')
+    isil = luigi.Parameter(default="DE-15")
 
     def requires(self):
         return AILicensing(date=self.date)
 
     def run(self):
-        output = shellout(""" unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output} """,
-                          input=self.input().path,
-                          isil=self.isil)
+        output = shellout(
+            """
+            zstd -cd -T0 {input} |
+            jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output}
+            """,
+            input=self.input().path,
+            isil=self.isil,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv'))
+        return luigi.LocalTarget(path=self.path(ext="tsv"))

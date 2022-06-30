@@ -48,6 +48,7 @@ class DataciteTask(DefaultTask):
     """
     Base task.
     """
+
     def closest(self):
         return monthly(date=self.date)
 
@@ -56,19 +57,27 @@ class DataciteCombine(DataciteTask):
     """
     Single file dump.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
     url = luigi.Parameter(default="http://oai.datacite.org/oai", significant=False)
     prefix = luigi.Parameter(default="oai_dc", significant=False)
 
     def requires(self):
-        return Executable(name='metha-sync', message='https://github.com/miku/metha')
+        return Executable(name="metha-sync", message="https://github.com/miku/metha")
 
     def run(self):
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=self.url, dir=self.config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix,
-                          url=self.url,
-                          dir=self.config.get('core', 'metha-dir'))
+        shellout(
+            "METHA_DIR={dir} metha-sync -format {prefix} {url}",
+            prefix=self.prefix,
+            url=self.url,
+            dir=self.config.get("core", "metha-dir"),
+        )
+        output = shellout(
+            "METHA_DIR={dir} metha-cat -root Records -format {prefix} {url} | pigz -c > {output}",
+            prefix=self.prefix,
+            url=self.url,
+            dir=self.config.get("core", "metha-dir"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -79,40 +88,48 @@ class DataciteIntermediateSchema(DataciteTask):
     """
     Experimental.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return DataciteCombine(date=self.date)
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("datacite/flux.flux"),
-                          mapdir=mapdir,
-                          input=self.input().path)
+        mapdir = "file:///%s" % self.assets("maps/")
+        output = shellout(
+            """flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
+            flux=self.assets("datacite/flux.flux"),
+            mapdir=mapdir,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
 
 class DataciteExport(DataciteTask):
     """
     Export to various formats
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3', description='export format')
+    format = luigi.Parameter(default="solr5vu3", description="export format")
 
     def requires(self):
         return DataciteIntermediateSchema(date=self.date)
 
     def run(self):
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=self.input().path)
+        output = shellout(
+            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
+            format=self.format,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         extensions = {
-            'solr5vu3': 'ldj.gz',
-            'formeta': 'form.gz',
+            "solr5vu3": "ldj.gz",
+            "formeta": "form.gz",
         }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, "gz")))

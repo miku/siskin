@@ -41,7 +41,18 @@ month = now.strftime("%b")
 date = now.strftime(day + ", %d " + month + " %Y %H:%M:%S +0100")
 
 
-def send_mail(sender=None, date=date, tolist=None, subject=None, message=None, smtp=None, smtp_port=25, username=None, password=None, starttls=True):
+def send_mail(
+    sender=None,
+    date=date,
+    tolist=None,
+    subject=None,
+    message=None,
+    smtp=None,
+    smtp_port=25,
+    username=None,
+    password=None,
+    starttls=True,
+):
     """
     Send out an email. Configure `smtp`, `default-sender` in `core` config
     section. A subject prefix is always prepended. The `tolist` parameter can
@@ -52,7 +63,7 @@ def send_mail(sender=None, date=date, tolist=None, subject=None, message=None, s
     XXX: ATM no FROM: line, maybe add that.
     """
     if subject is None:
-        subject = u"[automessage]"
+        subject = "[automessage]"
     if smtp is None:
         smtp = config.get("core", "smtp")
     if smtp_port is None:
@@ -61,7 +72,9 @@ def send_mail(sender=None, date=date, tolist=None, subject=None, message=None, s
         sender = config.get("core", "default-sender")
 
     if not all((sender, tolist, subject, smtp, message)):
-        raise ValueError("missing sender, recipients, subject, message or smtp: %s" % locals())
+        raise ValueError(
+            "missing sender, recipients, subject, message or smtp: %s" % locals()
+        )
 
     if not isinstance(tolist, list):
         tolist = [tolist]
@@ -73,7 +86,7 @@ def send_mail(sender=None, date=date, tolist=None, subject=None, message=None, s
         server.login(username, password)
     else:
         logger.debug("no username and password given, proceeding without login")
-    msg = u'From: {}\nDate: {}\nSubject: {}\n\n{}'.format(sender, date, subject, message)
+    msg = "From: {}\nDate: {}\nSubject: {}\n\n{}".format(sender, date, subject, message)
     server.sendmail(sender, tolist, msg)
     server.quit()
 

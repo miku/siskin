@@ -47,29 +47,37 @@ from siskin.task import DefaultTask
 
 
 class PQDTTask(DefaultTask):
-    """ PQDT open. """
-    TAG = '34'
+    """PQDT open."""
+
+    TAG = "34"
 
     def closest(self):
         return monthly(date=self.date)
 
 
 class PQDTCombine(PQDTTask):
-    """ Combine files."""
+    """Combine files."""
 
     date = ClosestDateParameter(default=datetime.date.today())
     prefix = luigi.Parameter(default="oai_dc")
 
     def requires(self):
-        return Executable(name='metha-sync', message='https://github.com/miku/metha')
+        return Executable(name="metha-sync", message="https://github.com/miku/metha")
 
     def run(self):
-        url = self.config.get('pqdt', 'oai')
-        shellout("METHA_DIR={dir} metha-sync -format {prefix} {url}", prefix=self.prefix, url=url, dir=self.config.get('core', 'metha-dir'))
-        output = shellout("METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
-                          prefix=self.prefix,
-                          url=url,
-                          dir=self.config.get('core', 'metha-dir'))
+        url = self.config.get("pqdt", "oai")
+        shellout(
+            "METHA_DIR={dir} metha-sync -format {prefix} {url}",
+            prefix=self.prefix,
+            url=url,
+            dir=self.config.get("core", "metha-dir"),
+        )
+        output = shellout(
+            "METHA_DIR={dir} metha-cat -format {prefix} {url} | pigz -c > {output}",
+            prefix=self.prefix,
+            url=url,
+            dir=self.config.get("core", "metha-dir"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -80,6 +88,7 @@ class PQDTFetch(PQDTTask):
     """
     Rewrite after endpoint behaviour has changed (12/2021).
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -94,20 +103,23 @@ class PQDTPrepare(PQDTTask):
     """
     Some postprocessing.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return PQDTFetch()
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                  echo '<?xml version="1.0" encoding="UTF-8"?>' | gzip -c >> {output} &&
                  echo '<Records xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' | gzip -c >> {output} &&
                  xmlcutty -path /OAI-PMH/ListRecords/record < {input} |
                  sed -e 's@<record>@<record xmlns="http://www.openarchives.org/OAI/2.0/">@g' | gzip -c >> {output} &&
                  echo '</Records>' | gzip -c >> {output} && zcat {output} | xmllint --format - | gzip -c | sponge {output}
                  """,
-                          input=self.input().path)
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -118,6 +130,7 @@ class PQDTIntermediateSchema(PQDTTask):
     """
     OAI to intermediate schema.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -125,34 +138,45 @@ class PQDTIntermediateSchema(PQDTTask):
         return PQDTPrepare(date=self.date)
 
     def run(self):
-        mapdir = 'file:///%s' % self.assets("maps/")
-        output = shellout("""flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
-                          flux=self.assets("34/flux.flux"),
-                          mapdir=mapdir,
-                          input=self.input().path)
+        mapdir = "file:///%s" % self.assets("maps/")
+        output = shellout(
+            """flux.sh {flux} in={input} MAP_DIR={mapdir} | pigz -c > {output}""",
+            flux=self.assets("34/flux.flux"),
+            mapdir=mapdir,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
 
 
 class PQDTExport(PQDTTask):
     """
     OAI to SOLR schema.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3')
+    format = luigi.Parameter(default="solr5vu3")
 
     def requires(self):
         return {
-            'file': PQDTIntermediateSchema(date=self.date),
-            'config': AMSLFilterConfig(date=self.date),
+            "file": PQDTIntermediateSchema(date=self.date),
+            "config": AMSLFilterConfig(date=self.date),
         }
 
     def run(self):
-        output = shellout(""" span-tag -c {config} {input} > {output} """, config=self.input().get('config').path, input=self.input().get('file').path)
-        output = shellout(""" span-export -o {format} {input} > {output} """, input=output, format=self.format)
+        output = shellout(
+            """ span-tag -c {config} {input} > {output} """,
+            config=self.input().get("config").path,
+            input=self.input().get("file").path,
+        )
+        output = shellout(
+            """ span-export -o {format} {input} > {output} """,
+            input=output,
+            format=self.format,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj'))
+        return luigi.LocalTarget(path=self.path(ext="ldj"))

@@ -37,7 +37,7 @@ import json
 
 import langdetect
 import luigi
-from gluish.format import Gzip
+from gluish.format import Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -49,7 +49,8 @@ class LissaTask(DefaultTask):
     """
     Base task.
     """
-    TAG = '179'
+
+    TAG = "179"
 
     def closest(self):
         return weekly(date=self.date)
@@ -64,12 +65,19 @@ class LissaFetch(LissaTask):
     In 08/2019, there are only about 230 items, so a single request window of
     1000 suffices. Adjust, if dataset grows.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
         es = "https://share.osf.io/api/v2/search/creativeworks"
         query = "sources:%22LIS%20Scholarship%20Archive%22"
-        output = shellout("""curl -s --fail "{es}/_search?from=0&size=1000&q={query}" > {output}""", query=query, es=es)
+        output = shellout(
+            """
+            curl -s --fail "{es}/_search?from=0&size=1000&q={query}" > {output}
+            """,
+            query=query,
+            es=es,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -80,6 +88,7 @@ class LissaIntermediateSchema(LissaTask):
     """
     Convert custom JSON to intermediate schema.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -91,6 +100,7 @@ class LissaIntermediateSchema(LissaTask):
 
         converted = []
 
+        # TODO: move this to conversions
         for hit in resp["hits"]["hits"]:
             source = hit["_source"]
             doc = {
@@ -103,14 +113,18 @@ class LissaIntermediateSchema(LissaTask):
                 "rft.atitle": source["title"],
                 "rft.genre": "article",
                 "rft.pub": source.get("publishers", []),
-                "authors": [{
-                    "rft.au": name
-                } for name in source["contributors"]],
-                "url": [link for link in source["identifiers"] if link.startswith("http")],
+                "authors": [{"rft.au": name} for name in source["contributors"]],
+                "url": [
+                    link for link in source["identifiers"] if link.startswith("http")
+                ],
                 "abstract": source.get("description", ""),
             }
 
-            dois = [v.replace("http://dx.doi.org/", "") for v in source["identifiers"] if "doi.org" in v]
+            dois = [
+                v.replace("http://dx.doi.org/", "")
+                for v in source["identifiers"]
+                if "doi.org" in v
+            ]
             if len(dois) == 0:
                 self.logger.warn("document without DOI")
             elif len(dois) == 1:
@@ -126,10 +140,18 @@ class LissaIntermediateSchema(LissaTask):
                 if len(doc["abstract"]) > 20:
                     result = langdetect.detect(doc["abstract"])
                     doc["languages"] = [languages.get(alpha2=result).bibliographic]
-                    self.logger.debug("detected %s in abstract (%s)", doc["languages"], doc["abstract"][:40])
+                    self.logger.debug(
+                        "detected %s in abstract (%s)",
+                        doc["languages"],
+                        doc["abstract"][:40],
+                    )
 
             # Gather subjects.
-            subjects = source.get("subjects", []) + source.get("subject_synonyms", []) + source.get("tags", [])
+            subjects = (
+                source.get("subjects", [])
+                + source.get("subject_synonyms", [])
+                + source.get("tags", [])
+            )
             unique_subjects = set(itertools.chain(*[v.split("|") for v in subjects]))
             doc.update({"x.subjects": list(unique_subjects)})
 
@@ -137,20 +159,22 @@ class LissaIntermediateSchema(LissaTask):
             for key in ("date_published", "date_created"):
                 if key not in source or not source[key]:
                     continue
-                doc.update({
-                    "x.date": source[key][:19] + "Z",
-                    "rft.date": source[key][:10],
-                })
+                doc.update(
+                    {
+                        "x.date": source[key][:19] + "Z",
+                        "rft.date": source[key][:10],
+                    }
+                )
                 break
             else:
                 raise ValueError("did not find any date field in document", hit)
 
             converted.append(doc)
 
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for doc in converted:
                 serialized = json.dumps(doc) + "\n"
                 output.write(serialized.encode("utf-8"))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)

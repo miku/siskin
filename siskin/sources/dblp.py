@@ -50,15 +50,19 @@ class DBLPTask(DefaultTask):
       19780 series
 
     """
-    TAG = 'dblp'
+
+    TAG = "dblp"
 
     def closest(self):
         return monthly(date=self.date)
 
 
 class DBLPDownload(DBLPTask):
-    """ Download file. """
-    url = luigi.Parameter(default='http://dblp.uni-trier.de/xml/dblp.xml.gz', significant=False)
+    """Download file."""
+
+    url = luigi.Parameter(
+        default="http://dblp.uni-trier.de/xml/dblp.xml.gz", significant=False
+    )
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -66,7 +70,7 @@ class DBLPDownload(DBLPTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml'))
+        return luigi.LocalTarget(path=self.path(ext="xml"))
 
 
 class DBLPIntermediateSchema(DBLPTask):
@@ -82,11 +86,11 @@ class DBLPIntermediateSchema(DBLPTask):
             print(len(blob))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ndj.gz"))
 
 
 class DBLPDOIList(DBLPTask):
-    """ QnD doi list. """
+    """QnD doi list."""
 
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -94,11 +98,13 @@ class DBLPDOIList(DBLPTask):
         return DBLPDownload()
 
     def run(self):
-        output = shellout("""LC_ALL=C grep "doi.org" <(unpigz -c {input}) |
+        output = shellout(
+            """LC_ALL=C grep "doi.org" <(unpigz -c {input}) |
                              LC_ALL=C sed -e 's@<ee>https://doi.org/@@g;s@</ee>@@g' |
                              LC_ALL=C grep ^10 |
                              LC_ALL=C sort -S50% > {output}""",
-                          input=self.input().path)
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -39,28 +39,34 @@ class ZDBTask(DefaultTask):
     """
     ZDB base task.
     """
-    TASK = 'zdb'
+
+    TASK = "zdb"
 
 
 class ZDBDownload(ZDBTask):
     """
     Download snapshot.
     """
+
     format = luigi.Parameter(default="jsonld", description="rdf, hdt")
 
     def run(self):
-        link = "http://datendienst.dnb.de/cgi-bin/mabit.pl?cmd=fetch&userID=opendata&pass=opendata&mabheft=ZDBTitel.%s.gz" % self.format
+        link = (
+            "http://datendienst.dnb.de/cgi-bin/mabit.pl?cmd=fetch&userID=opendata&pass=opendata&mabheft=ZDBTitel.%s.gz"
+            % self.format
+        )
         output = shellout(""" wget -O {output} "{link}" """, link=link)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='jsonld.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="jsonld.gz"), format=Gzip)
 
 
 class ZDBShortTitleMap(ZDBTask):
     """
     Just an ad-hoc task with some ad-hoc code, refs #10562.
     """
+
     def requires(self):
         return ZDBDownload(format="rdf")
 
@@ -81,11 +87,21 @@ class ZDBShortTitleMap(ZDBTask):
         yIDo9IGpzb24uTmV3RW5jb2Rlcihvcy5TdGRvdXQpLkVuY29kZShzbSk7IGVyciAhPSBuaWwgewog@@@ICBsb2cuRm
         F0YWwoZXJyKQog@@IH0K@IH0K
         """
-        source = self.run.__doc__.replace("\n", "").replace(" ", "").replace("@", "ICAg")
-        tempcode = shellout("""echo '{code}' | base64 -d > {output}.go """, code=source, preserve_whitespace=True)
-        output = shellout(""" unpigz -c {input} | go run {code}.go > {output} """, code=tempcode, input=self.input().path)
+        source = (
+            self.run.__doc__.replace("\n", "").replace(" ", "").replace("@", "ICAg")
+        )
+        tempcode = shellout(
+            """echo '{code}' | base64 -d > {output}.go """,
+            code=source,
+            preserve_whitespace=True,
+        )
+        output = shellout(
+            """ unpigz -c {input} | go run {code}.go > {output} """,
+            code=tempcode,
+            input=self.input().path,
+        )
         os.remove(tempcode)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext="json"))

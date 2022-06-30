@@ -15,13 +15,15 @@ class DummyTask(DefaultTask):
     """
     A base task in the dummy tag space.
     """
-    TAG = 'dummy'
+
+    TAG = "dummy"
 
 
 class DummyHelloWorld(DummyTask):
     """
     Just say hello world.
     """
+
     def run(self):
         print("Hello from %s" % self.__class__.__name__)
 
@@ -33,8 +35,9 @@ class DummyFail(DummyTask):
     """
     A task that always fails.
     """
+
     def run(self):
-        raise RuntimeError('This error occured at %s' % datetime.datetime.now())
+        raise RuntimeError("This error occured at %s" % datetime.datetime.now())
 
     def complete(self):
         return False

@@ -47,7 +47,8 @@ class OADOITask(DefaultTask):
     """
     Base task for oadoi.
     """
-    TAG = 'oadoi'
+
+    TAG = "oadoi"
 
 
 class OADOIDump(OADOITask, luigi.ExternalTask):
@@ -93,6 +94,7 @@ class OADOIDump(OADOITask, luigi.ExternalTask):
 
     Snapshot 2018-06-21 has 97751914 rows.
     """
+
     def output(self):
         return luigi.LocalTarget(path=self.config.get("oadoi", "dump"), format=Gzip)
 
@@ -101,6 +103,7 @@ class OADOIList(OADOIDump):
     """
     Provide a simple CSV (doi, is_oa).
     """
+
     def requires(self):
         return OADOIDump()
 

@@ -10,17 +10,30 @@ import requests
 
 import marcx
 import responses
-from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing, xmlstream)
+from siskin.utils import (
+    SetEncoder,
+    URLCache,
+    dictcheck,
+    get_task_import_cache,
+    load_set,
+    nwise,
+    random_string,
+    scrape_html_listing,
+    xmlstream,
+)
 
 
 def test_set_encoder_dumps():
-    assert json.dumps({'x': {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
+    assert json.dumps({"x": {0, 1, 2}}, cls=SetEncoder) == '{"x": [0, 1, 2]}'
 
 
 def test_dictcheck():
     assert dictcheck({"name": "x"}, contains=["name"]) is True
     assert dictcheck({"name": "x"}, contains=["name"], absent=["somekey"]) is True
-    assert dictcheck({"name": "x", "somekey": 123}, contains=["name"], absent=["somekey"]) is False
+    assert (
+        dictcheck({"name": "x", "somekey": 123}, contains=["name"], absent=["somekey"])
+        is False
+    )
     assert dictcheck({"somekey": None}, absent=["somekey"]) is True
     assert dictcheck({}, absent=["somekey"]) is True
 
@@ -28,7 +41,7 @@ def test_dictcheck():
 def test_nwise():
     assert list(nwise(range(4))) == [(0, 1), (2, 3)]
     assert list(nwise(range(4), n=2)) == [(0, 1), (2, 3)]
-    assert list(nwise(range(4), n=3)) == [(0, 1, 2), (3, )]
+    assert list(nwise(range(4), n=3)) == [(0, 1, 2), (3,)]
     assert list(nwise(range(4), n=10)) == [(0, 1, 2, 3)]
     assert list(nwise([], n=10)) == []
 
@@ -37,7 +50,7 @@ def test_random_string():
     assert len(random_string()) == 16
     assert len(random_string(length=1000)) == 1000
     assert len(random_string(length=-1)) == 0
-    assert random_string(length=-100) == ''
+    assert random_string(length=-100) == ""
     for char in ' \t\n.:,;#~+-?=[]()/&%$"!':
         assert char not in random_string()
 
@@ -49,11 +62,11 @@ def test_get_task_import_cache():
 
 
 def test_load_set():
-    assert load_set(io.StringIO(u"")) == set()
-    assert load_set(io.StringIO(u"1\n1\n1\n")) == {"1"}
-    assert load_set(io.StringIO(u"1\n    \n2\n")) == {"1", "2"}
-    assert load_set(io.StringIO(u"1\n2\n3\n")) == {"1", "2", "3"}
-    assert load_set(io.StringIO(u"1\n2\n3\n"), func=int) == {1, 2, 3}
+    assert load_set(io.StringIO("")) == set()
+    assert load_set(io.StringIO("1\n1\n1\n")) == {"1"}
+    assert load_set(io.StringIO("1\n    \n2\n")) == {"1", "2"}
+    assert load_set(io.StringIO("1\n2\n3\n")) == {"1", "2", "3"}
+    assert load_set(io.StringIO("1\n2\n3\n"), func=int) == {1, 2, 3}
 
     with tempfile.NamedTemporaryFile(delete=False) as tf:
         tf.write(b"1\n2\n")
@@ -71,9 +84,9 @@ def test_get_cache_file(tmpdir):
 
 @responses.activate
 def test_scrape_html_listing():
-    responses.add(responses.GET, 'http://fake.com/1', body='<html></html>', status=200)
-    resp = requests.get('http://fake.com/1')
-    assert scrape_html_listing('http://fake.com/1') == []
+    responses.add(responses.GET, "http://fake.com/1", body="<html></html>", status=200)
+    resp = requests.get("http://fake.com/1")
+    assert scrape_html_listing("http://fake.com/1") == []
 
     body = """
     <!doctype html><title>Index of /archlinux/iso/2018.12.01</title><h1>Index
@@ -110,24 +123,24 @@ def test_scrape_html_listing():
     """
 
     expected = [
-        'http://fake.com/archlinux-2018.12.01-x86_64.iso',
-        'http://fake.com/archlinux-2018.12.01-x86_64.iso.sig',
-        'http://fake.com/archlinux-2018.12.01-x86_64.iso.torr',
-        'http://fake.com/archlinux-bootstrap-2018.12.01-x86_64.tar.gz',
-        'http://fake.com/archlinux-bootstrap-2018.12.01-x86_64.tar.gz.sig',
-        'http://fake.com/md5sums.txt',
-        'http://fake.com/sha1sums.txt',
+        "http://fake.com/archlinux-2018.12.01-x86_64.iso",
+        "http://fake.com/archlinux-2018.12.01-x86_64.iso.sig",
+        "http://fake.com/archlinux-2018.12.01-x86_64.iso.torr",
+        "http://fake.com/archlinux-bootstrap-2018.12.01-x86_64.tar.gz",
+        "http://fake.com/archlinux-bootstrap-2018.12.01-x86_64.tar.gz.sig",
+        "http://fake.com/md5sums.txt",
+        "http://fake.com/sha1sums.txt",
     ]
 
-    responses.add(responses.GET, 'http://fake.com/1', body=body, status=200)
-    resp = requests.get('http://fake.com/1')
-    assert scrape_html_listing('http://fake.com/1') == expected
+    responses.add(responses.GET, "http://fake.com/1", body=body, status=200)
+    resp = requests.get("http://fake.com/1")
+    assert scrape_html_listing("http://fake.com/1") == expected
 
 
 def test_xmlstream():
-    with tempfile.NamedTemporaryFile('w', delete=False) as handle:
+    with tempfile.NamedTemporaryFile("w", delete=False) as handle:
         handle.write("""<a><b>C</b><b>C</b></a>""")
 
     filename = handle.name
-    assert [v for v in xmlstream(filename, "b")] == [b'<b>C</b>', b'<b>C</b>']
+    assert [v for v in xmlstream(filename, "b")] == [b"<b>C</b>", b"<b>C</b>"]
     os.remove(filename)

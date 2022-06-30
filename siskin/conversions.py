@@ -59,7 +59,7 @@ marburg_language_mapping = {
     "deu": "ger",
 }
 
-logger = logging.getLogger('siskin')
+logger = logging.getLogger("siskin")
 
 
 def html_escape(text):
@@ -76,7 +76,9 @@ def html_unescape(text):
     return unescape(text, html_unescape_table)
 
 
-def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None, max_failures=30):
+def imslp_tarball_to_marc(
+    tarball, outputfile=None, legacy_mapping=None, max_failures=30
+):
     """
     Convert an IMSLP tarball to MARC binary output file without extracting it.
     If outputfile is not given, write to a temporary location.
@@ -97,7 +99,9 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None, max_fai
             for member in tar.getmembers():
                 fobj = tar.extractfile(member)
                 try:
-                    record = imslp_xml_to_marc(fobj.read(), legacy_mapping=legacy_mapping)
+                    record = imslp_xml_to_marc(
+                        fobj.read(), legacy_mapping=legacy_mapping
+                    )
                     writer.write(record)
                 except ValueError as exc:
                     logger.warn("conversion failed: %s", exc)
@@ -109,10 +113,16 @@ def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None, max_fai
         writer.close()
 
         if stats["failed"] > max_failures:
-            logger.warn("%d records failed, only %d failures allowed", stats["failed"], max_failures)
+            logger.warn(
+                "%d records failed, only %d failures allowed",
+                stats["failed"],
+                max_failures,
+            )
             raise RuntimeError("more than %d records failed", max_failures)
 
-        logger.debug("%d/%d records failed/processed", stats["failed"], stats["processed"])
+        logger.debug(
+            "%d/%d records failed/processed", stats["failed"], stats["processed"]
+        )
 
     return outputfile
 
@@ -153,7 +163,9 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
                 record.add("041", a=l)
 
     creator = doc["creator"]["mainForm"]
-    record.add("100", a=creator, e="cmp", _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
+    record.add(
+        "100", a=creator, e="cmp", _0=legacy_mapping.get(identifier, {}).get("viaf", "")
+    )
 
     record.add("240", a=legacy_mapping.get(identifier, {}).get("title", ""))
 
@@ -178,7 +190,9 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
         else:
             raise ValueError("cannot handle %d subjects", len(doc["subject"]))
 
-        record.add("590", a=for689[0].title(), b=doc.get("music_arrangement_of", "").title())
+        record.add(
+            "590", a=for689[0].title(), b=doc.get("music_arrangement_of", "").title()
+        )
 
         for689.append(doc.get("music_arrangement_of", ""))
 
@@ -186,7 +200,9 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
             record.add("689", a=subject.title())
 
     record.add("700", a=doc.get("contributor", {}).get("mainForm", ""), e="ctb")
-    record.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=doc["url"]["#text"])
+    record.add(
+        "856", q="text/html", _3="Petrucci Musikbibliothek", u=doc["url"]["#text"]
+    )
     record.add("970", c="PN")
     record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
     return record
@@ -291,10 +307,10 @@ def olc_to_intermediate_schema(doc):
 
     result = {
         "abstract": de_listify(doc.get("abstract")),
-        "authors": [{
-            "rft.au": name
-        } for name in doc.get("author2", [])],
-        "finc.format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
+        "authors": [{"rft.au": name} for name in doc.get("author2", [])],
+        "finc.format": olc_format_to_finc_format.get(
+            de_listify(doc.get("format"), "Article")
+        ),
         "finc.id": "ai-68-{}".format(doc["id"]),
         "finc.mega_collection": list(mega_collections_set),
         "finc.source_id": "68",
@@ -385,6 +401,7 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
         try:
             import cld3
             from iso639 import languages
+
             result = cld3.get_language(attrs["description"])
             if not result.is_reliable:
                 return with_default
@@ -400,7 +417,10 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
         Example: https://api.osf.io/v2/preprints/egcsk/contributors/
         """
         result = []
-        cache = URLCache(directory=os.path.join(tempfile.gettempdir(), '.urlcache'), max_tries=max_retries)
+        cache = URLCache(
+            directory=os.path.join(tempfile.gettempdir(), ".urlcache"),
+            max_tries=max_retries,
+        )
         url = doc["relationships"]["contributors"]["links"]["related"]["href"]
         try:
             content = cache.get(url, force=force)
@@ -416,19 +436,27 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
                     attrs = item["embeds"]["users"]["data"]["attributes"]
                 except KeyError as exc:
                     attrs = item["embeds"]["users"]["errors"][0]["meta"]
-                result.append({
-                    "rft.aufirst": attrs["given_name"],
-                    "rft.aulast": attrs["family_name"],
-                })
+                result.append(
+                    {
+                        "rft.aufirst": attrs["given_name"],
+                        "rft.aulast": attrs["family_name"],
+                    }
+                )
         except KeyError as exc:
-            logger.debug("failed to find authors for {}: {}".format(exc, json.dumps(doc, indent=4)))
+            logger.debug(
+                "failed to find authors for {}: {}".format(
+                    exc, json.dumps(doc, indent=4)
+                )
+            )
         else:
             logger.debug("fetched {}, found {} author(s)".format(url, len(result)))
         return result
 
     result = {
         "abstract": attrs.get("description", ""),
-        "authors": fetch_authors(osf, force=force, best_effort=best_effort, max_retries=max_retries),
+        "authors": fetch_authors(
+            osf, force=force, best_effort=best_effort, max_retries=max_retries
+        ),
         "finc.format": "Preprint",
         "finc.id": "ai-{}-{}".format(source_id, osf["id"]),
         "finc.mega_collection": [
@@ -447,18 +475,22 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     }
 
     if "preprint_doi_created" in attrs and attrs["preprint_doi_created"]:
-        result.update({
-            "x.date": attrs.get("preprint_doi_created", "") + "Z",
-            "rft.date": attrs.get("preprint_doi_created", "")[:10],
-        })
+        result.update(
+            {
+                "x.date": attrs.get("preprint_doi_created", "") + "Z",
+                "rft.date": attrs.get("preprint_doi_created", "")[:10],
+            }
+        )
 
     return result
 
 
-def eastview_solr_to_intermediate_schema(blob,
-                                         source_id='210',
-                                         tcid='sid-210-col-udbedu',
-                                         collection_name='Universal Database of Social Sciences & Humanities (UDB-EDU)'):
+def eastview_solr_to_intermediate_schema(
+    blob,
+    source_id="210",
+    tcid="sid-210-col-udbedu",
+    collection_name="Universal Database of Social Sciences & Humanities (UDB-EDU)",
+):
     """
     Given a string containing raw XML. Each document contains a list of
     documents (100s), refs #12586.
@@ -477,22 +509,24 @@ def eastview_solr_to_intermediate_schema(blob,
         # 'coll', 'cdate'
         if not dd.get("title") or not dd.get("url"):
             continue
-        encoded_id = base64.b64encode(dd["id"].encode("utf-8")).decode("utf-8").rstrip("=")
+        encoded_id = (
+            base64.b64encode(dd["id"].encode("utf-8")).decode("utf-8").rstrip("=")
+        )
         authors = [{"rft.au": v} for v in dd.get("author", "").split(",") if v]
         result = {
-            'version': '0.9',
-            'finc.format': 'Article',
-            'finc.record_id': dd["id"],
-            'finc.id': 'ai-{}-{}'.format(source_id, encoded_id),
-            'finc.source_id': source_id,
-            'rft.atitle': dd["title"],
-            'rft.jtitle': dd.get("source", ""),
-            'url': [dd.get("url", "")],
-            'authors': authors,
-            'finc.mega_collection': [
+            "version": "0.9",
+            "finc.format": "Article",
+            "finc.record_id": dd["id"],
+            "finc.id": "ai-{}-{}".format(source_id, encoded_id),
+            "finc.source_id": source_id,
+            "rft.atitle": dd["title"],
+            "rft.jtitle": dd.get("source", ""),
+            "url": [dd.get("url", "")],
+            "authors": authors,
+            "finc.mega_collection": [
                 collection_name,
                 tcid,
-            ]
+            ],
         }
         if dd.get("content"):
             result["abstract"] = dd["content"][:500] + "..."
@@ -505,7 +539,7 @@ def eastview_solr_to_intermediate_schema(blob,
         if dd.get("number"):
             result["rft.issue"] = dd["number"]
         if dd.get("place"):
-            result['rft.place'] = [dd["place"]]
+            result["rft.place"] = [dd["place"]]
         if dd.get("year"):
             result["x.date"] = "{}-01-01T00:00:00Z".format(dd["year"])
             result["rft.date"] = dd["year"]
@@ -560,7 +594,6 @@ author_role_mapping = {
     "verfasserin": "",
     "voc": "",
     "zusammenstellender": "",
-
     # More, from MAB/151 mostly.
     " [Animation]": "",
     " [Ausstattung]": "",
@@ -684,7 +717,6 @@ author_role_mapping = {
     "[schnitt]": "",
     "[vocal]": "",
     "[Übers.]": "",
-
     # Below terms are actually ok, as per:
     # http://www.loc.gov/marc/relators/relaterm.html
     "abr": "abr",

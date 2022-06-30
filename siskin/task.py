@@ -68,9 +68,16 @@ class DefaultTask(BaseTask):
     A command line parameter named --stamp is used to optionally update
     timestamps in AMSL electronic resource management system.
     """
-    BASE = config.get('core', 'home', fallback=os.path.join(tempfile.gettempdir(), 'siskin-data'))
 
-    stamp = luigi.BoolParameter(default=False, description="update processing time of source via AMSL API", significant=False)
+    BASE = config.get(
+        "core", "home", fallback=os.path.join(tempfile.gettempdir(), "siskin-data")
+    )
+
+    stamp = luigi.BoolParameter(
+        default=False,
+        description="update processing time of source via AMSL API",
+        significant=False,
+    )
 
     @classmethod
     def assets(cls, path):
@@ -78,7 +85,7 @@ class DefaultTask(BaseTask):
         Return the absolute path to the asset. `path` is the relative path
         below the assets root dir.
         """
-        return os.path.join(os.path.dirname(__file__), 'assets', path)
+        return os.path.join(os.path.dirname(__file__), "assets", path)
 
     @property
     def config(self):
@@ -92,7 +99,7 @@ class DefaultTask(BaseTask):
         """
         Return the logger. Module logging uses singleton internally, so no worries.
         """
-        return logging.getLogger('siskin')
+        return logging.getLogger("siskin")
 
     def on_failure(self, exception):
         """
@@ -100,7 +107,10 @@ class DefaultTask(BaseTask):
         """
         try:
             tolist = self.config.get("core", "error-email").split(",")
-            subject = "%s %s" % (self, datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
+            subject = "%s %s" % (
+                self,
+                datetime.datetime.today().strftime("%Y-%m-%d %H:%M"),
+            )
             message = """
             This is siskin {version} on {host}.
 
@@ -122,7 +132,9 @@ class DefaultTask(BaseTask):
             send_mail(tolist=tolist, subject=subject, message=message)
             self.logger.debug("sent error emails to %s", ", ".join(tolist))
         except TypeError as err:
-            self.logger.debug("error-email may not be configured, not sending mail: %s", err)
+            self.logger.debug(
+                "error-email may not be configured, not sending mail: %s", err
+            )
         except Exception as err:
             self.logger.debug("failed to send error email: %s", err)
 
@@ -150,14 +162,16 @@ class DefaultTask(BaseTask):
         """
         if not self.stamp:
             return
-        if not hasattr(self, 'TAG'):
+        if not hasattr(self, "TAG"):
             self.logger.warn("no tag defined, skip stamping")
             return
         if not re.match(r"^[\d]+$", self.TAG):
             self.logger.warn("non-integer source id: %s, skip stamping", self.TAG)
             return
 
-        sid = self.TAG.lstrip("0")  # Otherwise: Parameter 'sid' ... not a positive integer.
+        sid = self.TAG.lstrip(
+            "0"
+        )  # Otherwise: Parameter 'sid' ... not a positive integer.
 
         try:
             write_url = config.get("amsl", "write-url")
@@ -169,7 +183,11 @@ class DefaultTask(BaseTask):
             return
 
         try:
-            shellout("""curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """, write_url=write_url, sid=sid)
+            shellout(
+                """curl --fail -XPOST "{write_url}?do=updatetime&sid={sid}" > /dev/null """,
+                write_url=write_url,
+                sid=sid,
+            )
         except RuntimeError as err:
             self.logger.warn(err)
             return

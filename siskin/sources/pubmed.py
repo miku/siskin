@@ -40,8 +40,9 @@ from siskin.task import DefaultTask
 
 
 class PubmedTask(DefaultTask):
-    """ Pubmed base. """
-    TAG = 'pubmed'
+    """Pubmed base."""
+
+    TAG = "pubmed"
 
     def closest(self):
         return weekly(self.date)
@@ -51,12 +52,21 @@ class PubmedMetadataPaths(PubmedTask):
     """
     Sync metadata only (much faster).
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
-        return FTPMirror(host='ftp.ncbi.nlm.nih.gov', base='/pub/pmc/', pattern='articles*tar.gz', max_retries=self.max_retries, timeout=self.timeout)
+        return FTPMirror(
+            host="ftp.ncbi.nlm.nih.gov",
+            base="/pub/pmc/",
+            pattern="articles*tar.gz",
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+        )
 
     @timed
     def run(self):
@@ -74,7 +84,9 @@ class PubmedJournalList(PubmedTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
+        output = shellout(
+            """curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

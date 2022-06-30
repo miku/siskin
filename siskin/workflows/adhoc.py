@@ -38,7 +38,11 @@ import xlsxwriter
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 from siskin.sources.amsl import AMSLCollections, AMSLService
-from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount, CrossrefCollectionsDifference)
+from siskin.sources.crossref import (
+    CrossrefCollections,
+    CrossrefCollectionsCount,
+    CrossrefCollectionsDifference,
+)
 from siskin.sources.degruyter import DegruyterExport
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
 from siskin.sources.jstor import JstorExport
@@ -50,6 +54,7 @@ class AdhocTask(DefaultTask):
     """
     Base task for throwaway tasks.
     """
+
     TAG = "adhoc"
 
 
@@ -62,8 +67,11 @@ class OADOIDatasetStatusByDOI(AdhocTask):
       about our Support Level Agreement (team@impactstory.org). For more
       information about oaDOI, see http://oadoi.org.
     """
+
     def run(self):
-        url = "https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz"
+        url = (
+            "https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz"
+        )
         output = shellout("""wget -O "{output}" "{url}" """, url=url)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -75,25 +83,26 @@ class Issue7049(AdhocTask):
     """
     Prepare a few bits about collections, refs #7049.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'amsl': AMSLCollections(date=self.date),
-            'crossref': CrossrefCollections(date=self.date),
+            "amsl": AMSLCollections(date=self.date),
+            "crossref": CrossrefCollections(date=self.date),
         }
 
     def run(self):
-        amsl = load_set_from_target(self.input().get('amsl'))
-        crossref = load_set_from_target(self.input().get('crossref'))
+        amsl = load_set_from_target(self.input().get("amsl"))
+        crossref = load_set_from_target(self.input().get("crossref"))
 
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             stats = {
-                'amsl': amsl,
-                'crossref': crossref,
-                'amsl_only': amsl - crossref,
-                'crossref_only': crossref - amsl,
-                'both': amsl & crossref,
+                "amsl": amsl,
+                "crossref": crossref,
+                "amsl_only": amsl - crossref,
+                "crossref_only": crossref - amsl,
+                "both": amsl & crossref,
             }
             output.write(json.dumps(stats, cls=SetEncoder))
 
@@ -105,25 +114,26 @@ class Issue7049ExportExcel(AdhocTask):
     """
     Create a simple Excel file, with one sheet per kind.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'issue7049': Issue7049(date=self.date),
-            'counts': CrossrefCollectionsCount(date=self.date),
+            "issue7049": Issue7049(date=self.date),
+            "counts": CrossrefCollectionsCount(date=self.date),
         }
 
     def run(self):
-        with self.input().get('counts').open() as handle:
+        with self.input().get("counts").open() as handle:
             counts = json.load(handle)
 
-        with self.input().get('issue7049').open() as handle:
+        with self.input().get("issue7049").open() as handle:
             doc = json.load(handle)
 
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         workbook = xlsxwriter.Workbook(stopover)
 
-        worksheet = workbook.add_worksheet(name='Overview')
+        worksheet = workbook.add_worksheet(name="Overview")
 
         keys = doc.keys()
 
@@ -137,7 +147,7 @@ class Issue7049ExportExcel(AdhocTask):
         for _, key in enumerate(keys):
             worksheet = workbook.add_worksheet(name=key)
             for j, item in enumerate(sorted(doc[key])):
-                worksheet.write(j, 0, counts.get(item, 'NA'))
+                worksheet.write(j, 0, counts.get(item, "NA"))
                 worksheet.write(j, 1, item)
 
         workbook.close()
@@ -160,25 +170,29 @@ class K10Matches(AdhocTask):
     def run(self):
         r = requests.get("https://is.gd/AW3bCB")
         with self.output().open("w") as output:
-            for line in r.text.split('\n'):
+            for line in r.text.split("\n"):
                 try:
-                    issn, count = line.split(',')
+                    issn, count = line.split(",")
 
                     results = {}
 
-                    results['ai'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.ai, issn))
-                    if results['ai'].status_code != 200:
+                    results["ai"] = requests.get(
+                        "%s/select?q=issn:%s&rows=0&wt=json" % (self.ai, issn)
+                    )
+                    if results["ai"].status_code != 200:
                         raise RuntimeError("ai reponded with %s" % rr.status_code)
 
-                    results['finc'] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.finc, issn))
-                    if results['finc'].status_code != 200:
+                    results["finc"] = requests.get(
+                        "%s/select?q=issn:%s&rows=0&wt=json" % (self.finc, issn)
+                    )
+                    if results["finc"].status_code != 200:
                         raise RuntimeError("finc reponded with %s" % rr.status_code)
 
                     output.write_tsv(
                         issn,
                         count,
-                        str(results['ai'].json().get("response").get("numFound")),
-                        str(results['finc'].json().get("response").get("numFound")),
+                        str(results["ai"].json().get("response").get("numFound")),
+                        str(results["finc"].json().get("response").get("numFound")),
                     )
 
                 except Exception as exc:

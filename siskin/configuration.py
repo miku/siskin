@@ -35,31 +35,32 @@ import logging
 import os
 import sys
 
-logger = logging.getLogger('siskin')
+logger = logging.getLogger("siskin")
 
 
 class Config(ConfigParser):
     """
     Access to ini file.
     """
+
     NO_DEFAULT = None
     _instance = None
 
     # most specific path last
     _config_paths = [
-        '/etc/siskin/siskin.ini',
-        os.path.join(os.path.expanduser('~'), '.config/siskin/siskin.ini'),
+        "/etc/siskin/siskin.ini",
+        os.path.join(os.path.expanduser("~"), ".config/siskin/siskin.ini"),
     ]
 
     @classmethod
     def add_config_path(cls, path):
-        """ Append config path. """
+        """Append config path."""
         cls._config_paths.append(path)
         cls._instance.reload()
 
     @classmethod
     def instance(cls, *args, **kwargs):
-        """ Singleton getter """
+        """Singleton getter"""
         if cls._instance is None:
             cls._instance = cls(*args, **kwargs)
             _ = cls._instance.reload()
@@ -67,5 +68,5 @@ class Config(ConfigParser):
         return cls._instance
 
     def reload(self):
-        """ Reload configuration. """
+        """Reload configuration."""
         return self._instance.read(self._config_paths)

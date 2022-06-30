@@ -63,7 +63,7 @@ from siskin.task import DefaultTask
 
 
 class SpringerTask(DefaultTask):
-    TAG = '105'
+    TAG = "105"
 
     def closest(self):
         return weekly(date=self.date)
@@ -76,16 +76,20 @@ class SpringerPaths(SpringerTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
-        return FTPMirror(host=self.config.get('springer', 'ftp-host'),
-                         base=self.config.get('springer', 'ftp-base'),
-                         username=self.config.get('springer', 'ftp-username'),
-                         password=self.config.get('springer', 'ftp-password'),
-                         pattern=self.config.get('springer', 'ftp-pattern'),
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
+        return FTPMirror(
+            host=self.config.get("springer", "ftp-host"),
+            base=self.config.get("springer", "ftp-base"),
+            username=self.config.get("springer", "ftp-username"),
+            password=self.config.get("springer", "ftp-password"),
+            pattern=self.config.get("springer", "ftp-pattern"),
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+        )
 
     def run(self):
         self.input().move(self.output().path)
@@ -99,6 +103,7 @@ class SpringerCleanup(SpringerTask):
     2017-11-28: finc.mega_collection is now multi-valued; AIAccessFacet remains.
     2017-12-12: new finc.id, refs #11821, #11960, #11961.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -107,31 +112,34 @@ class SpringerCleanup(SpringerTask):
     def run(self):
         realpath = None
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path', )):
+            for row in handle.iter_tsv(cols=("path",)):
                 if not row.path.endswith("total_tpu.ldj.gz"):
                     continue
                 realpath = row.path
                 break
             else:
-                raise RuntimeError('FTP site does not contain total_tpu.ldj.gz')
-        output = shellout("""
+                raise RuntimeError("FTP site does not contain total_tpu.ldj.gz")
+        output = shellout(
+            """
             unpigz -c {input} | jq -rc 'del(.["finc.AIRecordType"]) | del(.["AIAccessFacet"])' |
             jq -c '. + {{ "finc.record_id": .doi,
                           "finc.format": "ElectronicArticle",
                           "url": ["https://doi.org/" + .doi],
                           "finc.mega_collection": [.["finc.mega_collection"][0], "sid-105-col-springerjournals"] }}' | pigz -c > {output}
         """,
-                          input=realpath)
+            input=realpath,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
 
 
 class SpringerIntermediateSchema(SpringerTask, luigi.WrapperTask):
     """
     Just the cleaned version.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):

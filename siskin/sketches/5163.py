@@ -49,9 +49,9 @@ import six
 
 import tqdm
 
-pattern = re.compile(r'10[.][0-9a-zA-Z]*/[0-9a-zA-Z]{4,}')
+pattern = re.compile(r"10[.][0-9a-zA-Z]*/[0-9a-zA-Z]{4,}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     counter = collections.Counter()
     resolvable_dois = set()
@@ -66,7 +66,9 @@ if __name__ == '__main__':
 
     with gzip.open("dswarm-68-20181008150514_all.ldj.gz", "rb") as handle:
         for line in tqdm.tqdm(handle):
-            candidates = set([match.strip().strip('"') for match in pattern.findall(line)])
+            candidates = set(
+                [match.strip().strip('"') for match in pattern.findall(line)]
+            )
             resolvable = [doi for doi in candidates if doi in resolvable_dois]
             doc = json.loads(line)
 
@@ -85,7 +87,7 @@ if __name__ == '__main__':
                 "rft.issn": doc.get("issn", []),
                 "rft.pub": doc.get("publisher", []),
                 "rft.place": doc.get("place", []),
-                "rft.date": '%s-01-01' % doc.get("publishDateSort", "1970"),
+                "rft.date": "%s-01-01" % doc.get("publishDateSort", "1970"),
                 "x.subjects": doc.get("topic", []),
                 "version": "0.9",
                 "rft.authors": authors,

@@ -36,25 +36,26 @@ import warnings
 
 from siskin.configuration import Config
 
-logger = logging.getLogger('siskin')
+logger = logging.getLogger("siskin")
 warnings.filterwarnings("ignore")
 
 # https://urllib3.readthedocs.org/en/latest/security.html#insecurerequestwarning
 # wrap into try-except, since at install-time urllib3 might not be installed yet
 try:
     import urllib3
+
     urllib3.disable_warnings()
 except (AttributeError, ImportError):
     pass
 
-__version__ = '1.2.8'
+__version__ = "1.2.8"
 
 config = Config.instance()
 if sys.version_info.major == 2:
     try:
-        tempfile.tempdir = config.get('core', 'tempdir')
+        tempfile.tempdir = config.get("core", "tempdir")
     except Exception as err:
-        logger.debug('no config found, using default tempdir: %s', err)
+        logger.debug("no config found, using default tempdir: %s", err)
         tempfile.tempdir = tempfile.gettempdir()
 else:
-    tempfile.tempdir = config.get('core', 'tempdir', fallback=tempfile.gettempdir())
+    tempfile.tempdir = config.get("core", "tempdir", fallback=tempfile.gettempdir())

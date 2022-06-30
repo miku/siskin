@@ -48,7 +48,8 @@ class DOAJTask(DefaultTask):
     """
     Base task for DOAJ.
     """
-    TAG = '28'
+
+    TAG = "28"
 
     def closest(self):
         return monthly(date=self.date)
@@ -58,16 +59,19 @@ class DOAJHarvest(DOAJTask):
     """
     Harvest via OAI endpoint.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
-                          dir=self.config.get('core', 'metha-dir'),
-                          endpoint='http://www.doaj.org/oai.article')
+        output = shellout(
+            """metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
+            dir=self.config.get("core", "metha-dir"),
+            endpoint="http://www.doaj.org/oai.article",
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.zst'), format=Zstd)
+        return luigi.LocalTarget(path=self.path(ext="xml.zst"), format=Zstd)
 
 
 class DOAJIntermediateSchemaDirty(DOAJTask):
@@ -101,41 +105,53 @@ class DOAJIntermediateSchemaDirty(DOAJTask):
     $ taskcat DOAJDownloadDump | grep "A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS"
 
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="doaj-oai", description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
+    format = luigi.Parameter(
+        default="doaj-oai",
+        description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)",
+    )
 
     def requires(self):
         return {
-            'span-import': Executable(name='span-import', message='http://git.io/vI8NV'),
-            'input': DOAJHarvest(date=self.date),
+            "span-import": Executable(
+                name="span-import", message="http://git.io/vI8NV"
+            ),
+            "input": DOAJHarvest(date=self.date),
         }
 
     @timed
     def run(self):
-        output = shellout("""zstdcat -T0 -c {input} |
+        output = shellout(
+            """zstdcat -T0 -c {input} |
                              span-import -i {format} |
                              grep -vf {exclude} |
                              zstd -T0 -c > {output}""",
-                          exclude=self.assets('028_doaj_filter_issn.tsv'),
-                          input=self.input().get('input').path,
-                          format=self.format)
+            exclude=self.assets("028_doaj_filter_issn.tsv"),
+            input=self.input().get("input").path,
+            format=self.format,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.zst'), format=Zstd)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class DOAJTable(DOAJTask):
     """
     Emit a DOAJ data table: id, date, title - for rough deduplication by title (see DOAJWhitelist).
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return DOAJIntermediateSchemaDirty(date=self.date)
 
     def run(self):
-        output = shellout("""zstdcat -T0 -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """, input=self.input().path)
+        output = shellout(
+            """zstdcat -T0 -c {input} | jq -r '[.["finc.record_id"], .["x.date"], .["rft.atitle"]] | @tsv' > {output} """,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -146,6 +162,7 @@ class DOAJWhitelist(DOAJTask):
     """
     Create a list of ok DOAJ ids.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -153,12 +170,14 @@ class DOAJWhitelist(DOAJTask):
 
     def run(self):
         # Sort by title, then date, the find the newest date and filter the id.
-        output = shellout(""" sort -S30% -t $'\t' -k3,3 -k2,2 < {input} |
+        output = shellout(
+            """ sort -S30% -t $'\t' -k3,3 -k2,2 < {input} |
                           tac |
                           sort -S30% -t $'\t' -k3,3 -u |
                           cut -f1 | grep -v '^$' > {output} """,
-                          input=self.input().path,
-                          preserve_whitespace=True)
+            input=self.input().path,
+            preserve_whitespace=True,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -169,40 +188,58 @@ class DOAJIntermediateSchema(DOAJTask):
     """
     Respect whitelist.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="doaj-oai", description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)")
+    format = luigi.Parameter(
+        default="doaj-oai",
+        description="kind of source document, doaj-oai (defunkt: doaj, doaj-api)",
+    )
 
     def requires(self):
         return {
-            'data': DOAJIntermediateSchemaDirty(date=self.date, format=self.format),
-            'whitelist': DOAJWhitelist(date=self.date),
+            "data": DOAJIntermediateSchemaDirty(date=self.date, format=self.format),
+            "whitelist": DOAJWhitelist(date=self.date),
         }
 
     @timed
     def run(self):
-        output = shellout("""zstdcat -T0 {input} | LC_ALL=C grep -Ff {whitelist} | zstd -T0 -c > {output}""",
-                          whitelist=self.input().get('whitelist').path,
-                          input=self.input().get('data').path)
+        output = shellout(
+            """zstdcat -T0 {input} | LC_ALL=C grep -Ff {whitelist} | zstd -T0 -c > {output}""",
+            whitelist=self.input().get("whitelist").path,
+            input=self.input().get("data").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.zst'), format=Zstd)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class DOAJISSNList(DOAJTask):
     """
     A list of DOAJ ISSNs.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': DOAJIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='http://git.io/NYpfTw')}
+        return {
+            "input": DOAJIntermediateSchema(date=self.date),
+            "jq": Executable(name="jq", message="http://git.io/NYpfTw"),
+        }
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]?' <(zstdcat -T0 {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(zstdcat -T0 {input}) >> {output} """, input=self.input().get('input').path, output=stopover)
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
+        shellout(
+            """jq -r '.["rft.issn"][]?' <(zstdcat -T0 {input}) >> {output} """,
+            input=self.input().get("input").path,
+            output=stopover,
+        )
+        shellout(
+            """jq -r '.["rft.eissn"][]?' <(zstdcat -T0 {input}) >> {output} """,
+            input=self.input().get("input").path,
+            output=stopover,
+        )
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -214,18 +251,21 @@ class DOAJDOIList(DOAJTask):
     """
     An best-effort list of DOAJ DOIs.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return {
-            'input': DOAJIntermediateSchema(date=self.date),
-            'jq': Executable(name='jq', message='http://git.io/NYpfTw'),
+            "input": DOAJIntermediateSchema(date=self.date),
+            "jq": Executable(name="jq", message="http://git.io/NYpfTw"),
         }
 
     @timed
     def run(self):
-        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
-                          input=self.input().get('input').path)
+        output = shellout(
+            """jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null | sort -u > {output} """,
+            input=self.input().get("input").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -247,24 +287,28 @@ class DOAJDownloadDump(DOAJTask):
 
     $ taskcat DOAJDownloadDump | grep "A CLINICAL EXPERIENCE OF METHOTREXATE USE IN TREATMENT OF PATIENT WITH JUVENILE OLIGOARTHRITIS"
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    kind = luigi.Parameter(default='article', description='article or journal')
+    kind = luigi.Parameter(default="article", description="article or journal")
 
     def run(self):
         dumps = {
-            'article': 'https://doaj.org/public-data-dump/article',
-            'journal': 'https://doaj.org/public-data-dump/journal',
+            "article": "https://doaj.org/public-data-dump/article",
+            "journal": "https://doaj.org/public-data-dump/journal",
         }
         if self.kind not in dumps:
-            raise ValueError('kind must be: article or journal')
+            raise ValueError("kind must be: article or journal")
 
         original = shellout(""" wget -O {output} {link} """, link=dumps[self.kind])
 
         # The data comes in batches, each batch is a list of dicts, [{}, {},
         # ...], so we want to flatten all batches into a single json lines file first.
-        output = shellout(""" tar -xOzf {input} | jq -rc '.[]' | zstd -T0 -c > {output} """, input=original)
+        output = shellout(
+            """ tar -xOzf {input} | jq -rc '.[]' | zstd -T0 -c > {output} """,
+            input=original,
+        )
         luigi.LocalTarget(output).move(self.output().path)
         os.remove(original)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='zst'), format=Zstd)
+        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)

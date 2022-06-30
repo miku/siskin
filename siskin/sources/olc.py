@@ -34,7 +34,7 @@ import json
 import os
 
 import luigi
-from gluish.format import Gzip
+from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -47,20 +47,21 @@ class OLCTask(DefaultTask):
     """
     OLC base task.
     """
-    TAG = '68'
+
+    TAG = "68"
 
     # cf. https://is.gd/8DFvOo
     COLLECTIONS = [
-        'SSG-OLC-ANG',
-        'SSG-OLC-ARC',
-        'SSG-OLC-BUB',
-        'SSG-OLC-FTH',
-        'SSG-OLC-GER',
-        'SSG-OLC-GWK',
-        'SSG-OLC-KPH',
-        'SSG-OLC-MKW',
-        'SSG-OLC-MUS',
-        'SSG-OLC-PHI',
+        "SSG-OLC-ANG",
+        "SSG-OLC-ARC",
+        "SSG-OLC-BUB",
+        "SSG-OLC-FTH",
+        "SSG-OLC-GER",
+        "SSG-OLC-GWK",
+        "SSG-OLC-KPH",
+        "SSG-OLC-MKW",
+        "SSG-OLC-MUS",
+        "SSG-OLC-PHI",
     ]
 
     def closest(self):
@@ -73,24 +74,33 @@ class OLCDump(OLCTask):
 
     Currently, 9/51 collections are requested, but that might change over time.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        query = ' OR '.join(["collection_details:{}".format(c) for c in self.COLLECTIONS])
-        output = shellout(""" solrdump -verbose -server {server} -q '{query}' | jq -rc . | pigz -c > {output} """,
-                          query=query,
-                          server=self.config.get('olc', 'solr'))
+        query = " OR ".join(
+            ["collection_details:{}".format(c) for c in self.COLLECTIONS]
+        )
+        output = shellout(
+            """
+            solrdump -verbose -server {server} -q '{query}' |
+            jq -rc . | zstd -c -T0 > {output}
+            """,
+            query=query,
+            server=self.config.get("olc", "solr"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        filename = '{}-{}.ndj.gz'.format(self.date, sha1obj(self.COLLECTIONS))
-        return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
+        filename = "{}-{}.ndj.zst".format(self.date, sha1obj(self.COLLECTIONS))
+        return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
 
 
 class OLCIntermediateSchema(OLCTask):
     """
     Sample convertion.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -98,7 +108,7 @@ class OLCIntermediateSchema(OLCTask):
 
     def run(self):
         with self.input().open() as file:
-            with self.output().open('w') as output:
+            with self.output().open("w") as output:
                 for i, line in enumerate(file):
                     if i % 100000 == 0:
                         self.logger.debug("@{}".format(i))
@@ -108,7 +118,7 @@ class OLCIntermediateSchema(OLCTask):
                     output.write(b"\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
 class OLCIntermediateSchemaDeprecated(OLCTask):
@@ -124,19 +134,28 @@ class OLCIntermediateSchemaDeprecated(OLCTask):
         """
         Find the most recent output, compress and move into the "siskin" tree.
         """
-        shellout("{script} --overwrite --outputformat json",
-                 script=self.assets("68/68-fincjson", ignoremap={1: "most probably ok for skip, due to existing file"}))
+        shellout(
+            "{script} --overwrite --outputformat json",
+            script=self.assets(
+                "68/68-fincjson",
+                ignoremap={1: "most probably ok for skip, due to existing file"},
+            ),
+        )
 
         # Find the output file.
         taskdir = os.path.join(self.BASE, self.TAG)
-        outputs = sorted(glob.glob(os.path.join(taskdir, '68-output-*json')), reverse=True)
+        outputs = sorted(
+            glob.glob(os.path.join(taskdir, "68-output-*json")), reverse=True
+        )
         if len(outputs) == 0:
-            raise RuntimeError("could not find any artifacts for source at {}".format(taskdir))
+            raise RuntimeError(
+                "could not find any artifacts for source at {}".format(taskdir)
+            )
         path = outputs[0]
 
         # Compress as AIIntermediateSchema requires all artifacts to be gzip compressed.
-        output = shellout("pigz -c {input} > {output}", input=path)
+        output = shellout("zstd -T0 -c {input} > {output}", input=path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ndj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"))

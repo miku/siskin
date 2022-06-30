@@ -23,9 +23,9 @@ with open(filename) as file:
             if len(issn) == 8:
                 issn = issn[:4] + "-" + issn[4:]
 
-            match = re.search(r'([0-9]{4,4}-[0-9X]{4,4})', issn)
+            match = re.search(r"([0-9]{4,4}-[0-9X]{4,4})", issn)
             if not match:
-                raise ValueError('failed to parse ISSN: %s', issn)
+                raise ValueError("failed to parse ISSN: %s", issn)
             issn = match.group(1)
 
             assert len(issn) == 9
@@ -36,5 +36,8 @@ with open(filename) as file:
             else:
                 names[issn] = data["name"]
 
-    df = pd.DataFrame([(names[k], k, v) for k, v in c.most_common()], columns=["name", "issn", "count"])
+    df = pd.DataFrame(
+        [(names[k], k, v) for k, v in c.most_common()],
+        columns=["name", "issn", "count"],
+    )
     df.to_excel("65.xlsx")
