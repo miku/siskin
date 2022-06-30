@@ -69,14 +69,19 @@ class ThiemeCombine(ThiemeTask):
     def run(self):
         url = self.config.get("thieme", "oai")
         shellout(
-            "METHA_DIR={dir} metha-sync -set {set} -format {prefix} {url}",
+            """
+            METHA_DIR={dir} metha-sync -set {set} -format {prefix} {url}
+            """,
             set=self.set,
             prefix=self.prefix,
             url=url,
             dir=self.config.get("core", "metha-dir"),
         )
         output = shellout(
-            "METHA_DIR={dir} metha-cat -set {set} -format {prefix} {url} | pigz -c > {output}",
+            """
+            METHA_DIR={dir} metha-cat -set {set} -format {prefix} {url} |
+            zstd -T0 -c > {output}
+            """,
             set=self.set,
             prefix=self.prefix,
             url=url,
@@ -85,7 +90,7 @@ class ThiemeCombine(ThiemeTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="xml.gz"))
+        return luigi.LocalTarget(path=self.path(ext="xml.zst"))
 
 
 class ThiemeIntermediateSchema(ThiemeTask):
@@ -101,13 +106,16 @@ class ThiemeIntermediateSchema(ThiemeTask):
 
     def run(self):
         output = shellout(
-            "span-import -i thieme-nlm <(unpigz -c {input}) | pigz -c > {output}",
+            """
+            span-import -i thieme-nlm <(zstd -cd -T0 {input}) |
+            zstd -c -T0 > {output}
+            """,
             input=self.input().path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"))
 
 
 class ThiemeExport(ThiemeTask):
@@ -132,19 +140,25 @@ class ThiemeExport(ThiemeTask):
 
     def run(self):
         output = shellout(
-            "span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
+            """
+            span-tag -c {config} <(zstd -cd -T0 {input}) |
+            zstd -c -T0 > {output}
+            """,
             config=self.input().get("config").path,
             input=self.input().get("is").path,
         )
         output = shellout(
-            "span-export -o {version} <(unpigz -c {input}) | pigz -c > {output}",
+            """
+            span-export -o {version} <(zstd -cd -T0 {input}) |
+            zstd -c -T0 > {output}
+            """,
             input=output,
             version=self.version,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class ThiemeISSNList(ThiemeTask):
@@ -163,12 +177,12 @@ class ThiemeISSNList(ThiemeTask):
     def run(self):
         _, output = tempfile.mkstemp(prefix="siskin-")
         shellout(
-            """jq -c -r '.["rft.issn"][]?' <(unpigz -c {input}) >> {output} """,
+            """jq -c -r '.["rft.issn"][]?' <(zstd -cd -T0 {input}) >> {output} """,
             input=self.input().get("input").path,
             output=output,
         )
         shellout(
-            """jq -c -r '.["rft.eissn"][]?' <(unpigz -c {input}) >> {output} """,
+            """jq -c -r '.["rft.eissn"][]?' <(zstd -cd -T0 {input}) >> {output} """,
             input=self.input().get("input").path,
             output=output,
         )

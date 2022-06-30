@@ -50,7 +50,7 @@ import luigi
 import rdflib
 from bs4 import BeautifulSoup
 from gluish.common import Executable
-from gluish.format import TSV, Gzip
+from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -120,7 +120,7 @@ class AIIntermediateSchema(AITask):
     is put here, will pass along the ISIL attachment and deduplication
     pipeline.
 
-    All inputs must be gzipped, output will be gzipped.
+    All inputs must be zstd compressed.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -144,13 +144,15 @@ class AIIntermediateSchema(AITask):
     @timed
     def run(self):
         """
-        Check, if all files are gzipped before we concatenate.
+        Check, if all files are zstd compressed before we concatenate.
+
+        https://datatracker.ietf.org/doc/html/rfc8478#section-3.1.1
         """
         for target in self.input():
             with open(target.path, "rb") as f:
-                if binascii.hexlify(f.read(2)) != b"1f8b":
+                if binascii.hexlify(f.read(4)) != b"FD2FB528":
                     raise RuntimeError(
-                        "AIIntermediateSchema requires gzipped inputs, failed: %s"
+                        "AIIntermediateSchema requires zstd-compressed inputs, failed: %s"
                         % target.path
                     )
 
@@ -160,7 +162,7 @@ class AIIntermediateSchema(AITask):
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AIRedact(AITask):
@@ -175,15 +177,17 @@ class AIRedact(AITask):
 
     @timed
     def run(self):
-        """A bit slower: `jq 'del(.["x.fulltext"])' input > output`"""
+        """
+        A bit slower: jq 'del(.["x.fulltext"])' input > output
+        """
         output = shellout(
-            "span-redact <(unpigz -c {input}) | pigz -c > {output}",
+            "span-redact <(zstd -cd -T0 {input}) | zstd -c -T0 > {output}",
             input=self.input().path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AILicensing(AITask):
@@ -224,20 +228,20 @@ class AILicensing(AITask):
         """
         if self.drop:
             output = shellout(
-                "span-tag -D -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
+                "span-tag -D -unfreeze {config} <(zstd -cd -T0 {input}) | zstd -c -T0 > {output}",
                 config=self.input().get("config").path,
                 input=self.input().get("is").path,
             )
         else:
             output = shellout(
-                "span-tag -unfreeze {config} <(unpigz -c {input}) | pigz -c > {output}",
+                "span-tag -unfreeze {config} <(zstd -cd -T0 {input}) | zstd -c -T0 > {output}",
                 config=self.input().get("config").path,
                 input=self.input().get("is").path,
             )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AILocalData(AITask):
@@ -256,7 +260,11 @@ class AILocalData(AITask):
         Unzip on the fly, extract fields as CSV, sort be third column.
         """
         output = shellout(
-            """unpigz -c {input} | span-local-data -b {size} | LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output} """,
+            """
+            zstd -cd -T0 {input} |
+            span-local-data -b {size} |
+            LC_ALL=C sort --ignore-case -S20% -t, -k3 > {output}
+            """,
             size=self.batchsize,
             input=self.input().path,
         )
@@ -279,7 +287,9 @@ class AIInstitutionChanges(AITask):
 
     def run(self):
         output = shellout(
-            """groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}""",
+            """
+            groupcover -lower -prefs '85 55 89 60 50 105 34 101 53 49 28 48 121' < {input} > {output}
+            """,
             input=self.input().path,
         )
         luigi.LocalTarget(output).move(self.output().path)
@@ -307,14 +317,17 @@ class AIIntermediateSchemaDeduplicated(AITask):
         ISIL list from the changes.
         """
         output = shellout(
-            "unpigz -c {input} | span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | pigz -c > {output}",
+            """
+            zstd -cd -T0 {input} |
+            span-update-labels -b 20000 -f <(cut -d, -f1,4- {file}) | zstd -c -T0 > {output}
+            """,
             input=self.input().get("file").path,
             file=self.input().get("changes").path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AIExport(AITask):
@@ -336,23 +349,25 @@ class AIExport(AITask):
 
     def run(self):
         _, tmp = tempfile.mkstemp(prefix="siskin-")
-
-        if self.format == "solr5vu3":
-            shellout(
-                """cat "{input}" >> "{output}" """,
-                input=self.input().get("base").path,
-                output=tmp,
-            )
-            shellout(
-                """cat "{input}" >> "{output}" """,
-                input=self.input().get("perinorm").path,
-                output=tmp,
-            )
-        else:
-            self.logger.debug("ignoring [126] BASE, since format is: %s", self.format)
-
         shellout(
-            "span-export -o {format} <(unpigz -c {input}) | pigz -c >> {output}",
+            """
+            unpigz -c "{input}" | zstd -c -T0 >> "{output}"
+            """,
+            input=self.input().get("base").path,
+            output=tmp,
+        )
+        shellout(
+            """
+            unpigz -c "{input}" | zstd -c -T0 >> "{output}"
+            """,
+            input=self.input().get("perinorm").path,
+            output=tmp,
+        )
+        shellout(
+            """
+            span-export -o solr5vu3 <(zstd -cd -T0 {input}) |
+            zstd -c -T0 >> {output}
+            """,
             format=self.format,
             input=self.input().get("ai").path,
             output=tmp,
@@ -360,11 +375,7 @@ class AIExport(AITask):
         luigi.LocalTarget(tmp).move(self.output().path)
 
     def output(self):
-        extensions = {
-            "solr5vu3": "ldj.gz",
-            "formeta": "form.gz",
-        }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, "gz")))
+        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
 
 
 class AIUpdate(AITask, luigi.WrapperTask):
@@ -773,9 +784,10 @@ class AIApplyOpenAccessFlag(AITask):
         """
 
         output = shellout(
-            """unpigz -c {input} |
-                             span-oa-filter -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
-                             pigz -c > {output}""",
+            """
+            zstd -cd -T0 {input} |
+            span-oa-filter -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
+            zstd -c -T0 > {output}""",
             input=self.input().get("file").path,
             kbart=self.input().get("kbart").path,
             amslfc=self.input().get("amslfc").path,
@@ -783,14 +795,14 @@ class AIApplyOpenAccessFlag(AITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class AIDOIList(AITask):
     """
     List of DOI for a given ISIL,
 
-    taskcat AILicensing | jq -r 'select(.["x.labels"][]? | contains ("DE-15")) | .doi?' > xxxx
+    taskcat AILicensing | jq -r 'select(.["x.labels"][]? | contains ("DE-15")) | .doi?'
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
@@ -801,7 +813,10 @@ class AIDOIList(AITask):
 
     def run(self):
         output = shellout(
-            """ unpigz -c {input} | jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output} """,
+            """
+            zstd -cd -T0 {input} |
+            jq -r 'select(.["x.labels"][]? | contains ("{isil}")) | .doi?' > {output}
+            """,
             input=self.input().path,
             isil=self.isil,
         )
