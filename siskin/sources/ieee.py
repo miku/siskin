@@ -45,7 +45,7 @@ import tempfile
 
 import luigi
 from gluish.common import Executable
-from gluish.format import TSV
+from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -55,27 +55,30 @@ from siskin.task import DefaultTask
 
 
 class IEEETask(DefaultTask):
-    TAG = '89'
+    TAG = "89"
 
     def closest(self):
         return weekly(date=self.date)
 
 
 class IEEEPaths(IEEETask):
-    """ A list of IEEE file paths (via FTP). """
+    """A list of IEEE file paths (via FTP)."""
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        host = self.config.get('ieee', 'ftp-host')
-        username = self.config.get('ieee', 'ftp-username')
-        password = self.config.get('ieee', 'ftp-password')
-        base = self.config.get('ieee', 'ftp-path')
-        pattern = self.config.get('ieee', 'ftp-pattern')
-        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
+        host = self.config.get("ieee", "ftp-host")
+        username = self.config.get("ieee", "ftp-username")
+        password = self.config.get("ieee", "ftp-password")
+        base = self.config.get("ieee", "ftp-path")
+        pattern = self.config.get("ieee", "ftp-pattern")
+        return FTPMirror(
+            host=host, username=username, password=password, base=base, pattern=pattern
+        )
 
     @timed
     def run(self):
-        output = shellout('sort {input} > {output}', input=self.input().path)
+        output = shellout("sort {input} > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -86,25 +89,37 @@ class IEEEUpdatesIntermediateSchema(IEEETask):
     """
     Combined updates, with duplicates.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return IEEEPaths(date=self.date)
 
     def run(self):
-        output = shellout(r"cat {input} | unzippall -i '.*[.]xml' | span-import -i ieee | pigz -c > {output}", input=self.input().path)
+        output = shellout(
+            r"""
+                          cat {input} |
+                          unzippall -i '.*[.]xml' |
+                          span-import -i ieee |
+                          zstd -T0 -c > {output}""",
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class IEEEBacklogPaths(IEEETask):
     """
     List files in the backlog. Just a `tar -tf` of the compressed dump.
     """
+
     def run(self):
-        output = shellout('tar -tf {input} > {output}', input=self.config.get('ieee', 'backlog-archive'))
+        output = shellout(
+            "tar -tf {input} > {output}",
+            input=self.config.get("ieee", "backlog-archive"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -118,38 +133,49 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     <strike>Strangely,</strike> this yields an occasional tar "Cannot write: Broken pipe".
     // XML syntax error on line 402780414: invalid character entity &10 (no semicolon)
     """
+
     def run(self):
-        output = shellout("""tar --wildcards --no-anchored '*.xml' -xOzf {input} | span-import -i ieee | pigz -c > {output}""",
-                          input=self.config.get('ieee', 'backlog-archive'))
+        output = shellout(
+            """
+                          tar --wildcards --no-anchored '*.xml' -xOzf {input} |
+                          span-import -i ieee |
+                          zstd -T0 -c > {output}""",
+            input=self.config.get("ieee", "backlog-archive"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(digest=True, ext="ldj.zst"))
 
 
 class IEEEIntermediateSchema(IEEETask):
     """
     Combine the backlog and all updates into a single file.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return [IEEEBacklogIntermediateSchema(), IEEEUpdatesIntermediateSchema(date=self.date)]
+        return [
+            IEEEBacklogIntermediateSchema(),
+            IEEEUpdatesIntermediateSchema(date=self.date),
+        ]
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=stopover)
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"))
 
 
 class IEEESolrExport(IEEETask):
     """
     Export to a SOLR compatible format.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -159,26 +185,44 @@ class IEEESolrExport(IEEETask):
         """
         TODO: get ISIL attachments from AMSL.
         """
-        output = shellout("""span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(unpigz -c {input}) | span-export | pigz -c > {output}""", input=self.input().path)
+        output = shellout(
+            """
+                          span-tag -c '{{"DE-15": {{"any": {{}} }} }}' <(zstd -cd -T0 {input}) |
+                          span-export |
+                          zstd -T0 -c > {output}""",
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class IEEEDOIList(IEEETask):
-    """ A list of IEEE DOIs. """
+    """
+    A list of IEEE DOIs.
+    """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'input': IEEEIntermediateSchema(date=self.date), 'jq': Executable(name='jq', message='https://github.com/stedolan/jq')}
+        return {
+            "input": IEEEIntermediateSchema(date=self.date),
+            "jq": Executable(name="jq", message="https://github.com/stedolan/jq"),
+        }
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v "null" | grep -o "10.*" 2> /dev/null > {output} """,
-                 input=self.input().get('input').path,
-                 output=stopover)
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
+        shellout(
+            """
+                 jq -r '.doi' <(zstd -cd -T0 {input}) |
+                 grep -v "null" |
+                 grep -o "10.*" 2> /dev/null > {output}
+                 """,
+            input=self.input().get("input").path,
+            output=stopover,
+        )
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 

@@ -48,7 +48,8 @@ class WisoTask(DefaultTask):
     """
     An auxiliary namespace for WISO related tasks, refs #12301.
     """
-    TAG = 'wiso'
+
+    TAG = "wiso"
 
 
 class Wiso2018Files(WisoTask):
@@ -68,18 +69,24 @@ class Wiso2018Files(WisoTask):
         dtype='object')
 
     """
+
     def requires(self):
         return RedmineDownloadAttachments(issue="12301")
 
     def run(self):
         with self.input().open() as handle:
-            _, combined = tempfile.mkstemp(prefix='siskin-')
-            for row in handle.iter_tsv(cols=('path', )):
+            _, combined = tempfile.mkstemp(prefix="siskin-")
+            for row in handle.iter_tsv(cols=("path",)):
                 # Read CSV file and prepend the basename of the file to the line.
                 filename = os.path.basename(row.path)
-                shellout(""" awk '{{print "{filename};"$0}}' < {input} >> {output}""", filename=filename, input=row.path, output=combined)
+                shellout(
+                    """ awk '{{print "{filename};"$0}}' < {input} >> {output}""",
+                    filename=filename,
+                    input=row.path,
+                    output=combined,
+                )
 
         luigi.LocalTarget(combined).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='csv'))
+        return luigi.LocalTarget(path=self.path(ext="csv"))

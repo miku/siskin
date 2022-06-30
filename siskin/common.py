@@ -49,7 +49,8 @@ class CommonTask(DefaultTask):
     A base class for common classes. These artefacts will be written to the
     systems tempdir.
     """
-    TAG = 'common'
+
+    TAG = "common"
 
 
 class FTPMirror(CommonTask):
@@ -58,18 +59,23 @@ class FTPMirror(CommonTask):
     Note: The output of this task is a single file, that contains the paths to
     all the mirrored files.
     """
+
     host = luigi.Parameter()
-    username = luigi.Parameter(default='anonymous')
-    password = luigi.Parameter(default='')
-    pattern = luigi.Parameter(default='*', description="e.g. '*leip_*.zip'")
-    base = luigi.Parameter(default='.')
+    username = luigi.Parameter(default="anonymous")
+    password = luigi.Parameter(default="")
+    pattern = luigi.Parameter(default="*", description="e.g. '*leip_*.zip'")
+    base = luigi.Parameter(default=".")
     indicator = luigi.Parameter(default=random_string())
     max_retries = luigi.IntParameter(default=5, significant=False)
-    timeout = luigi.IntParameter(default=10, significant=False, description='timeout in seconds')
-    exclude_glob = luigi.Parameter(default="", significant=False, description='globs to exclude')
+    timeout = luigi.IntParameter(
+        default=10, significant=False, description="timeout in seconds"
+    )
+    exclude_glob = luigi.Parameter(
+        default="", significant=False, description="globs to exclude"
+    )
 
     def requires(self):
-        return Executable(name='lftp', message='http://lftp.yar.ru/')
+        return Executable(name="lftp", message="http://lftp.yar.ru/")
 
     def run(self):
         """
@@ -77,8 +83,14 @@ class FTPMirror(CommonTask):
         for a given (host, username, base, pattern) is just synced.
         """
         base = os.path.dirname(self.output().path)
-        subdir = hashlib.sha1('{host}:{username}:{base}:{pattern}'.format(host=self.host, username=self.username, base=self.base,
-                                                                          pattern=self.pattern).encode('utf-8')).hexdigest()
+        subdir = hashlib.sha1(
+            "{host}:{username}:{base}:{pattern}".format(
+                host=self.host,
+                username=self.username,
+                base=self.base,
+                pattern=self.pattern,
+            ).encode("utf-8")
+        ).hexdigest()
 
         target = os.path.join(base, subdir)  # target is the root of the mirror
         if not os.path.exists(target):
@@ -101,31 +113,36 @@ class FTPMirror(CommonTask):
 
         mirror --verbose=0 --only-newer {exclude_glob} -I {pattern} {base} {target}; exit" {host}"""
 
-        shellout(command,
-                 host=self.host,
-                 username=pipes.quote(self.username),
-                 password=pipes.quote(self.password),
-                 pattern=pipes.quote(self.pattern),
-                 target=pipes.quote(target),
-                 base=pipes.quote(self.base),
-                 max_retries=self.max_retries,
-                 timeout=self.timeout,
-                 exclude_glob=exclude_glob)
+        shellout(
+            command,
+            host=self.host,
+            username=pipes.quote(self.username),
+            password=pipes.quote(self.password),
+            pattern=pipes.quote(self.pattern),
+            target=pipes.quote(target),
+            base=pipes.quote(self.base),
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+            exclude_glob=exclude_glob,
+        )
 
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for path in iterfiles(target):
                 self.logger.debug("Mirrored: %s", path)
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext='filelist'), format=TSV)
+        return luigi.LocalTarget(
+            path=self.path(digest=True, ext="filelist"), format=TSV
+        )
 
 
 class HTTPDownload(CommonTask):
     """
     Download a file via HTTP, read out the HTTP Last-modified header and use it as filename.
     """
-    url = luigi.Parameter(description='pass this parameter')
+
+    url = luigi.Parameter(description="pass this parameter")
 
     def filename(self):
         """
@@ -133,16 +150,16 @@ class HTTPDownload(CommonTask):
         """
         r = requests.head(self.url, allow_redirects=True)
         if r.status_code != 200:
-            raise RuntimeError('%s on %s' % (r.status_code, self.url))
-        value = r.headers.get('Last-Modified')
+            raise RuntimeError("%s on %s" % (r.status_code, self.url))
+        value = r.headers.get("Last-Modified")
         if value is None:
-            raise RuntimeError('missing Last-Modified header')
+            raise RuntimeError("missing Last-Modified header")
         parsed_date = eut.parsedate(value)
         if parsed_date is None:
-            raise RuntimeError('could not parse Last-Modifier header')
+            raise RuntimeError("could not parse Last-Modifier header")
         last_modified_date = datetime.date(*parsed_date[:3])
         digest = hashlib.sha1(six.b(self.url)).hexdigest()
-        return '%s-%s.file' % (digest, last_modified_date.isoformat())
+        return "%s-%s.file" % (digest, last_modified_date.isoformat())
 
     def run(self):
         """
@@ -167,16 +184,27 @@ class RedmineDownload(CommonTask):
     baseurl = https://projects.examples.com
     apikey = 123123123-456ABC
     """
+
     issue = luigi.Parameter(description="issue number")
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
-        self.logger.info("Accessing Redmine Issue #%s (%s/issues/%s) ...", self.issue, self.config.get('redmine', 'baseurl'), self.issue)
-        url = "%s/issues/%s.json?include=attachments" % (self.config.get('redmine', 'baseurl'), self.issue)
-        output = shellout(""" curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
-                          apikey=self.config.get("redmine", "apikey"),
-                          url=url,
-                          issue=self.issue)
+        self.logger.info(
+            "Accessing Redmine Issue #%s (%s/issues/%s) ...",
+            self.issue,
+            self.config.get("redmine", "baseurl"),
+            self.issue,
+        )
+        url = "%s/issues/%s.json?include=attachments" % (
+            self.config.get("redmine", "baseurl"),
+            self.issue,
+        )
+        output = shellout(
+            """ curl -vL --fail -H "X-Redmine-API-Key:{apikey}" "{url}" > {output}""",
+            apikey=self.config.get("redmine", "apikey"),
+            url=url,
+            issue=self.issue,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -191,6 +219,7 @@ class RedmineDownloadAttachments(CommonTask):
 
     Target is a file containing a list of filenames downloaded.
     """
+
     issue = luigi.Parameter(description="issue number")
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -200,18 +229,20 @@ class RedmineDownloadAttachments(CommonTask):
     def run(self):
         with self.input().open() as handle:
             doc = json.load(handle)
-        tempdir = tempfile.mkdtemp(prefix='tmp-siskin-')
-        for attachment in doc['issue']['attachments']:
+        tempdir = tempfile.mkdtemp(prefix="tmp-siskin-")
+        for attachment in doc["issue"]["attachments"]:
             target = os.path.join(tempdir, os.path.basename(attachment["content_url"]))
-            shellout("""curl -vL --fail -H "X-Redmine-API-Key:{apikey}" -o {target} "{url}" """,
-                     url=attachment["content_url"],
-                     apikey=self.config.get("redmine", "apikey"),
-                     target=target)
+            shellout(
+                """curl -vL --fail -H "X-Redmine-API-Key:{apikey}" -o {target} "{url}" """,
+                url=attachment["content_url"],
+                apikey=self.config.get("redmine", "apikey"),
+                target=target,
+            )
 
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for path in iterfiles(tempdir):
                 self.logger.debug("Downloaded: %s", path)
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)

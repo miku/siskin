@@ -40,7 +40,8 @@ class PerinormTask(DefaultTask):
     """
     Base task for Perinorm, refs #16140.
     """
-    TAG = '201'
+
+    TAG = "201"
     current = {
         "date": datetime.date(2021, 4, 15),
         "filename": "basic/perinorm_2021-04-15T11:35:02Z.tar.gz",
@@ -51,18 +52,23 @@ class PerinormPaths(PerinormTask):
     """
     Mirror SLUB FTP.
     """
+
     date = luigi.DateParameter(default=PerinormTask.current["date"])
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
-        return FTPMirror(host=self.config.get('perinorm', 'ftp-host'),
-                         base=self.config.get('perinorm', 'ftp-base'),
-                         username=self.config.get('perinorm', 'ftp-username'),
-                         password=self.config.get('perinorm', 'ftp-password'),
-                         pattern=self.config.get('perinorm', 'ftp-pattern'),
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
+        return FTPMirror(
+            host=self.config.get("perinorm", "ftp-host"),
+            base=self.config.get("perinorm", "ftp-base"),
+            username=self.config.get("perinorm", "ftp-username"),
+            password=self.config.get("perinorm", "ftp-password"),
+            pattern=self.config.get("perinorm", "ftp-pattern"),
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+        )
 
     def run(self):
         self.input().move(self.output().path)
@@ -91,7 +97,9 @@ class PerinormExport(PerinormTask):
                 path = line
                 break
             else:
-                raise RuntimeError("could not file {} in ftp filelist".format(self.current["filename"]))
+                raise RuntimeError(
+                    "could not file {} in ftp filelist".format(self.current["filename"])
+                )
         self.logger.debug("using {}".format(path))
 
         # XXX: get these from amsl via: span-amsl-discovery -f -live

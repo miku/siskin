@@ -44,11 +44,11 @@ from siskin.workflows import *
 def main():
     print("siskin %s\n\n" % __version__)
     task_names = Register.task_names()
-    print('{0} tasks found\n'.format(len(task_names)))
+    print("{0} tasks found\n".format(len(task_names)))
 
     for name in task_names:
         if name.islower():
             continue
         klass = Register.get_task_cls(name)
         doc = klass.__doc__ or yellow("@TODO: docs")
-        print('{0} {1}\n'.format(green(name), doc))
+        print("{0} {1}\n".format(green(name), doc))

@@ -51,7 +51,8 @@ class CambridgeTask(DefaultTask):
     """
     Base task.
     """
-    TAG = '133'
+
+    TAG = "133"
 
     def closest(self):
         return weekly(date=self.date)
@@ -61,24 +62,29 @@ class CambridgeDropbox(CambridgeTask):
     """
     Pull down content from FTP dropbox, in Dec '18 about 10K zips.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return Executable('rsync', message='https://rsync.samba.org/')
+        return Executable("rsync", message="https://rsync.samba.org/")
 
     def run(self):
-        target = os.path.join(self.taskdir(), 'mirror')
-        shellout("mkdir -p {target} && rsync {rsync_options} {src} {target}",
-                 rsync_options=self.config.get('cambridge', 'rsync-options', fallback='-avzP'),
-                 src=self.config.get('cambridge', 'scp-src'),
-                 target=target)
+        target = os.path.join(self.taskdir(), "mirror")
+        shellout(
+            "mkdir -p {target} && rsync {rsync_options} {src} {target}",
+            rsync_options=self.config.get(
+                "cambridge", "rsync-options", fallback="-avzP"
+            ),
+            src=self.config.get("cambridge", "scp-src"),
+            target=target,
+        )
 
         if not os.path.exists(self.taskdir()):
             os.makedirs(self.taskdir())
 
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             for path in iterfiles(target):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='filelist'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext="filelist"), format=TSV)

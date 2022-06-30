@@ -43,7 +43,7 @@ import tempfile
 import six
 
 import luigi
-from gluish.format import TSV, Gzip
+from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -55,8 +55,9 @@ from siskin.utils import SetEncoder, load_set_from_file, nwise
 
 
 class JstorTask(DefaultTask):
-    """ Jstor base. """
-    TAG = '55'
+    """Jstor base."""
+
+    TAG = "55"
 
     def closest(self):
         return weekly(self.date)
@@ -66,17 +67,22 @@ class JstorPaths(JstorTask):
     """
     Sync.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description='timeout in seconds')
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
-        return FTPMirror(host=self.config.get('jstor', 'ftp-host'),
-                         username=self.config.get('jstor', 'ftp-username'),
-                         password=self.config.get('jstor', 'ftp-password'),
-                         pattern=self.config.get('jstor', 'ftp-pattern'),
-                         max_retries=self.max_retries,
-                         timeout=self.timeout)
+        return FTPMirror(
+            host=self.config.get("jstor", "ftp-host"),
+            username=self.config.get("jstor", "ftp-username"),
+            password=self.config.get("jstor", "ftp-password"),
+            pattern=self.config.get("jstor", "ftp-pattern"),
+            max_retries=self.max_retries,
+            timeout=self.timeout,
+        )
 
     def run(self):
         self.input().move(self.output().path)
@@ -90,6 +96,7 @@ class JstorMembers(JstorTask):
     Extract a full list of archive members.
     TODO: This should only be done once per file.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -97,16 +104,22 @@ class JstorMembers(JstorTask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=('path', )):
-                if not row.path.endswith('.zip'):
-                    self.logger.debug('skipping: %s', row.path)
+            for row in handle.iter_tsv(cols=("path",)):
+                if not row.path.endswith(".zip"):
+                    self.logger.debug("skipping: %s", row.path)
                     continue
-                shellout(""" unzip -l {input} | LC_ALL=C grep "xml$" | LC_ALL=C awk '{{print "{input}\t"$4}}' | LC_ALL=C sort >> {output} """,
-                         preserve_whitespace=True,
-                         input=row.path,
-                         output=stopover)
+                shellout(
+                    """
+                         unzip -l {input} |
+                         LC_ALL=C grep "xml$" |
+                         LC_ALL=C awk '{{print "{input}\t"$4}}' |
+                         LC_ALL=C sort -S 20% >> {output} """,
+                    preserve_whitespace=True,
+                    input=row.path,
+                    output=stopover,
+                )
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
@@ -218,9 +231,23 @@ class JstorLatestMembers(JstorTask):
             raise ValueError("supported versions: 1, 2 (refs #12669)")
 
         if self.version == 1:
-            output = shellout("tac {input} | grep -v metadata | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}", input=self.input().path)
+            output = shellout(
+                """
+                              tac {input} |
+                              grep -v metadata |
+                              LC_ALL=C sort -S 35% -u -k2,2 |
+                              LC_ALL=C sort -S 35% -k1,1 > {output}""",
+                input=self.input().path,
+            )
         if self.version == 2:
-            output = shellout("tac {input} | grep metadata | LC_ALL=C sort -S 35% -u -k2,2 | LC_ALL=C sort -S 35% -k1,1 > {output}", input=self.input().path)
+            output = shellout(
+                """
+                              tac {input} |
+                              grep metadata |
+                              LC_ALL=C sort -S 35% -u -k2,2 |
+                              LC_ALL=C sort -S 35% -k1,1 > {output}""",
+                input=self.input().path,
+            )
 
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -235,6 +262,7 @@ class JstorXML(JstorTask):
 
     [1] https://github.com/miku/unzippa
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
     version = luigi.IntParameter(default=2, description="#12669")
 
@@ -243,28 +271,34 @@ class JstorXML(JstorTask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            groups = itertools.groupby(handle.iter_tsv(cols=('archive', 'member')), lambda row: row.archive)
+            groups = itertools.groupby(
+                handle.iter_tsv(cols=("archive", "member")), lambda row: row.archive
+            )
 
             for archive, items in groups:
                 # Write members to extract to temporary file.
-                _, memberfile = tempfile.mkstemp(prefix='siskin-')
-                with open(memberfile, 'w') as output:
+                _, memberfile = tempfile.mkstemp(prefix="siskin-")
+                with open(memberfile, "w") as output:
                     for item in items:
                         output.write("%s\n" % item.member)
 
                 self.logger.debug("for archive %s extract via: %s", archive, memberfile)
 
                 if not isinstance(archive, six.string_types):
-                    archive = archive.decode(encoding='utf-8')
+                    archive = archive.decode(encoding="utf-8")
 
                 # The unzippa will not exhaust ARG_MAX.
-                shellout("""unzippa -v -m {memberfile} {archive} |
-                            sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' | pigz -c >> {output}""",
-                         archive=archive,
-                         memberfile=memberfile,
-                         output=stopover)
+                shellout(
+                    """
+                         unzippa -v -m {memberfile} {archive} |
+                         sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' |
+                         zstd -cd -T0 >> {output}""",
+                    archive=archive,
+                    memberfile=memberfile,
+                    output=stopover,
+                )
 
                 try:
                     os.remove(output.name)
@@ -274,7 +308,7 @@ class JstorXML(JstorTask):
             luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=TSV)
+        return luigi.LocalTarget(path=self.path(ext="xml.zst"), format=Zstd)
 
 
 class JstorIntermediateSchemaGenericCollection(JstorTask):
@@ -286,34 +320,49 @@ class JstorIntermediateSchemaGenericCollection(JstorTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return {'span': Executable(name='span-import', message='http://git.io/vI8NV'), 'file': JstorXML(date=self.date)}
+        return {
+            "span": Executable(name="span-import", message="http://git.io/vI8NV"),
+            "file": JstorXML(date=self.date),
+        }
 
     @timed
     def run(self):
-        output = shellout("span-import -i jstor <(unpigz -c {input}) | pigz -c > {output}", input=self.input().get('file').path)
+        output = shellout(
+            """
+                          span-import -i jstor <(zstd -cd -T0 {input}) |
+                          zstd -T0 -c > {output}
+                          """,
+            input=self.input().get("file").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zstd"), format=Zstd)
 
 
 class JstorAMSLNames(JstorTask):
     """
     Report technical collection id and collection name as TSV from AMSL, refs #14841.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
         return AMSLService(date=self.date)
 
     def run(self):
-        output = shellout(""" gunzip -c {input} | jq -r '.[] | select(.sourceID == "55") | [.technicalCollectionID, .megaCollection] | @tsv' | \
-                          sort -u > {output} """,
-                          input=self.input().path)
+        output = shellout(
+            """
+                          zstd -cd -T0 {input} |
+                          jq -r '.[] | select(.sourceID == "55") | [.technicalCollectionID, .megaCollection] | @tsv' | \
+                          LC_ALL=C sort -S 20% -u > {output}
+                          """,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv'))
+        return luigi.LocalTarget(path=self.path(ext="tsv"))
 
 
 class JstorCollectionNames(JstorTask):
@@ -321,26 +370,35 @@ class JstorCollectionNames(JstorTask):
     List current collection names, as notes in column 27 of
     https://www.jstor.org/kbart/collections/all-archive-titles, refs #14841.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def run(self):
         """
         Names may be in column 27 and 28.
         """
-        output = shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
+        output = shellout(
+            """
+                          curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
                           tail -n +2 | cut -f 27 | tr ';' '\n' | \
-                          sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u > {output}""",
-                          preserve_whitespace=True)
-        shellout("""curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
+                          sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -S 20% -u > {output}
+                          """,
+            preserve_whitespace=True,
+        )
+        shellout(
+            """
+                 curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
                  tail -n +2 | cut -f 28 | tr ';' '\n' | \
-                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u >> {output}""",
-                 output=output,
-                 preserve_whitespace=True)
+                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u >> {output}
+                 """,
+            output=output,
+            preserve_whitespace=True,
+        )
         output = shellout("""sort -u {input} | grep -v ^$ > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='tsv'))
+        return luigi.LocalTarget(path=self.path(ext="tsv"))
 
 
 class JstorCollectionMapping(JstorTask):
@@ -412,6 +470,7 @@ class JstorCollectionMapping(JstorTask):
     31 publication_date
 
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     @timed
@@ -440,11 +499,11 @@ class JstorCollectionMapping(JstorTask):
                             continue
                         names[issn].add(name)
 
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             json.dump(names, output, cls=SetEncoder)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext="json"))
 
 
 class JstorIntermediateSchema(JstorTask):
@@ -490,8 +549,8 @@ class JstorIntermediateSchema(JstorTask):
 
     def requires(self):
         return {
-            'file': JstorIntermediateSchemaGenericCollection(date=self.date),
-            'mapping': JstorCollectionMapping(date=self.date),
+            "file": JstorIntermediateSchemaGenericCollection(date=self.date),
+            "mapping": JstorCollectionMapping(date=self.date),
         }
 
     @timed
@@ -503,30 +562,30 @@ class JstorIntermediateSchema(JstorTask):
         tcid_to_mega_collection = dict()
         jstor_to_tcid = dict()
 
-        with open(self.assets('55/tcid_amsl.tsv')) as handle:
+        with open(self.assets("55/tcid_amsl.tsv")) as handle:
             for line in handle:
-                tcid, mega_collection = line.strip().split('\t')
+                tcid, mega_collection = line.strip().split("\t")
                 tcid_to_mega_collection[tcid] = mega_collection
-        with open(self.assets('55/tcid_jstor.tsv')) as handle:
+        with open(self.assets("55/tcid_jstor.tsv")) as handle:
             for line in handle:
-                tcid, jstor_collection = line.strip().split('\t')
+                tcid, jstor_collection = line.strip().split("\t")
                 jstor_to_tcid[jstor_collection] = tcid
-        with self.input().get('mapping').open() as mapfile:
+        with self.input().get("mapping").open() as mapfile:
             mapping = json.load(mapfile)
 
         counter = collections.Counter()
 
-        with self.input().get('file').open() as handle:
-            with self.output().open('w') as output:
+        with self.input().get("file").open() as handle:
+            with self.output().open("w") as output:
                 for i, line in enumerate(handle):
                     if i % 100000 == 0:
                         self.logger.debug("[jstor] processed %d lines", i)
                     doc = json.loads(line)
                     issns, names = set(), set()
 
-                    for issn in doc.get('rft.issn', []):
+                    for issn in doc.get("rft.issn", []):
                         issns.add(issn)
-                    for issn in doc.get('rft.eissn', []):
+                    for issn in doc.get("rft.eissn", []):
                         issns.add(issn)
 
                     for issn in issns:
@@ -537,13 +596,19 @@ class JstorIntermediateSchema(JstorTask):
                         # Translate JSTOR names to technical collection id.
                         amsl_names = [jstor_to_tcid.get(name) for name in names]
                         # Check validity against AMSL names.
-                        clean_names = [name for name in amsl_names if name in tcid_to_mega_collection]
-                        clean_names = clean_names + [tcid_to_mega_collection[tcid] for tcid in clean_names]
+                        clean_names = [
+                            name
+                            for name in amsl_names
+                            if name in tcid_to_mega_collection
+                        ]
+                        clean_names = clean_names + [
+                            tcid_to_mega_collection[tcid] for tcid in clean_names
+                        ]
 
                         # The clean_names list has both TCID and mega_collection.
-                        doc['finc.mega_collection'] = clean_names
+                        doc["finc.mega_collection"] = clean_names
 
-                        if len(doc['finc.mega_collection']) == 0:
+                        if len(doc["finc.mega_collection"]) == 0:
                             # self.logger.warn("no collection name given to %s: %s", doc["finc.id"], names)
                             counter["err.collection.not.in.amsl"] += 1
                     else:
@@ -552,60 +617,80 @@ class JstorIntermediateSchema(JstorTask):
                         # (24695). We check for this pattern to make these
                         # records accessible. And discard the other 13328, e.g.
                         # https://www.jstor.org/stable/10.5250/femigermstud.35.0147.
-                        assumed_oa_pattern = r'http[s]?://www.jstor.org/stable/[0-9]+$'
-                        if any((re.search(assumed_oa_pattern, url) for url in doc.get('url', []))):
+                        assumed_oa_pattern = r"http[s]?://www.jstor.org/stable/[0-9]+$"
+                        if any(
+                            (
+                                re.search(assumed_oa_pattern, url)
+                                for url in doc.get("url", [])
+                            )
+                        ):
                             # TODO(miku): These names are not official yet.
-                            doc['finc.mega_collection'] = ['Open JSTOR Collection', 'sid-55-col-jstoropen']  # Maybe, https://www.jstor.org/stable/26167842.
+                            doc["finc.mega_collection"] = [
+                                "Open JSTOR Collection",
+                                "sid-55-col-jstoropen",
+                            ]  # Maybe, https://www.jstor.org/stable/26167842.
                             counter["assumed_oa"] += 1
                         else:
-                            self.logger.warn("JSTOR record without issn or issn mapping and likely not open access neither: %s, %s", doc.get("finc.id"),
-                                             doc.get('url'))
+                            self.logger.warn(
+                                "JSTOR record without issn or issn mapping and likely not open access neither: %s, %s",
+                                doc.get("finc.id"),
+                                doc.get("url"),
+                            )
                             counter["err.name"] += 1
 
                     line = json.dumps(doc)
                     if isinstance(line, six.string_types):
-                        line = line.encode('utf-8')
+                        line = line.encode("utf-8")
                     output.write(line)
                     output.write(b"\n")
 
         self.logger.debug(counter)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class JstorExport(JstorTask):
     """
     Tag with ISILs, then export to various formats.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default='solr5vu3', description='export format')
 
     def requires(self):
         return {
-            'file': JstorIntermediateSchema(date=self.date),
-            'config': AMSLFilterConfig(date=self.date),
+            "file": JstorIntermediateSchema(date=self.date),
+            "config": AMSLFilterConfig(date=self.date),
         }
 
     def run(self):
-        output = shellout("span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-                          config=self.input().get('config').path,
-                          input=self.input().get('file').path)
-        output = shellout("span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}", format=self.format, input=output)
+        output = shellout(
+            """
+                          span-tag -c {config} <(zstd -cd -T0 {input}) |
+                          zstd -c -T0 > {output}
+                          """,
+            config=self.input().get("config").path,
+            input=self.input().get("file").path,
+        )
+        output = shellout(
+            """
+                          span-export -o solr5vu3 <(zstd -cd -T0 {input}) |
+                          zstd -c -T0 > {output}
+                          """,
+            format=self.format,
+            input=output,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        extensions = {
-            'solr5vu3': 'ldj.gz',
-            'formeta': 'form.gz',
-        }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, 'gz')))
+        return luigi.LocalTarget(path=self.path(ext="zst"))
 
 
 class JstorISSNList(JstorTask):
     """
     A list of JSTOR ISSNs.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -613,9 +698,21 @@ class JstorISSNList(JstorTask):
 
     @timed
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
-        shellout("""jq -r '.["rft.issn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
-        shellout("""jq -r '.["rft.eissn"][]?' <(unpigz -c {input}) 2> /dev/null >> {output} """, input=self.input().path, output=stopover)
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
+        shellout(
+            """
+                 jq -r '.["rft.issn"][]?' <(zstd -cd -T0 {input}) 2> /dev/null >> {output}
+                 """,
+            input=self.input().path,
+            output=stopover,
+        )
+        shellout(
+            """
+                 jq -r '.["rft.eissn"][]?' <(zstd -cd -T0 {input}) 2> /dev/null >> {output}
+                 """,
+            input=self.input().path,
+            output=stopover,
+        )
         output = shellout("""sort -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -627,6 +724,7 @@ class JstorDOIList(JstorTask):
     """
     A list of JSTOR DOIs.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -634,8 +732,14 @@ class JstorDOIList(JstorTask):
 
     @timed
     def run(self):
-        output = shellout("""jq -r '.doi' <(unpigz -c {input}) | grep -v null > {output} """, input=self.input().path)
-        output = shellout("""sort -u {input} > {output} """, input=output)
+        output = shellout(
+            """
+                          jq -r '.doi' <(zstd -cd -T0 {input}) |
+                          grep -v null |
+                          LC_ALL=C sort -S20% -u > {output}
+                          """,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

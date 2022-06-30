@@ -41,6 +41,7 @@ class sqlitedb:
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
+
     def __init__(self, path, timeout=5.0, detect_types=0):
         self.path = path
         self.conn = None
@@ -49,7 +50,9 @@ class sqlitedb:
         self.detect_types = detect_types
 
     def __enter__(self):
-        self.conn = sqlite3.connect(self.path, timeout=self.timeout, detect_types=self.detect_types)
+        self.conn = sqlite3.connect(
+            self.path, timeout=self.timeout, detect_types=self.detect_types
+        )
         self.conn.text_factory = str
         self.cursor = self.conn.cursor()
         return self.cursor
@@ -67,12 +70,13 @@ class mysqldb:
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
+
     def __init__(self, url, stream=False, commit_on_exit=False):
-        result = urllib.parse.urlparse(url, scheme='mysql')
+        result = urllib.parse.urlparse(url, scheme="mysql")
         self.hostname = result.hostname
         self.username = result.username
         self.password = result.password
-        self.database = result.path.strip('/')
+        self.database = result.path.strip("/")
         self.stream = stream
         self.commit_on_exit = commit_on_exit
         self.conn = None
@@ -80,9 +84,20 @@ class mysqldb:
 
     def __enter__(self):
         if self.stream:
-            self.conn = pymysql.connect(host=self.hostname, user=self.username, passwd=self.password, db=self.database, cursorclass=SSCursor)
+            self.conn = pymysql.connect(
+                host=self.hostname,
+                user=self.username,
+                passwd=self.password,
+                db=self.database,
+                cursorclass=SSCursor,
+            )
         else:
-            self.conn = pymysql.connect(host=self.hostname, user=self.username, passwd=self.password, db=self.database)
+            self.conn = pymysql.connect(
+                host=self.hostname,
+                user=self.username,
+                passwd=self.password,
+                db=self.database,
+            )
 
         self.cursor = self.conn.cursor()
         return self.cursor

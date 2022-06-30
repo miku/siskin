@@ -28,7 +28,7 @@ Genderopen OAI.
 import datetime
 
 import luigi
-from gluish.format import Gzip
+from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -39,7 +39,8 @@ class GenderopenTask(DefaultTask):
     """
     Base task for gender open.
     """
-    TAG = '162'
+
+    TAG = "162"
     REPO = "https://www.genderopen.de/oai/request"
 
     def closest(self):
@@ -50,11 +51,18 @@ class GenderopenIntermediateSchema(GenderopenTask):
     """
     Harvest and convert.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("metha-sync {repo} && metha-cat {repo} | span-import -i genderopen | gzip -c > {output}", repo=self.REPO)
+        output = shellout(
+            """
+                          metha-sync {repo} && metha-cat {repo} |
+                          span-import -i genderopen |
+                          zstd -T0 -c > {output}""",
+            repo=self.REPO,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)

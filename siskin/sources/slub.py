@@ -50,7 +50,8 @@ class SLUBTask(DefaultTask):
     """
     Base task for SLUB related tasks.
     """
-    TAG = 'slub'
+
+    TAG = "slub"
 
     def closest(self):
         return weekly(date=self.date)
@@ -60,19 +61,22 @@ class SLUBPaths(SLUBTask):
     """
     Mirror SLUB via FTP.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        host = self.config.get('slub', 'ftp-host')
-        username = self.config.get('slub', 'ftp-username')
-        password = self.config.get('slub', 'ftp-password')
-        base = self.config.get('slub', 'ftp-path')
-        pattern = self.config.get('slub', 'ftp-pattern')
-        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
+        host = self.config.get("slub", "ftp-host")
+        username = self.config.get("slub", "ftp-username")
+        password = self.config.get("slub", "ftp-password")
+        base = self.config.get("slub", "ftp-path")
+        pattern = self.config.get("slub", "ftp-pattern")
+        return FTPMirror(
+            host=host, username=username, password=password, base=base, pattern=pattern
+        )
 
     @timed
     def run(self):
-        output = shellout('sort {input} > {output}', input=self.input().path)
+        output = shellout("sort {input} > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

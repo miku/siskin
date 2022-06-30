@@ -52,7 +52,8 @@ class OSFTask(DefaultTask):
     """
     https://api.osf.io/v2/preprints/?filter[provider]=mediarxiv&format=json&page=1
     """
-    TAG = '191'
+
+    TAG = "191"
 
     def closest(self):
         return weekly(date=self.date)
@@ -66,6 +67,7 @@ class OSFDownload(OSFTask):
 
     Retrieval of full set takes: 117m13.266s - about 325M, 86651 docs.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -74,7 +76,9 @@ class OSFDownload(OSFTask):
         sleep_s = 60
         with self.output().open("w") as output:
             while True:
-                link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(page)
+                link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(
+                    page
+                )
                 self.logger.debug("osf: {}".format(link))
                 resp = requests.get(link)
                 if resp.status_code == 404:
@@ -85,22 +89,31 @@ class OSFDownload(OSFTask):
                         max_retries -= 1
                         continue
                     else:
-                        raise RuntimeError('osf api failed with {}'.format(resp.status_code))
-                self.logger.debug("fetched {} from {}: {}".format(len(resp.text), link, resp.text[:40]))
+                        raise RuntimeError(
+                            "osf api failed with {}".format(resp.status_code)
+                        )
+                self.logger.debug(
+                    "fetched {} from {}: {}".format(
+                        len(resp.text), link, resp.text[:40]
+                    )
+                )
                 output.write(resp.text)
                 output.write("\n")
                 page += 1
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json'))
+        return luigi.LocalTarget(path=self.path(ext="json"))
 
 
 class OSFIntermediateSchema(OSFTask):
     """
     Convert to intermediate schema (stub).
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
-    max_retries = luigi.IntParameter(default=5, description='number of HTTP request retries', significant=False)
+    max_retries = luigi.IntParameter(
+        default=5, description="number of HTTP request retries", significant=False
+    )
     encoding = luigi.Parameter(default="utf-8", significant=False)
 
     def requires(self):
@@ -122,7 +135,7 @@ class OSFIntermediateSchema(OSFTask):
                         i += 1
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="json.gz"), format=Gzip)
 
 
 class OSFExport(OSFTask):
@@ -130,6 +143,7 @@ class OSFExport(OSFTask):
     OSF should be a daily/weekly updated source, so we generate a solr
     importable file directly.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -139,11 +153,13 @@ class OSFExport(OSFTask):
         }
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                           unpigz -c {input} | span-tag -unfreeze {config} | span-export | pigz -c > {output}""",
-                          config=self.input().get("config").path,
-                          input=self.input().get("data").path)
+            config=self.input().get("config").path,
+            input=self.input().get("data").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='json.gz'))
+        return luigi.LocalTarget(path=self.path(ext="json.gz"))

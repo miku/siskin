@@ -42,7 +42,8 @@ class KXPTask(DefaultTask):
     """
     Base task for KXP. TAG might change from kxp to numeric id in the future.
     """
-    TAG = 'kxp'
+
+    TAG = "kxp"
 
     def closest(self):
         return weekly(date=self.date)
@@ -52,10 +53,11 @@ class KXPSRU(KXPTask):
     """
     Fetch selection via SRU.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return Executable(name='srufetch', message='https://github.com/miku/srufetch')
+        return Executable(name="srufetch", message="https://github.com/miku/srufetch")
 
     def run(self):
         # XXX: Move this to config, then gitlab.
@@ -88,8 +90,12 @@ class KXPSRU(KXPTask):
             pica.rvk="LT 5581*" or pica.rvk="LT 5582*" or pica.rvk="LT 5586*"
             or pica.rvk="LT 57240" or pica.sbn="vd17" or pica.sbn="vd18"
         """
-        output = shellout("""srufetch -x -q '{selector}' > {output} """, selector=selector)
-        output = shellout("""yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output)
+        output = shellout(
+            """srufetch -x -q '{selector}' > {output} """, selector=selector
+        )
+        output = shellout(
+            """yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

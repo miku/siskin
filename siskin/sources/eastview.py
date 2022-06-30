@@ -58,7 +58,7 @@ from siskin.task import DefaultTask
 
 
 class EastViewTask(DefaultTask):
-    TAG = 'eastview'
+    TAG = "eastview"
 
     def closest(self):
         return weekly(date=self.date)
@@ -73,19 +73,22 @@ class EastViewPaths(EastViewTask):
     xml.zip
 
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        host = self.config.get('eastview', 'ftp-host')
-        username = self.config.get('eastview', 'ftp-username')
-        password = self.config.get('eastview', 'ftp-password')
-        base = self.config.get('eastview', 'ftp-path')
-        pattern = self.config.get('eastview', 'ftp-pattern')
-        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
+        host = self.config.get("eastview", "ftp-host")
+        username = self.config.get("eastview", "ftp-username")
+        password = self.config.get("eastview", "ftp-password")
+        base = self.config.get("eastview", "ftp-path")
+        pattern = self.config.get("eastview", "ftp-pattern")
+        return FTPMirror(
+            host=host, username=username, password=password, base=base, pattern=pattern
+        )
 
     @timed
     def run(self):
-        output = shellout('sort {input} > {output}', input=self.input().path)
+        output = shellout("sort {input} > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -96,6 +99,7 @@ class EastViewIntermediateSchema(EastViewTask):
     """
     Convert to a single (is) file.
     """
+
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -104,7 +108,7 @@ class EastViewIntermediateSchema(EastViewTask):
     def run(self):
         with tempfile.NamedTemporaryFile(delete=False, mode="w") as tf:
             zname = None
-            with self.input().open(mode='r') as f:
+            with self.input().open(mode="r") as f:
                 for line in f:
                     line = line.decode("utf-8").strip()
                     if not line.endswith("xml.zip"):

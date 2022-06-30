@@ -49,13 +49,15 @@ import tempfile
 import luigi
 from gluish.utils import shellout
 from siskin.task import DefaultTask
+from siskin.format import Zstd
 
 
 class CeeolTask(DefaultTask):
     """
     Base task.
     """
-    TAG = '53'
+
+    TAG = "53"
 
     date = luigi.DateParameter(default=datetime.date(2021, 7, 14))
 
@@ -64,15 +66,20 @@ class CeeolIntermediateSchema(CeeolTask):
     """
     Convert XML and concat files into a single intermediate schema output.
     """
+
     def run(self):
-        diskdir = self.config.get('ceeol', 'disk-dir')
-        files = glob.glob(os.path.join(diskdir, 'articles_*xml'))
+        diskdir = self.config.get("ceeol", "disk-dir")
+        files = glob.glob(os.path.join(diskdir, "articles_*xml"))
         if len(files) == 0:
             raise RuntimeError("no file found at {}".format(diskdir))
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         for path in files:
-            shellout("span-import -i ceeol {input} | pigz -c >> {output}", input=path, output=stopover)
+            shellout(
+                "span-import -i ceeol {input} | zstd -T0 -c >> {output}",
+                input=path,
+                output=stopover,
+            )
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)

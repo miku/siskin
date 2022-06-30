@@ -65,7 +65,8 @@ class CoreTask(DefaultTask):
     """
     Base task. Irregular updates.
     """
-    TAG = 'core'
+
+    TAG = "core"
 
     def closest(self):
         return datetime.date(2018, 3, 1)
@@ -75,10 +76,14 @@ class CoreDownload(CoreTask):
     """
     Metadata. Filenaming inconsistent (tar or tar.gz).
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail https://core.ac.uk/datasets/core_{date}_metadata.tar > {output}""", date=self.closest().strftime("%Y-%m-%d"))
+        output = shellout(
+            """curl --fail https://core.ac.uk/datasets/core_{date}_metadata.tar > {output}""",
+            date=self.closest().strftime("%Y-%m-%d"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -89,10 +94,14 @@ class CoreDownloadFulltext(CoreTask):
     """
     Metadata and Fulltext. Filenaming inconsistent (tar or tar.gz).
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""curl --fail https://core.ac.uk/datasets/core_{date}_fulltext.tar > {output}""", date=self.closest().strftime("%Y-%m-%d"))
+        output = shellout(
+            """curl --fail https://core.ac.uk/datasets/core_{date}_fulltext.tar > {output}""",
+            date=self.closest().strftime("%Y-%m-%d"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

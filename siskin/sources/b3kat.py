@@ -87,10 +87,11 @@ class B3KatTask(DefaultTask):
     """
     Base task for B3Kat.
     """
-    TAG = '12'
+
+    TAG = "12"
 
     def closest(self):
-        """ Find exact date on this site: https://www.bib-bvb.de/web/b3kat/open-data """
+        """Find exact date on this site: https://www.bib-bvb.de/web/b3kat/open-data"""
         return semiyearly(date=self.date)
 
 
@@ -98,13 +99,16 @@ class B3KatLinks(B3KatTask):
     """
     A list of latest links. Currently grepped from https://www.bib-bvb.de/web/b3kat/open-data.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
             curl --fail -s "https://www.bib-bvb.de/web/b3kat/open-data" |
             grep -Eo "/OpenData/b3kat_export_[0-9]{{4,4}}_[0-9]{{1,2}}_teil[0-9]{{1,2}}.xml.gz" |
-            awk '{{print "https://www.bib-bvb.de"$0 }}' > {output} """)
+            awk '{{print "https://www.bib-bvb.de"$0 }}' > {output} """
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -116,17 +120,24 @@ class B3KatDownload(B3KatTask):
     Download snapshot. Output is a single (large) MARC binary file. Typically
     the downloads are provided in May and November.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return B3KatLinks(date=self.date)
 
     def run(self):
-        _, stopover = tempfile.mkstemp(prefix='siskin-')
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for i, row in enumerate(handle.iter_tsv(cols=('url', )), start=1):
-                downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
-                output = shellout("""yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""", input=downloaded, stopover=stopover)
+            for i, row in enumerate(handle.iter_tsv(cols=("url",)), start=1):
+                downloaded = shellout(
+                    """curl -sL --fail "{url}" > {output} """, url=row.url
+                )
+                output = shellout(
+                    """yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""",
+                    input=downloaded,
+                    stopover=stopover,
+                )
                 try:
                     os.remove(downloaded)
                     os.remove(output)
@@ -136,7 +147,7 @@ class B3KatDownload(B3KatTask):
         luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext="mrc"))
 
 
 class B3KatFilterSSG(B3KatTask):
@@ -148,7 +159,10 @@ class B3KatFilterSSG(B3KatTask):
     * https://www.dfg.de/download/pdf/foerderung/programme/lis/fid_zwischenbilanz_umstrukturierung_foerderung_sondersammelgebiete.pdf
     * https://web.archive.org/web/20190503122507/https://www.dfg.de/download/pdf/foerderung/programme/lis/fid_zwischenbilanz_umstrukturierung_foerderung_sondersammelgebiete.pdf
     """
-    ssg = luigi.Parameter(default='9,2', description='ssgn designation to be matched against 84.a')
+
+    ssg = luigi.Parameter(
+        default="9,2", description="ssgn designation to be matched against 84.a"
+    )
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -168,43 +182,49 @@ class B3KatFilterSSG(B3KatTask):
         """
         counter = collections.Counter()
         self.logger.debug("filtering out records from %s", self.input().path)
-        with open(self.input().path, 'rb') as handle:
-            with tempfile.NamedTemporaryFile('wb', delete=False) as output:
+        with open(self.input().path, "rb") as handle:
+            with tempfile.NamedTemporaryFile("wb", delete=False) as output:
                 reader = pymarc.MARCReader(handle)
                 writer = pymarc.MARCWriter(output)
                 for i, record in enumerate(reader):
                     if i % 100000 == 0:
-                        self.logger.debug('filtered %d/%d records, %s', counter['written'], i, counter)
+                        self.logger.debug(
+                            "filtered %d/%d records, %s", counter["written"], i, counter
+                        )
                     record = marcx.Record.from_record(record)
-                    if not 'ssgn' in record.values('084.2'):
-                        counter['not-ssgn'] += 1
+                    if not "ssgn" in record.values("084.2"):
+                        counter["not-ssgn"] += 1
                         continue
-                    if not '9,2' in record.values('084.a'):
-                        counter['not-9,2'] += 1
+                    if not "9,2" in record.values("084.a"):
+                        counter["not-9,2"] += 1
                         continue
-                    if not 'digit' in record.values('912.a'):
-                        counter['not-digit'] += 1
+                    if not "digit" in record.values("912.a"):
+                        counter["not-digit"] += 1
                         continue
                     writer.write(record)
-                    counter['written'] += 1
+                    counter["written"] += 1
             luigi.LocalTarget(output.name).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='mrc'))
+        return luigi.LocalTarget(path=self.path(ext="mrc"))
 
 
 class B3KatMARCXML(B3KatTask):
     """
     Convert binary MARC to MARCXML.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
         return B3KatDownload(date=self.date)
 
     def run(self):
-        output = shellout("yaz-marcdump -i marc -o marcxml {input} | pigz -c > {output}", input=self.input().path)
+        output = shellout(
+            "yaz-marcdump -i marc -o marcxml {input} | pigz -c > {output}",
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='xml.gz'), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="xml.gz"), format=Gzip)

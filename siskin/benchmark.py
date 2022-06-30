@@ -37,18 +37,18 @@ import logging
 from builtins import object
 from timeit import default_timer
 
-logger = logging.getLogger('gluish')
+logger = logging.getLogger("gluish")
 
 
 class bcolors(object):
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def red(s):
@@ -67,6 +67,7 @@ class Timer(object):
     """
     A timer as a context manager, slight visual language.
     """
+
     def __init__(self, green=10, yellow=60):
         """
         Indicate runtimes with colors, green < 10s, yellow < 60s.
@@ -93,6 +94,7 @@ def timed(method):
     """
     A @timed decorator.
     """
+
     @functools.wraps(method)
     def _timed(*args, **kwargs):
         """
@@ -103,7 +105,7 @@ def timed(method):
         klass = args[0].__class__.__name__
         fun = method.__name__
 
-        msg = '[%s.%s] %0.5f' % (klass, fun, timer.elapsed_s)
+        msg = "[%s.%s] %0.5f" % (klass, fun, timer.elapsed_s)
         if timer.elapsed_s <= timer.green:
             logger.debug(green(msg))
         elif timer.elapsed_s <= timer.yellow:
