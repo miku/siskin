@@ -49,7 +49,7 @@ import tempfile
 import luigi
 from gluish.utils import shellout
 from siskin.task import DefaultTask
-from siskin.format import Zstd
+from gluish.format import Zstd
 
 
 class CeeolTask(DefaultTask):
