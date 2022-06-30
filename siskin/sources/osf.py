@@ -39,7 +39,7 @@ import time
 import requests
 
 import luigi
-from gluish.format import Gzip
+from gluish.format import Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -135,7 +135,7 @@ class OSFIntermediateSchema(OSFTask):
                         i += 1
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
 
 
 class OSFExport(OSFTask):
@@ -155,11 +155,14 @@ class OSFExport(OSFTask):
     def run(self):
         output = shellout(
             """
-                          unpigz -c {input} | span-tag -unfreeze {config} | span-export | pigz -c > {output}""",
+            unpigz -c {input} |
+            span-tag -unfreeze {config} |
+            span-export |
+            zstd -c -T0 > {output}""",
             config=self.input().get("config").path,
             input=self.input().get("data").path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json.gz"))
+        return luigi.LocalTarget(path=self.path(ext="json.zst"))

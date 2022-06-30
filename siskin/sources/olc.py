@@ -34,7 +34,7 @@ import json
 import os
 
 import luigi
-from gluish.format import Gzip
+from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -82,15 +82,18 @@ class OLCDump(OLCTask):
             ["collection_details:{}".format(c) for c in self.COLLECTIONS]
         )
         output = shellout(
-            """ solrdump -verbose -server {server} -q '{query}' | jq -rc . | pigz -c > {output} """,
+            """
+            solrdump -verbose -server {server} -q '{query}' |
+            jq -rc . | zstd -c -T0 > {output}
+            """,
             query=query,
             server=self.config.get("olc", "solr"),
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        filename = "{}-{}.ndj.gz".format(self.date, sha1obj(self.COLLECTIONS))
-        return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
+        filename = "{}-{}.ndj.zst".format(self.date, sha1obj(self.COLLECTIONS))
+        return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
 
 
 class OLCIntermediateSchema(OLCTask):
@@ -115,7 +118,7 @@ class OLCIntermediateSchema(OLCTask):
                     output.write(b"\n")
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
 class OLCIntermediateSchemaDeprecated(OLCTask):
@@ -151,8 +154,8 @@ class OLCIntermediateSchemaDeprecated(OLCTask):
         path = outputs[0]
 
         # Compress as AIIntermediateSchema requires all artifacts to be gzip compressed.
-        output = shellout("pigz -c {input} > {output}", input=path)
+        output = shellout("zstd -T0 -c {input} > {output}", input=path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.gz"))
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"))

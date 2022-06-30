@@ -37,7 +37,7 @@ import json
 
 import langdetect
 import luigi
-from gluish.format import Gzip
+from gluish.format import Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
@@ -72,7 +72,9 @@ class LissaFetch(LissaTask):
         es = "https://share.osf.io/api/v2/search/creativeworks"
         query = "sources:%22LIS%20Scholarship%20Archive%22"
         output = shellout(
-            """curl -s --fail "{es}/_search?from=0&size=1000&q={query}" > {output}""",
+            """
+            curl -s --fail "{es}/_search?from=0&size=1000&q={query}" > {output}
+            """,
             query=query,
             es=es,
         )
@@ -98,6 +100,7 @@ class LissaIntermediateSchema(LissaTask):
 
         converted = []
 
+        # TODO: move this to conversions
         for hit in resp["hits"]["hits"]:
             source = hit["_source"]
             doc = {
@@ -174,4 +177,4 @@ class LissaIntermediateSchema(LissaTask):
                 output.write(serialized.encode("utf-8"))
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
