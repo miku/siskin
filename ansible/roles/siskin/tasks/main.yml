@@ -36,6 +36,7 @@
       - https://github.com/miku/solrbulk/releases/download/v{{ siskin_vendor_version_solrbulk }}/solrbulk-{{ siskin_vendor_version_solrbulk }}-0.x86_64.rpm
       - https://github.com/miku/span/releases/download/v{{ siskin_vendor_version_span }}/span-{{ siskin_vendor_version_span }}-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v{{ siskin_vendor_version_solrdump }}/solrdump-{{ siskin_vendor_version_solrdump }}-0.x86_64.rpm
+      - https://github.com/miku/unzippa/releases/download/v{{ siskin_vendor_version_unzippa }}/unzippa-{{ siskin_vendor_version_unzippa }}-0.x86_64.rpm
 - name: Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)
   get_url:
     url: https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist.tar.gz
