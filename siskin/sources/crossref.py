@@ -125,10 +125,11 @@ class CrossrefRawItems(CrossrefTask):
         # TODO: should this be "-mode s" for sync?
         output = shellout(
             """
-            span-crossref-sync -p zstd -P {feed} -i d -verbose -t 30m -s {begin} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
+            span-crossref-sync -p zstd -P {feed} -i d -verbose -t 30m -s {begin} -e {date} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
             """,
             feed=self.feed,
             begin=self.begin,
+            date=self.date,
             crossref_sync_dir=crossref_sync_dir,
         )  # 22min
         luigi.LocalTarget(output).move(self.output().path)
