@@ -118,14 +118,14 @@ class CrossrefRawItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
-    feed = luigi.Parameter(default="feed-1-", description="filename prefix")
+    feed = luigi.Parameter(default="1", description="feed id to distinguish between various parallel downloads")
 
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
         # TODO: should this be "-mode s" for sync?
         output = shellout(
             """
-            span-crossref-sync -p zstd -P {feed} -i d -verbose -t 30m -s {begin} -e {date} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
+            span-crossref-sync -p zstd -P feed-{feed}- -i d -verbose -t 30m -s {begin} -e {date} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
             """,
             feed=self.feed,
             begin=self.begin,
