@@ -114,8 +114,8 @@ class CrossrefRawItems(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -124,15 +124,15 @@ class CrossrefRawItems(CrossrefTask):
         # TODO: should this be "-mode s" for sync?
         output = shellout(
             """
-                 span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} | pigz -c >> {output}
-                 """,
+            span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
+            """,
             begin=self.begin,
             crossref_sync_dir=crossref_sync_dir,
         )  # 22min
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
 class CrossrefUniqItems(CrossrefTask):
@@ -146,8 +146,8 @@ class CrossrefUniqItems(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -156,13 +156,13 @@ class CrossrefUniqItems(CrossrefTask):
 
     def run(self):
         output = shellout(
-            "span-crossref-snapshot -verbose -z -compress-program pigz -o {output} {input}",
+            "span-crossref-snapshot -verbose -z -compress-program zstd -o {output} {input}",
             input=self.input().path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
 class CrossrefIntermediateSchema(CrossrefTask):
@@ -171,8 +171,8 @@ class CrossrefIntermediateSchema(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -185,13 +185,13 @@ class CrossrefIntermediateSchema(CrossrefTask):
     @timed
     def run(self):
         output = shellout(
-            "span-import -i crossref <(unpigz -c {input}) | pigz -c > {output}",
+            "span-import -i crossref <(zstd -cd -T0 {input}) | zstd -T0 -c > {output}",
             input=self.input().get("file").path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
 class CrossrefCollections(CrossrefTask):
@@ -200,8 +200,8 @@ class CrossrefCollections(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -214,7 +214,7 @@ class CrossrefCollections(CrossrefTask):
     @timed
     def run(self):
         output = shellout(
-            """jq -rc '.["finc.mega_collection"][]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% -u > {output}""",
+            """jq -rc '.["finc.mega_collection"][]?' <(zstd -cd -T0 {input}) | LC_ALL=C sort -S35% -u > {output}""",
             input=self.input().get("input").path,
         )
         luigi.LocalTarget(output).move(self.output().path)
@@ -229,8 +229,8 @@ class CrossrefCollectionsCount(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -243,7 +243,7 @@ class CrossrefCollectionsCount(CrossrefTask):
     @timed
     def run(self):
         output = shellout(
-            """jq -rc '.["finc.mega_collection"][]?' <(unpigz -c {input}) | LC_ALL=C sort -S35% > {output}""",
+            """jq -rc '.["finc.mega_collection"][]?' <(zstd -cd -T0 {input}) | LC_ALL=C sort -S35% > {output}""",
             input=self.input().get("input").path,
         )
 
@@ -271,8 +271,8 @@ class CrossrefCollectionsDifference(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -364,7 +364,7 @@ class CrossrefDOIList(CrossrefTask):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         # process substitution sometimes results in a broken pipe, so extract beforehand
         output = shellout(
-            "unpigz -c {input} > {output}", input=self.input().get("input").path
+            "zstd -cd -T0 {input} > {output}", input=self.input().get("input").path
         )
         shellout(
             """jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
@@ -372,7 +372,7 @@ class CrossrefDOIList(CrossrefTask):
             output=stopover,
         )
         os.remove(output)
-        output = shellout("""sort -S50% -u {input} > {output} """, input=stopover)
+        output = shellout("""LC_ALL=C sort -S50% -u {input} > {output} """, input=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -385,8 +385,8 @@ class CrossrefISSNList(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -399,7 +399,7 @@ class CrossrefISSNList(CrossrefTask):
     @timed
     def run(self):
         output = shellout(
-            "jq -r '.ISSN[]?' <(unpigz -c {input}) 2> /dev/null > {output}",
+            "jq -r '.ISSN[]?' <(zstd -cd -T0 {input}) 2> /dev/null > {output}",
             input=self.input().get("input").path,
         )
         luigi.LocalTarget(output).move(self.output().path)
@@ -414,8 +414,8 @@ class CrossrefUniqISSNList(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2021, 4, 27),
-        description="2021-04-27 seemed to be the start of the current crossref update streak",
+        default=datetime.date(2022, 1, 1),
+        description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
 
@@ -424,7 +424,7 @@ class CrossrefUniqISSNList(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("sort -u {input} > {output}", input=self.input().path)
+        output = shellout("LC_ALL=C sort -u {input} > {output}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -448,7 +448,7 @@ class CrossrefDOIAndISSNList(CrossrefTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         temp = shellout(
-            "unpigz -c {input} > {output}", input=self.input().get("input").path
+            "zstd -cd -T0 {input} > {output}", input=self.input().get("input").path
         )
         output = shellout(
             """jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
@@ -460,82 +460,6 @@ class CrossrefDOIAndISSNList(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="csv"))
-
-
-class CrossrefDOIHarvest(CrossrefTask):
-    """
-    Harvest DOI redirects from doi.org API. This is a long running task. It's
-    probably best to run this tasks complete separate from the rest and let
-    other processing pipelines use the result, as it is available.
-
-    ----
-
-    It is highly recommended that you put a static entry into /etc/hosts
-    for doi.org while `hurrly` is running.
-
-    As of 2015-07-31 doi.org resolves to six servers. Just choose one.
-
-    $ nslookup doi.org
-
-    """
-
-    def requires(self):
-        """
-        If we have more DOI sources, we could add them as requirements here.
-        """
-        return {
-            "input": CrossrefDOIList(date=datetime.date.today()),
-            "hurrly": Executable(
-                name="hurrly", message="http://github.com/miku/hurrly"
-            ),
-            "pigz": Executable(name="pigz", message="http://zlib.net/pigz/"),
-        }
-
-    def run(self):
-        output = shellout(
-            "hurrly -w 4 < {input} | pigz > {output}",
-            input=self.input().get("input").path,
-        )
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="tsv.gz"))
-
-
-class CrossrefDOIBlacklist(CrossrefTask):
-    """
-    Create a blacklist of DOIs. Possible cases:
-
-    1. A DOI redirects to http://www.crossref.org/deleted_DOI.html or
-       most of these sites below crossref.org: https://gist.github.com/miku/6d754104c51fb553256d
-    2. A DOI API lookup does not return a HTTP 200.
-
-    The output of this task should be used as doi-blacklist in config.
-    """
-
-    def requires(self):
-        return CrossrefDOIHarvest()
-
-    def run(self):
-        _, stopover = tempfile.mkstemp(prefix="siskin-")
-        shellout(
-            """LC_ALL=C zgrep -E "http(s)?://.*.crossref.org" {input} >> {output}""",
-            input=self.input().path,
-            output=stopover,
-        )
-        shellout(
-            """LC_ALL=C zgrep -v "^200" {input} >> {output}""",
-            input=self.input().path,
-            output=stopover,
-        )
-        output = shellout(
-            "sort -S50% -u {input} | cut -f4 | sed s@http://doi.org/api/handles/@@g > {output}",
-            input=stopover,
-        )
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path())
 
 
 class CrossrefMembers(CrossrefTask):
