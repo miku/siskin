@@ -66,7 +66,7 @@ from six import string_types
 import elasticsearch
 import luigi
 from gluish.common import Executable
-from gluish.format import TSV, Gzip
+from gluish.format import TSV, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
