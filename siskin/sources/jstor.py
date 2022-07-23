@@ -294,7 +294,7 @@ class JstorXML(JstorTask):
                     """
                          unzippa -v -m {memberfile} {archive} |
                          sed -e 's@<?xml version="1.0" encoding="UTF-8"?>@@g' |
-                         zstd -cd -T0 >> {output}""",
+                         zstd -c -T0 >> {output}""",
                     archive=archive,
                     memberfile=memberfile,
                     output=stopover,
