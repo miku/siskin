@@ -118,7 +118,7 @@ class CrossrefRawItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
-    feed = luigi.Parameter(default="feed-1-", "filename prefix")
+    feed = luigi.Parameter(default="feed-1-", description="filename prefix")
 
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
