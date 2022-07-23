@@ -107,7 +107,7 @@ class CrossrefRawItems(CrossrefTask):
 
     Companion cron:
 
-    28 1 * * *  span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
+    28 1 * * *  span-crossref-sync -p zstd -P feed-1- -i d -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
 
     Most updates so far in a single day on 2021-12-22: 10,120,570.
 
@@ -118,14 +118,16 @@ class CrossrefRawItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
+    feed = luigi.Parameter(default="feed-1-", "filename prefix")
 
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
         # TODO: should this be "-mode s" for sync?
         output = shellout(
             """
-            span-crossref-sync -t 30m -s {begin} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
+            span-crossref-sync -p zstd -P {feed} -i d -verbose -t 30m -s {begin} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
             """,
+            feed=self.feed,
             begin=self.begin,
             crossref_sync_dir=crossref_sync_dir,
         )  # 22min
