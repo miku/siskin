@@ -111,6 +111,7 @@ class CrossrefRawItems(CrossrefTask):
 
     Most updates so far in a single day on 2021-12-22: 10,120,570.
 
+    Data point: daily updates, 204G, takes about 60min.
     """
 
     begin = luigi.DateParameter(
