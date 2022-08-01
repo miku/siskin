@@ -154,13 +154,15 @@ class CrossrefUniqItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
+    batch_size = luigi.IntParameter(default=10000, description="batch size", significant=False)
 
     def requires(self):
         return CrossrefRawItems(begin=self.begin, date=self.closest())
 
     def run(self):
         output = shellout(
-            "span-crossref-snapshot -verbose -z -compress-program zstd -o {output} {input}",
+            "span-crossref-snapshot -b {batch_size} -verbose -z -compress-program zstd -o {output} {input}",
+            batch_size=self.batch_size,
             input=self.input().path,
         )
         luigi.LocalTarget(output).move(self.output().path)
