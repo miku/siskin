@@ -2,6 +2,8 @@
 siskin_user: finc
 siskin_group: finc
 
+# Temporary directory, set system wide
+siskin_tmp_dir: /data/tmp
 
 # Base directory for all raw and intermediate data files
 siskin_data_dir: /data/finc

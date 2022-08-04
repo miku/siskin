@@ -56,7 +56,7 @@ install_requires = [
     'lxml>=3.4.2',
     'marcx>=0.2.12',
     'numpy',
-    'pandas>=1.3.0',
+    'pandas>=1.1',
     'pycld3>=0.22',
     'pygments>=2.9.0',
     'pyisbn>=1.0.0',

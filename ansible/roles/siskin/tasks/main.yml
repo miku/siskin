@@ -1,5 +1,10 @@
 # TODO: switch to internal artifact servers or use a tunnel
 
+- name: Set tempdir
+  copy:
+    dest: /etc/profile.d/siskin_tmp_dir.sh
+    content: |
+      export TMPDIR={{ siskin_tmp_dir }}
 - name: Ensure group finc exists
   group:
     name: '{{ siskin_group }}'
