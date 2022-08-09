@@ -151,7 +151,7 @@ class AIIntermediateSchema(AITask):
         for target in self.input():
             with open(target.path, "rb") as f:
                 head = f.read(4)
-                if binascii.hexlify(head) != b"fd2fb528":
+                if binascii.hexlify(head) not in (b"fd2fb528", b"28b52ffd"):
                     raise RuntimeError(
                         "AIIntermediateSchema requires zstd-compressed inputs, failed: %s (got: %s)"
                         % (target.path, binascii.hexlify(head))
