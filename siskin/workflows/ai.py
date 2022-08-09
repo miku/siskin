@@ -154,7 +154,7 @@ class AIIntermediateSchema(AITask):
                 if binascii.hexlify(head) != b"fd2fb528":
                     raise RuntimeError(
                         "AIIntermediateSchema requires zstd-compressed inputs, failed: %s (got: %s)"
-                        % (target.path, binascii.hexlify(head)))
+                        % (target.path, binascii.hexlify(head))
                     )
 
         _, stopover = tempfile.mkstemp(prefix="siskin-")
