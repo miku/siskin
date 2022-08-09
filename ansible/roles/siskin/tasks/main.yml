@@ -63,11 +63,7 @@
   pip:
     name: siskin=={{ siskin_vendor_version_siskin }}
     extra_args: -U -i "{{ siskin_pypi_index_url }}"
-- name: Execute task with extended PATH
-  shell: echo $PATH
-  environment:
-    PATH: /usr/other/bin:{{ ansible_env.PATH }}
-- name: Create luigi configuration directory
+- name: Create configuration directories
   file:
     path: "{{ item }}"
     state: directory
@@ -86,7 +82,6 @@
     mode: '0644'
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
-    # use "items" for various directories
 - name: Create generic fast, large tmp dir; cache; static
   file:
     path: "{{ item }}"
@@ -95,9 +90,9 @@
     state: directory
     mode: '0755'
   loop:
-    - /data/tmp
-    - /data/static
-    - /data/.cache/metha
+    - '{{ siskin_data_dir }}'
+    - '{{ siskin_static_dir }}'
+    - '{{ siskin_cache_dir }}/metha'
 - name: Change crossref cache directory ownership
   file:
     path: '{{ siskin_data_dir }}'

@@ -4,8 +4,11 @@ siskin_group: finc
 
 # Temporary directory, set system wide
 siskin_tmp_dir: /data/tmp
-
-# Base directory for all raw and intermediate data files
+# Static files can live here
+siskin_static_dir: /data/static
+# XDG cache dir for applications
+siskin_cache_dir: /data/.cache
+# Base directory for all raw and intermediate data files (TODO: maybe reuse ".cache")
 siskin_data_dir: /data/finc
 
 
