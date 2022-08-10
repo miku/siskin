@@ -19,6 +19,7 @@
   yum:
     state: present
     name:
+    - bash-completion
     - gcc
     - gcc-c++
     - java-1.8.0-openjdk
@@ -121,6 +122,10 @@
     minute: '5'
     job: >
       span-crossref-sync -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d > /dev/null
+- name: Add siskin bash completion
+  copy:
+    dest: /etc/bash_completion.d/siskin_completion.sh
+    src: siskin_completion.sh
 - debug:
     msg: >
       Project siskin and dependencies set up. Complete the following step manually:

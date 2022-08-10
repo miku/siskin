@@ -1,0 +1,1 @@
+../../../../etc/bash_completion.d/siskin_completion.sh
