@@ -165,7 +165,7 @@ class DegruyterXML(DegruyterTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    group = luigi.Parameter(default="SSH", description="main subdirectory")
+    group = luigi.Parameter(default="finc", description="main subdirectory")
     ts = luigi.Parameter(default=DegruyterTask.TIMESTAMP)
 
     def requires(self):
