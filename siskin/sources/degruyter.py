@@ -178,8 +178,11 @@ class DegruyterXML(DegruyterTask):
             for row in handle.iter_tsv(cols=("path",)):
                 if not "/%s/" % self.group in row.path:
                     continue
-                if "-%s.zip" % self.ts not in row.path:
-                    continue
+                # TODO: clean this up
+                # Ignore timestamp for now; we may have duplicates but with the
+                # same id, so the latter ones should be used
+                # if "-%s.zip" % self.ts not in row.path:
+                #     continue
                 shellout(
                     r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
                     output=stopover,
