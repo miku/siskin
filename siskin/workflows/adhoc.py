@@ -43,7 +43,6 @@ from siskin.sources.crossref import (
     CrossrefCollectionsCount,
     CrossrefCollectionsDifference,
 )
-from siskin.sources.degruyter import DegruyterExport
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
 from siskin.sources.jstor import JstorExport
 from siskin.task import DefaultTask

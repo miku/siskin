@@ -38,7 +38,7 @@ import datetime
 import tempfile
 
 import luigi
-from gluish.format import TSV
+from gluish.format import TSV, Zstd
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 from siskin.benchmark import timed
@@ -208,49 +208,13 @@ class DegruyterIntermediateSchema(DegruyterTask):
     @timed
     def run(self):
         output = shellout(
-            "span-import -i degruyter {input} | pigz -c > {output}",
+            "span-import -i degruyter {input} | zstd -T0 -c > {output}",
             input=self.input().get("file").path,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
-
-
-class DegruyterExport(DegruyterTask):
-    """
-    A SOLR-importable format.
-    """
-
-    date = luigi.DateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="solr5vu3")
-
-    def requires(self):
-        return {
-            "file": DegruyterIntermediateSchema(date=self.date),
-            "config": AMSLFilterConfig(date=self.date),
-        }
-
-    @timed
-    def run(self):
-        output = shellout(
-            "span-tag -c {config} <(unpigz -c {input}) | pigz -c > {output}",
-            config=self.input().get("config").path,
-            input=self.input().get("file").path,
-        )
-        output = shellout(
-            "span-export -o {format} <(unpigz -c {input}) | pigz -c > {output}",
-            input=output,
-            format=self.format,
-        )
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        extensions = {
-            "solr5vu3": "ldj.gz",
-            "formeta": "form.gz",
-        }
-        return luigi.LocalTarget(path=self.path(ext=extensions.get(self.format, "gz")))
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class DegruyterISSNList(DegruyterTask):
