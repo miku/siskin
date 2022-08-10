@@ -47,6 +47,7 @@ import datetime
 import os
 
 import luigi
+import requests
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
@@ -93,6 +94,43 @@ class BasePaths(BaseTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class BaseDirectDownload(BaseTask):
+    """
+    Direct download link.
+    """
+
+    url = luigi.Parameter(
+        default="https://download.ubl-proxy.slub-dresden.de/base", significant=False
+    )
+
+    def run(self):
+        output = shellout(
+            """ curl --output {output} --fail -sL "{url}" """,
+            url=self.url,
+        )
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        last_modified_header = requests.head(self.url).headers["Last-Modified"]
+        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
+        filename = "base-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
+        return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
+
+class BaseFix(BaseTask):
+    """
+    On-the-fly fixes.
+    """
+    def requires(self):
+        return BaseDirectDownload()
+
+    def run(self):
+        # TODO: move sanitize code here
+        pass
+
+    def output(self):
+        pass
 
 
 class BaseSingleFile(BaseTask):
