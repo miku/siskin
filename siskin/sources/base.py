@@ -44,6 +44,7 @@ ftp-pattern = *
 """
 
 import datetime
+import functools
 import os
 
 import luigi
@@ -63,9 +64,17 @@ class BaseTask(DefaultTask):
 
     TAG = "126"
 
+    # default BASE download URL
+    download_url = "https://download.ubl-proxy.slub-dresden.de/base"
+
     def closest(self):
         return monthly(date=self.date)
 
+    @functools.lru_cache
+    def get_last_modified_date(self):
+        last_modified_header = requests.head(self.download_url).headers["Last-Modified"]
+        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
+        return last_modified
 
 class BasePaths(BaseTask):
     """
@@ -113,8 +122,7 @@ class BaseDirectDownload(BaseTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        last_modified_header = requests.head(self.url).headers["Last-Modified"]
-        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
+        last_modified = self.get_last_modified_date()
         filename = "base-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
 
@@ -126,11 +134,22 @@ class BaseFix(BaseTask):
         return BaseDirectDownload()
 
     def run(self):
-        # TODO: move sanitize code here
-        pass
+        # SOLR has a limit on facet_fields value length.
+        shellout("""
+        tar -xOzf {input} |
+        jq -rc '.author[0] = .author[0][0:4000] |
+                .author_sort = .author_sort[0:4000] |
+                .author_facet[0] = .author_facet[0][0:4000] |
+                .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
+        sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+        doisniffer -S |
+        zstd -T0 -c > {output}
+        """, input=self.input().path)
 
     def output(self):
-        pass
+        last_modified = self.get_last_modified_date()
+        filename = "base-{}.zst".format(last_modified.strftime("%Y-%m-%d"))
+        return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
 
 
 class BaseSingleFile(BaseTask):
