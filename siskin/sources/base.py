@@ -49,7 +49,7 @@ import os
 
 import luigi
 import requests
-from gluish.format import TSV, Gzip
+from gluish.format import TSV, Gzip, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
