@@ -73,8 +73,11 @@ class BaseTask(DefaultTask):
     @functools.lru_cache
     def get_last_modified_date(self):
         last_modified_header = requests.head(self.download_url).headers["Last-Modified"]
-        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
+        last_modified = datetime.datetime.strptime(
+            last_modified_header, "%a, %d %b %Y %H:%M:%S %Z"
+        )
         return last_modified
+
 
 class BasePaths(BaseTask):
     """
@@ -126,16 +129,19 @@ class BaseDirectDownload(BaseTask):
         filename = "base-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
 
+
 class BaseFix(BaseTask):
     """
     On-the-fly fixes.
     """
+
     def requires(self):
         return BaseDirectDownload()
 
     def run(self):
         # SOLR has a limit on facet_fields value length.
-        shellout("""
+        shellout(
+            """
         tar -xOzf {input} |
         jq -rc '.author[0] = .author[0][0:4000] |
                 .author_sort = .author_sort[0:4000] |
@@ -144,7 +150,9 @@ class BaseFix(BaseTask):
         sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
         doisniffer -S |
         zstd -T0 -c > {output}
-        """, input=self.input().path)
+        """,
+            input=self.input().path,
+        )
 
     def output(self):
         last_modified = self.get_last_modified_date()
