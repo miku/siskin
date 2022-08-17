@@ -140,7 +140,7 @@ class BaseFix(BaseTask):
 
     def run(self):
         # SOLR has a limit on facet_fields value length.
-        shellout(
+        output = shellout(
             """
         tar -xOzf {input} |
         jq -rc '.author[0] = .author[0][0:4000] |
@@ -153,6 +153,7 @@ class BaseFix(BaseTask):
         """,
             input=self.input().path,
         )
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         last_modified = self.get_last_modified_date()
