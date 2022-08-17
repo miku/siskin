@@ -148,7 +148,7 @@ class BaseFix(BaseTask):
                 .author_facet[0] = .author_facet[0][0:4000] |
                 .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
         sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
-        doisniffer -S |
+        span-doisniffer -S |
         zstd -T0 -c > {output}
         """,
             input=self.input().path,
