@@ -343,7 +343,7 @@ class AIExport(AITask):
     def requires(self):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date),
-            "base": BaseFix(date=self.date),
+            "base": BaseFix(),
         }
 
     def run(self):

@@ -60,6 +60,9 @@ from siskin.task import DefaultTask
 class BaseTask(DefaultTask):
     """
     Various tasks around base, refs #14947.
+
+    As of 08/2022, we only implement access to the latest version, i.e. no date
+    parameter.
     """
 
     TAG = "126"
@@ -81,7 +84,7 @@ class BaseTask(DefaultTask):
 
 class BasePaths(BaseTask):
     """
-    Mirror SLUB FTP for base.
+    Mirror SLUB FTP for base. Deprecated.
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
