@@ -63,7 +63,7 @@ from siskin.sources.amsl import (
     AMSLOpenAccessKBART,
     AMSLService,
 )
-from siskin.sources.base import BaseSingleFile
+from siskin.sources.base import BaseFix
 from siskin.sources.ceeol import CeeolIntermediateSchema
 from siskin.sources.crossref import (
     CrossrefDOIList,
@@ -343,7 +343,7 @@ class AIExport(AITask):
     def requires(self):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date),
-            "base": BaseSingleFile(date=self.date),
+            "base": BaseFix(date=self.date),
         }
 
     def run(self):
