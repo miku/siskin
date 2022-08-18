@@ -349,17 +349,8 @@ class AIExport(AITask):
     def run(self):
         _, tmp = tempfile.mkstemp(prefix="siskin-")
         shellout(
-            """
-            unpigz -c "{input}" | zstd -c -T0 >> "{output}"
-            """,
+            """cat "{input}" >> "{output}" """,
             input=self.input().get("base").path,
-            output=tmp,
-        )
-        shellout(
-            """
-            unpigz -c "{input}" | zstd -c -T0 >> "{output}"
-            """,
-            input=self.input().get("perinorm").path,
             output=tmp,
         )
         shellout(
