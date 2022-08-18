@@ -1,7 +1,7 @@
 # coding: utf-8
 # pylint: disable=C0103,C0301
 
-# Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
+# Copyright 2016 by Leipzig University Library, http://ub.uni-leipzig.de
 #                   The Finc Authors, http://finc.info
 #                   Martin Czygan, <martin.czygan@uni-leipzig.de>
 #
@@ -48,7 +48,7 @@ try:
 except (AttributeError, ImportError):
     pass
 
-__version__ = "1.3.20"
+__version__ = "1.3.21"
 
 config = Config.instance()
 if sys.version_info.major == 2:
