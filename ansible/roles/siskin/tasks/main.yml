@@ -25,8 +25,9 @@
     - java-1.8.0-openjdk
     - protobuf-compiler
     - protobuf-devel
-    - python-devel
     - python3-csvkit
+    - python3-devel
+    - python3-ipython
     - python3-pip
     - sshuttle
     - yaz
