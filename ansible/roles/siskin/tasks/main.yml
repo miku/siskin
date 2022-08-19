@@ -15,6 +15,7 @@
     group: '{{ siskin_group }}'
     shell: /bin/bash
     create_home: true
+    umask: "0022"
 - name: Install common packages for siskin
   yum:
     state: present
