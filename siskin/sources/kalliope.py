@@ -31,7 +31,7 @@ import functools
 import requests
 
 import luigi
-from gluish.format import Zstd, Gzip
+from gluish.format import Zstd
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
@@ -65,9 +65,13 @@ class KalliopeDirectDownload(KalliopeTask):
             """ curl --output {output} --fail -sL "{url}" """,
             url=self.url,
         )
+        output = shellout(
+            """ unpigz -c {input} | zstd -c -T0 > {output} """,
+            input=output,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         last_modified = self.get_last_modified_date()
-        filename = "kalliope-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
-        return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
+        filename = "kalliope-{}.zst".format(last_modified.strftime("%Y-%m-%d"))
+        return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)

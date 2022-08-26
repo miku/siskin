@@ -81,6 +81,7 @@ from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
 from siskin.sources.ijoc import IJOCIntermediateSchema
 from siskin.sources.jstor import JstorDOIList, JstorIntermediateSchema, JstorISSNList
+from siskin.sources.kalliope import KalliopeDirectDownload
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema
@@ -344,6 +345,7 @@ class AIExport(AITask):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date),
             "base": BaseFix(),
+            "kalliope": KalliopeDirectDownload(),
         }
 
     def run(self):

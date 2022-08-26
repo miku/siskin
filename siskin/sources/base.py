@@ -166,7 +166,7 @@ class BaseFix(BaseTask):
 
 class BaseSingleFile(BaseTask):
     """
-    Create a single compressed file of tarball.
+    Create a single compressed file of tarball. Deprecated, use BaseFix.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
