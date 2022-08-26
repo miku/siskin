@@ -31,7 +31,7 @@ import functools
 import requests
 
 import luigi
-from gluish.format import Zstd
+from gluish.format import Zstd, Gzip
 from gluish.utils import shellout
 from siskin.task import DefaultTask
 
