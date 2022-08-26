@@ -41,6 +41,7 @@ class KalliopeTask(DefaultTask):
     Base task.
     """
 
+    download_url = "https://download.ubl-proxy.slub-dresden.de/kalliope"
     TAG = "140"
 
     @functools.lru_cache
@@ -57,9 +58,7 @@ class KalliopeDirectDownload(KalliopeTask):
     Download.
     """
 
-    url = luigi.Parameter(
-        default="https://download.ubl-proxy.slub-dresden.de/kalliope", significant=False
-    )
+    url = luigi.Parameter(default=self.download_url, significant=False)
 
     def run(self):
         output = shellout(
@@ -72,4 +71,3 @@ class KalliopeDirectDownload(KalliopeTask):
         last_modified = self.get_last_modified_date()
         filename = "kalliope-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
-
