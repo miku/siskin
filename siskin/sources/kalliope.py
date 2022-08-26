@@ -73,5 +73,3 @@ class KalliopeDirectDownload(KalliopeTask):
         filename = "kalliope-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
 
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
