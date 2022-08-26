@@ -58,7 +58,7 @@ class KalliopeDirectDownload(KalliopeTask):
     Download.
     """
 
-    url = luigi.Parameter(default=self.download_url, significant=False)
+    url = luigi.Parameter(default=KalliopeTask.download_url, significant=False)
 
     def run(self):
         output = shellout(
