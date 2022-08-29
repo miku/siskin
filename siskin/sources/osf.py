@@ -102,7 +102,7 @@ class OSFDownload(OSFTask):
                 page += 1
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json"))
+        return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
 
 
 class OSFIntermediateSchema(OSFTask):
