@@ -69,11 +69,13 @@ class OSFDownload(OSFTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    encoding = luigi.Parameter(default="utf-8", significant=False)
 
     def run(self):
         page = 1
         max_retries = 20  # a "global" retry budget
         sleep_s = 60
+        b_newline = "\n".encode(self.encoding)
         with self.output().open("w") as output:
             while True:
                 link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(
@@ -97,8 +99,8 @@ class OSFDownload(OSFTask):
                         len(resp.text), link, resp.text[:40]
                     )
                 )
-                output.write(resp.text)
-                output.write("\n")
+                output.write(resp.text.encode(self.encoding))
+                output.write(b_newline)
                 page += 1
 
     def output(self):
