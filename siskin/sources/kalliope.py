@@ -65,8 +65,9 @@ class KalliopeDirectDownload(KalliopeTask):
             """ curl --output {output} --fail -sL "{url}" """,
             url=self.url,
         )
+        # TODO: missed the tar
         output = shellout(
-            """ unpigz -c {input} | zstd -c -T0 > {output} """,
+            """ tar -xOzf {input} | zstd -c -T0 > {output} """,
             input=output,
         )
         luigi.LocalTarget(output).move(self.output().path)
