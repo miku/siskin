@@ -11,7 +11,7 @@ for cmd in curl taskoutput grep rsync ssh; do
 	}
 done
 
-curl --s --fail "https://ai.ub.uni-leipzig.de/whatislive" || { echo "cannot reach https://ai.ub.uni-leipzig.de/whatislive"; exit 1; }
+curl -s --fail "https://ai.ub.uni-leipzig.de/whatislive" || { echo "cannot reach https://ai.ub.uni-leipzig.de/whatislive"; exit 1; }
 
 USER=$(whoami)
 
