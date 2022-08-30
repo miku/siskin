@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Copy files from the data VM to microblob and solr
+
+set -e -u -o pipefail
+
+for cmd in curl taskoutput grep rsync ssh; do
+	command -v "$cmd" >/dev/null 2>&1 || {
+		echo >&2 "$cmd required"
+		exit 1
+	}
+done
+
+curl --s --fail "https://ai.ub.uni-leipzig.de/whatislive" || { echo "cannot reach https://ai.ub.uni-leipzig.de/whatislive"; exit 1; }
+
+USER=$(whoami)
+
+# data artifacts
+IS=$(taskoutput AIRedact)
+SOLR=$(taskoutput AIExport)
+
+# nonlive ips
+MICROBLOB_NONLIVE=$(curl -s --fail https://ai.ub.uni-leipzig.de/whatislive | grep "microblob_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
+SOLR_NONLIVE=$(curl -s --fail https://ai.ub.uni-leipzig.de/whatislive | grep "solr_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
+
+rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$(USER)/.ssh/id_rsa" $(IS) $(USER)@$(MICROBLOB_NONLIVE):/home/$(USER)
+rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$(USER)/.ssh/id_rsa" $(SOLR) $(USER)@$(SOLR_NONLIVE):/home/$(USER)
