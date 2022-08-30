@@ -1,6 +1,10 @@
 #!/bin/bash
 #
 # Copy files from the data VM to microblob and solr
+#
+# Prints commands to be run, or actually runs them via
+#
+# $ TASKSYNC=1 tasksync
 
 set -e -u -o pipefail
 
@@ -11,7 +15,10 @@ for cmd in curl taskoutput grep rsync ssh; do
 	}
 done
 
-curl -s --fail "https://ai.ub.uni-leipzig.de/whatislive" || { echo "cannot reach https://ai.ub.uni-leipzig.de/whatislive"; exit 1; }
+curl -s --fail "https://ai.ub.uni-leipzig.de/whatislive" >/dev/null || {
+	echo "cannot reach https://ai.ub.uni-leipzig.de/whatislive"
+	exit 1
+}
 
 USER=$(whoami)
 
@@ -23,5 +30,10 @@ SOLR=$(taskoutput AIExport)
 MICROBLOB_NONLIVE=$(curl -s --fail https://ai.ub.uni-leipzig.de/whatislive | grep "microblob_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
 SOLR_NONLIVE=$(curl -s --fail https://ai.ub.uni-leipzig.de/whatislive | grep "solr_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
 
-rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$(USER)/.ssh/id_rsa" $(IS) $(USER)@$(MICROBLOB_NONLIVE):/home/$(USER)
-rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$(USER)/.ssh/id_rsa" $(SOLR) $(USER)@$(SOLR_NONLIVE):/home/$(USER)
+if [[ -z "${TASKSYNC}" ]]; then
+	echo rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$USER/.ssh/id_rsa" $IS "$USER@$MICROBLOB_NONLIVE:/home/$USER"
+	echo rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$USER/.ssh/id_rsa" $SOLR "$USER@$SOLR_NONLIVE:/home/$USER"
+else
+	rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$USER/.ssh/id_rsa" $IS "$USER@$MICROBLOB_NONLIVE:/home/$USER"
+	rsync -avP -e "ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$USER/.ssh/id_rsa" $SOLR "$USER@$SOLR_NONLIVE:/home/$USER"
+fi
