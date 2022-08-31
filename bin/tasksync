@@ -2,7 +2,7 @@
 #
 # Copy files from the data VM to microblob and solr
 #
-# Prints commands to be run, or actually runs them via
+# Prints commands to be run; to actually run them set TASKSYNC to anything.
 #
 # $ TASKSYNC=1 tasksync
 
@@ -15,8 +15,10 @@ for cmd in curl taskoutput grep rsync ssh; do
 	}
 done
 
-curl -s --fail "https://ai.ub.uni-leipzig.de/whatislive" >/dev/null || {
-	echo "cannot reach https://ai.ub.uni-leipzig.de/whatislive"
+WHATISLIVE_URL="https://ai.ub.uni-leipzig.de/whatislive"
+
+curl -s --fail "$WHATISLIVE_URL" >/dev/null || {
+	echo "cannot reach $WHATISLIVE_URL"
 	exit 1
 }
 
@@ -27,8 +29,8 @@ IS=$(taskoutput AIRedact)
 SOLR=$(taskoutput AIExport)
 
 # nonlive ips
-MICROBLOB_NONLIVE=$(curl -s --fail https://ai.ub.uni-leipzig.de/whatislive | grep "microblob_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
-SOLR_NONLIVE=$(curl -s --fail https://ai.ub.uni-leipzig.de/whatislive | grep "solr_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
+MICROBLOB_NONLIVE=$(curl -s --fail "$WHATISLIVE_URL" | grep "microblob_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
+SOLR_NONLIVE=$(curl -s --fail "$WHATISLIVE_URL" | grep "solr_nonlive" | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+')
 
 if [[ "${TASKSYNC:-no}" == "no" ]]; then
 	echo rsync -avP -e \""ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/$USER/.ssh/id_rsa"\" "$IS" "$USER@$MICROBLOB_NONLIVE:/home/$USER"
