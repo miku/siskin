@@ -124,6 +124,10 @@
     minute: '5'
     job: >
       span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d
+- name: Start service crond, if not started
+  service:
+    name: crond
+    state: started
 - name: Add siskin bash completion
   copy:
     dest: /etc/bash_completion.d/siskin_completion.sh
