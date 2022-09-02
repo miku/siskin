@@ -41,8 +41,8 @@ class KalliopeTask(DefaultTask):
     Base task.
     """
 
-    download_url = "https://download.ubl-proxy.slub-dresden.de/kalliope"
     TAG = "140"
+    download_url = "https://download.ubl-proxy.slub-dresden.de/kalliope"
 
     @functools.lru_cache
     def get_last_modified_date(self):
@@ -65,9 +65,17 @@ class KalliopeDirectDownload(KalliopeTask):
             """ curl --output {output} --fail -sL "{url}" """,
             url=self.url,
         )
-        # TODO: missed the tar
+        # in AMSL we have:
+        #   "collection": [
+        #     "Nachlässe SLUB Dresden",
+        #     "sid-140-col-nachlaesseslub"
+        #   ]
+        # data has:
+        #   "mega_collection": ["Nachlässe, Vorlässe, Sammlungen SLUB Dresden"],
         output = shellout(
-            """ tar -xOzf {input} | zstd -c -T0 > {output} """,
+            """ tar -xOzf {input} |
+                jq '.mega_collection += ["sid-140-col-nachlaesseslub"]' |
+                zstd -c -T0 > {output} """,
             input=output,
         )
         luigi.LocalTarget(output).move(self.output().path)
