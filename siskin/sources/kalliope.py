@@ -74,7 +74,7 @@ class KalliopeDirectDownload(KalliopeTask):
         #   "mega_collection": ["Nachlässe, Vorlässe, Sammlungen SLUB Dresden"],
         output = shellout(
             """ tar -xOzf {input} |
-                jq '.mega_collection += ["sid-140-col-nachlaesseslub"]' |
+                jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]' |
                 zstd -c -T0 > {output} """,
             input=output,
         )
