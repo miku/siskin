@@ -72,9 +72,7 @@ def send_mail(
         sender = config.get("core", "default-sender")
 
     if not all((sender, tolist, subject, smtp, message)):
-        raise ValueError(
-            "missing sender, recipients, subject, message or smtp: %s" % locals()
-        )
+        raise ValueError("missing sender, recipients, subject, message or smtp: %s" % locals())
 
     if not isinstance(tolist, list):
         tolist = [tolist]

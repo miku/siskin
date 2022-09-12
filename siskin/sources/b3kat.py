@@ -73,6 +73,7 @@ import os
 import tempfile
 
 import pymarc
+from siskin.task import DefaultTask
 
 import luigi
 import marcx
@@ -80,7 +81,6 @@ from gluish.format import TSV, Gzip
 from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class B3KatTask(DefaultTask):
@@ -103,12 +103,10 @@ class B3KatLinks(B3KatTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout(
-            """
+        output = shellout("""
             curl --fail -s "https://www.bib-bvb.de/web/b3kat/open-data" |
             grep -Eo "/OpenData/b3kat_export_[0-9]{{4,4}}_[0-9]{{1,2}}_teil[0-9]{{1,2}}.xml.gz" |
-            awk '{{print "https://www.bib-bvb.de"$0 }}' > {output} """
-        )
+            awk '{{print "https://www.bib-bvb.de"$0 }}' > {output} """)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -129,10 +127,8 @@ class B3KatDownload(B3KatTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for i, row in enumerate(handle.iter_tsv(cols=("url",)), start=1):
-                downloaded = shellout(
-                    """curl -sL --fail "{url}" > {output} """, url=row.url
-                )
+            for i, row in enumerate(handle.iter_tsv(cols=("url", )), start=1):
+                downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
                 output = shellout(
                     """yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""",
                     input=downloaded,
@@ -160,9 +156,7 @@ class B3KatFilterSSG(B3KatTask):
     * https://web.archive.org/web/20190503122507/https://www.dfg.de/download/pdf/foerderung/programme/lis/fid_zwischenbilanz_umstrukturierung_foerderung_sondersammelgebiete.pdf
     """
 
-    ssg = luigi.Parameter(
-        default="9,2", description="ssgn designation to be matched against 84.a"
-    )
+    ssg = luigi.Parameter(default="9,2", description="ssgn designation to be matched against 84.a")
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -188,9 +182,7 @@ class B3KatFilterSSG(B3KatTask):
                 writer = pymarc.MARCWriter(output)
                 for i, record in enumerate(reader):
                     if i % 100000 == 0:
-                        self.logger.debug(
-                            "filtered %d/%d records, %s", counter["written"], i, counter
-                        )
+                        self.logger.debug("filtered %d/%d records, %s", counter["written"], i, counter)
                     record = marcx.Record.from_record(record)
                     if not "ssgn" in record.values("084.2"):
                         counter["not-ssgn"] += 1

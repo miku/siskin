@@ -36,6 +36,5 @@ class FilterConfig:
     """
     Config accumulator and serializer.
     """
-
     def __init__(self):
         pass

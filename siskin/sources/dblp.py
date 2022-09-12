@@ -24,12 +24,13 @@
 
 import datetime
 
+from siskin.task import DefaultTask
+from siskin.utils import xmlstream
+
 import luigi
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
-from siskin.utils import xmlstream
 
 
 class DBLPTask(DefaultTask):
@@ -60,9 +61,7 @@ class DBLPTask(DefaultTask):
 class DBLPDownload(DBLPTask):
     """Download file."""
 
-    url = luigi.Parameter(
-        default="http://dblp.uni-trier.de/xml/dblp.xml.gz", significant=False
-    )
+    url = luigi.Parameter(default="http://dblp.uni-trier.de/xml/dblp.xml.gz", significant=False)
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):

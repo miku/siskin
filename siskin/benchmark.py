@@ -67,7 +67,6 @@ class Timer(object):
     """
     A timer as a context manager, slight visual language.
     """
-
     def __init__(self, green=10, yellow=60):
         """
         Indicate runtimes with colors, green < 10s, yellow < 60s.
@@ -94,7 +93,6 @@ def timed(method):
     """
     A @timed decorator.
     """
-
     @functools.wraps(method)
     def _timed(*args, **kwargs):
         """

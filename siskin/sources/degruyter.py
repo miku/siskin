@@ -37,14 +37,15 @@ ftp-pattern = some*glob*pattern.zip
 import datetime
 import tempfile
 
-import luigi
-from gluish.format import TSV, Zstd
-from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
+
+import luigi
+from gluish.format import TSV, Zstd
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 
 
 class DegruyterTask(DefaultTask):
@@ -135,7 +136,7 @@ class DegruyterCombine(DegruyterTask):
     def run(self):
         files = []
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path",)):
+            for row in handle.iter_tsv(cols=("path", )):
                 if not "/%s/" % self.group in row.path:
                     continue
                 files.append(row.path)
@@ -151,7 +152,10 @@ class DegruyterCombine(DegruyterTask):
                 r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
                 output=stopover,
                 path=fn,
-                ignoremap={1: "OK", 9: "skip corrupt file"},
+                ignoremap={
+                    1: "OK",
+                    9: "skip corrupt file"
+                },
             )
         luigi.LocalTarget(stopover).move(self.output().path)
 
@@ -175,7 +179,7 @@ class DegruyterXML(DegruyterTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path",)):
+            for row in handle.iter_tsv(cols=("path", )):
                 if not "/%s/" % self.group in row.path:
                     continue
                 # TODO: clean this up
@@ -187,7 +191,10 @@ class DegruyterXML(DegruyterTask):
                     r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
                     output=stopover,
                     path=row.path,
-                    ignoremap={1: "OK", 9: "skip corrupt file"},
+                    ignoremap={
+                        1: "OK",
+                        9: "skip corrupt file"
+                    },
                 )
         luigi.LocalTarget(stopover).move(self.output().path)
 

@@ -32,21 +32,17 @@ import json
 import tempfile
 
 import requests
+from siskin.sources.amsl import AMSLCollections, AMSLService
+from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount, CrossrefCollectionsDifference)
+from siskin.sources.elsevierjournals import ElsevierJournalsExport
+from siskin.sources.jstor import JstorExport
+from siskin.task import DefaultTask
+from siskin.utils import SetEncoder, load_set_from_target
 
 import luigi
 import xlsxwriter
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
-from siskin.sources.amsl import AMSLCollections, AMSLService
-from siskin.sources.crossref import (
-    CrossrefCollections,
-    CrossrefCollectionsCount,
-    CrossrefCollectionsDifference,
-)
-from siskin.sources.elsevierjournals import ElsevierJournalsExport
-from siskin.sources.jstor import JstorExport
-from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, load_set_from_target
 
 
 class AdhocTask(DefaultTask):
@@ -66,11 +62,8 @@ class OADOIDatasetStatusByDOI(AdhocTask):
       about our Support Level Agreement (team@impactstory.org). For more
       information about oaDOI, see http://oadoi.org.
     """
-
     def run(self):
-        url = (
-            "https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz"
-        )
+        url = ("https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz")
         output = shellout("""wget -O "{output}" "{url}" """, url=url)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -175,15 +168,11 @@ class K10Matches(AdhocTask):
 
                     results = {}
 
-                    results["ai"] = requests.get(
-                        "%s/select?q=issn:%s&rows=0&wt=json" % (self.ai, issn)
-                    )
+                    results["ai"] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.ai, issn))
                     if results["ai"].status_code != 200:
                         raise RuntimeError("ai reponded with %s" % rr.status_code)
 
-                    results["finc"] = requests.get(
-                        "%s/select?q=issn:%s&rows=0&wt=json" % (self.finc, issn)
-                    )
+                    results["finc"] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.finc, issn))
                     if results["finc"].status_code != 200:
                         raise RuntimeError("finc reponded with %s" % rr.status_code)
 

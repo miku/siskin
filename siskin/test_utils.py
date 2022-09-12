@@ -7,20 +7,10 @@ import tempfile
 
 import pymarc
 import requests
+from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing, xmlstream)
 
 import marcx
 import responses
-from siskin.utils import (
-    SetEncoder,
-    URLCache,
-    dictcheck,
-    get_task_import_cache,
-    load_set,
-    nwise,
-    random_string,
-    scrape_html_listing,
-    xmlstream,
-)
 
 
 def test_set_encoder_dumps():
@@ -30,10 +20,7 @@ def test_set_encoder_dumps():
 def test_dictcheck():
     assert dictcheck({"name": "x"}, contains=["name"]) is True
     assert dictcheck({"name": "x"}, contains=["name"], absent=["somekey"]) is True
-    assert (
-        dictcheck({"name": "x", "somekey": 123}, contains=["name"], absent=["somekey"])
-        is False
-    )
+    assert (dictcheck({"name": "x", "somekey": 123}, contains=["name"], absent=["somekey"]) is False)
     assert dictcheck({"somekey": None}, absent=["somekey"]) is True
     assert dictcheck({}, absent=["somekey"]) is True
 
@@ -41,7 +28,7 @@ def test_dictcheck():
 def test_nwise():
     assert list(nwise(range(4))) == [(0, 1), (2, 3)]
     assert list(nwise(range(4), n=2)) == [(0, 1), (2, 3)]
-    assert list(nwise(range(4), n=3)) == [(0, 1, 2), (3,)]
+    assert list(nwise(range(4), n=3)) == [(0, 1, 2), (3, )]
     assert list(nwise(range(4), n=10)) == [(0, 1, 2, 3)]
     assert list(nwise([], n=10)) == []
 

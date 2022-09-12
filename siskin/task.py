@@ -46,12 +46,13 @@ import socket
 import tempfile
 import traceback
 
-import luigi
-from gluish.task import BaseTask
-from gluish.utils import shellout
 from siskin import __version__
 from siskin.configuration import Config
 from siskin.mail import send_mail
+
+import luigi
+from gluish.task import BaseTask
+from gluish.utils import shellout
 
 config = Config.instance()
 
@@ -69,9 +70,7 @@ class DefaultTask(BaseTask):
     timestamps in AMSL electronic resource management system.
     """
 
-    BASE = config.get(
-        "core", "home", fallback=os.path.join(tempfile.gettempdir(), "siskin-data")
-    )
+    BASE = config.get("core", "home", fallback=os.path.join(tempfile.gettempdir(), "siskin-data"))
 
     stamp = luigi.BoolParameter(
         default=False,
@@ -132,9 +131,7 @@ class DefaultTask(BaseTask):
             send_mail(tolist=tolist, subject=subject, message=message)
             self.logger.debug("sent error emails to %s", ", ".join(tolist))
         except TypeError as err:
-            self.logger.debug(
-                "error-email may not be configured, not sending mail: %s", err
-            )
+            self.logger.debug("error-email may not be configured, not sending mail: %s", err)
         except Exception as err:
             self.logger.debug("failed to send error email: %s", err)
 
@@ -169,9 +166,7 @@ class DefaultTask(BaseTask):
             self.logger.warn("non-integer source id: %s, skip stamping", self.TAG)
             return
 
-        sid = self.TAG.lstrip(
-            "0"
-        )  # Otherwise: Parameter 'sid' ... not a positive integer.
+        sid = self.TAG.lstrip("0")  # Otherwise: Parameter 'sid' ... not a positive integer.
 
         try:
             write_url = config.get("amsl", "write-url")

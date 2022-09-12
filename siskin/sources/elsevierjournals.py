@@ -43,15 +43,16 @@ import os
 import tempfile
 from builtins import str
 
-import luigi
-from gluish.common import Executable
-from gluish.format import TSV, Gzip
-from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 from siskin.utils import iterfiles
+
+import luigi
+from gluish.common import Executable
+from gluish.format import TSV, Gzip
+from gluish.utils import shellout
 
 
 class ElsevierJournalsTask(DefaultTask):
@@ -66,7 +67,6 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     """
     Convert backlog to intermediate schema.
     """
-
     def run(self):
         directory = self.config.get("elsevierjournals", "backlog-dir")
         _, output = tempfile.mkstemp(prefix="siskin-")
@@ -108,9 +108,7 @@ class ElsevierJournalsPaths(ElsevierJournalsTask):
 
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(
@@ -144,7 +142,7 @@ class ElsevierJournalsUpdatesIntermediateSchema(ElsevierJournalsTask):
     def run(self):
         _, output = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for row in sorted(handle.iter_tsv(cols=("path",))):
+            for row in sorted(handle.iter_tsv(cols=("path", ))):
                 if not str(row.path).endswith(".tar"):
                     continue
                 shellout(
@@ -234,9 +232,7 @@ class ElsevierJournalsDOIList(ElsevierJournalsTask):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         # process substitution sometimes results in a broken pipe, so extract
         # beforehand
-        output = shellout(
-            "unpigz -c {input} > {output}", input=self.input().get("input").path
-        )
+        output = shellout("unpigz -c {input} > {output}", input=self.input().get("input").path)
         shellout(
             """jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
             input=output,

@@ -27,10 +27,11 @@ Open Citations, https://opencitations.net/.
 
 import tempfile
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class OCITask(DefaultTask):
@@ -39,16 +40,13 @@ class OCITask(DefaultTask):
     """
 
     TAG = "oci"
-    download_url = luigi.Parameter(
-        default="https://figshare.com/ndownloader/articles/6741422/versions/11"
-    )
+    download_url = luigi.Parameter(default="https://figshare.com/ndownloader/articles/6741422/versions/11")
 
 
 class OCIDownload(OCITask):
     """
     Download via configured URL, about 30G compressed (2021).
     """
-
     def run(self):
         output = shellout("""curl -sL "{url}" > {output}""", url=self.download_url)
         luigi.LocalTarget(output).move(self.output().path)
@@ -61,7 +59,6 @@ class OCISingleFile(OCITask):
     """
     OCI as a single task.
     """
-
     def requires(self):
         return OCIDownload()
 
@@ -79,16 +76,13 @@ class OCISingleFile(OCITask):
             luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(
-            path=self.path(ext="ndj.zst", digest=True), format=Gzip
-        )
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst", digest=True), format=Gzip)
 
 
 class OCICitingDOI(OCITask):
     """
     List of all citing doi.
     """
-
     def requires(self):
         return OCISingleFile()
 
@@ -101,16 +95,13 @@ class OCICitingDOI(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(
-            path=self.path(ext="ndj.zst", digest=True), format=Gzip
-        )
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst", digest=True), format=Gzip)
 
 
 class OCICitedDOI(OCITask):
     """
     List of all cited doi.
     """
-
     def requires(self):
         return OCISingleFile()
 
@@ -123,16 +114,13 @@ class OCICitedDOI(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(
-            path=self.path(ext="ndj.zst", digest=True), format=Gzip
-        )
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst", digest=True), format=Gzip)
 
 
 class OCICitingDOIUnique(OCITask):
     """
     List of all unique citing doi.
     """
-
     def requires(self):
         return OCICitingDOI()
 
@@ -145,16 +133,13 @@ class OCICitingDOIUnique(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(
-            path=self.path(ext="tsv.zst", digest=True), format=Gzip
-        )
+        return luigi.LocalTarget(path=self.path(ext="tsv.zst", digest=True), format=Gzip)
 
 
 class OCICitedDOIUnique(OCITask):
     """
     List of all unique cited doi.
     """
-
     def requires(self):
         return OCICitedDOI()
 
@@ -167,16 +152,13 @@ class OCICitedDOIUnique(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(
-            path=self.path(ext="tsv.zst", digest=True), format=Gzip
-        )
+        return luigi.LocalTarget(path=self.path(ext="tsv.zst", digest=True), format=Gzip)
 
 
 class OCIDOIUnique(OCITask):
     """
     Unique DOI in OCI.
     """
-
     def requires(self):
         return [OCICitingDOIUnique(), OCICitedDOIUnique()]
 
@@ -190,6 +172,4 @@ class OCIDOIUnique(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(
-            path=self.path(ext="tsv.zst", digest=True), format=Gzip
-        )
+        return luigi.LocalTarget(path=self.path(ext="tsv.zst", digest=True), format=Gzip)

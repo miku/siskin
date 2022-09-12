@@ -47,14 +47,15 @@ import datetime
 import functools
 import os
 
-import luigi
 import requests
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
+import luigi
 from gluish.format import TSV, Gzip, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class BaseTask(DefaultTask):
@@ -76,9 +77,7 @@ class BaseTask(DefaultTask):
     @functools.lru_cache
     def get_last_modified_date(self):
         last_modified_header = requests.head(self.download_url).headers["Last-Modified"]
-        last_modified = datetime.datetime.strptime(
-            last_modified_header, "%a, %d %b %Y %H:%M:%S %Z"
-        )
+        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
         return last_modified
 
 
@@ -89,9 +88,7 @@ class BasePaths(BaseTask):
 
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(
@@ -116,9 +113,7 @@ class BaseDirectDownload(BaseTask):
     Direct download link.
     """
 
-    url = luigi.Parameter(
-        default="https://download.ubl-proxy.slub-dresden.de/base", significant=False
-    )
+    url = luigi.Parameter(default="https://download.ubl-proxy.slub-dresden.de/base", significant=False)
 
     def run(self):
         output = shellout(
@@ -137,7 +132,6 @@ class BaseFix(BaseTask):
     """
     On-the-fly fixes.
     """
-
     def requires(self):
         return BaseDirectDownload()
 
@@ -195,12 +189,8 @@ class BaseSingleFile(BaseTask):
             # which makes this more flaky. Assume, that symlink points to the
             # same directory.
             if realpath.startswith("/"):
-                self.logger.debug(
-                    "absolute path detected; assuming symlinked file is in the same directory"
-                )
-                realpath = os.path.join(
-                    os.path.dirname(path), os.path.basename(realpath)
-                )
+                self.logger.debug("absolute path detected; assuming symlinked file is in the same directory")
+                realpath = os.path.join(os.path.dirname(path), os.path.basename(realpath))
             self.logger.debug("found: %s", realpath)
             if not realpath.endswith("gz"):
                 raise RuntimeError("want gz (tarball), got: %s", realpath)

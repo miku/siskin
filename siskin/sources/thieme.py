@@ -36,15 +36,16 @@ oai = https://example.com/oai/provider
 import datetime
 import tempfile
 
+from siskin.decorator import deprecated
+from siskin.sources.amsl import AMSLFilterConfig
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.decorator import deprecated
-from siskin.sources.amsl import AMSLFilterConfig
-from siskin.task import DefaultTask
 
 
 class ThiemeTask(DefaultTask):

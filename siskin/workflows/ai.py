@@ -45,6 +45,26 @@ import urllib
 import requests
 import six
 from dateutil.relativedelta import relativedelta
+from siskin.benchmark import timed
+from siskin.database import sqlitedb
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
+from siskin.sources.base import BaseFix
+from siskin.sources.ceeol import CeeolIntermediateSchema
+from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
+from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
+from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
+from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
+from siskin.sources.genderopen import GenderopenIntermediateSchema
+from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
+from siskin.sources.ijoc import IJOCIntermediateSchema
+from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
+from siskin.sources.kalliope import KalliopeDirectDownload
+from siskin.sources.lissa import LissaIntermediateSchema
+from siskin.sources.olc import OLCIntermediateSchema
+from siskin.sources.osf import OSFIntermediateSchema
+from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
+from siskin.task import DefaultTask
+from siskin.utils import URLCache, load_set_from_target
 
 import luigi
 import rdflib
@@ -54,40 +74,6 @@ from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.database import sqlitedb
-from siskin.sources.amsl import (
-    AMSLFilterConfigFreeze,
-    AMSLFreeContent,
-    AMSLHoldingsFile,
-    AMSLOpenAccessKBART,
-    AMSLService,
-)
-from siskin.sources.base import BaseFix
-from siskin.sources.ceeol import CeeolIntermediateSchema
-from siskin.sources.crossref import (
-    CrossrefDOIList,
-    CrossrefIntermediateSchema,
-    CrossrefUniqISSNList,
-)
-from siskin.sources.degruyter import (
-    DegruyterDOIList,
-    DegruyterIntermediateSchema,
-    DegruyterISSNList,
-)
-from siskin.sources.doaj import DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList
-from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
-from siskin.sources.genderopen import GenderopenIntermediateSchema
-from siskin.sources.ieee import IEEEDOIList, IEEEIntermediateSchema
-from siskin.sources.ijoc import IJOCIntermediateSchema
-from siskin.sources.jstor import JstorDOIList, JstorIntermediateSchema, JstorISSNList
-from siskin.sources.kalliope import KalliopeDirectDownload
-from siskin.sources.lissa import LissaIntermediateSchema
-from siskin.sources.olc import OLCIntermediateSchema
-from siskin.sources.osf import OSFIntermediateSchema
-from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
-from siskin.task import DefaultTask
-from siskin.utils import URLCache, load_set_from_target
 
 
 class AITask(DefaultTask):
@@ -152,10 +138,7 @@ class AIIntermediateSchema(AITask):
             with open(target.path, "rb") as f:
                 head = f.read(4)
                 if binascii.hexlify(head) not in (b"fd2fb528", b"28b52ffd"):
-                    raise RuntimeError(
-                        "AIIntermediateSchema requires zstd-compressed inputs, failed: %s (got: %s)"
-                        % (target.path, binascii.hexlify(head))
-                    )
+                    raise RuntimeError("AIIntermediateSchema requires zstd-compressed inputs, failed: %s (got: %s)" % (target.path, binascii.hexlify(head)))
 
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         for target in self.input():
@@ -203,9 +186,7 @@ class AILicensing(AITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    override = luigi.BoolParameter(
-        description="do not use jour fixe", significant=False
-    )
+    override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
     drop = luigi.BoolParameter(description="drop records w/o isil")
 
     def requires(self):
@@ -409,9 +390,7 @@ class AIDOIStats(AITask):
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(
-                    k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2)))
-                )
+                output.write_tsv(k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2))))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -525,9 +504,7 @@ class AICollectionsAndSerialNumbers(AITask):
         g = rdflib.Graph()
         ns = {
             "amsl": rdflib.Namespace("http://amsl.technology/"),
-            "disco": rdflib.Namespace(
-                "http://amsl.technology/discovery/Metadatenkollektion/"
-            ),
+            "disco": rdflib.Namespace("http://amsl.technology/discovery/Metadatenkollektion/"),
         }
 
         p = ns["amsl"].coveredMediumID
@@ -539,9 +516,7 @@ class AICollectionsAndSerialNumbers(AITask):
                     self.logger.debug("%s %s", i, len(g))
 
                 doc = json.loads(line)
-                issns = list(
-                    itertools.chain(doc.get("rft.issn", []), doc.get("rft.eissn", []))
-                )
+                issns = list(itertools.chain(doc.get("rft.issn", []), doc.get("rft.eissn", [])))
                 colls = doc.get("finc.mega_collection", [])
 
                 for issn in issns:
@@ -669,10 +644,7 @@ class AIISSNCoverageCatalogMatches(AITask):
             with self.output().open("w") as output:
                 for i, row in enumerate(handle.iter_tsv(cols=("issn", "status"))):
                     if row.status == "NOT_FOUND":
-                        link = (
-                            "https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN"
-                            % row.issn
-                        )
+                        link = ("https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN" % row.issn)
                         self.logger.info("fetch #%05d: %s" % (i, link))
                         body = cache.get(link)
                         if "Keine Ergebnisse!" in body:
@@ -684,14 +656,10 @@ class AIISSNCoverageCatalogMatches(AITask):
                                 output.write_tsv(row.issn, "ERR_LAYOUT", link)
                                 continue
                             first = rs[0]
-                            match = re.search(
-                                r"Treffer([0-9]+)-([0-9]+)von([0-9]+)", first.text
-                            )
+                            match = re.search(r"Treffer([0-9]+)-([0-9]+)von([0-9]+)", first.text)
                             if match:
                                 total = match.group(3)
-                                output.write_tsv(
-                                    row.issn, "FOUND_RESULTS_%s" % total, link
-                                )
+                                output.write_tsv(row.issn, "FOUND_RESULTS_%s" % total, link)
                             else:
                                 output.write_tsv(row.issn, "ERR_NO_MATCH", link)
 

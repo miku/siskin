@@ -61,6 +61,12 @@ import urllib.parse
 import urllib.request
 
 import requests
+from siskin import __version__
+from siskin.benchmark import timed
+from siskin.mail import send_mail
+from siskin.sources.amsl import AMSLFilterConfig, AMSLService
+from siskin.task import DefaultTask
+from siskin.utils import URLCache, load_set_from_target
 from six import string_types
 
 import elasticsearch
@@ -70,12 +76,6 @@ from gluish.format import TSV, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
-from siskin import __version__
-from siskin.benchmark import timed
-from siskin.mail import send_mail
-from siskin.sources.amsl import AMSLFilterConfig, AMSLService
-from siskin.task import DefaultTask
-from siskin.utils import URLCache, load_set_from_target
 
 
 class CrossrefTask(DefaultTask):
@@ -285,9 +285,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
     @timed
     def run(self):
         if self.to is None:
-            self.logger.debug(
-                "not sending any email, use --to my@mail.com to send out a report"
-            )
+            self.logger.debug("not sending any email, use --to my@mail.com to send out a report")
 
         amsl = set()
 
@@ -304,14 +302,12 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         with self.input().get("crossref").open() as handle:
             with self.output().open("w") as output:
-                for row in handle.iter_tsv(cols=("name",)):
+                for row in handle.iter_tsv(cols=("name", )):
                     if row.name not in amsl:
                         missing_in_amsl.append(row.name)
                         output.write_tsv(row.name)
 
-        self.logger.debug(
-            "%s collections seem to be missing in AMSL", len(missing_in_amsl)
-        )
+        self.logger.debug("%s collections seem to be missing in AMSL", len(missing_in_amsl))
 
         if self.to is not None:
             # Try to send a message, experimental.
@@ -358,9 +354,7 @@ class CrossrefDOIList(CrossrefTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         # process substitution sometimes results in a broken pipe, so extract beforehand
-        output = shellout(
-            "zstd -cd -T0 {input} > {output}", input=self.input().get("input").path
-        )
+        output = shellout("zstd -cd -T0 {input} > {output}", input=self.input().get("input").path)
         shellout(
             """jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
             input=output,
@@ -442,9 +436,7 @@ class CrossrefDOIAndISSNList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
-        temp = shellout(
-            "zstd -cd -T0 {input} > {output}", input=self.input().get("input").path
-        )
+        temp = shellout("zstd -cd -T0 {input} > {output}", input=self.input().get("input").path)
         output = shellout(
             """jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
             input=temp,
@@ -546,9 +538,7 @@ class CrossrefPrefixMapping(CrossrefTask):
 
                     if name is None:
                         # Cache canonical names, if we missed it.
-                        resp = requests.get(
-                            "https://api.crossref.org/members/%s" % prefix
-                        ).json()
+                        resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
                         namemap[prefix] = resp["message"]["primary-name"]
                         name = namemap.get(prefix, "UNDEFINED")
                         self.logger.debug(

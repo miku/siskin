@@ -38,10 +38,11 @@ import datetime
 import os
 import tempfile
 
-import luigi
-from gluish.utils import shellout
 from siskin.common import RedmineDownloadAttachments
 from siskin.task import DefaultTask
+
+import luigi
+from gluish.utils import shellout
 
 
 class WisoTask(DefaultTask):
@@ -69,14 +70,13 @@ class Wiso2018Files(WisoTask):
         dtype='object')
 
     """
-
     def requires(self):
         return RedmineDownloadAttachments(issue="12301")
 
     def run(self):
         with self.input().open() as handle:
             _, combined = tempfile.mkstemp(prefix="siskin-")
-            for row in handle.iter_tsv(cols=("path",)):
+            for row in handle.iter_tsv(cols=("path", )):
                 # Read CSV file and prepend the basename of the file to the line.
                 filename = os.path.basename(row.path)
                 shellout(

@@ -35,11 +35,12 @@ ftp-pattern = *
 
 import datetime
 
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV
 from gluish.parameter import ClosestDateParameter
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class DDNLTask(DefaultTask):
@@ -57,9 +58,7 @@ class DDNLPaths(DDNLTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(

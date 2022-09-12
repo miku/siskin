@@ -43,15 +43,16 @@ backlog-archive = /path/to/ieee.tar.gz
 import datetime
 import tempfile
 
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.common import Executable
 from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class IEEETask(DefaultTask):
@@ -72,9 +73,7 @@ class IEEEPaths(IEEETask):
         password = self.config.get("ieee", "ftp-password")
         base = self.config.get("ieee", "ftp-path")
         pattern = self.config.get("ieee", "ftp-pattern")
-        return FTPMirror(
-            host=host, username=username, password=password, base=base, pattern=pattern
-        )
+        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
 
     @timed
     def run(self):
@@ -114,7 +113,6 @@ class IEEEBacklogPaths(IEEETask):
     """
     List files in the backlog. Just a `tar -tf` of the compressed dump.
     """
-
     def run(self):
         output = shellout(
             "tar -tf {input} > {output}",
@@ -133,7 +131,6 @@ class IEEEBacklogIntermediateSchema(IEEETask):
     <strike>Strangely,</strike> this yields an occasional tar "Cannot write: Broken pipe".
     // XML syntax error on line 402780414: invalid character entity &10 (no semicolon)
     """
-
     def run(self):
         output = shellout(
             """

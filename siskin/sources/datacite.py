@@ -36,19 +36,19 @@ metha-dir = /path/to/dir
 
 import datetime
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.common import Executable
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class DataciteTask(DefaultTask):
     """
     Base task.
     """
-
     def closest(self):
         return monthly(date=self.date)
 

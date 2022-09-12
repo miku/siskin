@@ -46,10 +46,11 @@ import os
 import re
 import tempfile
 
-import luigi
-from gluish.utils import shellout
 from siskin.task import DefaultTask
+
+import luigi
 from gluish.format import Zstd
+from gluish.utils import shellout
 
 
 class CeeolTask(DefaultTask):
@@ -66,7 +67,6 @@ class CeeolIntermediateSchema(CeeolTask):
     """
     Convert XML and concat files into a single intermediate schema output.
     """
-
     def run(self):
         diskdir = self.config.get("ceeol", "disk-dir")
         files = glob.glob(os.path.join(diskdir, "articles_*xml"))

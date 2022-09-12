@@ -33,14 +33,15 @@ import glob
 import json
 import os
 
+from siskin.conversions import olc_to_intermediate_schema
+from siskin.task import DefaultTask
+from siskin.utils import sha1obj
+
 import luigi
 from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.conversions import olc_to_intermediate_schema
-from siskin.task import DefaultTask
-from siskin.utils import sha1obj
 
 
 class OLCTask(DefaultTask):
@@ -78,9 +79,7 @@ class OLCDump(OLCTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        query = " OR ".join(
-            ["collection_details:{}".format(c) for c in self.COLLECTIONS]
-        )
+        query = " OR ".join(["collection_details:{}".format(c) for c in self.COLLECTIONS])
         output = shellout(
             """
             solrdump -verbose -server {server} -q '{query}' |
@@ -144,13 +143,9 @@ class OLCIntermediateSchemaDeprecated(OLCTask):
 
         # Find the output file.
         taskdir = os.path.join(self.BASE, self.TAG)
-        outputs = sorted(
-            glob.glob(os.path.join(taskdir, "68-output-*json")), reverse=True
-        )
+        outputs = sorted(glob.glob(os.path.join(taskdir, "68-output-*json")), reverse=True)
         if len(outputs) == 0:
-            raise RuntimeError(
-                "could not find any artifacts for source at {}".format(taskdir)
-            )
+            raise RuntimeError("could not find any artifacts for source at {}".format(taskdir))
         path = outputs[0]
 
         # Compress as AIIntermediateSchema requires all artifacts to be gzip compressed.

@@ -37,15 +37,15 @@ import json
 import time
 
 import requests
+from siskin.conversions import osf_to_intermediate
+from siskin.sources.amsl import AMSLFilterConfigFreeze
+from siskin.task import DefaultTask
 
 import luigi
 from gluish.format import Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.conversions import osf_to_intermediate
-from siskin.sources.amsl import AMSLFilterConfigFreeze
-from siskin.task import DefaultTask
 
 
 class OSFTask(DefaultTask):
@@ -78,9 +78,7 @@ class OSFDownload(OSFTask):
         b_newline = "\n".encode(self.encoding)
         with self.output().open("w") as output:
             while True:
-                link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(
-                    page
-                )
+                link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(page)
                 self.logger.debug("osf: {}".format(link))
                 resp = requests.get(link)
                 if resp.status_code == 404:
@@ -91,14 +89,8 @@ class OSFDownload(OSFTask):
                         max_retries -= 1
                         continue
                     else:
-                        raise RuntimeError(
-                            "osf api failed with {}".format(resp.status_code)
-                        )
-                self.logger.debug(
-                    "fetched {} from {}: {}".format(
-                        len(resp.text), link, resp.text[:40]
-                    )
-                )
+                        raise RuntimeError("osf api failed with {}".format(resp.status_code))
+                self.logger.debug("fetched {} from {}: {}".format(len(resp.text), link, resp.text[:40]))
                 output.write(resp.text.encode(self.encoding))
                 output.write(b_newline)
                 page += 1
@@ -113,9 +105,7 @@ class OSFIntermediateSchema(OSFTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    max_retries = luigi.IntParameter(
-        default=5, description="number of HTTP request retries", significant=False
-    )
+    max_retries = luigi.IntParameter(default=5, description="number of HTTP request retries", significant=False)
     encoding = luigi.Parameter(default="utf-8", significant=False)
 
     def requires(self):

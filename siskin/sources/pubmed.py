@@ -29,14 +29,15 @@ from __future__ import print_function
 
 import datetime
 
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class PubmedTask(DefaultTask):
@@ -55,9 +56,7 @@ class PubmedMetadataPaths(PubmedTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(
@@ -84,9 +83,7 @@ class PubmedJournalList(PubmedTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout(
-            """curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """
-        )
+        output = shellout("""curl --fail "http://www.ncbi.nlm.nih.gov/pmc/journals/collections/?format=csv" > {output} """)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

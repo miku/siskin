@@ -27,13 +27,14 @@ import json
 import re
 import tarfile
 
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
 
 
 class PerinormTask(DefaultTask):
@@ -55,9 +56,7 @@ class PerinormPaths(PerinormTask):
 
     date = luigi.DateParameter(default=PerinormTask.current["date"])
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(
@@ -97,9 +96,7 @@ class PerinormExport(PerinormTask):
                 path = line
                 break
             else:
-                raise RuntimeError(
-                    "could not file {} in ftp filelist".format(self.current["filename"])
-                )
+                raise RuntimeError("could not file {} in ftp filelist".format(self.current["filename"]))
         self.logger.debug("using {}".format(path))
 
         # XXX: get these from amsl via: span-amsl-discovery -f -live

@@ -70,23 +70,18 @@ for line in tqdm.tqdm(fileinput.input(), total=941528):
 
         # Search ISSN in AI (w/o 65) and FID-MEDIEN-DE-15
         if not issn in counters["fid"]:
-            query = (
-                'issn:"%s" AND NOT source_id:65 AND institution:FID-MEDIEN-DE-15' % issn
-            )
+            query = ('issn:"%s" AND NOT source_id:65 AND institution:FID-MEDIEN-DE-15' % issn)
             resp = search(query)
             counters["fid"][issn] = resp["response"]["numFound"]
 
-data = [
-    (
-        names[k],
-        k,
-        v,
-        counters["ai"][k],
-        counters["fid"][k],
-        "%0.2f%%" % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])),
-    )
-    for k, v in counters["c"].most_common()
-]
+data = [(
+    names[k],
+    k,
+    v,
+    counters["ai"][k],
+    counters["fid"][k],
+    "%0.2f%%" % (100 * float(counters["fid"][k]) / max(0.01, counters["ai"][k])),
+) for k, v in counters["c"].most_common()]
 
 df = pd.DataFrame(data, columns=["name", "issn", "count", "ai", "ai-fid", "pct"])
 df.to_excel("65.xlsx")

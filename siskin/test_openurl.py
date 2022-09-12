@@ -6,7 +6,9 @@ def test_openurl_from_intermediateschema():
         ("empty doc", {}, {}),
         (
             "title only",
-            {"rft.atitle": "empty doc"},
+            {
+                "rft.atitle": "empty doc"
+            },
             {
                 "ctx_enc": "info:ofi/enc:UTF-8",
                 "ctx_ver": "Z39.88-2004",
@@ -71,39 +73,70 @@ def test_openurl_from_intermediateschema():
         (
             "crossref-1",
             {
-                "finc.format": "ElectronicArticle",
-                "finc.mega_collection": [
-                    "Springer Science + Business Media (CrossRef)"
-                ],
-                "finc.id": "ai-49-aHR0cDovL2R4LmRvaS5vcmcvMTAuMTAxNi9qLm51cnguMjAwNi4wNS4wMjU",
-                "finc.source_id": "49",
-                "ris.type": "EJOUR",
-                "rft.atitle": "An Analysis of Correlations Among 4 Outcome Scales Employed in Clinical Trials of Patients With Major Depressive Disorder",
-                "rft.epage": "412",
-                "rft.genre": "article",
+                "finc.format":
+                "ElectronicArticle",
+                "finc.mega_collection": ["Springer Science + Business Media (CrossRef)"],
+                "finc.id":
+                "ai-49-aHR0cDovL2R4LmRvaS5vcmcvMTAuMTAxNi9qLm51cnguMjAwNi4wNS4wMjU",
+                "finc.source_id":
+                "49",
+                "ris.type":
+                "EJOUR",
+                "rft.atitle":
+                "An Analysis of Correlations Among 4 Outcome Scales Employed in Clinical Trials of Patients With Major Depressive Disorder",
+                "rft.epage":
+                "412",
+                "rft.genre":
+                "article",
                 "rft.issn": ["1545-5343"],
-                "rft.issue": "3",
-                "rft.jtitle": "NeuroRX",
-                "rft.tpages": "2",
-                "rft.pages": "411-412",
+                "rft.issue":
+                "3",
+                "rft.jtitle":
+                "NeuroRX",
+                "rft.tpages":
+                "2",
+                "rft.pages":
+                "411-412",
                 "rft.pub": ["Springer Science + Business Media"],
-                "rft.date": "2006-07-01",
-                "x.date": "2006-07-01T00:00:00Z",
-                "rft.spage": "411",
-                "rft.volume": "3",
+                "rft.date":
+                "2006-07-01",
+                "x.date":
+                "2006-07-01T00:00:00Z",
+                "rft.spage":
+                "411",
+                "rft.volume":
+                "3",
                 "authors": [
-                    {"rft.aulast": "JIANG", "rft.aufirst": "Q"},
-                    {"rft.aulast": "AHMED", "rft.aufirst": "S"},
-                    {"rft.aulast": "PEDERSEN", "rft.aufirst": "R"},
-                    {"rft.aulast": "MUSGNUNG", "rft.aufirst": "J"},
-                    {"rft.aulast": "ENTSUAH", "rft.aufirst": "R"},
+                    {
+                        "rft.aulast": "JIANG",
+                        "rft.aufirst": "Q"
+                    },
+                    {
+                        "rft.aulast": "AHMED",
+                        "rft.aufirst": "S"
+                    },
+                    {
+                        "rft.aulast": "PEDERSEN",
+                        "rft.aufirst": "R"
+                    },
+                    {
+                        "rft.aulast": "MUSGNUNG",
+                        "rft.aufirst": "J"
+                    },
+                    {
+                        "rft.aulast": "ENTSUAH",
+                        "rft.aufirst": "R"
+                    },
                 ],
-                "doi": "10.1016/j.nurx.2006.05.025",
+                "doi":
+                "10.1016/j.nurx.2006.05.025",
                 "languages": ["eng"],
                 "url": ["http://dx.doi.org/10.1016/j.nurx.2006.05.025"],
-                "version": "0.9",
+                "version":
+                "0.9",
                 "x.subjects": ["Pharmacology (medical)"],
-                "x.type": "journal-article",
+                "x.type":
+                "journal-article",
             },
             {
                 "ctx_enc": "info:ofi/enc:UTF-8",

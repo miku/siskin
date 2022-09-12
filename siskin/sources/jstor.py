@@ -41,17 +41,17 @@ import re
 import tempfile
 
 import six
+from siskin.benchmark import timed
+from siskin.common import Executable, FTPMirror
+from siskin.sources.amsl import AMSLFilterConfig, AMSLService
+from siskin.task import DefaultTask
+from siskin.utils import SetEncoder, load_set_from_file, nwise
 
 import luigi
 from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.common import Executable, FTPMirror
-from siskin.sources.amsl import AMSLFilterConfig, AMSLService
-from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, load_set_from_file, nwise
 
 
 class JstorTask(DefaultTask):
@@ -70,9 +70,7 @@ class JstorPaths(JstorTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(
@@ -106,7 +104,7 @@ class JstorMembers(JstorTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path",)):
+            for row in handle.iter_tsv(cols=("path", )):
                 if not row.path.endswith(".zip"):
                     self.logger.debug("skipping: %s", row.path)
                     continue
@@ -273,9 +271,7 @@ class JstorXML(JstorTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            groups = itertools.groupby(
-                handle.iter_tsv(cols=("archive", "member")), lambda row: row.archive
-            )
+            groups = itertools.groupby(handle.iter_tsv(cols=("archive", "member")), lambda row: row.archive)
 
             for archive, items in groups:
                 # Write members to extract to temporary file.
@@ -596,14 +592,8 @@ class JstorIntermediateSchema(JstorTask):
                         # Translate JSTOR names to technical collection id.
                         amsl_names = [jstor_to_tcid.get(name) for name in names]
                         # Check validity against AMSL names.
-                        clean_names = [
-                            name
-                            for name in amsl_names
-                            if name in tcid_to_mega_collection
-                        ]
-                        clean_names = clean_names + [
-                            tcid_to_mega_collection[tcid] for tcid in clean_names
-                        ]
+                        clean_names = [name for name in amsl_names if name in tcid_to_mega_collection]
+                        clean_names = clean_names + [tcid_to_mega_collection[tcid] for tcid in clean_names]
 
                         # The clean_names list has both TCID and mega_collection.
                         doc["finc.mega_collection"] = clean_names
@@ -618,12 +608,7 @@ class JstorIntermediateSchema(JstorTask):
                         # records accessible. And discard the other 13328, e.g.
                         # https://www.jstor.org/stable/10.5250/femigermstud.35.0147.
                         assumed_oa_pattern = r"http[s]?://www.jstor.org/stable/[0-9]+$"
-                        if any(
-                            (
-                                re.search(assumed_oa_pattern, url)
-                                for url in doc.get("url", [])
-                            )
-                        ):
+                        if any((re.search(assumed_oa_pattern, url) for url in doc.get("url", []))):
                             # TODO(miku): These names are not official yet.
                             doc["finc.mega_collection"] = [
                                 "Open JSTOR Collection",

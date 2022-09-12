@@ -50,16 +50,16 @@ import json
 import re
 
 import six
+from siskin.common import FTPMirror
+from siskin.decorator import deprecated
+from siskin.sources.amsl import AMSLFilterConfig
+from siskin.task import DefaultTask
 
 import luigi
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import FTPMirror
-from siskin.decorator import deprecated
-from siskin.sources.amsl import AMSLFilterConfig
-from siskin.task import DefaultTask
 
 
 class SpringerTask(DefaultTask):
@@ -76,9 +76,7 @@ class SpringerPaths(SpringerTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(
-        default=20, significant=False, description="timeout in seconds"
-    )
+    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
 
     def requires(self):
         return FTPMirror(
@@ -112,7 +110,7 @@ class SpringerCleanup(SpringerTask):
     def run(self):
         realpath = None
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path",)):
+            for row in handle.iter_tsv(cols=("path", )):
                 if not row.path.endswith("total_tpu.ldj.gz"):
                     continue
                 realpath = row.path

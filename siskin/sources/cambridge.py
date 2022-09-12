@@ -37,14 +37,15 @@ scp-src = user@ftp.online:/home/cambridge
 import datetime
 import os
 
+from siskin.common import Executable
+from siskin.task import DefaultTask
+from siskin.utils import iterfiles
+
 import luigi
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.common import Executable
-from siskin.task import DefaultTask
-from siskin.utils import iterfiles
 
 
 class CambridgeTask(DefaultTask):
@@ -72,9 +73,7 @@ class CambridgeDropbox(CambridgeTask):
         target = os.path.join(self.taskdir(), "mirror")
         shellout(
             "mkdir -p {target} && rsync {rsync_options} {src} {target}",
-            rsync_options=self.config.get(
-                "cambridge", "rsync-options", fallback="-avzP"
-            ),
+            rsync_options=self.config.get("cambridge", "rsync-options", fallback="-avzP"),
             src=self.config.get("cambridge", "scp-src"),
             target=target,
         )

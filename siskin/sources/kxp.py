@@ -30,12 +30,13 @@ Tickets: 15833, 15694
 
 import datetime
 
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.common import Executable
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class KXPTask(DefaultTask):
@@ -90,12 +91,8 @@ class KXPSRU(KXPTask):
             pica.rvk="LT 5581*" or pica.rvk="LT 5582*" or pica.rvk="LT 5586*"
             or pica.rvk="LT 57240" or pica.sbn="vd17" or pica.sbn="vd18"
         """
-        output = shellout(
-            """srufetch -x -q '{selector}' > {output} """, selector=selector
-        )
-        output = shellout(
-            """yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output
-        )
+        output = shellout("""srufetch -x -q '{selector}' > {output} """, selector=selector)
+        output = shellout("""yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -34,14 +34,15 @@ import datetime
 import os
 import tempfile
 
+from siskin.benchmark import timed
+from siskin.task import DefaultTask
+
 import luigi
 from gluish.common import Executable
 from gluish.format import TSV, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
-from siskin.benchmark import timed
-from siskin.task import DefaultTask
 
 
 class DOAJTask(DefaultTask):
@@ -114,9 +115,7 @@ class DOAJIntermediateSchemaDirty(DOAJTask):
 
     def requires(self):
         return {
-            "span-import": Executable(
-                name="span-import", message="http://git.io/vI8NV"
-            ),
+            "span-import": Executable(name="span-import", message="http://git.io/vI8NV"),
             "input": DOAJHarvest(date=self.date),
         }
 

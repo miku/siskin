@@ -46,10 +46,10 @@ from xml.sax.saxutils import escape, unescape
 import pymarc
 import requests
 import six
+from siskin.utils import URLCache
 
 import marcx
 import xmltodict
-from siskin.utils import URLCache
 
 html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
@@ -76,9 +76,7 @@ def html_unescape(text):
     return unescape(text, html_unescape_table)
 
 
-def imslp_tarball_to_marc(
-    tarball, outputfile=None, legacy_mapping=None, max_failures=30
-):
+def imslp_tarball_to_marc(tarball, outputfile=None, legacy_mapping=None, max_failures=30):
     """
     Convert an IMSLP tarball to MARC binary output file without extracting it.
     If outputfile is not given, write to a temporary location.
@@ -99,9 +97,7 @@ def imslp_tarball_to_marc(
             for member in tar.getmembers():
                 fobj = tar.extractfile(member)
                 try:
-                    record = imslp_xml_to_marc(
-                        fobj.read(), legacy_mapping=legacy_mapping
-                    )
+                    record = imslp_xml_to_marc(fobj.read(), legacy_mapping=legacy_mapping)
                     writer.write(record)
                 except ValueError as exc:
                     logger.warn("conversion failed: %s", exc)
@@ -120,9 +116,7 @@ def imslp_tarball_to_marc(
             )
             raise RuntimeError("more than %d records failed", max_failures)
 
-        logger.debug(
-            "%d/%d records failed/processed", stats["failed"], stats["processed"]
-        )
+        logger.debug("%d/%d records failed/processed", stats["failed"], stats["processed"])
 
     return outputfile
 
@@ -163,9 +157,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
                 record.add("041", a=l)
 
     creator = doc["creator"]["mainForm"]
-    record.add(
-        "100", a=creator, e="cmp", _0=legacy_mapping.get(identifier, {}).get("viaf", "")
-    )
+    record.add("100", a=creator, e="cmp", _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
 
     record.add("240", a=legacy_mapping.get(identifier, {}).get("title", ""))
 
@@ -190,9 +182,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
         else:
             raise ValueError("cannot handle %d subjects", len(doc["subject"]))
 
-        record.add(
-            "590", a=for689[0].title(), b=doc.get("music_arrangement_of", "").title()
-        )
+        record.add("590", a=for689[0].title(), b=doc.get("music_arrangement_of", "").title())
 
         for689.append(doc.get("music_arrangement_of", ""))
 
@@ -200,9 +190,7 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
             record.add("689", a=subject.title())
 
     record.add("700", a=doc.get("contributor", {}).get("mainForm", ""), e="ctb")
-    record.add(
-        "856", q="text/html", _3="Petrucci Musikbibliothek", u=doc["url"]["#text"]
-    )
+    record.add("856", q="text/html", _3="Petrucci Musikbibliothek", u=doc["url"]["#text"])
     record.add("970", c="PN")
     record.add("980", a=identifier, b="15", c="Petrucci Musikbibliothek")
     return record
@@ -307,10 +295,10 @@ def olc_to_intermediate_schema(doc):
 
     result = {
         "abstract": de_listify(doc.get("abstract")),
-        "authors": [{"rft.au": name} for name in doc.get("author2", [])],
-        "finc.format": olc_format_to_finc_format.get(
-            de_listify(doc.get("format"), "Article")
-        ),
+        "authors": [{
+            "rft.au": name
+        } for name in doc.get("author2", [])],
+        "finc.format": olc_format_to_finc_format.get(de_listify(doc.get("format"), "Article")),
         "finc.id": "ai-68-{}".format(doc["id"]),
         "finc.mega_collection": list(mega_collections_set),
         "finc.source_id": "68",
@@ -436,27 +424,19 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
                     attrs = item["embeds"]["users"]["data"]["attributes"]
                 except KeyError as exc:
                     attrs = item["embeds"]["users"]["errors"][0]["meta"]
-                result.append(
-                    {
-                        "rft.aufirst": attrs["given_name"],
-                        "rft.aulast": attrs["family_name"],
-                    }
-                )
+                result.append({
+                    "rft.aufirst": attrs["given_name"],
+                    "rft.aulast": attrs["family_name"],
+                })
         except KeyError as exc:
-            logger.debug(
-                "failed to find authors for {}: {}".format(
-                    exc, json.dumps(doc, indent=4)
-                )
-            )
+            logger.debug("failed to find authors for {}: {}".format(exc, json.dumps(doc, indent=4)))
         else:
             logger.debug("fetched {}, found {} author(s)".format(url, len(result)))
         return result
 
     result = {
         "abstract": attrs.get("description", ""),
-        "authors": fetch_authors(
-            osf, force=force, best_effort=best_effort, max_retries=max_retries
-        ),
+        "authors": fetch_authors(osf, force=force, best_effort=best_effort, max_retries=max_retries),
         "finc.format": "Preprint",
         "finc.id": "ai-{}-{}".format(source_id, osf["id"]),
         "finc.mega_collection": [
@@ -475,12 +455,10 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     }
 
     if "preprint_doi_created" in attrs and attrs["preprint_doi_created"]:
-        result.update(
-            {
-                "x.date": attrs.get("preprint_doi_created", "") + "Z",
-                "rft.date": attrs.get("preprint_doi_created", "")[:10],
-            }
-        )
+        result.update({
+            "x.date": attrs.get("preprint_doi_created", "") + "Z",
+            "rft.date": attrs.get("preprint_doi_created", "")[:10],
+        })
 
     return result
 
@@ -509,9 +487,7 @@ def eastview_solr_to_intermediate_schema(
         # 'coll', 'cdate'
         if not dd.get("title") or not dd.get("url"):
             continue
-        encoded_id = (
-            base64.b64encode(dd["id"].encode("utf-8")).decode("utf-8").rstrip("=")
-        )
+        encoded_id = (base64.b64encode(dd["id"].encode("utf-8")).decode("utf-8").rstrip("="))
         authors = [{"rft.au": v} for v in dd.get("author", "").split(",") if v]
         result = {
             "version": "0.9",

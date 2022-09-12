@@ -29,11 +29,11 @@ import datetime
 import functools
 
 import requests
+from siskin.task import DefaultTask
 
 import luigi
 from gluish.format import Zstd
 from gluish.utils import shellout
-from siskin.task import DefaultTask
 
 
 class KalliopeTask(DefaultTask):
@@ -47,9 +47,7 @@ class KalliopeTask(DefaultTask):
     @functools.lru_cache
     def get_last_modified_date(self):
         last_modified_header = requests.head(self.download_url).headers["Last-Modified"]
-        last_modified = datetime.datetime.strptime(
-            last_modified_header, "%a, %d %b %Y %H:%M:%S %Z"
-        )
+        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
         return last_modified
 
 
