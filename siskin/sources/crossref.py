@@ -94,24 +94,13 @@ class CrossrefTask(DefaultTask):
 
 class CrossrefRawItems(CrossrefTask):
     """
-    Concatenate all harvested items.
+    Concatenate all harvested items. This will sync date slices from the
+    crossref API, if necessary. For index generation, we run a cron job that
+    tries to keep date slices recent, independent of this task.
 
-    TODO: we can get rid of all tasks before this with span-crossref-sync;
+    Companion cron: https://is.gd/WzUa6s
 
-    $ span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
-    $ time cat $(find ~/.cache/span/crossref-sync/ -type f -name "*gz") >> $(taskoutput CrossrefRawItems)
-
-    or:
-
-    $ span-crossref-sync -t 30m -mode s -verbose -s 2021-04-27 | pigz -c > $(taskoutput CrossrefRawItems)
-
-    Companion cron:
-
-    28 1 * * *  span-crossref-sync -p zstd -P feed-1- -i d -t 30m -mode s -verbose -s 2021-04-27 > /dev/null
-
-    Most updates so far in a single day on 2021-12-22: 10,120,570.
-
-    Data point: daily updates, 204G, takes about 60min.
+    In 09/2022 this task takes about 90 minutes, 300GB or more compressed.
     """
 
     begin = luigi.DateParameter(
