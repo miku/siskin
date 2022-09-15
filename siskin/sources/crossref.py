@@ -143,7 +143,7 @@ class CrossrefUniqItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
-    batch_size = luigi.IntParameter(default=10000, description="batch size", significant=False)
+    batch_size = luigi.IntParameter(default=5000, description="batch size", significant=False)
 
     def requires(self):
         return CrossrefRawItems(begin=self.begin, date=self.closest())
