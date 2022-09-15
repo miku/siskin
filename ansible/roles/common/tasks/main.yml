@@ -4,6 +4,7 @@
     name:
     - bash-completion
     - bc
+    - bind-utils # for nslookup, etc.
     - bzip2
     - cronie # https://stackoverflow.com/a/21802522/89391
     - curl
