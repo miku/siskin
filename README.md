@@ -35,7 +35,7 @@ More about the project:
 
 * [Blog about index](https://finc.info/Archive/268) [de], 2015
 * [Presentation at 4th VuFind Meetup](https://swop.bsz-bw.de/frontdoor/index/index/docId/1104) [de], 2015
-* [Metadaten zwischen Autopsie und Automatisierung](https://www.bibliotheksverband.de/fileadmin/user_upload/Kommissionen/Kom_ErwBest/Tagungen/Erwkomm_Fortbild_Ddorf2018_Wiesenmueller.pdf#page=26) [de], 2018
+* [Metadaten zwischen Autopsie und Automatisierung](http://web.archive.org/web/20200926012900id_/https://www.bibliotheksverband.de/fileadmin/user_upload/Kommissionen/Kom_ErwBest/Tagungen/Erwkomm_Fortbild_Ddorf2018_Wiesenmueller.pdf#page=26) [de], 2018
 
 Contents.
 
