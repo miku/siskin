@@ -683,6 +683,20 @@ class AMSLFilterConfigFreeze(AMSLTask):
         return luigi.LocalTarget(path=self.path(ext="zip"))
 
 
+class AMSLFilterConfigReduced(AMSLTask):
+    """
+    Reduced AMSL filter config. Only keep the holdings files associated with an
+    institution.
+    """
+    def requires(self):
+        return AMSLService(date=self.date),
+
+    def run(self):
+        pass
+
+    def complete(self):
+        return False
+
 class AMSLFilterConfig(AMSLTask):
     """
     Turn AMSL API to a span(1) filter configuration.
