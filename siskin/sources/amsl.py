@@ -70,12 +70,12 @@ import operator
 import tempfile
 import zipfile
 
-from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, dictcheck
-
 import luigi
+
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+from siskin.task import DefaultTask
+from siskin.utils import SetEncoder, dictcheck
 
 
 class AMSLTask(DefaultTask):
@@ -665,150 +665,6 @@ class AMSLOpenAccessKBART(AMSLTask):
         return luigi.LocalTarget(path=self.path())
 
 
-class AMSLWisoPackages(AMSLTask):
-    """
-    Collect WISO packages.
-
-    XXX(miku): Throw this away.
-    """
-
-    date = luigi.DateParameter(default=datetime.date.today())
-    encoding = luigi.Parameter(
-        default="latin-1",
-        description="wiso journal id csv file encoding",
-        significant=False,
-    )
-
-    def requires(self):
-        return AMSLService(date=self.date)
-
-    def hardcoded_list_of_wiso_journal_identifiers(self):
-        """
-        Refs. #10707, Att. #4444.
-        """
-        ids = set()
-        filename = self.assets("wiso/645896059854847ce4ccd1416e11ba372e45bfd6.csv")
-        with io.open(filename, encoding=self.encoding) as handle:
-            for i, line in enumerate(handle):
-                if i == 0:
-                    continue
-                line = line.strip()
-                if not line:
-                    continue
-                fields = line.split(";")
-                if len(fields) < 12:
-                    raise ValueError("expected ; separated KBART-ish file with journal identifier at column 11")
-                id = fields[11].strip()
-                if not id:
-                    continue
-                ids.add(id)
-
-        return sorted(ids)
-
-    def resolve_ubl_profile(self, colls):
-        """
-        Given a list of collection names, replace the complete list with
-        hardcoded WISO journal identifiers from #10707/4444.
-        """
-        if "wiso UB Leipzig Profil" in colls:
-            return self.hardcoded_list_of_wiso_journal_identifiers()
-
-        return colls
-
-    def run(self):
-        with self.input().open() as handle:
-            doc = json.loads(handle.read())
-
-        isilpkg = collections.defaultdict(lambda: collections.defaultdict(set))
-
-        for item in doc:
-            isil, sid = item.get("ISIL"), item.get("sourceID")
-            mega_collection = item.get("megaCollection")
-            tcid = item.get("technicalCollectionID")
-            lthf = item.get("linkToHoldingsFile")
-            if sid != "48":
-                continue
-            isilpkg[isil][lthf].add(mega_collection)
-            isilpkg[isil][lthf].add(tcid)
-
-        filterconfig = collections.defaultdict(dict)
-        fzs_package_name = "Genios (Fachzeitschriften)"
-
-        for isil, blob in list(isilpkg.items()):
-            include_fzs = False
-            for _, colls in list(blob.items()):
-                if fzs_package_name in colls:
-                    include_fzs = True
-
-            filters = []
-
-            if include_fzs and isil != "FID-MEDIEN-DE-15":
-                packages = set(itertools.chain(*[c for _, c in list(blob.items())]))
-                packages = self.resolve_ubl_profile(packages)
-                filters.append(
-                    {"and": [
-                        {
-                            "source": ["48"]
-                        },
-                        {
-                            "package": [fzs_package_name]
-                        },
-                        {
-                            "package": [name for name in packages if name != fzs_package_name]
-                        },
-                    ]})
-
-            for lthf, colls in list(blob.items()):
-                if lthf is None or lthf == "null":
-                    continue
-                if isil == "FID-MEDIEN-DE-15":
-                    colls = self.resolve_ubl_profile(colls)
-                    filter = {
-                        "and": [
-                            {
-                                "source": ["48"]
-                            },
-                            {
-                                "holdings": {
-                                    "urls": [lthf]
-                                }
-                            },
-                            {
-                                "package": [c for c in colls if c != fzs_package_name]
-                            },
-                        ]
-                    }
-                else:
-                    filter = {
-                        "and": [
-                            {
-                                "source": ["48"]
-                            },
-                            {
-                                "holdings": {
-                                    "urls": [lthf]
-                                }
-                            },
-                            {
-                                "package": [c for c in colls if c != fzs_package_name]
-                            },
-                            {
-                                "not": {
-                                    "package": [fzs_package_name]
-                                }
-                            },
-                        ]
-                    }
-                filters.append(filter)
-            filterconfig[isil] = {"or": filters}
-
-        with self.output().open("w") as output:
-            json.dump(filterconfig, output, cls=SetEncoder)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json"))
-
-
 class AMSLFilterConfigFreeze(AMSLTask):
     """
     Create a frozen file. File will contain the filterconfig plus content of all URLs.
@@ -919,13 +775,10 @@ class AMSLFilterConfig(AMSLTask):
         return list(result)
 
     def requires(self):
-        return {
-            "amsl": AMSLService(date=self.date),
-            "wiso": AMSLWisoPackages(date=self.date),
-        }
+        return AMSLService(date=self.date),
 
     def run(self):
-        with self.input().get("amsl").open() as handle:
+        with self.input().open() as handle:
             doc = json.loads(handle.read())
 
         # Case: ISIL, SID, collection.
@@ -1243,13 +1096,6 @@ class AMSLFilterConfig(AMSLTask):
                 filterconfig[isil] = filters[0]
                 continue
             filterconfig[isil] = {"or": filters}
-
-        # Include WISO.
-        with self.input().get("wiso").open() as handle:
-            wisoconf = json.load(handle)
-            for isil, tree in list(wisoconf.items()):
-                for filter in tree.get("or", []):
-                    filterconfig[isil]["or"].append(filter)
 
         # XXX: Adjust a few items for DE-14, cf. 2018-06-11, namely, add links
         # to external holding files, which are not included into the AMSL
