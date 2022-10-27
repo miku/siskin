@@ -14,8 +14,9 @@ Goals:
 """
 
 import luigi
-from gluish.utils import shellout
 from luigi.format import Gzip
+
+from gluish.utils import shellout
 
 
 class ArxivInput(luigi.ExternalTask):

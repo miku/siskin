@@ -37,15 +37,15 @@ ftp-pattern = some*glob*pattern.zip
 import datetime
 import tempfile
 
+import luigi
+
+from gluish.format import TSV, Zstd
+from gluish.parameter import ClosestDateParameter
+from gluish.utils import shellout
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
-
-import luigi
-from gluish.format import TSV, Zstd
-from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout
 
 
 class DegruyterTask(DefaultTask):

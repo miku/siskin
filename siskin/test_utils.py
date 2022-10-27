@@ -5,12 +5,12 @@ import json
 import os
 import tempfile
 
-import pymarc
-import requests
-from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing, xmlstream)
-
 import marcx
+import requests
 import responses
+
+import pymarc
+from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing, xmlstream)
 
 
 def test_set_encoder_dumps():

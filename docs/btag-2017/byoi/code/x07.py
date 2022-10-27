@@ -19,6 +19,7 @@ import json
 
 import luigi
 from luigi.format import Gzip
+
 from x06 import IntermediateSchema
 
 

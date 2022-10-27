@@ -61,9 +61,9 @@ import datetime
 import errno
 import json
 import sys
-import urllib3
 
 import requests
+import urllib3
 
 if __name__ == '__main__':
 

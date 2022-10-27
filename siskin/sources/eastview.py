@@ -45,17 +45,17 @@ import os
 import tempfile
 import zipfile
 
-from siskin.benchmark import timed
-from siskin.common import FTPMirror
-from siskin.conversions import eastview_solr_to_intermediate_schema
-from siskin.task import DefaultTask
-
 import luigi
+
 from gluish.common import Executable
 from gluish.format import TSV, Gzip, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.benchmark import timed
+from siskin.common import FTPMirror
+from siskin.conversions import eastview_solr_to_intermediate_schema
+from siskin.task import DefaultTask
 
 
 class EastViewTask(DefaultTask):

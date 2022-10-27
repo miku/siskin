@@ -43,13 +43,13 @@ import tarfile
 import tempfile
 from xml.sax.saxutils import escape, unescape
 
-import pymarc
+import marcx
 import requests
 import six
-from siskin.utils import URLCache
-
-import marcx
 import xmltodict
+
+import pymarc
+from siskin.utils import URLCache
 
 html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}

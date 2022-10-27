@@ -43,16 +43,16 @@ import sys
 import tempfile
 import xml.etree.cElementTree as ET
 
-import requests
-import six
-from dateutil import relativedelta
-from siskin import __version__
-from six import string_types
-
 import backoff
 import bs4
 import luigi
+import requests
+import six
+from dateutil import relativedelta
+from six import string_types
 from six.moves.urllib.parse import urlparse
+
+from siskin import __version__
 
 logger = logging.getLogger("siskin")
 

@@ -27,11 +27,11 @@ Open Citations, https://opencitations.net/.
 
 import tempfile
 
-from siskin.task import DefaultTask
-
 import luigi
+
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+from siskin.task import DefaultTask
 
 
 class OCITask(DefaultTask):

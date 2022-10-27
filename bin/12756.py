@@ -50,7 +50,6 @@ import logging
 import sys
 
 import requests
-
 from six.moves.urllib.parse import urlencode
 
 logging.basicConfig(level=logging.INFO,

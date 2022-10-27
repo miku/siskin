@@ -28,12 +28,12 @@ Refs. #16327
 import datetime
 import functools
 
-import requests
-from siskin.task import DefaultTask
-
 import luigi
+import requests
+
 from gluish.format import Zstd
 from gluish.utils import shellout
+from siskin.task import DefaultTask
 
 
 class KalliopeTask(DefaultTask):

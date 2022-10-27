@@ -47,15 +47,15 @@ import datetime
 import functools
 import os
 
-import requests
-from siskin.common import FTPMirror
-from siskin.task import DefaultTask
-
 import luigi
+import requests
+
 from gluish.format import TSV, Gzip, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+from siskin.common import FTPMirror
+from siskin.task import DefaultTask
 
 
 class BaseTask(DefaultTask):

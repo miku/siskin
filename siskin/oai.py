@@ -31,7 +31,6 @@ import tempfile
 import time
 
 import requests
-
 import xmltodict
 
 logger = logging.getLogger("siskin")
