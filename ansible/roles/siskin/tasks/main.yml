@@ -9,7 +9,7 @@
   copy:
     dest: /etc/profile.d/siskin_proxy.sh
     content: |
-      export no_proxy=localhost,127.0.0.1
+      export no_proxy=localhost,127.0.0.1,services.ub.uni-leipzig.de,ub.uni-leipzig.de,uni-leipzig.de
       export http_proxy=http://proxy.uni-leipzig.de:3128
       export https_proxy=http://proxy.uni-leipzig.de:3128
       export ftp_proxy=http://proxy.uni-leipzig.de:3128
