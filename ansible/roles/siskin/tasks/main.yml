@@ -86,6 +86,10 @@
   copy:
     src: logging.ini
     dest: /etc/luigi/logging.ini
+- name: Copy luigi config
+  copy:
+    src: luigi.cfg
+    dest: /etc/luigi/luigi.cfg
 - name: Set siskin log file permissions
   file:
     path: /var/log/siskin.log
