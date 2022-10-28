@@ -697,6 +697,7 @@ class AMSLFilterConfigReduced(AMSLTask):
     def complete(self):
         return False
 
+
 class AMSLFilterConfig(AMSLTask):
     """
     Turn AMSL API to a span(1) filter configuration.
