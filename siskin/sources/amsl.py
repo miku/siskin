@@ -790,7 +790,7 @@ class AMSLFilterConfig(AMSLTask):
         return list(result)
 
     def requires(self):
-        return AMSLService(date=self.date),
+        return AMSLService(date=self.date)
 
     def run(self):
         with self.input().open() as handle:
