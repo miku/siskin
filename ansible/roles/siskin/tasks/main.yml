@@ -32,6 +32,10 @@
     - gcc
     - gcc-c++
     - java-1.8.0-openjdk
+    - podman
+    - podman-docker
+    - podman-plugins
+    - podman-tui
     - protobuf-compiler
     - protobuf-devel
     - python3-csvkit
