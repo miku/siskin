@@ -1,5 +1,3 @@
-# TODO: switch to internal artifact servers or use a tunnel
-
 - name: Set tempdir
   copy:
     dest: /etc/profile.d/siskin_tmp_dir.sh
@@ -9,10 +7,11 @@
   copy:
     dest: /etc/profile.d/siskin_proxy.sh
     content: |
-      export no_proxy=localhost,127.0.0.1,services.ub.uni-leipzig.de,ub.uni-leipzig.de,uni-leipzig.de,live.amsl.technology,amsl.technology
-      export http_proxy=http://proxy.uni-leipzig.de:3128
-      export https_proxy=http://proxy.uni-leipzig.de:3128
-      export ftp_proxy=http://proxy.uni-leipzig.de:3128
+      export no_proxy={{ siskin_no_proxy }}
+      export http_proxy={{ siskin_proxy }}
+      export https_proxy={{ siskin_proxy }}
+      export ftp_proxy={{ siskin_proxy }}
+
 - name: Ensure group finc exists
   group:
     name: '{{ siskin_group }}'
@@ -24,6 +23,7 @@
     shell: /bin/bash
     create_home: true
     umask: "0022"
+
 - name: Install common packages for siskin
   yum:
     state: present
@@ -53,7 +53,11 @@
       - https://github.com/miku/span/releases/download/v{{ siskin_vendor_version_span }}/span-{{ siskin_vendor_version_span }}-0.x86_64.rpm
       - https://github.com/ubleipzig/solrdump/releases/download/v{{ siskin_vendor_version_solrdump }}/solrdump-{{ siskin_vendor_version_solrdump }}-0.x86_64.rpm
       - https://github.com/miku/unzippa/releases/download/v{{ siskin_vendor_version_unzippa }}/unzippa-{{ siskin_vendor_version_unzippa }}-0.x86_64.rpm
+
 - name: Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)
+  # We're stuck with MF 4.0.0 so we keep a copy of that version around; there's
+  # an additional copy at
+  # https://web.archive.org/web/20221029160044id_/https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist
   get_url:
     url: https://speicherwolke.uni-leipzig.de/index.php/s/mep2WBWAJgDRd6b/download/metafacture-runner-4.0.0-dist.tar.gz
     checksum: sha1:66c750ed2fa16da18016419e94fe6fa5141a0e2e
@@ -70,6 +74,7 @@
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
     state: link
+
 - name: Install siskin python package
   pip:
     name: siskin=={{ siskin_vendor_version_siskin }}
@@ -97,6 +102,7 @@
     mode: '0644'
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
+
 - name: Create generic fast, large tmp dir; cache; static
   file:
     path: "{{ item }}"
@@ -105,23 +111,11 @@
     state: directory
     mode: '0755'
   loop:
-    - '{{ siskin_data_dir }}'
-    - '{{ siskin_static_dir }}'
     - '{{ siskin_cache_dir }}/metha'
-- name: Change crossref cache directory ownership
-  file:
-    path: '{{ siskin_data_dir }}'
-    owner: '{{ siskin_user }}'
-    group: '{{ siskin_group }}'
-    state: directory
-    mode: '0755'
-- name: Create data subdir for siskin generate output
-  file:
-    path: '{{ siskin_data_dir }}/siskin'
-    owner: '{{ siskin_user }}'
-    group: '{{ siskin_group }}'
-    state: directory
-    mode: '0755'
+    - '{{ siskin_data_dir }}'
+    - '{{ siskin_data_dir }}/siskin'
+    - '{{ siskin_static_dir }}'
+
 - name: Creates an entry like `PATH=/opt/bin:...` on top of crontab
   cron:
     name: PATH
