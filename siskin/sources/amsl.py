@@ -676,7 +676,7 @@ class AMSLFilterConfigFreeze(AMSLTask):
         return AMSLFilterConfig(date=self.date)
 
     def run(self):
-        output = shellout("span-freeze -o {output} < {input}", input=self.input().path)
+        output = shellout("span-freeze -b -o {output} < {input}", input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
