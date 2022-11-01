@@ -762,16 +762,45 @@ class AMSLFilterConfigReduced(AMSLTask):
     FID-MEDIEN-DE-15        http://amsl.technology/discovery/metadata-usage/Dokument/BASE_DE15FID
     FID-MEDIEN-DE-15        http://amsl.technology/discovery/metadata-usage/Dokument/FID_ISSN_Filter
 
+    We want:
+
+        {
+            "DE-Zi4": {"holdings": {"files": ["a.txt", "b.txt", ...]}}
+            ...
+        }
 
     """
+    date = luigi.DateParameter(default=datetime.date.today())
+
     def requires(self):
         return AMSLService(date=self.date)
 
     def run(self):
-        pass
+        with self.input().open() as f:
+            docs = json.load(f)
+        hfs = collections.defaultdict(set)
+        for doc in docs:
+            if doc.get("shardLabel") != "UBL-ai":
+                continue
+            if doc.get("evaluateHoldingsFileForLibrary") == "no":
+                continue
+            if not doc.get("ISIL") or not doc.get("DokumentURI"):
+                continue
+            hfs[doc["ISIL"]].add(doc["DokumentURI"])
 
-    def complete(self):
-        return False
+        prefix = self.config.get("amsl", "url-download-prefix")
+        if not prefix:
+            raise ValueError("invalid uri download prefix")
+
+        config = {}
+        for k, vs in hfs.items():
+            config[k] = {"holdings": {"files": ["{}{}".format(prefix, v) for v in vs]}}
+
+        with self.output.open("w") as output:
+            json.dump(config, output)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="json.gz"), format=Gzip)
 
 
 class AMSLFilterConfig(AMSLTask):
