@@ -23,6 +23,10 @@ siskin_no_proxy: >
   localhost
   amsl.technology
   live.amsl.technology
+  172.18.113.15
+  172.18.113.7
+  172.18.113.98
+  172.18.113.99
   "
 
 # Where siskin packages come from
