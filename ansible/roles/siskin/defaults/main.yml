@@ -14,6 +14,7 @@ siskin_data_dir: /data/finc
 # Proxy settings
 siskin_proxy: http://proxy.uni-leipzig.de:3128
 siskin_no_proxy: >
+  "
   127.0.0.1
   uni-leipzig.de
   ub.uni-leipzig.de
@@ -22,6 +23,7 @@ siskin_no_proxy: >
   localhost
   amsl.technology
   live.amsl.technology
+  "
 
 # Where siskin packages come from
 siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple
