@@ -687,9 +687,85 @@ class AMSLFilterConfigReduced(AMSLTask):
     """
     Reduced AMSL filter config. Only keep the holdings files associated with an
     institution.
+
+    We only need ISIL and holdings file, e.g.
+
+    $ taskcat AMSLService |
+        jq -rc '.[] | select(.evaluateHoldingsFileForLibrary == "yes" and .shardLabel == "UBL-ai") | [.ISIL, .DokumentURI] | @tsv' |
+        sort -u
+
+    DE-105  http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-105  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DE105
+    DE-105  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-14   http://amsl.technology/discovery/metadata-usage/Dokument/BASE_DE14
+    DE-14   http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-14   http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-15   http://amsl.technology/discovery/metadata-usage/Dokument/BASE_DE15
+    DE-15   http://amsl.technology/discovery/metadata-usage/Dokument/EBOOKS_KBART_DE15
+    DE-15   http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-15   http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DE15/1
+    DE-15   http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-1972 http://amsl.technology/discovery/metadata-usage/Dokument/BASE_DE1972
+    DE-1972 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-1972 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DE1972
+    DE-1972 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-540  http://amsl.technology/discovery/metadata-usage/Dokument/BASE_DE540
+    DE-540  http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-540  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DE540
+    DE-540  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-82   http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-82   http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DE82
+    DE-82   http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Bn3  http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Bn3  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-Bn3  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Brt1 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Brt1 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-Brt1 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Ch1  http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Ch1  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DECh1
+    DE-Ch1  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-D161 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-D161 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-D161 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-D275 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-D275 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-D275 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Frei50       http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEFrei50
+    DE-Gla1 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Gla1 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-Gla1 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-L152 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-L152 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEL152
+    DE-L152 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-L229 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-L229 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-L229 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-L242 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEL242
+    DE-Mh31 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Mh31 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEMh31
+    DE-Mh31 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Pl11 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Pl11 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-Pl11 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Rs1  http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Rs1  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEGla1
+    DE-Rs1  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Trs1 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DETro1
+    DE-Zi4  http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Zi4  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_DEZi4
+    DE-Zi4  http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    DE-Zwi2 http://amsl.technology/discovery/metadata-usage/Dokument/GOLD_OA_LISTE
+    DE-Zwi2 http://amsl.technology/discovery/metadata-usage/Dokument/KBART_FREEJOURNALS
+    FID-BBI-DE-23   http://amsl.technology/discovery/metadata-usage/Dokument/BASE_23FIDBBI
+    FID-BBI-DE-23   http://amsl.technology/discovery/metadata-usage/Dokument/KBART_23FIDBBI_2022_04_07
+    FID-MEDIEN-DE-15        http://amsl.technology/discovery/metadata-usage/Dokument/BASE_DE15FID
+    FID-MEDIEN-DE-15        http://amsl.technology/discovery/metadata-usage/Dokument/FID_ISSN_Filter
+
+
     """
     def requires(self):
-        return AMSLService(date=self.date),
+        return AMSLService(date=self.date)
 
     def run(self):
         pass
