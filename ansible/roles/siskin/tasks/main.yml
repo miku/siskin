@@ -45,6 +45,10 @@
     - sshuttle
     - yaz
     - yaz-doc
+- name: Silence podman docker message
+  file:
+    path: /etc/containers/nodocker
+    state: touch
 - name: Install vendor packages required for siskin
   yum:
     state: present
