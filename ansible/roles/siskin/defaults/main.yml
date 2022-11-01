@@ -30,7 +30,7 @@ siskin_no_proxy: >
   "
 
 # Where siskin packages come from
-siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple
+siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple/
 
 # Versions of our packages
 siskin_vendor_version_filterline: 0.1.4
