@@ -188,7 +188,7 @@ class AILicensing(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
     override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
     drop = luigi.BoolParameter(description="drop records w/o isil")
-    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
         if self.override:
@@ -202,7 +202,7 @@ class AILicensing(AITask):
 
         return {
             "is": AIApplyOpenAccessFlag(date=self.date),
-            "config": AMSLFilterConfigFreeze(date=jourfixe, filter_config_style=self.filter_config_style),
+            "config": AMSLFilterConfigFreeze(date=jourfixe, style=self.style),
         }
 
 
@@ -235,10 +235,10 @@ class AILocalData(AITask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     batchsize = luigi.IntParameter(default=25000, significant=False)
-    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
-        return AILicensing(date=self.date, drop=True, filter_config_style=self.filter_config_style)
+        return AILicensing(date=self.date, drop=True, style=self.style)
 
     def run(self):
         """
@@ -266,10 +266,10 @@ class AIInstitutionChanges(AITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
-        return AILocalData(date=self.date, filter_config_style=self.filter_config_style)
+        return AILocalData(date=self.date, style=self.style)
 
     def run(self):
         output = shellout(
@@ -290,12 +290,12 @@ class AIIntermediateSchemaDeduplicated(AITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
         return {
             "changes": AIInstitutionChanges(date=self.date),
-            "file": AILicensing(date=self.date, drop=True, filter_config_style=self.filter_config_style),
+            "file": AILicensing(date=self.date, drop=True, style=self.style),
         }
 
     def run(self):
@@ -326,11 +326,11 @@ class AIExport(AITask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="solr5vu3", description="export format")
-    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
         return {
-            "ai": AIIntermediateSchemaDeduplicated(date=self.date, filter_config_style=self.filter_config_style),
+            "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
             "base": BaseFix(),
             "kalliope": KalliopeDirectDownload(),
         }
@@ -363,10 +363,10 @@ class AIUpdate(AITask, luigi.WrapperTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
-        return [AIExport(date=self.date, filter_config_style=self.filter_config_style), AIRedact(date=self.date)]
+        return [AIExport(date=self.date, style=self.style), AIRedact(date=self.date)]
 
     def output(self):
         return self.input()
