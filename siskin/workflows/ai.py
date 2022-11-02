@@ -294,7 +294,7 @@ class AIIntermediateSchemaDeduplicated(AITask):
 
     def requires(self):
         return {
-            "changes": AIInstitutionChanges(date=self.date),
+            "changes": AIInstitutionChanges(date=self.date, style=self.style),
             "file": AILicensing(date=self.date, drop=True, style=self.style),
         }
 
