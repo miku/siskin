@@ -671,9 +671,15 @@ class AMSLFilterConfigFreeze(AMSLTask):
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
+    filter_config_style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
 
     def requires(self):
-        return AMSLFilterConfig(date=self.date)
+        if self.filter_config_style == "default":
+            return AMSLFilterConfig(date=self.date)
+        elif self.filter_config_style == "reduced":
+            return AMSLFilterConfigReduced(date=self.date)
+        else:
+            raise ValueError("valid filter-config-style values: default, reduced")
 
     def run(self):
         output = shellout("span-freeze -b -o {output} < {input}", input=self.input().path)
