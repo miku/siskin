@@ -788,7 +788,7 @@ class AMSLFilterConfigReduced(AMSLTask):
                 continue
             hfs[doc["ISIL"]].add(doc["DokumentURI"])
 
-        prefix = self.config.get("amsl", "url-download-prefix")
+        prefix = self.config.get("amsl", "uri-download-prefix")
         if not prefix:
             raise ValueError("invalid uri download prefix")
 
