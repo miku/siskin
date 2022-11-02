@@ -796,8 +796,8 @@ class AMSLFilterConfigReduced(AMSLTask):
         for k, vs in hfs.items():
             config[k] = {"holdings": {"files": ["{}{}".format(prefix, v) for v in vs]}}
 
-        with self.output().open("w") as output:
-            json.dump(config, output)
+        with self.output().open("wb") as output:
+            output.write(json.dumps(config).encode("utf-8"))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json.gz"), format=Gzip)
