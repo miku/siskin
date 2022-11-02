@@ -796,7 +796,7 @@ class AMSLFilterConfigReduced(AMSLTask):
         for k, vs in hfs.items():
             config[k] = {"holdings": {"files": ["{}{}".format(prefix, v) for v in vs]}}
 
-        with self.output.open("w") as output:
+        with self.output().open("w") as output:
             json.dump(config, output)
 
     def output(self):
