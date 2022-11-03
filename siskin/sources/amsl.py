@@ -803,7 +803,7 @@ class AMSLFilterConfigReduced(AMSLTask):
             config[k] = {"holdings": {"files": ["{}{}".format(prefix, v) for v in vs]}}
 
         with self.output().open("w") as output:
-            json.dumps(config, output)
+            json.dump(config, output)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json"))
