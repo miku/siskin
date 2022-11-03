@@ -802,11 +802,11 @@ class AMSLFilterConfigReduced(AMSLTask):
         for k, vs in hfs.items():
             config[k] = {"holdings": {"files": ["{}{}".format(prefix, v) for v in vs]}}
 
-        with self.output().open("wb") as output:
-            output.write(json.dumps(config).encode("utf-8"))
+        with self.output().open("w") as output:
+            json.dumps(config, output)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json.gz"), format=Gzip)
+        return luigi.LocalTarget(path=self.path(ext="json"))
 
 
 class AMSLFilterConfig(AMSLTask):
