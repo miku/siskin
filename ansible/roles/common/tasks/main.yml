@@ -17,6 +17,7 @@
     - moreutils
     - multitail
     - ncdu
+    - neofetch
     - netcat
     - p7zip
     - p7zip-plugins
