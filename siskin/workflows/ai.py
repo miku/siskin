@@ -337,15 +337,25 @@ class AIExport(AITask):
 
     def run(self):
         _, tmp = tempfile.mkstemp(prefix="siskin-")
+        # already converted data
         shellout(
-            """cat "{input}" >> "{output}" """,
+            """
+            cat "{input}" >> "{output}"
+            """,
             input=self.input().get("base").path,
             output=tmp,
         )
         shellout(
             """
-            span-export -o solr5vu3 <(zstd -cd -T0 {input}) |
-            zstd -c -T0 >> {output}
+            cat "{input}" >> "{output}"
+            """,
+            input=self.input().get("kalliope").path,
+            output=tmp,
+        )
+        # turn intermediate schema into solr
+        shellout(
+            """
+            span-export -o solr5vu3 <(zstd -cd -T0 {input}) | zstd -c -T0 >> {output}
             """,
             format=self.format,
             input=self.input().get("ai").path,
