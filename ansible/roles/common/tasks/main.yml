@@ -35,6 +35,7 @@
     - unzip
     - vim-enhanced
     - wget
+    - z
     - zstd
 - name: Clean motd
   command: truncate -s 0 /etc/motd
