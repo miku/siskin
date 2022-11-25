@@ -1,3 +1,4 @@
+# OS as of 11/2022 is Fedore 35
 - name: Install common packages
   yum:
     state: present
@@ -14,6 +15,7 @@
     - jq
     - lftp
     - logrotate
+    - lsof
     - moreutils
     - multitail
     - ncdu
