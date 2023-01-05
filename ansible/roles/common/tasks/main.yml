@@ -9,6 +9,7 @@
     - bzip2
     - cronie # https://stackoverflow.com/a/21802522/89391
     - curl
+    - fd-find
     - git
     - glances
     - htop
@@ -28,6 +29,7 @@
     - pv
     - ranger
     - rclone
+    - ripgrep
     - rsync
     - screen
     - sqlite
