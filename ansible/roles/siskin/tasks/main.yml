@@ -38,10 +38,12 @@
     - podman-tui
     - protobuf-compiler
     - protobuf-devel
+    - python3-Cython
     - python3-csvkit
     - python3-devel
     - python3-ipython
     - python3-pip
+    - python3-wheel
     - sshuttle
     - yaz
     - yaz-doc
@@ -87,6 +89,8 @@
   pip:
     name: siskin=={{ siskin_vendor_version_siskin }}
     extra_args: -U -i "{{ siskin_pypi_index_url }}"
+  environment:
+    USE_CYTHON: 1
 - name: Create configuration directories
   file:
     path: "{{ item }}"
