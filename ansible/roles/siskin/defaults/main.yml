@@ -15,15 +15,15 @@ siskin_data_dir: /data/finc
 siskin_proxy: http://proxy.uni-leipzig.de:3128
 siskin_no_proxy: "127.0.0.1,uni-leipzig.de,ub.uni-leipzig.de,ai.ub.uni-leipzig.de,services.ub.uni-leipzig.de,localhost,amsl.technology,live.amsl.technology,172.18.113.15,172.18.113.7,172.18.113.98,172.18.113.99"
 
-# Where siskin packages come from
+# PyPI mirror, where we upload siskin
 siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple/
 
-# Versions of our packages
+# Versions of custom packages
 siskin_vendor_version_filterline: 0.1.4
 siskin_vendor_version_groupcover: 0.0.12
 siskin_vendor_version_metha: 0.2.35
 siskin_vendor_version_siskin: 1.4.5
 siskin_vendor_version_solrbulk: 0.3.8
 siskin_vendor_version_solrdump: 0.1.7
-siskin_vendor_version_span: 0.1.345
+siskin_vendor_version_span: 0.1.346
 siskin_vendor_version_unzippa: 0.1.6
