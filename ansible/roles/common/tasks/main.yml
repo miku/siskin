@@ -1,6 +1,6 @@
 # OS as of 11/2022 is Fedore 35
 - name: Install common packages
-  yum:
+  dnf:
     state: present
     name:
     - bash-completion
