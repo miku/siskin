@@ -52,8 +52,13 @@ install_requires = [
     'iso-639>=0.4.5',
     'langdetect>=1.0.9',
     'logilab-common>=0.61.0',
-    # 'luigi>=3', # https://github.com/spotify/luigi/issues/3202, 3.11 issue; PEP0508
-    'luigi @ git+https://github.com/spotify/luigi@3de05605024bdfdb38cf011c271edb0f488a90e0', # fix commit until release appears
+    # 'luigi>=3', # https://github.com/spotify/luigi/issues/3202, 3.11 issue;
+    # PEP0508 fix commit until release appears; seems to not work out of the
+    # box on target, but this does:
+    #
+    # $ pip install -e git+https://github.com/luigi#egg=luigi
+    #
+    'luigi @ git+https://github.com/spotify/luigi@3de05605024bdfdb38cf011c271edb0f488a90e0#egg=luigi',
     'lxml>=3.4.2',
     'marcx>=0.2.12',
     'numpy',
