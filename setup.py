@@ -52,7 +52,8 @@ install_requires = [
     'iso-639>=0.4.5',
     'langdetect>=1.0.9',
     'logilab-common>=0.61.0',
-    'luigi>=3',
+    # 'luigi>=3', # https://github.com/spotify/luigi/issues/3202, 3.11 issue; PEP0508
+    'luigi @ https://github.com/spotify/luigi@master#egg=luigi',
     'lxml>=3.4.2',
     'marcx>=0.2.12',
     'numpy',
