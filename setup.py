@@ -53,7 +53,7 @@ install_requires = [
     'langdetect>=1.0.9',
     'logilab-common>=0.61.0',
     # 'luigi>=3', # https://github.com/spotify/luigi/issues/3202, 3.11 issue; PEP0508
-    'luigi @ git+https://github.com/spotify/luigi@master#egg=luigi',
+    'luigi @ git+https://github.com/spotify/luigi@3de05605024bdfdb38cf011c271edb0f488a90e0', # fix commit until release appears
     'lxml>=3.4.2',
     'marcx>=0.2.12',
     'numpy',
