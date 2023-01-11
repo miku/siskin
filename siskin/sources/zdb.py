@@ -30,9 +30,9 @@ See: goo.gl/90cteW
 import os
 
 import luigi
-
 from gluish.format import Gzip
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 
@@ -64,6 +64,7 @@ class ZDBShortTitleMap(ZDBTask):
     """
     Just an ad-hoc task with some ad-hoc code, refs #10562.
     """
+
     def requires(self):
         return ZDBDownload(format="rdf")
 

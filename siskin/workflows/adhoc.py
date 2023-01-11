@@ -34,9 +34,9 @@ import tempfile
 import luigi
 import requests
 import xlsxwriter
-
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+
 from siskin.sources.amsl import AMSLCollections, AMSLService
 from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount, CrossrefCollectionsDifference)
 from siskin.sources.elsevierjournals import ElsevierJournalsExport
@@ -62,6 +62,7 @@ class OADOIDatasetStatusByDOI(AdhocTask):
       about our Support Level Agreement (team@impactstory.org). For more
       information about oaDOI, see http://oadoi.org.
     """
+
     def run(self):
         url = ("https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz")
         output = shellout("""wget -O "{output}" "{url}" """, url=url)

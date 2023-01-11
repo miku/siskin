@@ -36,6 +36,7 @@ def deprecated(func):
 
     TODO: emit a bit more useful text.
     """
+
     @functools.wraps(func)
     def new_func(*args, **kwargs):
         warnings.simplefilter("always", DeprecationWarning)  # turn off filter

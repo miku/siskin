@@ -28,9 +28,9 @@ Open Citations, https://opencitations.net/.
 import tempfile
 
 import luigi
-
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 
@@ -47,6 +47,7 @@ class OCIDownload(OCITask):
     """
     Download via configured URL, about 30G compressed (2021).
     """
+
     def run(self):
         output = shellout("""curl -sL "{url}" > {output}""", url=self.download_url)
         luigi.LocalTarget(output).move(self.output().path)
@@ -59,6 +60,7 @@ class OCISingleFile(OCITask):
     """
     OCI as a single task.
     """
+
     def requires(self):
         return OCIDownload()
 
@@ -83,6 +85,7 @@ class OCICitingDOI(OCITask):
     """
     List of all citing doi.
     """
+
     def requires(self):
         return OCISingleFile()
 
@@ -102,6 +105,7 @@ class OCICitedDOI(OCITask):
     """
     List of all cited doi.
     """
+
     def requires(self):
         return OCISingleFile()
 
@@ -121,6 +125,7 @@ class OCICitingDOIUnique(OCITask):
     """
     List of all unique citing doi.
     """
+
     def requires(self):
         return OCICitingDOI()
 
@@ -140,6 +145,7 @@ class OCICitedDOIUnique(OCITask):
     """
     List of all unique cited doi.
     """
+
     def requires(self):
         return OCICitedDOI()
 
@@ -159,6 +165,7 @@ class OCIDOIUnique(OCITask):
     """
     Unique DOI in OCI.
     """
+
     def requires(self):
         return [OCICitingDOIUnique(), OCICitedDOIUnique()]
 

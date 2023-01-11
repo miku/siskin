@@ -37,12 +37,12 @@ import datetime
 import tempfile
 
 import luigi
-
 from gluish.common import Executable
 from gluish.format import TSV
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.decorator import deprecated
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask

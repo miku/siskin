@@ -30,9 +30,9 @@ import functools
 
 import luigi
 import requests
-
 from gluish.format import Zstd
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 

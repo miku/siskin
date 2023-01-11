@@ -42,11 +42,11 @@ import tempfile
 
 import luigi
 import six
-
 from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService

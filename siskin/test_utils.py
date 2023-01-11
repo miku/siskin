@@ -6,10 +6,10 @@ import os
 import tempfile
 
 import marcx
+import pymarc
 import requests
 import responses
 
-import pymarc
 from siskin.utils import (SetEncoder, URLCache, dictcheck, get_task_import_cache, load_set, nwise, random_string, scrape_html_listing, xmlstream)
 
 

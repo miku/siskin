@@ -63,13 +63,13 @@ import urllib.request
 import elasticsearch
 import luigi
 import requests
-from six import string_types
-
 from gluish.common import Executable
 from gluish.format import TSV, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import date_range, shellout
+from six import string_types
+
 from siskin import __version__
 from siskin.benchmark import timed
 from siskin.mail import send_mail

@@ -23,6 +23,7 @@ class DummyHelloWorld(DummyTask):
     """
     Just say hello world.
     """
+
     def run(self):
         print("Hello from %s" % self.__class__.__name__)
 
@@ -34,6 +35,7 @@ class DummyFail(DummyTask):
     """
     A task that always fails.
     """
+
     def run(self):
         raise RuntimeError("This error occured at %s" % datetime.datetime.now())
 

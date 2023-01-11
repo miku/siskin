@@ -71,9 +71,9 @@ import tempfile
 import zipfile
 
 import luigi
-
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder, dictcheck
 
@@ -1249,5 +1249,6 @@ class AMSLCollectionList(AMSLTask):
     Find all collection names used in AMSL and their canonical name, via
     members API, prefix and names.
     """
+
     def run(self):
         raise NotImplementedError()

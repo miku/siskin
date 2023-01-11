@@ -65,6 +65,7 @@ class SetEncoder(json.JSONEncoder):
 
         json.dumps({"things": set([1, 2, 3])}, cls=SetEncoder)
     """
+
     def default(self, obj):
         """
         Decorate call to standard implementation.
@@ -281,6 +282,7 @@ class URLCache(object):
 
     >>> page = cache.get("https://www.google.com", force=True)
     """
+
     def __init__(self, directory=None, max_tries=12):
         """
         If `directory` is not explictly given, all files will be stored under
@@ -322,6 +324,7 @@ class URLCache(object):
         re-download a URL. Use `ttl_seconds` to set a TTL in seconds (day=86400,
         month=2592000, six month=15552000, a year=31104000).
         """
+
         def is_ttl_expired(url):
             """
             Returns True, if modification date of the file lies befores TTL.
@@ -444,6 +447,7 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
     True, it will collect all matched tags and will return them as a tuple
     (with the outermost element being the last).
     """
+
     def strip_ns(tag):
         if not "}" in tag:
             return tag

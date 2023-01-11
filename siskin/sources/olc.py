@@ -34,11 +34,11 @@ import json
 import os
 
 import luigi
-
 from gluish.format import Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.conversions import olc_to_intermediate_schema
 from siskin.task import DefaultTask
 from siskin.utils import sha1obj

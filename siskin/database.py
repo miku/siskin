@@ -41,6 +41,7 @@ class sqlitedb:
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
+
     def __init__(self, path, timeout=5.0, detect_types=0):
         self.path = path
         self.conn = None
@@ -67,6 +68,7 @@ class mysqldb:
             query = cursor.execute('SELECT * FROM items')
             result = query.fetchall()
     """
+
     def __init__(self, url, stream=False, commit_on_exit=False):
         result = urllib.parse.urlparse(url, scheme="mysql")
         self.hostname = result.hostname

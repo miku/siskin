@@ -56,9 +56,9 @@ from __future__ import print_function
 import datetime
 
 import luigi
-
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 

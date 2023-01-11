@@ -44,10 +44,10 @@ import tempfile
 from builtins import str
 
 import luigi
-
 from gluish.common import Executable
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.common import FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig
@@ -67,6 +67,7 @@ class ElsevierJournalsBacklogIntermediateSchema(ElsevierJournalsTask):
     """
     Convert backlog to intermediate schema.
     """
+
     def run(self):
         directory = self.config.get("elsevierjournals", "backlog-dir")
         _, output = tempfile.mkstemp(prefix="siskin-")

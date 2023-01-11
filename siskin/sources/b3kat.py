@@ -74,12 +74,12 @@ import tempfile
 
 import luigi
 import marcx
-
 import pymarc
 from gluish.format import TSV, Gzip
 from gluish.intervals import semiyearly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.task import DefaultTask
 
 

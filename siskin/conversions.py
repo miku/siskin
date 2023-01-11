@@ -44,11 +44,11 @@ import tempfile
 from xml.sax.saxutils import escape, unescape
 
 import marcx
+import pymarc
 import requests
 import six
 import xmltodict
 
-import pymarc
 from siskin.utils import URLCache
 
 html_escape_table = {'"': "&quot;", "'": "&apos;"}

@@ -35,8 +35,8 @@ import re
 import sys
 
 import marcx
-
 from gluish.utils import shellout
+
 from siskin.arguments import FincArgumentParser
 from siskin.configuration import Config
 
