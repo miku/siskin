@@ -75,7 +75,7 @@ install_requires = [
     'responses',
     'six>=1.16.0',
     'tqdm>=4',
-    'urllib3>=1.26.6',
+    'urllib3<1.27,>=1.21.1',
     'xlrd>=1.0.0',
     'xmltodict>=0.11.0',
 ]
