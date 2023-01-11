@@ -332,7 +332,7 @@ class AIExport(AITask):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
             "base": BaseFix(),
-            "kalliope": KalliopeDirectDownload(),
+            # "kalliope": KalliopeDirectDownload(), # refs. https://projekte.ub.uni-leipzig.de/issues/22596#note-10
         }
 
     def run(self):
