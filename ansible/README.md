@@ -24,7 +24,7 @@ $ make deploy
 
 ## Things left out of ansible (for now)
 
-* changes to "/etc/hosts" that are needed for manual tasks
+* changes to `/etc/hosts` that are needed for manual tasks (e.g. checking `.../whatislive` and such)
 
 ## TODO
 
