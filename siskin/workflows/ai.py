@@ -48,12 +48,12 @@ import requests
 import six
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
-
 from gluish.common import Executable
 from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
+
 from siskin.benchmark import timed
 from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
@@ -205,7 +205,6 @@ class AILicensing(AITask):
             "config": AMSLFilterConfigFreeze(date=jourfixe, style=self.style),
         }
 
-
     def run(self):
         """
         A recent version of span might be required.
@@ -338,20 +337,18 @@ class AIExport(AITask):
     def run(self):
         _, tmp = tempfile.mkstemp(prefix="siskin-")
         # already converted data
-        shellout(
-            """
-            cat "{input}" >> "{output}"
-            """,
-            input=self.input().get("base").path,
-            output=tmp,
-        )
-        shellout(
-            """
-            cat "{input}" >> "{output}"
-            """,
-            input=self.input().get("kalliope").path,
-            output=tmp,
-        )
+        filenames = [
+            self.input().get("base").path,
+            # self.input().get("kalliope").path,
+        ]
+        for fn in filenames:
+            shellout(
+                """
+                cat "{fn}" >> "{output}"
+                """,
+                fn=fn,
+                output=tmp,
+            )
         # turn intermediate schema into solr
         shellout(
             """
