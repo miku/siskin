@@ -782,6 +782,7 @@ class AMSLFilterConfigReduced(AMSLTask):
         return AMSLService(date=self.date)
 
     def run(self):
+        Entry = collections.namedtuple("Entry", "uri source_id")
         with self.input().open() as f:
             docs = json.load(f)
         hfs = collections.defaultdict(set)
@@ -801,10 +802,7 @@ class AMSLFilterConfigReduced(AMSLTask):
                 continue
             if not doc.get("ISIL") or not doc.get("DokumentURI"):
                 continue
-            hfs[doc["ISIL"]].add({
-                "uri": doc["DokumentURI"],
-                "source_id": doc["sourceID"],
-            })
+            hfs[doc["ISIL"]].add(Entry(uri=doc["DokumentURI"], source_id=doc["sourceID"]))
 
         prefix = self.config.get("amsl", "uri-download-prefix")
         if not prefix:
@@ -816,11 +814,11 @@ class AMSLFilterConfigReduced(AMSLTask):
             doc = {
                 "and": [
                     {
-                        "source": list(set(v["source_id"] for v in vs)),
+                        "source": list(set(v.source_id for v in vs)),
                     },
                     {
                         "holdings": {
-                            "files": ["{}{}".format(prefix, v["uri"]) for v in vs],
+                            "files": ["{}{}".format(prefix, v.uri) for v in vs],
                         }
                     },
                 ],
