@@ -786,21 +786,46 @@ class AMSLFilterConfigReduced(AMSLTask):
             docs = json.load(f)
         hfs = collections.defaultdict(set)
         for doc in docs:
+            # {
+            #   "evaluateHoldingsFileForLibrary": "no",
+            #   "ISIL": "DE-1972",
+            #   "megaCollection": "Digital Concert Hall",
+            #   "productISIL": "ZDB-176-DCH",
+            #   "shardLabel": "UBL-main",
+            #   "sourceID": "0",
+            #   "technicalCollectionID": "sid-0-col-zdb176dch"
+            # },
             if doc.get("shardLabel") != "UBL-ai":
                 continue
             if doc.get("evaluateHoldingsFileForLibrary") == "no":
                 continue
             if not doc.get("ISIL") or not doc.get("DokumentURI"):
                 continue
-            hfs[doc["ISIL"]].add(doc["DokumentURI"])
+            hfs[doc["ISIL"]].add({
+                "uri": doc["DokumentURI"],
+                "source_id": doc["sourceID"],
+            })
 
         prefix = self.config.get("amsl", "uri-download-prefix")
         if not prefix:
             raise ValueError("invalid uri download prefix")
 
         config = {}
+        # TODO: write a config higher level helper util for this
         for k, vs in hfs.items():
-            config[k] = {"holdings": {"files": ["{}{}".format(prefix, v) for v in vs]}}
+            doc = {
+                "and": [
+                    {
+                        "source": list(set(v["source_id"] for v in vs)),
+                    },
+                    {
+                        "holdings": {
+                            "files": ["{}{}".format(prefix, v["uri"]) for v in vs],
+                        }
+                    },
+                ],
+            }
+            config[k] = doc
 
         with self.output().open("w") as output:
             json.dump(config, output)
