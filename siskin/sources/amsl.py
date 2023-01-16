@@ -796,6 +796,9 @@ class AMSLFilterConfigReduced(AMSLTask):
             #   "sourceID": "0",
             #   "technicalCollectionID": "sid-0-col-zdb176dch"
             # },
+            if doc.get("DokumentLabel") == "GOLD_OA_LISTE":
+                # GOLD_OA_LISTE is outdated
+                continue
             if doc.get("shardLabel") != "UBL-ai":
                 continue
             if doc.get("evaluateHoldingsFileForLibrary") == "no":
