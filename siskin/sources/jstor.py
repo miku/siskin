@@ -80,6 +80,7 @@ class JstorPaths(JstorTask):
             pattern=self.config.get("jstor", "ftp-pattern"),
             max_retries=self.max_retries,
             timeout=self.timeout,
+            extra_args="-p 2222",
         )
 
     def run(self):

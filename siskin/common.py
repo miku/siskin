@@ -69,6 +69,7 @@ class FTPMirror(CommonTask):
     max_retries = luigi.IntParameter(default=5, significant=False)
     timeout = luigi.IntParameter(default=10, significant=False, description="timeout in seconds")
     exclude_glob = luigi.Parameter(default="", significant=False, description="globs to exclude")
+    extra_args = luigi.Parameter(default="", significant=False, description="extra args, like port: -p 123")
 
     def requires(self):
         return Executable(name="lftp", message="http://lftp.yar.ru/")
@@ -96,7 +97,7 @@ class FTPMirror(CommonTask):
 
         # Note that xfer:verify required "apt install libstring-crc32-perl" on ubuntu 18.04, perl v5.26.1.
         # Some lftp variables may not be supported by earlier versions, e.g. "set sftp:auto-confirm yes;"
-        command = """lftp -u {username},{password}
+        command = """lftp -u {username},{password} {extra_args}
         -e "
             set net:max-retries {max_retries};
             set net:timeout {timeout};
@@ -118,6 +119,7 @@ class FTPMirror(CommonTask):
             max_retries=self.max_retries,
             timeout=self.timeout,
             exclude_glob=exclude_glob,
+            extra_args=self.extra_args,
         )
 
         with self.output().open("w") as output:
