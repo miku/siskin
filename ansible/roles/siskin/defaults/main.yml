@@ -21,7 +21,7 @@ siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/
 # Versions of custom packages
 siskin_vendor_version_filterline: 0.1.4
 siskin_vendor_version_groupcover: 0.0.12
-siskin_vendor_version_metha: 0.2.35
+siskin_vendor_version_metha: 0.2.36
 siskin_vendor_version_siskin: 1.5.9
 siskin_vendor_version_solrbulk: 0.3.8
 siskin_vendor_version_solrdump: 0.1.7
