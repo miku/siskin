@@ -97,6 +97,14 @@ class FTPMirror(CommonTask):
 
         # Note that xfer:verify required "apt install libstring-crc32-perl" on ubuntu 18.04, perl v5.26.1.
         # Some lftp variables may not be supported by earlier versions, e.g. "set sftp:auto-confirm yes;"
+        #
+        # Some SFTP servers that moved may ask for host key verification.
+        # set sftp:connect-program \"ssh -o StrictHostKeyChecking=no\"
+        #
+        # Example:
+        #
+        # $ lftp -u u,pw -p 2222 -e 'set sftp:connect-program "ssh -o StrictHostKeyChecking=no"; ls; exit' \
+        #     sftp://ftp.server.org
         command = """lftp -u {username},{password} {extra_args}
         -e "
             set net:max-retries {max_retries};
