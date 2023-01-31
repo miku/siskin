@@ -13,6 +13,7 @@
     - git
     - glances
     - htop
+    - iotop
     - jq
     - lftp
     - logrotate
