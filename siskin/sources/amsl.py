@@ -775,6 +775,8 @@ class AMSLFilterConfigReduced(AMSLTask):
             ...
         }
 
+    TODO: * crossref-only nameless attachments
+
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
