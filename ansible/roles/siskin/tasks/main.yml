@@ -127,21 +127,6 @@
     - '{{ siskin_data_dir }}'
     - '{{ siskin_data_dir }}/siskin'
     - '{{ siskin_static_dir }}'
-
-- name: Creates an entry like `PATH=/opt/bin:...` on top of crontab
-  cron:
-    name: PATH
-    user: '{{ siskin_user }}'
-    env: true
-    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-- name: Crontab for crossref API sync
-  cron:
-    name: Crossref API sync
-    user: '{{ siskin_user }}'
-    hour: '0'
-    minute: '5'
-    job: >
-      span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d
 - name: Start service crond, if not started
   service:
     name: crond
@@ -150,6 +135,35 @@
   copy:
     dest: /etc/bash_completion.d/siskin_completion.sh
     src: siskin_completion.sh
+- name: Creates an entry like `PATH=/opt/bin:...` on top of crontab
+  cron:
+    name: PATH
+    user: '{{ siskin_user }}'
+    env: true
+    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Following tasks are related to regular data updates, e.g. from crossref.
+
+- name: Crontab for [49] crossref API sync
+  cron:
+    name: Crossref API sync
+    user: '{{ siskin_user }}'
+    hour: '0'
+    minute: '5'
+    job: >
+      span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d
+
+# - name: Crontab for [140] kalliope download and indexing (WIP)
+#   cron:
+#     name: Kalliope download and indexing
+#     user: '{{ siskin_user }}'
+#     hour: '12'
+#     minute: '0'
+#     job: >
+#       taskdo KalliopeDownload
+
+
+# Notification about additional, required configuration.
 - debug:
     msg: >
       Project siskin and dependencies set up. Complete the following step manually:

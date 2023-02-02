@@ -11,9 +11,9 @@ siskin_cache_dir: /data/.cache
 # Base directory for all raw and intermediate data files (TODO: maybe reuse ".cache")
 siskin_data_dir: /data/finc
 
-# Proxy settings
+# Proxy settings, may need tweaks
 siskin_proxy: http://proxy.uni-leipzig.de:3128
-siskin_no_proxy: "127.0.0.1,uni-leipzig.de,ub.uni-leipzig.de,ai.ub.uni-leipzig.de,services.ub.uni-leipzig.de,localhost,amsl.technology,live.amsl.technology,172.18.113.15,172.18.113.7,172.18.113.98,172.18.113.99"
+siskin_no_proxy: "127.0.0.1,uni-leipzig.de,ub.uni-leipzig.de,localhost,amsl.technology,live.amsl.technology,172.18.113.15,172.18.113.7,172.18.113.98,172.18.113.99"
 
 # PyPI mirror, where we upload siskin
 siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple/
