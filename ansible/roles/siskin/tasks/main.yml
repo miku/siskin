@@ -160,7 +160,7 @@
     hour: '12'
     minute: '0'
     job: >
-      (set -o pipefail; taskdo KalliopeDownload && taskcat KalliopeDownload | solrbulk -server $(siskin-whatislive.sh solr_nonlive))
+      (set -o pipefail && taskdo KalliopeDirectDownload && taskcat KalliopeDirectDownload | solrbulk -server $(siskin-whatislive.sh solr_nonlive))
 
 
 # Notification about additional, required configuration.

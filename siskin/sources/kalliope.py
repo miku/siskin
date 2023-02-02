@@ -68,6 +68,8 @@ class KalliopeDirectDownload(KalliopeTask):
     url = luigi.Parameter(default=KalliopeTask.download_url, significant=False)
 
     def run(self):
+        if "kalliope-" not in os.path.basename(self.output().path):
+            raise RuntimeError("url not usable: {}".format(self.download_url))
         output = shellout(
             """ curl --output {output} --fail -sL "{url}" """,
             url=self.url,
@@ -88,6 +90,10 @@ class KalliopeDirectDownload(KalliopeTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        last_modified = self.get_last_modified_date()
-        filename = "kalliope-{}.zst".format(last_modified.strftime("%Y-%m-%d"))
-        return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
+        try:
+            last_modified = self.get_last_modified_date(use_current_date=True)
+            filename = "kalliope-{}.zst".format(last_modified.strftime("%Y-%m-%d"))
+            return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
+        except KeyError as exc:
+            self.logger.warn("unuable URL, will trigger an exception on run")
+            return luigi.LocalTarget(is_tmp=True) # just a dummy, we'll use that to trigger an exception in run
