@@ -153,14 +153,14 @@
     job: >
       span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d
 
-# - name: Crontab for [140] kalliope download and indexing (WIP)
-#   cron:
-#     name: Kalliope download and indexing
-#     user: '{{ siskin_user }}'
-#     hour: '12'
-#     minute: '0'
-#     job: >
-#       taskdo KalliopeDownload
+- name: Crontab for [140] kalliope download and indexing (WIP)
+  cron:
+    name: Kalliope download and indexing
+    user: '{{ siskin_user }}'
+    hour: '12'
+    minute: '0'
+    job: >
+      (set -o pipefail; taskdo KalliopeDownload && taskcat KalliopeDownload | solrbulk -server $(siskin-whatislive.sh solr_nonlive))
 
 
 # Notification about additional, required configuration.
