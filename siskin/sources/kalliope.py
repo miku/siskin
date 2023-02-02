@@ -91,7 +91,7 @@ class KalliopeDirectDownload(KalliopeTask):
 
     def output(self):
         try:
-            last_modified = self.get_last_modified_date(use_current_date=True)
+            last_modified = self.get_last_modified_date()
             filename = "kalliope-{}.zst".format(last_modified.strftime("%Y-%m-%d"))
             return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
         except KeyError as exc:
