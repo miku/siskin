@@ -131,6 +131,8 @@ setup(name='siskin',
           ]},
       scripts=[
           'bin/iconv-chunks',
+          # TODO(martin): use "siskin-" prefix for all scripts
+          'bin/siskin-whatislive.sh',
           'bin/taskcat',
           'bin/taskchecksetup',
           'bin/taskcleanup',
