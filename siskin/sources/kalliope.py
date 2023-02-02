@@ -42,7 +42,7 @@ class KalliopeTask(DefaultTask):
     file the download URL at all.
     """
 
-    last_modified = luigi.Parameter(default="", help="format: 2022-08-25, overrides last-modified header check", significant=False)
+    last_modified = luigi.Parameter(default="", description="format: 2022-08-25, overrides last-modified header check", significant=False)
 
     TAG = "140"
     download_url = "https://download.ubl-proxy.slub-dresden.de/kalliope"
