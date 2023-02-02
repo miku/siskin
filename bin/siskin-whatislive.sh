@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Parse and pretty print IP of live/nonlive servers.
+#
+#   $ siskin-whatislive.sh solr_live
+#   1.2.3.4:5678
+#
 set -eu
 set -o pipefail
 

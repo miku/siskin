@@ -30,26 +30,10 @@ TODO(miku): Consider moving to a single entry point, e.g. "siskin" with
 subcommands implemented by separate scripts.
 """
 
-from __future__ import print_function
-
-import sys
-
-from luigi.task import Register
-
 from siskin import __version__
-from siskin.benchmark import green, yellow
-from siskin.sources import *
-from siskin.workflows import *
 
 
 def main():
     print("siskin %s\n\n" % __version__)
-    task_names = Register.task_names()
-    print("{0} tasks found\n".format(len(task_names)))
-
-    for name in task_names:
-        if name.islower():
-            continue
-        klass = Register.get_task_cls(name)
-        doc = klass.__doc__ or yellow("@TODO: docs")
-        print("{0} {1}\n".format(green(name), doc))
+    print()
+    print("For now, please use the functions listed here: https://is.gd/nfAGIP")
