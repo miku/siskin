@@ -38,15 +38,24 @@ from siskin.task import DefaultTask
 
 class KalliopeTask(DefaultTask):
     """
-    Base task.
+    Base task. We only care for a recent download. Only works, if there's a
+    file the download URL at all.
     """
+
+    last_modified = luigi.Parameter(default="", help="format: 2022-08-25, overrides last-modified header check", significant=False)
 
     TAG = "140"
     download_url = "https://download.ubl-proxy.slub-dresden.de/kalliope"
 
     @functools.lru_cache
     def get_last_modified_date(self):
-        last_modified_header = requests.head(self.download_url).headers["Last-Modified"]
+        if self.last_modified:
+            return self.last_modified
+        self.logger.debug("kalliope: last-modified check")
+        resp = requests.head(self.download_url)
+        last_modified_header = resp.headers.get("Last-Modified")
+        if last_modified_header is None:
+            raise KeyError("last-modified header not found, got HTTP {} on {}".format(resp.status_code, self.download_url))
         last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
         return last_modified
 
