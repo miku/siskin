@@ -66,3 +66,7 @@ if __name__ == '__main__':
     except TaskClassNotFoundException as err:
         print(err, file=sys.stderr)
         sys.exit(1)
+    except:
+        # TODO(martin): do we need to set the exit code?
+        print(err, file=sys.stderr)
+        sys.exit(1)
