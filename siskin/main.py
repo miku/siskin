@@ -34,6 +34,6 @@ from siskin import __version__
 
 
 def main():
-    print("siskin %s\n\n" % __version__)
+    print("siskin %s" % __version__)
     print()
     print("For now, please use the functions listed here: https://is.gd/nfAGIP")
