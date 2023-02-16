@@ -97,4 +97,4 @@ class KalliopeDirectDownload(KalliopeTask):
             return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
         except KeyError as exc:
             self.logger.warn("unuable URL, will trigger an exception on run")
-            return luigi.LocalTarget(is_tmp=True) # just a dummy, we'll use that to trigger an exception in run
+            return luigi.LocalTarget(is_tmp=True)  # just a dummy, we'll use that to trigger an exception in run
