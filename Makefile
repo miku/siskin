@@ -41,7 +41,7 @@ fmt: imports style
 # Fix imports, requires https://github.com/timothycrosley/isort.
 .PHONY: imports
 imports:
-	isort -rc --atomic .
+	isort --atomic .
 
 # Automatic code formatting, requires https://github.com/google/yapf.
 .PHONY: style
