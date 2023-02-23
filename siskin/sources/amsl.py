@@ -1213,6 +1213,10 @@ class AMSLFilterConfig(AMSLTask):
         # A second pass.
         for isil, blob in list(isilsidcollections.items()):
             for sid, colls in list(blob.items()):
+                if sid == "49":
+                    colls = []
+                else:
+                    colls = sorted(self.extend_collections(colls))
                 isilfilters[isil].append({"and": [
                     {
                         "source": [sid]
@@ -1226,20 +1230,23 @@ class AMSLFilterConfig(AMSLTask):
         for isil, blob in list(isilsidlinkcollections.items()):
             for sid, spec in list(blob.items()):
                 for link, colls in list(spec.items()):
-                    isilfilters[isil].append(
-                        {"and": [
-                            {
-                                "source": [sid]
+                    if sid == "49":
+                        colls = []
+                    else:
+                        colls = sorted(self.extend_collections(colls))
+                    isilfilters[isil].append({"and": [
+                        {
+                            "source": [sid],
+                        },
+                        {
+                            "collection": colls,
+                        },
+                        {
+                            "holdings": {
+                                "urls": [link],
                             },
-                            {
-                                "collection": sorted(self.extend_collections(colls))
-                            },
-                            {
-                                "holdings": {
-                                    "urls": [link]
-                                }
-                            },
-                        ]})
+                        },
+                    ]})
 
         # Final assembly.
         filterconfig = collections.defaultdict(dict)

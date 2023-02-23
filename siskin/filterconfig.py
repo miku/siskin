@@ -41,10 +41,10 @@ AMSL service can build a list of attachments:
 
 """
 
+import collections
 import json
 import logging
 import sys
-import collections
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -57,7 +57,6 @@ ch.setFormatter(formatter)
 logger = logging.getLogger("siskin")
 logger.setLevel(logging.DEBUG)
 logger.addHandler(ch)
-
 
 
 class Service(BaseModel):
@@ -98,15 +97,14 @@ class ServiceResponse(BaseModel):
             for sid, count in vs.items():
                 print(f"{k:20s}{sid:10s}{count:10d}")
 
-
     def generate_filter_config():
         """
         Returns a dictionary in filterconfig format, top-level keys are ISIL.
         """
         pass
 
-# TODO: generate filter config; group collections, except from [49]
 
+# TODO: generate filter config; group collections, except from [49]
 
 if __name__ == "__main__":
     payload = json.load(sys.stdin)
@@ -116,4 +114,3 @@ if __name__ == "__main__":
     resp = ServiceResponse(docs=docs)
     logger.info("done")
     resp.dump_isil_sources()
-
