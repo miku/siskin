@@ -117,7 +117,7 @@ class AIIntermediateSchema(AITask):
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
-            IJOCIntermediateSchema(stamp=True),
+            IJOCIntermediateSchema(stamp=True), # TODO: via base
             JstorIntermediateSchema(date=self.date, stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
