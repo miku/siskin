@@ -1214,6 +1214,7 @@ class AMSLFilterConfig(AMSLTask):
         for isil, blob in list(isilsidcollections.items()):
             for sid, colls in list(blob.items()):
                 if sid == "49":
+                    # TODO: too broad?
                     isilfilters[isil].append({"source": [sid]})
                 else:
                     isilfilters[isil].append({"and": [
