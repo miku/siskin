@@ -38,10 +38,9 @@ except ImportError:
 
 # XXX: Break this up into production and development dependencies.
 install_requires = [
-    'xlsxwriter>=1.4.4',
     'astroid>=1.1.1,<2',
     'backoff>=1.11.1',
-    'bs4',
+    'bs4>=4',
     'colorama>=0.3.3',
     'configparser>=3.5.0',
     'cython>=0.29.33',
@@ -79,6 +78,7 @@ install_requires = [
     'tqdm>=4',
     'urllib3<1.27,>=1.21.1',
     'xlrd>=1.0.0',
+    'xlsxwriter>=1.4.4',
     'xmltodict>=0.11.0',
 ]
 
