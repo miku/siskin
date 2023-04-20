@@ -132,7 +132,7 @@ class BaseFix(BaseTask):
     """
     On-the-fly fixes.
     """
-    style = luigi.Parameter(default="z", description="gzip in tar (zt) or tar.gz (tgz)", significant=False)
+    style = luigi.Parameter(default="z", description="gzip in tar (z) or tar.gz (tgz)", significant=False)
 
     def requires(self):
         return BaseDirectDownload()
