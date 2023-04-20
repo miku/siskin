@@ -127,6 +127,7 @@ class BaseDirectDownload(BaseTask):
         filename = "base-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
 
+
 class BaseFix(BaseTask):
     """
     On-the-fly fixes.
@@ -153,7 +154,7 @@ class BaseFix(BaseTask):
                 input=self.input().path,
             )
             luigi.LocalTarget(output).move(self.output().path)
-        else if self.style == "tgz":
+        elif self.style == "tgz":
             output = shellout(
                 """
             tar -xOzf {input} |
