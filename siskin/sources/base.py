@@ -127,31 +127,49 @@ class BaseDirectDownload(BaseTask):
         filename = "base-{}.tar.gz".format(last_modified.strftime("%Y-%m-%d"))
         return luigi.LocalTarget(path=self.path(filename=filename), format=Gzip)
 
-
 class BaseFix(BaseTask):
     """
     On-the-fly fixes.
     """
+    style = luigi.Parameter(default="z", description="gzip in tar (zt) or tar.gz (tgz)", significant=False)
 
     def requires(self):
         return BaseDirectDownload()
 
     def run(self):
         # SOLR has a limit on facet_fields value length.
-        output = shellout(
-            """
-        tar -xOzf {input} |
-        jq -rc '.author[0] = .author[0][0:4000] |
-                .author_sort = .author_sort[0:4000] |
-                .author_facet[0] = .author_facet[0][0:4000] |
-                .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
-        sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
-        span-doisniffer -S |
-        zstd -T0 -c > {output}
-        """,
-            input=self.input().path,
-        )
-        luigi.LocalTarget(output).move(self.output().path)
+        if self.style == "z":
+            output = shellout(
+                """
+            tar -xOf {input} | zcat |
+            jq -rc '.author[0] = .author[0][0:4000] |
+                    .author_sort = .author_sort[0:4000] |
+                    .author_facet[0] = .author_facet[0][0:4000] |
+                    .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
+            sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+            span-doisniffer -S |
+            zstd -T0 -c > {output}
+            """,
+                input=self.input().path,
+            )
+            luigi.LocalTarget(output).move(self.output().path)
+        else if self.style == "tgz":
+            output = shellout(
+                """
+            tar -xOzf {input} |
+            jq -rc '.author[0] = .author[0][0:4000] |
+                    .author_sort = .author_sort[0:4000] |
+                    .author_facet[0] = .author_facet[0][0:4000] |
+                    .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
+            sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+            span-doisniffer -S |
+            zstd -T0 -c > {output}
+            """,
+                input=self.input().path,
+            )
+            luigi.LocalTarget(output).move(self.output().path)
+        else:
+            raise ValueError("supported --style: z, tgz")
 
     def output(self):
         last_modified = self.get_last_modified_date()

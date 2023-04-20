@@ -326,7 +326,7 @@ class AIExport(AITask):
     def requires(self):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
-            "base": BaseFix(),
+            "base": BaseFix(style="z"),
             # "kalliope": KalliopeDirectDownload(), # (was) refs. https://projekte.ub.uni-leipzig.de/issues/22596#note-10
         }
 
