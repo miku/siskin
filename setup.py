@@ -40,7 +40,7 @@ except ImportError:
 install_requires = [
     'astroid>=1.1.1,<2',
     'backoff>=1.11.1',
-    'bs4>=4',
+    'beautifulsoup4>=4', # https://pypi.org/project/bs4/
     'colorama>=0.3.3',
     'configparser>=3.5.0',
     'cython>=0.29.33',
