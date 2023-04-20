@@ -46,6 +46,9 @@ ftp-pattern = *
 import datetime
 import functools
 import os
+import json
+import re
+import tempfile
 
 import luigi
 import requests
@@ -139,38 +142,67 @@ class BaseFix(BaseTask):
 
     def run(self):
         # SOLR has a limit on facet_fields value length.
-        if self.style == "z":
-            output = shellout(
-                """
-            tar -xOf {input} | zcat |
-            jq -rc '.author[0] = .author[0][0:4000] |
-                    .author_sort = .author_sort[0:4000] |
-                    .author_facet[0] = .author_facet[0][0:4000] |
-                    .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
-            sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
-            span-doisniffer -S |
-            zstd -T0 -c > {output}
-            """,
-                input=self.input().path,
-            )
-            luigi.LocalTarget(output).move(self.output().path)
-        elif self.style == "tgz":
-            output = shellout(
-                """
-            tar -xOzf {input} |
-            jq -rc '.author[0] = .author[0][0:4000] |
-                    .author_sort = .author_sort[0:4000] |
-                    .author_facet[0] = .author_facet[0][0:4000] |
-                    .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
-            sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
-            span-doisniffer -S |
-            zstd -T0 -c > {output}
-            """,
-                input=self.input().path,
-            )
-            luigi.LocalTarget(output).move(self.output().path)
-        else:
-            raise ValueError("supported --style: z, tgz")
+        max_length = 4000
+        pat_year = re.compile(r"[1-9][0-9][0-9][0-9]")
+        with tempfile.NamedTemporaryFile() as f:
+            if self.style == "z":
+                shellout("tar -xOf {input} | zcat | span-doisniffer -S > {output}",
+                         input=self.input().path, output=f.name)
+            elif self.style == "tgz":
+                shellout("tar -xOzf {input} | span-doisniffer -S > {output}",
+                         input=self.input().path, output=f.name)
+            f.flush()
+            f.seek(0)
+            with self.output().open("w") as output:
+                for line in f:
+                    line = line.replace("DE-15-FID", "FID-MEDIEN-DE-15")
+                    doc = json.loads(line)
+                    if "author" in doc:
+                        for i, v in enumerate(doc["author"]):
+                            doc["author"][i] = v[:max_length]
+                    if "author_sort" in doc:
+                        doc["author_sort"] = doc["author_sort"][:max_length]
+                    if "author_facet" in doc:
+                        for i, v in enumerate(doc["author_facet"]):
+                            doc["author_facet"][i] = v[:max_length]
+                    if "publishDate" in doc:
+                        m = pat_year.search(doc["publishDate"])
+                        if m:
+                            doc["publishDate"] = m.group()
+                    json.dumps(doc, output)
+
+        # if self.style == "z":
+        #     output = shellout(
+        #         """
+        #     tar -xOf {input} | zcat |
+        #     jq -rc '.author[0] = .author[0][0:4000] |
+        #             .author_sort = .author_sort[0:4000] |
+        #             .author_facet[0] = .author_facet[0][0:4000] |
+        #             .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
+        #     sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+        #     span-doisniffer -S |
+        #     zstd -T0 -c > {output}
+        #     """,
+        #         input=self.input().path,
+        #     )
+        #     luigi.LocalTarget(output).move(self.output().path)
+        # elif self.style == "tgz":
+        #     output = shellout(
+        #         """
+        #     tar -xOzf {input} |
+        #     jq -rc '.author[0] = .author[0][0:4000] |
+        #             .author_sort = .author_sort[0:4000] |
+        #             .author_facet[0] = .author_facet[0][0:4000] |
+        #             .publishDate = (.publishDate // "" | scan("[1-9][0-9][0-9][0-9]")) // ""' |
+        #     sed -e 's@"DE-15-FID"@"FID-MEDIEN-DE-15"@' |
+        #     span-doisniffer -S |
+        #     zstd -T0 -c > {output}
+        #     """,
+        #         input=self.input().path,
+        #     )
+        #     luigi.LocalTarget(output).move(self.output().path)
+        # else:
+        #     raise ValueError("supported --style: z, tgz")
 
     def output(self):
         last_modified = self.get_last_modified_date()
