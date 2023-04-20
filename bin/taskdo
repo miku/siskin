@@ -60,13 +60,13 @@ if __name__ == '__main__':
 
     try:
         luigi.run()
-    except MissingParameterException as err:
-        print('missing parameter: %s' % err, file=sys.stderr)
+    except MissingParameterException as exc:
+        print('missing parameter: %s' % exc, file=sys.stderr)
         sys.exit(1)
-    except TaskClassNotFoundException as err:
-        print(err, file=sys.stderr)
+    except TaskClassNotFoundException as exc:
+        print(exc, file=sys.stderr)
         sys.exit(1)
-    except:
+    except Exception as exc:
         # TODO(martin): do we need to set the exit code?
-        print(err, file=sys.stderr)
+        print(exc, file=sys.stderr)
         sys.exit(1)
