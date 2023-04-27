@@ -43,6 +43,7 @@ ftp-password= s3cr3t
 ftp-pattern = *
 """
 
+import collections
 import datetime
 import functools
 import os
@@ -153,19 +154,24 @@ class BaseFix(BaseTask):
                          input=self.input().path, output=f.name)
             f.flush()
             f.seek(0)
+            stats = collections.Counter()
             with self.output().open("w") as output:
                 for line in f:
                     line = line.replace(b"DE-15-FID", b"FID-MEDIEN-DE-15")
                     doc = json.loads(line)
+                    # we can decode w/o the base64 padding
+                    doc["id"] = doc["id"].replace("=", "")
                     if "author" in doc:
                         if isinstance(doc["author"], str):
                             doc["author"] = doc["author"][:max_length]
-                            self.logger.warn("base author is a string, not a list: {}".format(doc["id"]))
+                            stats["author.isstr"] += 1
                         else:
                             for i, v in enumerate(doc["author"]):
                                 if not v:
+                                    stats["author.isempty"] += 1
                                     continue
                                 doc["author"][i] = v[:max_length]
+                            stats["author.islist"] += 1
                     if "author_sort" in doc:
                         doc["author_sort"] = doc["author_sort"][:max_length]
                     if "author_facet" in doc:
@@ -178,6 +184,9 @@ class BaseFix(BaseTask):
                         if m:
                             doc["publishDate"] = m.group()
                     output.write(json.dumps(doc).encode("utf-8"))
+
+        self.logger.debug("{}".format(stats))
+
 
         # if self.style == "z":
         #     output = shellout(
