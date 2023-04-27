@@ -155,21 +155,29 @@ class BaseFix(BaseTask):
             f.seek(0)
             with self.output().open("w") as output:
                 for line in f:
-                    line = line.replace("DE-15-FID", "FID-MEDIEN-DE-15")
+                    line = line.replace(b"DE-15-FID", b"FID-MEDIEN-DE-15")
                     doc = json.loads(line)
                     if "author" in doc:
-                        for i, v in enumerate(doc["author"]):
-                            doc["author"][i] = v[:max_length]
+                        if isinstance(doc["author"], str):
+                            doc["author"] = doc["author"][:max_length]
+                            self.logger.warn("base author is a string, not a list: {}".format(doc["id"]))
+                        else:
+                            for i, v in enumerate(doc["author"]):
+                                if not v:
+                                    continue
+                                doc["author"][i] = v[:max_length]
                     if "author_sort" in doc:
                         doc["author_sort"] = doc["author_sort"][:max_length]
                     if "author_facet" in doc:
                         for i, v in enumerate(doc["author_facet"]):
+                            if not v:
+                                continue
                             doc["author_facet"][i] = v[:max_length]
                     if "publishDate" in doc:
                         m = pat_year.search(doc["publishDate"])
                         if m:
                             doc["publishDate"] = m.group()
-                    json.dumps(doc, output)
+                    output.write(json.dumps(doc).encode("utf-8"))
 
         # if self.style == "z":
         #     output = shellout(
