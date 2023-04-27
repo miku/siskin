@@ -155,11 +155,14 @@ class BaseFix(BaseTask):
             f.flush()
             f.seek(0)
             stats = collections.Counter()
+            self.logger.debug("applying fixes...")
             with self.output().open("w") as output:
                 for line in f:
+                    stats["total"] += 1
                     line = line.replace(b"DE-15-FID", b"FID-MEDIEN-DE-15")
                     doc = json.loads(line)
                     # we can decode w/o the base64 padding
+                    doc["recordtype"] = "default" # refs #23424
                     doc["id"] = doc["id"].replace("=", "")
                     if "author" in doc:
                         if isinstance(doc["author"], str):
