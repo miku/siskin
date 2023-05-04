@@ -164,6 +164,14 @@ class BaseFix(BaseTask):
                     # we can decode w/o the base64 padding
                     doc["recordtype"] = "default" # refs #23424
                     doc["id"] = doc["id"].replace("=", "")
+                    # possible analysis error: Document contains at least one
+                    # immense term in field=\"title_fullStr\" (whose UTF8
+                    # encoding is longer than the max length 32766), all of
+                    # which were skipped.  Please correct the analyzer to not
+                    # produce such terms.
+                    for key in ("title", "title_full", "title_short", "title_sort"):
+                        if key in doc:
+                            doc[key] = doc[key][:max_length]
                     if "author" in doc:
                         if isinstance(doc["author"], str):
                             doc["author"] = doc["author"][:max_length]
