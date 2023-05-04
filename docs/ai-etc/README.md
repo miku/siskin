@@ -2,6 +2,8 @@
 
 > 2023-05-05, AG INDEX, [UB Leipzig](https://www.ub.uni-leipzig.de/)
 
+![](pipelines.jpg)
+
 ## Orientation
 
 * [Building metadata indices](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
