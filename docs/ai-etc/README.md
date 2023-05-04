@@ -1,5 +1,7 @@
 # An article index, etc
 
+> 2023-05-05, AG INDEX, [UB Leipzig](https://www.ub.uni-leipzig.de/)
+
 ## Orientation
 
 * [Building metadata indices](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
@@ -7,9 +9,9 @@
 
 ## Data landscape
 
-Heterogenous data landscape, everyone does it differently.
+Heterogenous data landscape; metadata - everyone does it in a different way.
 
-![](LocomotivGT_Zene.jpg)
+[![](LocomotivGT_Zene.jpg)](https://en.wikipedia.org/wiki/Zene_%E2%80%93_Mindenki_m%C3%A1sk%C3%A9pp_csin%C3%A1lja)
 
 ### Crossref
 
