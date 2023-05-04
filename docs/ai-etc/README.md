@@ -20,9 +20,12 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 > enable persistent cross-publisher citation linking in online academic
 > journals. -- [Wikipedia](https://en.wikipedia.org/wiki/Crossref)
 
-* Crossref has an API
+* Crossref has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
 * we sync updates from the API, daily
-* currently about 4TB of raw data, we create monthly snapshots
+* currently about 4.3TB of raw data, we create monthly snapshots (last snapshot
+  took 589m22.691s with the actual
+[compaction](https://github.com/ubleipzig/filterline#use-case-data-compaction)
+taking 217min, result contains 144,325,200 records, 754GB)
 
 ### Other
 
@@ -41,6 +44,8 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 * one offline machine for data processing, [RAID6](https://en.wikipedia.org/wiki/Standard_RAID_levels#RAID_6), dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/215274/intel-xeon-gold-6326-processor-24m-cache-2-90-ghz.html)
 
 ![](RAID_6.svg)
+
+> Any form of RAID that can continue to execute read and write requests to all of a RAID array's virtual disks in the **presence of any two concurrent disk failures**.
 
 ```
 # lvdisplay
