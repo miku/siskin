@@ -24,6 +24,7 @@
     - ncdu
     - neofetch
     - netcat
+    - nvme-cli
     - p7zip
     - p7zip-plugins
     - parallel
