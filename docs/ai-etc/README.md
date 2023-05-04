@@ -3,8 +3,13 @@
 ## Orientation
 
 * [Building metadata indices](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
+* [finc](https://finc.info/), [partners](https://finc.info/anwender)
 
 ## Data landscape
+
+Heterogenous data landscape, everyone does it differently.
+
+![](LocomotivGT_Zene.jpg)
 
 ### Crossref
 
@@ -31,6 +36,8 @@
 
 * redundant setup with manual failover: 2x SOLR (dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/83361/intel-xeon-processor-e52667-v3-20m-cache-3-20-ghz.html)), 2x aux blob server (8 core [Xeon](https://www.intel.com/content/www/us/en/products/sku/64597/intel-xeon-processor-e52665-20m-cache-2-40-ghz-8-00-gts-intel-qpi/specifications.html)), all proxied
 * one offline machine for data processing, [RAID6](https://en.wikipedia.org/wiki/Standard_RAID_levels#RAID_6), dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/215274/intel-xeon-gold-6326-processor-24m-cache-2-90-ghz.html)
+
+![](RAID_6.svg)
 
 ```
 # lvdisplay
