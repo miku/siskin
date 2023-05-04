@@ -26,6 +26,7 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
   took 589m22.691s with the actual
 [compaction](https://github.com/ubleipzig/filterline#use-case-data-compaction)
 taking 217min, result contains 144,325,200 records, 754GB)
+* we use [zstd](https://en.wikipedia.org/wiki/Zstd) for everything we can - text files can be typically [compressed to 10-20%](https://lemire.me/blog/2021/06/30/compressing-json-gzip-vs-zstd/) of their original size; 14TB can yield 70-140TB of space
 
 ### Other
 
