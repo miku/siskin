@@ -30,7 +30,7 @@ taking 217min, result contains 144,325,200 records, 754GB)
 
 ### Other
 
-* DOAJ, Jstor, IEEE, BASE, ...
+* DOAJ, Jstor, IEEE, BASE, OSF, OLC, ...
 
 ### Licensing
 
@@ -43,6 +43,14 @@ taking 217min, result contains 144,325,200 records, 754GB)
 * live free ..., [Linux](https://en.wikipedia.org/wiki/Linux)
 * redundant setup with manual failover: 2x SOLR (dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/83361/intel-xeon-processor-e52667-v3-20m-cache-3-20-ghz.html)), 2x aux blob server (8 core [Xeon](https://www.intel.com/content/www/us/en/products/sku/64597/intel-xeon-processor-e52665-20m-cache-2-40-ghz-8-00-gts-intel-qpi/specifications.html)), all proxied
 * one offline machine for data processing, [RAID6](https://en.wikipedia.org/wiki/Standard_RAID_levels#RAID_6), dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/215274/intel-xeon-gold-6326-processor-24m-cache-2-90-ghz.html)
+* [ansible](https://en.wikipedia.org/wiki/Ansible_(software)) for [infrastructure as code](https://en.wikipedia.org/wiki/Infrastructure_as_code)
+
+> Infrastructure as code can be a key attribute of enabling best practices in
+> [DevOps](https://en.wikipedia.org/wiki/DevOps). Developers become more
+> involved in defining configuration and Ops teams get involved earlier in the
+> development process.
+
+Also, kind of: you build it, you run it (ACM Queue [4/4 2006](https://queue.acm.org/detail.cfm?id=1142065)).
 
 ![](RAID_6.svg)
 
