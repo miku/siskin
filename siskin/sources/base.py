@@ -187,6 +187,7 @@ class BaseFix(BaseTask):
                         if m:
                             doc["publishDate"] = m.group()
                     output.write(json.dumps(doc).encode("utf-8"))
+                    output.write(b"\n")
 
         self.logger.debug("{}".format(stats))
 
