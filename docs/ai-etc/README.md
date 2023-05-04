@@ -36,6 +36,7 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 
 ## Deployment
 
+* live free ..., [Linux](https://en.wikipedia.org/wiki/Linux)
 * redundant setup with manual failover: 2x SOLR (dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/83361/intel-xeon-processor-e52667-v3-20m-cache-3-20-ghz.html)), 2x aux blob server (8 core [Xeon](https://www.intel.com/content/www/us/en/products/sku/64597/intel-xeon-processor-e52665-20m-cache-2-40-ghz-8-00-gts-intel-qpi/specifications.html)), all proxied
 * one offline machine for data processing, [RAID6](https://en.wikipedia.org/wiki/Standard_RAID_levels#RAID_6), dual [Xeon](https://ark.intel.com/content/www/de/de/ark/products/215274/intel-xeon-gold-6326-processor-24m-cache-2-90-ghz.html)
 
@@ -112,4 +113,24 @@ Redundancy wrapup:
 * had RAM failures in the past
 * no automatic failover means failover not instant (but easy to switch, via [nginx](https://en.wikipedia.org/wiki/Nginx) [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy))
 * pro of setup: simple, few moving parts
+
+## Data curation and usability question
+
+* [ ] what should be included
+* [ ] where do people actually search for scholarly material
+
+## Data access and quality
+
+* one of the more time consuming aspects
+* regular feedback, *upstream* (ex: [CEEOL](https://gist.github.com/miku/f4d97b61121f43efef5550557bc111f5))
+* balance between comprehensiveness and correctness
+
+## Data questions
+
+* [ ] books, chapters in crossref
+* [ ] which dataset is contained in which other
+
+## Operational questions
+
+* [ ] moving from batch indexing to real-time indexing and updates
 
