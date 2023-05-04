@@ -38,6 +38,17 @@ taking 217min, result contains 144,325,200 records, 754GB)
 * we combine license information with the raw data to create indexable files
 * AMSL, FOLIO for configuration
 
+### Scheduling
+
+* using a framework to schedule tasks, [spotify/luigi](https://github.com/spotify/luigi/), mainly [toposort](https://en.wikipedia.org/wiki/Topological_sorting) - [many options in 2022](https://www.reddit.com/r/dataengineering/comments/s78jvx/best_job_scheduler_in_2022_airflow_dagster/)
+
+> In a scheduling problem, there is a set of tasks, along with a set of
+> constraints specifying that starting certain tasks depends on other tasks
+> being completed beforehand. We can map these sets to a digraph, with the
+> tasks as the nodes and the direct prerequisite constraints as the edges. [6.042](https://openlearninglibrary.mit.edu/assets/courseware/v1/ec6730f747b31e019f98b20842f6f064/asset-v1:OCW+6.042J+2T2019+type@asset+block/MIT6_042JS15_Session17.pdf)
+
+
+
 ## Deployment
 
 * live free ..., [Linux](https://en.wikipedia.org/wiki/Linux)
