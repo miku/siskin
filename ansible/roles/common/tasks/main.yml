@@ -1,4 +1,4 @@
-# OS as of 11/2022 is Fedore 35
+# Linux distro as of 11/2022 is Fedora
 - name: Install common packages
   dnf:
     state: present
@@ -35,6 +35,7 @@
     - rsync
     - screen
     - sqlite
+    - sysstat
     - tar
     - tmux
     - tree
