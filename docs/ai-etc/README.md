@@ -34,6 +34,9 @@ taking 217min, result contains 144,325,200 records, 754GB)
 
 * DOAJ, Jstor, IEEE, BASE, OSF, OLC, ...
 
+In total, our raw (not deduplicated) dataset of mostly article metadata
+consists of 161953178 (so 89.1% of data comes from Crossref).
+
 ### It's files all the way down
 
 * one way to [minimize state](https://www.worldofbs.com/minimize-state/)
@@ -184,11 +187,3 @@ Redundancy wrapup:
 
 * [ ] moving from batch indexing to real-time indexing and updates
 
-----
-
-## Notes
-
-* RDA is a bit
-* google: minimal design; fulltext
-* citation
-* commercial; not all licensed
