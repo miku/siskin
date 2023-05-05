@@ -55,7 +55,7 @@ $ tree -sh siskin  | tail -1
 
 * every institution can get an individual view over a single index
 
-![](view.jpg)
+![](view-s.jpg)
 
 > a group of people looking at a single index all seeing a slightly different part of it as a cubist painting
 
@@ -184,3 +184,11 @@ Redundancy wrapup:
 
 * [ ] moving from batch indexing to real-time indexing and updates
 
+----
+
+## Notes
+
+* RDA is a bit
+* google: minimal design; fulltext
+* citation
+* commercial; not all licensed
