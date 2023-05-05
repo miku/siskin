@@ -24,7 +24,7 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 
 * Crossref has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
 * we sync updates from the API, daily
-* currently about 4.3TB of raw data, we create monthly snapshots (last snapshot
+* currently about 4.3TB of raw data (438,925,575 records), we create monthly snapshots (last snapshot
   took 589m22.691s with the actual
 [compaction](https://github.com/ubleipzig/filterline#use-case-data-compaction)
 taking 217min, result contains 144,325,200 records, 754GB)
@@ -34,11 +34,34 @@ taking 217min, result contains 144,325,200 records, 754GB)
 
 * DOAJ, Jstor, IEEE, BASE, OSF, OLC, ...
 
+### It's files all the way down
+
+* one way to [minimize state](https://www.worldofbs.com/minimize-state/)
+
+> What this shows is that every programming philosophy is about how to manage
+> state, and each philosophy comes with trade-offs. What this means is that
+> there is no "one true way" to deal with state, and that each programming
+> philosophy is useful and important in the correct domain. It also shows how
+> important minimizing state is.
+
+* files are immutable
+
+```shell
+$ tree -sh siskin  | tail -1
+117 directories, 16899 files
+```
+
 ### Licensing
 
 * every institution can get an individual view over a single index
-* we combine license information with the raw data to create indexable files
+
+![](view.jpg)
+
+> a group of people looking at a single index all seeing a slightly different part of it as a cubist painting
+
+* we combine license information with the raw data to create indexable files, licensing information is just another source
 * AMSL, FOLIO for configuration
+* a filter program to pass data through
 
 ### Scheduling
 
@@ -149,7 +172,7 @@ Redundancy wrapup:
 ## Data access and quality
 
 * one of the more time consuming aspects
-* regular feedback, *upstream* (ex: [CEEOL](https://gist.github.com/miku/f4d97b61121f43efef5550557bc111f5))
+* regular feedback, *upstream* (ex: [CEEOL](https://gist.github.com/miku/f4d97b61121f43efef5550557bc111f5)), [more](https://github.com/ubleipzig/siskin/blob/master/docs/notes/Quality.md)
 * balance between comprehensiveness and correctness
 
 ## Data questions
