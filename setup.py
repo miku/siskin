@@ -137,7 +137,6 @@ setup(name='siskin',
           # TODO(martin): use "siskin-" prefix for all scripts
           'bin/siskin-whatislive.sh',
           'bin/taskcat',
-          'bin/taskcd',
           'bin/taskchecksetup',
           'bin/taskcleanup',
           'bin/taskconfig',
