@@ -30,7 +30,11 @@ research and enable collaboration.
 https://api.osf.io/v2/preprints/?filter[provider]=mediarxiv&format=json&page=1
 
 Refs: #20238.
+
 """
+
+# TODO: We could cache date slices to reduce the time/load on the server, e.g. via
+# daily slices: https://api.osf.io/v2/nodes/?filter[date_created]=2023-03-08
 
 import datetime
 import json
@@ -65,7 +69,8 @@ class OSFDownload(OSFTask):
 
     Pagination docs: https://jsonapi.org/format/#fetching-pagination
 
-    Retrieval of full set takes: 117m13.266s - about 325M, 86651 docs.
+    Retrieval of full set takes: 117m13.266s - about 325M, 86651 docs. Docs as
+    of 05/2023: 129200 docs; about 500M.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
