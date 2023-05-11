@@ -640,9 +640,12 @@ class JstorIntermediateSchema(JstorTask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
+
 class JstorIntermediateSchemaBacklog(JstorTask, luigi.ExternalTask):
+
     def output(self):
         return luigi.LocalTarget(path=self.config.get("jstor", "backlog"))
+
 
 class JstorIntermediateSchemaCombined(JstorTask):
     """
@@ -659,13 +662,12 @@ class JstorIntermediateSchemaCombined(JstorTask):
 
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
-        shellout("cat {input} >> {output}", input=self.get("backlog").path, output=stopover)
-        shellout("cat {input} >> {output}", input=self.get("current").path, output=stopover)
+        shellout("cat {input} >> {output}", input=self.input().get("backlog").path, output=stopover)
+        shellout("cat {input} >> {output}", input=self.input().get("current").path, output=stopover)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
-
 
 
 class JstorExport(JstorTask):

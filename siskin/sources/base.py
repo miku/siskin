@@ -46,8 +46,8 @@ ftp-pattern = *
 import collections
 import datetime
 import functools
-import os
 import json
+import os
 import re
 import tempfile
 
@@ -147,11 +147,9 @@ class BaseFix(BaseTask):
         pat_year = re.compile(r"[1-9][0-9][0-9][0-9]")
         with tempfile.NamedTemporaryFile() as f:
             if self.style == "z":
-                shellout("tar -xOf {input} | zcat | span-doisniffer -S > {output}",
-                         input=self.input().path, output=f.name)
+                shellout("tar -xOf {input} | zcat | span-doisniffer -S > {output}", input=self.input().path, output=f.name)
             elif self.style == "tgz":
-                shellout("tar -xOzf {input} | span-doisniffer -S > {output}",
-                         input=self.input().path, output=f.name)
+                shellout("tar -xOzf {input} | span-doisniffer -S > {output}", input=self.input().path, output=f.name)
             f.flush()
             f.seek(0)
             stats = collections.Counter()
@@ -162,7 +160,7 @@ class BaseFix(BaseTask):
                     line = line.replace(b"DE-15-FID", b"FID-MEDIEN-DE-15")
                     doc = json.loads(line)
                     # we can decode w/o the base64 padding
-                    doc["recordtype"] = "default" # refs #23424
+                    doc["recordtype"] = "default"  # refs #23424
                     doc["id"] = doc["id"].replace("=", "")
                     # possible analysis error: Document contains at least one
                     # immense term in field=\"title_fullStr\" (whose UTF8
@@ -198,7 +196,6 @@ class BaseFix(BaseTask):
                     output.write(b"\n")
 
         self.logger.debug("{}".format(stats))
-
 
         # if self.style == "z":
         #     output = shellout(
