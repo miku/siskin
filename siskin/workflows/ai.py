@@ -64,7 +64,7 @@ from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSch
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
 from siskin.sources.genderopen import GenderopenIntermediateSchema
-from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchema, JstorISSNList)
+from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchemaCombined, JstorISSNList)
 from siskin.sources.kalliope import KalliopeDirectDownload
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
@@ -116,7 +116,7 @@ class AIIntermediateSchema(AITask):
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
             DegruyterIntermediateSchema(date=self.date, stamp=True),
             GenderopenIntermediateSchema(date=self.date, stamp=True),
-            JstorIntermediateSchema(date=self.date, stamp=True),
+            JstorIntermediateSchemaCombined(date=self.date, stamp=True),
             LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
             OSFIntermediateSchema(date=self.date, stamp=True),
