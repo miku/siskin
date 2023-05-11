@@ -22,6 +22,11 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 """
+
+> JSTOR provides access to more than 12 million journal articles, books,
+images, and primary sources in 75 disciplines. -- https://about.jstor.org/
+
+
 [jstor]
 
 ftp-host = host.name
@@ -634,6 +639,33 @@ class JstorIntermediateSchema(JstorTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
+
+class JstorIntermediateSchemaBacklog(JstorTask, luigi.ExternalTask):
+    def output(self):
+        return luigi.LocalTarget(path=self.config.get("jstor", "backlog"))
+
+class JstorIntermediateSchemaCombined(JstorTask):
+    """
+    Join the current workflow with a previous intermediate schema snapshot
+    (since we lost some of the FTP cache during a disk crash).
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            "current": JstorIntermediateSchema(date=self.date),
+            "backlog": JstorIntermediateSchemaBacklog(),
+        }
+
+    def run(self):
+        _, stopover = tempfile.mkstemp(prefix="siskin-")
+        shellout("cat {input} >> {output}", input=self.get("backlog").path, output=stopover)
+        shellout("cat {input} >> {output}", input=self.get("current").path, output=stopover)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
+
 
 
 class JstorExport(JstorTask):
