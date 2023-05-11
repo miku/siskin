@@ -664,7 +664,7 @@ class JstorIntermediateSchemaCombined(JstorTask):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         shellout("cat {input} >> {output}", input=self.input().get("backlog").path, output=stopover)
         shellout("cat {input} >> {output}", input=self.input().get("current").path, output=stopover)
-        luigi.LocalTarget(output).move(self.output().path)
+        luigi.LocalTarget(stopover).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
