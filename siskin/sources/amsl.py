@@ -907,6 +907,11 @@ class AMSLFilterConfig(AMSLTask):
     ----
 
     [1] https://git.io/vQohE
+
+    Fixups, e.g. #23256: edit config file, create diff, apply:
+
+        $ patch $(taskoutput AMSLFilterConfig) < 23256.patch
+
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
