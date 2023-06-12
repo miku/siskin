@@ -668,6 +668,8 @@ class AMSLOpenAccessKBART(AMSLTask):
 class AMSLFilterConfigFreeze(AMSLTask):
     """
     Create a frozen file. File will contain the filterconfig plus content of all URLs.
+
+    Note: "reduced" filterconfig is deprecated.
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
@@ -675,7 +677,7 @@ class AMSLFilterConfigFreeze(AMSLTask):
 
     def requires(self):
         if self.style == "default":
-            return AMSLFilterConfig(date=self.date)
+            return AMSLFilterConfigPatched(date=self.date)
         elif self.style == "reduced":
             return AMSLFilterConfigReduced(date=self.date)
         else:
