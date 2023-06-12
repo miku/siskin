@@ -19,6 +19,7 @@
     - lftp
     - logrotate
     - lsof
+    - mariadb-server # for replace: https://mariadb.com/kb/en/replace-utility/
     - moreutils
     - multitail
     - ncdu
