@@ -691,6 +691,8 @@ class AMSLFilterConfigFreeze(AMSLTask):
 
 class AMSLFilterConfigReduced(AMSLTask):
     """
+    status: deprecated, use "default" filter config again
+
     Reduced AMSL filter config. Only keep the holdings files associated with an
     institution.
 
@@ -776,7 +778,6 @@ class AMSLFilterConfigReduced(AMSLTask):
         }
 
     TODO: * crossref-only nameless attachments
-
     """
     date = luigi.DateParameter(default=datetime.date.today())
 
@@ -1287,6 +1288,34 @@ class AMSLFilterConfig(AMSLTask):
 
         with self.output().open("w") as output:
             json.dump(filterconfig, output, cls=SetEncoder)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="json"))
+
+
+class AMSLFilterConfigPatched(AMSLTask):
+    """
+    Apply patches to AMSLFilterConfig configuration file.
+    """
+
+    date = luigi.DateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return AMSLFilterConfig(date=self.date)
+
+    def run(self):
+        # for now, just apply patches inline
+        with self.input().open() as f:
+            doc = json.load(f)
+
+        # $ dpkg -S replace | grep mariadb
+        # mariadb-server-10.6: /usr/share/man/man1/replace.1.gz
+        # mariadb-server-10.6: /usr/bin/replace
+
+        a = """{"and":[{"source":["49"]},{"holdings":{"urls":["https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/BASE_23FIDBBI"]}}]}"""
+        b = """{"and":[{"source":["49"]},{"holdings":{"urls":["https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/BASE_23FIDBBI", "https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/KBART_23FIDBBI_2022_04_07"]}}]}"""
+        output = shellout(""" replace '{a}' '{b}' < {input} > {output} """, a=a, b=b, input=self.input().path)
+        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json"))
