@@ -1312,9 +1312,10 @@ class AMSLFilterConfigPatched(AMSLTask):
         # mariadb-server-10.6: /usr/share/man/man1/replace.1.gz
         # mariadb-server-10.6: /usr/bin/replace
 
+        # temporary patch until links for BBI are fixed in AMSL
         a = """{"and":[{"source":["49"]},{"holdings":{"urls":["https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/BASE_23FIDBBI"]}}]}"""
         b = """{"and":[{"source":["49"]},{"holdings":{"urls":["https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/BASE_23FIDBBI", "https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/KBART_23FIDBBI_2022_04_07"]}}]}"""
-        output = shellout(""" replace '{a}' '{b}' < {input} > {output} """, a=a, b=b, input=self.input().path)
+        output = shellout(""" jq -c . {input} | replace '{a}' '{b}' > {output} """, a=a, b=b, input=self.input().path) # need to compact first
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
