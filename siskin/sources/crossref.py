@@ -189,7 +189,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
-class CrossrefFeedFile(luigi.ExternalTask):
+class CrossrefFeedFile(CrossrefTask, luigi.ExternalTask):
     """
     A single file from a crossref feed.
     """
@@ -199,7 +199,7 @@ class CrossrefFeedFile(luigi.ExternalTask):
     def output(self):
         filename = f"{self.feed}-index-{self.date}-{self.date}.json.zst"
         path = os.path.join(self.config.get("crossref", "sync-dir"), filename)
-        return path
+        return luigi.LocalTarget(path=path)
 
 
 #
