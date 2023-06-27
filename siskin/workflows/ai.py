@@ -426,9 +426,9 @@ class AIPartialUpdatePublish(AITask):
         elapsed = stopped - started
         with self.output().open("wb") as output:
             json.dump({
-                "started": started,
-                "stopped": stopped,
-                "elapsed": elapsed,
+                "started": started.isoformat(),
+                "stopped": stopped.isoformat(),
+                "elapsed_s": elapsed.seconds,
                 "solr": solr,
                 "file": self.input().path,
             }, output)
