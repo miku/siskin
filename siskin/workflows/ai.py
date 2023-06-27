@@ -417,8 +417,11 @@ class AIPartialUpdatePublish(AITask):
         if len(solr) < 15:
             raise RuntimeError("unexpected solr url: {}".format(solr))
         shellout("""
-                 # zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
+                 echo "solrbulk {input} => {solr}"
                  """, input=self.input().path, solr=solr)
+        # shellout("""
+        #          zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
+        #          """, input=self.input().path, solr=solr)
         stopped = datetime.datetime.now()
         elapsed = stopped - started
         with self.output.open("wb") as output:
