@@ -377,21 +377,29 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
 class AIPartialUpdate(AITask):
     """
-    Do a partial update from a daily crossref slice.
+    Prepare a partial, indexable file (from crossref).
     """
     date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
 
     def requires(self):
         return {
             "amsl": AMSLFilterConfigFreeze(date=self.date),
-            "file": CrossrefFeedFile(date=self.date),
+            "crossref-feed-file": CrossrefFeedFile(date=self.date),
         }
 
     def run(self):
-        pass
+        output = shellout("""
+                 zstdcat -T0 {input} |
+                 span-import -i crossref |
+                 span-tag -unfreeze {amsl} |
+                 span-export |
+                 zstd -c -T0 > {output}""",
+                 input=self.input.get("crossref-feed-file").path,
+                 amsl=self.input.get("amsl").path)
+        luigi.LocalTarget(output).move(self.output().path)
 
-    def complete(self):
-        return False
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
 
 
 # Other tasks
