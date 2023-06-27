@@ -189,7 +189,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
-class CrossrefFeedFile(CrossrefTask, luigi.ExternalTask):
+class CrossrefFeedFile(luigi.ExternalTask):
     """
     A single file from a crossref feed.
     """
