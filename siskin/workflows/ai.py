@@ -39,6 +39,7 @@ import os
 import re
 import shutil
 import string
+import subprocess
 import tempfile
 import urllib
 
@@ -401,6 +402,36 @@ class AIPartialUpdate(AITask):
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
 
+class AIPartialUpdatePublish(AITask):
+    """
+    Publish latest crossref snapshot to currently live index.
+    """
+    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    def requires(self):
+        return AIPartialUpdate(date=self.date)
+
+    def run(self):
+        started = datetime.datetime.now()
+        solr = subprocess.getoutput("echo $(siskin-whatislive.sh solr_live)/solr/biblio")
+        if len(solr) < 15:
+            raise RuntimeError("unexpected solr url: {}".format(solr))
+        shellout("""
+                 # zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
+                 """, input=self.input().path, solr=solr)
+        stopped = datetime.datetime.now()
+        elapsed = stopped - started
+        with self.output.open("wb") as output:
+            json.dump({
+                "started": started,
+                "stopped": stopped,
+                "elapsed": elapsed,
+                "solr": solr,
+                "file": self.input().path,
+            }, output)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="json"))
 
 # Other tasks
 # -----------
