@@ -189,6 +189,24 @@ class CrossrefIntermediateSchema(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
+class CrossrefFeedFile(CrossrefTask, luigi.ExternalTask):
+    """
+    A single file from a crossref feed.
+    """
+    feed = luigi.Parameter(default="feed-1")
+    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    def output(self):
+        filename = f"{self.feed}-index-{self.date}-{self.date}.json.zst"
+        path = os.path.join(self.config.get("crossref", "sync-dir"), filename)
+        return path
+
+
+#
+# Misc tasks
+#
+
+
 class CrossrefCollections(CrossrefTask):
     """
     A collection of crossref collections, refs. #6985. XXX: Save counts as well.

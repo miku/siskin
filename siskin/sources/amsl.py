@@ -1317,7 +1317,7 @@ class AMSLFilterConfigPatched(AMSLTask):
         # temporary patch until links for BBI are fixed in AMSL
         a = """{"and":[{"source":["49"]},{"holdings":{"urls":["https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/BASE_23FIDBBI"]}}]}"""
         b = """{"and":[{"source":["49"]},{"issn":{"url":"https://live.amsl.technology/OntoWiki/files/get?setResource=http://amsl.technology/discovery/metadata-usage/Dokument/KBART_23FIDBBI_2022_04_07"}}]}"""
-        output = shellout(""" jq -c . {input} | replace '{a}' '{b}' > {output} """, a=a, b=b, input=self.input().path) # need to compact first
+        output = shellout(""" jq -c . {input} | replace '{a}' '{b}' > {output} """, a=a, b=b, input=self.input().path)  # need to compact first
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

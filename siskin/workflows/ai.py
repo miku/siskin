@@ -59,7 +59,7 @@ from siskin.database import sqlitedb
 from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
 from siskin.sources.base import BaseFix
 from siskin.sources.ceeol import CeeolIntermediateSchema
-from siskin.sources.crossref import (CrossrefDOIList, CrossrefIntermediateSchema, CrossrefUniqISSNList)
+from siskin.sources.crossref import (CrossrefDOIList, CrossrefFeedFile, CrossrefIntermediateSchema, CrossrefUniqISSNList)
 from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
 from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
@@ -373,6 +373,25 @@ class AIUpdate(AITask, luigi.WrapperTask):
 
     def output(self):
         return self.input()
+
+
+class AIPartialUpdate(AITask):
+    """
+    Do a partial update from a daily crossref slice.
+    """
+    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    def requires(self):
+        return {
+            "amsl": AMSLFilterConfigFreeze(date=self.date),
+            "file": CrossrefFeedFile(date=self.date),
+        }
+
+    def run(self):
+        pass
+
+    def complete(self):
+        return False
 
 
 # Other tasks
