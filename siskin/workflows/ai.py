@@ -394,8 +394,8 @@ class AIPartialUpdate(AITask):
                  span-tag -unfreeze {amsl} |
                  span-export |
                  zstd -c -T0 > {output}""",
-                 input=self.input.get("crossref-feed-file").path,
-                 amsl=self.input.get("amsl").path)
+                 input=self.input().get("crossref-feed-file").path,
+                 amsl=self.input().get("amsl").path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
