@@ -424,7 +424,7 @@ class AIPartialUpdatePublish(AITask):
         #          """, input=self.input().path, solr=solr)
         stopped = datetime.datetime.now()
         elapsed = stopped - started
-        with self.output.open("wb") as output:
+        with self.output().open("wb") as output:
             json.dump({
                 "started": started,
                 "stopped": stopped,
