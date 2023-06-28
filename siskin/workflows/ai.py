@@ -421,11 +421,11 @@ class AIPartialUpdateStats(AITask):
 
     def run(self):
         stats = collections.defaultdict(dict)
-        stats["m"]["date"] = self.date.isoformat() # meta
-        stats["m"]["total"] = 0 # meta
-        stats["i"] = collections.Counter() # isil
-        stats["c"] = collections.Counter() # collection
-        stats["ic"] = collections.defaultdict(collections.Counter) # isil, collection
+        stats["m"]["date"] = self.date.isoformat()  # meta
+        stats["m"]["total"] = 0  # meta
+        stats["i"] = collections.Counter()  # isil
+        stats["c"] = collections.Counter()  # collection
+        stats["ic"] = collections.defaultdict(collections.Counter)  # isil, collection
         with self.input().open() as f:
             for line in f:
                 line = line.strip()
