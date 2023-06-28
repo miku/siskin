@@ -414,7 +414,7 @@ class AIPartialUpdatePublish(AITask):
 
     def run(self):
         started = datetime.datetime.now()
-        solr = subprocess.getoutput("echo $(siskin-whatislive.sh solr_live)/solr/biblio")
+        solr = subprocess.getoutput(f"echo $(siskin-whatislive.sh {self.index})/solr/biblio")
         if len(solr) < len(".../solr/biblio"):
             raise RuntimeError("unexpected solr url: {}".format(solr))
         shellout("""
