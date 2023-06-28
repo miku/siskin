@@ -407,6 +407,7 @@ class AIPartialUpdatePublish(AITask):
     Publish latest crossref snapshot to currently live index.
     """
     date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+    index = luigi.Parameter(default="solr_nonlive", description="solr_live or solr_nonlive")
 
     def requires(self):
         return AIPartialUpdate(date=self.date)
@@ -414,14 +415,11 @@ class AIPartialUpdatePublish(AITask):
     def run(self):
         started = datetime.datetime.now()
         solr = subprocess.getoutput("echo $(siskin-whatislive.sh solr_live)/solr/biblio")
-        if len(solr) < 15:
+        if len(solr) < len(".../solr/biblio"):
             raise RuntimeError("unexpected solr url: {}".format(solr))
         shellout("""
-                 echo "solrbulk {input} => {solr}"
+                 zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
                  """, input=self.input().path, solr=solr)
-        # shellout("""
-        #          zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
-        #          """, input=self.input().path, solr=solr)
         stopped = datetime.datetime.now()
         elapsed = stopped - started
         with self.output().open("wb") as output:
