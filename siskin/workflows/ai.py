@@ -379,6 +379,8 @@ class AIUpdate(AITask, luigi.WrapperTask):
 class AIPartialUpdate(AITask):
     """
     Prepare a partial, indexable file (from crossref).
+
+    CrossrefFeedFile will only be available for today - 2.
     """
     date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
 
@@ -395,12 +397,43 @@ class AIPartialUpdate(AITask):
                  span-tag -unfreeze {amsl} |
                  span-export |
                  zstd -c -T0 > {output}""",
-                 input=self.input().get("crossref-feed-file").path,
-                 amsl=self.input().get("amsl").path)
+                          input=self.input().get("crossref-feed-file").path,
+                          amsl=self.input().get("amsl").path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
+
+
+class AIPartialUpdateStats(AITask):
+    """
+    Gather some numbers for various ISIL.
+    """
+    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    def requires(self):
+        return AIPartialUpdate(date=self.date)
+
+    def run(self):
+        stats = collections.Counter()
+        stats["_date"] = self.date
+        with self.input().open() as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                doc = json.loads(line)
+                stats["_total"] += 1
+                for isil in doc["institution"]:
+                    stats[isil] += 1
+                for mc in doc["mega_collection"]:
+                    stats[mc] += 1
+        with self.output().open("wb") as output:
+            json.dump(stats, output)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="json"))
+
 
 class AIPartialUpdatePublish(AITask):
     """
@@ -433,6 +466,7 @@ class AIPartialUpdatePublish(AITask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json"))
+
 
 # Other tasks
 # -----------
