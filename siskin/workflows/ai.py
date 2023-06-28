@@ -410,6 +410,36 @@ class AIPartialUpdate(AITask):
         return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
 
 
+class AIPartialUpdateBlob(AITask):
+    """
+    Partial crossref update for blobserver.
+    """
+    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    def requires(self):
+        return {
+            "amsl": AMSLFilterConfigFreeze(date=self.date),
+            "amsl-free-content": AMSLFreeContent(date=self.date),
+            "amsl-oa-kbart": AMSLOpenAccessKBART(date=self.date),
+            "crossref-feed-file": CrossrefFeedFile(date=self.date),
+        }
+
+    def run(self):
+        output = shellout("""
+                 zstdcat -T0 {input} |
+                 span-import -i crossref |
+                 span-oa-filter -b 25000 -f {k} -fc {fc} |
+                 span-redact |
+                 zstd -c -T0 > {output}""",
+                          input=self.input().get("crossref-feed-file").path,
+                          k=self.input().get("amsl-oa-kbart").path,
+                          fc=self.input().get("amsl-free-content").path)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
+
+
 class AIPartialUpdateStats(AITask):
     """
     Gather some numbers for various ISIL.
