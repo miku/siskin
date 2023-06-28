@@ -424,9 +424,9 @@ class AIPartialUpdateStats(AITask):
                     continue
                 doc = json.loads(line)
                 stats["_total"] += 1
-                for isil in doc["institution"]:
+                for isil in doc.get("institution", []):
                     stats[isil] += 1
-                for mc in doc["mega_collection"]:
+                for mc in doc.get("mega_collection", []):
                     stats[mc] += 1
         with self.output().open("wb") as output:
             json.dump(stats, output)
