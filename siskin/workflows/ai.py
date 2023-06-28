@@ -435,7 +435,7 @@ class AIPartialUpdateStats(AITask):
                 for mc in doc.get("mega_collection", []):
                     stats["c"][mc] += 1
         with self.output().open("wb") as output:
-            json.dump(stats, output)
+            output.write(json.dumps(stats).encode("utf-8"))
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
