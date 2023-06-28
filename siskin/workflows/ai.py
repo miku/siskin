@@ -438,7 +438,7 @@ class AIPartialUpdateStats(AITask):
             json.dump(stats, output)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json"))
+        return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
 
 
 class AIPartialUpdatePublish(AITask):
