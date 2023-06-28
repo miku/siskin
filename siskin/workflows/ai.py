@@ -387,6 +387,8 @@ class AIPartialUpdate(AITask):
     def requires(self):
         return {
             "amsl": AMSLFilterConfigFreeze(date=self.date),
+            "amsl-free-content": AMSLFreeContent(date=self.date),
+            "amsl-oa-kbart": AMSLOpenAccessKBART(date=self.date),
             "crossref-feed-file": CrossrefFeedFile(date=self.date),
         }
 
@@ -394,11 +396,14 @@ class AIPartialUpdate(AITask):
         output = shellout("""
                  zstdcat -T0 {input} |
                  span-import -i crossref |
+                 span-oa-filter -b 25000 -f {k} -fc {fc} |
                  span-tag -unfreeze {amsl} |
                  span-export |
                  zstd -c -T0 > {output}""",
                           input=self.input().get("crossref-feed-file").path,
-                          amsl=self.input().get("amsl").path)
+                          amsl=self.input().get("amsl").path,
+                          k=self.input().get("amsl-oa-kbart").path,
+                          fc=self.input().get("amsl-free-content").path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
