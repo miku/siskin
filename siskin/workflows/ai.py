@@ -416,7 +416,7 @@ class AIPartialUpdateStats(AITask):
 
     def run(self):
         stats = collections.Counter()
-        stats["_date"] = self.date
+        stats["_date"] = self.date.isoformat()
         with self.input().open() as f:
             for line in f:
                 line = line.strip()
