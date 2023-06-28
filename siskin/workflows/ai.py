@@ -415,19 +415,25 @@ class AIPartialUpdateStats(AITask):
         return AIPartialUpdate(date=self.date)
 
     def run(self):
-        stats = collections.Counter()
-        stats["_date"] = self.date.isoformat()
+        stats = collections.defaultdict(dict)
+        stats["m"]["date"] = self.date.isoformat() # meta
+        stats["m"]["total"] = 0 # meta
+        stats["i"] = collections.Counter() # isil
+        stats["c"] = collections.Counter() # collection
+        stats["ic"] = collections.defaultdict(collections.Counter) # isil, collection
         with self.input().open() as f:
             for line in f:
                 line = line.strip()
                 if not line:
                     continue
                 doc = json.loads(line)
-                stats["_total"] += 1
+                stats["m"]["total"] += 1
                 for isil in doc.get("institution", []):
-                    stats[isil] += 1
+                    stats["i"][isil] += 1
+                    for mc in doc.get("mega_collection", []):
+                        stats["ic"][isil][mc] += 1
                 for mc in doc.get("mega_collection", []):
-                    stats[mc] += 1
+                    stats["c"][mc] += 1
         with self.output().open("wb") as output:
             json.dump(stats, output)
 
