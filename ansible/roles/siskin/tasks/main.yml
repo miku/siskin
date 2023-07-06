@@ -54,7 +54,8 @@
     checksum: sha256:892ae08f39598124180fbd2912895beb116f5ca0f32e9657db2376f3d58fec97
 - name: Install duckdb client
   shell:
-    cmd: unzip -d /usr/local/bin /tmp/duckdb-{{ siskin_extra_version_duckdb }}-dist.zip
+    # remove existing binary, otherwise ansible seems to get stuck
+    cmd: rm -f /usr/local/bin/duckdb && unzip -d /usr/local/bin /tmp/duckdb-{{ siskin_extra_version_duckdb }}-dist.zip
 - name: Silence podman docker message
   file:
     path: /etc/containers/nodocker
