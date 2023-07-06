@@ -69,6 +69,19 @@ max   1642269.00000
 
 ## New documents
 
-Documents are identifier by a DOI.
+About 550 files, about 1TB compressed.
+
+```sh
+$ fd 'feed-1-index-202*' | wc -l
+550
+```
+
+Create a first tabular view of crossref.
+
+```sh
+$ for fn in $(fd 'feed-1-index-202*'); do zstdcat -T0 $fn | span-crossref-table; done | zstd -c -T0 > out
+```
+
+At around 150kdocs/s; around 2h to extract.
 
 
