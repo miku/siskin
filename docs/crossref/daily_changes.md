@@ -106,7 +106,7 @@ D select count(DISTINCT c), count(DISTINCT d), count(DISTINCT i) from c;
 Run Time (s): real 0.887 user 42.651173 sys 0.885386
 ```
 
-If we export the number of updates per DOI, we have most 1, but up to 99 updates per DOI.
+If we export the number of updates per DOI, we have mostly 1, but up to 99 updates per DOI.
 
 ```python
 In [5]: df.describe()
@@ -122,4 +122,18 @@ min           1.000
 max          99.000
 ```
 
+3532704 dois have equal created and indexed date:
+
+```sql
+D select count(*) from c where c.c == c.i;
+┌──────────────┐
+│ count_star() │
+│    int64     │
+├──────────────┤
+│      3532704 │
+└──────────────┘
+```
+
+Of the total 509096757, that's about 0.69%. Estimating that on an average day
+with 1.1M docs, about 7633 will be new records.
 
