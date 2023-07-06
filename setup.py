@@ -45,6 +45,7 @@ install_requires = [
     'configparser>=3.5.0',
     'cython>=0.29.33',
     'decorator>=5.0.9',
+    'duckdb>=0.8.1',
     'elasticsearch>=7',
     'feedparser>=6.0.8',
     'gluish>=0.3',
