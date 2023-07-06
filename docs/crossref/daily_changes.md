@@ -82,6 +82,44 @@ Create a first tabular view of crossref.
 $ for fn in $(fd 'feed-1-index-202*'); do zstdcat -T0 $fn | span-crossref-table; done | zstd -c -T0 > out
 ```
 
-At around 150kdocs/s; around 2h to extract.
+At around 150kdocs/s; around 2h to extract. Yields a 14G compressed TSV, with
+509,096,757 lines, 47GB uncompressed.
+
+Include md5 of the raw blob to discover "diffless" changes. Re-running over 550 files.
+
+```sh
+$ time for fn in $(fd 'feed-1-index-*'); do zstdcat -T0 $fn 2> /dev/null | \
+    span-crossref-table ; done | pv -l | \
+    zstd -c -T0 > /data/tmp/span-crossref-table-feed-1-with-md5.tsv.zst
+```
+
+Three dates, created, deposited, indexed. Over the 550 files (which contain date w/ zero updates), we have:
+
+```sql
+D select count(DISTINCT c), count(DISTINCT d), count(DISTINCT i) from c;
+┌───────────────────┬───────────────────┬───────────────────┐
+│ count(DISTINCT c) │ count(DISTINCT d) │ count(DISTINCT i) │
+│       int64       │       int64       │       int64       │
+├───────────────────┼───────────────────┼───────────────────┤
+│              7594 │              5970 │               485 │
+└───────────────────┴───────────────────┴───────────────────┘
+Run Time (s): real 0.887 user 42.651173 sys 0.885386
+```
+
+If we export the number of updates per DOI, we have most 1, but up to 99 updates per DOI.
+
+```python
+In [5]: df.describe()
+Out[5]:
+                 99
+count 146148862.000
+mean          3.483
+std           6.282
+min           1.000
+25%           1.000
+50%           1.000
+75%           3.000
+max          99.000
+```
 
 
