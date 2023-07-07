@@ -798,3 +798,44 @@ Run Time (s): real 38.220 user 505.847775 sys 279.201109
 
 Which is Elsevier: [78](http://api.crossref.org/members/78).
 
+## Import on i7 8550u CPU / 16G RAM
+
+Can we run this on a 2018 laptop, too?
+
+```
+$ duckdb /data/tmp/span-crossref-table-feed-1-with-md5.db
+v0.8.1 6536a77232
+Enter ".help" for usage hints.
+D create table c (doi string, c date, d date, i date, member int, h string);
+D .timer on
+D copy c from 'span-crossref-table-feed-1-with-md5.tsv.zst' (compression "zstd", ignore_errors true, delimiter "\t");
+Killed
+```
+
+By default, 75% of RAM is set as `memory_limit`, but if we reduce that to,
+here: `10G` (62.5% RAM), the copy op works (slower, as process need to resort
+to tempfiles).
+
+```
+D PRAGMA memory_limit='10GB';
+
+D drop table c;
+D create table c (doi string, c date, d date, i date, member int, h string);
+D copy c from 'span-crossref-table-feed-1-with-md5.tsv.zst' (compression "zstd", ignore_errors true, delimiter "\t");
+
+Run Time (s): real 538.201 user 2761.105100 sys 132.009661
+```
+
+Difference:
+
+* 256G RAM: 219.931s (1.0x)
+*  16G RAM: 538.201s (2.5x)
+
+Some queries seem to fail:
+
+```sql
+D select c.doi, count(*) from c group by c.doi;
+ 50% ▕██████████████████████████████                              ▏ Run Time (s): real 97.069 user 391.312287 sys 125.325974
+Error: Out of Memory Error: failed to pin block of size 262KB (9.9GB/10.0GB used)
+```
+
