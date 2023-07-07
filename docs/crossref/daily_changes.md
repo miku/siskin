@@ -680,7 +680,7 @@ Run Time (s): real 15.895 user 388.559850 sys 71.093172
 
 Are there any members that are associated with many updates?
 
-```
+```sql
 D select m, count(*) as mc from (select any_value(c.member) as m, count(*) as g from c group by c.doi having g > 50) group by m order by mc desc;
 100% ▕████████████████████████████████████████████████████████████▏
 ┌───────┬────────┐
@@ -739,7 +739,7 @@ Run Time (s): real 35.335 user 518.912785 sys 289.015408
 
 Member 78 has the most updates.
 
-```
+```sql
 D select m, count(*) as mc from (select any_value(c.member) as m, count(*) as g from c group by c.doi having g > 1) group by m order by mc desc;
 100% ▕████████████████████████████████████████████████████████████▏
 ┌───────┬──────────┐
@@ -802,7 +802,7 @@ Which is Elsevier: [78](http://api.crossref.org/members/78).
 
 Can we run this on a 2018 laptop, too?
 
-```
+```sql
 $ duckdb /data/tmp/span-crossref-table-feed-1-with-md5.db
 v0.8.1 6536a77232
 Enter ".help" for usage hints.
@@ -816,7 +816,7 @@ By default, 75% of RAM is set as `memory_limit`, but if we reduce that to,
 here: `10G` (62.5% RAM), the copy op works (slower, as process need to resort
 to tempfiles).
 
-```
+```sql
 D PRAGMA memory_limit='10GB';
 
 D drop table c;
