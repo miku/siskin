@@ -55,3 +55,9 @@
     enabled: yes
   with_items:
   - crond
+- name: Increase histsize
+  file:
+    path: /etc/profile.d/histsize.sh
+    content: |
+      export HISTSIZE=1000000
+      export HISTFILESIZE=67108864
