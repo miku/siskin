@@ -100,7 +100,9 @@ class CrossrefRawItems(CrossrefTask):
 
     Companion cron: https://is.gd/WzUa6s
 
-    In 09/2022 this task takes about 90 minutes, 300GB or more compressed.
+    In 09/2022 this task takes about 90 minutes, 300GB or more compressed; in
+    09/2023 this task takes about 6 hours and results in a 1.4T compressed
+    file.
     """
 
     begin = luigi.DateParameter(
