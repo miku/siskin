@@ -102,7 +102,7 @@ class CrossrefRawItems(CrossrefTask):
 
     In 09/2022 this task takes about 90 minutes, 300GB or more compressed; in
     09/2023 this task takes about 6 hours and results in a 1.4T compressed
-    file.
+    file: 591,217,439 lines, 6793744967229 ~ 6.12T uncompressed.
     """
 
     begin = luigi.DateParameter(
