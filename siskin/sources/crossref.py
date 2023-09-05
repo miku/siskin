@@ -135,7 +135,9 @@ class CrossrefUniqItems(CrossrefTask):
     Calculate current snapshot via span-crossref-snapshot. About 204m30.910s;
     takes 99m59.783s to extract a value with jq (and parallel).
 
-    With span-crossref-{sync,snapshot} we get 130377934 unique records.
+    With span-crossref-{sync,snapshot} we get 130377934 unique records. As of
+    09/2023, we need 348m40.680s (about 6h) to process 6.12T, that's about
+    290M/s or 28K docs/s.
 
     Cf. https://www.crossref.org/06members/53status.html
     """
