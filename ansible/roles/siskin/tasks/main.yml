@@ -65,6 +65,7 @@
     state: present
     disable_gpg_check: true
     name:
+      - https://github.com/miku/esbulk/releases/download/v{{ siskin_vendor_version_esbulk }}/esbulk-{{ siskin_vendor_version_esbulk }}-0.x86_64.rpm
       - https://github.com/miku/filterline/releases/download/v{{ siskin_vendor_version_filterline }}/filterline-{{ siskin_vendor_version_filterline }}-0.x86_64.rpm
       - https://github.com/miku/groupcover/releases/download/v{{ siskin_vendor_version_groupcover }}/groupcover-{{ siskin_vendor_version_groupcover }}-0.x86_64.rpm
       - https://github.com/miku/metha/releases/download/v{{ siskin_vendor_version_metha }}/metha-{{ siskin_vendor_version_metha }}-0.x86_64.rpm
