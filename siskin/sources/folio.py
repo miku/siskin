@@ -50,7 +50,6 @@ class FolioTask(DefaultTask):
 
     TAG = "folio"
 
+
 class FolioSync(FolioTask):
     pass
-
-

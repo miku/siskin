@@ -82,12 +82,20 @@ class KalliopeDirectDownload(KalliopeTask):
         #   ]
         # data has:
         #   "mega_collection": ["Nachlässe, Vorlässe, Sammlungen SLUB Dresden"],
-        output = shellout(
-            """ tar -xOzf {input} |
-                jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]' |
-                zstd -c -T0 > {output} """,
-            input=output,
-        )
+        # output = shellout(
+        #     """ tar -xOzf {input} |
+        #         jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]' |
+        #         zstd -c -T0 > {output} """,
+        #     input=output,
+        # )
+
+        # 2023: format changed from tar.gz to gz.tar
+        output = shellout("""
+                          tar -xOf {input} |
+                          unpigz -c |
+                          jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]'
+                          zstd -c -T0 > {output} """,
+                          input=output)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

@@ -327,7 +327,7 @@ class AIExport(AITask):
     def requires(self):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
-            "base": BaseFix(style="z"), # Failed to establish a new connection: [Errno 111] Connection refused')
+            "base": BaseFix(style="z"),  # Failed to establish a new connection: [Errno 111] Connection refused')
             # "kalliope": KalliopeDirectDownload(), # (was) refs. https://projekte.ub.uni-leipzig.de/issues/22596#note-10
         }
 
