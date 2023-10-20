@@ -22,7 +22,7 @@ siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/
 siskin_vendor_version_esbulk: 0.7.13
 siskin_vendor_version_filterline: 0.1.5
 siskin_vendor_version_groupcover: 0.0.12
-siskin_vendor_version_metha: 0.2.50
+siskin_vendor_version_metha: 0.2.52
 siskin_vendor_version_siskin: 1.5.66
 siskin_vendor_version_solrbulk: 0.3.11
 siskin_vendor_version_solrdump: 0.1.7
