@@ -8,9 +8,11 @@
     - bind-utils # for nslookup, etc.
     - btop
     - bzip2
+    - cowsay
     - cronie # https://stackoverflow.com/a/21802522/89391
     - curl
     - fd-find
+    - fortune
     - git
     - glances
     - golang
@@ -37,6 +39,7 @@
     - ripgrep
     - rsync
     - screen
+    - sl
     - sqlite
     - sysstat
     - tar
