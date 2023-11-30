@@ -31,7 +31,6 @@
     - gcc
     - gcc-c++
     - java-1.8.0-openjdk
-    - mailutils
     - podman
     - podman-docker
     - podman-plugins
