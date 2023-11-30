@@ -28,10 +28,10 @@
   dnf:
     state: present
     name:
-    - bash-completion
     - gcc
     - gcc-c++
     - java-1.8.0-openjdk
+    - mailutils
     - podman
     - podman-docker
     - podman-plugins
@@ -44,6 +44,8 @@
     - python3-ipython
     - python3-pip
     - python3-wheel
+    - sendmail
+    - sendmail-cf
     - sshuttle
     - yaz
     - yaz-doc

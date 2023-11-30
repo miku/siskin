@@ -14,6 +14,7 @@
     - fd-find
     - fortune-mod
     - git
+    - git-extras
     - glances
     - golang
     - htop
