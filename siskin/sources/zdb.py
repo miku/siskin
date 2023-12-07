@@ -28,6 +28,7 @@ See: goo.gl/90cteW
 """
 
 import os
+import datetime
 
 import luigi
 from gluish.format import Gzip
@@ -58,6 +59,23 @@ class ZDBDownload(ZDBTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="jsonld.gz"), format=Gzip)
+
+
+class ZDBHoldingsDownload(ZDBTask):
+    """
+    https://data.dnb.de/ZDB/
+
+    Data updated twice a year, use a fixed link.
+    """
+    date = luigi.DateParameter(default=datetime.date(2023, 11, 14))
+
+    def run(self):
+        link = "https://data.dnb.de/ZDB/zdb-holdings_dnbmarc_20231114.mrc.gz"
+        output = shellout(""" wget -O {output} "{link}" """, link=link)
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="mrc.gz"), format=Gzip)
 
 
 class ZDBShortTitleMap(ZDBTask):
