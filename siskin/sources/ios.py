@@ -66,4 +66,19 @@ class IOSSync(IOSTask):
              share_pw=self.config.get("ios", "share_pw"))
     luigi.LocalTarget(output).move(self.output().path)
 
+class IOSIntermediateSchema(IOSTask):
+    """
+    Convert to intermediate schema, requires span 0.1.356 or higher.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
 
+    def requires(self):
+        return IOSSync(date=self.date)
+
+    def run(self):
+        output = shellout("""
+                          unzip -p {input} '*.xml' |
+                          span-import -i ios |
+                          zstd -c -T0 > {output}""",
+                          input=self.input().path)
+    luigi.LocalTarget(output).move(self.output().path)
