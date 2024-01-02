@@ -77,6 +77,7 @@ if __name__ == '__main__':
         ('jq', 'https://stedolan.github.io/jq/'),
         ('metha-sync', 'http://github.com/miku/metha/releases'),
         ('pigz', 'https://zlib.net/pigz/'),
+        ('rclone', 'https://rclone.org'),
         ('solrbulk', 'http://github.com/miku/solrbulk/releases'),
         ('span-import', 'http://github.com/miku/span/releases'),
         ('unzip', 'http://www.info-zip.org/pub/infozip/'),
