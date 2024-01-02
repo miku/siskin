@@ -23,6 +23,14 @@
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 """
 IOS, refs #24731
+
+Config
+
+[ios]
+
+filename = prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
+share_id = 1234
+share_pw = 1234
 """
 
 import datetime
@@ -51,8 +59,9 @@ class IOSSync(IOSTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     output = shellout("""
-             curl -u "{share_id}:{share_pw}" "https://owncloud.gwdg.de/index.php/s/{share_id}" > {output}
+             curl -su "{share_id}:{share_pw}" "https://owncloud.gwdg.de/public.php/webdav/{filename}" -o {output}
              """,
+             filename=self.config.get("ios", "filename"), # e.g. prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
              share_id=self.config.get("ios", "share_id"),
              share_pw=self.config.get("ios", "share_pw"))
     luigi.LocalTarget(output).move(self.output().path)
