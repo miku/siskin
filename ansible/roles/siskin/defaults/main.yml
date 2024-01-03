@@ -19,7 +19,7 @@ siskin_no_proxy: "127.0.0.1,services.ub.uni-leipzig.de,localhost,amsl.technology
 siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple/
 
 # Versions of custom packages
-siskin_vendor_version_esbulk: 0.7.15
+siskin_vendor_version_esbulk: 0.7.16
 siskin_vendor_version_filterline: 0.1.5
 siskin_vendor_version_groupcover: 0.0.12
 siskin_vendor_version_metha: 0.2.54
