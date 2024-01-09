@@ -82,4 +82,4 @@ class IOSIntermediateSchema(IOSTask):
                           span-import -i ios |
                           zstd -c -T0 > {output}""",
                           input=self.input().path)
-    luigi.LocalTarget(output).move(self.output().path)
+        luigi.LocalTarget(output).move(self.output().path)
