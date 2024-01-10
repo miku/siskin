@@ -43,6 +43,7 @@ from gluish.utils import shellout
 
 from siskin.task import DefaultTask
 
+
 class IOSTask(DefaultTask):
     """
     Base task for IOS Press, refs #24731.
@@ -52,6 +53,7 @@ class IOSTask(DefaultTask):
     def closest(self):
         return monthly(self.date)
 
+
 class IOSSync(IOSTask):
     """
     Sync from owncloud.
@@ -59,13 +61,15 @@ class IOSSync(IOSTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                  curl -su "{share_id}:{share_pw}" "https://owncloud.gwdg.de/public.php/webdav/{filename}" -o {output}
                  """,
-                 filename=self.config.get("ios", "filename"), # e.g. prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
-                 share_id=self.config.get("ios", "share_id"),
-                 share_pw=self.config.get("ios", "share_pw"))
+            filename=self.config.get("ios", "filename"),  # e.g. prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
+            share_id=self.config.get("ios", "share_id"),
+            share_pw=self.config.get("ios", "share_pw"))
         luigi.LocalTarget(output).move(self.output().path)
+
 
 class IOSIntermediateSchema(IOSTask):
     """

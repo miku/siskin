@@ -27,8 +27,8 @@ ZDB, for matching short titles of journals.
 See: goo.gl/90cteW
 """
 
-import os
 import datetime
+import os
 
 import luigi
 from gluish.format import Gzip
