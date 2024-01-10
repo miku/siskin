@@ -74,3 +74,5 @@ bin/indexcompare
 /siskin.pex
 /siskin.shiv
 /hack
+
+.venv
