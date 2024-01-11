@@ -348,14 +348,24 @@ class AIExport(AITask):
                 output=tmp,
             )
         # turn intermediate schema into solr
-        shellout(
-            """
-            span-export -o solr5vu3 <(zstd -cd -T0 {input}) | zstd -c -T0 >> {output}
-            """,
-            format=self.format,
-            input=self.input().get("ai").path,
-            output=tmp,
-        )
+        if self.with_fullrecord:
+            shellout(
+                """
+                span-export -with-fullrecord -o solr5vu3 <(zstd -cd -T0 {input}) | zstd -c -T0 >> {output}
+                """,
+                format=self.format,
+                input=self.input().get("ai").path,
+                output=tmp,
+            )
+        else:
+            shellout(
+                """
+                span-export -o solr5vu3 <(zstd -cd -T0 {input}) | zstd -c -T0 >> {output}
+                """,
+                format=self.format,
+                input=self.input().get("ai").path,
+                output=tmp,
+            )
         luigi.LocalTarget(tmp).move(self.output().path)
 
     def output(self):
