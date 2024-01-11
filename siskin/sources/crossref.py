@@ -121,7 +121,7 @@ class CrossrefRawItems(CrossrefTask):
         # TODO: should this be "-mode s" for sync?
         output = shellout(
             """
-            span-crossref-sync -p zstd -P feed-{feed}- -i d -verbose -t 30m -s {begin} -e {date} -c {crossref_sync_dir} | zstd -c19 -T0 >> {output}
+            span-crossref-sync -p zstd -P feed-{feed}- -i d -verbose -t 30m -s {begin} -e {date} -c {crossref_sync_dir} | zstd -c -T0 >> {output}
             """,
             feed=self.feed,
             begin=self.begin,
