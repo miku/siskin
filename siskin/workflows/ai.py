@@ -325,12 +325,12 @@ class AIExport(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="solr5vu3", description="export format")
     style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    with_fullrecord = luigi.BoolParameter(default=False, description="whether to include fulltext record, e.g. for solrcloud")
 
     def requires(self):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
             "base": BaseFix(style="z"),  # Failed to establish a new connection: [Errno 111] Connection refused')
-            # "kalliope": KalliopeDirectDownload(), # (was) refs. https://projekte.ub.uni-leipzig.de/issues/22596#note-10
         }
 
     def run(self):
@@ -338,7 +338,6 @@ class AIExport(AITask):
         # already converted data
         filenames = [
             self.input().get("base").path,
-            # self.input().get("kalliope").path,
         ]
         for fn in filenames:
             shellout(
