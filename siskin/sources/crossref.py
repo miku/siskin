@@ -142,6 +142,12 @@ class CrossrefUniqItems(CrossrefTask):
     With span-crossref-{sync,snapshot} we get 130377934 unique records. As of
     09/2023, we need 348m40.680s (about 6h) to process 6.12T, that's about
     290M/s or 28K docs/s. As of 12/2023, this process takes 450m11.171s (7.5h).
+    In 01/2024, this task took 486m24.435s (8h+), input files was 2TB
+    compressed.
+
+    TODO: To reduce processing time again, compact state and start a new feed.
+    Snapshot at: https://archive.org/details/crossref-2023-12-01 (and
+    https://archive.org/details/ia_biblio_metadata?sort=-publicdate).
 
     Cf. https://www.crossref.org/06members/53status.html
     """
