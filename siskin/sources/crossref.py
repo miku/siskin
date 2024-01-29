@@ -145,6 +145,10 @@ class CrossrefUniqItems(CrossrefTask):
     In 01/2024, this task took 486m24.435s (8h+), input files was 2TB
     compressed.
 
+    Compression data point (01/2024): with `-3` we get 177GB, with `-22` (after
+    350 [i9] core-hours), we get 112GB (a 0.63 reduction). Sequential iteration
+    over 153842785 lines and 809GB  takes about 17min (780MB/s).
+
     TODO: To reduce processing time again, compact state and start a new feed.
     Snapshot at: https://archive.org/details/crossref-2023-12-01 (and
     https://archive.org/details/ia_biblio_metadata?sort=-publicdate).
