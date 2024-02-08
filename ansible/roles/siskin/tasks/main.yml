@@ -23,6 +23,11 @@
     shell: /bin/bash
     create_home: true
     umask: "0022"
+- name: Set home permissions
+  file:
+    path: '/home/{{ siskin_user }}'
+    state: 'directory'
+    mode: '0755'
 
 - name: Install common packages for siskin
   dnf:
@@ -161,8 +166,6 @@
   ansible.builtin.template:
     src: luigid.service.j2
     dest: /usr/lib/systemd/system/luigid.service
-    owner: '{{ siskin_user }}'
-    group: '{{ siskin_group }}'
     mode: '0644'
 
 # Following tasks are related to regular data updates, e.g. from crossref.
