@@ -3,6 +3,8 @@ Description=luigi scheduler daemon
 
 [Service]
 ExecStart=/home/{{ siskin_user }}/.local/bin/luigid
+User={{ siskin_user }}
+Group={{ siskin_group }}
 
 [Install]
 WantedBy=multi-user.target
