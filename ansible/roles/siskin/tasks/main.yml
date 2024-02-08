@@ -127,7 +127,7 @@
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
 
-- name: Create generic fast, large tmp dir; cache; static
+- name: Create generic fast, large tmp dir; cache; static; systemd config
   file:
     path: "{{ item }}"
     owner: '{{ siskin_user }}'
@@ -139,6 +139,8 @@
     - '{{ siskin_data_dir }}'
     - '{{ siskin_data_dir }}/siskin'
     - '{{ siskin_static_dir }}'
+    - '/home/{{ siskin_user }}/.config/systemd/user'
+
 - name: Start service crond, if not started
   service:
     name: crond
@@ -153,6 +155,16 @@
     user: '{{ siskin_user }}'
     env: true
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Create systemd unit for luigid
+
+- name: Install luigid systemd service
+  ansible.builtin.template:
+    src: luigid.service.j2
+    dest: /usr/lib/systemd/system/luigid.service
+    owner: '{{ siskin_user }}'
+    group: '{{ siskin_group }}'
+    mode: '0644'
 
 # Following tasks are related to regular data updates, e.g. from crossref.
 

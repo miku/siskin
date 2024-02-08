@@ -1,0 +1,8 @@
+[Unit]
+Description=luigi scheduler daemon
+
+[Service]
+ExecStart=/home/{{ siskin_user }}/.local/bin/luigid
+
+[Install]
+WantedBy=multi-user.target
