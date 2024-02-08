@@ -127,7 +127,7 @@
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
 
-- name: Create generic fast, large tmp dir; cache; static; systemd config
+- name: Create generic fast, large tmp dir; cache; static
   file:
     path: "{{ item }}"
     owner: '{{ siskin_user }}'
@@ -139,7 +139,6 @@
     - '{{ siskin_data_dir }}'
     - '{{ siskin_data_dir }}/siskin'
     - '{{ siskin_static_dir }}'
-    - '/home/{{ siskin_user }}/.config/systemd/user'
 
 - name: Start service crond, if not started
   service:
