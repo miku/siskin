@@ -1,10 +1,12 @@
 [Unit]
-Description=luigi scheduler daemon
+Description=central luigi server
 
 [Service]
-ExecStart=/home/{{ siskin_user }}/.local/bin/luigid
+Type=simple
+ExecStart=/home/{{ siskin_user }}/.local/bin/luigid --port 8082 --pidfile /tmp/luigid.pid --logdir /var/log/luigi --state-path /home/{{ siskin_user }}/.local/state/luigi.state
 User={{ siskin_user }}
 Group={{ siskin_group }}
 
 [Install]
 WantedBy=multi-user.target
+

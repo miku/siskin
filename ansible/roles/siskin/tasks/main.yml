@@ -132,7 +132,7 @@
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
 
-- name: Create generic fast, large tmp dir; cache; static
+- name: Create generic fast, large tmp dir; cache; static; log dir for siskin and luigi
   file:
     path: "{{ item }}"
     owner: '{{ siskin_user }}'
@@ -144,6 +144,7 @@
     - '{{ siskin_data_dir }}'
     - '{{ siskin_data_dir }}/siskin'
     - '{{ siskin_static_dir }}'
+    - '{{ luigid_log_dir }}'
 
 - name: Start service crond, if not started
   service:
@@ -167,6 +168,11 @@
     src: luigid.service.j2
     dest: /usr/lib/systemd/system/luigid.service
     mode: '0644'
+
+# Allow one additional location to run systemd daemons off
+# https://serverfault.com/questions/1032597/selinux-is-preventing-from-execute-access-on-the-file-centos
+- name: Allow systemd services to be run off local directory
+  shell: chcon -R -t bin_t /home/{{ siskin_user }}/.local/bin
 
 # Following tasks are related to regular data updates, e.g. from crossref.
 
