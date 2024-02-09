@@ -164,7 +164,7 @@
 # Create systemd unit for luigid
 
 - name: Install luigid systemd service
-  ansible.builtin.template:
+  template:
     src: luigid.service.j2
     dest: /usr/lib/systemd/system/luigid.service
     mode: '0644'
