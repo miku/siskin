@@ -28,10 +28,10 @@ siskin_vendor_version_solrbulk: 0.3.12
 siskin_vendor_version_solrdump: 0.1.9
 siskin_vendor_version_span: 0.1.358
 siskin_vendor_version_unzippa: 0.1.6
-siskin_vendor_version_zek: 0.1.21
+siskin_vendor_version_zek: 0.1.23
 
 # Versions of extra packages
-siskin_extra_version_duckdb: 0.9.2
+siskin_extra_version_duckdb: 0.10.0
 
 # luigid log dir
 luigid_log_dir: /var/log/luigi
