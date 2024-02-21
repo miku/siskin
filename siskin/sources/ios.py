@@ -81,7 +81,7 @@ class IOSBacklogIntermediateSchema(IOSTask):
     def run(self):
         output = shellout("""
                           find {backlog} -type f -name '*.xml' |
-                          xargs -I {} cat {} |
+                          xargs -I {{}} cat {{}} |
                           span-import -i ios |
                           zstd -c -T0 > {output}
                           """,
