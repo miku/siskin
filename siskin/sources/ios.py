@@ -31,6 +31,7 @@ Config
 filename = prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
 share_id = 1234
 share_pw = 1234
+backlog = /path/to/ios/
 """
 
 import datetime
@@ -63,13 +64,29 @@ class IOSSync(IOSTask):
     def run(self):
         output = shellout(
             """
-                 curl -su "{share_id}:{share_pw}" "https://owncloud.gwdg.de/public.php/webdav/{filename}" -o {output}
-                 """,
+            curl -su "{share_id}:{share_pw}" "https://owncloud.gwdg.de/public.php/webdav/{filename}" -o {output}
+            """,
             filename=self.config.get("ios", "filename"),  # e.g. prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
             share_id=self.config.get("ios", "share_id"),
             share_pw=self.config.get("ios", "share_pw"))
         luigi.LocalTarget(output).move(self.output().path)
 
+
+class IOSBacklogIntermediateSchema(IOSTask):
+    """
+    Convert backlog to intermediate schema.
+    """
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        output = shellout("""
+                          find {backlog} -type f -name '*.xml' |
+                          xargs -I {} cat {} |
+                          span-import -i ios |
+                          zstd -c -T0 > {output}
+                          """,
+                          backlog=self.config.get("ios", "backlog"))
+        luigi.LocalTarget(output).move(self.output().path)
 
 class IOSIntermediateSchema(IOSTask):
     """
