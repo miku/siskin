@@ -71,6 +71,9 @@ class IOSSync(IOSTask):
             share_pw=self.config.get("ios", "share_pw"))
         luigi.LocalTarget(output).move(self.output().path)
 
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zip"))
+
 
 class IOSBacklogIntermediateSchema(IOSTask):
     """
@@ -88,6 +91,10 @@ class IOSBacklogIntermediateSchema(IOSTask):
                           backlog=self.config.get("ios", "backlog"))
         luigi.LocalTarget(output).move(self.output().path)
 
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
+
+
 class IOSIntermediateSchema(IOSTask):
     """
     Convert to intermediate schema, requires span 0.1.356 or higher.
@@ -104,3 +111,6 @@ class IOSIntermediateSchema(IOSTask):
                           zstd -c -T0 > {output}""",
                           input=self.input().path)
         luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
