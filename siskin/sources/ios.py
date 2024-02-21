@@ -22,7 +22,8 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 """
-IOS, refs #24731
+IOS, refs #24731, backlog should be a directory containing one or more plain
+XML files; delivery TBD
 
 Config
 
@@ -97,19 +98,27 @@ class IOSBacklogIntermediateSchema(IOSTask):
 
 class IOSIntermediateSchema(IOSTask):
     """
-    Convert to intermediate schema, requires span 0.1.356 or higher.
+    Convert to intermediate schema, requires span 0.1.356 or higher; combine,
+    roughly deduplicate.
     """
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return IOSSync(date=self.date)
+        return {
+            "sync": IOSSync(date=self.date),
+            "backlog": IOSBacklogIntermediateSchema(date=self.date),
+        }
 
     def run(self):
         output = shellout("""
                           unzip -p {input} '*.xml' |
                           span-import -i ios |
-                          zstd -c -T0 > {output}""",
-                          input=self.input().path)
+                          zstd -c -T0 > {output} &&
+                          cat {backlog} >> {output} &&
+                          zstd -c -T0 {output} | LC_ALL=C sort -S10% -u | zstd -c -T0 | sponge {output}
+                          """,
+                          input=self.input().get("sync").path,
+                          backlog=self.input().get("backlog").path)
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

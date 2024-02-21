@@ -24,7 +24,7 @@
     - logrotate
     - lsof
     - mariadb-server # for replace: https://mariadb.com/kb/en/replace-utility/
-    - moreutils
+    - moreutils # e.g. for "sponge"
     - multitail
     - ncdu
     - neofetch
