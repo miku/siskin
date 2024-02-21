@@ -115,7 +115,7 @@ class IOSIntermediateSchema(IOSTask):
                           span-import -i ios |
                           zstd -c -T0 > {output} &&
                           cat {backlog} >> {output} &&
-                          zstd -c -T0 {output} | LC_ALL=C sort -S10% -u | zstd -c -T0 | sponge {output}
+                          zstdcat -T0 {output} | LC_ALL=C sort -S10% -u | zstd -c -T0 | sponge {output}
                           """,
                           input=self.input().get("sync").path,
                           backlog=self.input().get("backlog").path)
