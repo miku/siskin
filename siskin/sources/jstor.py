@@ -571,8 +571,8 @@ class JstorIntermediateSchema(JstorTask):
         with open(self.assets("55/tcid_jstor.tsv")) as handle:
             for line in handle:
                 # note: this failed at one point due to non-tab separator in
-                # the data (TODO: would need to type check, first)
-                tcid, jstor_collection = line.strip().split("\t")
+                # the data (todo: would need to type check, first)
+                tcid, jstor_collection = re.split("\W", line.strip(), maxsplit=1)
                 jstor_to_tcid[jstor_collection] = tcid
         with self.input().get("mapping").open() as mapfile:
             mapping = json.load(mapfile)
