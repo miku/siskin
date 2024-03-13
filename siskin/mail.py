@@ -35,15 +35,11 @@ from siskin.configuration import Config
 config = Config.instance()
 logger = logging.getLogger("siskin")
 
-now = datetime.datetime.now()
-day = now.strftime("%a")
-month = now.strftime("%b")
-date = now.strftime(day + ", %d " + month + " %Y %H:%M:%S +0100")
 
 
 def send_mail(
     sender=None,
-    date=date,
+    date=None,
     tolist=None,
     subject=None,
     message=None,
@@ -62,6 +58,11 @@ def send_mail(
 
     XXX: ATM no FROM: line, maybe add that.
     """
+    if date is None:
+        now = datetime.datetime.now()
+        day = now.strftime("%a")
+        month = now.strftime("%b")
+        date = now.strftime(day + ", %d " + month + " %Y %H:%M:%S +0100")
     if subject is None:
         subject = "[automessage]"
     if smtp is None:
