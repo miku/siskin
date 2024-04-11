@@ -77,9 +77,10 @@
       - https://github.com/miku/metha/releases/download/v{{ siskin_vendor_version_metha }}/metha-{{ siskin_vendor_version_metha }}-0.x86_64.rpm
       - https://github.com/miku/solrbulk/releases/download/v{{ siskin_vendor_version_solrbulk }}/solrbulk-{{ siskin_vendor_version_solrbulk }}-0.x86_64.rpm
       - https://github.com/miku/span/releases/download/v{{ siskin_vendor_version_span }}/span-{{ siskin_vendor_version_span }}-0.x86_64.rpm
-      - https://github.com/ubleipzig/solrdump/releases/download/v{{ siskin_vendor_version_solrdump }}/solrdump-{{ siskin_vendor_version_solrdump }}-0.x86_64.rpm
+      - https://github.com/miku/srufetch/releases/download/v{{ siskin_vendor_version_srufetch }}/srufetch-{{ siskin_vendor_version_srufetch }}-0.x86_64.rpm
       - https://github.com/miku/unzippa/releases/download/v{{ siskin_vendor_version_unzippa }}/unzippa-{{ siskin_vendor_version_unzippa }}-0.x86_64.rpm
       - https://github.com/miku/zek/releases/download/v{{ siskin_vendor_version_zek }}/zek-{{ siskin_vendor_version_zek }}-0.x86_64.rpm
+      - https://github.com/ubleipzig/solrdump/releases/download/v{{ siskin_vendor_version_solrdump }}/solrdump-{{ siskin_vendor_version_solrdump }}-0.x86_64.rpm
 
 - name: Download metafacture 4.0.0 (https://github.com/metafacture/metafacture-core/releases/tag/metafacture-runner-4.0.0)
   # We're stuck with MF 4.0.0 so we keep a copy of that version around; there's
