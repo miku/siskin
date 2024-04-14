@@ -35,10 +35,8 @@ dump = /path/to/full_dois_2018-03-29T113154.jsonl.gz
 from __future__ import print_function
 
 import json
-import sys
 
 import luigi
-from gluish.utils import shellout
 from luigi.format import Gzip
 
 from siskin.task import DefaultTask
@@ -119,7 +117,7 @@ class OADOIList(OADOIDump):
             for i, line in enumerate(handle, start=1):
                 try:
                     doc = json.loads(line)
-                except ValueError as err:
+                except ValueError:
                     self.logger.debug("at line %d" % i)
                     error_lines.append(i)
                     continue

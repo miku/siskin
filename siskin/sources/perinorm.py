@@ -24,14 +24,10 @@
 
 import datetime
 import json
-import re
 import tarfile
 
 import luigi
-from gluish.format import TSV, Gzip
-from gluish.intervals import monthly
-from gluish.parameter import ClosestDateParameter
-from gluish.utils import shellout
+from gluish.format import Gzip
 
 from siskin.common import FTPMirror
 from siskin.task import DefaultTask
@@ -91,7 +87,7 @@ class PerinormExport(PerinormTask):
         with self.input().open() as file:
             for line in file:
                 line = line.strip()
-                if not self.current["filename"] in line:
+                if self.current["filename"] not in line:
                     continue
                 path = line
                 break

@@ -44,7 +44,6 @@ from gluish.utils import shellout
 
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
-from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
@@ -137,7 +136,7 @@ class DegruyterCombine(DegruyterTask):
         files = []
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=("path", )):
-                if not "/%s/" % self.group in row.path:
+                if "/%s/" % self.group not in row.path:
                     continue
                 files.append(row.path)
 
@@ -180,7 +179,7 @@ class DegruyterXML(DegruyterTask):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
             for row in handle.iter_tsv(cols=("path", )):
-                if not "/%s/" % self.group in row.path:
+                if "/%s/" % self.group not in row.path:
                     continue
                 # TODO: clean this up
                 # Ignore timestamp for now; we may have duplicates but with the

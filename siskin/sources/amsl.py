@@ -63,8 +63,6 @@ from __future__ import print_function
 import collections
 import datetime
 import gzip
-import io
-import itertools
 import json
 import operator
 import tempfile
@@ -153,7 +151,7 @@ class AMSLServiceDeprecated(AMSLTask):
         with gzip.open(output, "rb") as handle:
             try:
                 _ = json.load(handle)
-            except ValueError as err:
+            except ValueError:
                 self.logger.warning("AMSL API did not return valid JSON")
                 raise
 
@@ -1282,7 +1280,7 @@ class AMSLFilterConfig(AMSLTask):
         fix_url = "https://dbod.de/SLUB-EZB-KBART.zip"
         for term in filterconfig["DE-14"]["or"]:
             for t in term["and"]:
-                if (not "holdings" in t) and (not "urls" in t.get("holdings", [])):
+                if ("holdings" not in t) and ("urls" not in t.get("holdings", [])):
                     continue
                 if fix_url in t["holdings"]["urls"]:
                     continue

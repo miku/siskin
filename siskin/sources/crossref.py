@@ -55,27 +55,22 @@ import json
 import os
 import socket
 import tempfile
-import time
-import urllib.error
-import urllib.parse
-import urllib.request
 
-import elasticsearch
 import luigi
 import requests
 from gluish.common import Executable
 from gluish.format import TSV, Zstd
 from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
-from gluish.utils import date_range, shellout
+from gluish.utils import shellout
 from six import string_types
 
 from siskin import __version__
 from siskin.benchmark import timed
 from siskin.mail import send_mail
-from siskin.sources.amsl import AMSLFilterConfig, AMSLService
+from siskin.sources.amsl import AMSLService
 from siskin.task import DefaultTask
-from siskin.utils import URLCache, load_set_from_target
+from siskin.utils import load_set_from_target
 
 
 class CrossrefTask(DefaultTask):
@@ -586,7 +581,7 @@ class CrossrefPrefixMapping(CrossrefTask):
 
                     try:
                         name = name.decode("utf-8")
-                    except AttributeError as err:
+                    except AttributeError:
                         pass  # XXX: python 2/3 compat
                     entry = tuple(v for v in (prefix, name, mega_collection))
                     result.add(entry)  # Unique.

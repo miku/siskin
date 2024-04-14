@@ -5,8 +5,6 @@ import json
 import os
 import tempfile
 
-import marcx
-import pymarc
 import requests
 import responses
 

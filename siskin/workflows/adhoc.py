@@ -37,10 +37,8 @@ import xlsxwriter
 from gluish.format import TSV, Gzip
 from gluish.utils import shellout
 
-from siskin.sources.amsl import AMSLCollections, AMSLService
-from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount, CrossrefCollectionsDifference)
-from siskin.sources.elsevierjournals import ElsevierJournalsExport
-from siskin.sources.jstor import JstorExport
+from siskin.sources.amsl import AMSLCollections
+from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount)
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder, load_set_from_target
 

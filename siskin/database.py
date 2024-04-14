@@ -25,11 +25,9 @@
 Helper for databases.
 """
 
-import logging
 import sqlite3
 
 import pymysql
-import six.moves.urllib.parse
 from pymysql.cursors import SSCursor
 
 

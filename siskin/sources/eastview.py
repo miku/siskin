@@ -46,10 +46,8 @@ import tempfile
 import zipfile
 
 import luigi
-from gluish.common import Executable
-from gluish.format import TSV, Gzip, Zstd
+from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
-from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.benchmark import timed

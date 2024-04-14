@@ -34,11 +34,7 @@ select-url: https://de-15.staging.folio.finc.info/finc-select
 config-url: https://de-15.staging.folio.finc.info/finc-config
 
 """
-import datetime
 
-import luigi
-from gluish.format import TSV, Gzip
-from gluish.utils import shellout
 
 from siskin.task import DefaultTask
 

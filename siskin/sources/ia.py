@@ -4,9 +4,7 @@
 Data hosted at Internet Archive.
 """
 
-import datetime
 import os
-import shutil
 import tempfile
 
 import luigi

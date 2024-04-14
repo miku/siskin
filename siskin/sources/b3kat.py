@@ -184,13 +184,13 @@ class B3KatFilterSSG(B3KatTask):
                     if i % 100000 == 0:
                         self.logger.debug("filtered %d/%d records, %s", counter["written"], i, counter)
                     record = marcx.Record.from_record(record)
-                    if not "ssgn" in record.values("084.2"):
+                    if "ssgn" not in record.values("084.2"):
                         counter["not-ssgn"] += 1
                         continue
-                    if not "9,2" in record.values("084.a"):
+                    if "9,2" not in record.values("084.a"):
                         counter["not-9,2"] += 1
                         continue
-                    if not "digit" in record.values("912.a"):
+                    if "digit" not in record.values("912.a"):
                         counter["not-digit"] += 1
                         continue
                     writer.write(record)

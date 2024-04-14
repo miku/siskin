@@ -30,10 +30,8 @@ try:
 except ImportError:
     from ConfigParser import SafeConfigParser as ConfigParser
 
-import datetime
 import logging
 import os
-import sys
 
 logger = logging.getLogger("siskin")
 

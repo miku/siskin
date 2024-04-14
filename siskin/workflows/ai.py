@@ -34,11 +34,8 @@ import collections
 import datetime
 import itertools
 import json
-import multiprocessing
 import os
 import re
-import shutil
-import string
 import subprocess
 import tempfile
 import urllib
@@ -46,18 +43,15 @@ import urllib
 import luigi
 import rdflib
 import requests
-import six
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
-from gluish.common import Executable
 from gluish.format import TSV, Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.benchmark import timed
-from siskin.database import sqlitedb
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART, AMSLService)
+from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART)
 from siskin.sources.base import BaseFix
 from siskin.sources.ceeol import CeeolIntermediateSchema
 from siskin.sources.crossref import (CrossrefDOIList, CrossrefFeedFile, CrossrefIntermediateSchema, CrossrefUniqISSNList)
@@ -67,7 +61,6 @@ from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
 from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.ios import IOSIntermediateSchema
 from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchemaCombined, JstorISSNList)
-from siskin.sources.kalliope import KalliopeDirectDownload
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema

@@ -41,7 +41,6 @@ import datetime
 import itertools
 import json
 import os
-import pipes
 import re
 import tempfile
 
@@ -56,7 +55,7 @@ from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
 from siskin.sources.amsl import AMSLFilterConfig, AMSLService
 from siskin.task import DefaultTask
-from siskin.utils import SetEncoder, load_set_from_file, nwise
+from siskin.utils import SetEncoder
 
 
 class JstorTask(DefaultTask):

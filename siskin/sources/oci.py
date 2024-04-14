@@ -28,7 +28,7 @@ Open Citations, https://opencitations.net/.
 import tempfile
 
 import luigi
-from gluish.format import TSV, Gzip
+from gluish.format import Gzip
 from gluish.utils import shellout
 
 from siskin.task import DefaultTask

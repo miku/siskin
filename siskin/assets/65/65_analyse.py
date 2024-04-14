@@ -7,7 +7,6 @@ import collections
 import fileinput
 import json
 import re
-import sys
 
 import pandas as pd
 import requests
@@ -62,13 +61,13 @@ for line in tqdm.tqdm(fileinput.input(), total=941528):
             names[issn] = doc["name"]
 
         # Search ISSN in AI (w/o 65)
-        if not issn in counters["ai"]:
+        if issn not in counters["ai"]:
             query = 'issn:"%s" AND NOT source_id:65' % issn
             resp = search(query)
             counters["ai"][issn] = resp["response"]["numFound"]
 
         # Search ISSN in AI (w/o 65) and FID-MEDIEN-DE-15
-        if not issn in counters["fid"]:
+        if issn not in counters["fid"]:
             query = ('issn:"%s" AND NOT source_id:65 AND institution:FID-MEDIEN-DE-15' % issn)
             resp = search(query)
             counters["fid"][issn] = resp["response"]["numFound"]

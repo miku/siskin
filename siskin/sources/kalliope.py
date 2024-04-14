@@ -103,6 +103,6 @@ class KalliopeDirectDownload(KalliopeTask):
             last_modified = self.get_last_modified_date()
             filename = "kalliope-{}.zst".format(last_modified.strftime("%Y-%m-%d"))
             return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
-        except KeyError as exc:
+        except KeyError:
             self.logger.warn("unuable URL, will trigger an exception on run")
             return luigi.LocalTarget(is_tmp=True)  # just a dummy, we'll use that to trigger an exception in run

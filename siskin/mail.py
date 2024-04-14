@@ -28,7 +28,6 @@ Helper for sending mail.
 import datetime
 import logging
 import smtplib
-import socket
 
 from siskin.configuration import Config
 

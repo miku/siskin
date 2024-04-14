@@ -27,7 +27,6 @@ Various utilities.
 
 from __future__ import print_function
 
-import base64
 import datetime
 import errno
 import hashlib
@@ -39,7 +38,6 @@ import os
 import random
 import re
 import string
-import sys
 import tempfile
 import xml.etree.cElementTree as ET
 
@@ -48,7 +46,6 @@ import bs4
 import luigi
 import requests
 import six
-from dateutil import relativedelta
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
@@ -449,7 +446,7 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
     """
 
     def strip_ns(tag):
-        if not "}" in tag:
+        if "}" not in tag:
             return tag
         return tag.split("}")[1]
 

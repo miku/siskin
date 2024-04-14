@@ -38,7 +38,6 @@ import collections
 import json
 import logging
 import os
-import sys
 import tarfile
 import tempfile
 from xml.sax.saxutils import escape, unescape
@@ -353,7 +352,7 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     """
     if not osf:
         return None
-    if not "id" in osf:
+    if "id" not in osf:
         raise ValueError("osf record w/o id: {}".format(osf))
     source_id = "179"
 
@@ -422,7 +421,7 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
             for item in doc["data"]:
                 try:
                     attrs = item["embeds"]["users"]["data"]["attributes"]
-                except KeyError as exc:
+                except KeyError:
                     attrs = item["embeds"]["users"]["errors"][0]["meta"]
                 result.append({
                     "rft.aufirst": attrs["given_name"],

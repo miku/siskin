@@ -70,7 +70,7 @@ def pqdt_harvest(
             resp = requests.get(link, cookies=cookies, headers={"User-Agent": user_agent})
             if resp.status_code >= 400:
                 raise RuntimeError("harvest failed: {} {}".format(link, resp.status_code))
-            logger.debug("retrieved {} {}".format(len(resp.text), resp.text[:50], "..."))
+            logger.debug("retrieved {} {}".format(len(resp.text), resp.text[:50], ))
             dd = xmltodict.parse(resp.text)
             tf.write(resp.text)
             tf.write("\n")
@@ -81,7 +81,7 @@ def pqdt_harvest(
                 cursor = int(tokenTag["@cursor"])
                 size = int(tokenTag["@completeListSize"])
                 token = tokenTag["#text"]
-            except KeyError as exc:
+            except KeyError:
                 logger.debug(json.dumps({
                     "text": resp.text,
                     "status": resp.status_code,

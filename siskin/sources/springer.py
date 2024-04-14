@@ -46,19 +46,14 @@ ftp-pattern = *
 from __future__ import print_function
 
 import datetime
-import json
-import re
 
 import luigi
-import six
 from gluish.format import TSV, Gzip
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.common import FTPMirror
-from siskin.decorator import deprecated
-from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
 
 
