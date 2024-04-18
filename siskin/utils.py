@@ -82,7 +82,8 @@ def iterfiles(directory=".", fun=None):
     paths by function given in `fun`.
     """
     if fun is None:
-        fun = lambda path: True
+        def fun(path):
+            return True
     for root, _, files in os.walk(directory):
         for f in files:
             path = os.path.join(root, f)

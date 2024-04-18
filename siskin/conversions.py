@@ -149,11 +149,11 @@ def imslp_xml_to_marc(s, legacy_mapping=None):
     record.add("007", data="cr")
 
     if doc.get("languages", []):
-        langs = [l for l in doc["languages"] if l != "unbekannt"]
+        langs = [lang for lang in doc["languages"] if lang != "unbekannt"]
         if langs:
             record.add("008", data="130227uu20uuuuuuxx uuup%s  c" % langs[0])
-            for l in langs:
-                record.add("041", a=l)
+            for lang in langs:
+                record.add("041", a=lang)
 
     creator = doc["creator"]["mainForm"]
     record.add("100", a=creator, e="cmp", _0=legacy_mapping.get(identifier, {}).get("viaf", ""))
@@ -372,7 +372,6 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
         except KeyError:
             return "sid-{}-col-{}".format(source_id, provider)
 
-    id = "ai-{}-{}".format(source_id, osf["id"])
     attrs = osf.get("attributes")
     rels = osf.get("relationships")
     if not attrs or not rels:

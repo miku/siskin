@@ -116,7 +116,7 @@ class OADOIList(OADOIDump):
         with self.input().open() as handle:
             for i, line in enumerate(handle, start=1):
                 try:
-                    doc = json.loads(line)
+                    _ = json.loads(line)
                 except ValueError:
                     self.logger.debug("at line %d" % i)
                     error_lines.append(i)

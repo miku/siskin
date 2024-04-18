@@ -32,9 +32,8 @@ import json
 import tempfile
 
 import luigi
-import requests
 import xlsxwriter
-from gluish.format import TSV, Gzip
+from gluish.format import Gzip
 from gluish.utils import shellout
 
 from siskin.sources.amsl import AMSLCollections
@@ -148,42 +147,3 @@ class Issue7049ExportExcel(AdhocTask):
         return luigi.LocalTarget(path=self.path(ext="xlsx"))
 
 
-class K10Matches(AdhocTask):
-    """
-    How many of the ISSN in K10Plus are indexed in finc?
-
-    CSV list: https://is.gd/AW3bCB
-    """
-
-    ai = luigi.Parameter(default="http://localhost:8983/solr/biblio")
-    finc = luigi.Parameter(default="http://localhost:8983/solr/biblio")
-
-    def run(self):
-        r = requests.get("https://is.gd/AW3bCB")
-        with self.output().open("w") as output:
-            for line in r.text.split("\n"):
-                try:
-                    issn, count = line.split(",")
-
-                    results = {}
-
-                    results["ai"] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.ai, issn))
-                    if results["ai"].status_code != 200:
-                        raise RuntimeError("ai reponded with %s" % rr.status_code)
-
-                    results["finc"] = requests.get("%s/select?q=issn:%s&rows=0&wt=json" % (self.finc, issn))
-                    if results["finc"].status_code != 200:
-                        raise RuntimeError("finc reponded with %s" % rr.status_code)
-
-                    output.write_tsv(
-                        issn,
-                        count,
-                        str(results["ai"].json().get("response").get("numFound")),
-                        str(results["finc"].json().get("response").get("numFound")),
-                    )
-
-                except Exception as exc:
-                    self.logger.debug(exc)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True), format=TSV)

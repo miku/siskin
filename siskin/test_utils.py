@@ -70,7 +70,7 @@ def test_get_cache_file(tmpdir):
 @responses.activate
 def test_scrape_html_listing():
     responses.add(responses.GET, "http://fake.com/1", body="<html></html>", status=200)
-    resp = requests.get("http://fake.com/1")
+    _ = requests.get("http://fake.com/1")
     assert scrape_html_listing("http://fake.com/1") == []
 
     body = """
@@ -118,7 +118,7 @@ def test_scrape_html_listing():
     ]
 
     responses.add(responses.GET, "http://fake.com/1", body=body, status=200)
-    resp = requests.get("http://fake.com/1")
+    _ = requests.get("http://fake.com/1")
     assert scrape_html_listing("http://fake.com/1") == expected
 
 

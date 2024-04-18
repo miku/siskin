@@ -27,6 +27,7 @@ Helper for databases.
 
 import sqlite3
 
+import urllib
 import pymysql
 from pymysql.cursors import SSCursor
 

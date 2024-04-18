@@ -29,8 +29,8 @@ import json
 
 from luigi.task import Register
 
-from siskin.sources import *
-from siskin.workflows import *
+from siskin.sources import * # noqa: F403
+from siskin.workflows import * # noqa: F403
 
 
 def _write_task_import_cache(path):

@@ -1304,10 +1304,6 @@ class AMSLFilterConfigPatched(AMSLTask):
         return AMSLFilterConfig(date=self.date)
 
     def run(self):
-        # for now, just apply patches inline
-        with self.input().open() as f:
-            doc = json.load(f)
-
         # $ dpkg -S replace | grep mariadb
         # mariadb-server-10.6: /usr/share/man/man1/replace.1.gz
         # mariadb-server-10.6: /usr/bin/replace
