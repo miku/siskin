@@ -1,0 +1,77 @@
+   1: import pandas as pd
+   2:
+s = """
+./date-2021-07-14.ndj.zst 723535
+./date-2023-03-20.ndj.zst 835874
+./date-2023-10-27.ndj.zst 874543
+./date-2024-03-27.ndj.zst 952238
+"""
+   3: lines = s.split()
+   4: lines = [line for line s.split()]
+   5: lines = [line for line in s.split()]
+   6: lines = [line for line in s.split() if line]
+   7: lines
+   8: lines = [line for line in s.split("\n") if line]
+   9: lines
+  10: lines = [line[8:18] for line in s.split("\n") if line]
+  11: lines
+  12: lines = [line[7:17] for line in s.split("\n") if line]
+  13: lines
+  14: lines = [line[7:17] + " " + lines[:-6] for line in s.split("\n") if line]
+  15: lines = [line[7:17] + [" "] + lines[:-6] for line in s.split("\n") if line]
+  16: lines = [line[7:17] + lines[-6:] for line in s.split("\n") if line]
+  17: lines = [(line[7:17] + lines[-6:]) for line in s.split("\n") if line]
+  18: lines = [line[7:17] for line in s.split("\n") if line]
+  19: lines
+  20: lines = [line[7:17] + " " for line in s.split("\n") if line]
+  21: lines
+  22: lines = [line[7:17] + " " + line[-6:] for line in s.split("\n") if line]
+  23: lines
+  24: lines = [line[7:17] + " " + line[-6:] for line in s.split("\n") if line])
+  25: lines = [(line[7:17], line[-6:]) for line in s.split("\n") if line]
+  26: lines
+  27: df = pd.DataFrame[(line[7:17], line[-6:]) for line in s.split("\n") if line]
+  28: df = pd.DataFrame([(line[7:17], line[-6:]) for line in s.split("\n") if line])
+  29: df
+  30: df.names
+  31: df.columns
+  32: df.columns = ["date", "c"]
+  33: df
+  34: pd.to_datetime(df["date"])
+  35: df["date"] = pd.to_datetime(df["date"])
+  36: df
+  37: df.set_index("date")
+  38: df = df.set_index("date")
+  39: df
+  40: df.diff()
+  41: df.diff?
+  42: df.diff()
+  43: df
+  44: df.info()
+  45: df["c"].astype(int)
+  46: df["c"] = df["c"].astype(int)
+  47: df
+  48: df.diff()
+  49: df
+  50: df["diff"] = df.diff()
+  51: df
+  52: df.index.to_series().diff().dt
+  53: df.index.to_series().diff().dt.seconds
+  54: df.index.to_series().diff().dt
+  55: df.index.to_series().diff().dt.seconds
+  56: df.index.to_series().diff().dt.seconds.div(60)
+  57: df.index.to_series().diff()
+  58: df.index.to_series().diff().days
+  59: df.index.to_series().diff().dt.days
+  60: df["days"] = df.index.to_series().diff().dt.days
+  61: df
+  62: c["diff"] / c["days"]
+  63: df["diff"] / df["days"]
+  64: df["record_per_day"] = df["diff"] / df["days"]
+  65: df
+  66: df.to_markdown()
+  67: !pip install tabulate
+  68: df.to_markdown()
+  69: print(df.to_markdown())
+  70: %history -g -f hack.py
+
