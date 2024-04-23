@@ -1,13 +1,23 @@
 # An article index, etc
 
-> 2023-05-05, AG INDEX, [UB Leipzig](https://www.ub.uni-leipzig.de/)
+> 2024-04-23 / 2023-05-05, AG INDEX, [UB Leipzig](https://www.ub.uni-leipzig.de/)
 
 ![](pipelines.jpg)
 
 ## Orientation
 
-* [Building metadata indices](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md)
-* [finc](https://finc.info/), [partners](https://finc.info/anwender)
+* [Building metadata indices](https://github.com/miku/siskin/blob/master/docs/ai-overview/slides.md) (2017)
+* [finc](https://finc.info/) (2011-...), [partners](https://finc.info/anwender), [B'TAG 2017](https://github.com/miku/siskin/blob/master/docs/btag-2017/btag-2017.md) presentation
+* BYOI: [Build your own index](https://freidok.uni-freiburg.de/fedora/objects/freidok:11346/datastreams/FILE1/content), 5th German Vufind Meetup 2016, 2016–10–11
+* ELAG2016 slides: [Build your own discovery index of scholary e-resources](https://www.slideshare.net/slideshow/build-your-own-discovery-index-of-scholary-eresources/62855622)
+
+## Current developments
+
+* mostly maintenance, fixes and data updates
+* what could be a next step? full-text search over complete publication
+  content, [maybe](https://scholar.archive.org/)? moving to or including
+[openalex](https://openalex.org/)?
+* ...
 
 ## Data landscape
 
@@ -24,11 +34,12 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 
 * Crossref has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
 * we sync updates from the API, daily
-* currently about 4.3TB of raw data (438,925,575 records), we create monthly snapshots (last snapshot
-  took 589m22.691s with the actual
-[compaction](https://github.com/ubleipzig/filterline#use-case-data-compaction)
-taking 217min, result contains 144,325,200 records, 754GB)
-* we use [zstd](https://en.wikipedia.org/wiki/Zstd) for everything we can - text files can be typically [compressed to 10-20%](https://lemire.me/blog/2021/06/30/compressing-json-gzip-vs-zstd/) of their original size; 14TB can yield 70-140TB of space
+* currently about ~8TB of raw data (438,925,575 records), we derive monthly snapshots (some [archived](https://archive.org/details/crossref-2024-01-01))
+* we use [zstd](https://en.wikipedia.org/wiki/Zstd) for everything we can -
+  text files can be typically [compressed to
+10-20%](https://lemire.me/blog/2021/06/30/compressing-json-gzip-vs-zstd/) of
+their original size; so 14TB of disk spaces can allow to work with 70-140TB of
+text data
 
 ### Other
 
@@ -39,6 +50,13 @@ consists of 161953178 (so 89.1% of data comes from Crossref).
 
 ### It's files all the way down
 
+Preprocessing over [data at rest](https://en.wikipedia.org/wiki/Data_at_rest);
+data in use / serving from [SOLR](https://en.wikipedia.org/wiki/Apache_Solr)
+open source [full-text search
+engine](https://en.wikipedia.org/wiki/Full-text_search) (and [key-value
+store](https://github.com/ubleipzig/microblob), for now). Moving to
+[SOLRCLOUD](https://solr.apache.org/guide/6_6/solrcloud.html) · DD+L.
+
 * one way to [minimize state](https://www.worldofbs.com/minimize-state/)
 
 > What this shows is that every programming philosophy is about how to manage
@@ -47,7 +65,7 @@ consists of 161953178 (so 89.1% of data comes from Crossref).
 > philosophy is useful and important in the correct domain. It also shows how
 > important minimizing state is.
 
-* files are immutable
+* files are immutable (not modified after they are created)
 
 ```shell
 $ tree -sh siskin  | tail -1
@@ -56,7 +74,7 @@ $ tree -sh siskin  | tail -1
 
 ### Licensing
 
-* every institution can get an individual view over a single index
+* every institution can get an individual view over a single index (cf. [KBART](https://www.niso.org/standards-committees/kbart))
 
 ![](view-s.jpg)
 
