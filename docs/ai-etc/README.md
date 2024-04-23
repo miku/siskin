@@ -32,7 +32,7 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 > enable persistent cross-publisher citation linking in online academic
 > journals. -- [Wikipedia](https://en.wikipedia.org/wiki/Crossref)
 
-* CrossRef has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
+* CrossRef has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) ([API?](https://en.wikipedia.org/wiki/API))
 * we sync updates from the API, daily
 * currently about ~8TB of raw data (400M+ records), we derive monthly snapshots (150M+ records, some snapshots are [archived](https://archive.org/details/crossref-2024-01-01))
 * we use [zstd](https://en.wikipedia.org/wiki/Zstd) for everything we can -
