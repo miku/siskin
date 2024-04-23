@@ -25,28 +25,27 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 
 [![](LocomotivGT_Zene.jpg)](https://en.wikipedia.org/wiki/Zene_%E2%80%93_Mindenki_m%C3%A1sk%C3%A9pp_csin%C3%A1lja)
 
-### Crossref
+### CrossRef
 
 > It is run by the Publishers International Linking Association Inc. (PILA)[2]
 > and was launched in early 2000 as a cooperative effort among publishers to
 > enable persistent cross-publisher citation linking in online academic
 > journals. -- [Wikipedia](https://en.wikipedia.org/wiki/Crossref)
 
-* Crossref has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
+* CrossRef has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
 * we sync updates from the API, daily
-* currently about ~8TB of raw data (438,925,575 records), we derive monthly snapshots (some [archived](https://archive.org/details/crossref-2024-01-01))
+* currently about ~8TB of raw data (400M+ records), we derive monthly snapshots (150M+ records, some snapshots are [archived](https://archive.org/details/crossref-2024-01-01))
 * we use [zstd](https://en.wikipedia.org/wiki/Zstd) for everything we can -
-  text files can be typically [compressed to
-10-20%](https://lemire.me/blog/2021/06/30/compressing-json-gzip-vs-zstd/) of
-their original size; so 14TB of disk spaces can allow to work with 70-140TB of
-text data
+  text files can be typically [compressed to 10-20%](https://lemire.me/blog/2021/06/30/compressing-json-gzip-vs-zstd/) of
+their original size; i.e. 14TB of disk space allows to work with 70-140TB of
+textual data (cf. "[big data is dead](https://motherduck.com/blog/big-data-is-dead/)")
 
 ### Other
 
 * DOAJ, Jstor, IEEE, BASE, OSF, OLC, ...
 
 In total, our raw (not deduplicated) dataset of mostly article metadata
-consists of 161953178 (so 89.1% of data comes from Crossref).
+consists of 186891126 (as of 2023-04-23; maybe 80% CrossRef).
 
 ### It's files all the way down
 
