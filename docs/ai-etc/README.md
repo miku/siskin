@@ -34,7 +34,7 @@ Heterogenous data landscape; metadata - everyone does it in a different way.
 
 * CrossRef has an [API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) ([API?](https://en.wikipedia.org/wiki/API))
 * we sync updates from the API, daily
-* currently about ~8TB of raw data (400M+ records), we derive monthly snapshots (150M+ records, some snapshots are [archived](https://archive.org/details/crossref-2024-01-01))
+* currently about ~10TB of raw API messages (930M+ records), we derive monthly snapshots (150M+ records, some snapshots are [archived](https://archive.org/details/crossref-2024-01-01))
 * we use [zstd](https://en.wikipedia.org/wiki/Zstd) for everything we can -
   text files can be typically [compressed to 10-20%](https://lemire.me/blog/2021/06/30/compressing-json-gzip-vs-zstd/) of
 their original size; i.e. 14TB of disk space allows to work with 70-140TB of
