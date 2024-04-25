@@ -186,6 +186,21 @@
     job: >
       span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2022-01-01 -P feed-1- -i d
 
+# To keep the crossref download folder from growing indefinitely, we start a
+# new feed from a more recent date and use a compacted "CrossrefUniqItems"
+# output as a first file (manually placed).
+#
+# Once switched over, we can `rm -f feed-1-*json.zst`
+- name: Crontab for [49] crossref-next API sync
+  cron:
+    name: Crossref API sync (next)
+    user: '{{ siskin_user }}'
+    hour: '10'
+    minute: '0'
+    job: >
+      span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2024-04-01 -P feed-2- -i d
+
+
 - name: Crontab for [140] kalliope download and indexing (WIP)
   cron:
     name: Kalliope download and indexing
