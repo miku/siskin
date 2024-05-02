@@ -9,6 +9,7 @@
     - btop
     - bzip2
     - cowsay
+    - cpufetch
     - cronie # https://stackoverflow.com/a/21802522/89391
     - curl
     - fd-find
