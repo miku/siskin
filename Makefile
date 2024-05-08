@@ -34,6 +34,7 @@ clean:
 	rm -rf build/ dist/ .tox/ .pytest_cache/
 	rm -rf logs # Probably automatically created by some Java MAB library.
 	rm -rf siskin.egg-info
+	rm -rf .ruff_cache/
 
 .PHONY: fmt
 fmt: imports style
