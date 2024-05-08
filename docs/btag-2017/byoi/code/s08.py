@@ -15,7 +15,6 @@ Goals:
 import json
 import logging
 import os
-import tempfile
 
 import luigi
 from gluish.utils import shellout

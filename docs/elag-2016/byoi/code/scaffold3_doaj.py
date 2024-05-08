@@ -24,7 +24,6 @@ import os
 
 import luigi
 from gluish.task import BaseTask
-from gluish.utils import shellout
 
 
 class Task(BaseTask):

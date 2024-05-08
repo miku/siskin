@@ -9,7 +9,6 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
-from matplotlib import cm
 
 addr = base64.b64decode("""aHR0cDovLzE3Mi4xOC4xMTMuNzo4MDg1L3NvbHIvYmlibGlv""")
 

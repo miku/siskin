@@ -131,7 +131,7 @@ if __name__ == '__main__':
         resp = json.loads(r.text)
         isils = set()
         for doc in resp['response']['docs']:
-            if not 'institution' in doc:
+            if 'institution' not in doc:
                 continue
             isils.update(doc['institution'])
         print("%s\t%s\t%s" % (doi, resp['response']['numFound'], ', '.join(isils)))

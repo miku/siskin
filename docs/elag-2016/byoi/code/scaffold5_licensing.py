@@ -25,7 +25,6 @@ import os
 import luigi
 from gluish.task import BaseTask
 from gluish.utils import shellout
-from part4_combine import CombinedIntermediateSchema
 
 
 class Task(BaseTask):
