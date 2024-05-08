@@ -67,9 +67,15 @@ class FTPMirror(CommonTask):
     base = luigi.Parameter(default=".")
     indicator = luigi.Parameter(default=random_string())
     max_retries = luigi.IntParameter(default=5, significant=False)
-    timeout = luigi.IntParameter(default=10, significant=False, description="timeout in seconds")
-    exclude_glob = luigi.Parameter(default="", significant=False, description="globs to exclude")
-    extra_args = luigi.Parameter(default="", significant=False, description="extra args, like port: -p 123")
+    timeout = luigi.IntParameter(
+        default=10, significant=False, description="timeout in seconds"
+    )
+    exclude_glob = luigi.Parameter(
+        default="", significant=False, description="globs to exclude"
+    )
+    extra_args = luigi.Parameter(
+        default="", significant=False, description="extra args, like port: -p 123"
+    )
 
     def requires(self):
         return Executable(name="lftp", message="http://lftp.yar.ru/")
@@ -80,12 +86,14 @@ class FTPMirror(CommonTask):
         for a given (host, username, base, pattern) is just synced.
         """
         base = os.path.dirname(self.output().path)
-        subdir = hashlib.sha1("{host}:{username}:{base}:{pattern}".format(
-            host=self.host,
-            username=self.username,
-            base=self.base,
-            pattern=self.pattern,
-        ).encode("utf-8")).hexdigest()
+        subdir = hashlib.sha1(
+            "{host}:{username}:{base}:{pattern}".format(
+                host=self.host,
+                username=self.username,
+                base=self.base,
+                pattern=self.pattern,
+            ).encode("utf-8")
+        ).hexdigest()
 
         target = os.path.join(base, subdir)  # target is the root of the mirror
         if not os.path.exists(target):
@@ -136,7 +144,9 @@ class FTPMirror(CommonTask):
                 output.write_tsv(path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(digest=True, ext="filelist"), format=TSV)
+        return luigi.LocalTarget(
+            path=self.path(digest=True, ext="filelist"), format=TSV
+        )
 
 
 class HTTPDownload(CommonTask):

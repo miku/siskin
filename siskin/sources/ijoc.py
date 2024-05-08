@@ -31,6 +31,7 @@ from gluish.utils import shellout
 
 from siskin.sources.amsl import AMSLFilterConfig
 from siskin.task import DefaultTask
+
 """
 IJOC, refs #7138, #11005.
 """
@@ -50,7 +51,9 @@ class IJOCHarvest(IJOCTask):
     Harvest.
     """
 
-    endpoint = luigi.Parameter(default="http://ijoc.org/index.php/ijoc/oai", significant=False)
+    endpoint = luigi.Parameter(
+        default="http://ijoc.org/index.php/ijoc/oai", significant=False
+    )
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):

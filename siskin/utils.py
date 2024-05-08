@@ -73,7 +73,9 @@ class SetEncoder(json.JSONEncoder):
 
 
 def date_range(start_date, end_date, increment, period):
-    raise NotImplementedError("use: from gluish.utils import date_range, https://git.io/fpDU1")
+    raise NotImplementedError(
+        "use: from gluish.utils import date_range, https://git.io/fpDU1"
+    )
 
 
 def iterfiles(directory=".", fun=None):
@@ -82,8 +84,10 @@ def iterfiles(directory=".", fun=None):
     paths by function given in `fun`.
     """
     if fun is None:
+
         def fun(path):
             return True
+
     for root, _, files in os.walk(directory):
         for f in files:
             path = os.path.join(root, f)
@@ -176,7 +180,9 @@ def get_task_import_cache():
     It is save to remove the file returned by `taskimportcache` at any time.
     """
     task_import_cache = None
-    path = os.path.join(tempfile.gettempdir(), "siskin_task_import_cache_%s" % __version__)
+    path = os.path.join(
+        tempfile.gettempdir(), "siskin_task_import_cache_%s" % __version__
+    )
     if not os.path.exists(path):
         logger.debug("creating task import cache at %s", path)
         from siskin.cacheutils import _write_task_import_cache
@@ -187,7 +193,10 @@ def get_task_import_cache():
         try:
             task_import_cache = json.load(handle)
         except Exception as err:
-            message = ("failed to load task import cache, remove %s then try again (%s)" % (path, err))
+            message = (
+                "failed to load task import cache, remove %s then try again (%s)"
+                % (path, err)
+            )
             raise RuntimeError(message)
 
     return task_import_cache, path
@@ -329,10 +338,16 @@ class URLCache(object):
             """
             if ttl_seconds is None:
                 return False
-            mtime = datetime.datetime.fromtimestamp(os.path.getmtime(self.get_cache_file(url)))
+            mtime = datetime.datetime.fromtimestamp(
+                os.path.getmtime(self.get_cache_file(url))
+            )
             xtime = datetime.datetime.now() - datetime.timedelta(seconds=ttl_seconds)
             is_expired = mtime < xtime
-            logger.debug("[cache] mtime={}, xtime={}, expired={}, file={}".format(mtime, xtime, is_expired, self.get_cache_file(url)))
+            logger.debug(
+                "[cache] mtime={}, xtime={}, expired={}, file={}".format(
+                    mtime, xtime, is_expired, self.get_cache_file(url)
+                )
+            )
             return is_expired
 
         @backoff.on_exception(backoff.expo, RuntimeError, max_tries=self.max_tries)
@@ -452,13 +467,15 @@ def xmlstream(filename, tag, skip=0, aggregate=False):
         return tag.split("}")[1]
 
     # https://stackoverflow.com/a/13261805, http://effbot.org/elementtree/iterparse.htm
-    context = iter(ET.iterparse(
-        filename,
-        events=(
-            "start",
-            "end",
-        ),
-    ))
+    context = iter(
+        ET.iterparse(
+            filename,
+            events=(
+                "start",
+                "end",
+            ),
+        )
+    )
     try:
         _, root = next(context)
     except StopIteration:

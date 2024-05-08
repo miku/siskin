@@ -88,15 +88,16 @@ class MyTask(luigi.Task):
         """
         Run just writes a string to the output file.
         """
-        with self.output().open('w') as output:
-            output.write('Some bytes written to a file.\n')
+        with self.output().open("w") as output:
+            output.write("Some bytes written to a file.\n")
 
     def output(self):
         """
         Output target. Targets can be other things than files, see:
         https://git.io/vH0qI, e.g. MongoDB, MySQL, S3, Elasticsearch, ...
         """
-        return luigi.LocalTarget(path='outputs/x00.txt')
+        return luigi.LocalTarget(path="outputs/x00.txt")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     luigi.run(local_scheduler=True)

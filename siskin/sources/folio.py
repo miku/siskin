@@ -35,7 +35,6 @@ config-url: https://de-15.staging.folio.finc.info/finc-config
 
 """
 
-
 from siskin.task import DefaultTask
 
 

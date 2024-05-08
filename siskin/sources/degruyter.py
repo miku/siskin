@@ -135,7 +135,7 @@ class DegruyterCombine(DegruyterTask):
     def run(self):
         files = []
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path", )):
+            for row in handle.iter_tsv(cols=("path",)):
                 if "/%s/" % self.group not in row.path:
                     continue
                 files.append(row.path)
@@ -151,10 +151,7 @@ class DegruyterCombine(DegruyterTask):
                 r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
                 output=stopover,
                 path=fn,
-                ignoremap={
-                    1: "OK",
-                    9: "skip corrupt file"
-                },
+                ignoremap={1: "OK", 9: "skip corrupt file"},
             )
         luigi.LocalTarget(stopover).move(self.output().path)
 
@@ -178,7 +175,7 @@ class DegruyterXML(DegruyterTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path", )):
+            for row in handle.iter_tsv(cols=("path",)):
                 if "/%s/" % self.group not in row.path:
                     continue
                 # TODO: clean this up
@@ -190,10 +187,7 @@ class DegruyterXML(DegruyterTask):
                     r"unzip -p {path} \*.xml 2> /dev/null >> {output}",
                     output=stopover,
                     path=row.path,
-                    ignoremap={
-                        1: "OK",
-                        9: "skip corrupt file"
-                    },
+                    ignoremap={1: "OK", 9: "skip corrupt file"},
                 )
         luigi.LocalTarget(stopover).move(self.output().path)
 

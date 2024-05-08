@@ -114,14 +114,18 @@ class LissaIntermediateSchema(LissaTask):
                 "rft.atitle": source["title"],
                 "rft.genre": "article",
                 "rft.pub": source.get("publishers", []),
-                "authors": [{
-                    "rft.au": name
-                } for name in source["contributors"]],
-                "url": [link for link in source["identifiers"] if link.startswith("http")],
+                "authors": [{"rft.au": name} for name in source["contributors"]],
+                "url": [
+                    link for link in source["identifiers"] if link.startswith("http")
+                ],
                 "abstract": source.get("description", ""),
             }
 
-            dois = [v.replace("http://dx.doi.org/", "") for v in source["identifiers"] if "doi.org" in v]
+            dois = [
+                v.replace("http://dx.doi.org/", "")
+                for v in source["identifiers"]
+                if "doi.org" in v
+            ]
             if len(dois) == 0:
                 self.logger.warn("document without DOI")
             elif len(dois) == 1:
@@ -144,7 +148,11 @@ class LissaIntermediateSchema(LissaTask):
                     )
 
             # Gather subjects.
-            subjects = (source.get("subjects", []) + source.get("subject_synonyms", []) + source.get("tags", []))
+            subjects = (
+                source.get("subjects", [])
+                + source.get("subject_synonyms", [])
+                + source.get("tags", [])
+            )
             unique_subjects = set(itertools.chain(*[v.split("|") for v in subjects]))
             doc.update({"x.subjects": list(unique_subjects)})
 
@@ -152,10 +160,12 @@ class LissaIntermediateSchema(LissaTask):
             for key in ("date_published", "date_created"):
                 if key not in source or not source[key]:
                     continue
-                doc.update({
-                    "x.date": source[key][:19] + "Z",
-                    "rft.date": source[key][:10],
-                })
+                doc.update(
+                    {
+                        "x.date": source[key][:19] + "Z",
+                        "rft.date": source[key][:10],
+                    }
+                )
                 break
             else:
                 raise ValueError("did not find any date field in document", hit)

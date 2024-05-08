@@ -24,7 +24,7 @@ class IPlannerResponse(luigi.ExternalTask):
     """
 
     def output(self):
-        return luigi.LocalTarget(path='inputs/iplanner.json')
+        return luigi.LocalTarget(path="inputs/iplanner.json")
 
 
 class MyTask(luigi.Task):
@@ -42,11 +42,14 @@ class MyTask(luigi.Task):
         with self.input().open() as file:
             doc = json.load(file)
 
-        with self.output().open('w') as output:
-            output.write("Willkommen zum Lab '%s' am DBT 2017!\n" % doc['sessions']['1']['title'])
+        with self.output().open("w") as output:
+            output.write(
+                "Willkommen zum Lab '%s' am DBT 2017!\n" % doc["sessions"]["1"]["title"]
+            )
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/x03.txt')
+        return luigi.LocalTarget(path="outputs/x03.txt")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     luigi.run(local_scheduler=True)

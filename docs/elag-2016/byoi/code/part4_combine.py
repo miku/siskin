@@ -28,24 +28,27 @@ from part3_doaj import DOAJIntermediateSchema
 
 
 class Task(BaseTask):
-    BASE = 'output'
-    TAG = '4'
+    BASE = "output"
+    TAG = "4"
+
 
 class CombinedIntermediateSchema(Task):
     """
     Combine both things.
     """
+
     def requires(self):
         return [CrossrefIntermediateSchema(), DOAJIntermediateSchema()]
 
     def run(self):
-        _, tmpfile = tempfile.mkstemp(prefix='byoi-')
+        _, tmpfile = tempfile.mkstemp(prefix="byoi-")
         for target in self.input():
             shellout("cat {input} >> {output}", input=target.path, output=tmpfile)
         luigi.File(tmpfile).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
-if __name__ == '__main__':
-    luigi.run(['CombinedIntermediateSchema', '--workers', '1', '--local-scheduler'])
+
+if __name__ == "__main__":
+    luigi.run(["CombinedIntermediateSchema", "--workers", "1", "--local-scheduler"])

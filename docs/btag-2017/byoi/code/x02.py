@@ -36,15 +36,17 @@ class MyTask(luigi.Task):
     A custom completion criteria. Here, we want to ensure, that there is enough
     space on the device.
     """
-    free = luigi.IntParameter(description='in GB', default=100)
+
+    free = luigi.IntParameter(description="in GB", default=100)
 
     def run(self):
-        raise RuntimeError('%s GB of free space required' % self.free)
+        raise RuntimeError("%s GB of free space required" % self.free)
 
     def complete(self):
-        statvfs = os.statvfs('/')
+        statvfs = os.statvfs("/")
         required, free = self.free * 1073741824, statvfs.f_frsize * statvfs.f_bavail
         return free > required
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     luigi.run(local_scheduler=True)

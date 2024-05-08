@@ -37,20 +37,10 @@ clean:
 	rm -rf .ruff_cache/
 
 .PHONY: fmt
-fmt: imports style
+fmt:
+	ruff format
 
-# Fix imports, requires https://github.com/timothycrosley/isort.
-.PHONY: imports
-imports:
-	isort --atomic .
-
-# Automatic code formatting, requires https://github.com/google/yapf.
-.PHONY: style
-style:
-	yapf -p -i -r siskin
-
-# Basic scoring, requires https://www.pylint.org/.
-.PHONY: pylint
-pylint:
-	pylint siskin
+.PHONY: lint
+lint:
+	ruff check
 

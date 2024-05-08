@@ -67,10 +67,19 @@ def pqdt_harvest(
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as tf:
         while True:
             logger.debug(link)
-            resp = requests.get(link, cookies=cookies, headers={"User-Agent": user_agent})
+            resp = requests.get(
+                link, cookies=cookies, headers={"User-Agent": user_agent}
+            )
             if resp.status_code >= 400:
-                raise RuntimeError("harvest failed: {} {}".format(link, resp.status_code))
-            logger.debug("retrieved {} {}".format(len(resp.text), resp.text[:50], ))
+                raise RuntimeError(
+                    "harvest failed: {} {}".format(link, resp.status_code)
+                )
+            logger.debug(
+                "retrieved {} {}".format(
+                    len(resp.text),
+                    resp.text[:50],
+                )
+            )
             dd = xmltodict.parse(resp.text)
             tf.write(resp.text)
             tf.write("\n")
@@ -82,11 +91,17 @@ def pqdt_harvest(
                 size = int(tokenTag["@completeListSize"])
                 token = tokenTag["#text"]
             except KeyError:
-                logger.debug(json.dumps({
-                    "text": resp.text,
-                    "status": resp.status_code,
-                }))
-                raise RuntimeError("failed to fetch pqdt, unexpected text: {}".format(resp.text))
+                logger.debug(
+                    json.dumps(
+                        {
+                            "text": resp.text,
+                            "status": resp.status_code,
+                        }
+                    )
+                )
+                raise RuntimeError(
+                    "failed to fetch pqdt, unexpected text: {}".format(resp.text)
+                )
             else:
                 if not token or int(cursor) >= int(size):
                     break
@@ -106,7 +121,9 @@ def pqdt_harvest(
 
 
 if __name__ == "__main__":
-    formatter = logging.Formatter("[%(asctime)s][%(name)s][%(levelname)-8s] %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s][%(name)s][%(levelname)-8s] %(message)s"
+    )
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)

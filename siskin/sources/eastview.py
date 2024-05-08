@@ -81,7 +81,9 @@ class EastViewPaths(EastViewTask):
         password = self.config.get("eastview", "ftp-password")
         base = self.config.get("eastview", "ftp-path")
         pattern = self.config.get("eastview", "ftp-pattern")
-        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
+        return FTPMirror(
+            host=host, username=username, password=password, base=base, pattern=pattern
+        )
 
     @timed
     def run(self):

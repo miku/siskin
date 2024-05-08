@@ -71,7 +71,9 @@ class SpringerPaths(SpringerTask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
         return FTPMirror(
@@ -105,7 +107,7 @@ class SpringerCleanup(SpringerTask):
     def run(self):
         realpath = None
         with self.input().open() as handle:
-            for row in handle.iter_tsv(cols=("path", )):
+            for row in handle.iter_tsv(cols=("path",)):
                 if not row.path.endswith("total_tpu.ldj.gz"):
                     continue
                 realpath = row.path

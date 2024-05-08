@@ -52,9 +52,10 @@ import sys
 import requests
 from six.moves.urllib.parse import urlencode
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(message)s',
-                    datefmt='%m/%d/%Y %H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %H:%M:%S"
+)
+
 
 def facet_response_values(resp):
     """
@@ -65,10 +66,12 @@ def facet_response_values(resp):
         for i in range(0, len(v), 2):
             yield v[i], v[i + 1]
 
+
 class Solr(object):
     """
     Wrap a solr server and expose a couple of helper methods.
     """
+
     def __init__(self, server="http://localhost:8983/solr/biblio"):
         self.server = server.rstrip("/")
 
@@ -94,6 +97,7 @@ class Solr(object):
         resp = json.loads(r.text)
         return resp
 
+
 def test_year_is_plausible(year):
     try:
         v = int(year)
@@ -102,18 +106,24 @@ def test_year_is_plausible(year):
     except ValueError:
         logging.warn("implausible year: %s", year)
 
+
 def test_field(resp, field, test_func):
     vcs = [(v, c) for v, c in facet_response_values(resp)]
     for v, c in vcs:
         if not test_func(v):
             logging.warn("[%s] [%s]: %s (%s)", source_id, field, v, c)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser("12756")
-    parser.add_argument("--server", "-r", type=str, default="http://localhost:8983/solr/biblio")
+    parser.add_argument(
+        "--server", "-r", type=str, default="http://localhost:8983/solr/biblio"
+    )
     parser.add_argument("--field", "-f", type=str, default="format")
     parser.add_argument("--source-id", "-s", type=str, default="49")
-    parser.add_argument("--all", action="store_true", help="Run all queries from #12756#note-2")
+    parser.add_argument(
+        "--all", action="store_true", help="Run all queries from #12756#note-2"
+    )
 
     args = parser.parse_args()
 
@@ -122,15 +132,15 @@ if __name__ == '__main__':
     if args.all:
         source_ids = (28, 30, 34, 48, 49, 50, 53, 55, 60, 85, 87, 89, 101, 105)
         fields = (
-            'format',
-            'format_de15',
-            'facet_avail',
-            'access_facet',
-            'author_facet',
-            'publishDateSort',
-            'language',
-            'mega_collection',
-            'finc_class_facet',
+            "format",
+            "format_de15",
+            "facet_avail",
+            "access_facet",
+            "author_facet",
+            "publishDateSort",
+            "language",
+            "mega_collection",
+            "finc_class_facet",
         )
 
         for source_id in source_ids:
@@ -150,7 +160,7 @@ if __name__ == '__main__':
 
                 # Just output everything.
                 for value, count in facet_response_values(resp):
-                    pass # print("%s\t%s" % (value, count))
+                    pass  # print("%s\t%s" % (value, count))
 
         sys.exit(0)
 

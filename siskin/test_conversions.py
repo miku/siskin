@@ -2,7 +2,7 @@ import json
 
 import pymarc
 
-from siskin.conversions import (de_listify, imslp_xml_to_marc, osf_to_intermediate)
+from siskin.conversions import de_listify, imslp_xml_to_marc, osf_to_intermediate
 
 
 def test_imslp_xml_to_marc():
@@ -239,8 +239,7 @@ def test_osf_to_intermediate():
               }
             }"""),
             {
-                "abstract":
-                "Penulisan karya ilmiah ini dikhususkan untuk membahas mengenai "
+                "abstract": "Penulisan karya ilmiah ini dikhususkan untuk membahas mengenai "
                 "Allah yang dirumuskan dalam teologi proses, yang dicetuskan oleh "
                 "Alfred Whitehead. Dalam bagian bagian ini penulis menyajikan "
                 "konsep Allah dalam teologi proses dan bagaimana tanggapan "
@@ -256,33 +255,21 @@ def test_osf_to_intermediate():
                 "teologi proses mengenai Allah yang menyimpang dan mengarahkan "
                 "seseorang dalam memahami konsep Allah yang benar sesuai dengan "
                 "pernyataan Allah m",
-                "authors": [{
-                    "rft.aufirst": "Ceria",
-                    "rft.aulast": "Ceria"
-                }],
-                "doi":
-                "10.31219/osf.io/egcsk",
-                "finc.format":
-                "Article",
-                "finc.id":
-                "ai-191-egcsk",
+                "authors": [{"rft.aufirst": "Ceria", "rft.aulast": "Ceria"}],
+                "doi": "10.31219/osf.io/egcsk",
+                "finc.format": "Article",
+                "finc.id": "ai-191-egcsk",
                 "finc.mega_collection": ["sid-191-col-osf", "Osf"],
-                "finc.source_id":
-                "191",
+                "finc.source_id": "191",
                 "languages": ["eng"],
-                "rft.atitle":
-                "Konsep Allah Dalam Teologi Proses",
-                "rft.date":
-                "2021-07-19",
-                "rft.genre":
-                "article",
-                "rft.jtitle":
-                "osf",
+                "rft.atitle": "Konsep Allah Dalam Teologi Proses",
+                "rft.date": "2021-07-19",
+                "rft.genre": "article",
+                "rft.jtitle": "osf",
                 "rft.pub": ["OSF Preprints"],
                 "subjects": ["Gambar", "Respon", "Teologi Proses", "Tuhan"],
                 "url": ["https://doi.org/10.31219/osf.io/egcsk"],
-                "x.date":
-                "2021-07-19T07:42:12.695116Z",
+                "x.date": "2021-07-19T07:42:12.695116Z",
             },
         ),
     )

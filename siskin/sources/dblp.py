@@ -61,7 +61,9 @@ class DBLPTask(DefaultTask):
 class DBLPDownload(DBLPTask):
     """Download file."""
 
-    url = luigi.Parameter(default="http://dblp.uni-trier.de/xml/dblp.xml.gz", significant=False)
+    url = luigi.Parameter(
+        default="http://dblp.uni-trier.de/xml/dblp.xml.gz", significant=False
+    )
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -73,7 +75,6 @@ class DBLPDownload(DBLPTask):
 
 
 class DBLPIntermediateSchema(DBLPTask):
-
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):

@@ -81,7 +81,9 @@ class BaseTask(DefaultTask):
     @functools.lru_cache
     def get_last_modified_date(self):
         last_modified_header = requests.head(self.download_url).headers["Last-Modified"]
-        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
+        last_modified = datetime.datetime.strptime(
+            last_modified_header, "%a, %d %b %Y %H:%M:%S %Z"
+        )
         return last_modified
 
 
@@ -92,7 +94,9 @@ class BasePaths(BaseTask):
 
     date = luigi.DateParameter(default=datetime.date.today())
     max_retries = luigi.IntParameter(default=10, significant=False)
-    timeout = luigi.IntParameter(default=20, significant=False, description="timeout in seconds")
+    timeout = luigi.IntParameter(
+        default=20, significant=False, description="timeout in seconds"
+    )
 
     def requires(self):
         return FTPMirror(
@@ -117,7 +121,9 @@ class BaseDirectDownload(BaseTask):
     Direct download link.
     """
 
-    url = luigi.Parameter(default="https://download.ubl-proxy.slub-dresden.de/base", significant=False)
+    url = luigi.Parameter(
+        default="https://download.ubl-proxy.slub-dresden.de/base", significant=False
+    )
 
     def run(self):
         output = shellout(
@@ -136,7 +142,10 @@ class BaseFix(BaseTask):
     """
     On-the-fly fixes.
     """
-    style = luigi.Parameter(default="z", description="gzip in tar (z) or tar.gz (tgz)", significant=False)
+
+    style = luigi.Parameter(
+        default="z", description="gzip in tar (z) or tar.gz (tgz)", significant=False
+    )
 
     def requires(self):
         return BaseDirectDownload()
@@ -147,9 +156,17 @@ class BaseFix(BaseTask):
         pat_year = re.compile(r"[1-9][0-9][0-9][0-9]")
         with tempfile.NamedTemporaryFile() as f:
             if self.style == "z":
-                shellout("tar -xOf {input} | zcat | span-doisniffer -S > {output}", input=self.input().path, output=f.name)
+                shellout(
+                    "tar -xOf {input} | zcat | span-doisniffer -S > {output}",
+                    input=self.input().path,
+                    output=f.name,
+                )
             elif self.style == "tgz":
-                shellout("tar -xOzf {input} | span-doisniffer -S > {output}", input=self.input().path, output=f.name)
+                shellout(
+                    "tar -xOzf {input} | span-doisniffer -S > {output}",
+                    input=self.input().path,
+                    output=f.name,
+                )
             f.flush()
             f.seek(0)
             stats = collections.Counter()
@@ -267,8 +284,12 @@ class BaseSingleFile(BaseTask):
             # which makes this more flaky. Assume, that symlink points to the
             # same directory.
             if realpath.startswith("/"):
-                self.logger.debug("absolute path detected; assuming symlinked file is in the same directory")
-                realpath = os.path.join(os.path.dirname(path), os.path.basename(realpath))
+                self.logger.debug(
+                    "absolute path detected; assuming symlinked file is in the same directory"
+                )
+                realpath = os.path.join(
+                    os.path.dirname(path), os.path.basename(realpath)
+                )
             self.logger.debug("found: %s", realpath)
             if not realpath.endswith("gz"):
                 raise RuntimeError("want gz (tarball), got: %s", realpath)

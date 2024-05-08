@@ -32,45 +32,58 @@ class Task(BaseTask):
     """
     All output will go to: output/2/<class>/<file>
     """
-    BASE = 'output'
-    TAG = '2'
+
+    BASE = "output"
+    TAG = "2"
 
     def inputdir(self):
         __dir__ = os.path.dirname(os.path.realpath(__file__))
-        return os.path.join(__dir__, '../input')
+        return os.path.join(__dir__, "../input")
+
 
 class CrossrefInput(Task):
     """
     List crossref files.
     """
+
     def run(self):
         """
         Only use the first file, so it is faster. To use more files, drop the `head -1`.
         """
-        directory = os.path.join(self.inputdir(), 'crossref')
-        output = shellout("find {directory} -name '*.ldj.gz' | head -1 > {output}", directory=directory)
+        directory = os.path.join(self.inputdir(), "crossref")
+        output = shellout(
+            "find {directory} -name '*.ldj.gz' | head -1 > {output}",
+            directory=directory,
+        )
         luigi.File(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path())
 
+
 class CrossrefItems(Task):
     """
     Extract the actual items from crossref API dumps. This will take about 30min.
     """
+
     def requires(self):
         return CrossrefInput()
 
     def run(self):
-        _, temp = tempfile.mkstemp(prefix='byoi-')
+        _, temp = tempfile.mkstemp(prefix="byoi-")
         with self.input().open() as handle:
             for path in map(str.strip, handle):
-                print('processing: %s' % path)
-                shellout("jq -r -c '.message.items[]' <(unpigz -c {input}) | pigz -c >> {output}", input=path, output=temp)
+                print("processing: %s" % path)
+                shellout(
+                    "jq -r -c '.message.items[]' <(unpigz -c {input}) | pigz -c >> {output}",
+                    input=path,
+                    output=temp,
+                )
         luigi.File(temp).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
+
 
 class CrossrefIntermediateSchema(Task):
     """
@@ -79,15 +92,20 @@ class CrossrefIntermediateSchema(Task):
     We use a tool called span, but it is really
     only converting one JSON format into another.
     """
+
     def requires(self):
         return CrossrefItems()
 
     def run(self):
-        output = shellout("span-import -w 2 -i crossref <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout(
+            "span-import -w 2 -i crossref <(unpigz -c {input}) | pigz -c > {output}",
+            input=self.input().path,
+        )
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
-if __name__ == '__main__':
-    luigi.run(['CrossrefIntermediateSchema', '--workers', '1', '--local-scheduler'])
+
+if __name__ == "__main__":
+    luigi.run(["CrossrefIntermediateSchema", "--workers", "1", "--local-scheduler"])

@@ -43,7 +43,11 @@ class KalliopeTask(DefaultTask):
     file the download URL at all.
     """
 
-    last_modified = luigi.Parameter(default="", description="format: 2022-08-25, overrides last-modified header check", significant=False)
+    last_modified = luigi.Parameter(
+        default="",
+        description="format: 2022-08-25, overrides last-modified header check",
+        significant=False,
+    )
 
     TAG = "140"
     download_url = "https://download.ubl-proxy.slub-dresden.de/kalliope"
@@ -56,8 +60,14 @@ class KalliopeTask(DefaultTask):
         resp = requests.head(self.download_url)
         last_modified_header = resp.headers.get("Last-Modified")
         if last_modified_header is None:
-            raise KeyError("last-modified header not found, got HTTP {} on {}".format(resp.status_code, self.download_url))
-        last_modified = datetime.datetime.strptime(last_modified_header, "%a, %d %b %Y %H:%M:%S %Z")
+            raise KeyError(
+                "last-modified header not found, got HTTP {} on {}".format(
+                    resp.status_code, self.download_url
+                )
+            )
+        last_modified = datetime.datetime.strptime(
+            last_modified_header, "%a, %d %b %Y %H:%M:%S %Z"
+        )
         return last_modified
 
 
@@ -90,12 +100,14 @@ class KalliopeDirectDownload(KalliopeTask):
         # )
 
         # 2023: format changed from tar.gz to gz.tar
-        output = shellout("""
+        output = shellout(
+            """
                           tar -xOf {input} |
                           unpigz -c |
                           jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]'
                           zstd -c -T0 > {output} """,
-                          input=output)
+            input=output,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -105,4 +117,6 @@ class KalliopeDirectDownload(KalliopeTask):
             return luigi.LocalTarget(path=self.path(filename=filename), format=Zstd)
         except KeyError:
             self.logger.warn("unuable URL, will trigger an exception on run")
-            return luigi.LocalTarget(is_tmp=True)  # just a dummy, we'll use that to trigger an exception in run
+            return luigi.LocalTarget(
+                is_tmp=True
+            )  # just a dummy, we'll use that to trigger an exception in run

@@ -26,12 +26,13 @@ g = collections.defaultdict(set)
 
 
 def dump(root=None, indent=0):
-    """ dump to stdout """
-    print('%s \_ %s' % ('   ' * indent, root))
+    """dump to stdout"""
+    print("%s \_ %s" % ("   " * indent, root))
     for dep in g[root]:
         dump(root=dep, indent=indent + 1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # a basic BFS to populate g
     queue = [Export()]
     while len(queue) > 0:

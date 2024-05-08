@@ -122,7 +122,7 @@ dois = [
 ]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for doi in dois:
         url = "%s/select?wt=json&q=%s" % (solr, quote_plus('"%s"' % doi))
         r = requests.get(url)
@@ -130,11 +130,11 @@ if __name__ == '__main__':
             raise RuntimeError("%s at %s" % (r.status_code, url))
         resp = json.loads(r.text)
         isils = set()
-        for doc in resp['response']['docs']:
-            if 'institution' not in doc:
+        for doc in resp["response"]["docs"]:
+            if "institution" not in doc:
                 continue
-            isils.update(doc['institution'])
-        print("%s\t%s\t%s" % (doi, resp['response']['numFound'], ', '.join(isils)))
+            isils.update(doc["institution"])
+        print("%s\t%s\t%s" % (doi, resp["response"]["numFound"], ", ".join(isils)))
 
 # $ bin/11958.py http://0.0.0.0:8085/solr/biblio | csvlook -t -H # 2017-01-15
 #

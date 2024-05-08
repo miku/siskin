@@ -40,7 +40,9 @@ class OCITask(DefaultTask):
     """
 
     TAG = "oci"
-    download_url = luigi.Parameter(default="https://figshare.com/ndownloader/articles/6741422/versions/11")
+    download_url = luigi.Parameter(
+        default="https://figshare.com/ndownloader/articles/6741422/versions/11"
+    )
 
 
 class OCIDownload(OCITask):
@@ -78,7 +80,9 @@ class OCISingleFile(OCITask):
             luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.zst", digest=True), format=Gzip)
+        return luigi.LocalTarget(
+            path=self.path(ext="ndj.zst", digest=True), format=Gzip
+        )
 
 
 class OCICitingDOI(OCITask):
@@ -98,7 +102,9 @@ class OCICitingDOI(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.zst", digest=True), format=Gzip)
+        return luigi.LocalTarget(
+            path=self.path(ext="ndj.zst", digest=True), format=Gzip
+        )
 
 
 class OCICitedDOI(OCITask):
@@ -118,7 +124,9 @@ class OCICitedDOI(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ndj.zst", digest=True), format=Gzip)
+        return luigi.LocalTarget(
+            path=self.path(ext="ndj.zst", digest=True), format=Gzip
+        )
 
 
 class OCICitingDOIUnique(OCITask):
@@ -138,7 +146,9 @@ class OCICitingDOIUnique(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="tsv.zst", digest=True), format=Gzip)
+        return luigi.LocalTarget(
+            path=self.path(ext="tsv.zst", digest=True), format=Gzip
+        )
 
 
 class OCICitedDOIUnique(OCITask):
@@ -158,7 +168,9 @@ class OCICitedDOIUnique(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="tsv.zst", digest=True), format=Gzip)
+        return luigi.LocalTarget(
+            path=self.path(ext="tsv.zst", digest=True), format=Gzip
+        )
 
 
 class OCIDOIUnique(OCITask):
@@ -179,4 +191,6 @@ class OCIDOIUnique(OCITask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="tsv.zst", digest=True), format=Gzip)
+        return luigi.LocalTarget(
+            path=self.path(ext="tsv.zst", digest=True), format=Gzip
+        )

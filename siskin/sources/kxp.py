@@ -91,8 +91,12 @@ class KXPSRU(KXPTask):
             pica.rvk="LT 5581*" or pica.rvk="LT 5582*" or pica.rvk="LT 5586*"
             or pica.rvk="LT 57240" or pica.sbn="vd17" or pica.sbn="vd18"
         """
-        output = shellout("""srufetch -x -q '{selector}' > {output} """, selector=selector)
-        output = shellout("""yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output)
+        output = shellout(
+            """srufetch -x -q '{selector}' > {output} """, selector=selector
+        )
+        output = shellout(
+            """yaz-marcdump -i marcxml -o marc {input} > {output}""", input=output
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

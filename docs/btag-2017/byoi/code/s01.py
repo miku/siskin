@@ -31,17 +31,18 @@ import luigi
 
 
 class MyTask(luigi.Task):
-    """ Simulate work, so we can inspect the web interface. """
+    """Simulate work, so we can inspect the web interface."""
 
     def run(self):
-        """ TODO: Adjust HTTP URL. """
-        print('running task - visit http://127.0.0.1:8082')
+        """TODO: Adjust HTTP URL."""
+        print("running task - visit http://127.0.0.1:8082")
         time.sleep(60)
-        with self.output().open('w') as output:
-            output.write('Some bytes written to a file.\n')
+        with self.output().open("w") as output:
+            output.write("Some bytes written to a file.\n")
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/x01.txt')
+        return luigi.LocalTarget(path="outputs/x01.txt")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     luigi.run()

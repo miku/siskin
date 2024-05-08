@@ -70,7 +70,9 @@ class SLUBPaths(SLUBTask):
         password = self.config.get("slub", "ftp-password")
         base = self.config.get("slub", "ftp-path")
         pattern = self.config.get("slub", "ftp-pattern")
-        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
+        return FTPMirror(
+            host=host, username=username, password=password, base=base, pattern=pattern
+        )
 
     @timed
     def run(self):

@@ -31,37 +31,29 @@ class CreateConfig(luigi.Task):
     """
 
     def run(self):
-        with self.output().open('w') as output:
+        with self.output().open("w") as output:
             config = {
-                'DE-15': {
-                    'or': [
+                "DE-15": {
+                    "or": [
+                        {"holdings": {"file": "inputs/de-15.tsv"}},
                         {
-                            'holdings': {
-                                'file': 'inputs/de-15.tsv'
-                            }
-                        },
-                        {
-                            'collection': ["Arxiv"],
+                            "collection": ["Arxiv"],
                         },
                     ]
                 },
-                'DE-14': {
-                    'or': [
+                "DE-14": {
+                    "or": [
+                        {"holdings": {"file": "inputs/de-14.tsv"}},
                         {
-                            'holdings': {
-                                'file': 'inputs/de-14.tsv'
-                            }
-                        },
-                        {
-                            'collection': ["Arxiv"],
+                            "collection": ["Arxiv"],
                         },
                     ]
-                }
+                },
             }
             output.write(json.dumps(config))
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/filterconfig.json')
+        return luigi.LocalTarget(path="outputs/filterconfig.json")
 
 
 class TaggedIntermediateSchema(luigi.Task):
@@ -73,18 +65,21 @@ class TaggedIntermediateSchema(luigi.Task):
 
     def requires(self):
         return {
-            'config': CreateConfig(),
-            'records': IntermediateSchema(),
+            "config": CreateConfig(),
+            "records": IntermediateSchema(),
         }
 
     def run(self):
-        output = shellout(""" gunzip -c {input} | span-tag -c {config} | gzip -c > {output} """,
-                          config=self.input().get('config').path,
-                          input=self.input().get('records').path)
+        output = shellout(
+            """ gunzip -c {input} | span-tag -c {config} | gzip -c > {output} """,
+            config=self.input().get("config").path,
+            input=self.input().get("records").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/tagged.is.ldj.gz', format=Gzip)
+        return luigi.LocalTarget(path="outputs/tagged.is.ldj.gz", format=Gzip)
+
 
 # Optional.
 #
@@ -106,16 +101,19 @@ class ListifyRecords(luigi.Task):
         return TaggedIntermediateSchema()
 
     def run(self):
-        output = shellout("""gunzip -c {input} | jq -r '[
+        output = shellout(
+            """gunzip -c {input} | jq -r '[
             .["finc.record_id"],
             .["finc.source_id"],
             .["doi"],
             .["x.labels"][]? ] | @csv' | sort -t, -k3 > {output}
-        """, input=self.input().path)
+        """,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/listified.csv')
+        return luigi.LocalTarget(path="outputs/listified.csv")
 
 
 class CalculateInstitutionChanges(luigi.Task):
@@ -128,12 +126,14 @@ class CalculateInstitutionChanges(luigi.Task):
         return ListifyRecords()
 
     def run(self):
-        output = shellout("""groupcover -prefs '121 49 28' < {input} > {output}""",
-                          input=self.input().path)
+        output = shellout(
+            """groupcover -prefs '121 49 28' < {input} > {output}""",
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/institution-changes.tsv')
+        return luigi.LocalTarget(path="outputs/institution-changes.tsv")
 
 
 class TaggedAndDeduplicatedIntermediateSchema(luigi.Task):
@@ -143,8 +143,8 @@ class TaggedAndDeduplicatedIntermediateSchema(luigi.Task):
 
     def requires(self):
         return {
-            'changes': CalculateInstitutionChanges(),
-            'file': TaggedIntermediateSchema(),
+            "changes": CalculateInstitutionChanges(),
+            "file": TaggedIntermediateSchema(),
         }
 
     def run(self):
@@ -155,30 +155,34 @@ class TaggedAndDeduplicatedIntermediateSchema(luigi.Task):
         updates = {}
 
         # First column is the ID, 4th to the end are the ISILs.
-        output = shellout("cut -d, -f1,4- {changes} > {output}",
-                          changes=self.input().get('changes').path)
+        output = shellout(
+            "cut -d, -f1,4- {changes} > {output}",
+            changes=self.input().get("changes").path,
+        )
         with open(output) as handle:
             for line in handle:
-                fields = [s.strip() for s in line.split(',')]
+                fields = [s.strip() for s in line.split(",")]
                 updates[fields[0]] = fields[1:]
 
         os.remove(output)
-        logging.debug('%s changes staged', len(updates))
+        logging.debug("%s changes staged", len(updates))
 
-        with self.input().get('file').open() as handle:
-            with self.output().open('w') as output:
+        with self.input().get("file").open() as handle:
+            with self.output().open("w") as output:
                 for line in handle:
                     doc = json.loads(line)
                     identifier = doc["finc.record_id"]
 
                     if identifier in updates:
-                        doc['x.labels'] = updates[identifier]
+                        doc["x.labels"] = updates[identifier]
 
-                    output.write(json.dumps(doc) + '\n')
+                    output.write(json.dumps(doc) + "\n")
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/tagged-deduplicated.is.ldj.gz', format=Gzip)
+        return luigi.LocalTarget(
+            path="outputs/tagged-deduplicated.is.ldj.gz", format=Gzip
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     luigi.run(local_scheduler=True)

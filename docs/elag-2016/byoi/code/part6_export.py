@@ -26,8 +26,9 @@ from part5_licensing import ApplyLicensing
 
 
 class Task(BaseTask):
-    BASE = 'output'
-    TAG = '6'
+    BASE = "output"
+    TAG = "6"
+
 
 class Export(Task):
     """
@@ -42,11 +43,15 @@ class Export(Task):
         return ApplyLicensing()
 
     def run(self):
-        output = shellout("span-export <(unpigz -c {input}) | pigz -c > {output}", input=self.input().path)
+        output = shellout(
+            "span-export <(unpigz -c {input}) | pigz -c > {output}",
+            input=self.input().path,
+        )
         luigi.File(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
-if __name__ == '__main__':
-    luigi.run(['Export', '--workers', '1', '--local-scheduler'])
+
+if __name__ == "__main__":
+    luigi.run(["Export", "--workers", "1", "--local-scheduler"])

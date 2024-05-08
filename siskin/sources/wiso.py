@@ -76,7 +76,7 @@ class Wiso2018Files(WisoTask):
     def run(self):
         with self.input().open() as handle:
             _, combined = tempfile.mkstemp(prefix="siskin-")
-            for row in handle.iter_tsv(cols=("path", )):
+            for row in handle.iter_tsv(cols=("path",)):
                 # Read CSV file and prepend the basename of the file to the line.
                 filename = os.path.basename(row.path)
                 shellout(

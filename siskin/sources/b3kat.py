@@ -127,8 +127,10 @@ class B3KatDownload(B3KatTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         with self.input().open() as handle:
-            for i, row in enumerate(handle.iter_tsv(cols=("url", )), start=1):
-                downloaded = shellout("""curl -sL --fail "{url}" > {output} """, url=row.url)
+            for i, row in enumerate(handle.iter_tsv(cols=("url",)), start=1):
+                downloaded = shellout(
+                    """curl -sL --fail "{url}" > {output} """, url=row.url
+                )
                 output = shellout(
                     """yaz-marcdump -i marcxml -o marc "{input}" >> {stopover}""",
                     input=downloaded,
@@ -156,7 +158,9 @@ class B3KatFilterSSG(B3KatTask):
     * https://web.archive.org/web/20190503122507/https://www.dfg.de/download/pdf/foerderung/programme/lis/fid_zwischenbilanz_umstrukturierung_foerderung_sondersammelgebiete.pdf
     """
 
-    ssg = luigi.Parameter(default="9,2", description="ssgn designation to be matched against 84.a")
+    ssg = luigi.Parameter(
+        default="9,2", description="ssgn designation to be matched against 84.a"
+    )
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -182,7 +186,9 @@ class B3KatFilterSSG(B3KatTask):
                 writer = pymarc.MARCWriter(output)
                 for i, record in enumerate(reader):
                     if i % 100000 == 0:
-                        self.logger.debug("filtered %d/%d records, %s", counter["written"], i, counter)
+                        self.logger.debug(
+                            "filtered %d/%d records, %s", counter["written"], i, counter
+                        )
                     record = marcx.Record.from_record(record)
                     if "ssgn" not in record.values("084.2"):
                         counter["not-ssgn"] += 1

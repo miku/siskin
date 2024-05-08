@@ -51,7 +51,7 @@ from pydantic import BaseModel, Field
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ch.setFormatter(formatter)
 
 logger = logging.getLogger("siskin")
@@ -62,7 +62,9 @@ logger.addHandler(ch)
 class Service(BaseModel):
     label: Optional[str] = Field(alias="DokumentLabel")
     uri: Optional[str] = Field(alias="DokumentURI")
-    evaluate_holdings_file_for_library: str = Field(alias="evaluateHoldingsFileForLibrary")
+    evaluate_holdings_file_for_library: str = Field(
+        alias="evaluateHoldingsFileForLibrary"
+    )
     isil: str = Field(alias="ISIL")
     link_to_holdings_file: Optional[str] = Field(alias="linkToHoldingsFile")
     mega_collection: str = Field(alias="megaCollection")
@@ -76,6 +78,7 @@ class ServiceResponse(BaseModel):
     """
     AMSL Service response, about 250MB currently.
     """
+
     docs: List[Service]
 
     def filter_by(self, **kwargs):

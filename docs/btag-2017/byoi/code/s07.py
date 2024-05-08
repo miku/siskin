@@ -28,7 +28,7 @@ class ReferenceList(luigi.ExternalTask):
     """
 
     def output(self):
-        return luigi.LocalTarget('inputs/mag.tsv.gz', format=Gzip)
+        return luigi.LocalTarget("inputs/mag.tsv.gz", format=Gzip)
 
 
 class CombinedWithRefs(luigi.Task):
@@ -39,8 +39,8 @@ class CombinedWithRefs(luigi.Task):
 
     def requires(self):
         return {
-            'records': IntermediateSchema(),
-            'refs': ReferenceList(),
+            "records": IntermediateSchema(),
+            "refs": ReferenceList(),
         }
 
     def run(self):
@@ -50,25 +50,26 @@ class CombinedWithRefs(luigi.Task):
         """
         refmap = collections.defaultdict(list)
 
-        with self.input().get('refs').open() as handle:
+        with self.input().get("refs").open() as handle:
             for line in handle:
-                parts = line.strip().split('\t')
+                parts = line.strip().split("\t")
                 if len(parts) > 0:
                     doi, refs = parts[0], parts[1:]
                     refmap[doi] = refs
 
-        with self.input().get('records').open() as handle:
-            with self.output().open('w') as output:
+        with self.input().get("records").open() as handle:
+            with self.output().open("w") as output:
                 for line in handle:
                     doc = json.loads(line)
                     try:
-                        doc['refs'] = refmap[doc.get('doi')]
+                        doc["refs"] = refmap[doc.get("doi")]
                     except KeyError:
                         pass
-                    output.write(json.dumps(doc) + '\n')
+                    output.write(json.dumps(doc) + "\n")
 
     def output(self):
-        return luigi.LocalTarget('outputs/combined-with-refs.is.ldj')
+        return luigi.LocalTarget("outputs/combined-with-refs.is.ldj")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     luigi.run(local_scheduler=True)

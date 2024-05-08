@@ -35,12 +35,16 @@ class SomeInput(luigi.ExternalTask):
     """
     This is an external task. Something, that already exists on the file system.
     """
+
     def output(self):
         __dir__ = os.path.dirname(os.path.realpath(__file__))
-        return luigi.LocalTarget(path=os.path.join(__dir__, '../input/warmup', 'hello.json'))
+        return luigi.LocalTarget(
+            path=os.path.join(__dir__, "../input/warmup", "hello.json")
+        )
+
 
 class Greeting(luigi.Task):
-    """ This task requires `SomeInput`. """
+    """This task requires `SomeInput`."""
 
     def requires(self):
         """
@@ -55,13 +59,14 @@ class Greeting(luigi.Task):
         """
         with self.input().open() as handle:
             doc = json.load(handle)
-        print("%s from %s" % (doc['message'], doc['location']))
+        print("%s from %s" % (doc["message"], doc["location"]))
 
     def complete(self):
         return False
 
-if __name__ == '__main__':
-    luigi.run(['Greeting', '--workers', '1', '--local-scheduler'])
+
+if __name__ == "__main__":
+    luigi.run(["Greeting", "--workers", "1", "--local-scheduler"])
 
     # Alternatively, replace
     #

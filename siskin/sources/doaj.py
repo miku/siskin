@@ -115,7 +115,9 @@ class DOAJIntermediateSchemaDirty(DOAJTask):
 
     def requires(self):
         return {
-            "span-import": Executable(name="span-import", message="http://git.io/vI8NV"),
+            "span-import": Executable(
+                name="span-import", message="http://git.io/vI8NV"
+            ),
             "input": DOAJHarvest(date=self.date),
         }
 

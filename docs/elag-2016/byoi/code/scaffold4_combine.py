@@ -23,29 +23,31 @@ from gluish.task import BaseTask
 
 
 class Task(BaseTask):
-    BASE = 'output'
-    TAG = '4'
+    BASE = "output"
+    TAG = "4"
+
 
 class CombinedIntermediateSchema(Task):
     """
     Combine both things.
     """
+
     def requires(self):
         """
         TODO: require intermediate schema for crossref and doaj.
         """
-        
 
     def run(self):
         """
         TODO: Concatenate all input files.
         """
-        _, tmpfile = tempfile.mkstemp(prefix='byoi-')
+        _, tmpfile = tempfile.mkstemp(prefix="byoi-")
         # TODO: loop over inputs and run `cat`
         luigi.File(tmpfile).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext='ldj.gz'))
+        return luigi.LocalTarget(path=self.path(ext="ldj.gz"))
 
-if __name__ == '__main__':
-    luigi.run(['CombinedIntermediateSchema', '--workers', '1', '--local-scheduler'])
+
+if __name__ == "__main__":
+    luigi.run(["CombinedIntermediateSchema", "--workers", "1", "--local-scheduler"])

@@ -51,16 +51,34 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.benchmark import timed
-from siskin.sources.amsl import (AMSLFilterConfigFreeze, AMSLFreeContent, AMSLHoldingsFile, AMSLOpenAccessKBART)
+from siskin.sources.amsl import (
+    AMSLFilterConfigFreeze,
+    AMSLFreeContent,
+    AMSLHoldingsFile,
+    AMSLOpenAccessKBART,
+)
 from siskin.sources.base import BaseFix
 from siskin.sources.ceeol import CeeolIntermediateSchema
-from siskin.sources.crossref import (CrossrefDOIList, CrossrefFeedFile, CrossrefIntermediateSchema, CrossrefUniqISSNList)
-from siskin.sources.degruyter import (DegruyterDOIList, DegruyterIntermediateSchema, DegruyterISSNList)
-from siskin.sources.doaj import (DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList)
+from siskin.sources.crossref import (
+    CrossrefDOIList,
+    CrossrefFeedFile,
+    CrossrefIntermediateSchema,
+    CrossrefUniqISSNList,
+)
+from siskin.sources.degruyter import (
+    DegruyterDOIList,
+    DegruyterIntermediateSchema,
+    DegruyterISSNList,
+)
+from siskin.sources.doaj import DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
 from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.ios import IOSIntermediateSchema
-from siskin.sources.jstor import (JstorDOIList, JstorIntermediateSchemaCombined, JstorISSNList)
+from siskin.sources.jstor import (
+    JstorDOIList,
+    JstorIntermediateSchemaCombined,
+    JstorISSNList,
+)
 from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema
@@ -130,7 +148,10 @@ class AIIntermediateSchema(AITask):
             with open(target.path, "rb") as f:
                 head = f.read(4)
                 if binascii.hexlify(head) not in (b"fd2fb528", b"28b52ffd"):
-                    raise RuntimeError("AIIntermediateSchema requires zstd-compressed inputs, failed: %s (got: %s)" % (target.path, binascii.hexlify(head)))
+                    raise RuntimeError(
+                        "AIIntermediateSchema requires zstd-compressed inputs, failed: %s (got: %s)"
+                        % (target.path, binascii.hexlify(head))
+                    )
 
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         for target in self.input():
@@ -178,9 +199,13 @@ class AILicensing(AITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    override = luigi.BoolParameter(description="do not use jour fixe", significant=False)
+    override = luigi.BoolParameter(
+        description="do not use jour fixe", significant=False
+    )
     drop = luigi.BoolParameter(description="drop records w/o isil")
-    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(
+        default="default", description="licensing style, e.g. default or reduced"
+    )
 
     def requires(self):
         if self.override:
@@ -226,7 +251,9 @@ class AILocalData(AITask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     batchsize = luigi.IntParameter(default=25000, significant=False)
-    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(
+        default="default", description="licensing style, e.g. default or reduced"
+    )
 
     def requires(self):
         return AILicensing(date=self.date, drop=True, style=self.style)
@@ -257,7 +284,9 @@ class AIInstitutionChanges(AITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(
+        default="default", description="licensing style, e.g. default or reduced"
+    )
 
     def requires(self):
         return AILocalData(date=self.date, style=self.style)
@@ -281,7 +310,9 @@ class AIIntermediateSchemaDeduplicated(AITask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(
+        default="default", description="licensing style, e.g. default or reduced"
+    )
 
     def requires(self):
         return {
@@ -317,13 +348,20 @@ class AIExport(AITask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="solr5vu3", description="export format")
-    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
-    with_fullrecord = luigi.BoolParameter(default=False, description="whether to include fulltext record, e.g. for solrcloud")
+    style = luigi.Parameter(
+        default="default", description="licensing style, e.g. default or reduced"
+    )
+    with_fullrecord = luigi.BoolParameter(
+        default=False,
+        description="whether to include fulltext record, e.g. for solrcloud",
+    )
 
     def requires(self):
         return {
             "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
-            "base": BaseFix(style="z"),  # Failed to establish a new connection: [Errno 111] Connection refused')
+            "base": BaseFix(
+                style="z"
+            ),  # Failed to establish a new connection: [Errno 111] Connection refused')
         }
 
     def run(self):
@@ -371,7 +409,9 @@ class AIUpdate(AITask, luigi.WrapperTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    style = luigi.Parameter(default="default", description="licensing style, e.g. default or reduced")
+    style = luigi.Parameter(
+        default="default", description="licensing style, e.g. default or reduced"
+    )
 
     def requires(self):
         return [AIExport(date=self.date, style=self.style), AIRedact(date=self.date)]
@@ -386,7 +426,10 @@ class AIPartialUpdate(AITask):
 
     CrossrefFeedFile will only be available for today - 2.
     """
-    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    date = luigi.DateParameter(
+        default=datetime.date.today() - datetime.timedelta(days=2)
+    )
 
     def requires(self):
         return {
@@ -397,17 +440,19 @@ class AIPartialUpdate(AITask):
         }
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                  zstdcat -T0 {input} |
                  span-import -i crossref |
                  span-oa-filter -b 25000 -f {k} -fc {fc} |
                  span-tag -unfreeze {amsl} |
                  span-export |
                  zstd -c -T0 > {output}""",
-                          input=self.input().get("crossref-feed-file").path,
-                          amsl=self.input().get("amsl").path,
-                          k=self.input().get("amsl-oa-kbart").path,
-                          fc=self.input().get("amsl-free-content").path)
+            input=self.input().get("crossref-feed-file").path,
+            amsl=self.input().get("amsl").path,
+            k=self.input().get("amsl-oa-kbart").path,
+            fc=self.input().get("amsl-free-content").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -418,7 +463,10 @@ class AIPartialUpdateBlob(AITask):
     """
     Partial crossref update for blobserver.
     """
-    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    date = luigi.DateParameter(
+        default=datetime.date.today() - datetime.timedelta(days=2)
+    )
 
     def requires(self):
         return {
@@ -429,15 +477,17 @@ class AIPartialUpdateBlob(AITask):
         }
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                  zstdcat -T0 {input} |
                  span-import -i crossref |
                  span-oa-filter -b 25000 -f {k} -fc {fc} |
                  span-redact |
                  zstd -c -T0 > {output}""",
-                          input=self.input().get("crossref-feed-file").path,
-                          k=self.input().get("amsl-oa-kbart").path,
-                          fc=self.input().get("amsl-free-content").path)
+            input=self.input().get("crossref-feed-file").path,
+            k=self.input().get("amsl-oa-kbart").path,
+            fc=self.input().get("amsl-free-content").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -448,7 +498,10 @@ class AIPartialUpdateStats(AITask):
     """
     Gather some numbers for various ISIL.
     """
-    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+
+    date = luigi.DateParameter(
+        default=datetime.date.today() - datetime.timedelta(days=2)
+    )
 
     def requires(self):
         return AIPartialUpdate(date=self.date)
@@ -484,30 +537,44 @@ class AIPartialUpdatePublish(AITask):
     """
     Publish latest crossref snapshot to currently live index.
     """
-    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
-    index = luigi.Parameter(default="solr_nonlive", description="solr_live or solr_nonlive")
+
+    date = luigi.DateParameter(
+        default=datetime.date.today() - datetime.timedelta(days=2)
+    )
+    index = luigi.Parameter(
+        default="solr_nonlive", description="solr_live or solr_nonlive"
+    )
 
     def requires(self):
         return AIPartialUpdate(date=self.date)
 
     def run(self):
         started = datetime.datetime.now()
-        solr = subprocess.getoutput(f"echo $(siskin-whatislive.sh {self.index})/solr/biblio")
+        solr = subprocess.getoutput(
+            f"echo $(siskin-whatislive.sh {self.index})/solr/biblio"
+        )
         if len(solr) < len(".../solr/biblio"):
             raise RuntimeError("unexpected solr url: {}".format(solr))
-        shellout("""
+        shellout(
+            """
                  zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
-                 """, input=self.input().path, solr=solr)
+                 """,
+            input=self.input().path,
+            solr=solr,
+        )
         stopped = datetime.datetime.now()
         elapsed = stopped - started
         with self.output().open("wb") as output:
-            json.dump({
-                "started": started.isoformat(),
-                "stopped": stopped.isoformat(),
-                "elapsed_s": elapsed.seconds,
-                "solr": solr,
-                "file": self.input().path,
-            }, output)
+            json.dump(
+                {
+                    "started": started.isoformat(),
+                    "stopped": stopped.isoformat(),
+                    "elapsed_s": elapsed.seconds,
+                    "solr": solr,
+                    "file": self.input().path,
+                },
+                output,
+            )
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json"))
@@ -538,7 +605,9 @@ class AIDOIStats(AITask):
             for k1, k2 in itertools.combinations(list(self.input().keys()), 2):
                 s1 = load_set_from_target(self.input().get(k1))
                 s2 = load_set_from_target(self.input().get(k2))
-                output.write_tsv(k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2))))
+                output.write_tsv(
+                    k1, k2, str(len(s1)), str(len(s2)), str(len(s1.intersection(s2)))
+                )
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -652,7 +721,9 @@ class AICollectionsAndSerialNumbers(AITask):
         g = rdflib.Graph()
         ns = {
             "amsl": rdflib.Namespace("http://amsl.technology/"),
-            "disco": rdflib.Namespace("http://amsl.technology/discovery/Metadatenkollektion/"),
+            "disco": rdflib.Namespace(
+                "http://amsl.technology/discovery/Metadatenkollektion/"
+            ),
         }
 
         p = ns["amsl"].coveredMediumID
@@ -664,7 +735,9 @@ class AICollectionsAndSerialNumbers(AITask):
                     self.logger.debug("%s %s", i, len(g))
 
                 doc = json.loads(line)
-                issns = list(itertools.chain(doc.get("rft.issn", []), doc.get("rft.eissn", [])))
+                issns = list(
+                    itertools.chain(doc.get("rft.issn", []), doc.get("rft.eissn", []))
+                )
                 colls = doc.get("finc.mega_collection", [])
 
                 for issn in issns:
@@ -792,7 +865,10 @@ class AIISSNCoverageCatalogMatches(AITask):
             with self.output().open("w") as output:
                 for i, row in enumerate(handle.iter_tsv(cols=("issn", "status"))):
                     if row.status == "NOT_FOUND":
-                        link = ("https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN" % row.issn)
+                        link = (
+                            "https://katalog.ub.uni-leipzig.de/Search/Results?lookfor=%s&type=ISN"
+                            % row.issn
+                        )
                         self.logger.info("fetch #%05d: %s" % (i, link))
                         body = cache.get(link)
                         if "Keine Ergebnisse!" in body:
@@ -804,10 +880,14 @@ class AIISSNCoverageCatalogMatches(AITask):
                                 output.write_tsv(row.issn, "ERR_LAYOUT", link)
                                 continue
                             first = rs[0]
-                            match = re.search(r"Treffer([0-9]+)-([0-9]+)von([0-9]+)", first.text)
+                            match = re.search(
+                                r"Treffer([0-9]+)-([0-9]+)von([0-9]+)", first.text
+                            )
                             if match:
                                 total = match.group(3)
-                                output.write_tsv(row.issn, "FOUND_RESULTS_%s" % total, link)
+                                output.write_tsv(
+                                    row.issn, "FOUND_RESULTS_%s" % total, link
+                                )
                             else:
                                 output.write_tsv(row.issn, "ERR_NO_MATCH", link)
 

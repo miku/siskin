@@ -109,7 +109,10 @@ class CrossrefRawItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
-    feed = luigi.Parameter(default="1", description="feed id to distinguish between various parallel downloads")
+    feed = luigi.Parameter(
+        default="1",
+        description="feed id to distinguish between various parallel downloads",
+    )
 
     def run(self):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
@@ -156,7 +159,9 @@ class CrossrefUniqItems(CrossrefTask):
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
-    batch_size = luigi.IntParameter(default=5000, description="batch size", significant=False)
+    batch_size = luigi.IntParameter(
+        default=5000, description="batch size", significant=False
+    )
 
     def requires(self):
         return CrossrefRawItems(begin=self.begin, date=self.closest())
@@ -206,8 +211,11 @@ class CrossrefFeedFile(CrossrefTask, luigi.ExternalTask):
     """
     A single file from a crossref feed.
     """
+
     feed = luigi.Parameter(default="feed-1")
-    date = luigi.DateParameter(default=datetime.date.today() - datetime.timedelta(days=2))
+    date = luigi.DateParameter(
+        default=datetime.date.today() - datetime.timedelta(days=2)
+    )
 
     def output(self):
         filename = f"{self.feed}-index-{self.date}-{self.date}.json.zst"
@@ -316,7 +324,9 @@ class CrossrefCollectionsDifference(CrossrefTask):
     @timed
     def run(self):
         if self.to is None:
-            self.logger.debug("not sending any email, use --to my@mail.com to send out a report")
+            self.logger.debug(
+                "not sending any email, use --to my@mail.com to send out a report"
+            )
 
         amsl = set()
 
@@ -333,12 +343,14 @@ class CrossrefCollectionsDifference(CrossrefTask):
 
         with self.input().get("crossref").open() as handle:
             with self.output().open("w") as output:
-                for row in handle.iter_tsv(cols=("name", )):
+                for row in handle.iter_tsv(cols=("name",)):
                     if row.name not in amsl:
                         missing_in_amsl.append(row.name)
                         output.write_tsv(row.name)
 
-        self.logger.debug("%s collections seem to be missing in AMSL", len(missing_in_amsl))
+        self.logger.debug(
+            "%s collections seem to be missing in AMSL", len(missing_in_amsl)
+        )
 
         if self.to is not None:
             # Try to send a message, experimental.
@@ -385,14 +397,18 @@ class CrossrefDOIList(CrossrefTask):
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
         # process substitution sometimes results in a broken pipe, so extract beforehand
-        output = shellout("zstd -cd -T0 {input} > {output}", input=self.input().get("input").path)
+        output = shellout(
+            "zstd -cd -T0 {input} > {output}", input=self.input().get("input").path
+        )
         shellout(
             """jq -r '.doi?' {input} | grep -o "10.*" 2> /dev/null | LC_ALL=C sort -S50% > {output} """,
             input=output,
             output=stopover,
         )
         os.remove(output)
-        output = shellout("""LC_ALL=C sort -S50% -u {input} > {output} """, input=stopover)
+        output = shellout(
+            """LC_ALL=C sort -S50% -u {input} > {output} """, input=stopover
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -444,7 +460,9 @@ class CrossrefUniqISSNList(CrossrefTask):
 
     @timed
     def run(self):
-        output = shellout("LC_ALL=C sort -u {input} > {output}", input=self.input().path)
+        output = shellout(
+            "LC_ALL=C sort -u {input} > {output}", input=self.input().path
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -467,7 +485,9 @@ class CrossrefDOIAndISSNList(CrossrefTask):
     @timed
     def run(self):
         _, stopover = tempfile.mkstemp(prefix="siskin-")
-        temp = shellout("zstd -cd -T0 {input} > {output}", input=self.input().get("input").path)
+        temp = shellout(
+            "zstd -cd -T0 {input} > {output}", input=self.input().get("input").path
+        )
         output = shellout(
             """jq -r '[.doi?, .["rft.issn"][]?, .["rft.eissn"][]?] | @csv' {input} | LC_ALL=C sort -S50% > {output} """,
             input=temp,
@@ -569,7 +589,9 @@ class CrossrefPrefixMapping(CrossrefTask):
 
                     if name is None:
                         # Cache canonical names, if we missed it.
-                        resp = requests.get("https://api.crossref.org/members/%s" % prefix).json()
+                        resp = requests.get(
+                            "https://api.crossref.org/members/%s" % prefix
+                        ).json()
                         namemap[prefix] = resp["message"]["primary-name"]
                         name = namemap.get(prefix, "UNDEFINED")
                         self.logger.debug(

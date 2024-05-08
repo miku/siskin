@@ -20,8 +20,7 @@ Index with solrbulk:
 
 import luigi
 from gluish.utils import shellout
-from x08 import \
-    TaggedIntermediateSchema  # TaggedAndDeduplicatedIntermediateSchema
+from x08 import TaggedIntermediateSchema  # TaggedAndDeduplicatedIntermediateSchema
 
 
 class Export(luigi.Task):
@@ -29,7 +28,8 @@ class Export(luigi.Task):
     This task uses a parameter. There are different parameter types like
     IntParameter, DateParameter, ...
     """
-    format = luigi.Parameter(default='solr5vu3', description='solr5vu3 or formeta')
+
+    format = luigi.Parameter(default="solr5vu3", description="solr5vu3 or formeta")
 
     def requires(self):
         """
@@ -39,12 +39,16 @@ class Export(luigi.Task):
         return TaggedIntermediateSchema()
 
     def run(self):
-        output = shellout("gunzip -c {input} | span-export -o {format} | gzip -c > {output} ",
-                          format=self.format, input=self.input().path)
+        output = shellout(
+            "gunzip -c {input} | span-export -o {format} | gzip -c > {output} ",
+            format=self.format,
+            input=self.input().path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path='outputs/export-%s.ldj.gz' % self.format)
+        return luigi.LocalTarget(path="outputs/export-%s.ldj.gz" % self.format)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     luigi.run(local_scheduler=True)

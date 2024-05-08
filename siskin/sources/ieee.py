@@ -73,7 +73,9 @@ class IEEEPaths(IEEETask):
         password = self.config.get("ieee", "ftp-password")
         base = self.config.get("ieee", "ftp-path")
         pattern = self.config.get("ieee", "ftp-pattern")
-        return FTPMirror(host=host, username=username, password=password, base=base, pattern=pattern)
+        return FTPMirror(
+            host=host, username=username, password=password, base=base, pattern=pattern
+        )
 
     @timed
     def run(self):

@@ -37,7 +37,7 @@ from gluish.format import Gzip
 from gluish.utils import shellout
 
 from siskin.sources.amsl import AMSLCollections
-from siskin.sources.crossref import (CrossrefCollections, CrossrefCollectionsCount)
+from siskin.sources.crossref import CrossrefCollections, CrossrefCollectionsCount
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder, load_set_from_target
 
@@ -61,7 +61,9 @@ class OADOIDatasetStatusByDOI(AdhocTask):
     """
 
     def run(self):
-        url = ("https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz")
+        url = (
+            "https://s3-us-west-2.amazonaws.com/oadoi-datasets/oa_status_by_doi.csv.gz"
+        )
         output = shellout("""wget -O "{output}" "{url}" """, url=url)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -145,5 +147,3 @@ class Issue7049ExportExcel(AdhocTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="xlsx"))
-
-

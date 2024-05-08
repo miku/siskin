@@ -49,7 +49,6 @@ import tqdm
 pattern = re.compile(r"10[.][0-9a-zA-Z]*/[0-9a-zA-Z]{4,}")
 
 if __name__ == "__main__":
-
     counter = collections.Counter()
     resolvable_dois = set()
 
@@ -63,7 +62,9 @@ if __name__ == "__main__":
 
     with gzip.open("dswarm-68-20181008150514_all.ldj.gz", "rb") as handle:
         for line in tqdm.tqdm(handle):
-            candidates = set([match.strip().strip('"') for match in pattern.findall(line)])
+            candidates = set(
+                [match.strip().strip('"') for match in pattern.findall(line)]
+            )
             resolvable = [doi for doi in candidates if doi in resolvable_dois]
             doc = json.loads(line)
 

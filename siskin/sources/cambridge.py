@@ -73,7 +73,9 @@ class CambridgeDropbox(CambridgeTask):
         target = os.path.join(self.taskdir(), "mirror")
         shellout(
             "mkdir -p {target} && rsync {rsync_options} {src} {target}",
-            rsync_options=self.config.get("cambridge", "rsync-options", fallback="-avzP"),
+            rsync_options=self.config.get(
+                "cambridge", "rsync-options", fallback="-avzP"
+            ),
             src=self.config.get("cambridge", "scp-src"),
             target=target,
         )

@@ -50,6 +50,7 @@ class IOSTask(DefaultTask):
     """
     Base task for IOS Press, refs #24731.
     """
+
     TAG = "219"
 
     def closest(self):
@@ -60,6 +61,7 @@ class IOSSync(IOSTask):
     """
     Sync from owncloud.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
@@ -67,9 +69,12 @@ class IOSSync(IOSTask):
             """
             curl -su "{share_id}:{share_pw}" "https://owncloud.gwdg.de/public.php/webdav/{filename}" -o {output}
             """,
-            filename=self.config.get("ios", "filename"),  # e.g. prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
+            filename=self.config.get(
+                "ios", "filename"
+            ),  # e.g. prod_BYDbJQ_01_ios_journals_2023-2024_20240102.zip
             share_id=self.config.get("ios", "share_id"),
-            share_pw=self.config.get("ios", "share_pw"))
+            share_pw=self.config.get("ios", "share_pw"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -80,16 +85,19 @@ class IOSBacklogIntermediateSchema(IOSTask):
     """
     Convert backlog to intermediate schema.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                           find {backlog} -type f -name '*.xml' |
                           xargs -I {{}} cat {{}} |
                           span-import -i ios |
                           zstd -c -T0 > {output}
                           """,
-                          backlog=self.config.get("ios", "backlog"))
+            backlog=self.config.get("ios", "backlog"),
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
@@ -101,6 +109,7 @@ class IOSIntermediateSchema(IOSTask):
     Convert to intermediate schema, requires span 0.1.356 or higher; combine,
     roughly deduplicate.
     """
+
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
@@ -110,15 +119,17 @@ class IOSIntermediateSchema(IOSTask):
         }
 
     def run(self):
-        output = shellout("""
+        output = shellout(
+            """
                           unzip -p {input} '*.xml' |
                           span-import -i ios |
                           zstd -c -T0 > {output} &&
                           cat {backlog} >> {output} &&
                           zstdcat -T0 {output} | LC_ALL=C sort -S10% -u | zstd -c -T0 | sponge {output}
                           """,
-                          input=self.input().get("sync").path,
-                          backlog=self.input().get("backlog").path)
+            input=self.input().get("sync").path,
+            backlog=self.input().get("backlog").path,
+        )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):

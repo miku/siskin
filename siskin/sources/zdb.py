@@ -53,7 +53,10 @@ class ZDBDownload(ZDBTask):
     format = luigi.Parameter(default="jsonld", description="rdf, hdt")
 
     def run(self):
-        link = ("http://datendienst.dnb.de/cgi-bin/mabit.pl?cmd=fetch&userID=opendata&pass=opendata&mabheft=ZDBTitel.%s.gz" % self.format)
+        link = (
+            "http://datendienst.dnb.de/cgi-bin/mabit.pl?cmd=fetch&userID=opendata&pass=opendata&mabheft=ZDBTitel.%s.gz"
+            % self.format
+        )
         output = shellout(""" wget -O {output} "{link}" """, link=link)
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -67,6 +70,7 @@ class ZDBHoldingsDownload(ZDBTask):
 
     Data updated twice a year, use a fixed link.
     """
+
     date = luigi.DateParameter(default=datetime.date(2023, 11, 14))
 
     def run(self):
@@ -103,7 +107,9 @@ class ZDBShortTitleMap(ZDBTask):
         yIDo9IGpzb24uTmV3RW5jb2Rlcihvcy5TdGRvdXQpLkVuY29kZShzbSk7IGVyciAhPSBuaWwgewog@@@ICBsb2cuRm
         F0YWwoZXJyKQog@@IH0K@IH0K
         """
-        source = (self.run.__doc__.replace("\n", "").replace(" ", "").replace("@", "ICAg"))
+        source = (
+            self.run.__doc__.replace("\n", "").replace(" ", "").replace("@", "ICAg")
+        )
         tempcode = shellout(
             """echo '{code}' | base64 -d > {output}.go """,
             code=source,

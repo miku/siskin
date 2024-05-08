@@ -49,7 +49,9 @@ class sqlitedb:
         self.detect_types = detect_types
 
     def __enter__(self):
-        self.conn = sqlite3.connect(self.path, timeout=self.timeout, detect_types=self.detect_types)
+        self.conn = sqlite3.connect(
+            self.path, timeout=self.timeout, detect_types=self.detect_types
+        )
         self.conn.text_factory = str
         self.cursor = self.conn.cursor()
         return self.cursor
