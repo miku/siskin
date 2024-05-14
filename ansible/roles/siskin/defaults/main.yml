@@ -23,7 +23,7 @@ siskin_vendor_version_esbulk: 0.7.19
 siskin_vendor_version_filterline: 0.1.5
 siskin_vendor_version_groupcover: 0.1.0
 siskin_vendor_version_metha: 0.3.7
-siskin_vendor_version_siskin: 1.5.85
+siskin_vendor_version_siskin: 1.5.87
 siskin_vendor_version_solrbulk: 0.3.14
 siskin_vendor_version_solrdump: 0.1.11
 siskin_vendor_version_span: 0.1.361
@@ -32,7 +32,7 @@ siskin_vendor_version_unzippa: 0.1.6
 siskin_vendor_version_zek: 0.1.24
 
 # Versions of extra packages
-siskin_extra_version_duckdb: 0.10.0
+siskin_extra_version_duckdb: 0.10.2
 
 # luigid log dir
 luigid_log_dir: /var/log/luigi
