@@ -52,6 +52,7 @@ install_requires = [
     "internetarchive>=2.0.3",
     "iso-639>=0.4.5",
     "langdetect>=1.0.9",
+    "lingua-language-detector>=2.0.2",
     "logilab-common>=0.61.0",
     # 'luigi>=3', # https://github.com/spotify/luigi/issues/3202, 3.11 issue;
     # PEP0508 fix commit until release appears; seems to not work out of the
@@ -65,7 +66,6 @@ install_requires = [
     "marcx>=0.2.12",
     "numpy",
     "pandas>=1.1",
-    "pycld3>=0.22",
     "pydantic>=1.10.5",
     "pygments>=2.9.0",
     "pyisbn>=1.0.0",
