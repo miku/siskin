@@ -123,7 +123,7 @@ class CrossrefRawItems(CrossrefTask):
             """,
             feed=self.feed,
             begin=self.begin,
-            date=self.date,
+            date=self.closest(),
             crossref_sync_dir=crossref_sync_dir,
         )  # 22min
         luigi.LocalTarget(output).move(self.output().path)
