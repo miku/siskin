@@ -105,12 +105,12 @@ class CrossrefRawItems(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
     feed = luigi.Parameter(
-        default="1",
+        default="2",
         description="feed id to distinguish between various parallel downloads",
     )
 
