@@ -38,9 +38,9 @@ clean:
 
 .PHONY: fmt
 fmt:
-	ruff format
+	ruff format siskin
 
 .PHONY: lint
 lint:
-	ruff check
+	ruff check siskin
 
