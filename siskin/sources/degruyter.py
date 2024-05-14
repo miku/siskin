@@ -48,7 +48,7 @@ from siskin.task import DefaultTask
 
 
 class DegruyterTask(DefaultTask):
-    """
+    r"""
     De Gruyter is a scholarly publishing house specializing in academic literature.
 
     Each file on the FTP server comes with an epoch timestamp, which seems to be the

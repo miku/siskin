@@ -167,7 +167,7 @@ class B3KatFilterSSG(B3KatTask):
         return B3KatDownload(date=self.date)
 
     def run(self):
-        """
+        r"""
         Taken from 012_filter.sh
 
         unzip -p $f | tr -d '\t' | sed -e 's/\(<marc:record>\)/\t\1/g' | tr -d
