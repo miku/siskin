@@ -30,7 +30,7 @@ import email.utils as eut
 import hashlib
 import json
 import os
-import pipes
+import shlex
 import tempfile
 
 import luigi
@@ -127,11 +127,11 @@ class FTPMirror(CommonTask):
         shellout(
             command,
             host=self.host,
-            username=pipes.quote(self.username),
-            password=pipes.quote(self.password),
-            pattern=pipes.quote(self.pattern),
-            target=pipes.quote(target),
-            base=pipes.quote(self.base),
+            username=shlex.quote(self.username),
+            password=shlex.quote(self.password),
+            pattern=shlex.quote(self.pattern),
+            target=shlex.quote(target),
+            base=shlex.quote(self.base),
             max_retries=self.max_retries,
             timeout=self.timeout,
             exclude_glob=exclude_glob,
