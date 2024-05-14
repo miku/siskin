@@ -155,7 +155,7 @@ class CrossrefUniqItems(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
@@ -212,7 +212,7 @@ class CrossrefFeedFile(CrossrefTask, luigi.ExternalTask):
     A single file from a crossref feed.
     """
 
-    feed = luigi.Parameter(default="feed-1")
+    feed = luigi.Parameter(default="feed-2")
     date = luigi.DateParameter(
         default=datetime.date.today() - datetime.timedelta(days=2)
     )
