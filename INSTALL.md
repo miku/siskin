@@ -20,12 +20,11 @@ built in.
 
 ## Install the siskin package
 
-The *siskin* project is distributed as a Python package. The current release
-should be available on [PyPI](https://pypi.org/project/siskin/) or on your
-local Package repository (e.g. Nexus, artifactory, ...).
+The *siskin* project is distributed as a Python package. Access through local
+NEXUS pypi cache.
 
 ```
-$ pip install -U --no-cache siskin
+$ pip install -U --no-cache siskin # --index-url $NEXUS
 ```
 
 This will install siskin, its assets and a number of command line scripts to
@@ -300,7 +299,7 @@ output of the task will be stored.
 The siskin project can be upgraded with:
 
 ```
-$ pip install -U --no-cache siskin
+$ pip install -U --no-cache siskin # --index-url $NEXUS
 ```
 
 Important: The pip command will update the software and the software only. If a
@@ -344,19 +343,13 @@ If you are not familiar with the concept of an environment, please take a moment
 * https://docs.python.org/3/glossary.html#term-virtual-environment
 * https://docs.python.org/3/tutorial/venv.html
 
+```shell
+$ python -m venv .venv && source .venv/bin/activate
+```
+
 ## Development install
 
 In order to have siskin and all dependencies installed (in your virtual environment), run:
-
-```
-$ python setup.py develop
-```
-
-You can read a bit more about this command here:
-
-* [Python setup.py develop vs install](https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install)
-
-Note: the following should have the same effect as well:
 
 ```
 $ pip install -e .
@@ -408,12 +401,6 @@ Each of these tasks will require you to look at different files.
 ## Creating a source distribution
 
 To create a [source distribution](https://packaging.python.org/glossary/#term-source-distribution-or-sdist) run:
-
-```
-$ python setup.py sdist
-```
-
-Or, as a shortcut:
 
 ```
 $ make dist
