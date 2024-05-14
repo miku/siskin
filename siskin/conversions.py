@@ -50,6 +50,17 @@ import xmltodict
 
 from siskin.utils import URLCache
 
+try:
+    from lingua import LanguageDetectorBuilder
+
+    language_detector = (
+        LanguageDetectorBuilder.from_all_languages()
+        .with_preloaded_language_models()
+        .build()
+    )
+except ImportError:
+    language_detector = None
+
 html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
 
@@ -396,15 +407,10 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
         """
         if not attrs.get("description"):
             return with_default
-        try:
-            import cld3
-            from iso639 import languages
-
-            result = cld3.get_language(attrs["description"])
-            if not result.is_reliable:
-                return with_default
-            return languages.get(alpha2=result.language).part2b
-        except (ImportError, KeyError):
+        if language_detector is not None:
+            lang = language_detector.detect_language_of(attrs["description"])
+            return lang.iso_code_639_3.name.lower()
+        else:
             return with_default
 
     def fetch_authors(doc, force=False, best_effort=False, max_retries=5):
