@@ -18,6 +18,7 @@ tests:
   script:
     - pip install python-daemon --index-url $PYPI_PROXY_URL # error: setuptools 57.4.0 is installed but setuptools>=62.4.0 is required by {'python-daemon'}
     - pip install backports.csv # try installing this from pypi, nexus may not like the [.]
+    - pip install iso-639 # try installing this from pypi, nexus may not like the [.]
     - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
     - pytest
   tags: [docker]
