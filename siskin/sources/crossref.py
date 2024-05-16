@@ -147,9 +147,8 @@ class CrossrefUniqItems(CrossrefTask):
     350 [i9] core-hours), we get 112GB (a 0.63 reduction). Sequential iteration
     over 153842785 lines and 809GB  takes about 17min (780MB/s).
 
-    TODO: To reduce processing time again, compact state and start a new feed.
-    Snapshot at: https://archive.org/details/crossref-2023-12-01 (and
-    https://archive.org/details/ia_biblio_metadata?sort=-publicdate).
+    05/2024: Difference between zstd level 3 and 22: 181GB vs 115GB (compression
+    takes over 12h using about 32 cores); 157M records.
 
     Cf. https://www.crossref.org/06members/53status.html
     """
