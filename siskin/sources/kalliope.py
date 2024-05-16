@@ -104,7 +104,7 @@ class KalliopeDirectDownload(KalliopeTask):
             """
                           tar -xOf {input} |
                           unpigz -c |
-                          jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]'
+                          jq -rc '.mega_collection += ["sid-140-col-nachlaesseslub"]' |
                           zstd -c -T0 > {output} """,
             input=output,
         )
