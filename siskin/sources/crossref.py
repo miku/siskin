@@ -184,7 +184,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
@@ -234,7 +234,7 @@ class CrossrefCollections(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
@@ -263,7 +263,7 @@ class CrossrefCollectionsCount(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
@@ -305,7 +305,7 @@ class CrossrefCollectionsDifference(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
@@ -421,7 +421,7 @@ class CrossrefISSNList(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
@@ -450,7 +450,7 @@ class CrossrefUniqISSNList(CrossrefTask):
     """
 
     begin = luigi.DateParameter(
-        default=datetime.date(2022, 1, 1),
+        default=datetime.date(2024, 3, 31),
         description="start of the current crossref update streak",
     )
     date = ClosestDateParameter(default=datetime.date.today())
