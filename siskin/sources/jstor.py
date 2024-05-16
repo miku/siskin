@@ -70,6 +70,10 @@ class JstorTask(DefaultTask):
 class JstorPaths(JstorTask):
     """
     Sync.
+
+    Occasionally, there are incomplete files, for now manually check the sync dir:
+
+      $ fd -e zip -x unzip -l > /dev/null
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
