@@ -3,7 +3,7 @@
 # git tag v0.1.2
 # git push sc --tags => creates package and uploads to Nexus
 
-image: python:3.11.9-slim-bullseye@sha256:a24e509d2f7055675a39612b7efc230af72da23a8c03127b8db2d60e807f716f
+image: python:3.12.3-slim-bullseye@sha256:6fa552fb879325884b0c1b6792d14ae9500d246c8b19cc27876d84c7c41117ff
 
 stages:
   - test
