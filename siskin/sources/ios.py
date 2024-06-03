@@ -91,11 +91,11 @@ class IOSBacklogIntermediateSchema(IOSTask):
     def run(self):
         output = shellout(
             """
-                          find {backlog} -type f -name '*.xml' |
-                          xargs -I {{}} cat {{}} |
-                          span-import -i ios |
-                          zstd -c -T0 > {output}
-                          """,
+            find {backlog} -type f -name '*.xml' |
+            xargs -I {{}} cat {{}} |
+            span-import -i ios |
+            zstd -c -T0 > {output}
+            """,
             backlog=self.config.get("ios", "backlog"),
         )
         luigi.LocalTarget(output).move(self.output().path)
@@ -121,12 +121,12 @@ class IOSIntermediateSchema(IOSTask):
     def run(self):
         output = shellout(
             """
-                          unzip -p {input} '*.xml' |
-                          span-import -i ios |
-                          zstd -c -T0 > {output} &&
-                          cat {backlog} >> {output} &&
-                          zstdcat -T0 {output} | LC_ALL=C sort -S10% -u | zstd -c -T0 | sponge {output}
-                          """,
+            unzip -p {input} '*.xml' |
+            span-import -i ios |
+            zstd -c -T0 > {output} &&
+            cat {backlog} >> {output} &&
+            zstdcat -T0 {output} | LC_ALL=C sort -S10% -u | zstd -c -T0 | sponge {output}
+            """,
             input=self.input().get("sync").path,
             backlog=self.input().get("backlog").path,
         )

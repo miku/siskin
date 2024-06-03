@@ -409,9 +409,9 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
             return with_default
         if language_detector is not None:
             lang = language_detector.detect_language_of(attrs["description"])
-            return lang.iso_code_639_3.name.lower()
-        else:
-            return with_default
+            if lang is not None:
+                return lang.iso_code_639_3.name.lower()
+        return with_default
 
     def fetch_authors(doc, force=False, best_effort=False, max_retries=5):
         """
