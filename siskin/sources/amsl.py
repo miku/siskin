@@ -1000,7 +1000,7 @@ class AMSLFilterConfig(AMSLTask):
                                 "isbn": {
                                     "link": item.get("linkToHoldingsFile"),
                                 }
-                            }
+                            },
                         ],
                     }
                 )
