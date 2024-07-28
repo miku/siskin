@@ -44,3 +44,7 @@ fmt:
 lint:
 	ruff check siskin
 
+.PHONY: test
+test:
+	# pip install pytest-cov
+	pytest --cov .
