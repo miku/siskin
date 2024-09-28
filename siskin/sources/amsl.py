@@ -989,6 +989,23 @@ class AMSLFilterConfig(AMSLTask):
             if sid == "48":  # Handled elsewhere.
                 continue
 
+            if item.get("DokumentLabel") == "EBOOKS_KBART_DE-15":
+                isilfilters[isil].append(
+                    {
+                        "and": [
+                            {
+                                "source": [sid],
+                            },
+                            {
+                                "isbn": {
+                                    "link": item.get("linkToHoldingsFile"),
+                                }
+                            },
+                        ],
+                    }
+                )
+                continue
+
             # refs #10495, a subject filter for a few hard-coded ISIL.
             if sid == "34" and isil in ("DE-L152", "DE-1156", "DE-1972", "DE-Kn38"):
                 isilfilters[isil].append(

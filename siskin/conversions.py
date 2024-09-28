@@ -50,16 +50,8 @@ import xmltodict
 
 from siskin.utils import URLCache
 
-try:
-    from lingua import LanguageDetectorBuilder
 
-    language_detector = (
-        LanguageDetectorBuilder.from_all_languages()
-        .with_preloaded_language_models()
-        .build()
-    )
-except ImportError:
-    language_detector = None
+language_detector = None
 
 html_escape_table = {'"': "&quot;", "'": "&apos;"}
 html_unescape_table = {v: k for k, v in html_escape_table.items()}
@@ -400,17 +392,28 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     if not attrs or not rels:
         raise ValueError("osf record w/o attributes or relationships: {}".format(osf))
 
-    def find_osf_language(doc, with_default="eng"):
+    def find_osf_language(doc, with_default="eng", language_detector=language_detector):
         """
         If possible, detect language from abstract and return 3-letter ISO 639
         code. Otherwise return a default.
         """
         if not attrs.get("description"):
             return with_default
-        if language_detector is not None:
-            lang = language_detector.detect_language_of(attrs["description"])
-            if lang is not None:
-                return lang.iso_code_639_3.name.lower()
+        if language_detector is None:
+            try:
+                from lingua import LanguageDetectorBuilder
+
+                language_detector = (
+                    LanguageDetectorBuilder.from_all_languages()
+                    .with_preloaded_language_models()
+                    .build()
+                )
+            except ImportError:
+                logger.warning("skipping language detection, using default")
+                return with_default
+        lang = language_detector.detect_language_of(attrs["description"])
+        if lang is not None:
+            return lang.iso_code_639_3.name.lower()
         return with_default
 
     def fetch_authors(doc, force=False, best_effort=False, max_retries=5):

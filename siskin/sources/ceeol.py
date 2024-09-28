@@ -59,7 +59,7 @@ class CeeolTask(DefaultTask):
 
     TAG = "53"
 
-    date = luigi.DateParameter(default=datetime.date(2024, 3, 27))
+    date = luigi.DateParameter(default=datetime.date(2024, 6, 18))
 
 
 class CeeolIntermediateSchema(CeeolTask):
