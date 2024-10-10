@@ -398,6 +398,7 @@ class AIExport(AITask):
                 output=tmp,
             )
         luigi.LocalTarget(tmp).move(self.output().path)
+        self.create_symlink("latest")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
