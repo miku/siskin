@@ -139,17 +139,17 @@ class DefaultTask(BaseTask):
         except Exception as err:
             self.logger.debug("failed to send error email: %s", err)
 
-	def create_symlink(self, name="latest", suffix=""):
-		"""
-		Allows to create a symlink pointing to the task output, optionally
-		containing a suffix. Overwrites existing links.
-		"""
-		dirname = self.taskdir()
-		name = "{}-{}".format(name, suffix) if suffix else name
-		current = os.path.join(dirname, name)
-		if os.path.exists(current):
-			os.remove(current)
-		os.symlink(self.output().path, current)
+    def create_symlink(self, name="latest", suffix=""):
+        """
+        Allows to create a symlink pointing to the task output, optionally
+        containing a suffix. Overwrites existing links.
+        """
+        dirname = self.taskdir()
+        name = "{}-{}".format(name, suffix) if suffix else name
+        current = os.path.join(dirname, name)
+        if os.path.exists(current):
+            os.remove(current)
+        os.symlink(self.output().path, current)
 
     def on_success(self):
         """
