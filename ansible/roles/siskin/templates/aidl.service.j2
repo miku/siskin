@@ -1,0 +1,13 @@
+[Unit]
+Description=static download server of AIExport artifacts (#26394)
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python -m http.server -d {{ siskin_aidl_dir }} {{ siskin_aidl_port }}
+User={{ siskin_user }}
+Group={{ siskin_group }}
+WorkingDirectory={{ siskin_aidl_dir }}
+
+[Install]
+WantedBy=multi-user.target
+

@@ -151,6 +151,7 @@
   service:
     name: crond
     state: started
+
 - name: Add siskin bash completion
   copy:
     dest: /etc/bash_completion.d/siskin_completion.sh
@@ -169,6 +170,23 @@
     src: luigid.service.j2
     dest: /usr/lib/systemd/system/luigid.service
     mode: '0644'
+
+- name: Start service luigid, if not started
+  service:
+    name: luigid
+    state: started
+
+# Serve AIExport artifact per HTTP, refs #26394
+- name: Install static webserver for AI artifacts
+  template:
+    src: aidl.service.j2
+    dest: /usr/lib/systemd/system/aidl.service
+    mode: '0644'
+
+- name: Start service aidl, if not started
+  service:
+    name: aidl
+    state: started
 
 # Allow one additional location to run systemd daemons off
 # https://serverfault.com/questions/1032597/selinux-is-preventing-from-execute-access-on-the-file-centos

@@ -11,6 +11,10 @@ siskin_cache_dir: /data/.cache
 # Base directory for all raw and intermediate data files (TODO: maybe reuse ".cache")
 siskin_data_dir: /data/finc
 
+# AI DL folder
+siskin_aidl_dir: /data/finc/siskin/ai/AIExport
+siskin_aidl_port: 8089
+
 # Proxy settings, may need tweaks
 siskin_proxy: http://proxy.uni-leipzig.de:3128
 siskin_no_proxy: "127.0.0.1,services.ub.uni-leipzig.de,solrcloud.ub.uni-leipzig.de,localhost,amsl.technology,live.amsl.technology,141.39.229.15,172.18.113.15,172.18.113.7,172.18.113.98,172.18.113.99"
@@ -36,3 +40,4 @@ siskin_extra_version_duckdb: 1.0.0
 
 # luigid log dir
 luigid_log_dir: /var/log/luigi
+
