@@ -33,7 +33,7 @@ siskin_vendor_version_solrdump: 0.1.13
 siskin_vendor_version_span: 0.1.372
 siskin_vendor_version_srufetch: 0.1.13
 siskin_vendor_version_unzippa: 0.1.7
-siskin_vendor_version_zek: 0.1.25
+siskin_vendor_version_zek: 0.1.26
 
 # Versions of extra packages
 siskin_extra_version_duckdb: 1.0.0
