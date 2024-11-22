@@ -374,7 +374,7 @@ def scrape_html_listing(url, with_head=False):
     Given a URL to a webpage containing a simple (Apache) file listing, try to
     return a list of links to the files on the page.
 
-    >>> scrape_html_listing("http://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.08.01/")
+    >>> scrape_html_listing("https://ftp.halifax.rwth-aachen.de/archlinux/iso/latest/")
     ['https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.08.01-x86_64.iso',
      'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.08.01-x86_64.iso.sig',
      'https://ftp.halifax.rwth-aachen.de/archlinux/iso/2019.04.01/archlinux-2019.08.01-x86_64.iso.torr',
