@@ -422,6 +422,9 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
         cache locally.
 
         Example: https://api.osf.io/v2/preprints/egcsk/contributors/
+
+        2024-11-22: encountered HTTP 401 w/ some requests, e.g.
+        https://api.osf.io/v2/preprints/xcfdq/contributors/
         """
         result = []
         cache = URLCache(
