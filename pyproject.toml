@@ -1,0 +1,127 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = 'siskin'
+version = '1.6.0'
+description = 'Luigi tasks for building an article metadata index for https://finc.info'
+readme = 'README.md'
+requires-python = '>=3.12'
+dependencies = [
+    'astroid>=1.1.1,<2',
+    'backoff>=1.11.1',
+    'beautifulsoup4>=4',
+    'colorama>=0.3.3',
+    'configparser>=3.5.0',
+    'cython>=0.29.33',
+    'decorator>=5.0.9',
+    'duckdb>=0.8.1',
+    'elasticsearch>=7',
+    'feedparser>=6.0.8',
+    'gluish>=0.3.5',
+    'internetarchive>=2.0.3',
+    'iso-639>=0.4.5',
+    'langdetect>=1.0.9',
+    'lingua-language-detector>=2.0.2',
+    'logilab-common>=0.61.0',
+    'luigi>=3.2.1',
+    'lxml>=3.4.2',
+    'marcx>=0.2.12',
+    'numpy>=1.24.5',
+    'pandas>=1.1',
+    'pydantic>=1.10.5',
+    'pygments>=2.9.0',
+    'pyisbn>=1.0.0',
+    'pymarc>=3.0.1',
+    'pymysql>=0.7',
+    'python-dateutil>=2.8.2',
+    'pytz>=2014.4',
+    'rdflib>=4',
+    'requests>=2.26.0',
+    'responses',
+    'six>=1.16.0',
+    'tqdm>=4',
+    'urllib3<1.27,>=1.21.1',
+    'xlrd>=1.0.0',
+    'xlsxwriter>=1.4.4',
+    'xmltodict>=0.11.0',
+]
+
+[[project.authors]]
+name = 'Leipzig University Library Finc Team'
+email = 'team@finc.info'
+
+[project.urls]
+Homepage = 'https://github.com/ubleipzig/siskin'
+
+[project.optional-dependencies]
+dev = [
+    'ipython',
+    'pytest',
+    'ruff',
+]
+[tool.setuptools]
+script-files = [
+    'bin/iconv-chunks',
+    'bin/siskin-whatislive.sh',
+    'bin/taskcat',
+    'bin/taskchecksetup',
+    'bin/taskcleanup',
+    'bin/taskconfig',
+    'bin/taskdeps',
+    'bin/taskdeps-dot',
+    'bin/taskdir',
+    'bin/taskdo',
+    'bin/taskdocs',
+    'bin/taskdu',
+    'bin/taskgc',
+    'bin/taskhash',
+    'bin/taskhead',
+    'bin/taskhelp',
+    'bin/taskhome',
+    'bin/taskimportcache',
+    'bin/taskinspect',
+    'bin/taskless',
+    'bin/taskls',
+    'bin/tasknames',
+    'bin/taskopen',
+    'bin/taskoutput',
+    'bin/taskps',
+    'bin/taskredo',
+    'bin/taskrm',
+    'bin/taskstatus',
+    'bin/tasksync',
+    'bin/tasktags',
+    'bin/tasktree',
+    'bin/taskversion',
+    'bin/taskwc',
+]
+include-package-data = true
+[tool.setuptools.packages.find]
+where = ['siskin']
+
+[tool.setuptools.package-data]
+siskin = [
+    'assets/*',
+    'assets/arxiv/*',
+    'assets/amsl/*',
+    'assets/datacite/*',
+    'assets/js/*',
+    'assets/mail/*',
+    'assets/maps/*',
+    'assets/oai/*',
+    'assets/55/*',
+    'assets/68/*',
+    'assets/87/*',
+]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python',
+    'Topic :: Text Processing',
+]

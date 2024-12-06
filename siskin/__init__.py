@@ -31,6 +31,7 @@ from __future__ import print_function
 import logging
 import sys
 import tempfile
+import pathlib
 import warnings
 
 from siskin.configuration import Config
@@ -47,7 +48,8 @@ try:
 except (AttributeError, ImportError):
     pass
 
-__version__ = "1.5.99"
+
+__version__ = "1.6.0"
 
 config = Config.instance()
 if sys.version_info.major == 2:
