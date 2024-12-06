@@ -7,6 +7,7 @@ PY_FILES := $(shell find siskin -name \*.py -print)
 .PHONY: dist
 dist:
 	python setup.py sdist
+	# TODO: move to `uv build`
 
 # Upload requires https://github.com/pypa/twine and some configuration.
 .PHONY: upload
@@ -23,6 +24,7 @@ upload: dist
 	#
 	# For automatic package deployments, also see: .gitlab-ci.yml.
 	twine upload $(TWINE_OPTS) dist/*
+	# TODO: move to `uv publish`
 
 .PHONY: clean
 clean:

@@ -31,7 +31,6 @@ from __future__ import print_function
 import logging
 import sys
 import tempfile
-import pathlib
 import warnings
 
 from siskin.configuration import Config
