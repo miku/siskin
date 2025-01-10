@@ -67,7 +67,7 @@ class DOAJHarvest(DOAJTask):
         output = shellout(
             """metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
             dir=self.config.get("core", "metha-dir"),
-            endpoint="http://www.doaj.org/oai",
+            endpoint="https://doaj.org/oai",
         )
         luigi.LocalTarget(output).move(self.output().path)
 
