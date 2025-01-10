@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = 'siskin'
-version = '1.6.5'
+version = '1.6.6'
 description = 'Luigi tasks for building an article metadata index for https://finc.info'
 readme = 'README.md'
 requires-python = '>=3.12'
