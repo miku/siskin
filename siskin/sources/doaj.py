@@ -65,7 +65,7 @@ class DOAJHarvest(DOAJTask):
 
     def run(self):
         output = shellout(
-            """metha-sync -base-dir {dir} {endpoint} && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
+            """metha-sync -base-dir {dir} {endpoint} -ignore-unexpected-eof && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
             dir=self.config.get("core", "metha-dir"),
             endpoint="https://doaj.org/oai.article",
         )
