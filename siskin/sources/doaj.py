@@ -66,7 +66,7 @@ class DOAJHarvest(DOAJTask):
     def run(self):
         # 2025-01-17: FATA[3772] stream error: stream ID 5609; INTERNAL_ERROR; received from peer
         output = shellout(
-            """metha-sync -base-dir {dir} {endpoint} -ignore-http-errors -ignore-unexpected-eof && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
+            """metha-sync -base-dir {dir} -ignore-http-errors -ignore-unexpected-eof {endpoint} && metha-cat -base-dir {dir} {endpoint} | zstd -T0 -c > {output}""",
             dir=self.config.get("core", "metha-dir"),
             endpoint="https://doaj.org/oai.article",
         )
