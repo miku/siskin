@@ -346,7 +346,7 @@ class JstorIntermediateSchemaGenericCollection(JstorTask):
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="ldj.zstd"), format=Zstd)
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
 class JstorAMSLNames(JstorTask):
