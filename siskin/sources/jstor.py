@@ -582,7 +582,7 @@ class JstorIntermediateSchema(JstorTask):
             for line in handle:
                 # note: this failed at one point due to non-tab separator in
                 # the data (todo: would need to type check, first)
-                tcid, jstor_collection = re.split(r"\W", line.strip(), maxsplit=1)
+                tcid, jstor_collection = line.strip().split(maxsplit=1)
                 jstor_to_tcid[jstor_collection] = tcid
         with self.input().get("mapping").open() as mapfile:
             mapping = json.load(mapfile)
