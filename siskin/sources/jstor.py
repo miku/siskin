@@ -573,7 +573,7 @@ class JstorIntermediateSchema(JstorTask):
 
         with open(self.assets("55/tcid_amsl.tsv")) as handle:
             for line in handle:
-                parts = line.strip().split("\t")
+                parts = line.strip().split(maxsplit=1)
                 if len(parts) != 2:
                     continue
                 tcid, mega_collection = parts
