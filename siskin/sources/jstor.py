@@ -586,6 +586,10 @@ class JstorIntermediateSchema(JstorTask):
 
         counter = collections.Counter()
 
+        self.logger.debug("tcid_to_mega_collection: {}".format(tcid_to_mega_collection))
+        self.logger.debug("jstor_to_tcid: {}".format(jstor_to_tcid))
+        self.logger.debug("mapping: {}".format(mapping))
+
         with self.input().get("file").open() as handle:
             with self.output().open("w") as output:
                 for i, line in enumerate(handle):
