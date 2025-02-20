@@ -573,7 +573,10 @@ class JstorIntermediateSchema(JstorTask):
 
         with open(self.assets("55/tcid_amsl.tsv")) as handle:
             for line in handle:
-                tcid, mega_collection = line.strip().split("\t")
+                parts = line.strip().split("\t")
+                if len(parts) != 2:
+                    continue
+                tcid, mega_collection = parts
                 tcid_to_mega_collection[tcid] = mega_collection
         with open(self.assets("55/tcid_jstor.tsv")) as handle:
             for line in handle:
@@ -658,6 +661,10 @@ class JstorIntermediateSchema(JstorTask):
                         line = line.encode("utf-8")
                     output.write(line)
                     output.write(b"\n")
+
+                    # err.collection.not.in.amsl
+                    if counter["err.collection.not.in.amsl"] > 0:
+                        raise RuntimeError("missing collections in AMSL")
 
         self.logger.debug(counter)
 
