@@ -79,6 +79,9 @@ class JstorPaths(JstorTask):
 
       $ find . -size 22c
 
+    Apparently, Jstor will publish empty zip files and unzip, while only giving
+    a warning, still returns exit code 1 (which one may argue is wrong), hence
+    further processing fails (cf. https://unix.stackexchange.com/q/792384/376)
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
