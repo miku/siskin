@@ -108,6 +108,43 @@ class JstorPaths(JstorTask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
+class JstorPathsClean(JstorTask):
+    """
+    Sort out files that are empty (https://unix.stackexchange.com/q/792384/376).
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    min_size = luigi.IntParameter(
+        default=22,
+        description="Minimum file size in bytes (exclusive)",
+        significant=False,
+    )
+
+    def requires(self):
+        return JstorPath(date=self.date)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(), format=TSV)
+
+    def run(self):
+        num_skipped = 0
+        with self.input().open() as f, self.output().open("w") as out:
+            for line in f:
+                path = line.strip()
+                if not path:
+                    continue
+                try:
+                    if os.path.isfile(path) and os.path.getsize(path) > self.min_size:
+                        out.write(f"{path}\n")
+                    else:
+                        self.logger.warn(f"skipping small file: {path}")
+                        num_skipped += 1
+                except OSError as e:
+                    logger.error(f"failed to check {path}: {e}")
+        if num_skipped > 0:
+            self.logger.warn(f"skipped {num_skipped} small files from jstor FTP")
+
+
 class JstorMembers(JstorTask):
     """
     Extract a full list of archive members.
@@ -117,7 +154,7 @@ class JstorMembers(JstorTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
-        return JstorPaths(date=self.date)
+        return JstorPathsClean(date=self.date)
 
     @timed
     def run(self):
