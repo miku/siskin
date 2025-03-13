@@ -121,7 +121,7 @@ class JstorPathsClean(JstorTask):
     )
 
     def requires(self):
-        return JstorPath(date=self.date)
+        return JstorPaths(date=self.date)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
@@ -130,12 +130,12 @@ class JstorPathsClean(JstorTask):
         num_skipped = 0
         with self.input().open() as f, self.output().open("w") as out:
             for line in f:
-                path = line.strip()
+                path = line.decode("utf-8").strip()
                 if not path:
                     continue
                 try:
                     if os.path.isfile(path) and os.path.getsize(path) > self.min_size:
-                        out.write(f"{path}\n")
+                        out.write("{}\n".format(path).encode("utf-8"))
                     else:
                         self.logger.warn(f"skipping small file: {path}")
                         num_skipped += 1
