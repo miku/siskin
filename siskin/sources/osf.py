@@ -42,6 +42,8 @@ import time
 
 import luigi
 import requests
+
+from requests.exceptions import ChunkedEncodingError, ProxyError, Timeout
 from gluish.format import Zstd
 from gluish.intervals import weekly
 from gluish.parameter import ClosestDateParameter
@@ -97,7 +99,7 @@ class OSFDownload(OSFTask):
         page = 1
         max_retries = 20  # a "global" retry budget
         sleep_after_retry_s = 60
-        sleep_s = 10 # also sleep between request, we fail after about 450 requests, consistently
+        sleep_s = 10  # also sleep between request, we fail after about 450 requests, consistently
         b_newline = "\n".encode(self.encoding)
         with self.output().open("w") as output:
             while True:
@@ -105,27 +107,38 @@ class OSFDownload(OSFTask):
                     page
                 )
                 self.logger.debug("osf: {}".format(link))
-                resp = requests.get(link)
-                if resp.status_code == 404:
-                    break
-                if resp.status_code != 200:
+                try:
+                    resp = requests.get(link)
+                    if resp.status_code == 404:
+                        break
+                    if resp.status_code != 200:
+                        if max_retries > 0:
+                            time.sleep(sleep_after_retry_s)
+                            max_retries -= 1
+                            continue
+                        else:
+                            raise RuntimeError(
+                                "osf api failed with {}".format(resp.status_code)
+                            )
+                    self.logger.debug(
+                        "fetched {} from {}: {}".format(
+                            len(resp.text), link, resp.text[:40]
+                        )
+                    )
+                    output.write(resp.text.encode(self.encoding))
+                    output.write(b_newline)
+                    page += 1
+                    time.sleep(sleep_s)
+                except (ChunkedEncodingError, ProxyError, Timeout) as exc:
+                    self.logger.warn(
+                        f"request failed with {exc}, retries left: {max_retries}"
+                    )
                     if max_retries > 0:
                         time.sleep(sleep_after_retry_s)
                         max_retries -= 1
                         continue
                     else:
-                        raise RuntimeError(
-                            "osf api failed with {}".format(resp.status_code)
-                        )
-                self.logger.debug(
-                    "fetched {} from {}: {}".format(
-                        len(resp.text), link, resp.text[:40]
-                    )
-                )
-                output.write(resp.text.encode(self.encoding))
-                output.write(b_newline)
-                page += 1
-                time.sleep(sleep_s)
+                        raise RuntimeError(f"osf api failed with {exc}")
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)

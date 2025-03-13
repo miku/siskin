@@ -638,7 +638,11 @@ class JstorIntermediateSchema(JstorTask):
                         doc["finc.mega_collection"] = clean_names
 
                         if len(doc["finc.mega_collection"]) == 0:
-                            self.logger.warn("no collection name given to {}: {}".format(doc["finc.id"], names))
+                            self.logger.warn(
+                                "no collection name given to {}: {}".format(
+                                    doc["finc.id"], names
+                                )
+                            )
                             counter["err.collection.not.in.amsl"] += 1
                     else:
                         # As of 01/2020, there are two rough types of stable
