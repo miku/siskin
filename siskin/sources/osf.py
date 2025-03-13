@@ -79,7 +79,8 @@ class OSFDownload(OSFTask):
     def run(self):
         page = 1
         max_retries = 20  # a "global" retry budget
-        sleep_s = 60
+        sleep_after_retry_s = 60
+        sleep_s = 10 # also sleep between request, we fail after about 450 requests, consistently
         b_newline = "\n".encode(self.encoding)
         with self.output().open("w") as output:
             while True:
@@ -92,7 +93,7 @@ class OSFDownload(OSFTask):
                     break
                 if resp.status_code != 200:
                     if max_retries > 0:
-                        time.sleep(sleep_s)
+                        time.sleep(sleep_after_retry_s)
                         max_retries -= 1
                         continue
                     else:
@@ -107,6 +108,7 @@ class OSFDownload(OSFTask):
                 output.write(resp.text.encode(self.encoding))
                 output.write(b_newline)
                 page += 1
+                time.sleep(sleep_s)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
