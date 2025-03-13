@@ -71,6 +71,19 @@ class OSFDownload(OSFTask):
 
     Retrieval of full set takes: 117m13.266s - about 325M, 86651 docs. Docs as
     of 05/2023: 129200 docs; about 500M.
+
+    Since Q1/2025 various issues:
+
+    requests.exceptions.ChunkedEncodingError: ("Connection broken:
+        InvalidChunkLength(got length b'', 0 bytes read)",
+        InvalidChunkLength(got length b'', 0 bytes read))
+
+    requests.exceptions.ProxyError: HTTPSConnectionPool(host='api.osf.io',
+    port=443): Max retries exceeded with url:
+        /v2/preprints/?page=460&page%5Bsize%5D=100 (Caused by
+        ProxyError('Cannot connect to proxy.', OSError('Tunnel connection
+        failed : 503 Service Unavailable')))
+
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
