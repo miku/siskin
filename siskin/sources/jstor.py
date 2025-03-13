@@ -74,6 +74,11 @@ class JstorPaths(JstorTask):
     Occasionally, there are incomplete files, for now manually check the sync dir:
 
       $ fd -e zip -x unzip -l > /dev/null
+
+    Another way to check for non-atomic ops artifacts on ftp:
+
+      $ find . -size 22c
+
     """
 
     date = ClosestDateParameter(default=datetime.date.today())

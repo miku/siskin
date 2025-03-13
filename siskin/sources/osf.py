@@ -78,6 +78,10 @@ class OSFDownload(OSFTask):
         InvalidChunkLength(got length b'', 0 bytes read)",
         InvalidChunkLength(got length b'', 0 bytes read))
 
+    raise ChunkedEncodingError(e) requests.exceptions.ChunkedEncodingError:
+        ('Connection broken: IncompleteRead(2538 bytes read, 1969 more
+        expected)', IncompleteRead(2538 bytes read, 1969 more expected))
+
     requests.exceptions.ProxyError: HTTPSConnectionPool(host='api.osf.io',
     port=443): Max retries exceeded with url:
         /v2/preprints/?page=460&page%5Bsize%5D=100 (Caused by
