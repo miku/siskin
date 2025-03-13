@@ -97,7 +97,7 @@ class OSFDownload(OSFTask):
 
     def run(self):
         page = 1
-        max_retries = 20  # a "global" retry budget
+        max_retries = 400  # a "global" retry budget
         sleep_after_retry_s = 60
         sleep_s = 10  # also sleep between request, we fail after about 450 requests, consistently
         b_newline = "\n".encode(self.encoding)
