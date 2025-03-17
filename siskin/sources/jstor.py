@@ -433,18 +433,18 @@ class JstorCollectionNames(JstorTask):
         """
         output = shellout(
             """
-                          curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
-                          tail -n +2 | cut -f 27 | tr ';' '\n' | \
-                          sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -S 20% -u > {output}
-                          """,
+            curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
+            tail -n +2 | cut -f 27 | tr ';' '\n' | \
+            sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -S 20% -u > {output}
+            """,
             preserve_whitespace=True,
         )
         shellout(
             """
-                 curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
-                 tail -n +2 | cut -f 28 | tr ';' '\n' | \
-                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u >> {output}
-                 """,
+            curl -sL https://www.jstor.org/kbart/collections/all-archive-titles | \
+            tail -n +2 | cut -f 28 | tr ';' '\n' | \
+            sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sort -u >> {output}
+            """,
             output=output,
             preserve_whitespace=True,
         )
