@@ -719,7 +719,7 @@ class JstorIntermediateSchema(JstorTask):
 
                     # err.collection.not.in.amsl
                     if counter["err.collection.not.in.amsl"] > 0:
-                        raise RuntimeError("missing collections in AMSL")
+                        self.logger.warn("missing collections in AMSL")
 
         self.logger.debug(counter)
 
