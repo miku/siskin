@@ -664,6 +664,9 @@ class JstorIntermediateSchema(JstorTask):
 
         with open(self.assets("55/tcid_amsl.tsv")) as handle:
             for line in handle:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
                 parts = line.strip().split(maxsplit=1)
                 if len(parts) != 2:
                     continue
@@ -673,6 +676,9 @@ class JstorIntermediateSchema(JstorTask):
             for line in handle:
                 # note: this failed at one point due to non-tab separator in
                 # the data (todo: would need to type check, first)
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
                 tcid, jstor_collection = line.strip().split(maxsplit=1)
                 jstor_to_tcid[jstor_collection] = tcid
         with self.input().get("mapping").open() as mapfile:
