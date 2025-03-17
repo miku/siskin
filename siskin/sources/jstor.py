@@ -423,6 +423,52 @@ class JstorCollectionNames(JstorTask):
     """
     List current collection names, as notes in column 27 of
     https://www.jstor.org/kbart/collections/all-archive-titles, refs #14841.
+
+    There is a mix of names ending on " Collection" and not. This may effect
+    ISIL attachments.
+
+    [finc@indexmaker2 ~]$ taskcat JstorCollectionNames | grep -c " Collection"
+    42
+    [finc@indexmaker2 ~]$ taskcat JstorCollectionNames | grep -vc " Collection"
+    91
+
+    [2025-03-17 14:06:13][siskin][WARNING ] no collection name given to
+    ai-55-aHR0cHM6Ly93d3cuanN0b3Iub3JnL3N0YWJsZS8yNzE2NjY4NA: {'Museum
+    Collection', 'Language & Literature', 'Public Library I', 'Humanities',
+    'Secondary Schools Collection', 'JSTOR Archival Journal & Primary Source
+    Collection', 'Lives of Literature Collection'}
+
+    [finc@indexmaker2 ~]$ taskcat JstorAMSLNames | cut -f 2 | grep -c ' Collection'
+    3
+    [finc@indexmaker2 ~]$ taskcat JstorAMSLNames | cut -f 2 | grep -vc ' Collection'
+    40
+
+    Example:
+
+        AMSL    JSTOR Language & Literature Archive
+
+        vs
+
+        JSTOR   Language & Literature
+        JSTOR   Language & Literature Collection
+        JSTOR   Lives of Literature Collection
+
+    Another example:
+
+        [finc@indexmaker2 ~]$ taskcat JstorCollectionNames | grep Lives
+        Lives of Literature Collection
+
+    In tcid_jstor.tsv:
+
+        sid-55-col-jstorlivlit  Lives of Literature
+        sid-55-col-jstorlivlitext   Lives of Literature Extension
+
+    In AMSL:
+
+        [finc@indexmaker2 ~]$ taskcat JstorAMSLNames | grep Lives
+        sid-55-col-jstorlivlit  JSTOR Lives of Literature Collection
+        sid-55-col-jstorlivlitext       JSTOR Lives of Literature Extension
+
     """
 
     date = luigi.DateParameter(default=datetime.date.today())
