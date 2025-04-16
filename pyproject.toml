@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = 'siskin'
-version = '1.6.23'
+version = '1.6.24'
 description = 'Luigi tasks for building an article metadata index for https://finc.info'
 readme = 'README.md'
 requires-python = '>=3.12'
@@ -54,7 +54,7 @@ dependencies = [
 ]
 
 [[project.authors]]
-name = 'Leipzig University Library Finc Team'
+name = 'Finc Authors'
 email = 'team@finc.info'
 
 [project.urls]
@@ -103,8 +103,10 @@ script-files = [
     'bin/taskwc',
 ]
 include-package-data = true
-[tool.setuptools.packages.find]
-where = ['siskin']
+# [tool.setuptools.packages.find]
+# where = ["."]
+# include = ['siskin*']
+packages = ["siskin", "siskin.sources", "siskin.workflows"]
 
 [tool.setuptools.package-data]
 siskin = [
