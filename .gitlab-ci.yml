@@ -3,24 +3,26 @@
 # git tag v0.1.2
 # git push sc --tags => creates package and uploads to Nexus
 
-image: python:3.12.3-slim-bullseye@sha256:6fa552fb879325884b0c1b6792d14ae9500d246c8b19cc27876d84c7c41117ff
+# image: python:3.12.3-slim-bullseye@sha256:6fa552fb879325884b0c1b6792d14ae9500d246c8b19cc27876d84c7c41117ff
+image: ghcr.io/astral-sh/uv:python3.12-bookworm@sha256:49557779236dbb588107b5b93d3af67a6da18f5912c5a306b357265e1688fa01
 
 stages:
   - test
   - deploy
 
 before_script:
-   - pip install --upgrade pip
-   - pip install pytest twine
+   - uv pip install pytest twine
 
 tests:
   stage: test
   script:
-    - pip install python-daemon --index-url $PYPI_PROXY_URL # error: setuptools 57.4.0 is installed but setuptools>=62.4.0 is required by {'python-daemon'}
-    - pip install backports.csv # try installing this from pypi, nexus may not like the [.]
-    - pip install iso-639 # try installing this from pypi, nexus may not like the [.]
-    - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
-    - pytest
+    # XXX: can we remove this?
+    - uv pip install python-daemon --index-url $PYPI_PROXY_URL # error: setuptools 57.4.0 is installed but setuptools>=62.4.0 is required by {'python-daemon'}
+    - uv pip install backports.csv # try installing this from pypi, nexus may not like the [.]
+    - uv pip install iso-639 # try installing this from pypi, nexus may not like the [.]
+    # - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
+    - uv pip sync
+    - uv run pytest
   tags: [docker]
   except:
     - tags
@@ -31,7 +33,8 @@ upload_to_nexus:
     TWINE_USERNAME: $NEXUS_USERNAME
     TWINE_PASSWORD: $NEXUS_PASSWORD
   script:
-    - python setup.py sdist
+    # - python setup.py sdist
+    - uv build
     - twine upload --repository-url $NEXUS_REPOSITORY_URL dist/*
   only:
     - tags
