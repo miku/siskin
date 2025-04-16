@@ -927,7 +927,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/9e/bd/3704a8c3e0942d711
 
 [[package]]
 name = "siskin"
-version = "1.6.23"
+version = "1.6.24"
 source = { editable = "." }
 dependencies = [
     { name = "astroid" },
