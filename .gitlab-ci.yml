@@ -12,6 +12,7 @@ stages:
 
 before_script:
    - uv pip install pytest twine
+   - uv pip install --upgrade pip
 
 tests:
   stage: test
@@ -20,6 +21,7 @@ tests:
     - uv pip install python-daemon --index-url $PYPI_PROXY_URL # error: setuptools 57.4.0 is installed but setuptools>=62.4.0 is required by {'python-daemon'}
     - uv pip install backports.csv # try installing this from pypi, nexus may not like the [.]
     - uv pip install iso-639 # try installing this from pypi, nexus may not like the [.]
+    - uv pip install pybind11 # via duckdb error
     # - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
     - uv pip sync
     - uv run pytest
