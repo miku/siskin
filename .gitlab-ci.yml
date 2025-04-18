@@ -26,7 +26,9 @@ tests:
     - uv pip install iso-639 # try installing this from pypi, nexus may not like the [.]
     - uv pip install pybind11 # via duckdb error
     # - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
-    - uv sync --all-groups
+    - uv sync --all-groups --all-extras
+    - which python
+    - which pytest
     - uv run pytest
   tags: [docker]
   except:
