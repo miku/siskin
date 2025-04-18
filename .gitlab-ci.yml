@@ -41,10 +41,8 @@ upload_to_nexus:
     TWINE_PASSWORD: $NEXUS_PASSWORD
   script:
     # - python setup.py sdist
-    - uv venv
-    - source .venv/bin/activate
     - uv build
-    - twine upload --repository-url $NEXUS_REPOSITORY_URL dist/*
+    - uv run twine upload --repository-url $NEXUS_REPOSITORY_URL dist/*
   only:
     - tags
   tags: [docker]
