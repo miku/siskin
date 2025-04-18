@@ -12,9 +12,9 @@ stages:
 
 before_script:
    - uv venv
-   - source .venv/bin/activate
-   - uv pip install pytest twine
+   - source .venv/bin/activate && which python
    - uv pip install --upgrade pip
+   - uv pip install pytest twine
 
 tests:
   stage: test
