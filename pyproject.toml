@@ -1,9 +1,4 @@
-# WIP (2025-01-16): we still use setuptools based workflow, but aim to switch
-# to pyproject, uv or "build"
-
 [build-system]
-# requires = ['hatchling']
-# build-backend = 'hatchling.build'
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
