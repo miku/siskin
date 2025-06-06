@@ -36,7 +36,7 @@ siskin_vendor_version_unzippa: 0.1.8
 siskin_vendor_version_zek: 0.1.28
 
 # Versions of extra packages
-siskin_extra_version_duckdb: 1.2.2
+siskin_extra_version_duckdb: 1.3.0
 
 # luigid log dir
 luigid_log_dir: /var/log/luigi
