@@ -90,6 +90,11 @@ class OSFDownload(OSFTask):
         ProxyError('Cannot connect to proxy.', OSError('Tunnel connection
         failed : 503 Service Unavailable')))
 
+    In 07/2025 one run of harvest takes one week:
+
+    real    9505m20.024s
+    user    245m58.010s
+    sys     21m28.353s
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
