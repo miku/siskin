@@ -42,6 +42,7 @@
     - rsync
     - screen
     - sl
+    - smartmontools
     - sqlite
     - sysstat
     - tar
