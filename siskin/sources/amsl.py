@@ -576,10 +576,12 @@ class AMSLOpenAccessISSNList(AMSLTask):
             output=stopover,
         )
 
-        # Include OA list, refs #11579, maybe cache this?
+        # Include OA list, refs #11579, maybe cache this? In 07/2025, AI walls
+        # require us to cache this, finally.
         shellout(
-            """curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
+            """cat {file} | cut -d, -f1,2 | tr -d '"' |
                     grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' | tr ',' '\n' >> {output}""",
+            file=self.assets("36707"),
             output=stopover,
             preserve_whitespace=True,
         )
