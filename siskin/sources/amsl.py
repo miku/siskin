@@ -579,9 +579,12 @@ class AMSLOpenAccessISSNList(AMSLTask):
         # Include OA list, refs #11579, maybe cache this? In 07/2025, AI walls
         # require us to cache this, finally.
         shellout(
-            """cat {file} | cut -d, -f1,2 | tr -d '"' |
-                    grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' | tr ',' '\n' >> {output}""",
-            file=self.assets("36707"),
+            """cat {file} |
+               cut -d, -f1,2 |
+               tr -d '"' |
+               grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' |
+               tr ',' '\n' >> {output}""",
+            file=self.assets("ISSN_GOLD-OA_2.0.csv"),
             output=stopover,
             preserve_whitespace=True,
         )
@@ -606,13 +609,14 @@ class AMSLGoldListKBART(AMSLTask):
         shellout(""" echo "online_identifier" > {output}""", output=stopover)
         # Include OA list, refs #11579.
         shellout(
-            """curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 |
-                    cut -d, -f1,2 |
-                    tr -d '"' |
-                    grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' |
-                    tr ',' '\n' |
-                    sort -u |
-                    grep -v ^$ >> {output}""",
+            """cat {file} |
+               cut -d, -f1,2 |
+               tr -d '"' |
+               grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' |
+               tr ',' '\n' |
+               sort -u |
+               grep -v ^$ >> {output}""",
+            file=self.assets("ISSN_GOLD-OA_2.0.csv"),
             output=stopover,
             preserve_whitespace=True,
         )
@@ -668,9 +672,13 @@ class AMSLOpenAccessKBART(AMSLTask):
 
         # Include OA list, refs #11579.
         shellout(
-            """curl -s https://pub.uni-bielefeld.de/download/2913654/2913655 | cut -d, -f1,2 | tr -d '"' |
-                    grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' | tr ',' '\n' |
-                    awk '{{ print "\t\t"$0 }}' >> {output}""",
+            """cat {file} |
+               cut -d, -f1,2 |
+               tr -d '"' |
+               grep -E '[0-9]{{4,4}}-[0-9]{{3,3}}[0-9xX]' |
+               tr ',' '\n' |
+               awk '{{ print "\t\t"$0 }}' >> {output}""",
+            file=self.assets("ISSN_GOLD-OA_2.0.csv"),
             output=output,
             preserve_whitespace=True,
         )
