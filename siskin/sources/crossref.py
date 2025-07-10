@@ -192,7 +192,7 @@ class CrossrefSnapshot(CrossrefTask):
         crossref_sync_dir = self.config.get("crossref", "sync-dir")
         # as of 07/2025, span-crossref-fast-snapshot determines compression by
         # file extension only, which is a bit awkward
-        scratch = task.path(filename=".snapshot.tmp.zst")
+        scratch = self.path(filename=".snapshot.tmp.zst")
         output = shellout(
             """
             span-crossref-fast-snapshot -o {output} -v -S '35%' $(find {crossref_sync_dir} -name "feed-2*json.zst")
