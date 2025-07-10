@@ -975,7 +975,7 @@ class AIApplyOpenAccessFlag(AITask):
         output = shellout(
             """
             zstd -cd -T0 {input} |
-            span-oa-filter -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
+            span-oa-filter -B -b 25000 -f {kbart} -fc {amslfc} -xsid 48 -oasid 28 -oasid 30 -oasid 34 |
             zstd -c -T0 > {output}""",
             input=self.input().get("file").path,
             kbart=self.input().get("kbart").path,
