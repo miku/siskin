@@ -177,6 +177,35 @@ class CrossrefUniqItems(CrossrefTask):
         return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
 
 
+class CrossrefSnapshot(CrossrefTask):
+    """
+    A faster, less disk wearing crossref snapshot.
+    """
+
+    feed = luigi.Parameter(
+        default="2",
+        description="feed id to distinguish between various parallel downloads",
+    )
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def run(self):
+        crossref_sync_dir = self.config.get("crossref", "sync-dir")
+        # as of 07/2025, span-crossref-fast-snapshot determines compression by
+        # file extension only, which is a bit awkward
+        scratch = task.path(filename=".snapshot.tmp.zst")
+        output = shellout(
+            """
+            span-crossref-fast-snapshot -o {output} -v -S '35%' $(find {crossref_sync_dir} -name "feed-2*json.zst")
+            """,
+            output=scratch,
+            crossref_sync_dir=crossref_sync_dir,
+        )
+        luigi.LocalTarget(scratch).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
+
+
 class CrossrefIntermediateSchema(CrossrefTask):
     """
     Convert to intermediate format via span.
