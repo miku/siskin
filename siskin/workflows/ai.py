@@ -344,6 +344,12 @@ class AIExport(AITask):
     Export to various formats. Include SOLR-ready (isil'd) BASE file as well.
 
     XXX: #11467, crossref vs JSTOR.
+
+    With 8 workers, it takes about 16h to index (1 shard, 3 replica).
+
+    real    961m50.225s
+    user    82m43.389s
+    sys     59m15.269s
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
