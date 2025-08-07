@@ -113,7 +113,12 @@ class OSFDownload(OSFTask):
                 )
                 self.logger.debug("osf: {}".format(link))
                 try:
-                    resp = requests.get(link)
+                    resp = requests.get(
+                        link,
+                        headers={
+                            "Authorization": f"""Bearer {self.config.get("osf", "token")}"""
+                        },
+                    )
                     if resp.status_code == 404:
                         break
                     if resp.status_code != 200:
