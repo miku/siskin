@@ -140,7 +140,7 @@ class JstorPathsClean(JstorTask):
                         self.logger.warn(f"skipping small file: {path}")
                         num_skipped += 1
                 except OSError as e:
-                    logger.error(f"failed to check {path}: {e}")
+                    self.logger.error(f"failed to check {path}: {e}")
         if num_skipped > 0:
             self.logger.warn(f"skipped {num_skipped} small files from jstor FTP")
 

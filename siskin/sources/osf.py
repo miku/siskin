@@ -107,11 +107,13 @@ class OSFDownload(OSFTask):
         sleep_s = 10  # also sleep between request, we fail after about 450 requests, consistently
         b_newline = "\n".encode(self.encoding)
         # https://developer.osf.io/#tag/Authentication
-        token = self.config.get("osf", "token"):
+        token = self.config.get("osf", "token")
         if token:
             self.logger.info(f"osf: found token, {token[:5]}...")
         else:
-            self.logger.warning("osf: no auth token configured, performance may degrade")
+            self.logger.warning(
+                "osf: no auth token configured, performance may degrade"
+            )
         with self.output().open("w") as output:
             while True:
                 link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(
@@ -121,9 +123,7 @@ class OSFDownload(OSFTask):
                 try:
                     resp = requests.get(
                         link,
-                        headers={
-                            "Authorization": f"Bearer {token}"
-                        },
+                        headers={"Authorization": f"Bearer {token}"},
                     )
                     if resp.status_code == 404:
                         break
