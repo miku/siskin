@@ -107,6 +107,10 @@ class OSFDownload(OSFTask):
         sleep_s = 10  # also sleep between request, we fail after about 450 requests, consistently
         b_newline = "\n".encode(self.encoding)
         with self.output().open("w") as output:
+            if self.config.get("osf", "token"):
+                self.logger.info(f"osf: found token, {token[:5]}...")
+            else:
+                self.logger.warning("osf: no auth token configured, performance may degrade")
             while True:
                 link = "https://api.osf.io/v2/preprints/?page={}&page[size]=100".format(
                     page
