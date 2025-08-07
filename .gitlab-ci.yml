@@ -12,20 +12,16 @@ stages:
 
 before_script:
    - uv venv
-   - source .venv/bin/activate && which python
    - uv pip install --upgrade pip
    - uv pip install pytest twine
 
 tests:
   stage: test
   script:
-    # XXX: can we remove this?
-    - source .venv/bin/activate
     - uv pip install python-daemon --index-url $PYPI_PROXY_URL # error: setuptools 57.4.0 is installed but setuptools>=62.4.0 is required by {'python-daemon'}
     - uv pip install backports.csv # try installing this from pypi, nexus may not like the [.]
-    - uv pip install iso-639 # try installing this from pypi, nexus may not like the [.]
+    - uv pip install iso-639 # try installing this from pypi, nexus/pypi issue
     - uv pip install pybind11 # via duckdb error
-    # - python setup.py develop --index-url $PYPI_PROXY_URL # faster, less load for pypi
     - uv sync --all-groups --all-extras
     - which python
     - which pytest
@@ -40,7 +36,6 @@ upload_to_nexus:
     TWINE_USERNAME: $NEXUS_USERNAME
     TWINE_PASSWORD: $NEXUS_PASSWORD
   script:
-    # - python setup.py sdist
     - uv build
     - uv run twine upload --repository-url $NEXUS_REPOSITORY_URL dist/*
   only:
