@@ -6,8 +6,8 @@ PY_FILES := $(shell find siskin -name \*.py -print)
 # Create a source distribution.
 .PHONY: dist
 dist:
-	python setup.py sdist
-	# TODO: move to `uv build`
+	# was: python setup.py sdist
+	uv build
 
 # Upload requires https://github.com/pypa/twine and some configuration.
 .PHONY: upload
