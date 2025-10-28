@@ -180,6 +180,9 @@ class CrossrefUniqItems(CrossrefTask):
 class CrossrefSnapshot(CrossrefTask):
     """
     A faster, less disk wearing crossref snapshot.
+
+    The feed parameter will be used as prefix for the harvested filenames, e.g.
+    "feed-2-..."
     """
 
     feed = luigi.Parameter(
@@ -220,7 +223,7 @@ class CrossrefIntermediateSchema(CrossrefTask):
     def requires(self):
         return {
             "span": Executable(name="span-import", message="http://git.io/vI8NV"),
-            "file": CrossrefSnapshot(begin=self.begin, date=self.date),
+            "file": CrossrefSnapshot(feed="2", date=self.date),
         }
 
     @timed
