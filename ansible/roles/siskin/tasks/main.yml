@@ -35,7 +35,7 @@
     name:
     - gcc
     - gcc-c++
-    - java-1.8.0-openjdk
+    - java-latest-openjdk
     - podman
     - podman-docker
     - podman-plugins
