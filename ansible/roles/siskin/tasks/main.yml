@@ -29,6 +29,13 @@
     state: 'directory'
     mode: '0755'
 
+- name: Install orphaned Python packages via pip
+  pip:
+    name:
+      - csvkit  # https://bugzilla.redhat.com/show_bug.cgi/show_bug.cgi?id=2389368
+    state: present
+    executable: pip3
+
 - name: Install common packages for siskin
   dnf:
     state: present
@@ -43,7 +50,6 @@
     - protobuf-compiler
     - protobuf-devel
     - python3-Cython
-    - python3-csvkit
     - python3-devel
     - python3-ipython
     - python3-pip
