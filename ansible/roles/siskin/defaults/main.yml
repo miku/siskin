@@ -23,10 +23,10 @@ siskin_no_proxy: "127.0.0.1,services.ub.uni-leipzig.de,solrcloud.ub.uni-leipzig.
 siskin_pypi_index_url: https://services.ub.uni-leipzig.de/nexus/repository/pypi/simple/
 
 # Versions of custom packages
-siskin_vendor_version_esbulk: 0.7.26
+siskin_vendor_version_esbulk: 0.7.27
 siskin_vendor_version_filterline: 0.1.7
 siskin_vendor_version_groupcover: 0.1.1
-siskin_vendor_version_metha: 0.4.17
+siskin_vendor_version_metha: 0.4.18
 siskin_vendor_version_siskin: 1.6.38
 siskin_vendor_version_solrbulk: 0.4.2
 siskin_vendor_version_solrdump: 0.2.1
