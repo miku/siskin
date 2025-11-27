@@ -31,8 +31,6 @@ Usage: taskdeps-dot TASKNAME
 Example outputs images: http://imgur.com/a/12Dag, http://i.imgur.com/8bFvSvN.gif
 """
 
-from __future__ import print_function
-
 import collections
 import sys
 

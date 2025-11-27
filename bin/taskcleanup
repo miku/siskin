@@ -41,8 +41,6 @@ Another example:
 This will only work for tasks, that do not require additional parameters.
 """
 
-from __future__ import print_function
-
 import datetime
 import importlib
 import os

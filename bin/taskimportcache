@@ -27,8 +27,6 @@
 Output the task import cache location.
 """
 
-from __future__ import print_function
-
 from siskin.utils import get_task_import_cache
 
 if __name__ == '__main__':

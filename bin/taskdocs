@@ -26,8 +26,6 @@
 PMMP. Poor man's man page. Better output with: taskdocs | less -R.
 """
 
-from __future__ import print_function
-
 import sys
 
 from luigi.task import Register

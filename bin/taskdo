@@ -27,8 +27,6 @@
 The main command line program to interact with the tasks.
 """
 
-from __future__ import print_function
-
 import importlib
 import os
 import sys
