@@ -61,9 +61,9 @@
     - yaz-doc
 - name: Fetch duckdb distribution
   get_url:
-    url: https://github.com/duckdb/duckdb/releases/download/v{{ siskin_extra_version_duckdb }}/duckdb_cli-linux-amd64.zip
+    url: https://install.duckdb.org/v{{ siskin_extra_version_duckdb }}/duckdb_cli-linux-amd64.zip
     dest: /tmp/duckdb-{{ siskin_extra_version_duckdb }}-dist.zip
-    checksum: sha256:682ff48f988cb6f054fe42e755b7037ade3441e7a406cce3180b05ac0287279d
+    checksum: sha256:fae3ba93eedf20b08bca4b23aeac1ba94c446f1c10d029c193e2fc4b4e0bc1bc
 - name: Install duckdb client
   shell:
     # remove existing binary, otherwise ansible seems to get stuck
