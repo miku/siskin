@@ -35,6 +35,9 @@
     - p7zip-plugins
     - parallel
     - pigz
+    # TODO: pip needs to be changed to use the correct python version as well; https://discussion.fedoraproject.org/t/is-it-possible-to-install-pip-for-older-versions-of-python/71371
+    - python3.12
+    - python3.13 # fedora 43 ships with 3.14 by default, some pypi packages require 3.13 (e.g. "lingua-language-detector")
     - pv
     - ranger
     - rclone
@@ -49,10 +52,19 @@
     - tmux
     - tree
     - unzip
+    - uv
     - vim-enhanced
     - wget
     - z
     - zstd
+- name: Register Python 3.12 with alternatives
+  command:
+    cmd: /usr/sbin/alternatives --install /usr/bin/python python /usr/bin/python3.12 3
+- name: Register Python 3.13 with alternatives
+  command:
+    cmd: /usr/sbin/alternatives --install /usr/bin/python python /usr/bin/python3.13 4
+- name: Set Python 3.13 as default
+  command: /usr/sbin/alternatives --set python /usr/bin/python3.12
 - name: Clean motd
   command: truncate -s 0 /etc/motd
 - name: Enable services # https://stackoverflow.com/a/37633887/89391
