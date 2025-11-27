@@ -130,9 +130,9 @@
     group: "{{ siskin_user }}"
     mode: '0644'
 
-- name: Source siskin aliases in user's .profile
+- name: Source siskin aliases in user's .bashrc
   lineinfile:
-    path: "/home/{{ siskin_user }}/.profile"
+    path: "/home/{{ siskin_user }}/.bashrc"
     line: '[ -f "$HOME/.aliases.siskin.sh" ] && . "$HOME/.aliases.siskin.sh"'
     state: present
     create: yes
