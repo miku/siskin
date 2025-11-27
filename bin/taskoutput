@@ -26,7 +26,6 @@
 Show task output, if it has a path.
 """
 
-from __future__ import print_function
 
 import importlib
 import os

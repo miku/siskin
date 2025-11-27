@@ -41,8 +41,6 @@ bb1a3873f4e6d6e6fff291bac52bb6845ae36d30    siskin.workflows.ai.AICoverageISSN
 ...
 """
 
-from __future__ import print_function
-
 import hashlib
 import importlib
 import inspect
