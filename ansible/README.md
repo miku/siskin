@@ -26,6 +26,14 @@ $ make deploy
 
 * changes to `/etc/hosts` that are needed for manual tasks (e.g. checking `.../whatislive` and such)
 
+Add nexus repo to `/etc/uv/uv.toml` manually:
+
+```
+[[index]]
+url = "https://services.example.org/nexus/repository/pypi/simple"
+default = true
+```
+
 ## TODO
 
 * [ ] up to regular generation of indexable files
