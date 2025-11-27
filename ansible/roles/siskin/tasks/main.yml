@@ -109,12 +109,20 @@
     group: '{{ siskin_group }}'
     state: link
 
-- name: Install siskin python package
-  pip:
-    name: siskin=={{ siskin_vendor_version_siskin }}
-    extra_args: -U -i "{{ siskin_pypi_index_url }}"
-  environment:
-    USE_CYTHON: 1
+# Do not install siskin, but use aliases to uvx
+# - name: Install siskin python package
+#   pip:
+#     name: siskin=={{ siskin_vendor_version_siskin }}
+#     extra_args: -U -i "{{ siskin_pypi_index_url }}"
+#   environment:
+#     USE_CYTHON: 1
+
+- name: Aliases for siskin scripts
+  template:
+    src: siskin_aliases.sh.j2
+    dest: /home/{{ siskin_user }}/.aliases.siskin.sh
+    mode: '0644'
+
 - name: Create configuration directories
   file:
     path: "{{ item }}"
