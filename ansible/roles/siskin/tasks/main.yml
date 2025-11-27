@@ -123,6 +123,16 @@
     dest: /home/{{ siskin_user }}/.aliases.siskin.sh
     mode: '0644'
 
+- name: Source siskin aliases in user's .profile
+  lineinfile:
+    path: "/home/{{ siskin_user }}/.profile"
+    line: '[ -f "$HOME/.aliases.siskin.sh" ] && . "$HOME/.aliases.siskin.sh"'
+    state: present
+    create: yes
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_user }}"
+    mode: '0644'
+
 - name: Create configuration directories
   file:
     path: "{{ item }}"
