@@ -43,7 +43,6 @@
     - gcc
     - gcc-c++
     - java-latest-openjdk
-    - luigi # for scheduler, server
     - podman
     - podman-docker
     - podman-plugins
@@ -109,6 +108,11 @@
     owner: '{{ siskin_user }}'
     group: '{{ siskin_group }}'
     state: link
+
+- name: Install luigi for scheduling
+  pip:
+    name: luigi
+    extra_args: -U -i "{{ siskin_pypi_index_url }}"
 
 # Do not install siskin, but use aliases to uvx
 # - name: Install siskin python package
