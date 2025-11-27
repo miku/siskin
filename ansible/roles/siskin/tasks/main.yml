@@ -43,6 +43,7 @@
     - gcc
     - gcc-c++
     - java-latest-openjdk
+    - luigi # for scheduler, server
     - podman
     - podman-docker
     - podman-plugins
@@ -121,6 +122,8 @@
   template:
     src: siskin_aliases.sh.j2
     dest: /home/{{ siskin_user }}/.aliases.siskin.sh
+    owner: "{{ siskin_user }}"
+    group: "{{ siskin_user }}"
     mode: '0644'
 
 - name: Source siskin aliases in user's .profile
