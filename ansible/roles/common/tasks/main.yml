@@ -36,9 +36,12 @@
     - parallel
     - pigz
     # TODO: pip needs to be changed to use the correct python version as well; https://discussion.fedoraproject.org/t/is-it-possible-to-install-pip-for-older-versions-of-python/71371
-    - python3.12
-    - python3.13 # fedora 43 ships with 3.14 by default, some pypi packages require 3.13 (e.g. "lingua-language-detector")
     - pv
+    - python3-devel
+    - python3.12
+    - python3.12-devel
+    - python3.13 # fedora 43 ships with 3.14 by default, some pypi packages require 3.13 (e.g. "lingua-language-detector")
+    - python3.13-devel # fedora 43 ships with 3.14 by default, some pypi packages require 3.13 (e.g. "lingua-language-detector")
     - ranger
     - rclone
     - ripgrep
