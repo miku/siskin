@@ -25,6 +25,6 @@ $ time zstdcat -T0 $(taskoutput AIExport --with-fullrecord) | solrbulk -w 8 -ser
 
 ## Additional information
 
-* [AI Overview](../ai-overview/README.md)
-* [Quick Look at the AI](../ai-etc/README.md)
-*
+* [AI Overview](../ai-overview/slides.md) (2017), a higher level overview, with all preprocessing steps illustrated
+* [Quick Look at the AI](../ai-etc/README.md) (2024), a quick intro with software, hardware and data aspects
+
