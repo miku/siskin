@@ -36,8 +36,7 @@ default = true
 
 ## TODO
 
-* [ ] up to regular generation of indexable files
-    * [ ] add cron for AIUpdate
-    * [ ] check that crossref feed is stable
+* [ ] put AIUpdate into cron
+* [x] check crossref feed is stable
 * [x] host w/o sudo
 * [x] install common packages
