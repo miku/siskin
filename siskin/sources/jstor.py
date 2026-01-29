@@ -34,6 +34,12 @@ ftp-username = username
 ftp-password = password
 ftp-path = /
 ftp-pattern = *
+
+
+TODO:
+
+via collection specific kbart files; cf. https://support.jstor.org/hc/en-us/articles/115007466248-JSTOR-Title-Lists
+
 """
 
 import collections
