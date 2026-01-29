@@ -124,16 +124,16 @@ class AIIntermediateSchema(AITask):
 
     def requires(self):
         return [
-            CeeolIntermediateSchema(stamp=True),
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
-            DegruyterIntermediateSchema(date=self.date, stamp=True),
-            GenderopenIntermediateSchema(date=self.date, stamp=True),
+            # CeeolIntermediateSchema(stamp=True),
+            # DegruyterIntermediateSchema(date=self.date, stamp=True),
+            # GenderopenIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchemaCombined(date=self.date, stamp=True),
-            LissaIntermediateSchema(date=self.date, stamp=True),
+            # LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
             OSFIntermediateSchema(date=self.date, stamp=True),
-            ThiemeIntermediateSchema(date=self.date, stamp=True),
+            # ThiemeIntermediateSchema(date=self.date, stamp=True),
             IOSIntermediateSchema(date=self.date, stamp=True),
         ]
 
