@@ -123,6 +123,7 @@ class AIIntermediateSchema(AITask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def requires(self):
+        # 02/2026, downsizing; deprecating various sources
         return [
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
