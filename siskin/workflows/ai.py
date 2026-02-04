@@ -85,6 +85,7 @@ from siskin.sources.osf import OSFIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
+from warnings import deprecated
 
 
 class AITask(DefaultTask):
@@ -163,6 +164,7 @@ class AIIntermediateSchema(AITask):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
+@deprecated
 class AIRedact(AITask):
     """
     Redact intermediate schema.
@@ -278,6 +280,7 @@ class AILocalData(AITask):
         return luigi.LocalTarget(path=self.path(ext="csv"))
 
 
+@deprecated
 class AIInstitutionChanges(AITask):
     """
     Calculate institution changes based on DOI duplicates. Experimental, using
@@ -305,6 +308,7 @@ class AIInstitutionChanges(AITask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
+@deprecated
 class AIIntermediateSchemaDeduplicated(AITask):
     """
     A DOI deduplicated version of the intermediate schema. Experimental.
@@ -428,166 +432,6 @@ class AIUpdate(AITask, luigi.WrapperTask):
         return self.input()
 
 
-class AIPartialUpdate(AITask):
-    """
-    Prepare a partial, indexable file (from crossref).
-
-    CrossrefFeedFile will only be available for today - 2.
-    """
-
-    date = luigi.DateParameter(
-        default=datetime.date.today() - datetime.timedelta(days=2)
-    )
-
-    def requires(self):
-        return {
-            "amsl": AMSLFilterConfigFreeze(date=self.date),
-            "amsl-free-content": AMSLFreeContent(date=self.date),
-            "amsl-oa-kbart": AMSLOpenAccessKBART(date=self.date),
-            "crossref-feed-file": CrossrefFeedFile(date=self.date),
-        }
-
-    def run(self):
-        output = shellout(
-            """
-                 zstdcat -T0 {input} |
-                 span-import -i crossref |
-                 span-oa-filter -b 25000 -f {k} -fc {fc} |
-                 span-tag -unfreeze {amsl} |
-                 span-export |
-                 zstd -c -T0 > {output}""",
-            input=self.input().get("crossref-feed-file").path,
-            amsl=self.input().get("amsl").path,
-            k=self.input().get("amsl-oa-kbart").path,
-            fc=self.input().get("amsl-free-content").path,
-        )
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
-
-
-class AIPartialUpdateBlob(AITask):
-    """
-    Partial crossref update for blobserver.
-    """
-
-    date = luigi.DateParameter(
-        default=datetime.date.today() - datetime.timedelta(days=2)
-    )
-
-    def requires(self):
-        return {
-            "amsl": AMSLFilterConfigFreeze(date=self.date),
-            "amsl-free-content": AMSLFreeContent(date=self.date),
-            "amsl-oa-kbart": AMSLOpenAccessKBART(date=self.date),
-            "crossref-feed-file": CrossrefFeedFile(date=self.date),
-        }
-
-    def run(self):
-        output = shellout(
-            """
-                 zstdcat -T0 {input} |
-                 span-import -i crossref |
-                 span-oa-filter -b 25000 -f {k} -fc {fc} |
-                 span-redact |
-                 zstd -c -T0 > {output}""",
-            input=self.input().get("crossref-feed-file").path,
-            k=self.input().get("amsl-oa-kbart").path,
-            fc=self.input().get("amsl-free-content").path,
-        )
-        luigi.LocalTarget(output).move(self.output().path)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
-
-
-class AIPartialUpdateStats(AITask):
-    """
-    Gather some numbers for various ISIL.
-    """
-
-    date = luigi.DateParameter(
-        default=datetime.date.today() - datetime.timedelta(days=2)
-    )
-
-    def requires(self):
-        return AIPartialUpdate(date=self.date)
-
-    def run(self):
-        stats = collections.defaultdict(dict)
-        stats["m"]["date"] = self.date.isoformat()  # meta
-        stats["m"]["total"] = 0  # meta
-        stats["i"] = collections.Counter()  # isil
-        stats["c"] = collections.Counter()  # collection
-        stats["ic"] = collections.defaultdict(collections.Counter)  # isil, collection
-        with self.input().open() as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                doc = json.loads(line)
-                stats["m"]["total"] += 1
-                for isil in doc.get("institution", []):
-                    stats["i"][isil] += 1
-                    for mc in doc.get("mega_collection", []):
-                        stats["ic"][isil][mc] += 1
-                for mc in doc.get("mega_collection", []):
-                    stats["c"][mc] += 1
-        with self.output().open("wb") as output:
-            output.write(json.dumps(stats).encode("utf-8"))
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json.zst"), format=Zstd)
-
-
-class AIPartialUpdatePublish(AITask):
-    """
-    Publish latest crossref snapshot to currently live index.
-    """
-
-    date = luigi.DateParameter(
-        default=datetime.date.today() - datetime.timedelta(days=2)
-    )
-    index = luigi.Parameter(
-        default="solr_nonlive", description="solr_live or solr_nonlive"
-    )
-
-    def requires(self):
-        return AIPartialUpdate(date=self.date)
-
-    def run(self):
-        started = datetime.datetime.now()
-        solr = subprocess.getoutput(
-            f"echo $(siskin-whatislive.sh {self.index})/solr/biblio"
-        )
-        if len(solr) < len(".../solr/biblio"):
-            raise RuntimeError("unexpected solr url: {}".format(solr))
-        shellout(
-            """
-                 zstdcat -T0 {input} | solrbulk -server {solr} -commit 5000000
-                 """,
-            input=self.input().path,
-            solr=solr,
-        )
-        stopped = datetime.datetime.now()
-        elapsed = stopped - started
-        with self.output().open("wb") as output:
-            json.dump(
-                {
-                    "started": started.isoformat(),
-                    "stopped": stopped.isoformat(),
-                    "elapsed_s": elapsed.seconds,
-                    "solr": solr,
-                    "file": self.input().path,
-                },
-                output,
-            )
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json"))
-
-
 # Other tasks
 # -----------
 
@@ -671,39 +515,6 @@ class AIISSNOverlaps(AITask):
                 s2 = load_set_from_target(self.input().get(k2))
                 for issn in sorted(s1.intersection(s2)):
                     output.write_tsv(k1, k2, issn)
-
-    def output(self):
-        return luigi.LocalTarget(path=self.path(), format=TSV)
-
-
-class AIISSNList(AITask):
-    """
-    List of uniq ISSNs in AI.
-    """
-
-    date = ClosestDateParameter(default=datetime.date.today())
-
-    def requires(self):
-        return {
-            "crossref": CrossrefUniqISSNList(date=self.date),
-            "degruyter": DegruyterISSNList(date=self.date),
-            "doaj": DOAJISSNList(date=self.date),
-            "jstor": JstorISSNList(date=self.date),
-            "thieme": ThiemeISSNList(date=self.date),
-            "elsevier": ElsevierJournalsISSNList(date=self.date),
-        }
-
-    @timed
-    def run(self):
-        _, output = tempfile.mkstemp(prefix="siskin-")
-        for _, target in list(self.input().items()):
-            shellout(
-                "cat {input} | grep -v null >> {output}",
-                input=target.path,
-                output=output,
-            )
-        output = shellout("sort -u {input} > {output}", input=output)
-        luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
