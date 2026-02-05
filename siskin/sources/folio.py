@@ -56,6 +56,8 @@ class FolioFilterConfigFreeze(FolioTask):
     Create filterconfig for span tag from FOLIO API.
     """
 
+    date = ClosestDateParameter(default=datetime.date.today())
+
     def run(self):
         output = shellout(
             """
