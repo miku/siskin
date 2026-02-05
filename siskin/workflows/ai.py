@@ -36,7 +36,6 @@ import itertools
 import json
 import os
 import re
-import subprocess
 import tempfile
 import urllib
 
@@ -58,31 +57,26 @@ from siskin.sources.amsl import (
     AMSLOpenAccessKBART,
 )
 from siskin.sources.base import BaseFix
-from siskin.sources.ceeol import CeeolIntermediateSchema
 from siskin.sources.crossref import (
     CrossrefDOIList,
-    CrossrefFeedFile,
     CrossrefIntermediateSchema,
     CrossrefUniqISSNList,
 )
 from siskin.sources.degruyter import (
     DegruyterDOIList,
-    DegruyterIntermediateSchema,
     DegruyterISSNList,
 )
 from siskin.sources.doaj import DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
-from siskin.sources.genderopen import GenderopenIntermediateSchema
 from siskin.sources.ios import IOSIntermediateSchema
 from siskin.sources.jstor import (
     JstorDOIList,
     JstorIntermediateSchemaCombined,
     JstorISSNList,
 )
-from siskin.sources.lissa import LissaIntermediateSchema
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema
-from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
+from siskin.sources.thieme import ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
 

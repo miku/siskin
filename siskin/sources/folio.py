@@ -34,6 +34,7 @@ okapi_url = https://some-tenant.folio.finc.info
 okapi_token = XXX
 """
 
+from gluish.parameter import ClosestDateParameter
 from siskin.task import DefaultTask
 from gluish.utils import shellout
 from gluish.intervals import weekly
