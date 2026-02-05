@@ -57,6 +57,7 @@ class FolioFilterConfigFreeze(FolioTask):
             """
             OKAPI_TOKEN={okapi_token} span-freeze -f -no-proxy -tenant de15 -okapi-url {okapi_url} -o {output}
             """,
+            okapi_token=self.config.get("folio", "okapi_token"),
             okapi_url=self.config.get("folio", "okapi_url"),
         )
         luigi.LocalTarget(output).move(self.output().path)
