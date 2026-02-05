@@ -337,6 +337,27 @@ class AIIntermediateSchemaDeduplicated(AITask):
 class AILicensingViaFolio(AITask):
     """ """
 
+    date = ClosestDateParameter(default=datetime.date.today())
+
+    def requires(self):
+        return {
+            "data": AIIntermediateSchema(date=self.date),
+            "config": FolioFilterConfigFreeze(date=self.date),
+        }
+
+    def run(self):
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+        """,
+            input=self.input().get("data"),
+            config=self.input().get("config"),
+        )
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
+
 
 class AIExport(AITask):
     """
