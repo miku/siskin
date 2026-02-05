@@ -22,17 +22,16 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 """
-FOLIO mod-finc-config, mod-finc-select
+FOLIO filterconfig adapter
 
 ----
 
 Config:
 
+
 [folio]
-
-select-url: https://de-15.staging.folio.finc.info/finc-select
-config-url: https://de-15.staging.folio.finc.info/finc-config
-
+okapi_url = https://some-tenant.folio.finc.info
+okapi_token = XXX
 """
 
 from siskin.task import DefaultTask
@@ -58,7 +57,7 @@ class FolioFilterConfigFreeze(FolioTask):
             """
             OKAPI_TOKEN={okapi_token} span-freeze -f -no-proxy -tenant de15 -okapi-url {okapi_url} -o {output}
             """,
-            okapi_url=self.config.get("folio", "okapi-url"),
+            okapi_url=self.config.get("folio", "okapi_url"),
         )
         luigi.LocalTarget(output).move(self.output().path)
 
