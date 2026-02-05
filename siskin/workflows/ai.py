@@ -85,7 +85,6 @@ from siskin.sources.osf import OSFIntermediateSchema
 from siskin.sources.thieme import ThiemeIntermediateSchema, ThiemeISSNList
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
-from warnings import deprecated
 
 
 class AITask(DefaultTask):
@@ -164,7 +163,6 @@ class AIIntermediateSchema(AITask):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
-@deprecated
 class AIRedact(AITask):
     """
     Redact intermediate schema.
@@ -280,7 +278,6 @@ class AILocalData(AITask):
         return luigi.LocalTarget(path=self.path(ext="csv"))
 
 
-@deprecated
 class AIInstitutionChanges(AITask):
     """
     Calculate institution changes based on DOI duplicates. Experimental, using
@@ -308,7 +305,6 @@ class AIInstitutionChanges(AITask):
         return luigi.LocalTarget(path=self.path(), format=TSV)
 
 
-@deprecated
 class AIIntermediateSchemaDeduplicated(AITask):
     """
     A DOI deduplicated version of the intermediate schema. Experimental.
