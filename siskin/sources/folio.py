@@ -36,6 +36,7 @@ okapi_token = XXX
 
 from siskin.task import DefaultTask
 from gluish.utils import shellout
+from gluish.intervals import weekly
 import luigi
 
 
@@ -45,6 +46,9 @@ class FolioTask(DefaultTask):
     """
 
     TAG = "folio"
+
+    def closest(self):
+        return weekly(self.date)
 
 
 class FolioFilterConfigFreeze(FolioTask):
