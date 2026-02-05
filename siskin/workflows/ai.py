@@ -340,6 +340,10 @@ class AIIntermediateSchemaDeduplicated(AITask):
         return luigi.LocalTarget(path=self.path(ext="ldj.zst"), format=Zstd)
 
 
+class AILicensingViaFolio(AITask):
+    """ """
+
+
 class AIExport(AITask):
     """
     Export to various formats. Include SOLR-ready (isil'd) BASE file as well.

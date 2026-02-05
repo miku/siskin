@@ -36,6 +36,8 @@ config-url: https://de-15.staging.folio.finc.info/finc-config
 """
 
 from siskin.task import DefaultTask
+from gluish.utils import shellout
+import luigi
 
 
 class FolioTask(DefaultTask):
@@ -46,5 +48,19 @@ class FolioTask(DefaultTask):
     TAG = "folio"
 
 
-class FolioSync(FolioTask):
-    pass
+class FolioFilterConfigFreeze(FolioTask):
+    """
+    Create filterconfig for span tag from FOLIO API.
+    """
+
+    def run(self):
+        output = shellout(
+            """
+            OKAPI_TOKEN={okapi_token} span-freeze -f -no-proxy -tenant de15 -okapi-url {okapi_url} -o {output}
+            """,
+            okapi_url=self.config.get("folio", "okapi-url"),
+        )
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zip"))
