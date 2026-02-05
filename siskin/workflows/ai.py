@@ -77,6 +77,7 @@ from siskin.sources.jstor import (
 from siskin.sources.olc import OLCIntermediateSchema
 from siskin.sources.osf import OSFIntermediateSchema
 from siskin.sources.thieme import ThiemeISSNList
+from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.task import DefaultTask
 from siskin.utils import URLCache, load_set_from_target
 
