@@ -68,6 +68,7 @@ class JstorTask(DefaultTask):
     """Jstor base."""
 
     TAG = "55"
+    WARN_CORRUPT_ZIP = "jstor occasionally puts invalid zip files onto their server"
 
     def closest(self):
         return weekly(self.date)
@@ -179,6 +180,7 @@ class JstorMembers(JstorTask):
                     preserve_whitespace=True,
                     input=row.path,
                     output=stopover,
+                    ignoremap={1: self.WARN_CORRUPT_ZIP},
                 )
         luigi.LocalTarget(stopover).move(self.output().path)
 
