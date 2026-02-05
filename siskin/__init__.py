@@ -32,6 +32,7 @@ import logging
 import sys
 import tempfile
 import warnings
+from importlib.metadata import PackageNotFoundError, version
 
 from siskin.configuration import Config
 
@@ -48,7 +49,10 @@ except (AttributeError, ImportError):
     pass
 
 
-__version__ = "2.0.0"
+try:
+    __version__ = version("siskin")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 
 config = Config.instance()
 if sys.version_info.major == 2:

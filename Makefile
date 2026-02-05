@@ -50,3 +50,11 @@ lint:
 test:
 	# pip install pytest-cov
 	pytest --cov .
+
+# Update version across all files. Usage: make setversion V=2.1.0
+.PHONY: setversion
+setversion:
+	@test -n "$(V)" || { echo "usage: make setversion V=x.y.z"; exit 1; }
+	sed -i "s/^version = .*/version = '$(V)'/" pyproject.toml
+	sed -i "s/^siskin_vendor_version_siskin: .*/siskin_vendor_version_siskin: $(V)/" ansible/roles/siskin/defaults/main.yml
+	@echo "version set to $(V) in pyproject.toml and ansible/roles/siskin/defaults/main.yml"
