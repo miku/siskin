@@ -22,18 +22,7 @@
 #
 # @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
 """
-Entry points should replace scripts in the future. Currently we use a mix of
-bash and Python for executables and console_scripts - with bash not being cross
-platform anyway.
-
-TODO(miku): Consider moving to a single entry point, e.g. "siskin" with
-subcommands implemented by separate scripts.
+Legacy entry point stub. The actual CLI is in siskin.cli.
 """
 
-from siskin import __version__
-
-
-def main():
-    print("siskin %s" % __version__)
-    print()
-    print("For now, please use the functions listed here: https://is.gd/nfAGIP")
+from siskin.cli import main  # noqa: F401

@@ -52,6 +52,9 @@ dependencies = [
 name = 'Finc Authors'
 email = 'team@finc.info'
 
+[project.scripts]
+siskin = "siskin.cli:main"
+
 [project.urls]
 Homepage = 'https://github.com/ubleipzig/siskin'
 
