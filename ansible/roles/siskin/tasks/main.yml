@@ -116,8 +116,6 @@
 
 - name: Install siskin via uv tool
   shell: uv tool install -U siskin --index-url "{{ siskin_pypi_index_url }}"
-  become: true
-  become_user: "{{ siskin_user }}"
 
 - name: Aliases for siskin scripts
   template:
