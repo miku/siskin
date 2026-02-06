@@ -385,7 +385,8 @@ class AIExport(AITask):
 
     def requires(self):
         return {
-            "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
+            # "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
+            "ai": AILicensingViaFolio(date=self.date),
             "base": BaseFix(
                 style="z"
             ),  # Failed to establish a new connection: [Errno 111] Connection refused')
