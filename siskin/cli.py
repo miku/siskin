@@ -578,10 +578,12 @@ def cmd_du():
 
 
 def cmd_gc():
-    """Garbage collection: remove obsolete task artifacts."""
-    CO = "\033[0;33m"
-    NC = "\033[0m"
+    """Suggest obsolete task artifacts for removal.
 
+    Lists files from known task directories that do not belong to the current
+    month.  Prints each candidate with its size and a total summary.  No files
+    are deleted — the operator decides what to remove.
+    """
     try:
         config = Config.instance()
         taskhome = config.get("core", "home")
@@ -600,7 +602,8 @@ def cmd_gc():
     }
 
     current_month_prefix = datetime.datetime.now().strftime("date-%Y-%m-")
-    matching_files = []
+    total_bytes = 0
+    total_files = 0
 
     for src, task_names in tasks.items():
         for t in task_names.split():
@@ -609,35 +612,25 @@ def cmd_gc():
                 continue
             for root, _, files in os.walk(task_dir):
                 for f in files:
-                    if not f.startswith(current_month_prefix):
-                        matching_files.append(os.path.join(root, f))
+                    if f.startswith(current_month_prefix):
+                        continue
+                    path = os.path.join(root, f)
+                    try:
+                        size = os.path.getsize(path)
+                    except OSError:
+                        continue
+                    total_bytes += size
+                    total_files += 1
+                    print(f"{size:>14d}  {path}")
 
-    if not matching_files:
-        print("Nothing to delete. Bye.")
+    if total_files == 0:
+        print("no obsolete files found")
         return
 
-    for f in matching_files:
-        print(f)
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--force":
-        for f in matching_files:
-            os.remove(f)
-            print(f"removed '{f}'")
-        return
-
-    total_bytes = sum(os.path.getsize(f) for f in matching_files)
     freed_gb = total_bytes / 1073741824
-
-    answer = input(
-        f"\nDelete the above {len(matching_files)} file(s) "
-        f"[{CO}{freed_gb:.2f}GB{NC} would be freed] [y/N]? "
-    )
-    if answer.lower().startswith("y"):
-        for f in matching_files:
-            os.remove(f)
-            print(f"removed '{f}'")
-    else:
-        print("Not deleting anything. Bye.")
+    print(f"\n{total_files} file(s), {freed_gb:.2f} GB total")
+    print("\nTo remove these files, inspect the list and run e.g.")
+    print(f"  siskin gc | tail -n +1 | head -n -3 | awk '{{print $2}}' | xargs rm -f")
 
 
 def cmd_head():
@@ -832,10 +825,9 @@ COMMAND_GROUPS = [
         "Maintenance",
         [
             ("cleanup", "Remove date-based task outputs before a date"),
-            ("gc", "Garbage collection for old task artifacts"),
+            ("gc", "Suggest obsolete task artifacts for removal"),
             ("du", "Show disk usage for a task"),
             ("tree", "Display a directory tree for a task"),
-            ("sync", "Sync task outputs to remote servers"),
             ("ps", "Show running/pending/done tasks from scheduler"),
         ],
     ),
