@@ -49,6 +49,7 @@ from siskin.utils import get_task_import_cache, iterfiles, random_string
 # helpers
 # ---------------------------------------------------------------------------
 
+
 def _ensure_task_imports(taskname):
     """
     Import the module for a given task name using the import cache, falling
@@ -73,6 +74,7 @@ def _star_imports():
     """
     import siskin.sources
     import siskin.workflows
+
     for name in siskin.sources.__all__:
         if name.startswith("_"):
             continue
@@ -138,6 +140,7 @@ def _cat_output(args, out=None):
 # ---------------------------------------------------------------------------
 # commands — ported from Python scripts
 # ---------------------------------------------------------------------------
+
 
 def cmd_run():
     """Run a Luigi task."""
@@ -218,9 +221,9 @@ def cmd_deps():
 
     def dump(root=None, indent=0, output=None):
         if indent == 0:
-            output.write('%s ── %s\n' % ('    ' * indent, root))
+            output.write("%s ── %s\n" % ("    " * indent, root))
         else:
-            output.write('%s └─ %s\n' % ('    ' * indent, root))
+            output.write("%s └─ %s\n" % ("    " * indent, root))
         for dep in g[root]:
             dump(root=dep, indent=indent + 1, output=output)
 
@@ -251,7 +254,7 @@ def cmd_deps_dot():
     _star_imports()
     g = collections.defaultdict(set)
     seen = set()
-    INCLUDE_FULLY = {'Executable', 'FTPMirror'}
+    INCLUDE_FULLY = {"Executable", "FTPMirror"}
 
     def iterdeps(task):
         for dependency in task.deps():
@@ -269,14 +272,14 @@ def cmd_deps_dot():
                 iterdeps(dependency)
 
     def simpleformat(graph):
-        s = 'digraph %s {' % random_string()
+        s = "digraph %s {" % random_string()
         for task, deps in graph.items():
             for dep in deps:
                 s += '\t"%s" [fontname="Helvetica"]; ' % task[0]
                 s += '\t"%s" [fontname="Helvetica"]; ' % dep[0]
                 s += '\t"%s" -> "%s"; ' % (task[0], dep[0])
                 s += "\n"
-        s += '}'
+        s += "}"
         return s
 
     try:
@@ -339,6 +342,7 @@ def cmd_cleanup():
 
 def cmd_hash():
     """Calculate SHA1 hashes of task source code to detect changes."""
+
     def calculate_task_hashes():
         hashes = []
         task_import_cache, _ = get_task_import_cache()
@@ -360,7 +364,9 @@ def cmd_hash():
             for line in handle:
                 parts = line.strip().split("\t")
                 if len(parts) != 2:
-                    raise ValueError(f"invalid format: got {len(parts)} columns, want 2")
+                    raise ValueError(
+                        f"invalid format: got {len(parts)} columns, want 2"
+                    )
                 fromfile[parts[1]] = parts[0]
         for h, taskname in calculate_task_hashes():
             if fromfile[taskname] != h:
@@ -437,6 +443,7 @@ def cmd_importcache():
 
 def cmd_checksetup():
     """Check external tool dependencies."""
+
     def which(program):
         return shutil.which(program)
 
@@ -492,6 +499,7 @@ def cmd_tags():
 # commands — ported from shell scripts
 # ---------------------------------------------------------------------------
 
+
 def cmd_cat():
     """Display task output, handling compressed formats transparently."""
     if len(sys.argv) < 2:
@@ -515,7 +523,10 @@ def cmd_help():
 def cmd_rm():
     """Delete task output files."""
     if len(sys.argv) < 2:
-        print("usage: siskin rm TASKNAME [--param value ...] [TASKNAME ...]", file=sys.stderr)
+        print(
+            "usage: siskin rm TASKNAME [--param value ...] [TASKNAME ...]",
+            file=sys.stderr,
+        )
         sys.exit(0)
 
     # Single task name, no flags.
@@ -716,49 +727,6 @@ def cmd_status():
         sys.exit(1)
 
 
-def cmd_sync():
-    """Sync task outputs to remote servers."""
-    for cmd in ("curl", "grep", "rsync", "ssh"):
-        if not shutil.which(cmd):
-            print(f"{cmd} required", file=sys.stderr)
-            sys.exit(1)
-
-    whatislive_url = "https://ai.ub.uni-leipzig.de/whatislive"
-    try:
-        r = requests.get(whatislive_url, timeout=10)
-        r.raise_for_status()
-    except Exception:
-        print(f"cannot reach {whatislive_url}")
-        sys.exit(1)
-
-    user = os.environ.get("USER", "siskin")
-    is_path = _get_output_path(["AIRedact"])
-    solr_path = _get_output_path(["AIExport"])
-
-    content = r.text
-    mb_match = re.search(r"microblob_nonlive.*?(\d+\.\d+\.\d+\.\d+)", content)
-    solr_match = re.search(r"solr_nonlive.*?(\d+\.\d+\.\d+\.\d+)", content)
-    if not mb_match or not solr_match:
-        print("cannot parse nonlive IPs from whatislive", file=sys.stderr)
-        sys.exit(1)
-
-    mb_ip = mb_match.group(1)
-    solr_ip = solr_match.group(1)
-    ssh_cmd = f"ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' -i /home/{user}/.ssh/id_rsa"
-    rsync_opts = "-avP"
-
-    dry_run = os.environ.get("TASKSYNC", "no") == "no"
-    cmds = [
-        f'rsync {rsync_opts} -e "{ssh_cmd}" {is_path} {user}@{mb_ip}:/home/{user}',
-        f'rsync {rsync_opts} -e "{ssh_cmd}" {solr_path} {user}@{solr_ip}:/home/{user}',
-    ]
-    for c in cmds:
-        if dry_run:
-            print(c)
-        else:
-            subprocess.run(c, shell=True)
-
-
 def cmd_tree():
     """Display a directory tree for a task (or the entire task home)."""
     if len(sys.argv) < 2:
@@ -819,54 +787,68 @@ COMMANDS = {
     "open": cmd_open,
     "redo": cmd_redo,
     "status": cmd_status,
-    "sync": cmd_sync,
     "tree": cmd_tree,
     "wc": cmd_wc,
 }
 
 # Grouped for help display.
 COMMAND_GROUPS = [
-    ("Task execution", [
-        ("run", "Run a Luigi task"),
-        ("redo", "Re-run a task (remove output, then run)"),
-        ("help", "Show Luigi help for a task"),
-    ]),
-    ("Task information", [
-        ("names", "List all available task names"),
-        ("docs", "Show documentation for all tasks"),
-        ("tags", "Show task tags (source IDs)"),
-        ("inspect", "Show the source code of a task"),
-        ("deps", "Show the dependency tree (ASCII)"),
-        ("deps-dot", "Show the dependency tree (Graphviz DOT)"),
-        ("hash", "Calculate SHA1 hashes of task source code"),
-    ]),
-    ("Task output", [
-        ("output", "Show the output path of a task"),
-        ("dir", "Show the directory of a task's output"),
-        ("status", "Check whether a task is done"),
-        ("cat", "Display task output (handles compressed formats)"),
-        ("head", "Show the first 10 lines of task output"),
-        ("less", "View task output in the less pager"),
-        ("ls", "List the task output file"),
-        ("open", "Open task output with default application"),
-        ("wc", "Count lines in task output"),
-        ("rm", "Delete task output files"),
-    ]),
-    ("Maintenance", [
-        ("cleanup", "Remove date-based task outputs before a date"),
-        ("gc", "Garbage collection for old task artifacts"),
-        ("du", "Show disk usage for a task"),
-        ("tree", "Display a directory tree for a task"),
-        ("sync", "Sync task outputs to remote servers"),
-        ("ps", "Show running/pending/done tasks from scheduler"),
-    ]),
-    ("Configuration", [
-        ("config", "Display the current configuration"),
-        ("home", "Show the task home directory"),
-        ("version", "Show the siskin version"),
-        ("checksetup", "Check external tool dependencies"),
-        ("importcache", "Show the task import cache path"),
-    ]),
+    (
+        "Task execution",
+        [
+            ("run", "Run a Luigi task"),
+            ("redo", "Re-run a task (remove output, then run)"),
+            ("help", "Show Luigi help for a task"),
+        ],
+    ),
+    (
+        "Task information",
+        [
+            ("names", "List all available task names"),
+            ("docs", "Show documentation for all tasks"),
+            ("tags", "Show task tags (source IDs)"),
+            ("inspect", "Show the source code of a task"),
+            ("deps", "Show the dependency tree (ASCII)"),
+            ("deps-dot", "Show the dependency tree (Graphviz DOT)"),
+            ("hash", "Calculate SHA1 hashes of task source code"),
+        ],
+    ),
+    (
+        "Task output",
+        [
+            ("output", "Show the output path of a task"),
+            ("dir", "Show the directory of a task's output"),
+            ("status", "Check whether a task is done"),
+            ("cat", "Display task output (handles compressed formats)"),
+            ("head", "Show the first 10 lines of task output"),
+            ("less", "View task output in the less pager"),
+            ("ls", "List the task output file"),
+            ("open", "Open task output with default application"),
+            ("wc", "Count lines in task output"),
+            ("rm", "Delete task output files"),
+        ],
+    ),
+    (
+        "Maintenance",
+        [
+            ("cleanup", "Remove date-based task outputs before a date"),
+            ("gc", "Garbage collection for old task artifacts"),
+            ("du", "Show disk usage for a task"),
+            ("tree", "Display a directory tree for a task"),
+            ("sync", "Sync task outputs to remote servers"),
+            ("ps", "Show running/pending/done tasks from scheduler"),
+        ],
+    ),
+    (
+        "Configuration",
+        [
+            ("config", "Display the current configuration"),
+            ("home", "Show the task home directory"),
+            ("version", "Show the siskin version"),
+            ("checksetup", "Check external tool dependencies"),
+            ("importcache", "Show the task import cache path"),
+        ],
+    ),
 ]
 
 
@@ -889,6 +871,7 @@ def print_usage():
 # ---------------------------------------------------------------------------
 # entry point
 # ---------------------------------------------------------------------------
+
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
