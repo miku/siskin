@@ -7,10 +7,7 @@
 #
 #     . /path/to/siskin_aliases.sh
 #
-# If siskin is not installed globally, uncomment the following line to use uvx:
-# alias siskin="uvx --python 3.12 --from siskin siskin"
-
-alias iconv-chunks="uvx --python 3.12 --from siskin iconv-chunks"
+# Install siskin with: uv tool install -U siskin
 alias taskcat="siskin cat"
 alias taskchecksetup="siskin checksetup"
 alias taskcleanup="siskin cleanup"

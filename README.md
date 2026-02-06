@@ -64,7 +64,7 @@ The siskin project includes a [bunch of
 scripts](https://github.com/miku/siskin/tree/master/bin), that allow to create,
 inspect or remove tasks or task artifacts.
 
-Starting 02/2020, only Python 3 is supported; as of 12/2025, we recommend [uvx to run siskin](INSTALL.md).
+Starting 02/2020, only Python 3 is supported; as of 02/2026, we recommend [`uv tool install` to deploy siskin](INSTALL.md).
 
 Run `taskchecksetup` to see, what additional tools might need to be installed
 (this is a manually [curated](https://git.io/fhZvG) list, not everything is

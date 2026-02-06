@@ -1,15 +1,14 @@
 # Installation
 
-Note: As of 12/2025 the **legacy instructions** are workable, but we do not
-deploy siskin this way anymore. In 12/2025 we switched to deployment with
-"uvx"; we do not need to install siskin on the target host before running it,
-we can just:
+Note: As of 02/2026 the **legacy instructions** are workable, but we do not
+deploy siskin this way anymore. We use `uv tool install` to install siskin once
+on the target host:
 
 ```
-$ uvx --from siskin taskdocs
+$ uv tool install -U siskin
 ```
 
-You will need `$NEXUS` set in e.g. `/etc/uv/uv.toml`
+You will need a package index configured in e.g. `/etc/uv/uv.toml`
 
 ```
 [[index]]
@@ -17,10 +16,9 @@ url = "https://services.example.org/nexus/repository/pypi/simple"
 default = true
 ```
 
-Some aliases for convenience are in `extra/siskin_aliases.sh` which the current
-ansible workflow will deploy, so they are sourced by the shell. In a future
-iteration, we will move to a single entry point script, which should make most
-of the aliases obsolete.
+The `siskin` command is the single entry point. Backward-compatible aliases
+(e.g. `taskdo`, `taskls`) are in `extra/siskin_aliases.sh`, deployed via
+ansible.
 
 ----
 
