@@ -339,6 +339,7 @@ class AILicensingViaFolio(AITask):
     """ """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    drop = luigi.BoolParameter(description="drop records w/o isil")
 
     def requires(self):
         return {
@@ -347,12 +348,16 @@ class AILicensingViaFolio(AITask):
         }
 
     def run(self):
+        extra_flags = (
+            "-D" if self.drop else ""
+        )  # keep only records with at least one ISIL
         output = shellout(
             """
-            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+            zstdcat -T0 {input} | span-tag {extra_flags} -unfreeze {config} | zstd -c -T0 > {output}
         """,
             input=self.input().get("data"),
             config=self.input().get("config"),
+            extra_flags=extra_flags,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
@@ -375,9 +380,9 @@ class AIExport(AITask):
 
     date = ClosestDateParameter(default=datetime.date.today())
     format = luigi.Parameter(default="solr5vu3", description="export format")
-    style = luigi.Parameter(
-        default="default", description="licensing style, e.g. default or reduced"
-    )
+    # style = luigi.Parameter(
+    #     default="default", description="licensing style, e.g. default or reduced"
+    # )
     with_fullrecord = luigi.BoolParameter(
         default=False,
         description="whether to include fulltext record, e.g. for solrcloud",
@@ -386,7 +391,7 @@ class AIExport(AITask):
     def requires(self):
         return {
             # "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
-            "ai": AILicensingViaFolio(date=self.date),
+            "ai": AILicensingViaFolio(date=self.date, drop=True),
             "base": BaseFix(
                 style="z"
             ),  # Failed to establish a new connection: [Errno 111] Connection refused')
