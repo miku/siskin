@@ -183,6 +183,10 @@ class CrossrefSnapshot(CrossrefTask):
 
     The feed parameter will be used as prefix for the harvested filenames, e.g.
     "feed-2-..."
+
+    $ time zstdcat -T0 ...49/CrossrefSnapshot/date-2026-02-01-feed-2.ndj.zst | wc -cl
+    179481158 1097096333715
+
     """
 
     feed = luigi.Parameter(
