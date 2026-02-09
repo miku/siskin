@@ -59,7 +59,8 @@ from gluish.utils import shellout
 
 from siskin.benchmark import timed
 from siskin.common import Executable, FTPMirror
-from siskin.sources.amsl import AMSLFilterConfig, AMSLService
+from siskin.sources.amsl import AMSLService
+from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.task import DefaultTask
 from siskin.utils import SetEncoder
 
@@ -830,27 +831,26 @@ class JstorExport(JstorTask):
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="solr5vu3")
 
     def requires(self):
         return {
             "file": JstorIntermediateSchema(date=self.date),
-            "config": AMSLFilterConfig(date=self.date),
+            "config": FolioFilterConfigFreeze(date=self.date),
         }
 
     def run(self):
         output = shellout(
             """
-                          span-tag -c {config} <(zstd -cd -T0 {input}) |
-                          zstd -c -T0 > {output}
-                          """,
+            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+            """,
             config=self.input().get("config").path,
             input=self.input().get("file").path,
         )
         output = shellout(
             """
-                          span-export -o solr5vu3 <(zstd -cd -T0 {input}) |
-                          zstd -c -T0 > {output}
-                          """,
+            zstdcat -T0 {input} | span-export -o {format} | zstd -c -T0 > {output}
+            """,
             format=self.format,
             input=output,
         )

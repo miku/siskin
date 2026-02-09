@@ -630,7 +630,7 @@ def cmd_gc():
     freed_gb = total_bytes / 1073741824
     print(f"\n{total_files} file(s), {freed_gb:.2f} GB total")
     print("\nTo remove these files, inspect the list and run e.g.")
-    print(f"  siskin gc | tail -n +1 | head -n -3 | awk '{{print $2}}' | xargs rm -f")
+    print("  siskin gc | tail -n +1 | head -n -3 | awk '{print $2}' | xargs rm -f")
 
 
 def cmd_head():
@@ -881,7 +881,7 @@ def main():
         COMMANDS[subcmd]()
     else:
         print(f"siskin: unknown command '{subcmd}'", file=sys.stderr)
-        print(f"Run 'siskin --help' for a list of commands.", file=sys.stderr)
+        print("Run 'siskin --help' for a list of commands.", file=sys.stderr)
         sys.exit(1)
 
 
