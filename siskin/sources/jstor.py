@@ -835,7 +835,7 @@ class JstorExport(JstorTask):
 
     def requires(self):
         return {
-            "file": JstorIntermediateSchema(date=self.date),
+            "file": JstorIntermediateSchemaCombined(date=self.date),
             "config": FolioFilterConfigFreeze(date=self.date),
         }
 
