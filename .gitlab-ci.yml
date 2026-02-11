@@ -23,8 +23,8 @@ tests:
     - uv pip install iso-639 # try installing this from pypi, nexus/pypi issue
     - uv pip install pybind11 # via duckdb error
     - uv sync --all-groups --all-extras
-    - which python
-    - which pytest
+    - uv run python --version
+    - uv run pytest --version
     - uv run pytest
   tags: [docker]
   except:
