@@ -116,6 +116,7 @@
 
 - name: Install siskin via uv tool
   shell: uv tool install -U siskin --index-url "{{ siskin_pypi_index_url }}"
+  become_user: "{{ siskin_user }}"
 
 - name: Aliases for siskin scripts
   template:
@@ -187,7 +188,7 @@
     name: PATH
     user: '{{ siskin_user }}'
     env: true
-    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+    job: /home/{{ siskin_user }}/.local/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # Create systemd unit for luigid
 
