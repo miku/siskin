@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 import pymarc
 
@@ -273,5 +274,27 @@ def test_osf_to_intermediate():
             },
         ),
     )
-    for v, expected in cases:
-        assert osf_to_intermediate(v) == expected
+    # mock URLCache.get to avoid real HTTP requests to the OSF API for
+    # contributor data; the fixture matches the expected author "Ceria Ceria"
+    contributor_fixture = json.dumps({
+        "data": [{
+            "id": "egcsk_v1-fsyax",
+            "type": "contributors",
+            "embeds": {
+                "users": {
+                    "data": {
+                        "id": "fsyax",
+                        "type": "users",
+                        "attributes": {
+                            "full_name": "Ceria Ceria",
+                            "given_name": "Ceria",
+                            "family_name": "Ceria",
+                        },
+                    }
+                }
+            },
+        }],
+    })
+    with patch("siskin.conversions.URLCache.get", return_value=contributor_fixture):
+        for v, expected in cases:
+            assert osf_to_intermediate(v) == expected
