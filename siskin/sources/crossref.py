@@ -68,6 +68,7 @@ from six import string_types
 from siskin import __version__
 from siskin.benchmark import timed
 from siskin.mail import send_mail
+from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.sources.amsl import AMSLService
 from siskin.task import DefaultTask
 from siskin.utils import load_set_from_target
@@ -744,3 +745,38 @@ class CrossrefPrefix13587(CrossrefTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(), format=TSV)
+
+
+class CrossrefExport(CrossrefTask):
+    """
+    Tag with ISILs, then export to solr format.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="solr5vu3")
+
+    def requires(self):
+        return {
+            "file": CrossrefIntermediateSchema(date=self.date),
+            "config": FolioFilterConfigFreeze(date=self.date),
+        }
+
+    def run(self):
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+            """,
+            config=self.input().get("config").path,
+            input=self.input().get("file").path,
+        )
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-export -o {format} | zstd -c -T0 > {output}
+            """,
+            format=self.format,
+            input=output,
+        )
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zst"))

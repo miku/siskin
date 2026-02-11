@@ -59,6 +59,7 @@ from siskin.sources.amsl import (
 from siskin.sources.base import BaseFix
 from siskin.sources.crossref import (
     CrossrefDOIList,
+    CrossrefExport,
     CrossrefIntermediateSchema,
     CrossrefUniqISSNList,
 )
@@ -66,16 +67,17 @@ from siskin.sources.degruyter import (
     DegruyterDOIList,
     DegruyterISSNList,
 )
-from siskin.sources.doaj import DOAJDOIList, DOAJIntermediateSchema, DOAJISSNList
+from siskin.sources.doaj import DOAJDOIList, DOAJExport, DOAJIntermediateSchema, DOAJISSNList
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
-from siskin.sources.ios import IOSIntermediateSchema
+from siskin.sources.ios import IOSExport, IOSIntermediateSchema
 from siskin.sources.jstor import (
     JstorDOIList,
+    JstorExport,
     JstorIntermediateSchemaCombined,
     JstorISSNList,
 )
-from siskin.sources.olc import OLCIntermediateSchema
-from siskin.sources.osf import OSFIntermediateSchema
+from siskin.sources.olc import OLCExport, OLCIntermediateSchema
+from siskin.sources.osf import OSFExport, OSFIntermediateSchema
 from siskin.sources.thieme import ThiemeISSNList
 from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.task import DefaultTask
@@ -367,67 +369,31 @@ class AILicensingViaFolio(AITask):
 
 class AIExport(AITask):
     """
-    Export to various formats. Include SOLR-ready (isil'd) BASE file as well.
-
-    XXX: #11467, crossref vs JSTOR.
+    Concatenate per-source solr exports and BASE into a single file for
+    indexing. Each source handles its own licensing and solr export.
 
     With 8 workers, it takes about 16h to index (1 shard, 3 replica).
-
-    real    961m50.225s
-    user    82m43.389s
-    sys     59m15.269s
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
-    format = luigi.Parameter(default="solr5vu3", description="export format")
-    # style = luigi.Parameter(
-    #     default="default", description="licensing style, e.g. default or reduced"
-    # )
-    with_fullrecord = luigi.BoolParameter(
-        default=False,
-        description="whether to include fulltext record, e.g. for solrcloud",
-    )
 
     def requires(self):
         return {
-            # "ai": AIIntermediateSchemaDeduplicated(date=self.date, style=self.style),
-            "ai": AILicensingViaFolio(date=self.date, drop=True),
-            "base": BaseFix(
-                style="z"
-            ),  # Failed to establish a new connection: [Errno 111] Connection refused')
+            "crossref": CrossrefExport(date=self.date),
+            "doaj": DOAJExport(date=self.date),
+            "jstor": JstorExport(date=self.date),
+            "olc": OLCExport(date=self.date),
+            "osf": OSFExport(date=self.date),
+            "ios": IOSExport(date=self.date),
+            "base": BaseFix(style="z"),
         }
 
     def run(self):
         _, tmp = tempfile.mkstemp(prefix="siskin-")
-        # already converted data
-        filenames = [
-            self.input().get("base").path,
-        ]
-        for fn in filenames:
+        for _, target in self.input().items():
             shellout(
-                """
-                cat "{fn}" >> "{output}"
-                """,
-                fn=fn,
-                output=tmp,
-            )
-        # turn intermediate schema into solr
-        if self.with_fullrecord:
-            shellout(
-                """
-                span-export -with-fullrecord -o solr5vu3 <(zstd -cd -T0 {input}) | zstd -c -T0 >> {output}
-                """,
-                format=self.format,
-                input=self.input().get("ai").path,
-                output=tmp,
-            )
-        else:
-            shellout(
-                """
-                span-export -o solr5vu3 <(zstd -cd -T0 {input}) | zstd -c -T0 >> {output}
-                """,
-                format=self.format,
-                input=self.input().get("ai").path,
+                """cat {input} >> {output}""",
+                input=target.path,
                 output=tmp,
             )
         luigi.LocalTarget(tmp).move(self.output().path)

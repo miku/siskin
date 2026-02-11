@@ -42,6 +42,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.benchmark import timed
+from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.task import DefaultTask
 
 
@@ -314,3 +315,38 @@ class DOAJDownloadDump(DOAJTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="zst"), format=Zstd)
+
+
+class DOAJExport(DOAJTask):
+    """
+    Tag with ISILs, then export to solr format.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="solr5vu3")
+
+    def requires(self):
+        return {
+            "file": DOAJIntermediateSchema(date=self.date),
+            "config": FolioFilterConfigFreeze(date=self.date),
+        }
+
+    def run(self):
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+            """,
+            config=self.input().get("config").path,
+            input=self.input().get("file").path,
+        )
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-export -o {format} | zstd -c -T0 > {output}
+            """,
+            format=self.format,
+            input=output,
+        )
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zst"))

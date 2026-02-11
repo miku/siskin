@@ -43,6 +43,7 @@ from gluish.intervals import monthly
 from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
+from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.task import DefaultTask
 
 
@@ -134,3 +135,38 @@ class IOSIntermediateSchema(IOSTask):
 
     def output(self):
         return luigi.LocalTarget(path=self.path(ext="ndj.zst"), format=Zstd)
+
+
+class IOSExport(IOSTask):
+    """
+    Tag with ISILs, then export to solr format.
+    """
+
+    date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="solr5vu3")
+
+    def requires(self):
+        return {
+            "file": IOSIntermediateSchema(date=self.date),
+            "config": FolioFilterConfigFreeze(date=self.date),
+        }
+
+    def run(self):
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+            """,
+            config=self.input().get("config").path,
+            input=self.input().get("file").path,
+        )
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-export -o {format} | zstd -c -T0 > {output}
+            """,
+            format=self.format,
+            input=output,
+        )
+        luigi.LocalTarget(output).move(self.output().path)
+
+    def output(self):
+        return luigi.LocalTarget(path=self.path(ext="zst"))

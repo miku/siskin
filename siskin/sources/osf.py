@@ -50,7 +50,7 @@ from gluish.parameter import ClosestDateParameter
 from gluish.utils import shellout
 
 from siskin.conversions import osf_to_intermediate
-from siskin.sources.amsl import AMSLFilterConfigFreeze
+from siskin.sources.folio import FolioFilterConfigFreeze
 from siskin.task import DefaultTask
 
 
@@ -195,29 +195,34 @@ class OSFIntermediateSchema(OSFTask):
 
 class OSFExport(OSFTask):
     """
-    OSF should be a daily/weekly updated source, so we generate a solr
-    importable file directly.
+    Tag with ISILs, then export to solr format.
     """
 
     date = ClosestDateParameter(default=datetime.date.today())
+    format = luigi.Parameter(default="solr5vu3")
 
     def requires(self):
         return {
-            "data": OSFIntermediateSchema(),
-            "config": AMSLFilterConfigFreeze(),
+            "file": OSFIntermediateSchema(date=self.date),
+            "config": FolioFilterConfigFreeze(date=self.date),
         }
 
     def run(self):
         output = shellout(
             """
-            unpigz -c {input} |
-            span-tag -unfreeze {config} |
-            span-export |
-            zstd -c -T0 > {output}""",
+            zstdcat -T0 {input} | span-tag -unfreeze {config} | zstd -c -T0 > {output}
+            """,
             config=self.input().get("config").path,
-            input=self.input().get("data").path,
+            input=self.input().get("file").path,
+        )
+        output = shellout(
+            """
+            zstdcat -T0 {input} | span-export -o {format} | zstd -c -T0 > {output}
+            """,
+            format=self.format,
+            input=output,
         )
         luigi.LocalTarget(output).move(self.output().path)
 
     def output(self):
-        return luigi.LocalTarget(path=self.path(ext="json.zst"))
+        return luigi.LocalTarget(path=self.path(ext="zst"))
