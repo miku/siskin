@@ -236,14 +236,87 @@
     job: >
       span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2024-04-01 -P feed-2- -i d
 
-- name: Crontab for [140] kalliope download and indexing (WIP)
+- name: Crontab for [140] kalliope download and indexing
   cron:
     name: Kalliope download and indexing
     user: '{{ siskin_user }}'
     hour: '12'
     minute: '0'
     job: >
-      (set -o pipefail && taskdo KalliopeDirectDownload && taskcat KalliopeDirectDownload | solrbulk -server "$(siskin-whatislive.sh solr_nonlive)/solr/biblio")
+      (set -o pipefail && siskin run KalliopeDirectDownload && siskin cat KalliopeDirectDownload | solrbulk -server "{{ siskin_solr }}")
+
+# Per-source export tasks, staggered to avoid resource contention.
+# Each task applies licensing (via FolioFilterConfigFreeze) and exports to solr format.
+# Dependencies (intermediate schema, config) are resolved automatically by Luigi.
+- name: Crontab for CrossrefExport
+  cron:
+    name: CrossrefExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '2'
+    minute: '0'
+    job: >
+      siskin run CrossrefExport --workers 4
+
+- name: Crontab for DOAJExport
+  cron:
+    name: DOAJExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '2'
+    minute: '30'
+    job: >
+      siskin run DOAJExport --workers 4
+
+- name: Crontab for JstorExport
+  cron:
+    name: JstorExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '3'
+    minute: '0'
+    job: >
+      siskin run JstorExport --workers 4
+
+- name: Crontab for OLCExport
+  cron:
+    name: OLCExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '3'
+    minute: '30'
+    job: >
+      siskin run OLCExport --workers 4
+
+- name: Crontab for OSFExport
+  cron:
+    name: OSFExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '4'
+    minute: '0'
+    job: >
+      siskin run OSFExport --workers 4
+
+- name: Crontab for IOSExport
+  cron:
+    name: IOSExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '4'
+    minute: '30'
+    job: >
+      siskin run IOSExport --workers 4
+
+- name: Crontab for AIExport (combined)
+  cron:
+    name: AIExport
+    user: '{{ siskin_user }}'
+    weekday: '0'
+    hour: '6'
+    minute: '0'
+    job: >
+      siskin run AIExport --workers 4
 
 # Notification about additional, required configuration.
 - debug:

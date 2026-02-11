@@ -76,3 +76,4 @@ bin/indexcompare
 /hack
 
 .venv
+/docs/issues

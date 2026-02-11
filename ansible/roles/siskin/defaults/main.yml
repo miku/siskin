@@ -38,6 +38,9 @@ siskin_vendor_version_zek: 0.1.28
 # Versions of extra packages
 siskin_extra_version_duckdb: 1.4.2
 
+# Solr collection URL for indexing
+siskin_solr: http://localhost:8983/solr/biblio
+
 # luigid log dir
 luigid_log_dir: /var/log/luigi
 
