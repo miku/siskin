@@ -290,7 +290,7 @@ class URLCache(object):
     >>> page = cache.get("https://www.google.com", force=True)
     """
 
-    def __init__(self, directory=None, max_tries=12):
+    def __init__(self, directory=None, max_tries=12, headers=None):
         """
         If `directory` is not explictly given, all files will be stored under
         the temporary directory. Requests can be retried, if they resulted in
@@ -301,6 +301,8 @@ class URLCache(object):
         """
         self.directory = directory or tempfile.gettempdir()
         self.sess = requests.session()
+        if headers:
+            self.sess.headers.update(headers)
         self.max_tries = max_tries
 
     def get_cache_file(self, url):

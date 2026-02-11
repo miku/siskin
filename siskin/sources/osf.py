@@ -177,12 +177,13 @@ class OSFIntermediateSchema(OSFTask):
     def run(self):
         i = 0
         bNL = "\n".encode(self.encoding)
+        token = self.config.get("osf", "token")
         with self.output().open("w") as output:
             with self.input().open() as f:
                 for line in f:
                     resp = json.loads(line)
                     for doc in resp["data"]:
-                        result = osf_to_intermediate(doc, max_retries=self.max_retries)
+                        result = osf_to_intermediate(doc, max_retries=self.max_retries, token=token)
                         if i % 1000 == 0:
                             self.logger.debug("converted {} docs".format(i))
                         output.write(json.dumps(result).encode(self.encoding))

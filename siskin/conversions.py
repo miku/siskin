@@ -360,7 +360,7 @@ def de_listify(v, default=None):
     raise ValueError("cannot de-listify: {}".format(v))
 
 
-def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
+def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5, token=None):
     """
     Convert a document from https://api.osf.io/v2/preprints/?format=json&page=1
     to intermediate schema; see also kiwi:[191], also: 179; refs #20238.
@@ -416,7 +416,7 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
             return lang.iso_code_639_3.name.lower()
         return with_default
 
-    def fetch_authors(doc, force=False, best_effort=False, max_retries=5):
+    def fetch_authors(doc, force=False, best_effort=False, max_retries=5, token=None):
         """
         Fetch and cache author docs. We will need an extra request, which we'll
         cache locally.
@@ -427,9 +427,13 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
         https://api.osf.io/v2/preprints/xcfdq/contributors/
         """
         result = []
+        headers = {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
         cache = URLCache(
             directory=os.path.join(tempfile.gettempdir(), ".urlcache"),
             max_tries=max_retries,
+            headers=headers,
         )
         url = doc["relationships"]["contributors"]["links"]["related"]["href"]
         try:
@@ -465,7 +469,7 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5):
     result = {
         "abstract": attrs.get("description", ""),
         "authors": fetch_authors(
-            osf, force=force, best_effort=best_effort, max_retries=max_retries
+            osf, force=force, best_effort=best_effort, max_retries=max_retries, token=token
         ),
         "finc.format": "Preprint",
         "finc.id": "ai-{}-{}".format(source_id, osf["id"]),
