@@ -115,7 +115,7 @@
     extra_args: -U -i "{{ siskin_pypi_index_url }}"
 
 - name: Install siskin via uv tool
-  shell: UV_TOOL_BIN_DIR=/usr/local/bin uv tool install -U siskin --index-url "{{ siskin_pypi_index_url }}"
+  shell: UV_TOOL_DIR=/usr/local/share/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install -U siskin --index-url "{{ siskin_pypi_index_url }}" --force
 
 - name: Aliases for siskin scripts
   template:
