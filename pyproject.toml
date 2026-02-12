@@ -67,7 +67,6 @@ dev = [
 [tool.setuptools]
 script-files = [
     'bin/iconv-chunks',
-    'bin/siskin-whatislive.sh',
     'bin/taskcat',
     'bin/taskchecksetup',
     'bin/taskcleanup',
