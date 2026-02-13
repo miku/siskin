@@ -67,7 +67,12 @@ from siskin.sources.degruyter import (
     DegruyterDOIList,
     DegruyterISSNList,
 )
-from siskin.sources.doaj import DOAJDOIList, DOAJExport, DOAJIntermediateSchema, DOAJISSNList
+from siskin.sources.doaj import (
+    DOAJDOIList,
+    DOAJExport,
+    DOAJIntermediateSchema,
+    DOAJISSNList,
+)
 from siskin.sources.elsevierjournals import ElsevierJournalsISSNList
 from siskin.sources.ios import IOSExport, IOSIntermediateSchema
 from siskin.sources.jstor import (
@@ -121,17 +126,17 @@ class AIIntermediateSchema(AITask):
 
     def requires(self):
         # 02/2026, downsizing; deprecating various sources
+        # CeeolIntermediateSchema(stamp=True),
+        # DegruyterIntermediateSchema(date=self.date, stamp=True),
+        # GenderopenIntermediateSchema(date=self.date, stamp=True),
+        # LissaIntermediateSchema(date=self.date, stamp=True),
+        # ThiemeIntermediateSchema(date=self.date, stamp=True),
         return [
             CrossrefIntermediateSchema(date=self.date, stamp=True),
             DOAJIntermediateSchema(date=self.date, stamp=True, format="doaj-oai"),
-            # CeeolIntermediateSchema(stamp=True),
-            # DegruyterIntermediateSchema(date=self.date, stamp=True),
-            # GenderopenIntermediateSchema(date=self.date, stamp=True),
             JstorIntermediateSchemaCombined(date=self.date, stamp=True),
-            # LissaIntermediateSchema(date=self.date, stamp=True),
             OLCIntermediateSchema(date=self.date, stamp=True),
             OSFIntermediateSchema(date=self.date, stamp=True),
-            # ThiemeIntermediateSchema(date=self.date, stamp=True),
             IOSIntermediateSchema(date=self.date, stamp=True),
         ]
 
