@@ -22,6 +22,12 @@ $ ln -s hosts.prod hosts
 $ make deploy
 ```
 
+Some cron jobs want the current SOLR url, so pass in:
+
+```
+SISKIN_SOLR=http://example.org:8983/solr/ai2602 make deploy
+```
+
 ## Things left out of ansible (for now)
 
 * changes to `/etc/hosts` that are needed for manual tasks (e.g. checking `.../whatislive` and such)
