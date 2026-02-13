@@ -59,7 +59,7 @@ class OSFTask(DefaultTask):
     https://api.osf.io/v2/preprints/?filter[provider]=mediarxiv&format=json&page=1
     """
 
-    TAG = "191"
+    TAG = "179"  #  "191" (?)
 
     def closest(self):
         return weekly(date=self.date)
