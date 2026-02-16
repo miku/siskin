@@ -65,6 +65,8 @@ dev = [
     'ruff',
 ]
 [tool.setuptools]
+# Note: these script files are now deprecated, as we use a single command
+# 'siskin' with subcommands now. Here for backwards compatibility and docs.
 script-files = [
     'bin/iconv-chunks',
     'bin/taskcat',
@@ -101,8 +103,6 @@ script-files = [
 ]
 include-package-data = true
 # [tool.setuptools.packages.find]
-# where = ["."]
-# include = ['siskin*']
 packages = ["siskin", "siskin.sources", "siskin.workflows"]
 
 # [[tool.uv.index]]
