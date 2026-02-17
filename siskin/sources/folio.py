@@ -61,10 +61,13 @@ class FolioFilterConfigFreeze(FolioTask):
     date = ClosestDateParameter(default=datetime.date.today())
 
     def run(self):
+        # refs #29085
+        expand = '{"finc-DHSN": ["DE-Bn3", "DE-Brt1", "DE-D161", "DE-Gla1", "DE-L229", "DE-Rs1", "DE-Pl11"]}'
         output = shellout(
             """
-            OKAPI_TOKEN={okapi_token} span-freeze -b -f -no-proxy -tenant de15 -okapi-url {okapi_url} -o {output}
+            OKAPI_TOKEN={okapi_token} span-freeze -b -f -expand '{expand}' -no-proxy -tenant de15 -okapi-url {okapi_url} -o {output}
             """,
+            expand=expand,
             okapi_token=self.config.get("folio", "okapi_token"),
             okapi_url=self.config.get("folio", "okapi_url"),
         )
