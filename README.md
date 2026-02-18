@@ -4,12 +4,13 @@ Various tasks for heterogeneous metadata handling for project
 [finc](https://finc.info) at [Leipzig University Library](https://www.ub.uni-leipzig.de). Based on
 [luigi](https://github.com/spotify/luigi) from Spotify.
 
-We use a couple of [scripts](bin) in the repository to harvest about twenty
-[data sources](siskin/sources) of various flavors (FTPs, OAIs, HTTPs), mix and
-match CSV, XML and JSON, run conversions and deduplication to create a single
-file that is indexable and conforms to a customized VuFind SOLR schema, running
-on an unified index host serving part of the data in the online catalogs of
-[partners](https://finc.info/de/anwender).
+The number of data sources harvested varied over the years. Currently we fetch
+copies of Crossref, DOAJ, JSTOR, OLC, OSF, IOS and BASE (via SLUB). As of
+02/2026, the non-deduplicated index consists of 205,499,249 records consuming
+about 840GB, uncompressed.
+
+Over twenty libraries and [partners](https://finc.info/de/anwender) use this
+index in production as of 2026.
 
 [![DOI](https://zenodo.org/badge/21136499.svg)](https://zenodo.org/badge/latestdoi/21136499) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
