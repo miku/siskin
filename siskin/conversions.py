@@ -435,7 +435,13 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5, token
             max_tries=max_retries,
             headers=headers,
         )
-        url = doc["relationships"]["contributors"]["links"]["related"]["href"]
+        try:
+            url = doc["relationships"]["contributors"]["links"]["related"]["href"]
+        except KeyError:
+            if best_effort:
+                logger.debug("[best-effort] skipping: missing contributors key")
+                return result
+            raise
         try:
             content = cache.get(url, force=force)
         except (RuntimeError, requests.exceptions.ConnectionError) as exc:
