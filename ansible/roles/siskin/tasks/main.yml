@@ -29,6 +29,13 @@
     state: 'directory'
     mode: '0755'
 
+- name: Increase max open files for siskin user
+  copy:
+    dest: /etc/security/limits.d/90-{{ siskin_user }}-nofile.conf
+    content: |
+      {{ siskin_user }} soft nofile {{ siskin_nofile_limit }}
+      {{ siskin_user }} hard nofile {{ siskin_nofile_limit }}
+
 - name: Install orphaned Python packages via pip
   pip:
     name:

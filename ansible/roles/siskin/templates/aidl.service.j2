@@ -7,6 +7,7 @@ ExecStart=/usr/bin/python -m http.server -d {{ siskin_aidl_dir }} {{ siskin_aidl
 User={{ siskin_user }}
 Group={{ siskin_group }}
 WorkingDirectory={{ siskin_aidl_dir }}
+LimitNOFILE={{ siskin_nofile_limit }}
 
 [Install]
 WantedBy=multi-user.target

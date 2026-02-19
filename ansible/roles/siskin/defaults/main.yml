@@ -41,6 +41,9 @@ siskin_extra_version_duckdb: 1.4.2
 # Solr collection URL for indexing
 siskin_solr: http://localhost:8983/solr/biblio
 
+# Max number of open files (NOFILE soft limit)
+siskin_nofile_limit: 524288
+
 # luigid log dir
 luigid_log_dir: /var/log/luigi
 
