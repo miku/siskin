@@ -416,7 +416,7 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5, token
             return lang.iso_code_639_3.name.lower()
         return with_default
 
-    def fetch_authors(doc, force=False, best_effort=False, max_retries=5, token=None):
+    def fetch_authors(doc, force=False, best_effort=False, max_retries=3, token=None):
         """
         Fetch and cache author docs. We will need an extra request, which we'll
         cache locally.
@@ -425,6 +425,8 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5, token
 
         2024-11-22: encountered HTTP 401 w/ some requests, e.g.
         https://api.osf.io/v2/preprints/xcfdq/contributors/
+
+        Regular 429s; may need a couple of runs until the cache fills up.
         """
         result = []
         headers = {}
@@ -475,7 +477,11 @@ def osf_to_intermediate(osf, force=False, best_effort=True, max_retries=5, token
     result = {
         "abstract": attrs.get("description", ""),
         "authors": fetch_authors(
-            osf, force=force, best_effort=best_effort, max_retries=max_retries, token=token
+            osf,
+            force=force,
+            best_effort=best_effort,
+            max_retries=max_retries,
+            token=token,
         ),
         "finc.format": "Preprint",
         "finc.id": "ai-{}-{}".format(source_id, osf["id"]),
