@@ -70,7 +70,7 @@
   get_url:
     url: https://install.duckdb.org/v{{ siskin_extra_version_duckdb }}/duckdb_cli-linux-amd64.zip
     dest: /tmp/duckdb-{{ siskin_extra_version_duckdb }}-dist.zip
-    checksum: sha256:fae3ba93eedf20b08bca4b23aeac1ba94c446f1c10d029c193e2fc4b4e0bc1bc
+    checksum: {{ siskin_extra_checksum_duckdb }}
 - name: Install duckdb client
   shell:
     # remove existing binary, otherwise ansible seems to get stuck
