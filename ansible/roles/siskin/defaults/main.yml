@@ -37,7 +37,7 @@ siskin_vendor_version_zek: 0.1.28
 
 # Versions of extra packages
 siskin_extra_version_duckdb: 1.4.4
-siskin_extra_checksum_duckdb: sha256:97995363217ddef691fe53b26df3b55ff368d356613d9daaea5999bb7a637e60
+siskin_extra_checksum_duckdb: sha256:ea79eae4233f1aba9a020c8a61877de38a789bc62cdd37485d3589cd77dc0d3e
 
 # Solr collection URL for indexing
 siskin_solr: http://localhost:8983/solr/biblio
