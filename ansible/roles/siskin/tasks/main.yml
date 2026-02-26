@@ -243,14 +243,16 @@
     job: >
       span-crossref-sync -q -p zstd -c {{ siskin_data_dir }}/crossref -t 45m -mode s -verbose -s 2024-04-01 -P feed-2- -i d
 
-- name: Crontab for [140] kalliope download and indexing
-  cron:
-    name: Kalliope download and indexing
-    user: '{{ siskin_user }}'
-    hour: '12'
-    minute: '0'
-    job: >
-      (set -o pipefail && siskin run KalliopeDirectDownload && siskin cat KalliopeDirectDownload | solrbulk -server "{{ siskin_solr }}")
+# removed, as per @SN, 2026-02-26
+#
+# - name: Crontab for [140] kalliope download and indexing
+#   cron:
+#     name: Kalliope download and indexing
+#     user: '{{ siskin_user }}'
+#     hour: '12'
+#     minute: '0'
+#     job: >
+#       (set -o pipefail && siskin run KalliopeDirectDownload && siskin cat KalliopeDirectDownload | solrbulk -server "{{ siskin_solr }}")
 
 # Per-source export tasks, staggered to avoid resource contention.
 # Each task applies licensing (via FolioFilterConfigFreeze) and exports to solr format.
