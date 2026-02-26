@@ -187,7 +187,7 @@ class OLCExport(OLCTask):
         )
         output = shellout(
             """
-            zstdcat -T0 {input} | span-export -o {format} | zstd -c -T0 > {output}
+            zstdcat -T0 {input} | span-export -with-fullrecord -o {format} | zstd -c -T0 > {output}
             """,
             format=self.format,
             input=output,
