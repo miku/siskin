@@ -185,10 +185,16 @@
     name: crond
     state: started
 
-- name: Add siskin bash completion
+- name: Add siskin bash completion (legacy)
+  copy:
+    dest: /etc/bash_completion.d/siskin_legacy_completion.sh
+    src: siskin_legacy_completion.sh
+
+- name: Add siskin bash completion (cli)
   copy:
     dest: /etc/bash_completion.d/siskin_completion.sh
     src: siskin_completion.sh
+
 - name: Creates an entry like `PATH=/opt/bin:...` on top of crontab
   cron:
     name: PATH

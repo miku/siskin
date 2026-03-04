@@ -1,52 +1,38 @@
 #!/bin/bash
 
-#  Copyright 2015 by Leipzig University Library, http://ub.uni-leipzig.de
-#                    The Finc Authors, http://finc.info
-#                    Martin Czygan, <martin.czygan@uni-leipzig.de>
-#
-# This file is part of some open source application.
-#
-# Some open source application is free software: you can redistribute
-# it and/or modify it under the terms of the GNU General Public
-# License as published by the Free Software Foundation, either
-# version 3 of the License, or (at your option) any later version.
-#
-# Some open source application is distributed in the hope that it will
-# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
-#
-# @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
+# Bash completion for the unified `siskin` command.
+# Source this file or place it in /etc/bash_completion.d/.
 
-# siskin task name completion
-#
-# TODO(miku): autocomplete task parameters, too
-
-_siskin_task_names()
+_siskin()
 {
-    hash tasknames 2>/dev/null || { return 1; }
-    local cur=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=( $(compgen -W "$(tasknames)" -- $cur) )
+    local cur prev
+    cur=${COMP_WORDS[COMP_CWORD]}
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+
+    # Subcommands that accept a task name as first argument.
+    local task_cmds="run inspect output deps deps-dot cleanup cat help rm dir du head less ls open redo status tree wc"
+
+    # All subcommands.
+    local subcommands="run names inspect output config deps deps-dot docs cleanup hash ps home importcache checksetup version tags cat help rm dir du gc head less ls open redo status tree wc"
+
+    # Complete subcommand at position 1.
+    if [[ $COMP_CWORD -eq 1 ]]; then
+        COMPREPLY=( $(compgen -W "$subcommands" -- "$cur") )
+        return
+    fi
+
+    # Complete task names for subcommands that accept them.
+    if [[ $COMP_CWORD -eq 2 ]]; then
+        local subcmd=${COMP_WORDS[1]}
+        for cmd in $task_cmds; do
+            if [[ "$subcmd" == "$cmd" ]]; then
+                local names
+                names=$(siskin names 2>/dev/null)
+                COMPREPLY=( $(compgen -W "$names" -- "$cur") )
+                return
+            fi
+        done
+    fi
 }
 
-complete -F _siskin_task_names taskcat
-complete -F _siskin_task_names taskdeps
-complete -F _siskin_task_names taskdeps-dot
-complete -F _siskin_task_names taskdir
-complete -F _siskin_task_names taskdo
-complete -F _siskin_task_names taskdu
-complete -F _siskin_task_names taskhead
-complete -F _siskin_task_names taskhelp
-complete -F _siskin_task_names taskinspect
-complete -F _siskin_task_names taskless
-complete -F _siskin_task_names taskls
-complete -F _siskin_task_names taskopen
-complete -F _siskin_task_names taskoutput
-complete -F _siskin_task_names taskredo
-complete -F _siskin_task_names taskrm
-complete -F _siskin_task_names taskstatus
-complete -F _siskin_task_names tasktree
-complete -F _siskin_task_names taskwc
+complete -F _siskin siskin

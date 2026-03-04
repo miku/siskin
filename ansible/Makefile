@@ -4,7 +4,8 @@
 #
 SHELL := /bin/bash
 ANSIBLE_OPTS = ANSIBLE_RETRY_FILES_ENABLED=false ANSIBLE_NOCOWS=true ANSIBLE_HOST_KEY_CHECKING=false
-ANSIBLE_EXEC = uvx --from ansible-core ansible-playbook
+# ANSIBLE_EXEC = uvx --from ansible-core ansible-playbook
+ANSIBLE_EXEC = ansible-playbook
 EXTRA_VARS =
 
 ifdef SISKIN_SOLR
