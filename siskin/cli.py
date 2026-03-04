@@ -219,13 +219,16 @@ def cmd_deps():
         s = re.sub(r"password=[^ ,]+", "password=xxxx", s, 0)
         return s
 
-    def dump(root=None, indent=0, output=None):
-        if indent == 0:
-            output.write("%s ── %s\n" % ("    " * indent, root))
-        else:
-            output.write("%s └─ %s\n" % ("    " * indent, root))
-        for dep in g[root]:
-            dump(root=dep, indent=indent + 1, output=output)
+    def dump(node, prefix="", is_root=True, output=None):
+        if is_root:
+            output.write(f"{node}\n")
+        deps = sorted(g[node], key=lambda t: str(t))
+        for i, dep in enumerate(deps):
+            is_last = i == len(deps) - 1
+            connector = "└── " if is_last else "├── "
+            output.write(f"{prefix}{connector}{dep}\n")
+            extension = "    " if is_last else "│   "
+            dump(dep, prefix + extension, is_root=False, output=output)
 
     try:
         parser = CmdlineParser(sys.argv[1:])
@@ -237,7 +240,7 @@ def cmd_deps():
                 g[task].add(dep)
                 queue.append(dep)
         output = StringIO()
-        dump(root=root_task, output=output)
+        dump(root_task, output=output)
         print(sanitize(output.getvalue()))
     except MissingParameterException as err:
         print(f"missing parameter: {err}", file=sys.stderr)
