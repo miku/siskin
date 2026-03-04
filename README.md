@@ -53,6 +53,10 @@ Contents.
 * [Deployment](#deployment)
 * [TODO](#todo)
 
+## TL;DR
+
+![](docs/2026-03-04-siskin-deps-aiexport.png)
+
 ----
 
 ## Install
