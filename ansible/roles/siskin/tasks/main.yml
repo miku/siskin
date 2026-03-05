@@ -124,6 +124,12 @@
 - name: Install siskin via uv tool
   shell: UV_TOOL_DIR=/usr/local/share/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install -U siskin --index-url "{{ siskin_pypi_index_url }}" --force
 
+- name: Add helper script for splitting zstd files
+  copy:
+    src: split-zstd.sh
+    dest: /usr/local/bin/split-zstd.sh
+    mode: '0755'
+
 - name: Aliases for siskin scripts
   template:
     src: siskin_aliases.sh.j2
