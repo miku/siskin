@@ -163,7 +163,7 @@
 - name: Copy luigi config
   copy:
     src: luigi.cfg
-    dest: /etc/luigi/luigi.cfg
+    dest: /etc/luigi/luigi.cfg.example # setup /etc/luigi/luigi.cfg manually
 - name: Set siskin log file permissions
   file:
     path: /var/log/siskin.log
