@@ -77,3 +77,7 @@ bin/indexcompare
 
 .venv
 /docs/issues
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
